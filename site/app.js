@@ -669,7 +669,7 @@
     const prompt = `Create 20 French vocabulary flashcards for the TCF Canada theme "${th.label}" (${th.en}) for a B1→B2 learner.\nPrioritize collocations and verb + preposition pairs over isolated nouns. Include 2–3 connectors or linking phrases useful for arguing about this topic, 1–2 idiomatic expressions, and 2 B1→B2 "sophistication swaps" (for those, the English side reads "B2 upgrade of: <the plain B1 phrase in French>").\nDon't repeat any of: ${have.join("; ")}.\nEach card: {"fr": "French, with the article or preposition when useful", "en": "short English meaning", "ex": "one natural French example sentence, max 18 words"}.\nReply with only JSON: {"cards": [ ... ]}`;
     const out = await ask("build-" + theme, prompt);
     if (!out) return;
-    const seen = new Set(have.map((s) => norm(s)));
+    const seen = new Set([...allCards().values()].map((c) => norm(c.fr)));
     let n = 0;
     for (const c of arr(out.cards).slice(0, 30)) {
       if (!c || !c.fr || !c.en || seen.has(norm(c.fr))) continue;
@@ -988,7 +988,7 @@
 
   const samplesFor = (skill) => (skill === "ce" ? T.COMP.ceSets : T.COMP.coSets);
   // Topics for comprehension sets: the vocabulary themes, minus the two that are language lists rather than topics.
-  const COMP_TOPICS = T.VOCAB.filter((t2) => t2.id !== "connecteurs" && t2.id !== "pieges");
+  const COMP_TOPICS = T.VOCAB.filter((t2) => t2.id !== "connecteurs" && t2.id !== "pieges" && !t2.own);
   function compLevel() { return ui.c.level || phaseInfo().level; }
   const compKey = (skill) => `${skill}|${compLevel()}|${ui.c.theme || ""}`;
   const themeLabel = (id) => (THEME[id] ? THEME[id].label : "");
@@ -1535,7 +1535,7 @@
       return `<tr>
         <td><b class="fr">${esc(th.label)}</b><br><span class="small muted">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
         <td class="n">${lr} / ${cs.length}</td><td class="n">${ms}</td>
-        <td>${claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
+        <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}</span><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : "new"}</span></li>`; }).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
@@ -1590,7 +1590,7 @@
       <section class="panel flash">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
         ${front}
-        ${v.shown ? back + (c.ex ? `<p class="ex">${typo(c.ex)}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
+        ${v.shown ? back + (c.ex ? `<p class="ex">${c.ex.split("\n").map((l) => typo(l)).join("<br>")}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
         <div class="row">${buttons}</div>
       </section>
     </div>`;
