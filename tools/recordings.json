@@ -1,0 +1,293 @@
+{
+ "co-consommation-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "702f272bb52b",
+  "seconds": 138.2,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-consommation-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "c0fd159cf463",
+  "seconds": 142.1,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-crime-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "1cb9c64d5de6",
+  "seconds": 130.0,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-crime-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "269b0d9ee80f",
+  "seconds": 155.8,
+  "voices": {
+   "A": "remy",
+   "B": "vivienne"
+  }
+ },
+ "co-economie-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "37cb27d1b321",
+  "seconds": 129.9,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-economie-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "4977657e0cc2",
+  "seconds": 137.7,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-education-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "6bd474299884",
+  "seconds": 149.9,
+  "voices": {
+   "A": "vivienne",
+   "B": "remy"
+  }
+ },
+ "co-environnement-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "e4aabce18303",
+  "seconds": 128.4,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-environnement-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "2803693caa64",
+  "seconds": 151.4,
+  "voices": {
+   "A": "remy",
+   "B": "vivienne"
+  }
+ },
+ "co-famille-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "3214b8c81393",
+  "seconds": 144.6,
+  "voices": {
+   "A": "vivienne",
+   "B": "remy"
+  }
+ },
+ "co-famille-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "125b01aad470",
+  "seconds": 140.7,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-gouvernement-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "257c28970384",
+  "seconds": 126.8,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-gouvernement-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "8a57082eda8e",
+  "seconds": 139.3,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-immigration-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "3cc8c059a74b",
+  "seconds": 140.2,
+  "voices": {
+   "A": "remy",
+   "B": "vivienne"
+  }
+ },
+ "co-immigration-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "004efd3c663d",
+  "seconds": 160.8,
+  "voices": {
+   "A": "remy",
+   "B": "vivienne"
+  }
+ },
+ "co-logement-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "893b1603b239",
+  "seconds": 156.6,
+  "voices": {
+   "A": "remy",
+   "B": "vivienne"
+  }
+ },
+ "co-logement-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "7bc148c65ef1",
+  "seconds": 141.6,
+  "voices": {
+   "A": "vivienne",
+   "B": "remy"
+  }
+ },
+ "co-quotidien-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "8d6569359355",
+  "seconds": 144.9,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-sante-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "e151e4835ce4",
+  "seconds": 146.2,
+  "voices": {
+   "A": "vivienne",
+   "B": "remy"
+  }
+ },
+ "co-sante-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "0721e2db9267",
+  "seconds": 143.0,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-science-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "45d10a8bcb97",
+  "seconds": 134.1,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-science-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "4fc0e4f9226a",
+  "seconds": 146.7,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-societe-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "0b10d657ee22",
+  "seconds": 136.9,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-technologie-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "00effed10ec1",
+  "seconds": 134.5,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-technologie-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "4b6fd4e76f43",
+  "seconds": 131.5,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-tourisme-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "4fc954f537a7",
+  "seconds": 135.5,
+  "voices": {
+   "N": "remy"
+  }
+ },
+ "co-tourisme-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "a21a8c82237a",
+  "seconds": 146.0,
+  "voices": {
+   "A": "remy",
+   "B": "vivienne"
+  }
+ },
+ "co-transports-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "6f08db2f94b8",
+  "seconds": 136.5,
+  "voices": {
+   "N": "vivienne"
+  }
+ },
+ "co-transports-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "b3b4b297f1f6",
+  "seconds": 147.8,
+  "voices": {
+   "A": "vivienne",
+   "B": "remy"
+  }
+ },
+ "co-travail-b1": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "bec71a473848",
+  "seconds": 155.4,
+  "voices": {
+   "A": "vivienne",
+   "B": "remy"
+  }
+ },
+ "co-travail-b2": {
+  "date": "2026-09-25",
+  "engine": "microsoft",
+  "hash": "6a04ae867b45",
+  "seconds": 146.5,
+  "voices": {
+   "N": "remy"
+  }
+ }
+}
