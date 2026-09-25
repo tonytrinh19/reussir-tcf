@@ -1413,9 +1413,50 @@ window.TCF = (function () {
       ] },
     ],
   };
+  // The instruction shown above every question of a set, as an exam would give it. It says what to do,
+  // so a question still makes sense in the mixed review, where it appears away from its set.
+  const ASKS = {
+    "pronominaux.pc": "Put the sentence above into the passé composé: type the missing words.",
+    "pronominaux.fix": "Find the mistake and type the whole sentence, corrected.",
+    "pronominaux.b2": "Put the verb in brackets in the tense and form the sentence needs.",
+    "subjonctif.formation": "Put the verb in brackets in the subjonctif.",
+    "subjonctif.contraste": "Put the verb in brackets in the right mood: subjonctif, indicatif or conditionnel.",
+    "subjonctif.b2": "Put the verb in brackets in the right mood and tense (subjonctif présent or passé).",
+    "sequence.main": "Put the verb in brackets in the right past tense: passé composé, imparfait or plus-que-parfait.",
+    "sequence.b2": "Put the verb in brackets in the right past tense: think about which action came first.",
+    "si.main": "Put the verb in brackets in the tense this si sentence needs.",
+    "si.b2": "Put the verb in brackets in the tense this si sentence needs: check when each part happens.",
+    "relatifs.main": "Join the two sentences above: type the missing relative pronoun.",
+    "relatifs.b2": "Type the missing relative pronoun.",
+    "pronoms.main": "Rewrite the whole sentence above, replacing the nouns with pronouns (le, lui, y, en…).",
+    "pronoms.b2": "Rewrite the whole sentence above, replacing the nouns with pronouns, in the right order.",
+    "interrogative.main": "Turn the question above into an indirect question: type the missing words.",
+    "interrogative.b2": "Report the question above: type the missing words, shifting the tenses if needed.",
+    "imperatif.main": "Turn the sentence above into an order (impératif), keeping the pronouns.",
+    "imperatif.b2": "Turn the sentence above into an order (impératif), keeping the pronouns.",
+    "elision.main": "Join the two words above as French writes them (elide if needed) and type them.",
+    "elision.fix": "Find the missing elisions and type the whole sentence, corrected.",
+    "cause.main": "Pick the connector that fits the meaning.",
+    "cause.b2": "Pick the connector that fits: check whether a noun or a full clause follows.",
+    "concession.main": "Pick the structure that fits: check whether a noun or a full clause follows.",
+    "concession.b2": "Pick the word that completes the structure.",
+    "conditionnel.main": "Put the verb in brackets in the conditionnel.",
+    "conditionnel.uses": "What is the conditionnel doing in this sentence? Pick its use.",
+    "conditionnel.b2": "Put the verb in brackets in the conditionnel passé.",
+    "discours.main": "Report what was said: type the verb in the tense reported speech needs.",
+    "discours.b2": "Report the question or order above: type the missing words, shifting tenses and time words.",
+    "passif.main": "Turn the sentence above into the passive: type the missing verb.",
+    "passif.b2": "Turn the sentence above into the passive: type the missing words.",
+    "gerondif.main": "Combine the two actions: type the second one as a gérondif (en + -ant).",
+    "gerondif.b2": "Rewrite the part above with a participle form (tout en, étant, ayant…).",
+    "gerondif.spell": "Pick the right spelling: is this the adjective or the present participle of the verb?",
+    "micro.main": "Pick the form that's correct in French.",
+    "micro.b2": "Pick the word that fits.",
+  };
   TOPICS.forEach((tp) => {
     tp.sets.forEach((s) => { if (!s.level) s.level = CORE_LEVELS[tp.id + "." + s.id] || "B1"; });
     (MORE_SETS[tp.id] || []).forEach((s) => tp.sets.push(s));
+    tp.sets.forEach((s) => { s.ask = s.ask || ASKS[tp.id + "." + s.id] || ""; });
   });
   TOPICS.find((t) => t.id === "pronoms").sets[0].hint = REWRITE_HINT;
 
