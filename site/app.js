@@ -444,9 +444,10 @@
   function top3() { const r = errorCounts(21); return (r.length ? r : errorCounts(0)).slice(0, 3); }
 
   /* =============== drills: data =============== */
-  function normItem(raw, kind, topic) {
-    if (kind === "choice") return { kind, topic, q: raw[0], options: raw[1].slice(), a: [raw[1][0]], why: raw[2] || "" };
-    return { kind: "type", topic, src: raw[0] || "", q: raw[1], a: Array.isArray(raw[2]) ? raw[2] : [raw[2]], why: raw[3] || "" };
+  // Each item carries its set's instruction, so it still says what to do in the mixed review and retries.
+  function normItem(raw, kind, topic, ask) {
+    if (kind === "choice") return { kind, topic, ask: ask || "", q: raw[0], options: raw[1].slice(), a: [raw[1][0]], why: raw[2] || "" };
+    return { kind: "type", topic, ask: ask || "", src: raw[0] || "", q: raw[1], a: Array.isArray(raw[2]) ? raw[2] : [raw[2]], why: raw[3] || "" };
   }
   function drillsFor(topic, set) {
     return list("drills").filter((d) => d.topic === topic && (!set || d.set === set) && d.src !== "retry").sort((a, b) => (a.ts || 0) - (b.ts || 0));
@@ -498,7 +499,7 @@
         const sets = TOPIC[tid].sets;
         let pool = sets.filter((x) => allowed.includes(x.level));
         if (!pool.length) pool = [sets.find((x) => x.id === sid)];
-        const all = pool.flatMap((st) => st.items.map((r) => normItem(r, st.kind, tid)));
+        const all = pool.flatMap((st) => st.items.map((r) => normItem(r, st.kind, tid, st.ask)));
         items.push(...shuffle(all).slice(0, n));
       });
       items = shuffle(items);
@@ -511,7 +512,7 @@
       title = set.title;
       if (o.items) items = o.items;
       else if (o.gen && ui.gen[tp.id + "." + set.id]) items = ui.gen[tp.id + "." + set.id].slice();
-      else items = shuffle(set.items.map((r) => normItem(r, set.kind, tp.id))).slice(0, set.take);
+      else items = shuffle(set.items.map((r) => normItem(r, set.kind, tp.id, set.ask))).slice(0, set.take);
     }
     items = items.map((it) => Object.assign({}, it, it.kind === "choice" ? { order: shuffle(it.options.map((_, k) => k)) } : {}));
     ui.drill = { topic: topicId, set: setId, title, items, i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: o.src || (o.gen ? "claude" : "bank"), saved: null, parent: o.parent || null };
@@ -589,6 +590,7 @@
       const r = d.results[k] || {};
       const o = { kind: it.kind, q: it.q, a: it.a, why: it.why || "", given: str(r.given), ok: !!r.ok };
       if (it.src) o.src = it.src;
+      if (it.ask) o.ask = it.ask;
       if (it.kind === "choice") o.options = it.options;
       if (it.topic && it.topic !== d.topic) o.topic = it.topic;
       return o;
@@ -650,13 +652,13 @@
     const levelNote = lvl === "B2"
       ? "Target level B2: longer sentences with subordinate clauses, compound tenses and TCF-register vocabulary (work, housing, immigration, environment, public debate). Include the traps a B2 grader looks for."
       : lvl === "B1+" ? "Target level B1+: everyday sentences, each with one genuinely tricky point." : "Target level B1: short, clear sentences that isolate the structure, but not trivial.";
-    const prompt = `Write ${set.take} NEW practice items for a French grammar drill.\nTopic: ${tp.title} (${tp.en}). What to master: ${tp.master}\nDrill: ${set.title}.\n${levelNote}\n${PROFILE}\nRules: use TCF Canada-style contexts (work, housing, immigration paperwork, transit, environment, daily life in Canada). Vary persons and verbs. Every item must have one clearly correct answer; list every acceptable variant. Don't reuse these sentences: ${avoid}.\n${fmt}\n${set.hint ? "Item format note: " + set.hint + "\n" : ""}Example item: ${example}\nReply with only JSON: {"items": [ ... ]}`;
+    const prompt = `Write ${set.take} NEW practice items for a French grammar drill.\nTopic: ${tp.title} (${tp.en}). What to master: ${tp.master}\nDrill: ${set.title}.\n${levelNote}\n${PROFILE}\nRules: use TCF Canada-style contexts (work, housing, immigration paperwork, transit, environment, daily life in Canada). Vary persons and verbs. Every item must have one clearly correct answer; list every acceptable variant. Don't reuse these sentences: ${avoid}.\n${fmt}\n${set.ask ? `The learner sees this instruction above every item, so each item must fit it: "${set.ask}"\n` : ""}${set.hint ? "Item format note: " + set.hint + "\n" : ""}Example item: ${example}\nReply with only JSON: {"items": [ ... ]}`;
     const out = await ask("gen-" + topicId + "." + setId, prompt);
     if (!out) return;
     const items = arr(out.items).map((x) => {
       if (!x || typeof x.q !== "string") return null;
-      if (set.kind === "choice") return Array.isArray(x.options) && x.options.length >= 2 ? { kind: "choice", topic: topicId, q: x.q, options: x.options.map(str), a: [str(x.options[0])], why: str(x.why) } : null;
-      return x.q.includes("___") && Array.isArray(x.a) && x.a.length ? { kind: "type", topic: topicId, src: str(x.src), q: x.q, a: x.a.map(str), why: str(x.why) } : null;
+      if (set.kind === "choice") return Array.isArray(x.options) && x.options.length >= 2 ? { kind: "choice", topic: topicId, ask: set.ask, q: x.q, options: x.options.map(str), a: [str(x.options[0])], why: str(x.why) } : null;
+      return x.q.includes("___") && Array.isArray(x.a) && x.a.length ? { kind: "type", topic: topicId, ask: set.ask, src: str(x.src), q: x.q, a: x.a.map(str), why: str(x.why) } : null;
     }).filter(Boolean);
     if (!items.length) { toast("Claude's items didn't come back in a usable shape. Try again."); return; }
     ui.gen[topicId + "." + set.id] = items;
@@ -1971,11 +1973,19 @@
     return `<section class="panel drill" id="drill-area">
       <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? " · retrying misses" : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
       <div class="bar"><i style="width:${(d.i / n) * 100}%"></i></div>
+      ${drillAsk(d, it)}
       ${it.src ? `<p class="src">${typo(it.src)}</p>` : ""}
       <p class="q">${q}</p>
       ${extra}
       ${foot}
     </section>`;
+  }
+  // What the question asks you to do. In the mixed review it also says which topic the question is from.
+  function drillAsk(d, it) {
+    const tp = TOPIC[it.topic || d.topic];
+    const ask = it.ask || (tp && (tp.sets.find((x) => x.id === d.set) || {}).ask) || "";
+    const cat = d.topic === "mixed" && tp ? `<span class="pill info">${esc(tp.title)}</span>` : "";
+    return ask || cat ? `<div class="row" style="gap:8px">${cat}<span class="h3">${esc(ask)}</span></div>` : "";
   }
   function drillDone(d) {
     const n = d.items.length;
@@ -1997,6 +2007,7 @@
       <div class="row"><span class="scorebig">${score}/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
       ${breakdown}
       ${misses.length ? `<div class="stack tight"><p class="h3">Review</p><ul class="misses">${misses.map(({ it, k, r }) => `<li>
+          ${it.ask ? `<p class="small muted">${esc(it.ask)}</p>` : ""}
           ${it.src ? `<p class="small muted fr">${typo(it.src)}</p>` : ""}
           <p class="fr">${typo(it.q).replace("___", "<b>___</b>")}</p>
           <p><span class="pen-wrong">${esc(r.given)}</span> <span class="pen-right">${esc(it.a[0])}</span></p>
@@ -2586,6 +2597,7 @@
     return `<div class="stack tight">
       ${items.length ? "" : `<p class="small muted">This round is from before whole rounds were saved, so only the questions you missed are here.</p>`}
       <ul class="misses">${qs.map((it) => `<li>
+        ${it.ask ? `<p class="small muted">${esc(it.ask)}</p>` : ""}
         ${it.src ? `<p class="small muted fr">${typo(it.src)}</p>` : ""}
         <p class="fr">${typo(it.q).replace("___", "<b>___</b>")}</p>
         <p>${it.ok ? `<span class="pen-ok">${esc(it.given)}</span>${it.overturned ? ` <span class="small muted">· accepted by Claude</span>` : ""}` : `<span class="pen-wrong">${esc(it.given || "—")}</span> <span class="pen-right">${esc(arr(it.a)[0] || "")}</span>`}</p>
