@@ -1,0 +1,11 @@
+{
+  "name": "reussir-tcf",
+  "private": true,
+  "description": "TCF Canada practice site, served locally with progress in SQLite",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node server/server.js",
+    "import": "node server/import.js",
+    "check": "node tools/check_ce.js && node tools/check_co.js"
+  }
+}
