@@ -68,12 +68,13 @@
   }
 
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
-  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks"];
+  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress"];
   const S = {};
   COLLS.forEach((c) => { S[c] = new Map(); });
   const LS_KEY = "tcf-reussir-data-v1";
   let backend = { kind: "loading" };
   let loaded = false;
+  let hydrated = false;
   const pendingOps = [];
   const chains = new Map();
 
@@ -149,8 +150,43 @@
     render(false);
   }
 
+  /* =============== unfinished attempts =============== */
+  // One `inprogress` record per unfinished activity: a drill round, a comprehension set, the practice exam,
+  // a writing draft, a speaking attempt. It's written at the first real answer or keystroke, never when
+  // something is only opened or generated, and it's deleted when the attempt is submitted or discarded.
+  const ipPending = new Map();
+  const ipLast = new Map();
+  const ipGet = (id) => S.inprogress.get(id) || null;
+  function ipSave(id, doc, delay) {
+    const prev = ipPending.get(id);
+    if (prev) clearTimeout(prev.t);
+    const write = () => {
+      ipPending.delete(id);
+      const body = JSON.stringify(doc);
+      if (ipLast.get(id) === body && S.inprogress.has(id)) return;
+      ipLast.set(id, body);
+      const cur = S.inprogress.get(id);
+      put("inprogress", id, Object.assign(JSON.parse(body), { started: (cur && cur.started) || Date.now(), updated: Date.now() }));
+    };
+    if (delay) ipPending.set(id, { t: setTimeout(write, delay), write }); else write();
+  }
+  function ipDrop(id) {
+    const prev = ipPending.get(id);
+    if (prev) clearTimeout(prev.t);
+    ipPending.delete(id);
+    ipLast.delete(id);
+    if (S.inprogress.has(id)) remove("inprogress", id);
+  }
+  // Typing is saved 1.5 s after it stops; save it at once if the page is hidden or closed meanwhile.
+  function ipFlush() {
+    [...ipPending.values()].forEach((p) => { clearTimeout(p.t); p.write(); });
+    examKeep();
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") ipFlush(); });
+  window.addEventListener("pagehide", ipFlush);
+
   /* =============== settings & derived state =============== */
-  const DEFAULTS = { phase: 1, startDate: "", rate: 0.9, voice: "", fixes: {}, criteria: {} };
+  const DEFAULTS = { phase: 1, startDate: "", rate: 0.9, fixes: {}, criteria: {} };
   function settings() {
     const s = S.settings.get("main") || {};
     const out = Object.assign({}, DEFAULTS, s);
@@ -213,7 +249,10 @@
       chat: null,
       chatIn: "",
       covered: {},
+      viewing: null,
     },
+    hist: { filter: "all", limit: 30, open: null },
+    hwSug: null,
     c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, playing: false, exam: false, script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null } },
     cx: null, // the CE practice exam being taken or reviewed
     cxGen: null, // progress while Claude writes a practice exam
@@ -475,10 +514,26 @@
       else items = shuffle(set.items.map((r) => normItem(r, set.kind, tp.id))).slice(0, set.take);
     }
     items = items.map((it) => Object.assign({}, it, it.kind === "choice" ? { order: shuffle(it.options.map((_, k) => k)) } : {}));
-    ui.drill = { topic: topicId, set: setId, title, items, i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: o.src || (o.gen ? "claude" : "bank"), saved: null };
+    ui.drill = { topic: topicId, set: setId, title, items, i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: o.src || (o.gen ? "claude" : "bank"), saved: null, parent: o.parent || null };
     render(true);
     const el = document.getElementById("drill-area");
     if (el) el.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  // An unfinished round is kept from its first checked answer, with its items (Claude's too), so it can be
+  // picked up later. Retry rounds are short and belong to the round they came from, so they aren't kept.
+  const drillIpId = (d) => (d.topic === "mixed" ? "drill--mixed" : `drill--${d.topic}--${d.set}`);
+  function drillKeep() {
+    const d = ui.drill;
+    if (!d || d.done || d.src === "retry" || !d.results.some(Boolean)) return;
+    const tp = TOPIC[d.topic];
+    ipSave(drillIpId(d), { kind: "drill", title: tp ? `${tp.title} · ${d.title}` : d.title, route: tp ? "grammar." + d.topic : "grammar.mixed", topic: d.topic, set: d.set, name: d.title, src: d.src, items: d.items, results: d.results, i: d.i });
+  }
+  function drillResume(ip) {
+    const items = arr(ip.items);
+    const results = arr(ip.results).map((r) => r || undefined);
+    const i = Math.max(0, Math.min(Number(ip.i) || 0, items.length - 1));
+    const r = results[i];
+    ui.drill = { topic: ip.topic, set: ip.set, title: ip.name || ip.title, items, i, results, given: r ? r.given : "", checked: !!r, verdict: r ? r.verdict : null, done: false, src: ip.src || "bank", saved: null, parent: null };
   }
   function drillCheck() {
     const d = ui.drill;
@@ -491,6 +546,7 @@
     d.verdict = checkAnswer(it, given);
     d.checked = true;
     d.results[d.i] = { given, ok: d.verdict === "ok", verdict: d.verdict };
+    drillKeep();
     render(true);
   }
   function drillPick(k) {
@@ -501,6 +557,7 @@
     d.verdict = k === 0 ? "ok" : "bad";
     d.checked = true;
     d.results[d.i] = { given: d.given, ok: k === 0, verdict: d.verdict };
+    drillKeep();
     render(true);
   }
   function drillNext() {
@@ -511,30 +568,47 @@
     d.given = "";
     d.checked = false;
     d.verdict = null;
+    drillKeep();
     render(true);
   }
   function drillFinish() {
     const d = ui.drill;
     d.done = true;
     const score = d.results.filter((r) => r && r.ok).length;
+    // A retry round's score goes on the round it came from rather than into a record of its own.
+    if (d.src === "retry") {
+      const cur = d.parent && S.drills.get(d.parent);
+      if (cur) put("drills", d.parent, Object.assign(clone(cur), { retry: { score, total: d.items.length, date: todayStr() } }));
+      render(true);
+      return;
+    }
     const id = uid();
     d.saved = id;
-    const misses = d.items.map((it, k) => ({ it, r: d.results[k] || {} })).filter((x) => !x.r.ok).slice(0, 20)
-      .map((x) => ({ q: x.it.q, src: x.it.src || "", given: str(x.r.given), a: x.it.a[0], topic: x.it.topic || d.topic }));
-    put("drills", id, { topic: d.topic, set: d.set, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, misses });
-    if (d.src !== "retry") autoTick(`grammar.${d.topic}.${d.set}`);
+    // Every question is kept with the answer given, so the round can be reviewed from the history.
+    const items = d.items.map((it, k) => {
+      const r = d.results[k] || {};
+      const o = { kind: it.kind, q: it.q, a: it.a, why: it.why || "", given: str(r.given), ok: !!r.ok };
+      if (it.src) o.src = it.src;
+      if (it.kind === "choice") o.options = it.options;
+      if (it.topic && it.topic !== d.topic) o.topic = it.topic;
+      return o;
+    });
+    put("drills", id, { topic: d.topic, set: d.set, name: d.title, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, items });
+    ipDrop(drillIpId(d));
+    autoTick(`grammar.${d.topic}.${d.set}`);
     render(true);
   }
   function drillRetry() {
     const d = ui.drill;
     const items = d.items.filter((it, k) => !(d.results[k] && d.results[k].ok)).map((it) => Object.assign({}, it));
     if (!items.length) return;
+    const parent = d.src === "retry" ? d.parent : d.saved;
     if (d.topic === "mixed") {
-      ui.drill = { topic: "mixed", set: "main", title: "Retry misses", items: items.map((it) => Object.assign({}, it, it.kind === "choice" ? { order: shuffle(it.options.map((_, k) => k)) } : {})), i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: "retry", saved: null };
+      ui.drill = { topic: "mixed", set: "main", title: "Retry misses", items: items.map((it) => Object.assign({}, it, it.kind === "choice" ? { order: shuffle(it.options.map((_, k) => k)) } : {})), i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: "retry", saved: null, parent };
       render(true);
       return;
     }
-    startDrill(d.topic, d.set, { items, src: "retry" });
+    startDrill(d.topic, d.set, { items, src: "retry", parent });
   }
   async function drillDispute(k) {
     const d = ui.drill;
@@ -548,8 +622,18 @@
     if (out.correct && !r.ok) {
       r.ok = true;
       r.overturned = true;
-      const cur = S.drills.get(d.saved);
-      if (cur) put("drills", d.saved, Object.assign(clone(cur), { score: d.results.filter((x) => x && x.ok).length }));
+      const score = d.results.filter((x) => x && x.ok).length;
+      const rid = d.src === "retry" ? d.parent : d.saved;
+      const cur = rid && S.drills.get(rid);
+      if (cur) {
+        const doc = clone(cur);
+        if (d.src === "retry") doc.retry = Object.assign({}, doc.retry, { score });
+        else {
+          doc.score = score;
+          if (Array.isArray(doc.items) && doc.items[k]) Object.assign(doc.items[k], { ok: true, overturned: true });
+        }
+        put("drills", rid, doc);
+      }
     }
     render(true);
   }
@@ -588,9 +672,17 @@
     if (!out) return;
     const fb = { pass: !!out.pass, comment: str(out.comment), errors: arr(out.errors).filter((e) => e && e.wrong).slice(0, 15).map((e) => ({ wrong: str(e.wrong), right: str(e.right), why: str(e.why) })), improved: str(out.improved) };
     ui.prod[topicId] = { text, fb };
-    put("drills", uid(), { topic: topicId, set: "prod", date: todayStr(), ts: Date.now(), score: fb.pass ? 1 : 0, total: 1, src: "claude" });
+    put("drills", uid(), { topic: topicId, set: "prod", date: todayStr(), ts: Date.now(), score: fb.pass ? 1 : 0, total: 1, src: "claude", text, fb });
+    ipDrop("prod--" + topicId);
     if (fb.pass) autoTick(`grammar.${topicId}`);
     render(true);
+  }
+  // The production answer is kept as you type, until Claude checks it.
+  function prodKeep(topicId) {
+    const text = str((ui.prod[topicId] || {}).text);
+    if (!text.trim()) { ipDrop("prod--" + topicId); return; }
+    const tp = TOPIC[topicId];
+    ipSave("prod--" + topicId, { kind: "prod", title: `${tp.title} · ${tp.prod.title}`, route: "grammar." + topicId, topic: topicId, text }, 1500);
   }
 
   /* =============== vocabulary =============== */
@@ -694,13 +786,40 @@
     const p = W.prompts[((ui.w.idx[task] % W.prompts.length) + W.prompts.length) % W.prompts.length];
     return typeof p === "string" ? { q: p } : p;
   }
-  let draftTimer = 0;
   function onWText(el) {
     const task = ui.w.task;
     ui.w.text[task] = el.value;
     updateMeters();
-    clearTimeout(draftTimer);
-    draftTimer = setTimeout(() => lsSet("tcf-draft-" + task, ui.w.text[task]), 400);
+    writingKeep(task, 1500);
+  }
+  // The draft is kept with its prompt (Claude's and the Tâche 3 documents too), so it comes back as it was.
+  function writingKeep(task, delay) {
+    const text = ui.w.text[task] || "";
+    if (!text.trim()) { ipDrop("writing--" + task); return; }
+    const W = T.WRITING[task], p = wPrompt(task);
+    ipSave("writing--" + task, { kind: "writing", title: W.name + " écrit", route: "writing." + task, task, prompt: { q: p.q, en: p.en || "", docs: p.docs || null }, gen: !!(ui.w.gen[task] && !ui.w.gen[task].kept), idx: ui.w.idx[task], text, checks: ui.w.checks[task] || {} }, delay);
+  }
+  function writingRestore(task) {
+    const ip = ipGet("writing--" + task);
+    if (!ip) return false;
+    ui.w.text[task] = str(ip.text);
+    ui.w.checks[task] = Object.assign({}, ip.checks);
+    if (Number.isFinite(ip.idx)) ui.w.idx[task] = ip.idx;
+    ui.w.gen[task] = ip.gen ? ip.prompt : null;
+    // If a built-in prompt has changed since, keep the one the draft answers.
+    if (!ip.gen && ip.prompt && wPrompt(task).q !== ip.prompt.q) ui.w.gen[task] = Object.assign({}, ip.prompt, { kept: true });
+    return true;
+  }
+  // A new prompt would leave the draft answering the wrong question, so ask before throwing it away.
+  function wDraftGuard(act) {
+    const t = ui.w.task;
+    if (!str(ui.w.text[t]).trim()) return false;
+    if (ui.confirm !== "w-switch-" + act) { ui.confirm = "w-switch-" + act; render(true); return true; }
+    ui.confirm = "";
+    ipDrop("writing--" + t);
+    ui.w.text[t] = "";
+    ui.w.checks[t] = {};
+    return false;
   }
   function meterHTML(words, min, max, label) {
     const top = Math.max(max * 1.25, words, 1);
@@ -770,8 +889,9 @@
     if (!out) return;
     const fb = cleanFb(out, task);
     const id = uid();
+    // Claude's follow-up tasks stay suggestions on the correction until you add them to your homework.
     put("writing", id, { task, date: todayStr(), ts: Date.now(), prompt: p.q, docs: p.docs || null, text, words, minutes: timerElapsedMin("writing." + task), fb });
-    fb.homework.forEach((h) => put("homework", uid(), { text: h, created: todayStr(), ts: Date.now(), done: false, src: `${W.name} correction` }));
+    ipDrop("writing--" + task);
     ui.w.viewing = id;
     autoTick("writing." + task);
     render(true);
@@ -781,13 +901,14 @@
   function writingSave() {
     const task = ui.w.task;
     const text = ui.w.text[task] || "";
-    if (countWords(text) < 5) { toast("There's nothing to save yet."); return; }
+    if (countWords(text) < 5) { toast("There's nothing to hand in yet."); return; }
     const p = wPrompt(task);
     const id = uid();
     put("writing", id, { task, date: todayStr(), ts: Date.now(), prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: timerElapsedMin("writing." + task), fb: null });
+    ipDrop("writing--" + task);
     ui.w.viewing = id;
     autoTick("writing." + task);
-    toast("Saved to your writing history.");
+    toast("Finished. It's in your writing history.");
     render(true);
   }
   async function writingGenPrompt() {
@@ -821,16 +942,50 @@
     const P = T.SPEAKING[task];
     const rub = ui.sp.rubric[task] || {};
     const doc = { task, date: todayStr(), ts: Date.now(), prompt: spPrompt(task), rubric: Object.assign({}, rub), score: P.rubric ? P.rubric.filter((r) => rub[r[0]]).length : null, of: P.rubric ? P.rubric.length : null, notes: ui.sp.notes[task] || "", transcript: ui.sp.trans[task] || "", fb: ui.sp.fb[task] || null };
-    if (task === "t2" && ui.sp.chat) doc.transcript = ui.sp.chat.turns.filter((t) => t.role === "user" && !t.rules).map((t) => t.content).join("\n");
+    if (task === "t2" && ui.sp.chat) {
+      const turns = spTurns();
+      doc.transcript = turns.filter((t) => t.role === "user").map((t) => t.content).join("\n");
+      doc.chat = turns;
+    }
     put("speaking", uid(), doc);
     autoTick("speaking." + task);
+    spClear(task);
+    toast("Attempt saved.");
+    render(true);
+  }
+  // The role-play without the hidden instructions Claude plays from.
+  const spTurns = () => (ui.sp.chat ? ui.sp.chat.turns.filter((t) => !t.rules).map((t) => ({ role: t.role, content: t.content })) : []);
+  function spClear(task) {
+    ipDrop("speaking--" + task);
     ui.sp.rubric[task] = {};
     ui.sp.notes[task] = "";
     ui.sp.trans[task] = "";
     ui.sp.fb[task] = null;
     if (task === "t2") { ui.sp.chat = null; ui.sp.covered = {}; }
-    toast("Attempt saved.");
-    render(true);
+  }
+  // A speaking attempt is kept from its first tick, note, transcript or question to the examiner.
+  function spKeep(task, delay) {
+    const P = T.SPEAKING[task];
+    const rubric = ui.sp.rubric[task] || {}, notes = ui.sp.notes[task] || "", trans = ui.sp.trans[task] || "", fb = ui.sp.fb[task] || null;
+    const chat = task === "t2" ? spTurns() : [];
+    const covered = task === "t2" ? ui.sp.covered : {};
+    const any = Object.values(rubric).some(Boolean) || notes.trim() || trans.trim() || fb || chat.some((t) => t.role === "user") || Object.values(covered).some(Boolean);
+    if (!any) { ipDrop("speaking--" + task); return; }
+    ipSave("speaking--" + task, { kind: "speaking", title: P.name + " oral", route: "speaking." + task, task, idx: task === "t1" ? 0 : ui.sp[task], prompt: spPrompt(task), rubric, notes, trans, fb, chat, covered }, delay);
+  }
+  function spRestore(task) {
+    const ip = ipGet("speaking--" + task);
+    if (!ip) return false;
+    if (task !== "t1" && Number.isFinite(ip.idx)) ui.sp[task] = ip.idx;
+    ui.sp.rubric[task] = Object.assign({}, ip.rubric);
+    ui.sp.notes[task] = str(ip.notes);
+    ui.sp.trans[task] = str(ip.trans);
+    ui.sp.fb[task] = ip.fb || null;
+    if (task === "t2") {
+      ui.sp.covered = Object.assign({}, ip.covered);
+      ui.sp.chat = arr(ip.chat).length ? { turns: [{ role: "user", content: chatRules(), rules: true }].concat(arr(ip.chat).map((t) => ({ role: t.role, content: str(t.content) }))) } : null;
+    }
+    return true;
   }
   async function spFeedback(task) {
     const P = T.SPEAKING[task];
@@ -842,6 +997,7 @@
     const out = await ask("sp-fb-" + task, prompt);
     if (!out) return;
     ui.sp.fb[task] = { level: str(out.level), summary: str(out.summary), criteria: cleanCriteria(out.criteria), structure: arr(out.structure).filter((s) => s && s.step).map((s) => ({ step: str(s.step), done: !!s.done, comment: str(s.comment) })), errors: cleanErrors(out.errors), next: arr(out.next_time).map(str).filter(Boolean) };
+    spKeep(task, 0);
     render(true);
   }
   function chatRules() {
@@ -853,6 +1009,7 @@
     const text = await ask("chat", turns, { json: false, tier: "quick", cache: false });
     if (text == null || ui.sp.chat !== c) return;
     c.turns.push({ role: "assistant", content: text });
+    spKeep("t2", 0);
     render(true);
     scrollChat();
   }
@@ -869,6 +1026,7 @@
     c.turns.push({ role: "user", content: v });
     if (c.turns.length > 40) c.turns.splice(1, 2);
     ui.sp.chatIn = "";
+    spKeep("t2", 0);
     chatCall();
   }
   function scrollChat() { const el = document.getElementById("chat-log"); if (el) el.scrollTop = el.scrollHeight; }
@@ -882,6 +1040,7 @@
     if (!out) return;
     const cov = out.coverage || {};
     ui.sp.fb.t2 = { level: "", summary: str(out.summary), criteria: cleanCriteria(out.criteria), count: Number(out.count) || qs.length, coverage: { prix: !!cov.prix, lieu: !!cov.lieu, horaires: !!cov.horaires, conditions: !!cov.conditions }, errors: cleanErrors(out.errors), next: arr(out.better_questions).map(str).filter(Boolean), better: true };
+    spKeep("t2", 0);
     render(true);
   }
 
@@ -954,6 +1113,7 @@
     const token = playToken;
     ui.c.playing = true;
     ui.c.plays++;
+    compKeep("co");
     render(true);
     if (set.audio) {
       const a = new Audio(set.audio);
@@ -1067,10 +1227,13 @@
     if (cur && cur.key === key && !(cur.early && loaded && untouched)) return;
     if (busy["c-gen-" + skill] || ui.c.inflight[key]) return;
     compReset(skill);
-    if (ui.c.cache[key]) { ui.c.set[skill] = prepSet(ui.c.cache[key]); return; }
     const lvl = compLevel(), th = ui.c.theme;
+    // A set you started at this level and topic comes back first, with your answers.
+    const ip = compUnfinished(skill, lvl, th);
+    if (ip && compLoad(skill, ip.setId, ip)) { ui.c.set[skill].early = !loaded; return; }
+    if (ui.c.cache[key]) { ui.c.set[skill] = prepSet(ui.c.cache[key]); compRestore(skill); return; }
     const i = findSample(skill, lvl, th, -1);
-    if (i >= 0) { ui.c.set[skill] = sampleSet(skill, i, key); ui.c.set[skill].early = !loaded; return; }
+    if (i >= 0) { ui.c.set[skill] = sampleSet(skill, i, key); ui.c.set[skill].early = !loaded; compRestore(skill); return; }
     if (th && claudeOn() && !ui.c.failed[key]) {
       ui.c.set[skill] = null;
       if (!ui.c.queued) { ui.c.queued = true; setTimeout(() => { ui.c.queued = false; compGenerate(skill); }, 0); }
@@ -1080,6 +1243,33 @@
     ui.c.set[skill] = sampleSet(skill, j < 0 ? 0 : j, key);
     ui.c.set[skill].fallback = !!th;
     ui.c.set[skill].early = !loaded;
+    compRestore(skill);
+  }
+  // A set is kept from its first answer (or first listen), so switching topic or reloading keeps the answers.
+  // Claude's sets exist only in memory, so their record keeps a copy of the set.
+  const compIpId = (skill, setId) => `${skill}--${setId}`;
+  function compKeep(skill) {
+    const set = ui.c.set[skill];
+    if (!set || !set.id || ui.c.submitted[skill] || ui.c.review[skill]) return;
+    const answers = ui.c.ans[skill] || {};
+    const plays = skill === "co" ? ui.c.plays : 0;
+    if (!Object.keys(answers).length && !plays) return;
+    const doc = { kind: "comp", title: set.title, route: "comp." + skill, skill, setId: set.id, level: set.level || compLevel(), theme: set.theme || "", themes: arr(set.themes), src: set.src || "sample", total: set.questions.length, answers, plays };
+    if (set.src === "claude") doc.snap = snapOf(set);
+    ipSave(compIpId(skill, set.id), doc);
+  }
+  function compRestore(skill) {
+    const set = ui.c.set[skill];
+    const ip = set && set.id && !ui.c.submitted[skill] && ipGet(compIpId(skill, set.id));
+    if (!ip) return;
+    ui.c.ans[skill] = Object.assign({}, ip.answers);
+    if (skill === "co") ui.c.plays = Number(ip.plays) || 0;
+  }
+  // The most recent unfinished set at this level and topic. Under "Any topic" that's only Claude's
+  // topic-less sets, so the topic picker doesn't jump; the others stay one click away on Today and History.
+  function compUnfinished(skill, lvl, theme) {
+    return list("inprogress").filter((x) => x.kind === "comp" && x.skill === skill && x.level === lvl && (theme ? x.theme === theme || arr(x.themes).includes(theme) : !x.theme && !arr(x.themes).length))
+      .sort((a, b) => (b.updated || 0) - (a.updated || 0))[0] || null;
   }
   async function compGenerate(skill) {
     if (busy["c-gen-" + skill]) return;
@@ -1131,6 +1321,7 @@
     // Claude's sets exist only in this page's memory, so the attempt keeps a copy to reopen from the history.
     if (set.src === "claude") doc.snap = snapOf(set);
     put("comp", id, doc);
+    ipDrop(compIpId(skill, set.id));
     ui.c.open[doc.theme ? `${skill}:t:${doc.theme}` : `${skill}:g:mixed`] = true;
     ui.c.open[`${skill}:s:${doc.setId}`] = true;
     autoTick("comp." + skill);
@@ -1165,6 +1356,7 @@
     const key = compKey(skill);
     compReset(skill);
     ui.c.set[skill] = i >= 0 ? sampleSet(skill, i, key) : prepSet(Object.assign(clone(snap), { id: setId, src: "claude", key }));
+    compRestore(skill);
     return true;
   }
   // Show a past attempt: its set, the answers given, the right ones and the explanations.
@@ -1200,12 +1392,15 @@
   function setBranch(skill, set, st) {
     const head = `<span class="lv">${esc(set.level || "")}</span><span class="h-name">${typo(set.title)}</span>${set.type ? `<span class="small muted">${esc(set.type)}</span>` : ""}${set.src === "claude" ? `<span class="pill info">from Claude</span>` : ""}`;
     const open = `data-act="c-open" data-skill="${skill}" data-set="${esc(set.id)}"`;
-    if (!st) return `<div class="h-row">${head}<span class="h-meta">Not done yet</span><button class="btn sm" ${open}>Open</button></div>`;
+    // A set you've started but not submitted says so, and opening it brings your answers back.
+    const ip = ipGet(compIpId(skill, set.id));
+    const going = ip ? `<span class="pill warn">In progress · ${Object.keys(ip.answers || {}).length}/${ip.total || arr(set.questions).length}</span>` : "";
+    if (!st) return `<div class="h-row">${head}${going}<span class="h-meta">${ip ? "" : "Not done yet"}</span><button class="btn sm ${ip ? "primary" : ""}" ${open}>${ip ? "Resume" : "Open"}</button></div>`;
     const n = st.attempts.length;
     const meta = `${n} attempt${n > 1 ? "s" : ""} · best ${st.best ? `${st.best.score}/${st.best.total}` : "—"} · last ${shortDate(st.attempts[0].date)}`;
     const body = st.attempts.map((a) => attemptRow(skill, a, set.questions)).join("")
-      + (set.questions ? `<div class="row"><button class="btn sm" ${open}>Retake this set</button></div>` : `<p class="small muted">This set's text wasn't saved, so it can't be opened again.</p>`);
-    return branch(`${skill}:s:${set.id}`, `${head}<span class="h-meta">${meta}</span>`, body);
+      + (set.questions ? `<div class="row"><button class="btn sm ${ip ? "primary" : ""}" ${open}>${ip ? "Resume your new attempt" : "Retake this set"}</button></div>` : `<p class="small muted">This set's text wasn't saved, so it can't be opened again.</p>`);
+    return branch(`${skill}:s:${set.id}`, `${head}${going}<span class="h-meta">${meta}</span>`, body);
   }
   // A topic: how far each level is done (✓ all, 1/2 some, ○ none), then its sets.
   function topicBranch(skill, t, sets, stats) {
@@ -1314,11 +1509,37 @@
     put("comp", id, doc);
     // Every practice exam goes into the score log that the Phase 4–5 criteria read, labelled as an estimate.
     put("mocks", uid(), { date: todayStr(), ts: Date.now(), label: `${cx.exam.title} · CE (site estimate)`, ce: r.est, compId: id });
+    ipDrop("exam--ce");
     ui.c.open["ce:g:exams"] = true;
     ui.c.open["ce:x:" + cx.exam.id] = true;
     autoTick("comp.ce.exam");
     toast(reason === "time" ? "Time's up: your exam was handed in, and its estimated score added to Progress." : "Handed in. The estimated score is also in Progress → Scores and NCLC.");
     render(true);
+    window.scrollTo(0, 0);
+  }
+  // The exam is kept from its first answer, with the time left on its clock. Claude's exams keep a copy.
+  function examKeep() {
+    const cx = ui.cx;
+    if (!cx || cx.done || !Object.keys(cx.ans).length) return;
+    const left = timer.home === "comp.ce.exam" ? Math.max(0, Math.round(timerRemaining())) : null;
+    const doc = { kind: "exam", title: cx.exam.title, route: "comp.ce.exam", examId: cx.exam.id, src: cx.exam.src, total: cx.exam.items.length, ans: cx.ans, i: cx.i, left };
+    if (cx.exam.src === "claude") doc.snap = { id: cx.exam.id, title: cx.exam.title, src: "claude", items: cx.exam.items.map((it) => { const o = Object.assign({}, it); delete o.order; return o; }) };
+    ipSave("exam--ce", doc);
+  }
+  // Pick the exam up again; the clock carries on from the time that was left.
+  function examResume(ip) {
+    if (ui.cx && !ui.cx.done) { goTo("#comp.ce.exam"); return; }
+    const base = (T.COMP.ceExams || []).find((e) => e.id === ip.examId) || ip.snap;
+    if (!base) { toast("This exam's text wasn't saved, so it can't be picked up again."); return; }
+    const ex = clone(base);
+    ex.src = ex.src || ip.src || "built-in";
+    ex.items.forEach((it) => { it.order = shuffle(it.options.map((_, j) => j)); });
+    ui.cx = { exam: ex, i: Math.max(0, Math.min(Number(ip.i) || 0, ex.items.length - 1)), ans: Object.assign({}, ip.ans), done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
+    const full = TC.ceExam.minutes * 60;
+    timerSet(full, "Examen blanc CE", "comp.ce.exam");
+    if (ip.left != null) timer.left = Math.min(full, Math.max(0, Number(ip.left)));
+    timerStart();
+    goTo("#comp.ce.exam");
     window.scrollTo(0, 0);
   }
   function examReview(attemptId) {
@@ -1371,7 +1592,8 @@
   function examCta() {
     const last = compAttempts("ce").find((a) => a.kind === "exam");
     const running = ui.cx && !ui.cx.done;
-    return `<section class="panel flat row between"><div class="stack tight"><p class="h3">Examen blanc</p><p class="small muted">The full reading test: 39 questions in 60 minutes, from A1 to C2, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}.` : ""}</p></div><a class="btn ${running ? "primary" : ""}" href="#comp.ce.exam">${running ? "Back to the exam" : "Go to the exam"}</a></section>`;
+    const paused = !running && ipGet("exam--ce");
+    return `<section class="panel flat row between"><div class="stack tight"><p class="h3">Examen blanc</p><p class="small muted">The full reading test: 39 questions in 60 minutes, from A1 to C2, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="exam--ce">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#comp.ce.exam">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
   }
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
   function examView() {
@@ -1417,13 +1639,15 @@
     }
     const exams = compAttempts("ce").filter((a) => a.kind === "exam");
     const starts = (T.COMP.ceExams || []).map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}`; }).join("");
+    const paused = ipGet("exam--ce");
     return `${back}
       <section class="panel stack">
         <p class="h3">Examen blanc · Compréhension écrite</p>
         <p>39 questions in 60 minutes, one document each, getting harder from A1 to C2, as on the TCF Canada.</p>
         <ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>
         <p class="small muted">${esc(spec.note)}</p>
-        <div class="row">${starts}${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>
+        ${paused ? `<div class="notice"><b>You have an unfinished exam:</b> ${esc(paused.title)}, ${esc(ipProgress(paused))}. Pick it up where you stopped, or discard it to start another.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="exam--ce">Resume</button>${discardBtn("exam--ce")}</div></div>`
+          : `<div class="row">${starts}${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>`}
         ${ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
       </section>
       ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}</span>${(T.COMP.ceExams || []).some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
@@ -1505,6 +1729,7 @@
     return !!el && (el.tagName === "TEXTAREA" || el.tagName === "SELECT" || (el.tagName === "INPUT" && !/^(checkbox|radio|button|submit|range|reset)$/i.test(el.type)));
   }
   function render(force) {
+    if (loaded && !hydrated) hydrate();
     const ae = document.activeElement;
     const typing = isTyping(ae) && viewEl.contains(ae);
     if (typing && !force) { pendingRender = true; paintFoot(); return; }
@@ -1538,6 +1763,12 @@
   function confirmBtn(key, label, act, attrs) {
     if (ui.confirm === key) return `<button class="btn sm danger" data-act="${act}" ${attrs}>Confirm</button><button class="btn sm ghost" data-act="confirm-cancel">Cancel</button>`;
     return `<button class="x" data-act="confirm" data-key="${esc(key)}" title="${esc(label)}" aria-label="${esc(label)}">×</button>`;
+  }
+  // Throwing away an unfinished attempt always asks first.
+  function discardBtn(id) {
+    const key = "ip-del-" + id;
+    if (ui.confirm === key) return `<button class="btn sm danger" data-act="ip-discard" data-id="${esc(id)}">Discard it</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button>`;
+    return `<button class="btn sm ghost" data-act="confirm" data-key="${esc(key)}">Discard</button>`;
   }
 
   /* shared bits */
@@ -1596,7 +1827,7 @@
         <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
-          <aside class="side">${homeworkCard()}${watchCard()}${streakCard()}</aside>
+          <aside class="side">${continueCard()}${homeworkCard()}${watchCard()}${streakCard()}</aside>
         </div>
       </div>`;
     },
@@ -1609,12 +1840,15 @@
         <input type="checkbox" data-change="hw-done" data-id="${esc(h.id)}" ${h.done ? "checked" : ""} aria-label="Done">
         <span>${esc(h.text)}${h.src || h.go ? `<small>${esc(h.src || "")}${h.go ? ` · <a href="#${esc(h.go)}">Open</a>` : ""}</small>` : ""}</span>
         <button class="x" data-act="hw-del" data-id="${esc(h.id)}" aria-label="Remove">×</button>
-      </li>`).join("")}</ul>` : `<p class="small muted">No homework yet. Corrections from Claude add follow-up tasks here, or add your own.</p>`;
+      </li>`).join("")}</ul>` : `<p class="small muted">No homework yet. Add your own, or take the follow-up tasks Claude suggests with a correction.</p>`;
+    // Claude's suggestions live only on the page until you add the ones you want.
+    const sug = arr(ui.hwSug);
+    const suggestions = sug.length ? `<div class="stack tight"><p class="small muted">Claude's suggestions. Nothing is saved unless you add it.</p><ul class="hw">${sug.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(h.text)}${h.go ? `<small><a href="#${esc(h.go)}">Open</a></small>` : ""}</span><button class="btn sm" data-act="hw-sug-add" data-i="${i}">Add</button></li>`).join("")}</ul><div><button class="btn ghost sm" data-act="hw-sug-clear">Dismiss</button></div></div>` : "";
     return `<section class="panel stack tight">
       <div class="row between"><h2 class="h3">Devoirs · Homework</h2></div>
       ${items}
       <div class="row"><input type="text" id="hw-new" data-input="form" data-k="hw" value="${formVal("hw")}" placeholder="Add a task…" style="flex:1"><button class="btn sm" data-act="hw-add">Add</button></div>
-      <div>${claudeBtn("hw-suggest", "hw-suggest", "Suggest 3 from my error log", "", "btn ghost sm")}</div>
+      ${suggestions || `<div>${claudeBtn("hw-suggest", "hw-suggest", "Suggest 3 from my error log", "", "btn ghost sm")}</div>`}
     </section>`;
   }
   function watchCard() {
@@ -1653,14 +1887,9 @@
     const prompt = `You set daily homework for a TCF Canada learner.\n${PROFILE}\nCurrent phase: ${s.phase}, ${P.name}: ${P.goal}\nMost frequent error categories over the last 3 weeks: ${counts}.\nOpen homework already assigned: ${open.join(" | ") || "none"}.\nSuggest 3 short, concrete homework tasks for tomorrow (5–15 minutes each), each aimed at one weakness, and say where to do it in the app, using one of: ${routes.join(", ")}.\nReply with only JSON: {"homework": [{"text": "task in English, with French examples if useful", "go": "one of the routes"}]}`;
     const out = await ask("hw-suggest", prompt);
     if (!out) return;
-    let n = 0;
-    arr(out.homework).slice(0, 3).forEach((h) => {
-      if (!h || !h.text) return;
-      const go = routes.includes(str(h.go)) ? str(h.go) : "";
-      put("homework", uid(), { text: str(h.text), go, created: todayStr(), ts: Date.now(), done: false, src: "Suggested by Claude" });
-      n++;
-    });
-    toast(n ? `Added ${n} tasks to your homework.` : "No suggestions came back. Try again.");
+    ui.hwSug = arr(out.homework).slice(0, 3).filter((h) => h && h.text).map((h) => ({ text: str(h.text), go: routes.includes(str(h.go)) ? str(h.go) : "" }));
+    if (!ui.hwSug.length) toast("No suggestions came back. Try again.");
+    render(true);
   }
 
   /* =============== view: grammar =============== */
@@ -1735,8 +1964,8 @@
         <div class="row"><button class="btn primary" data-act="drill-next">${d.i + 1 >= n ? "See results" : "Next"} <span class="kbd">Enter</span></button></div>`;
     } else {
       foot = it.kind === "type"
-        ? `<div class="row"><button class="btn primary" data-act="drill-check">Check <span class="kbd">Enter</span></button><button class="btn ghost sm" data-act="drill-quit">Quit</button></div>`
-        : `<div class="row"><span class="small muted">Pick an answer, or press 1–${it.options.length}.</span><button class="btn ghost sm" data-act="drill-quit">Quit</button></div>`;
+        ? `<div class="row"><button class="btn primary" data-act="drill-check">Check <span class="kbd">Enter</span></button><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`
+        : `<div class="row"><span class="small muted">Pick an answer, or press 1–${it.options.length}.</span><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`;
     }
     const done = d.results.filter((r) => r && r.ok).length;
     return `<section class="panel drill" id="drill-area">
@@ -1784,7 +2013,6 @@
   function grammarTopic(tp, setArg) {
     const s = settings();
     const m = topicMastery(tp);
-    const hist = drillsFor(tp.id).filter((d) => d.set !== "prod").slice(-8).reverse();
     const active = ui.drill && ui.drill.topic === tp.id;
     // Build up: the set that counts toward mastery comes first; once it's mastered, the B2 set is next.
     const coreSet = tp.criterion.set;
@@ -1794,12 +2022,16 @@
       const n = drillsFor(tp.id, st.id).length;
       const best = n ? pct(bestPct(tp.id, st.id)) : "—";
       const isNext = st.id === nextSet;
+      const ipId = `drill--${tp.id}--${st.id}`, ip = ipGet(ipId);
+      const startBtns = ip
+        ? `<button class="btn primary sm" data-act="ip-resume" data-id="${esc(ipId)}">Resume · ${arr(ip.results).filter(Boolean).length}/${arr(ip.items).length}</button><button class="btn sm" data-act="drill-start" data-topic="${tp.id}" data-set="${st.id}" data-fresh="1">Start over</button>`
+        : `<button class="btn ${isNext ? "primary" : ""} sm" data-act="drill-start" data-topic="${tp.id}" data-set="${st.id}">Start</button>`;
       return `<div class="set-row">
         <div class="stack tight" style="gap:4px">
           <span class="row" style="gap:8px"><span class="lvl ${st.level === "B2" ? "b2" : ""}">${esc(st.level)}</span><b>${esc(st.title)}</b>${isNext ? `<span class="pill info">Up next</span>` : ""}</span>
           <span class="small muted">${Math.min(st.take, st.items.length)} per round from ${st.items.length} · ${st.kind === "choice" ? "multiple choice" : "type the answer"} · best ${best}${st.id === coreSet ? " · counts toward mastery" : ""}</span>
         </div>
-        <span class="row"><button class="btn ${isNext ? "primary" : ""} sm" data-act="drill-start" data-topic="${tp.id}" data-set="${st.id}">Start</button>${claudeBtn("gen-" + tp.id + "." + st.id, "drill-gen", "New items from Claude", `data-topic="${tp.id}" data-set="${st.id}"`, "btn sm")}</span>
+        <span class="row">${startBtns}${claudeBtn("gen-" + tp.id + "." + st.id, "drill-gen", "New items from Claude", `data-topic="${tp.id}" data-set="${st.id}"`, "btn sm")}</span>
       </div>`;
     }).join("");
     const pr = tp.prod ? prodPanel(tp) : "";
@@ -1810,7 +2042,7 @@
         <div class="stack">
           ${active ? drillBox(tp.id) : `<section class="panel stack tight" id="drill-area"><p class="h3">Drill</p><p class="small muted">${esc(tp.exercise)}</p>${sets}</section>`}
           ${pr}
-          <section class="stack tight"><p class="h3">History</p>${hist.length ? `<div class="history">${hist.map((d) => `<span class="pill ${d.total && d.score / d.total >= tp.criterion.pct - 1e-9 && tp.criterion.set === d.set ? "ok" : ""}">${shortDate(d.date)} · ${d.score}/${d.total}${d.src === "claude" ? " · Claude" : ""}</span>`).join("")}</div>` : `<p class="small muted">No sessions yet.</p>`}</section>
+          <section class="stack tight"><p class="h3">History</p>${recentRounds(tp.id)}</section>
         </div>
         <aside class="side">
           <section class="panel stack tight"><p class="h3">Mastery</p><p class="small">${esc(tp.criterion.text)}</p>${m.parts.map((p2) => `<p class="small"><b style="color:var(${p2.ok ? "--green" : "--ink-3"})">${p2.ok ? "✓" : "○"}</b> ${esc(p2.note)}</p>`).join("")}</section>
@@ -1821,7 +2053,19 @@
       </div>
     </div>`;
   }
+  // A topic's last five finished rounds; the full list, with every question, is in Progrès → Historique.
+  function recentRounds(topicId) {
+    const rounds = drillsFor(topicId).filter((d) => d.set !== "prod").slice(-5).reverse();
+    if (!rounds.length) return `<p class="small muted">No finished rounds yet.</p>`;
+    const tp = TOPIC[topicId];
+    return `<ul class="hw">${rounds.map((d) => {
+      const st = tp && tp.sets.find((x) => x.id === d.set);
+      return `<li style="grid-template-columns:auto minmax(0,1fr) auto"><span class="num small">${shortDate(d.date)}</span><span>${esc(d.name || (st ? st.title : "Mixed review"))} · <b>${d.score}/${d.total}</b>${d.retry ? ` <span class="small muted">· retry ${d.retry.score}/${d.retry.total}</span>` : ""}</span><button class="btn ghost sm" data-act="h-show" data-id="${esc(d.id)}" data-f="grammar">Review</button></li>`;
+    }).join("")}</ul><a class="small" href="#progress.history">All your history →</a>`;
+  }
   function prodPanel(tp) {
+    // Your saved answer comes back after a reload or on another device.
+    if (!ui.prod[tp.id]) { const ip = ipGet("prod--" + tp.id); if (ip) ui.prod[tp.id] = { text: str(ip.text) }; }
     const st = ui.prod[tp.id] || { text: "" };
     const fb = st.fb;
     const passed = prodMet(tp.id);
@@ -1836,12 +2080,15 @@
   }
   function grammarMixed() {
     const active = ui.drill && ui.drill.topic === "mixed";
-    const hist = drillsFor("mixed").slice(-8).reverse();
+    const ip = ipGet("drill--mixed");
+    const startBtns = ip
+      ? `<button class="btn primary" data-act="ip-resume" data-id="drill--mixed">Resume · ${arr(ip.results).filter(Boolean).length}/${arr(ip.items).length}</button><button class="btn" data-act="drill-start" data-topic="mixed" data-set="main" data-fresh="1">Start over</button>`
+      : `<button class="btn primary" data-act="drill-start" data-topic="mixed" data-set="main">Start mixed review</button>`;
     return `<div class="wrap">
       <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
       <header class="stack tight"><p class="eyebrow">Friday review</p><h1 class="title">Mixed review<small>15 items across pronominal verbs, imperative + pronoun, embedded questions and subjonctif. The difficulty follows your phase: B1 in Phase 1, up to B1+ in Phase 2, B1+ and B2 from Phase 3. The results tell you which topic is still weakest.</small></h1></header>
-      ${active ? drillBox("mixed") : `<section class="panel stack tight" id="drill-area"><p class="small muted">A fresh random mix every round.</p><div class="row"><button class="btn primary" data-act="drill-start" data-topic="mixed" data-set="main">Start mixed review</button></div></section>`}
-      <section class="stack tight"><p class="h3">History</p>${hist.length ? `<div class="history">${hist.map((d) => `<span class="pill">${shortDate(d.date)} · ${d.score}/${d.total}</span>`).join("")}</div>` : `<p class="small muted">No sessions yet.</p>`}</section>
+      ${active ? drillBox("mixed") : `<section class="panel stack tight" id="drill-area"><p class="small muted">A fresh random mix every round.</p><div class="row">${startBtns}</div></section>`}
+      <section class="stack tight"><p class="h3">History</p>${recentRounds("mixed")}</section>
     </div>`;
   }
 
@@ -1964,11 +2211,12 @@
       const viewing = ui.w.viewing && S.writing.get(ui.w.viewing);
       const hist = list("writing").sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 25);
       return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Expression écrite<small>TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft saves in this browser as you type.</small></h1></header>
+        <header class="stack tight"><h1 class="title">Expression écrite<small>TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</small></h1></header>
         <nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === task}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}</nav>
         <section class="panel prompt-card">
-          <div class="row between"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] ? " · from Claude" : ""}</span>
+          <div class="row between"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] && !ui.w.gen[task].kept ? " · from Claude" : ""}</span>
             <span class="row"><button class="btn sm" data-act="w-next">Another prompt</button>${claudeBtn("w-gen", "w-gen", "New prompt from Claude", "", "btn sm")}</span></div>
+          ${ui.confirm === "w-switch-w-next" || ui.confirm === "w-switch-w-gen" ? `<div class="notice warn small">A new prompt would leave your draft answering the wrong question, so the draft would be discarded.<div class="row" style="margin-top:8px"><button class="btn sm danger" data-act="${ui.confirm.slice(9)}">Discard the draft and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep my draft</button></div></div>` : ""}
           <p class="fr">${typo(p.q)}</p>
           ${p.en ? `<p class="small muted">${esc(p.en)}</p>` : ""}
           ${docs}
@@ -1993,7 +2241,7 @@
           <label class="check"><input type="checkbox" id="chk-words" disabled><span>Word count inside ${W.min}–${W.max}. Outside the range, a task can be marked “A1 non atteint” however good the French.</span></label>
           ${checks.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="w-check" data-k="${k}" ${ch[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}
         </section>
-        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-save">Save without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-save">Finish without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
         <section class="sec"><div class="sec-head"><h2 class="h2">History</h2><span class="small muted">${hist.length ? `${hist.length} most recent` : ""}</span></div>
           ${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Task</th><th>Words</th><th>Level</th><th></th></tr></thead><tbody>${hist.map((w) => {
@@ -2007,11 +2255,11 @@
     },
     after() { updateMeters(); },
   };
-  function writingFb(id, doc) {
+  function writingFb(id, doc, closeAct) {
     const W = T.WRITING[doc.task] || T.WRITING.t1;
     const fb = doc.fb;
     const inRange = doc.words >= W.min && doc.words <= W.max;
-    const head = `<div class="row between"><h2 class="h2">${esc(W.name)} · ${shortDate(doc.date)}</h2><button class="btn ghost sm" data-act="w-close">Close</button></div>
+    const head = `<div class="row between"><h2 class="h2">${esc(W.name)} · ${shortDate(doc.date)}</h2><button class="btn ghost sm" data-act="${closeAct || "w-close"}">Close</button></div>
       <p class="small muted fr">${typo(doc.prompt || "")}</p>`;
     if (!fb) return `<section class="panel fb" id="w-fb">${head}<div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">Not corrected</span></div><p class="corrected seyes">${esc(doc.text)}</p></section>`;
     const flag = (ok, yes, no) => `<span class="pill ${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(ok ? yes : no)}</span>`;
@@ -2033,7 +2281,7 @@
       ${fb.strengths.length ? `<div class="stack tight"><p class="h3">What worked</p><ul class="small" style="margin:0;padding-left:20px">${fb.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
       ${fb.corrected ? `<details class="fold"><summary>Corrected text</summary><p class="corrected seyes" style="margin-top:10px">${esc(fb.corrected)}</p></details>` : ""}
       <details class="fold"><summary>Your original</summary><p class="corrected seyes" style="margin-top:10px">${esc(doc.text)}</p></details>
-      ${fb.homework.length ? `<p class="small muted">Follow-up tasks went to today's homework: ${fb.homework.map(esc).join(" · ")}</p>` : ""}
+      ${fb.homework.length ? `<div class="stack tight"><p class="h3">Follow-up tasks</p><p class="small muted">Claude's suggestions. Add the ones you want to your homework.</p><ul class="hw">${fb.homework.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(h)}</span>${list("homework").some((x) => x.text === h) ? `<span class="small muted">Added</span>` : `<button class="btn sm" data-act="hw-fb-add" data-id="${esc(id)}" data-i="${i}">Add</button>`}</li>`).join("")}</ul></div>` : ""}
     </section>`;
   }
 
@@ -2050,7 +2298,7 @@
         ${tabs}
         <p class="small muted">${esc(P.tests)}</p>
         ${body}
-        <section class="sec"><h2 class="h2">Attempts</h2>${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Prompt</th><th>Self-score</th><th>Notes</th><th></th></tr></thead><tbody>${hist.map((h) => `<tr><td class="n">${shortDate(h.date)}</td><td class="small fr">${typo(h.prompt || "")}</td><td class="n">${h.of ? `${h.score}/${h.of}` : "—"}</td><td class="small">${esc(h.notes || "")}${h.fb && h.fb.level ? ` <span class="pill">${esc(h.fb.level)}</span>` : ""}</td><td>${confirmBtn("sp-del-" + h.id, "Delete this attempt", "sp-del", `data-id="${esc(h.id)}"`)}</td></tr>`).join("")}</tbody></table></div>` : `<p class="small muted">Saved attempts collect here, so you can compare this week's recording notes with last week's.</p>`}</section>
+        <section class="sec"><h2 class="h2">Attempts</h2>${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Prompt</th><th>Self-score</th><th>Notes</th><th></th></tr></thead><tbody>${hist.map((h) => `<tr><td class="n">${shortDate(h.date)}</td><td class="small fr">${typo(h.prompt || "")}</td><td class="n">${h.of ? `${h.score}/${h.of}` : "—"}</td><td class="small">${esc(h.notes || "")}${h.fb && h.fb.level ? ` <span class="pill">${esc(h.fb.level)}</span>` : ""}</td><td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn ghost sm" data-act="sp-open" data-id="${esc(h.id)}">${ui.sp.viewing === h.id ? "Close" : "Open"}</button>${confirmBtn("sp-del-" + h.id, "Delete this attempt", "sp-del", `data-id="${esc(h.id)}"`)}</span></td></tr>${ui.sp.viewing === h.id ? `<tr><td colspan="5">${spReview(h)}</td></tr>` : ""}`).join("")}</tbody></table></div>` : `<p class="small muted">Saved attempts collect here, so you can compare this week's recording notes with last week's.</p>`}</section>
       </div>`;
     },
     after() { scrollChat(); },
@@ -2070,7 +2318,7 @@
       ${fb ? spFbHTML(fb) : ""}
     </section>`;
   }
-  function spFbHTML(fb) {
+  function spFbHTML(fb, saved) {
     return `<div class="panel flat stack">
       ${fb.level ? `<div class="fb-head"><span class="level">${esc(fb.level)}</span><p>${esc(fb.summary)}</p></div>` : `<p>${esc(fb.summary)}</p>`}
       ${criteriaTable(fb.criteria, "TCF Canada speaking criteria. Pronunciation can't be judged from a transcript.")}
@@ -2078,7 +2326,7 @@
       ${fb.structure && fb.structure.length ? `<ul class="hw">${fb.structure.map((st) => `<li style="grid-template-columns:auto minmax(0,1fr)"><b style="color:var(${st.done ? "--green" : "--red"})">${st.done ? "✓" : "✗"}</b><span>${esc(st.step)}${st.comment ? `<small>${esc(st.comment)}</small>` : ""}</span></li>`).join("")}</ul>` : ""}
       <div class="stack tight"><p class="h3">Corrections</p>${errList(fb.errors, true)}</div>
       ${fb.next && fb.next.length ? `<div class="stack tight"><p class="h3">${fb.better ? "Stronger questions" : "Next time"}</p><ul class="small" style="margin:0;padding-left:20px">${fb.next.map((x) => `<li class="${fb.better ? "fr" : ""}">${typo(x)}</li>`).join("")}</ul></div>` : ""}
-      <p class="small muted">Save the attempt to add these corrections to your error log.</p>
+      ${saved ? "" : `<p class="small muted">Save the attempt to add these corrections to your error log.</p>`}
     </div>`;
   }
   function speakT1(P) {
@@ -2111,7 +2359,7 @@
         ? `<p class="small muted">Claude plays the examiner in role. Type your questions in French. Aim for 5–6 well-formed ones, broad first, then specifics, then logistics.</p><div>${claudeBtn("chat", "chat-start", "Start the role-play", "", "btn primary")}</div>`
         : `<p class="small muted">Say your questions out loud to an imaginary examiner. Aim for 5–6 well-formed ones: broad first, then specifics, then logistics. Tap each topic above as you cover it.</p>`;
     return `<section class="panel prompt-card">
-        <div class="row between"><span class="eyebrow">Scénario</span><button class="btn sm" data-act="sp-next" data-task="t2">Another scenario</button></div>
+        <div class="row between"><span class="eyebrow">Scénario</span><button class="btn sm" data-act="sp-next" data-task="t2">Another scenario</button>${ui.confirm === "sp-switch-t2" ? `<span class="row"><span class="small">This attempt would be discarded.</span><button class="btn sm danger" data-act="sp-next" data-task="t2">Discard and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button></span>` : ""}</div>
         <p class="fr">${typo(sc)}</p>
         <div class="chips">${P.checklist.map((k) => `<button class="chip" data-act="chip" data-k="${esc(k)}" aria-pressed="${!!cov[k]}">${esc(k)}</button>`).join("")}</div>
         <p class="small muted">Tap each topic as you cover it: your mental checklist for any scenario.</p>
@@ -2133,7 +2381,7 @@
     let from = 0;
     const steps = P.steps.map((st) => { const li = `<li data-from="${from}" data-until="${st.until}"><span class="t">${fmtClock(from)}</span><b>${esc(st.label)}</b><small>${typo(st.hint)}</small></li>`; from = st.until; return li; }).join("");
     return `<section class="panel prompt-card">
-        <div class="row between"><span class="eyebrow">Sujet · no preparation</span><button class="btn sm" data-act="sp-next" data-task="t3">Another prompt</button></div>
+        <div class="row between"><span class="eyebrow">Sujet · no preparation</span><button class="btn sm" data-act="sp-next" data-task="t3">Another prompt</button>${ui.confirm === "sp-switch-t3" ? `<span class="row"><span class="small">This attempt would be discarded.</span><button class="btn sm danger" data-act="sp-next" data-task="t3">Discard and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button></span>` : ""}</div>
         <p class="fr" style="font-size:22px">${typo(pr[0])}</p>
         <p class="small muted">${esc(pr[1])}</p>
       </section>
@@ -2247,8 +2495,174 @@
   };
 
   /* =============== view: progress =============== */
+  /* =============== history =============== */
+  // Only two kinds of entry: unfinished attempts (the inprogress records) and finished ones (drill rounds,
+  // production checks, reading and listening sets, practice exams, writing tasks, speaking attempts).
+  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit", speaking: "Oral" };
+  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"], ["speaking", "Oral"]];
+  const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind);
+  const clip = (s, n) => { const t = str(s).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+  function whenOf(ts) {
+    if (!ts) return "";
+    const d = new Date(ts), day = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return `${day === todayStr() ? "Today" : shortDate(day)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  const unfinished = () => list("inprogress").filter((x) => x && SECTION[x.kind]).sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  function ipProgress(ip) {
+    if (ip.kind === "drill") return `${arr(ip.results).filter(Boolean).length} of ${arr(ip.items).length} answered`;
+    if (ip.kind === "comp") return `${Object.keys(ip.answers || {}).length} of ${ip.total || "?"} answered${ip.plays ? ` · played ${ip.plays}×` : ""}`;
+    if (ip.kind === "exam") return `${Object.keys(ip.ans || {}).length} of ${ip.total} answered${ip.left != null ? ` · ${Math.ceil(ip.left / 60)} min left` : ""}`;
+    if (ip.kind === "writing" || ip.kind === "prod") return `${countWords(str(ip.text))} words`;
+    if (ip.kind === "speaking") {
+      const bits = [];
+      const n = Object.values(ip.rubric || {}).filter(Boolean).length;
+      if (n) bits.push(`${n} ticked`);
+      if (str(ip.notes).trim()) bits.push("notes");
+      if (str(ip.trans).trim()) bits.push("transcript");
+      const q = arr(ip.chat).filter((t) => t.role === "user").length;
+      if (q) bits.push(`${q} question${q > 1 ? "s" : ""} asked`);
+      if (ip.fb) bits.push("feedback");
+      return bits.join(" · ") || "started";
+    }
+    return "";
+  }
+  function ipResume(id) {
+    const ip = ipGet(id);
+    if (!ip) return;
+    if (ip.kind === "drill") { drillResume(ip); goTo("#" + ip.route); return; }
+    if (ip.kind === "prod") { ui.prod[ip.topic] = { text: str(ip.text) }; goTo("#" + ip.route); return; }
+    if (ip.kind === "comp") { if (compLoad(ip.skill, ip.setId, ip)) { goTo("#comp." + ip.skill); window.scrollTo(0, 0); } return; }
+    if (ip.kind === "exam") { examResume(ip); return; }
+    if (ip.kind === "writing") { writingRestore(ip.task); ui.w.task = ip.task; goTo("#writing." + ip.task); return; }
+    if (ip.kind === "speaking") { spRestore(ip.task); ui.sp.task = ip.task; goTo("#speaking." + ip.task); }
+  }
+  function ipDiscard(id) {
+    const ip = ipGet(id);
+    ui.confirm = "";
+    ipDrop(id);
+    if (ip) {
+      if (ip.kind === "drill" && ui.drill && !ui.drill.done && drillIpId(ui.drill) === id) ui.drill = null;
+      if (ip.kind === "prod") ui.prod[ip.topic] = { text: "" };
+      if (ip.kind === "comp") { const set = ui.c.set[ip.skill]; if (set && set.id === ip.setId && !ui.c.submitted[ip.skill]) compReset(ip.skill); }
+      if (ip.kind === "exam" && ui.cx && !ui.cx.done) { ui.cx = null; timerSet(0, "", ""); }
+      if (ip.kind === "writing") { ui.w.text[ip.task] = ""; ui.w.checks[ip.task] = {}; }
+      if (ip.kind === "speaking") spClear(ip.task);
+    }
+    toast("Discarded.");
+    render(true);
+  }
+  // Once saved progress has loaded, writing drafts and speaking attempts fill their pages back in, and
+  // drafts from the old browser-only store move into the saved ones.
+  function hydrate() {
+    hydrated = true;
+    ["t1", "t2", "t3"].forEach((t) => {
+      const legacy = lsGet("tcf-draft-" + t, "");
+      if (!writingRestore(t) && legacy.trim()) { ui.w.text[t] = legacy; writingKeep(t, 0); }
+      if (legacy) lsSet("tcf-draft-" + t, "");
+      spRestore(t);
+    });
+  }
+  function finishedAttempts() {
+    const out = [];
+    for (const d of list("drills")) {
+      if (d.src === "retry") continue;
+      const tp = TOPIC[d.topic];
+      if (d.set === "prod") { out.push({ kind: "prod", id: d.id, ts: d.ts || 0, date: d.date, title: tp && tp.prod ? `${tp.title} · ${tp.prod.title}` : "Production", result: d.score >= 1 ? "Passed" : "Not yet", doc: d }); continue; }
+      const st = tp && tp.sets.find((x) => x.id === d.set);
+      const name = d.topic === "mixed" ? d.name || "Mixed review" : `${tp ? tp.title : d.topic} · ${d.name || (st ? st.title : d.set)}`;
+      out.push({ kind: "drill", id: d.id, ts: d.ts || 0, date: d.date, title: name, result: `${d.score}/${d.total}${d.retry ? ` · retry ${d.retry.score}/${d.retry.total}` : ""}`, doc: d });
+    }
+    for (const c of list("comp")) {
+      const exam = c.kind === "exam";
+      out.push({ kind: exam ? "exam" : "comp", id: c.id, ts: c.ts || 0, date: c.date, title: `${c.skill === "co" ? "CO" : "CE"} · ${exam ? c.title : `${c.title || ""}${c.level ? " · " + c.level : ""}`}`, result: exam ? `≈${c.est} · ${c.score}/${c.total}` : `${c.score}/${c.total}${c.src === "logged" ? " · logged" : ""}`, doc: c });
+    }
+    for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : "not corrected", doc: w }); }
+    for (const s of list("speaking")) { const P = T.SPEAKING[s.task]; out.push({ kind: "speaking", id: s.id, ts: s.ts || 0, date: s.date, title: `${P ? P.name : "Oral"} · ${clip(s.prompt, 80)}`, result: [s.of ? `self ${s.score}/${s.of}` : "", s.fb && s.fb.level ? s.fb.level : ""].filter(Boolean).join(" · ") || "saved", doc: s }); }
+    return out.sort((a, b) => b.ts - a.ts);
+  }
+  function drillReview(d) {
+    const items = arr(d.items);
+    const qs = items.length ? items : arr(d.misses).map((m) => ({ q: m.q, src: m.src, a: [m.a], given: m.given, ok: false }));
+    return `<div class="stack tight">
+      ${items.length ? "" : `<p class="small muted">This round is from before whole rounds were saved, so only the questions you missed are here.</p>`}
+      <ul class="misses">${qs.map((it) => `<li>
+        ${it.src ? `<p class="small muted fr">${typo(it.src)}</p>` : ""}
+        <p class="fr">${typo(it.q).replace("___", "<b>___</b>")}</p>
+        <p>${it.ok ? `<span class="pen-ok">${esc(it.given)}</span>${it.overturned ? ` <span class="small muted">· accepted by Claude</span>` : ""}` : `<span class="pen-wrong">${esc(it.given || "—")}</span> <span class="pen-right">${esc(arr(it.a)[0] || "")}</span>`}</p>
+        ${it.why ? `<p class="small muted">${typo(it.why)}</p>` : ""}
+      </li>`).join("")}</ul>
+      ${d.retry ? `<p class="small">Retried the misses: ${d.retry.score}/${d.retry.total}.</p>` : ""}
+    </div>`;
+  }
+  function prodReview(d) {
+    const fb = d.fb;
+    if (!d.text && !fb) return `<p class="small muted">This check is from before answers were saved with it, so only the result is here.</p>`;
+    return `<div class="stack tight">
+      ${d.text ? `<p class="fr" style="white-space:pre-line">${typo(d.text)}</p>` : ""}
+      ${fb ? `<div class="verdict ${fb.pass ? "ok" : "bad"}"><p><b>${fb.pass ? "Criterion met." : "Not yet."}</b> ${esc(fb.comment)}</p></div>${errList(fb.errors)}${fb.improved ? `<div class="stack tight"><p class="eyebrow">Improved version</p><p class="fr" style="white-space:pre-line">${typo(fb.improved)}</p></div>` : ""}` : ""}
+    </div>`;
+  }
+  function spReview(s) {
+    const P = T.SPEAKING[s.task];
+    const ticks = P && P.rubric ? `<ul class="hw">${P.rubric.map(([k, l]) => `<li style="grid-template-columns:auto minmax(0,1fr)"><b style="color:var(${s.rubric && s.rubric[k] ? "--green" : "--ink-3"})">${s.rubric && s.rubric[k] ? "✓" : "○"}</b><span>${esc(l)}</span></li>`).join("")}</ul>` : "";
+    const chat = arr(s.chat);
+    return `<div class="stack tight">
+      <p class="fr small">${typo(s.prompt || "")}</p>
+      ${ticks}
+      ${s.notes ? `<p class="small"><b>Fixes for next time:</b> ${esc(s.notes)}</p>` : ""}
+      ${chat.length ? `<div class="stack tight"><p class="h3">The conversation</p>${chat.map((t) => `<p class="small"><b>${t.role === "user" ? "You" : "Examiner"}:</b> <span class="fr">${typo(t.content)}</span></p>`).join("")}</div>` : s.transcript ? `<div class="stack tight"><p class="h3">Transcript</p><p class="fr" style="white-space:pre-line">${typo(s.transcript)}</p></div>` : ""}
+      ${s.fb ? spFbHTML(s.fb, true) : ""}
+    </div>`;
+  }
+  function reviewOf(x) {
+    if (x.kind === "drill") return drillReview(x.doc);
+    if (x.kind === "prod") return prodReview(x.doc);
+    if (x.kind === "writing") return writingFb(x.id, x.doc, "h-close");
+    if (x.kind === "speaking") return spReview(x.doc);
+    return "";
+  }
+  function historyOpenBtn(x) {
+    if (x.kind === "comp") {
+      const c = x.doc;
+      if (c.src === "logged" || !(samplesFor(c.skill).some((s) => s.id === c.setId) || c.snap)) return "";
+      return `<button class="btn ghost sm" data-act="h-comp" data-skill="${esc(c.skill)}" data-id="${esc(x.id)}">Open</button>`;
+    }
+    if (x.kind === "exam") return (T.COMP.ceExams || []).some((e) => e.id === x.doc.setId) || x.doc.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(x.id)}">Open</button>` : "";
+    return `<button class="btn ghost sm" data-act="h-open" data-id="${esc(x.id)}">${ui.hist.open === x.id ? "Close" : "Open"}</button>`;
+  }
+  function historyView(head, tabs) {
+    const f = ui.hist.filter;
+    const pick = (x) => f === "all" || sectionOf(x.kind) === f;
+    const ips = unfinished().filter(pick);
+    const all = finishedAttempts().filter(pick);
+    const shown = all.slice(0, ui.hist.limit);
+    const chips = `<div class="seg" role="group" aria-label="Section">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div>`;
+    const ipRows = ips.map((ip) => `<tr><td class="small">${esc(SECTION[ip.kind])}</td><td>${typo(ip.title)}<br><span class="small muted">${esc(ipProgress(ip))}</span></td><td class="n small">${esc(whenOf(ip.updated))}</td><td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button>${discardBtn(ip.id)}</span></td></tr>`).join("");
+    const rows = shown.map((x) => `<tr id="h-${esc(x.id)}"><td class="n">${shortDate(x.date)}</td><td class="small">${esc(SECTION[x.kind])}</td><td>${typo(x.title)}</td><td class="n small">${esc(x.result)}</td><td>${historyOpenBtn(x)}</td></tr>${ui.hist.open === x.id ? `<tr><td colspan="5">${reviewOf(x)}</td></tr>` : ""}`).join("");
+    return `<div class="wrap">
+      ${head}
+      ${tabs}
+      <div class="row">${chips}</div>
+      <section class="sec"><div class="sec-head"><h2 class="h2">Unfinished</h2><span class="small muted">Saved as you go, from your first answer or keystroke.</span></div>
+        ${ips.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Section</th><th>Attempt</th><th>Last change</th><th></th></tr></thead><tbody>${ipRows}</tbody></table></div>` : `<p class="small muted">Nothing unfinished.</p>`}
+      </section>
+      <section class="sec"><div class="sec-head"><h2 class="h2">Finished</h2><span class="small muted">${all.length} attempt${all.length === 1 ? "" : "s"}, newest first. Open one to see the questions, your answers and the results.</span></div>
+        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, writing tasks and speaking attempts collect here.</p>`}
+      </section>
+    </div>`;
+  }
+  // Today's "Continue where you left off": the most recent unfinished attempts.
+  function continueCard() {
+    const ips = unfinished();
+    if (!ips.length) return "";
+    return `<section class="panel stack tight"><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
+  }
+
   VIEWS.progress = {
-    render() {
+    render(args) {
+      const head = `<header class="stack tight"><h1 class="title">Progrès<small>Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</small></h1></header>`;
+      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${args[0] !== "history"}">Vue d'ensemble<small>overview</small></a><a href="#progress.history" role="tab" aria-selected="${args[0] === "history"}">Historique<small>history</small></a></nav>`;
+      if (args[0] === "history") return historyView(head, tabs);
       const s = settings();
       const P = T.PHASES[s.phase - 1];
       const crit = T.CRITERIA[s.phase] || [];
@@ -2274,7 +2688,8 @@
         [list("comp").length, "CO / CE sets"],
       ];
       return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Progrès<small>Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</small></h1></header>
+        ${head}
+        ${tabs}
 
         <section class="panel stack">
           <div class="row between"><p class="h3">Phase ${s.phase} · ${esc(P.name)} <span class="muted">· ${esc(P.weeks)}</span></p><span class="small muted">Semaine ${weekNo()}</span></div>
@@ -2342,6 +2757,12 @@
     },
     after(args) {
       const tok = args.join(".");
+      if (args[0] === "history") {
+        const el = ui.hist.jump && document.getElementById("h-" + ui.hist.jump);
+        if (el) el.scrollIntoView({ block: "start" });
+        ui.hist.jump = null;
+        return;
+      }
       if (args[0] && ui.applied !== "progress." + tok) {
         ui.applied = "progress." + tok;
         const el = document.getElementById("sec-" + args[0]);
@@ -2388,12 +2809,55 @@
     "hw-add": addHomework,
     "hw-suggest": suggestHomework,
     "hw-del": (el) => remove("homework", el.dataset.id),
-    "drill-start": (el) => startDrill(el.dataset.topic, el.dataset.set),
+    // Claude's suggestions are saved only when you add them.
+    "hw-sug-add": (el) => {
+      const h = arr(ui.hwSug)[Number(el.dataset.i)];
+      if (!h) return;
+      put("homework", uid(), { text: h.text, go: h.go || "", created: todayStr(), ts: Date.now(), done: false, src: "Suggested by Claude" });
+      ui.hwSug = arr(ui.hwSug).filter((x) => x !== h);
+      if (!ui.hwSug.length) ui.hwSug = null;
+      render(true);
+    },
+    "hw-sug-clear": () => { ui.hwSug = null; render(true); },
+    "hw-fb-add": (el) => {
+      const w = S.writing.get(el.dataset.id), W = w && T.WRITING[w.task];
+      const h = w && w.fb && arr(w.fb.homework)[Number(el.dataset.i)];
+      if (!h || list("homework").some((x) => x.text === h)) return;
+      put("homework", uid(), { text: h, created: todayStr(), ts: Date.now(), done: false, src: `${W ? W.name : "Écrit"} correction` });
+      toast("Added to your homework.");
+      render(true);
+    },
+    "ip-resume": (el) => ipResume(el.dataset.id),
+    "ip-discard": (el) => ipDiscard(el.dataset.id),
+    "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; render(true); },
+    "h-more": () => { ui.hist.limit += 30; render(true); },
+    "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
+    "h-close": () => { ui.hist.open = null; render(true); },
+    // Reading and listening attempts open on the Compréhension page, which already shows a set with your answers.
+    "h-comp": (el) => { compReview(el.dataset.skill, el.dataset.id); goTo("#comp." + el.dataset.skill); window.scrollTo(0, 0); },
+    // A "Review" link elsewhere opens that attempt in the history, scrolled into view.
+    "h-show": (el) => {
+      const f = el.dataset.f || "all", id = el.dataset.id;
+      const idx = finishedAttempts().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
+      ui.hist = { filter: f, limit: Math.max(30, idx + 1), open: id, jump: id };
+      goTo("#progress.history");
+    },
+    "drill-start": (el) => {
+      if (el.dataset.fresh) ipDrop(el.dataset.topic === "mixed" ? "drill--mixed" : `drill--${el.dataset.topic}--${el.dataset.set}`);
+      startDrill(el.dataset.topic, el.dataset.set);
+    },
     "drill-gen": (el) => drillGenerate(el.dataset.topic, el.dataset.set),
     "drill-check": drillCheck,
     "drill-next": drillNext,
     "drill-pick": (el) => drillPick(Number(el.dataset.k)),
-    "drill-quit": () => { ui.drill = null; render(true); },
+    // Pausing keeps the round; it's already saved from its first checked answer.
+    "drill-quit": () => {
+      const d = ui.drill;
+      const kept = d && !d.done && d.src !== "retry" && ipGet(drillIpId(d));
+      ui.drill = null;
+      if (kept) toast("Paused. Pick it up from this page, from Today or from Progrès → Historique.");
+      render(true);
+    },
     "drill-close": () => { ui.drill = null; render(true); },
     "drill-retry": drillRetry,
     "drill-dispute": (el) => drillDispute(Number(el.dataset.k)),
@@ -2416,35 +2880,44 @@
       toast("Card added. It shows up under New cards for its theme.");
       render(true);
     },
-    "w-next": () => { const t = ui.w.task; ui.w.gen[t] = null; ui.w.idx[t]++; render(true); },
-    "w-gen": writingGenPrompt,
+    "w-next": () => { if (wDraftGuard("w-next")) return; const t = ui.w.task; ui.w.gen[t] = null; ui.w.idx[t]++; render(true); },
+    "w-gen": () => { if (wDraftGuard("w-gen")) return; render(true); writingGenPrompt(); },
     "w-skeleton": () => {
       const t = ui.w.task, W = T.WRITING[t];
       const cur = ui.w.text[t] || "";
       ui.w.text[t] = cur.trim() ? cur.replace(/\s*$/, "\n\n") + W.skeleton : W.skeleton;
-      lsSet("tcf-draft-" + t, ui.w.text[t]);
+      writingKeep(t, 0);
       render(true);
       const ta = document.getElementById("w-text");
       if (ta) ta.focus();
     },
     "w-correct": writingCorrect,
     "w-save": writingSave,
-    "w-clear": () => { const t = ui.w.task; ui.w.text[t] = ""; lsSet("tcf-draft-" + t, ""); ui.w.checks[t] = {}; ui.confirm = ""; render(true); },
+    "w-clear": () => { const t = ui.w.task; ipDrop("writing--" + t); ui.w.text[t] = ""; ui.w.checks[t] = {}; ui.confirm = ""; render(true); },
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },
     "w-close": () => { ui.w.viewing = null; render(true); },
     "w-del": (el) => { if (ui.w.viewing === el.dataset.id) ui.w.viewing = null; ui.confirm = ""; remove("writing", el.dataset.id); },
-    "timer-toggle": (el) => timerAct(el, "toggle"),
+    "timer-toggle": (el) => { timerAct(el, "toggle"); if (el.dataset.home === "comp.ce.exam") examKeep(); },
     "timer-reset": (el) => timerAct(el, "reset"),
     "timer-preset": (el) => timerAct(el, "preset"),
-    "sp-next": (el) => { ui.sp[el.dataset.task]++; if (el.dataset.task === "t2") { ui.sp.chat = null; ui.sp.covered = {}; ui.sp.fb.t2 = null; } render(true); },
+    // A new prompt ends the attempt in progress, so ask first when there is one.
+    "sp-next": (el) => {
+      const t = el.dataset.task;
+      if (ipGet("speaking--" + t) && ui.confirm !== "sp-switch-" + t) { ui.confirm = "sp-switch-" + t; render(true); return; }
+      ui.confirm = "";
+      spClear(t);
+      ui.sp[t]++;
+      render(true);
+    },
     "sp-save": (el) => spSave(el.dataset.task),
     "sp-fb": (el) => spFeedback(el.dataset.task),
-    "sp-del": (el) => { ui.confirm = ""; remove("speaking", el.dataset.id); },
-    chip: (el) => { const k = el.dataset.k; ui.sp.covered[k] = !ui.sp.covered[k]; render(true); },
+    "sp-del": (el) => { ui.confirm = ""; if (ui.sp.viewing === el.dataset.id) ui.sp.viewing = null; remove("speaking", el.dataset.id); },
+    "sp-open": (el) => { ui.sp.viewing = ui.sp.viewing === el.dataset.id ? null : el.dataset.id; render(true); },
+    chip: (el) => { const k = el.dataset.k; ui.sp.covered[k] = !ui.sp.covered[k]; spKeep("t2", 0); render(true); },
     "chat-start": chatStart,
     "chat-send": chatSend,
     "chat-end": chatEnd,
-    "chat-reset": () => { const c = busy.chat; if (c) c.abort(); ui.sp.chat = null; ui.sp.fb.t2 = null; render(true); },
+    "chat-reset": () => { const c = busy.chat; if (c) c.abort(); ui.sp.chat = null; ui.sp.fb.t2 = null; spKeep("t2", 0); render(true); },
     "c-level": (el) => { ui.c.level = el.dataset.l; render(true); },
     "c-next": (el) => {
       const sk = el.dataset.skill, key = compKey(sk), cur = ui.c.set[sk];
@@ -2491,7 +2964,7 @@
     "x-submit": () => examSubmit("done"),
     "x-keep": () => { if (ui.cx) { ui.cx.confirm = false; ui.cx.quit = false; render(true); } },
     "x-quit": () => { if (ui.cx) { ui.cx.quit = true; render(true); } },
-    "x-quit-yes": () => { ui.cx = null; timerSet(0, "", ""); render(true); },
+    "x-quit-yes": () => { ui.cx = null; ipDrop("exam--ce"); timerSet(0, "", ""); render(true); },
     "x-review": (el) => examReview(el.dataset.id),
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
     "p-phase": (el) => { saveSettings({ phase: Number(el.dataset.n) }); toast(`Phase ${el.dataset.n}: ${T.PHASES[Number(el.dataset.n) - 1].name}.`); },
@@ -2522,15 +2995,15 @@
   const CHANGES = {
     tick: (el) => setBlock(el.dataset.date, el.dataset.key, el.checked),
     "hw-done": (el) => { const cur = S.homework.get(el.dataset.id); if (cur) put("homework", el.dataset.id, Object.assign(clone(cur), { done: el.checked, doneOn: el.checked ? todayStr() : null })); },
-    "w-check": (el) => { ui.w.checks[ui.w.task][el.dataset.k] = el.checked; },
-    "sp-rubric": (el) => { const t = ui.sp.task; ui.sp.rubric[t] = ui.sp.rubric[t] || {}; ui.sp.rubric[t][el.dataset.k] = el.checked; },
+    "w-check": (el) => { ui.w.checks[ui.w.task][el.dataset.k] = el.checked; if (str(ui.w.text[ui.w.task]).trim()) writingKeep(ui.w.task, 0); },
+    "sp-rubric": (el) => { const t = ui.sp.task; ui.sp.rubric[t] = ui.sp.rubric[t] || {}; ui.sp.rubric[t][el.dataset.k] = el.checked; spKeep(t, 0); },
     crit: (el) => { const s = settings(); s.criteria[el.dataset.id] = el.checked; saveSettings({ criteria: s.criteria }); },
     "start-date": (el) => { if (/^\d{4}-\d{2}-\d{2}$/.test(el.value)) saveSettings({ startDate: el.value }); },
     fix: (el) => { const s = settings(); s.fixes[el.dataset.k] = el.value.trim(); saveSettings({ fixes: s.fixes }); },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
     "v-theme": (el) => { ui.vTheme = el.value; render(true); },
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
-    "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); },
+    "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); compKeep(ui.c.skill); },
     // Updates the navigator in place rather than re-rendering, so the chosen option keeps focus.
     "x-ans": (el) => {
       const cx = ui.cx;
@@ -2540,6 +3013,7 @@
       if (b) { b.classList.add("done"); b.setAttribute("aria-label", `Question ${cx.i + 1}, answered`); }
       const c = document.getElementById("x-count");
       if (c) c.textContent = `${Object.keys(cx.ans).length} of ${cx.exam.items.length} answered`;
+      examKeep();
     },
     "c-exam": (el) => { ui.c.exam = el.checked; render(true); },
     rate: (el) => { saveSettings({ rate: Number(el.value) }); if (audioEl) audioEl.playbackRate = Number(el.value); },
@@ -2547,9 +3021,9 @@
   const INPUTS = {
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
     "w-text": onWText,
-    prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); },
-    "sp-notes": (el) => { ui.sp.notes[ui.sp.task] = el.value; },
-    "sp-trans": (el) => { ui.sp.trans[ui.sp.task] = el.value; },
+    prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); prodKeep(t); },
+    "sp-notes": (el) => { ui.sp.notes[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
+    "sp-trans": (el) => { ui.sp.trans[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
     "chat-in": (el) => { ui.sp.chatIn = el.value; },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
   };
