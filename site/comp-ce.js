@@ -1,0 +1,388 @@
+/* Built-in Compréhension écrite sets: a B1 and a B2 set for every topic, in TCF Canada style
+   (everyday documents at B1, argued articles at B2, some Canadian contexts; four options, one correct).
+   The correct option is listed first; the app shuffles the options. */
+(function () {
+  "use strict";
+  const T = window.TCF;
+  const set = (level, theme, type, title, paras, qs) => ({
+    level, themes: [theme], type, title, text: paras.join("\n\n"),
+    questions: qs.map(([q, options, why]) => ({ q, options, answer: 0, why })),
+  });
+
+  T.COMP.ceSets.push(
+    /* ---------- Vie quotidienne ---------- */
+    set("B2", "quotidien", "Article", "Faire ses courses : le retour du commerce de proximité", [
+      "Pendant des années, le grand supermarché de périphérie semblait avoir gagné la partie. On y allait une fois par semaine, en voiture, pour remplir un chariot entier. Depuis peu, pourtant, les habitudes changent. Dans de nombreux quartiers, les petites épiceries, les marchés et les boulangeries retrouvent des clients, en particulier parmi les jeunes actifs et les retraités.",
+      "Plusieurs raisons expliquent ce retour. La hausse du prix de l'essence rend les longs trajets moins attractifs, et beaucoup de ménages préfèrent acheter moins, mais plus souvent, pour éviter le gaspillage. Le télétravail joue aussi un rôle : ceux qui travaillent à domicile font leurs courses à pied, entre deux réunions. Enfin, le commerce de proximité offre ce que les grandes surfaces ont perdu : un contact humain, des conseils et le plaisir de reconnaître son boulanger.",
+      "Faut-il pour autant annoncer la fin des supermarchés ? Ce serait aller vite en besogne. Les petits commerces restent souvent plus chers, et les familles nombreuses ou à petit budget n'ont pas toujours le choix. Le vrai changement est ailleurs : les consommateurs ne restent plus fidèles à un seul lieu, ils combinent. Le supermarché pour les produits de base, le marché pour les légumes, l'épicerie du coin pour le dépannage. Un quotidien plus éclaté, mais peut-être plus humain.",
+    ], [
+      ["Selon l'article, qui revient surtout vers les petits commerces ?", ["Les jeunes actifs et les retraités", "Les familles nombreuses", "Les automobilistes de la périphérie", "Les commerçants eux-mêmes"], "« en particulier parmi les jeunes actifs et les retraités »"],
+      ["Quel lien l'auteur fait-il entre le télétravail et les courses ?", ["Les personnes qui travaillent chez elles font leurs courses à pied, près de chez elles", "Le télétravail permet de commander en ligne", "Les télétravailleurs dépensent davantage", "Le télétravail a fait fermer des épiceries"], "« ceux qui travaillent à domicile font leurs courses à pied, entre deux réunions »"],
+      ["Que signifie « ce serait aller vite en besogne » ?", ["Ce serait une conclusion trop rapide", "Ce serait une bonne nouvelle", "Ce serait un travail difficile", "Ce serait une décision urgente"], "Aller vite en besogne = to jump to conclusions."],
+      ["Quelle est l'idée principale de la conclusion ?", ["Les consommateurs utilisent désormais plusieurs types de commerces", "Les supermarchés vont bientôt disparaître", "Les petits commerces sont devenus moins chers", "Les familles préfèrent un seul magasin"], "« ils combinent. Le supermarché pour les produits de base, le marché pour les légumes… »"],
+    ]),
+
+    /* ---------- Immigration ---------- */
+    set("B1", "immigration", "Annonce", "Séances d'information pour les nouveaux arrivants", [
+      "Vous venez de vous installer à Sherbrooke ? Le Service d'accueil des nouveaux arrivants vous invite à ses séances d'information gratuites, chaque premier samedi du mois, de 9 h 30 à 12 h, au centre communautaire.",
+      "Au programme : comment obtenir votre carte d'assurance maladie, ouvrir un compte bancaire, trouver un logement et inscrire vos enfants à l'école. Un conseiller en emploi présentera aussi les démarches pour faire reconnaître vos diplômes.",
+      "Les séances ont lieu en français. Un interprète en anglais et en espagnol peut être présent si vous le demandez au moins une semaine à l'avance.",
+      "L'inscription est obligatoire, car le nombre de places est limité à trente personnes. Une halte-garderie gratuite est offerte sur place pour les enfants de 3 à 10 ans. Inscription par téléphone ou à l'accueil du centre, du lundi au vendredi.",
+    ], [
+      ["Quand ont lieu les séances ?", ["Le premier samedi de chaque mois, le matin", "Tous les samedis après-midi", "Du lundi au vendredi", "Une fois par an, en septembre"], "« chaque premier samedi du mois, de 9 h 30 à 12 h »"],
+      ["Quel sujet ne sera PAS présenté ?", ["Obtenir le permis de conduire", "L'assurance maladie", "La reconnaissance des diplômes", "L'inscription des enfants à l'école"], "The driver's licence isn't on the programme."],
+      ["Que faut-il faire pour avoir un interprète ?", ["Le demander au moins une semaine avant", "Payer un supplément", "Venir avec une personne qui parle français", "Choisir une séance en anglais"], "« si vous le demandez au moins une semaine à l'avance »"],
+      ["Qu'est-ce qui est proposé aux parents ?", ["Une garde gratuite des enfants pendant la séance", "Des cours de français pour les enfants", "Une inscription prioritaire à l'école", "Un repas offert"], "« Une halte-garderie gratuite est offerte sur place »"],
+    ]),
+    set("B2", "immigration", "Article", "S'intégrer, un parcours plus long qu'on ne le croit", [
+      "On imagine souvent que l'intégration d'un nouvel arrivant se résume à trouver un emploi et un logement. Les chercheurs qui suivent les parcours migratoires décrivent pourtant un processus beaucoup plus lent, fait d'étapes successives et parfois de retours en arrière.",
+      "La première année est généralement celle de l'urgence : il faut régler les démarches administratives, apprendre à se déplacer, comprendre le fonctionnement des services publics. Viennent ensuite les années de « déclassement », que beaucoup vivent douloureusement. Faute de reconnaissance de leurs diplômes ou d'expérience locale, des ingénieurs deviennent chauffeurs, des infirmières travaillent comme préposées. Ce décalage entre les compétences et l'emploi occupé peut durer de cinq à dix ans.",
+      "Ce qui fait la différence, selon les études, ce n'est pas seulement le niveau de langue, mais le réseau. Les personnes qui font du bénévolat, fréquentent des associations ou participent à des programmes de mentorat accèdent plus rapidement à des postes correspondant à leur formation. Elles découvrent aussi les codes implicites du milieu de travail, rarement enseignés dans les cours de langue.",
+      "Pour les spécialistes, les politiques d'accueil gagneraient donc à ne pas s'arrêter après les premiers mois. Un accompagnement sur plusieurs années, associant employeurs, organismes communautaires et établissements de formation, permettrait de réduire ce gaspillage de talents dont souffrent à la fois les immigrants et la société qui les accueille.",
+    ], [
+      ["Selon le texte, qu'est-ce que le « déclassement » ?", ["Occuper un emploi inférieur à ses compétences", "Perdre son statut de résident", "Changer de ville plusieurs fois", "Échouer aux examens de langue"], "« des ingénieurs deviennent chauffeurs… Ce décalage entre les compétences et l'emploi occupé »"],
+      ["D'après les études citées, qu'est-ce qui accélère l'accès à un emploi qualifié ?", ["Le réseau, par exemple grâce au bénévolat ou au mentorat", "Un niveau de langue parfait", "Un diplôme obtenu dans le pays d'origine", "La première année d'urgence"], "« ce n'est pas seulement le niveau de langue, mais le réseau »"],
+      ["Quels « codes implicites » l'auteur évoque-t-il ?", ["Les règles non écrites du milieu de travail", "Les lois sur l'immigration", "Les codes d'accès aux bâtiments", "Le vocabulaire technique des métiers"], "Implicite = unstated: the unwritten rules of the workplace."],
+      ["Que recommandent les spécialistes ?", ["Un accompagnement des nouveaux arrivants sur plusieurs années", "Des cours de langue plus courts", "Une sélection plus stricte des immigrants", "La fin des programmes de mentorat"], "« Un accompagnement sur plusieurs années… »"],
+    ]),
+
+    /* ---------- Travail ---------- */
+    set("B1", "travail", "Offre d'emploi", "Préposé(e) à l'accueil – Hôtel du Vieux-Port", [
+      "L'Hôtel du Vieux-Port, à Québec, recherche un ou une préposé(e) à l'accueil pour la saison d'été, du 1er juin au 15 septembre.",
+      "Vos tâches : accueillir les clients, gérer les réservations, répondre au téléphone et aux courriels, et conseiller les visiteurs sur les activités de la région.",
+      "Profil recherché : vous êtes souriant(e), organisé(e) et vous aimez le contact avec le public. Vous parlez français et anglais ; une troisième langue est un atout. Une première expérience dans le tourisme est appréciée, mais pas obligatoire : une formation de deux semaines est prévue.",
+      "Conditions : 30 heures par semaine, de jour ou de soir, une fin de semaine sur deux. Salaire : 19 $ de l'heure, repas fournis pendant les heures de travail. Envoyez votre CV et une courte lettre de motivation avant le 30 avril.",
+    ], [
+      ["Quelle est la durée du contrat proposé ?", ["Environ trois mois et demi, pour l'été", "Un an", "Deux semaines", "Un contrat permanent"], "« du 1er juin au 15 septembre »"],
+      ["Quelle condition est obligatoire ?", ["Parler français et anglais", "Avoir déjà travaillé dans le tourisme", "Parler trois langues", "Travailler toutes les fins de semaine"], "Experience is « appréciée, mais pas obligatoire »; a third language is only « un atout »."],
+      ["Que propose l'hôtel aux candidats sans expérience ?", ["Une formation au début du contrat", "Un salaire plus élevé", "Un logement gratuit", "Un horaire réduit"], "« une formation de deux semaines est prévue »"],
+      ["Qu'est-ce qui est offert en plus du salaire ?", ["Les repas pendant le travail", "Le transport", "Une chambre à l'hôtel", "Des vacances payées en été"], "« repas fournis pendant les heures de travail »"],
+    ]),
+
+    /* ---------- Environnement ---------- */
+    set("B1", "environnement", "Avis municipal", "Collecte des déchets : ce qui change le 1er mars", [
+      "À partir du 1er mars, la collecte des déchets change dans tous les quartiers de la ville.",
+      "Les ordures ménagères seront ramassées toutes les deux semaines, et non plus chaque semaine. En revanche, le bac brun, pour les restes de nourriture, sera collecté chaque lundi, toute l'année.",
+      "Pourquoi ce changement ? Près de la moitié du contenu de nos poubelles est composée de déchets alimentaires, qui peuvent être transformés en compost. En les mettant dans le bac brun, vous réduisez les odeurs et vous aidez la ville à diminuer ses émissions de gaz à effet de serre.",
+      "Vous n'avez pas encore de bac brun ? Il est gratuit. Commandez-le en ligne ou par téléphone : il sera livré chez vous en dix jours, avec un petit seau pour la cuisine. Les résidus verts (feuilles, branches) continuent d'être collectés au printemps et à l'automne.",
+    ], [
+      ["Qu'est-ce qui change pour les ordures ménagères ?", ["Elles seront ramassées moins souvent", "Elles seront ramassées chaque lundi", "Elles devront être déposées au centre de tri", "Leur collecte deviendra payante"], "« toutes les deux semaines, et non plus chaque semaine »"],
+      ["Pourquoi la ville encourage-t-elle l'utilisation du bac brun ?", ["Beaucoup de déchets sont des restes de nourriture qui peuvent devenir du compost", "Les bacs bruns sont plus grands", "Les camions ne peuvent plus passer chaque semaine", "Le compost est vendu aux habitants"], "« Près de la moitié… déchets alimentaires, qui peuvent être transformés en compost »"],
+      ["Comment obtenir un bac brun ?", ["Le commander gratuitement ; il sera livré à domicile", "L'acheter au centre de tri", "Le demander à un voisin", "Aller le chercher à la mairie le lundi"], "« Il est gratuit. Commandez-le… il sera livré chez vous »"],
+      ["Quand les feuilles et les branches sont-elles ramassées ?", ["Au printemps et à l'automne", "Chaque lundi", "Toutes les deux semaines", "Seulement en hiver"], "« au printemps et à l'automne »"],
+    ]),
+    set("B2", "environnement", "Tribune", "Planter des arbres ne suffira pas", [
+      "Chaque printemps, les campagnes de plantation d'arbres se multiplient. Entreprises, municipalités et écoles rivalisent d'annonces : des milliers, parfois des millions d'arbres pour « compenser » nos émissions de carbone. L'intention est louable, et personne ne se plaindra de voir les villes verdir. Mais présenter ces opérations comme une solution au réchauffement climatique relève, au mieux, de la naïveté.",
+      "D'abord, un jeune arbre met des décennies avant de stocker une quantité significative de carbone, et beaucoup ne survivent pas aux premières années, faute d'entretien. Ensuite, les forêts elles-mêmes sont de plus en plus menacées : sécheresses, insectes et incendies peuvent libérer en quelques jours le carbone accumulé pendant un siècle. Enfin, et surtout, la plantation sert trop souvent d'alibi. Une entreprise qui finance quelques hectares de forêt peut ainsi continuer à polluer tout en affichant une image « verte ».",
+      "Faut-il pour autant cesser de planter ? Évidemment pas. Les arbres rafraîchissent les villes pendant les canicules, protègent la biodiversité et améliorent la qualité de l'air. Mais ils doivent venir en complément d'une réduction réelle des émissions, et non à sa place. La seule tonne de carbone qui ne pose aucun problème est celle que l'on n'émet pas.",
+    ], [
+      ["Quelle est la position de l'auteur ?", ["Planter des arbres est utile, mais ne remplace pas la réduction des émissions", "Il faut arrêter de planter des arbres", "Les plantations suffisent à compenser les émissions", "Seules les entreprises devraient planter des arbres"], "« ils doivent venir en complément d'une réduction réelle des émissions, et non à sa place »"],
+      ["Pourquoi un arbre planté aujourd'hui aide-t-il peu à court terme ?", ["Il lui faut des décennies pour stocker beaucoup de carbone", "Il rafraîchit trop les villes", "Il attire des insectes", "Il coûte trop cher à planter"], "« un jeune arbre met des décennies avant de stocker une quantité significative de carbone »"],
+      ["Que reproche l'auteur à certaines entreprises ?", ["Elles utilisent la plantation pour se donner une image verte tout en continuant à polluer", "Elles refusent de financer des forêts", "Elles plantent des arbres en ville", "Elles vendent du carbone aux écoles"], "« la plantation sert trop souvent d'alibi »"],
+      ["Que veut dire la dernière phrase ?", ["Le mieux est de ne pas produire de carbone au départ", "Toutes les émissions finissent par être compensées", "Une tonne de carbone est facile à mesurer", "Il faut planter un arbre pour chaque tonne émise"], "The only harmless tonne of carbon is the one never emitted."],
+    ]),
+
+    /* ---------- Technologie ---------- */
+    set("B1", "technologie", "Message sur un forum", "Forum des parents : un téléphone à 11 ans ?", [
+      "Bonjour à tous,",
+      "Mon fils Léo entre au secondaire en septembre. Tous ses amis ont déjà un téléphone, et il me dit qu'il se sent exclu des conversations de groupe. De mon côté, j'hésite. J'ai peur qu'il passe ses soirées sur les jeux et les réseaux sociaux au lieu de faire ses devoirs.",
+      "Mon idée : lui acheter un téléphone simple, sans accès à internet, seulement pour appeler et envoyer des messages. Il pourrait nous prévenir s'il manque l'autobus. Mais je ne suis pas sûre que cela règle le problème des conversations de groupe…",
+      "Comment avez-vous fait avec vos enfants ? Avez-vous fixé des règles, par exemple pas de téléphone dans la chambre le soir ? À quel âge leur avez-vous donné un téléphone intelligent ? Merci d'avance pour vos conseils !",
+      "Nathalie",
+    ], [
+      ["Pourquoi Léo veut-il un téléphone ?", ["Il se sent mis à l'écart des conversations de ses amis", "Il veut jouer à des jeux", "Il en a besoin pour ses devoirs", "Son école l'exige"], "« il se sent exclu des conversations de groupe »"],
+      ["Qu'est-ce qui inquiète Nathalie ?", ["Que son fils néglige ses devoirs à cause des écrans", "Le prix du téléphone", "La sécurité dans l'autobus", "Le manque d'amis de son fils"], "« J'ai peur qu'il passe ses soirées sur les jeux… au lieu de faire ses devoirs »"],
+      ["Quelle solution envisage-t-elle ?", ["Un téléphone sans internet, pour appeler et envoyer des messages", "Un téléphone intelligent avec des règles", "Attendre la fin du secondaire", "Lui prêter son propre téléphone"], "« un téléphone simple, sans accès à internet »"],
+      ["Que demande-t-elle aux autres parents ?", ["Leur expérience et les règles qu'ils ont fixées", "L'adresse d'un magasin", "Un téléphone d'occasion", "Leur avis sur l'école secondaire"], "« Comment avez-vous fait avec vos enfants ? Avez-vous fixé des règles… ? »"],
+    ]),
+    set("B2", "technologie", "Article", "L'intelligence artificielle à l'école : interdire ou apprivoiser ?", [
+      "Quelques mois après l'arrivée des assistants d'intelligence artificielle capables de rédiger une dissertation en quelques secondes, les établissements scolaires restent divisés. Certains ont choisi l'interdiction pure et simple, estimant que ces outils encouragent la tricherie et menacent l'apprentissage de l'écriture. D'autres, au contraire, les intègrent à leurs cours.",
+      "Les partisans de l'interdiction avancent un argument de poids : on apprend à penser en écrivant. Un élève qui confie ses rédactions à une machine perd l'occasion de structurer ses idées, de chercher ses mots, de se tromper et de recommencer. À quoi bon enseigner l'argumentation si le texte final ne reflète plus le travail de l'élève ?",
+      "Leurs opposants répondent que l'interdiction est illusoire. Les élèves utiliseront ces outils de toute façon, chez eux, sans aucun encadrement. Mieux vaudrait donc leur apprendre à s'en servir de manière critique : vérifier les informations, repérer les erreurs, comparer plusieurs réponses. Certains enseignants demandent déjà à leurs élèves de corriger un texte produit par une IA, un exercice qui exige de solides connaissances.",
+      "Entre ces deux positions, une voie médiane semble se dessiner : réserver certaines évaluations à la classe, sans appareil, et accepter l'usage de l'IA pour d'autres tâches, à condition qu'il soit déclaré. Reste à former les enseignants, qui découvrent souvent ces outils en même temps que leurs élèves.",
+    ], [
+      ["Quel est l'argument principal des partisans de l'interdiction ?", ["Écrire soi-même est essentiel pour apprendre à penser", "Les outils d'IA coûtent trop cher", "Les enseignants ne savent pas les utiliser", "Les élèves n'aiment pas ces outils"], "« on apprend à penser en écrivant »"],
+      ["Pourquoi les opposants jugent-ils l'interdiction « illusoire » ?", ["Les élèves utiliseront ces outils chez eux de toute façon", "L'IA est déjà interdite par la loi", "Les écoles n'ont pas d'ordinateurs", "Les parents s'y opposent"], "« Les élèves utiliseront ces outils de toute façon, chez eux »"],
+      ["Quel exercice certains enseignants proposent-ils ?", ["Corriger un texte produit par une IA", "Écrire sans jamais utiliser d'ordinateur", "Programmer une intelligence artificielle", "Comparer deux dissertations d'élèves"], "« corriger un texte produit par une IA »"],
+      ["Quelle difficulté l'article mentionne-t-il à la fin ?", ["Les enseignants doivent eux-mêmes être formés", "Les élèves refusent les évaluations en classe", "Les outils changent de nom chaque année", "L'usage déclaré de l'IA est interdit"], "« Reste à former les enseignants »"],
+    ]),
+
+    /* ---------- Société ---------- */
+    set("B1", "societe", "Appel aux bénévoles", "Banque alimentaire du quartier Saint-Roch", [
+      "La banque alimentaire du quartier Saint-Roch cherche des bénévoles pour la période des fêtes.",
+      "Chaque semaine, nous distribuons des paniers de nourriture à plus de 300 familles. En décembre, les demandes augmentent beaucoup, et nous avons besoin de renfort pour trier les dons, préparer les paniers et accueillir les familles.",
+      "Aucune expérience n'est nécessaire. Vous pouvez donner quelques heures seulement, en semaine ou le samedi matin. Les étudiants qui ont besoin d'heures de bénévolat pour leur école sont les bienvenus : nous leur remettrons une attestation.",
+      "Vous préférez aider autrement ? Nous acceptons les dons de produits non périssables (conserves, pâtes, riz) et de produits d'hygiène. Merci de ne pas apporter de produits frais. Pour vous inscrire, remplissez le formulaire sur notre site ou passez nous voir, au 245, rue du Roi.",
+    ], [
+      ["Pourquoi la banque alimentaire a-t-elle besoin de plus de bénévoles en décembre ?", ["Le nombre de demandes augmente", "Beaucoup de bénévoles partent en vacances", "Elle déménage rue du Roi", "Elle ouvre aussi le dimanche"], "« En décembre, les demandes augmentent beaucoup »"],
+      ["Qui peut devenir bénévole ?", ["Toute personne, même sans expérience", "Seulement les étudiants", "Seulement les personnes disponibles tous les jours", "Les anciens employés de la banque"], "« Aucune expérience n'est nécessaire »"],
+      ["Qu'est-ce que les étudiants peuvent recevoir ?", ["Un document qui prouve leurs heures de bénévolat", "Un panier de nourriture", "Un salaire", "Des cours gratuits"], "« nous leur remettrons une attestation »"],
+      ["Quel don n'est PAS accepté ?", ["Les produits frais", "Les conserves", "Le riz", "Les produits d'hygiène"], "« Merci de ne pas apporter de produits frais. »"],
+    ]),
+    set("B2", "societe", "Article", "La solitude, un mal discret des grandes villes", [
+      "Jamais nous n'avons été aussi connectés, et pourtant la solitude progresse. Dans les grandes villes, un nombre croissant de ménages ne compte plus qu'une seule personne, et de plus en plus d'habitants déclarent n'avoir personne à qui parler en cas de difficulté. Longtemps associé aux personnes âgées, ce sentiment touche désormais toutes les générations, y compris les jeunes adultes.",
+      "Les causes sont multiples. La mobilité professionnelle éloigne des familles et des amis d'enfance ; les horaires décalés compliquent les rencontres ; le coût du logement pousse à vivre seul dans de petits espaces. Quant aux réseaux sociaux, ils entretiennent l'illusion d'une vie sociale intense, sans toujours offrir le soutien d'une présence réelle.",
+      "Or la solitude n'est pas qu'une question de confort. Les médecins la considèrent aujourd'hui comme un véritable facteur de risque pour la santé : elle augmente le stress, perturbe le sommeil et favorise la dépression.",
+      "Face à ce constat, des initiatives voient le jour : jardins partagés, cafés de quartier où l'on vient pour discuter, programmes qui font cohabiter étudiants et personnes âgées. Aucune ne suffira seule. Mais toutes rappellent une évidence que nos villes avaient oubliée : le lien social ne se décrète pas, il se construit, et il a besoin de lieux pour exister.",
+    ], [
+      ["Selon l'article, qui est touché par la solitude aujourd'hui ?", ["Toutes les générations, y compris les jeunes adultes", "Surtout les personnes âgées", "Uniquement les personnes qui vivent seules", "Les habitants des campagnes"], "« ce sentiment touche désormais toutes les générations »"],
+      ["Quel rôle l'auteur attribue-t-il aux réseaux sociaux ?", ["Ils donnent l'impression d'une vie sociale sans remplacer une présence réelle", "Ils sont la principale cause de la solitude", "Ils permettent de lutter efficacement contre l'isolement", "Ils sont surtout utilisés par les personnes âgées"], "« ils entretiennent l'illusion d'une vie sociale intense »"],
+      ["Pourquoi les médecins s'intéressent-ils à la solitude ?", ["Elle présente des risques pour la santé", "Elle coûte cher aux hôpitaux", "Elle empêche de faire du sport", "Elle est liée au tabagisme"], "« un véritable facteur de risque pour la santé »"],
+      ["Que signifie « le lien social ne se décrète pas » ?", ["On ne peut pas créer des relations par une simple décision officielle", "Le lien social est interdit par la loi", "Les villes doivent voter des lois sur la solitude", "Les relations se créent surtout en ligne"], "Décréter = to order officially; relationships can't be ordered into existence."],
+    ]),
+
+    /* ---------- Éducation ---------- */
+    set("B1", "education", "Courriel de l'école", "Rencontre parents-enseignants du 14 novembre", [
+      "Chers parents,",
+      "La première rencontre parents-enseignants de l'année aura lieu le jeudi 14 novembre, de 16 h à 20 h. Ce sera l'occasion de discuter du premier bulletin de votre enfant et de poser vos questions à ses enseignants.",
+      "Pour éviter l'attente, les rencontres se font sur rendez-vous. Réservez une plage de dix minutes par enseignant sur le portail de l'école, avant le 8 novembre. Si vous n'avez pas accès à internet, appelez le secrétariat.",
+      "Les élèves n'ont pas de cours ce jour-là. Un service de garde est offert gratuitement de 7 h 30 à 16 h pour les parents qui travaillent ; l'inscription est obligatoire. Si vous avez besoin d'un interprète, indiquez-le dans votre réservation : l'école fera son possible pour vous aider.",
+      "La direction",
+    ], [
+      ["Quel est le but principal de la rencontre ?", ["Parler du premier bulletin avec les enseignants", "Inscrire les enfants au service de garde", "Élire un comité de parents", "Visiter la nouvelle école"], "« discuter du premier bulletin de votre enfant »"],
+      ["Comment faut-il prendre rendez-vous ?", ["Sur le portail de l'école, ou par téléphone sans internet", "En arrivant le 14 novembre", "Par courriel à chaque enseignant", "Par l'intermédiaire de son enfant"], "« sur le portail de l'école… Si vous n'avez pas accès à internet, appelez le secrétariat »"],
+      ["Que se passe-t-il pour les élèves le 14 novembre ?", ["Ils n'ont pas de cours", "Ils assistent aux rencontres", "Ils finissent à 16 h", "Ils passent un examen"], "« Les élèves n'ont pas de cours ce jour-là. »"],
+      ["Que doivent faire les parents qui ont besoin d'un interprète ?", ["Le signaler au moment de la réservation", "Venir avec un ami", "Appeler le ministère", "Choisir une rencontre en anglais"], "« indiquez-le dans votre réservation »"],
+    ]),
+    set("B2", "education", "Article d'opinion", "Faut-il supprimer les devoirs à la maison ?", [
+      "Dans plusieurs écoles primaires, les devoirs à la maison ont tout simplement disparu. Les enseignants qui ont fait ce choix avancent un argument d'équité : tous les enfants ne rentrent pas chez eux dans les mêmes conditions. Certains disposent d'un bureau calme et de parents disponibles pour les aider ; d'autres partagent une chambre, gardent leurs frères et sœurs ou ont des parents qui travaillent le soir. Les devoirs, loin de réduire les inégalités, auraient donc tendance à les accentuer.",
+      "Leurs détracteurs estiment au contraire que les devoirs développent l'autonomie et l'habitude du travail régulier, indispensables au secondaire. Ils rappellent aussi que, pour beaucoup de parents, les devoirs sont le seul moyen de savoir ce que leur enfant apprend en classe.",
+      "La recherche, elle, apporte une réponse nuancée. Au primaire, l'effet des devoirs sur les résultats scolaires semble faible ; il devient plus net au secondaire, à condition que les tâches soient courtes, bien expliquées et corrigées. Autrement dit, la question n'est peut-être pas de savoir s'il faut des devoirs, mais lesquels.",
+      "Plusieurs écoles ont trouvé un compromis : des périodes d'étude encadrées à la fin de la journée, où chaque élève peut travailler avec l'aide d'un adulte. Une solution qui a un coût, mais qui garantit au moins que la réussite d'un enfant dépend moins de la table de cuisine familiale.",
+    ], [
+      ["Pourquoi certains enseignants ont-ils supprimé les devoirs ?", ["Parce que les conditions à la maison sont très inégales selon les enfants", "Parce que les parents s'en plaignent", "Parce que les élèves ont trop de cours", "Parce que le ministère l'a exigé"], "« tous les enfants ne rentrent pas chez eux dans les mêmes conditions »"],
+      ["Quel argument avancent les défenseurs des devoirs ?", ["Ils développent l'autonomie et informent les parents", "Ils améliorent fortement les résultats au primaire", "Ils réduisent les inégalités", "Ils remplacent les cours"], "« les devoirs développent l'autonomie… le seul moyen de savoir ce que leur enfant apprend »"],
+      ["Que dit la recherche, selon l'article ?", ["L'effet des devoirs est faible au primaire et plus net au secondaire s'ils sont bien conçus", "Les devoirs n'ont jamais d'effet", "Les devoirs sont indispensables dès le primaire", "Les devoirs longs sont les plus efficaces"], "« Au primaire, l'effet… semble faible ; il devient plus net au secondaire, à condition que… »"],
+      ["Que représente « la table de cuisine familiale » dans la dernière phrase ?", ["Les conditions de travail à la maison", "Les repas en famille", "Le métier des parents", "Les cours de cuisine"], "The kitchen table stands for the conditions at home."],
+    ]),
+
+    /* ---------- Santé ---------- */
+    set("B1", "sante", "Affiche en pharmacie", "Vaccination contre la grippe : c'est le moment !", [
+      "La saison de la grippe commence. Cette année encore, votre pharmacie offre la vaccination sans rendez-vous, du lundi au samedi, de 10 h à 18 h.",
+      "Le vaccin est gratuit pour les personnes de 65 ans et plus, les femmes enceintes, les personnes atteintes d'une maladie chronique et les enfants de 6 mois à 17 ans. Pour les autres adultes, il coûte 25 $.",
+      "Avant de venir, vérifiez que vous n'avez pas de fièvre. Si vous êtes malade, attendez d'être guéri pour vous faire vacciner. Apportez votre carte d'assurance maladie. Après l'injection, vous devrez rester quinze minutes à la pharmacie, par précaution.",
+      "Vous préférez prendre rendez-vous ? Réservez en ligne sur le site de la pharmacie ou appelez-nous.",
+    ], [
+      ["Qui peut être vacciné gratuitement ?", ["Les personnes de 65 ans et plus", "Tous les adultes", "Seulement les enfants de moins de 6 mois", "Les clients qui prennent rendez-vous"], "« gratuit pour les personnes de 65 ans et plus… »"],
+      ["Que faut-il faire si on a de la fièvre ?", ["Attendre d'être guéri avant de se faire vacciner", "Venir quand même avec sa carte", "Prendre rendez-vous en ligne", "Payer 25 $"], "« Si vous êtes malade, attendez d'être guéri »"],
+      ["Que doit-on faire juste après la vaccination ?", ["Rester quinze minutes à la pharmacie", "Rentrer immédiatement se reposer", "Revenir le lendemain", "Appeler son médecin"], "« vous devrez rester quinze minutes à la pharmacie »"],
+      ["Est-il obligatoire de prendre rendez-vous ?", ["Non, la vaccination se fait aussi sans rendez-vous", "Oui, uniquement en ligne", "Oui, par téléphone", "Seulement le samedi"], "« la vaccination sans rendez-vous »"],
+    ]),
+    set("B2", "sante", "Article", "Médecin de famille : la longue attente", [
+      "Au Québec comme dans plusieurs provinces canadiennes, des centaines de milliers de personnes attendent d'être inscrites auprès d'un médecin de famille. Pour elles, le moindre problème de santé devient un casse-tête. Faute de suivi régulier, beaucoup finissent aux urgences pour des consultations qui auraient pu être réglées en quelques minutes dans une clinique, ce qui contribue à engorger les hôpitaux.",
+      "Comment expliquer cette pénurie ? Le vieillissement de la population augmente les besoins, alors que de nombreux médecins partent à la retraite. Les jeunes diplômés, eux, choisissent plus volontiers une spécialité ou un rythme de travail moins intense que leurs aînés, ce qui réduit le nombre de patients qu'ils peuvent suivre.",
+      "Pour réduire l'attente, les autorités misent de plus en plus sur le travail d'équipe. Dans les nouvelles cliniques, les infirmières praticiennes peuvent diagnostiquer et traiter certains problèmes courants, les pharmaciens renouvellent des ordonnances et les travailleurs sociaux prennent en charge une partie des consultations. Le patient n'est plus forcément « le patient d'un médecin », mais celui d'une équipe.",
+      "Ce modèle suscite toutefois des réserves. Certains patients regrettent de ne plus avoir un interlocuteur unique qui connaît leur histoire ; d'autres craignent qu'on leur propose une solution au rabais. Pour les défenseurs de la réforme, il s'agit au contraire de mieux utiliser les compétences de chacun, afin que les médecins se consacrent aux cas qui ont réellement besoin d'eux.",
+    ], [
+      ["Quelle conséquence de la pénurie l'article mentionne-t-il ?", ["Des patients vont aux urgences pour des problèmes simples", "Les hôpitaux ferment le soir", "Les médicaments coûtent plus cher", "Les pharmacies refusent de nouveaux clients"], "« beaucoup finissent aux urgences pour des consultations qui auraient pu être réglées en quelques minutes »"],
+      ["Selon le texte, pourquoi les jeunes médecins suivent-ils moins de patients ?", ["Ils préfèrent souvent une spécialité ou un rythme moins intense", "Ils partent à la retraite plus tôt", "Ils travaillent seulement aux urgences", "Ils quittent la province"], "« choisissent plus volontiers une spécialité ou un rythme de travail moins intense »"],
+      ["En quoi consiste la solution du « travail d'équipe » ?", ["Partager certaines consultations entre infirmières, pharmaciens et autres professionnels", "Regrouper plusieurs médecins dans un seul hôpital", "Recruter des médecins à l'étranger", "Réduire le nombre de consultations"], "« les infirmières praticiennes… les pharmaciens… les travailleurs sociaux »"],
+      ["Quelle critique certains patients font-ils à ce modèle ?", ["Ils perdent un interlocuteur unique qui connaît leur histoire", "Ils doivent payer leurs consultations", "Ils attendent plus longtemps aux urgences", "Ils ne peuvent plus renouveler leurs ordonnances"], "« ne plus avoir un interlocuteur unique qui connaît leur histoire »"],
+    ]),
+
+    /* ---------- Gouvernement ---------- */
+    set("B1", "gouvernement", "Information municipale", "Budget participatif : proposez vos projets !", [
+      "Vous avez une idée pour améliorer votre quartier ? Pour la troisième année, la Ville réserve 500 000 $ de son budget à des projets proposés par les citoyens.",
+      "Qui peut participer ? Toutes les personnes de 12 ans et plus qui habitent la ville, quelle que soit leur nationalité.",
+      "Quels projets ? Ils doivent profiter au public et coûter moins de 150 000 $ : un jardin collectif, des bancs dans un parc, une piste cyclable, une boîte à livres… Les projets privés ou commerciaux ne sont pas acceptés.",
+      "Comment ça marche ? Déposez votre idée en ligne avant le 31 mars. Les services de la Ville vérifieront qu'elle est réalisable, puis les habitants voteront en juin pour leurs projets préférés. Les projets gagnants seront réalisés l'année suivante. Des ateliers gratuits sont organisés en février pour vous aider à préparer votre proposition.",
+    ], [
+      ["Qui peut proposer un projet ?", ["Les habitants de 12 ans et plus, quelle que soit leur nationalité", "Seulement les citoyens canadiens", "Les entreprises de la ville", "Les employés municipaux"], "« Toutes les personnes de 12 ans et plus qui habitent la ville, quelle que soit leur nationalité »"],
+      ["Quel projet serait refusé ?", ["L'ouverture d'un café privé", "Un jardin collectif", "Une piste cyclable", "Des bancs dans un parc"], "« Les projets privés ou commerciaux ne sont pas acceptés. »"],
+      ["Qui choisit les projets gagnants ?", ["Les habitants, par un vote", "Le maire", "Les services de la Ville", "Les participants aux ateliers"], "« les habitants voteront en juin pour leurs projets préférés »"],
+      ["À quoi servent les ateliers de février ?", ["À aider les habitants à préparer leur proposition", "À voter pour les projets", "À construire les projets", "À présenter le budget de la Ville"], "« pour vous aider à préparer votre proposition »"],
+    ]),
+    set("B2", "gouvernement", "Article d'opinion", "Faut-il rendre le vote obligatoire ?", [
+      "Élection après élection, le constat se répète : la participation recule, en particulier chez les jeunes. Pour enrayer ce phénomène, certains proposent une solution radicale : rendre le vote obligatoire, comme c'est déjà le cas en Belgique ou en Australie, où les abstentionnistes s'exposent à une amende.",
+      "Les arguments ne manquent pas. Un vote obligatoire garantirait que les élus représentent vraiment l'ensemble de la population, et non les seuls groupes qui se rendent aux urnes, souvent plus âgés et plus aisés. Il obligerait aussi les partis à s'adresser à tous les électeurs, y compris ceux qu'ils négligent aujourd'hui.",
+      "Les opposants y voient pourtant une atteinte à la liberté. Voter est un droit, disent-ils, et le droit de ne pas voter en fait partie. Contraindre des citoyens désintéressés à se prononcer risquerait de produire des votes au hasard, sans améliorer la qualité du débat démocratique. Surtout, l'obligation traiterait le symptôme sans guérir la maladie : si les gens ne votent plus, c'est souvent parce qu'ils ont le sentiment que leur voix ne change rien.",
+      "Entre ces deux positions, d'autres pistes existent : faciliter le vote par anticipation, développer l'éducation civique à l'école ou reconnaître le vote blanc. Autant de mesures moins spectaculaires, mais qui ont le mérite de chercher à convaincre plutôt qu'à contraindre.",
+    ], [
+      ["Quel problème l'article décrit-il au départ ?", ["La baisse de la participation aux élections, surtout chez les jeunes", "La corruption des élus", "Le coût des élections", "Le manque de candidats"], "« la participation recule, en particulier chez les jeunes »"],
+      ["Selon ses partisans, quel serait le principal avantage du vote obligatoire ?", ["Les élus représenteraient mieux toute la population", "Les élections coûteraient moins cher", "Les jeunes seraient mieux informés", "Les partis seraient moins nombreux"], "« garantirait que les élus représentent vraiment l'ensemble de la population »"],
+      ["Que signifie ici « traiter le symptôme sans guérir la maladie » ?", ["Obliger à voter ne règle pas la cause du désintérêt", "Le vote obligatoire est dangereux pour la santé", "Les malades ne peuvent pas voter", "L'abstention est une maladie grave"], "The real cause is the feeling « que leur voix ne change rien »."],
+      ["Quelle semble être la position de l'auteur ?", ["Il préfère des mesures qui convainquent plutôt que la contrainte", "Il est favorable à une amende pour les abstentionnistes", "Il pense que le vote n'a plus d'importance", "Il veut supprimer le vote blanc"], "« chercher à convaincre plutôt qu'à contraindre »"],
+    ]),
+
+    /* ---------- Économie ---------- */
+    set("B1", "economie", "Article de conseils", "Cinq conseils pour réduire votre facture d'épicerie", [
+      "Avec la hausse des prix, le budget de l'épicerie devient un casse-tête pour beaucoup de familles. Voici quelques conseils simples pour économiser.",
+      "D'abord, planifiez vos repas de la semaine et faites une liste avant d'aller au magasin : vous éviterez les achats impulsifs. Ensuite, comparez le prix au kilo plutôt que le prix du paquet ; les grands formats ne sont pas toujours les moins chers.",
+      "Troisième conseil : privilégiez les fruits et légumes de saison, souvent plus abordables et meilleurs au goût. Pensez aussi aux marques maison, en moyenne 20 à 30 % moins chères que les grandes marques.",
+      "Enfin, luttez contre le gaspillage : congelez les restes et cuisinez les légumes un peu abîmés dans une soupe. Une famille jette en moyenne plusieurs centaines de dollars de nourriture par an !",
+    ], [
+      ["Pourquoi faut-il faire une liste avant d'aller au magasin ?", ["Pour éviter d'acheter des produits dont on n'a pas besoin", "Pour trouver les grands formats", "Pour aller plus vite à la caisse", "Pour obtenir des réductions"], "« vous éviterez les achats impulsifs »"],
+      ["Que conseille l'article à propos des grands formats ?", ["Vérifier le prix au kilo, car ils ne sont pas toujours moins chers", "Toujours les choisir", "Ne jamais les acheter", "Les partager avec les voisins"], "« comparez le prix au kilo… les grands formats ne sont pas toujours les moins chers »"],
+      ["Quel avantage ont les marques maison ?", ["Elles coûtent généralement moins cher", "Elles sont de meilleure qualité", "Elles sont fabriquées localement", "Elles sont vendues en grands formats"], "« en moyenne 20 à 30 % moins chères »"],
+      ["Que propose l'article pour lutter contre le gaspillage ?", ["Congeler les restes et cuisiner les légumes abîmés", "Acheter moins de légumes", "Faire ses courses tous les jours", "Donner la nourriture aux voisins"], "« congelez les restes et cuisinez les légumes un peu abîmés »"],
+    ]),
+    set("B2", "economie", "Article", "L'économie du partage : une bonne affaire pour qui ?", [
+      "Louer sa voiture quand on ne s'en sert pas, proposer son appartement aux touristes, prêter sa perceuse à un voisin contre quelques dollars : il y a une dizaine d'années, l'économie du partage promettait une révolution. Moins de gaspillage, des revenus d'appoint pour les particuliers et des services moins chers pour les consommateurs. Qui pouvait s'y opposer ?",
+      "Le bilan est aujourd'hui plus contrasté. Certes, des millions de personnes utilisent chaque jour ces plateformes, et beaucoup y trouvent un complément de revenu bienvenu. Mais le modèle s'est transformé. Dans de nombreuses villes, les logements loués aux touristes ne sont plus les appartements de particuliers partis en vacances : ce sont des immeubles entiers achetés par des investisseurs et retirés du marché locatif, ce qui fait grimper les loyers des résidents.",
+      "Quant aux chauffeurs et aux livreurs, ils sont officiellement « travailleurs autonomes ». Cette liberté a un prix : pas d'assurance-emploi, pas de congés payés, et une rémunération qui dépend d'un algorithme qu'ils ne contrôlent pas.",
+      "Faut-il pour autant condamner ces plateformes ? Plusieurs villes ont choisi de les encadrer plutôt que de les interdire : limitation du nombre de nuits de location, obligation d'enregistrement, protection minimale pour les travailleurs. L'économie du partage n'a pas tenu toutes ses promesses, mais elle peut encore évoluer, à condition que le partage ne soit pas seulement un argument de marketing.",
+    ], [
+      ["Que promettait l'économie du partage au départ ?", ["Moins de gaspillage, des revenus d'appoint et des services moins chers", "La fin du travail salarié", "La construction de nouveaux logements", "Des emplois stables pour tous"], "« Moins de gaspillage, des revenus d'appoint… des services moins chers »"],
+      ["Selon l'article, quel effet la location touristique a-t-elle eu dans certaines villes ?", ["Elle a fait augmenter les loyers en réduisant les logements disponibles", "Elle a fait baisser le prix des hôtels", "Elle a attiré de nouveaux résidents", "Elle a créé des emplois dans la construction"], "« retirés du marché locatif, ce qui fait grimper les loyers des résidents »"],
+      ["Quel inconvénient le statut de « travailleur autonome » présente-t-il ?", ["L'absence de protections comme l'assurance-emploi ou les congés payés", "Des horaires imposés", "Un salaire fixe trop bas", "L'obligation d'acheter une voiture"], "« pas d'assurance-emploi, pas de congés payés »"],
+      ["Quelle solution plusieurs villes ont-elles choisie ?", ["Encadrer les plateformes par des règles", "Interdire complètement les plateformes", "Racheter les logements touristiques", "Supprimer les taxes des plateformes"], "« de les encadrer plutôt que de les interdire »"],
+    ]),
+
+    /* ---------- Logement ---------- */
+    set("B2", "logement", "Article", "Colocation après quarante ans : une nouvelle façon d'habiter", [
+      "Longtemps réservée aux étudiants, la colocation attire désormais des adultes de tous âges. Personnes divorcées, travailleurs en mobilité, jeunes retraités : ils sont de plus en plus nombreux à partager un appartement ou une maison, non plus seulement par obligation, mais parfois par choix.",
+      "La raison financière reste la première. Avec la hausse des loyers, un logement de trois chambres partagé revient souvent moins cher qu'un petit studio. Mais les colocataires interrogés évoquent aussi d'autres avantages : rompre l'isolement, partager les tâches ménagères, avoir quelqu'un sur qui compter en cas de problème. Pour certains retraités, c'est même une manière de rester autonomes plus longtemps, sans devoir entrer en résidence.",
+      "Cette formule n'est pas sans difficultés. Vivre avec des inconnus à cinquante ans, c'est accepter de renoncer à une partie de son intimité et de ses habitudes. Les conflits portent rarement sur l'argent, davantage sur le bruit, le ménage ou les invités. Les agences spécialisées recommandent donc de signer une charte de vie commune dès l'emménagement.",
+      "Les propriétaires, eux, restent parfois méfiants, et la loi n'a pas toujours suivi : avec un bail unique, signé par un seul locataire, les autres occupants se trouvent dans une situation fragile. Plusieurs associations réclament aujourd'hui un bail adapté à la colocation, qui protégerait chacun des occupants.",
+    ], [
+      ["Selon l'article, qui choisit aujourd'hui la colocation ?", ["Des adultes de tous âges, et pas seulement des étudiants", "Surtout des étudiants étrangers", "Uniquement des retraités", "Les propriétaires"], "« la colocation attire désormais des adultes de tous âges »"],
+      ["Quel avantage non financier est cité ?", ["Rompre l'isolement", "Payer moins d'impôts", "Habiter plus près du travail", "Avoir un grand logement pour soi seul"], "« rompre l'isolement, partager les tâches ménagères… »"],
+      ["Sur quoi portent le plus souvent les conflits entre colocataires ?", ["Le bruit, le ménage ou les invités", "Le montant du loyer", "Le choix des meubles", "Les factures d'électricité"], "« rarement sur l'argent, davantage sur le bruit, le ménage ou les invités »"],
+      ["Quel problème juridique l'article soulève-t-il ?", ["Avec un bail unique, les autres colocataires sont mal protégés", "La colocation est interdite après quarante ans", "Les propriétaires ne peuvent pas louer à plusieurs personnes", "Les chartes de vie commune n'ont aucune valeur"], "« avec un bail unique… les autres occupants se trouvent dans une situation fragile »"],
+    ]),
+
+    /* ---------- Transports ---------- */
+    set("B1", "transports", "Avis aux usagers", "Travaux sur la ligne 2 : ce qu'il faut savoir", [
+      "En raison de travaux de rénovation, les stations Gare-Centrale et Parc-Laurier seront fermées toutes les fins de semaine, du 5 au 27 octobre, du vendredi 23 h au lundi 5 h.",
+      "Pendant ces fermetures, des autobus gratuits remplaceront le métro entre les stations concernées. Ils passeront toutes les cinq minutes. Prévoyez environ quinze minutes de plus pour vos déplacements. Les autres stations de la ligne restent ouvertes normalement, et le service n'est pas modifié en semaine.",
+      "Les personnes à mobilité réduite peuvent réserver un transport adapté sans frais supplémentaires, au moins 24 heures à l'avance.",
+      "Pour connaître l'état du service en temps réel, consultez notre site ou notre application. Merci de votre patience : ces travaux permettront d'améliorer la sécurité et l'accessibilité des stations.",
+    ], [
+      ["Quand les stations seront-elles fermées ?", ["Les fins de semaine, du 5 au 27 octobre", "Tous les jours en octobre", "En semaine, la nuit", "Le lundi matin seulement"], "« toutes les fins de semaine, du 5 au 27 octobre »"],
+      ["Qu'est-ce qui remplacera le métro pendant la fermeture ?", ["Des autobus gratuits", "Des taxis à prix réduit", "Des vélos en libre-service", "Rien : il faudra marcher"], "« des autobus gratuits remplaceront le métro »"],
+      ["Que doivent faire les personnes à mobilité réduite ?", ["Réserver un transport adapté au moins 24 heures avant", "Payer un supplément", "Éviter de voyager la fin de semaine", "Appeler le lundi"], "« réserver un transport adapté… au moins 24 heures à l'avance »"],
+      ["Pourquoi ces travaux sont-ils faits ?", ["Pour améliorer la sécurité et l'accessibilité des stations", "Pour construire une nouvelle ligne", "Pour réduire le prix des billets", "Pour agrandir les stationnements"], "« améliorer la sécurité et l'accessibilité des stations »"],
+    ]),
+    set("B2", "transports", "Tribune", "Le vélo toute l'année : une utopie nordique ?", [
+      "Dès les premières neiges, les pistes cyclables se vident et les critiques reprennent : à quoi bon investir dans le vélo dans un pays où l'hiver dure cinq mois ? L'argument semble imparable. Il est pourtant démenti par l'expérience de plusieurs villes nordiques, où une part importante des cyclistes continue de rouler par grand froid.",
+      "Le secret n'est pas le climat, mais l'entretien. Dans ces villes, les pistes cyclables sont déneigées en priorité, souvent avant les rues, et forment un réseau continu, séparé de la circulation automobile. Quand rouler l'hiver n'est ni dangereux ni compliqué, beaucoup de gens le font, équipés de pneus adaptés et de vêtements chauds.",
+      "Chez nous, le réseau reste trop souvent discontinu : une piste s'arrête brusquement, reprend deux rues plus loin, disparaît sous un banc de neige. Dans ces conditions, il n'est pas étonnant que seuls les plus courageux persistent. Et le cercle est vicieux : peu de cyclistes en hiver, donc peu d'investissements, donc peu de cyclistes.",
+      "Personne ne prétend que tout le monde se rendra au travail à vélo par moins vingt degrés. Mais rendre le vélo d'hiver possible pour ceux qui le souhaitent coûte moins cher qu'on ne le pense, désengorge les routes et les transports en commun, et améliore la santé. Encore faut-il que les villes considèrent le vélo comme un véritable moyen de transport, et non comme un loisir de beau temps.",
+    ], [
+      ["Quel argument contre le vélo l'auteur conteste-t-il ?", ["On ne peut pas faire de vélo dans un pays où l'hiver est long", "Le vélo coûte trop cher", "Les pistes cyclables sont dangereuses l'été", "Les cyclistes ne respectent pas le code de la route"], "« à quoi bon investir dans le vélo dans un pays où l'hiver dure cinq mois ? »"],
+      ["Qu'est-ce qui explique le succès du vélo d'hiver dans certaines villes nordiques ?", ["L'entretien et le déneigement prioritaire des pistes", "Un climat plus doux", "L'interdiction des voitures", "Des vélos gratuits"], "« Le secret n'est pas le climat, mais l'entretien. »"],
+      ["Quel est le « cercle vicieux » décrit dans le troisième paragraphe ?", ["Peu de cyclistes entraîne peu d'investissements, ce qui décourage encore les cyclistes", "Plus il neige, plus il y a d'accidents", "Les villes déneigent trop tard", "Les cyclistes abîment les pistes"], "« peu de cyclistes en hiver, donc peu d'investissements, donc peu de cyclistes »"],
+      ["Quelle est la conclusion de l'auteur ?", ["Les villes devraient traiter le vélo comme un vrai moyen de transport", "Tout le monde devrait aller au travail à vélo l'hiver", "Il faut fermer les pistes cyclables en hiver", "Le vélo n'est qu'un loisir"], "« considèrent le vélo comme un véritable moyen de transport »"],
+    ]),
+
+    /* ---------- Famille ---------- */
+    set("B1", "famille", "Courriel", "Les 80 ans de Mamie", [
+      "Bonjour à toute la famille,",
+      "Comme vous le savez, Mamie aura 80 ans le 12 juillet. Avec Paul et Isabelle, nous avons décidé de lui organiser une fête surprise le samedi 13 juillet, chez nous, à Gatineau.",
+      "Nous commencerons à midi par un grand pique-nique dans le jardin. S'il pleut, pas de panique : nous nous installerons dans la salle communautaire, juste à côté. Chacun peut apporter un plat à partager ; merci de me dire à l'avance ce que vous préparez, pour éviter d'avoir dix gâteaux !",
+      "Pour le cadeau, nous proposons de lui offrir un album de photos de famille. Envoyez-moi vos plus belles photos avec Mamie avant le 30 juin. Surtout, ne dites rien à Mamie : c'est une surprise ! Répondez-moi avant le 1er juillet pour me dire combien vous serez.",
+      "Bises, Camille",
+    ], [
+      ["Pourquoi Camille écrit-elle ce message ?", ["Pour inviter la famille à une fête surprise pour les 80 ans de sa grand-mère", "Pour annoncer un déménagement à Gatineau", "Pour organiser des vacances en juillet", "Pour demander de l'aide pour un pique-nique d'école"], "« organiser une fête surprise »"],
+      ["Que se passera-t-il s'il pleut ?", ["La fête aura lieu dans une salle communautaire voisine", "La fête sera annulée", "La fête sera reportée au dimanche", "Tout le monde ira au restaurant"], "« nous nous installerons dans la salle communautaire, juste à côté »"],
+      ["Pourquoi faut-il prévenir Camille du plat qu'on apporte ?", ["Pour éviter que tout le monde apporte la même chose", "Parce qu'elle paie les ingrédients", "Parce que Mamie a des allergies", "Pour réserver la salle"], "« pour éviter d'avoir dix gâteaux »"],
+      ["Que faut-il envoyer avant le 30 juin ?", ["Des photos avec Mamie pour l'album", "Sa réponse à l'invitation", "De l'argent pour le cadeau", "La liste des invités"], "The reply is due on 1 July; the photos before 30 June."],
+    ]),
+    set("B2", "famille", "Article", "Les grands-parents, pilier discret des familles", [
+      "Ils conduisent les petits-enfants à l'école, les gardent le mercredi, les accueillent pendant les vacances et dépannent quand un enfant tombe malade. Sans les grands-parents, bien des familles auraient du mal à concilier travail et vie familiale. Selon plusieurs enquêtes, une large part des jeunes parents compte sur eux pour la garde régulière de leurs enfants, un service rendu gratuitement qui représenterait des sommes considérables s'il fallait le payer.",
+      "Cette aide n'est pourtant pas toujours facile à vivre. Les grands-parents d'aujourd'hui sont souvent encore actifs, ou profitent enfin d'une retraite qu'ils imaginaient consacrée aux voyages. Certains se sentent pris en étau entre leurs propres parents très âgés, dont ils s'occupent aussi, et leurs petits-enfants. On parle désormais de « génération sandwich ».",
+      "Les relations peuvent aussi se tendre au sujet de l'éducation. Les grands-parents n'élèvent pas les enfants comme les parents le souhaiteraient : trop de sucreries, trop d'écrans, ou au contraire trop de sévérité. Les psychologues conseillent de définir clairement les règles importantes et d'accepter une certaine souplesse sur le reste.",
+      "Enfin, cette solidarité familiale n'est pas accessible à tous. Les familles immigrantes, dont les grands-parents vivent souvent à l'autre bout du monde, en sont largement privées. Pour elles, les services de garde publics ne sont pas un complément, mais une nécessité.",
+    ], [
+      ["Selon l'article, quel rôle jouent souvent les grands-parents ?", ["Ils aident beaucoup les parents à faire garder leurs enfants", "Ils financent les études des petits-enfants", "Ils remplacent les enseignants", "Ils décident de l'éducation des enfants"], "« compte sur eux pour la garde régulière de leurs enfants »"],
+      ["Qu'est-ce que la « génération sandwich » ?", ["Des personnes qui s'occupent à la fois de leurs parents âgés et de leurs petits-enfants", "Des grands-parents qui préparent les repas", "Des jeunes parents qui travaillent le midi", "Trois générations qui vivent dans un petit logement"], "« pris en étau entre leurs propres parents très âgés… et leurs petits-enfants »"],
+      ["Que conseillent les psychologues en cas de désaccord sur l'éducation ?", ["Fixer clairement les règles importantes et être souple sur le reste", "Ne plus confier les enfants aux grands-parents", "Laisser les grands-parents décider", "Interdire les écrans chez les grands-parents"], "« définir clairement les règles importantes et d'accepter une certaine souplesse sur le reste »"],
+      ["Pourquoi les services de garde publics sont-ils essentiels pour les familles immigrantes ?", ["Leurs grands-parents vivent souvent loin, dans un autre pays", "Elles ont plus d'enfants", "Elles préfèrent les services publics", "Leurs grands-parents travaillent encore"], "« dont les grands-parents vivent souvent à l'autre bout du monde »"],
+    ]),
+
+    /* ---------- Sécurité ---------- */
+    set("B1", "crime", "Avis de prévention", "Fraude téléphonique : attention aux faux appels", [
+      "Ces dernières semaines, plusieurs résidents ont reçu des appels de personnes qui se présentaient comme des employés de leur banque ou de l'Agence du revenu. Au téléphone, ces fraudeurs annoncent un problème urgent : un compte bloqué, une dette d'impôt, une amende à payer immédiatement.",
+      "Voici quelques règles simples pour vous protéger. Votre banque ne vous demandera jamais votre mot de passe ou votre NIP par téléphone. Aucun organisme officiel ne vous demandera de payer avec des cartes-cadeaux ou en cryptomonnaie. En cas de doute, raccrochez et rappelez vous-même votre banque, au numéro inscrit au dos de votre carte.",
+      "Si vous pensez avoir été victime d'une fraude, contactez rapidement votre institution financière, puis le service de police. Plus vous agissez vite, plus vous avez de chances de récupérer votre argent.",
+    ], [
+      ["Comment les fraudeurs se présentent-ils ?", ["Comme des employés d'une banque ou d'un organisme officiel", "Comme des voisins", "Comme des policiers en uniforme", "Comme des vendeurs de cartes-cadeaux"], "« comme des employés de leur banque ou de l'Agence du revenu »"],
+      ["Que ne fera jamais votre banque, selon l'avis ?", ["Vous demander votre mot de passe par téléphone", "Vous appeler", "Vous envoyer une carte", "Bloquer un compte"], "« ne vous demandera jamais votre mot de passe ou votre NIP par téléphone »"],
+      ["Que faut-il faire en cas de doute pendant un appel ?", ["Raccrocher et rappeler soi-même la banque", "Donner seulement son NIP", "Payer une petite partie de la somme", "Demander le nom de l'employé"], "« raccrochez et rappelez vous-même votre banque »"],
+      ["Pourquoi faut-il agir vite après une fraude ?", ["Pour avoir plus de chances de récupérer son argent", "Pour éviter une amende", "Pour garder sa carte-cadeau", "Parce que la police ferme tôt"], "« Plus vous agissez vite, plus vous avez de chances de récupérer votre argent. »"],
+    ]),
+    set("B2", "crime", "Article", "Les caméras de surveillance rendent-elles nos villes plus sûres ?", [
+      "Aux carrefours, dans les stations de métro, à l'entrée des commerces : les caméras de surveillance se sont multipliées dans nos villes. Pour de nombreux élus, elles sont une réponse évidente au sentiment d'insécurité des habitants. Mais leur efficacité réelle fait débat.",
+      "Les études menées dans plusieurs pays montrent des résultats contrastés. Dans les stationnements et les lieux fermés, les caméras semblent réduire certains délits, comme les vols de voitures. Dans la rue, en revanche, leur effet dissuasif est beaucoup plus faible : les délinquants se déplacent souvent vers les quartiers voisins non surveillés. Les images servent surtout après coup, pour identifier des suspects, ce qui n'est pas négligeable, mais ne correspond pas toujours à ce que les citoyens imaginent.",
+      "Le coût pose aussi question. Installer des caméras est relativement simple ; employer des agents pour regarder les écrans en permanence l'est beaucoup moins. Certains criminologues estiment que le même budget serait plus utile s'il servait à éclairer les rues, à rénover les espaces abandonnés ou à financer des intervenants de rue.",
+      "Reste la question des libertés. Avec les progrès de la reconnaissance faciale, une caméra n'est plus un simple œil : elle peut identifier, suivre, enregistrer. Qui a accès aux images, et pour combien de temps ? Pour les défenseurs de la vie privée, la sécurité ne peut justifier une surveillance généralisée sans règles claires ni contrôle indépendant.",
+    ], [
+      ["Où les caméras semblent-elles le plus efficaces, selon les études ?", ["Dans les stationnements et les lieux fermés", "Dans les rues des centres-villes", "Dans les quartiers résidentiels", "Dans les parcs"], "« Dans les stationnements et les lieux fermés, les caméras semblent réduire certains délits »"],
+      ["Quel phénomène limite leur effet dans la rue ?", ["Les délinquants vont dans des quartiers voisins sans caméras", "Les caméras tombent souvent en panne", "Les images sont de mauvaise qualité", "Les habitants cachent les caméras"], "« les délinquants se déplacent souvent vers les quartiers voisins non surveillés »"],
+      ["Que proposent certains criminologues ?", ["Utiliser le budget pour l'éclairage, la rénovation ou des intervenants de rue", "Installer davantage de caméras", "Employer plus d'agents devant les écrans", "Développer la reconnaissance faciale"], "« éclairer les rues, rénover les espaces abandonnés ou financer des intervenants de rue »"],
+      ["Quelle inquiétude exprime le dernier paragraphe ?", ["Le risque pour la vie privée, sans règles ni contrôle", "Le prix des caméras", "La hausse de la criminalité", "Le manque de policiers"], "« sans règles claires ni contrôle indépendant »"],
+    ]),
+
+    /* ---------- Science ---------- */
+    set("B1", "science", "Programme", "Nuit des étoiles au parc national du Lac-Bleu", [
+      "Le samedi 10 août, le parc national du Lac-Bleu vous invite à sa Nuit des étoiles. Le parc est reconnu pour la qualité exceptionnelle de son ciel, protégé de la pollution lumineuse.",
+      "Au programme : à 20 h, conférence d'une astronome sur les étoiles filantes ; dès 21 h 30, observation du ciel au télescope, accompagnée de guides. Vers minuit, vous pourrez peut-être voir une pluie d'étoiles filantes !",
+      "Prévoyez des vêtements chauds, même en été : la température baisse beaucoup la nuit en montagne. Apportez une chaise pliante ou une couverture. Pour ne pas gêner l'observation, les lampes de poche doivent être recouvertes d'un papier rouge.",
+      "L'entrée coûte 15 $ pour les adultes et elle est gratuite pour les moins de 17 ans. Si le ciel est nuageux, les observations sont remplacées par une visite du planétarium.",
+    ], [
+      ["Pourquoi le parc est-il un bon endroit pour observer le ciel ?", ["Il est protégé de la pollution lumineuse", "Il possède le plus grand télescope du pays", "Il est situé en pleine ville", "Il n'y a jamais de nuages"], "« protégé de la pollution lumineuse »"],
+      ["Que peut-on faire à 20 h ?", ["Assister à une conférence sur les étoiles filantes", "Observer le ciel au télescope", "Visiter le planétarium", "Voir la pluie d'étoiles filantes"], "« à 20 h, conférence d'une astronome »"],
+      ["Pourquoi faut-il couvrir les lampes de poche de papier rouge ?", ["Pour ne pas gêner l'observation du ciel", "Pour se réchauffer", "Pour être vu des guides", "Pour économiser les piles"], "« Pour ne pas gêner l'observation »"],
+      ["Que se passe-t-il si le ciel est nuageux ?", ["On visite le planétarium à la place", "La soirée est annulée et remboursée", "La soirée est reportée au lendemain", "Les observations continuent quand même"], "« les observations sont remplacées par une visite du planétarium »"],
+    ]),
+    set("B2", "science", "Article", "Quand les citoyens deviennent chercheurs", [
+      "Compter les oiseaux dans son jardin, photographier des champignons lors d'une randonnée, signaler l'arrivée des premières fleurs au printemps : chaque année, des centaines de milliers de bénévoles participent à des programmes de science participative. Ils ne sont ni chercheurs ni techniciens, mais leurs observations alimentent de véritables études scientifiques.",
+      "Pour les chercheurs, l'intérêt est considérable. Aucune équipe, si nombreuse soit-elle, ne pourrait surveiller seule l'ensemble d'un territoire. Grâce aux citoyens, il devient possible de suivre l'évolution d'espèces sur des milliers de kilomètres et pendant des décennies, ce qui permet par exemple de mesurer les effets du réchauffement climatique sur les migrations d'oiseaux.",
+      "Encore faut-il que les données soient fiables. Un débutant peut confondre deux espèces ou oublier de noter l'heure d'une observation. Les programmes sérieux prévoient donc des formations, des guides d'identification et une vérification des données par des spécialistes, parfois assistés par l'intelligence artificielle.",
+      "Au-delà des résultats, la science participative change aussi le regard du public. Les participants comprennent mieux comment se construit une connaissance scientifique : lentement, collectivement, avec des doutes et des vérifications. À l'heure où la défiance envers la science progresse, cet apprentissage n'est peut-être pas le moindre de ses bénéfices.",
+    ], [
+      ["Qui fournit les observations dans la science participative ?", ["Des bénévoles qui ne sont pas des scientifiques", "Des chercheurs professionnels", "Seulement des étudiants en biologie", "Des entreprises privées"], "« Ils ne sont ni chercheurs ni techniciens »"],
+      ["Pourquoi les chercheurs ont-ils besoin des citoyens ?", ["Pour observer un très grand territoire sur une longue période", "Parce qu'ils manquent de laboratoires", "Pour financer leurs recherches", "Pour écrire les articles scientifiques"], "« Aucune équipe… ne pourrait surveiller seule l'ensemble d'un territoire »"],
+      ["Comment les programmes sérieux assurent-ils la fiabilité des données ?", ["Par des formations, des guides et une vérification par des spécialistes", "En refusant les débutants", "En payant les participants", "En limitant le nombre d'observations"], "« des formations, des guides d'identification et une vérification des données »"],
+      ["Quel autre bénéfice l'auteur souligne-t-il à la fin ?", ["Le public comprend mieux comment la science fonctionne", "Les participants deviennent chercheurs", "Les oiseaux migrent moins", "La science devient plus rapide"], "« Les participants comprennent mieux comment se construit une connaissance scientifique »"],
+    ]),
+
+    /* ---------- Tourisme ---------- */
+    set("B1", "tourisme", "Brochure", "Découvrez la Gaspésie à vélo", [
+      "Envie de vacances actives ? Notre agence vous propose un circuit de sept jours à vélo le long de la côte gaspésienne, entre mer et montagnes.",
+      "Chaque jour, vous parcourez entre 40 et 60 kilomètres, à votre rythme. Pas besoin d'être un grand sportif : les vélos électriques sont inclus dans le prix. Vos bagages sont transportés d'un hôtel à l'autre ; vous ne portez qu'un petit sac pour la journée.",
+      "Le prix comprend l'hébergement en chambre double, les déjeuners et quatre soupers, la location du vélo et un guide pour les deux premiers jours. Les dîners et les activités facultatives, comme l'observation des baleines, ne sont pas compris.",
+      "Départs chaque lundi, du 15 juin au 15 septembre. Groupes de 12 personnes maximum. Réservez au moins un mois à l'avance : les places partent vite !",
+    ], [
+      ["À qui s'adresse ce circuit ?", ["À des personnes qui aiment les vacances actives, même sans être très sportives", "Uniquement aux cyclistes expérimentés", "Aux familles avec de jeunes enfants", "Aux personnes qui veulent faire de la randonnée en montagne"], "« Pas besoin d'être un grand sportif : les vélos électriques sont inclus »"],
+      ["Qu'est-ce qui facilite le voyage pour les participants ?", ["Les bagages sont transportés d'un hôtel à l'autre", "Le guide accompagne le groupe toute la semaine", "Les étapes font moins de 20 kilomètres", "Les participants dorment toujours dans le même hôtel"], "« Vos bagages sont transportés d'un hôtel à l'autre »"],
+      ["Qu'est-ce qui n'est PAS compris dans le prix ?", ["L'observation des baleines", "Les déjeuners", "La location du vélo", "L'hébergement"], "Optional activities « ne sont pas compris ». In Québec, déjeuner = breakfast and dîner = lunch."],
+      ["Pourquoi l'agence conseille-t-elle de réserver tôt ?", ["Les groupes sont petits et les places partent vite", "Les prix augmentent en septembre", "Les vélos électriques sont rares", "Le circuit n'a lieu qu'une fois"], "« Groupes de 12 personnes maximum… les places partent vite »"],
+    ]),
+    set("B2", "tourisme", "Tribune", "Tourisme de masse : quand les habitants disent stop", [
+      "À Venise, à Barcelone ou à Dubrovnik, les images se ressemblent : des ruelles saturées, des paquebots géants qui déversent des milliers de visiteurs en quelques heures, et des habitants qui manifestent contre la « surfréquentation ». Longtemps perçu comme une chance économique, le tourisme est désormais vécu par certains comme une menace pour la vie locale.",
+      "Le problème ne tient pas seulement au nombre de visiteurs, mais à leur concentration. Les touristes visitent les mêmes lieux, aux mêmes saisons, souvent pour quelques heures seulement. Résultat : les commerces de proximité cèdent la place aux boutiques de souvenirs, et les appartements se transforment en locations de courte durée, ce qui chasse les résidents vers la périphérie.",
+      "Face à ce phénomène, plusieurs villes ont pris des mesures : droit d'entrée pour les visiteurs d'un jour, limitation des navires de croisière, interdiction de nouvelles locations touristiques dans certains quartiers. Ces décisions inquiètent les professionnels du secteur, qui craignent pour les emplois.",
+      "Pourtant, la solution ne passe pas forcément par moins de tourisme, mais par un tourisme différent : mieux réparti dans le temps et dans l'espace, plus attentif aux habitants, et qui laisse davantage de richesses sur place. Le voyageur a aussi sa part de responsabilité. Visiter une ville hors saison, loger chez l'habitant, sortir des circuits balisés : autant de choix qui transforment le touriste pressé en visiteur respectueux.",
+    ], [
+      ["Selon l'article, quel est le cœur du problème ?", ["La concentration des visiteurs dans les mêmes lieux et aux mêmes moments", "Le manque d'hôtels", "Le prix des voyages", "Le mauvais comportement de quelques touristes"], "« Le problème ne tient pas seulement au nombre de visiteurs, mais à leur concentration. »"],
+      ["Quelle conséquence sur le logement l'article mentionne-t-il ?", ["Les locations de courte durée poussent les habitants vers la périphérie", "Les loyers baissent dans le centre", "On construit plus de logements sociaux", "Les hôtels ferment"], "« ce qui chasse les résidents vers la périphérie »"],
+      ["Pourquoi les professionnels du tourisme s'inquiètent-ils des nouvelles mesures ?", ["Ils craignent de perdre des emplois", "Ils ne veulent pas payer d'impôts", "Ils préfèrent les visiteurs d'un jour", "Ils veulent plus de paquebots"], "« qui craignent pour les emplois »"],
+      ["Que propose l'auteur ?", ["Un tourisme mieux réparti et plus respectueux des habitants", "Interdire le tourisme dans les grandes villes", "Supprimer les taxes touristiques", "Réserver les villes aux croisiéristes"], "« un tourisme différent : mieux réparti dans le temps et dans l'espace, plus attentif aux habitants »"],
+    ]),
+
+    /* ---------- Consommation ---------- */
+    set("B1", "consommation", "Annonce", "Café-réparation : ne jetez plus, réparez !", [
+      "Votre grille-pain ne fonctionne plus ? Votre pantalon est déchiré ? Avant de le jeter, venez au Café-réparation de la bibliothèque, le dernier dimanche de chaque mois, de 13 h à 17 h.",
+      "Des bénévoles passionnés vous aident gratuitement à réparer vos petits appareils électriques, vos vêtements, vos vélos et vos jouets. Attention : ce n'est pas un service de réparation. Vous restez avec le bénévole et vous apprenez à réparer vous-même.",
+      "Nous ne réparons pas les téléphones cellulaires ni les gros appareils comme les réfrigérateurs. Café et biscuits sont offerts. Les pièces de rechange, si elles sont nécessaires, sont à votre charge.",
+      "L'an dernier, plus de 600 objets ont retrouvé une seconde vie grâce à nos ateliers. Vous êtes doué pour le bricolage ? Rejoignez notre équipe de bénévoles !",
+    ], [
+      ["Quel est le but du Café-réparation ?", ["Aider les gens à réparer eux-mêmes leurs objets au lieu de les jeter", "Vendre des objets d'occasion", "Réparer les objets pendant que les clients font autre chose", "Récupérer les vieux appareils"], "« vous apprenez à réparer vous-même »"],
+      ["Quel objet ne peut pas être réparé ?", ["Un téléphone cellulaire", "Un grille-pain", "Un pantalon", "Un vélo"], "« Nous ne réparons pas les téléphones cellulaires »"],
+      ["Qu'est-ce que les participants doivent payer ?", ["Les pièces de rechange, si nécessaire", "L'aide des bénévoles", "Le café", "L'inscription"], "« Les pièces de rechange… sont à votre charge. »"],
+      ["Que demande l'annonce aux bricoleurs ?", ["De devenir bénévoles", "D'apporter leurs outils", "De réparer chez eux", "De donner des pièces"], "« Rejoignez notre équipe de bénévoles ! »"],
+    ]),
+    set("B2", "consommation", "Article", "Mode rapide : le vrai prix d'un t-shirt à cinq dollars", [
+      "Un t-shirt à cinq dollars, une robe à quinze, de nouvelles collections chaque semaine : la « mode rapide » a transformé notre façon de nous habiller. Jamais les vêtements n'ont été aussi bon marché, et jamais nous n'en avons acheté autant, alors même que nous les portons de moins en moins longtemps.",
+      "Ce prix très bas cache pourtant des coûts qui ne figurent pas sur l'étiquette. Des coûts environnementaux, d'abord : la production textile consomme d'énormes quantités d'eau, rejette des produits chimiques dans les rivières et génère une part importante des émissions de gaz à effet de serre. Des coûts humains, ensuite : dans les usines de certains pays, les ouvrières travaillent de longues heures pour des salaires qui ne leur permettent pas de vivre dignement.",
+      "Les consommateurs sont-ils prêts à changer ? Les enquêtes montrent une préoccupation réelle, surtout chez les jeunes, mais les comportements suivent lentement. Le marché de la seconde main progresse, les plateformes de revente se multiplient et certaines marques proposent de réparer ou de reprendre leurs vêtements. Pour autant, les promotions permanentes continuent d'encourager l'achat impulsif.",
+      "Plusieurs gouvernements envisagent désormais d'intervenir : obligation d'informer sur l'impact environnemental, taxe sur les vêtements les plus polluants, interdiction de détruire les invendus. Car la solution ne peut reposer uniquement sur la bonne volonté individuelle ; elle suppose aussi de changer les règles du jeu.",
+    ], [
+      ["Qu'est-ce qui caractérise la « mode rapide » selon l'article ?", ["Des vêtements très bon marché et des collections renouvelées très souvent", "Des vêtements fabriqués localement", "Des vêtements de meilleure qualité", "Des magasins ouverts jour et nuit"], "« Un t-shirt à cinq dollars… de nouvelles collections chaque semaine »"],
+      ["Quels coûts ne figurent pas sur l'étiquette ?", ["Les coûts environnementaux et humains", "Les taxes de vente", "Le transport jusqu'au magasin", "Les frais de retour"], "« Des coûts environnementaux, d'abord… Des coûts humains, ensuite »"],
+      ["Comment les consommateurs réagissent-ils, selon l'article ?", ["Ils sont préoccupés, mais changent lentement leurs habitudes", "Ils ont complètement arrêté d'acheter des vêtements neufs", "Ils ne s'intéressent pas du tout au problème", "Ils n'achètent plus que des marques de luxe"], "« une préoccupation réelle… mais les comportements suivent lentement »"],
+      ["Quelle est l'idée de la dernière phrase ?", ["Il faut aussi changer les règles, pas seulement compter sur les individus", "Les consommateurs sont les seuls responsables", "Les gouvernements ne peuvent rien faire", "Les marques doivent baisser leurs prix"], "« ne peut reposer uniquement sur la bonne volonté individuelle »"],
+    ]),
+  );
+})();
