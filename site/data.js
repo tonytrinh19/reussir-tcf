@@ -1011,26 +1011,6 @@ window.TCF = (function () {
         { q: "Quel changement concerne les emprunts ?", options: ["On peut emprunter plus de documents à la fois", "Les emprunts sont limités à quatre documents", "Les emprunts deviennent payants pour tous", "On peut garder les documents quinze semaines"], answer: 0, why: "« jusqu'à quinze documents à la fois, pour une durée de quatre semaines »" },
       ],
     },
-    co: {
-      level: "B1", title: "À l'accueil d'un centre pour nouveaux arrivants",
-      context: "Une femme parle avec un employé à l'accueil d'un centre de services pour nouveaux arrivants.",
-      lines: [
-        { speaker: "A", text: "Bonjour, madame. Je peux vous aider ?" },
-        { speaker: "B", text: "Bonjour. Je viens d'arriver à Montréal et je voudrais m'inscrire aux cours de français gratuits." },
-        { speaker: "A", text: "Très bien. Vous avez votre carte de résident permanent avec vous ?" },
-        { speaker: "B", text: "Oui, la voici. Est-ce que les cours ont lieu le soir ? Je travaille pendant la journée." },
-        { speaker: "A", text: "Nous avons des cours du soir, le lundi et le jeudi, de 18 h à 21 h. Mais attention, la session commence dans deux semaines et il reste peu de places." },
-        { speaker: "B", text: "Alors je m'inscris tout de suite. Il faut passer un test ?" },
-        { speaker: "A", text: "Oui, un petit test de niveau, mercredi prochain à 10 h. Ça dure environ une heure." },
-        { speaker: "B", text: "Mercredi à 10 h… Je vais demander à mon patron si je peux commencer plus tard ce jour-là. Merci beaucoup !" },
-      ],
-      questions: [
-        { q: "Pourquoi la femme vient-elle au centre ?", options: ["Pour s'inscrire à des cours de français", "Pour renouveler sa carte de résident", "Pour trouver un emploi", "Pour passer un examen officiel"], answer: 0, why: "« je voudrais m'inscrire aux cours de français gratuits »" },
-        { q: "Pourquoi préfère-t-elle les cours du soir ?", options: ["Elle travaille pendant la journée", "Elle garde ses enfants le matin", "Elle habite loin du centre", "Les cours du soir sont moins chers"], answer: 0, why: "« Je travaille pendant la journée. »" },
-        { q: "Que doit-elle faire avant de commencer les cours ?", options: ["Passer un test de niveau", "Payer l'inscription", "Apporter une photo", "Attendre deux mois"], answer: 0, why: "« un petit test de niveau, mercredi prochain à 10 h »" },
-        { q: "Quel problème pourrait-elle avoir mercredi ?", options: ["Elle travaille normalement à cette heure-là", "Le centre sera fermé", "Elle n'a pas de transport", "Le test est déjà complet"], answer: 0, why: "« Je vais demander à mon patron si je peux commencer plus tard ce jour-là. »" },
-      ],
-    },
     resources: [
       { name: "TV5Monde Apprendre", url: "https://apprendre.tv5monde.com/fr", what: "Short videos with exercises, sorted by CEFR level up to B2." },
       { name: "RFI Français facile", url: "https://francaisfacile.rfi.fr/fr/", what: "Journal en français facile: ten minutes of news read slowly, with transcripts." },
@@ -1595,40 +1575,6 @@ window.TCF = (function () {
       { q: "Que propose l'auteur à la fin du texte ?", options: ["Alterner bureau et maison selon le type de travail", "Laisser chaque salarié choisir librement son lieu de travail", "Interdire les réunions en visioconférence dans l'entreprise", "Réserver le télétravail aux employés les plus expérimentés"], answer: 0, why: "« des journées communes au bureau… et des journées à domicile pour le travail qui exige de la concentration »" },
     ],
   }];
-  COMP.coSets = [COMP.co, {
-    level: "B1", title: "Un message sur votre répondeur",
-    context: "Vous écoutez un message laissé par une clinique sur votre répondeur.",
-    lines: [
-      { speaker: "A", text: "Bonjour, ici Karine, de la clinique médicale Saint-Laurent. Je vous appelle au sujet de votre rendez-vous avec le docteur Martin, prévu ce vendredi à 14 h." },
-      { speaker: "A", text: "Malheureusement, le docteur Martin sera absent ce jour-là. Nous pouvons vous proposer deux autres possibilités : lundi prochain à 9 h 30 avec lui, ou ce vendredi à la même heure avec sa collègue, la docteure Lemieux." },
-      { speaker: "A", text: "Merci de nous rappeler avant jeudi midi pour confirmer votre choix. Sans réponse de votre part, votre rendez-vous sera automatiquement déplacé à lundi." },
-      { speaker: "A", text: "N'oubliez pas d'apporter votre carte d'assurance maladie. Bonne journée !" },
-    ],
-    questions: [
-      { q: "Pourquoi la clinique appelle-t-elle ?", options: ["Le médecin ne pourra pas assurer le rendez-vous", "La clinique sera fermée vendredi", "Il manque un document dans le dossier", "Le patient a manqué son dernier rendez-vous"], answer: 0, why: "« le docteur Martin sera absent ce jour-là »" },
-      { q: "Quelle possibilité permet de garder le même jour et la même heure ?", options: ["Voir la docteure Lemieux", "Voir le docteur Martin lundi", "Rappeler jeudi", "Venir à 9 h 30"], answer: 0, why: "« ce vendredi à la même heure avec sa collègue, la docteure Lemieux »" },
-      { q: "Que se passera-t-il si le patient ne rappelle pas ?", options: ["Son rendez-vous passera à lundi", "Son rendez-vous sera annulé", "Il verra la docteure Lemieux", "Il devra payer des frais"], answer: 0, why: "« votre rendez-vous sera automatiquement déplacé à lundi »" },
-      { q: "Que doit apporter le patient ?", options: ["Sa carte d'assurance maladie", "Son dossier médical", "Une lettre du docteur Martin", "Une pièce d'identité avec photo"], answer: 0, why: "« N'oubliez pas d'apporter votre carte d'assurance maladie. »" },
-    ],
-  }, {
-    level: "B2", title: "Le retour à la campagne",
-    context: "Une journaliste interroge un sociologue à la radio.",
-    lines: [
-      { speaker: "A", text: "Depuis quelques années, de plus en plus de citadins quittent les grandes villes pour s'installer en région. Est-ce une véritable tendance de fond, selon vous ?" },
-      { speaker: "B", text: "C'est une tendance réelle, mais il faut la nuancer. Tous les citadins ne partent pas : ce sont surtout des familles avec de jeunes enfants et des travailleurs qui peuvent faire du télétravail au moins une partie de la semaine." },
-      { speaker: "A", text: "Qu'est-ce qui les pousse à partir ?" },
-      { speaker: "B", text: "Le prix du logement, d'abord. Avec ce qu'on paie pour un petit appartement en ville, on peut souvent acheter une maison avec un terrain. Mais il y a aussi une recherche de qualité de vie : plus d'espace, moins de bruit, un contact avec la nature." },
-      { speaker: "A", text: "Et est-ce que ça se passe toujours bien ?" },
-      { speaker: "B", text: "Pas toujours. Certains découvrent que les services sont éloignés, l'hôpital, les écoles secondaires, et que la voiture devient indispensable. D'autres ont du mal à se faire accepter par la population locale, qui voit parfois les prix de l'immobilier grimper à cause d'eux. Les régions qui réussissent le mieux sont celles qui ont préparé l'accueil : internet haute vitesse, garderies, activités pour créer des liens." },
-    ],
-    questions: [
-      { q: "Selon le sociologue, qui quitte surtout les villes ?", options: ["Des familles et des personnes qui peuvent télétravailler", "Des retraités à la recherche de calme", "Des jeunes sans emploi", "Tous les citadins, sans distinction"], answer: 0, why: "« ce sont surtout des familles avec de jeunes enfants et des travailleurs qui peuvent faire du télétravail »" },
-      { q: "Quelle est la première raison du départ qu'il mentionne ?", options: ["Le coût du logement", "Le bruit", "Le désir de nature", "Le télétravail"], answer: 0, why: "« Le prix du logement, d'abord. »" },
-      { q: "Quelle difficulté les nouveaux arrivants rencontrent-ils parfois ?", options: ["Ils dépendent davantage de la voiture", "Ils ne trouvent pas de travail", "Ils paient plus d'impôts", "Ils doivent apprendre une autre langue"], answer: 0, why: "« la voiture devient indispensable »" },
-      { q: "Pourquoi la population locale réagit-elle parfois mal ?", options: ["Les prix de l'immobilier augmentent", "Les nouveaux arrivants refusent de participer", "Les écoles sont surchargées", "Le télétravail crée de la concurrence"], answer: 0, why: "« qui voit parfois les prix de l'immobilier grimper à cause d'eux »" },
-      { q: "D'après le sociologue, qu'est-ce qui favorise une bonne intégration ?", options: ["Un accueil préparé par les régions", "La construction de nouvelles routes", "La baisse du prix des maisons", "La limitation du télétravail"], answer: 0, why: "« Les régions qui réussissent le mieux sont celles qui ont préparé l'accueil »" },
-    ],
-  }];
 
   /* ================= TCF Canada: the exam this whole site targets =================
      Source: Manuel du candidat TCF Canada (France Éducation International, ex-CIEP) and
@@ -1723,9 +1669,6 @@ window.TCF = (function () {
   tag(COMP.ceSets[0], ["quotidien"]);
   tag(COMP.ceSets[1], ["logement", "quotidien"]);
   tag(COMP.ceSets[2], ["travail"]);
-  tag(COMP.coSets[0], ["immigration", "education"], "fr-CA");
-  tag(COMP.coSets[1], ["sante", "quotidien"], "fr-CA");
-  tag(COMP.coSets[2], ["logement", "societe"], "fr-CA");
   COMP.resources = [
     { name: "TV5MONDE · S'entraîner au TCF", url: "https://apprendre.tv5monde.com/fr/tcf", what: "The official preparation partner: 560 questions in listening, language structure and reading, written by the test's own designers and validated by France Éducation International. Real audio and video.", skills: ["co", "ce"] },
     { name: "RFI · Diplômes et tests", url: "https://francaisfacile.rfi.fr/fr/dipl%C3%B4mes-tests/", what: "TCF listening series from A2 to C1, made with France Éducation International, in exam conditions.", skills: ["co"] },
