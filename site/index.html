@@ -412,6 +412,30 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .transcript { display: grid; gap: 6px; }
 .transcript p { font-family: var(--f-text); font-size: 16px; }
 .transcript p b { font-family: var(--f-ui); font-size: 12px; color: var(--ink-3); margin-right: 6px; }
+/* history tree: topic → set → attempt */
+.tree { display: grid; gap: 8px; }
+.h-node { border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
+.h-node > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 14px; cursor: pointer; list-style: none; border-radius: 8px; }
+.h-node > summary::-webkit-details-marker { display: none; }
+.h-node > summary::before { content: "▸"; color: var(--ink-3); width: 12px; }
+.h-node[open] > summary::before { content: "▾"; }
+.h-node > summary:hover { background: var(--hover); }
+.h-kids { display: grid; gap: 6px; padding: 0 14px 12px 36px; }
+.h-kids .h-node { background: var(--paper); }
+.h-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 14px; border: 1px dashed var(--rule-2); border-radius: 8px; }
+.h-att { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 7px 0; border-top: 1px solid var(--rule); font-size: 14px; }
+.h-kids > .h-att:first-child { border-top: 0; }
+.h-name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.h-meta { margin-left: auto; font-size: 13px; color: var(--ink-3); }
+.lv { display: inline-block; padding: 2px 7px; border-radius: 4px; background: var(--sunk); color: var(--ink-2); font: 700 11.5px/1.35 var(--f-ui); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lv.done { background: var(--green-soft); color: var(--green); }
+.miss { font-size: 12.5px; font-weight: 600; color: var(--red); white-space: nowrap; }
+.ok-t { font-weight: 700; color: var(--green); }
+/* practice exam: the 1–39 navigator */
+.qnav { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 4px; }
+.qnav button { height: 32px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--surface); color: var(--ink-2); font: 600 13px/1 var(--f-ui); font-variant-numeric: tabular-nums; cursor: pointer; }
+.qnav button.done { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+.qnav button[aria-current="true"] { outline: 2px solid var(--ink); outline-offset: 1px; }
 .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .links li { display: grid; gap: 2px; }
 .links a { font-weight: 600; }
@@ -472,5 +496,6 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 600; }
 <script src="data.js"></script>
 <script src="anki.js"></script>
 <script src="comp-ce.js"></script>
+<script src="exam-ce.js"></script>
 <script src="comp-co.js"></script>
 <script src="app.js"></script>
