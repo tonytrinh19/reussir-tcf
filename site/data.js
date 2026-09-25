@@ -165,7 +165,7 @@ window.TCF = (function () {
         [
           ["voc", 10, "New words: consumerism & crime", "", "", "vocab.new.consommation"],
           ["gra", 30, "Targeted grammar drill", "Pick the topic your latest mock exposed.", "", "grammar"],
-          ["ce", 60, "Full timed CE mock #1", "", "", "comp.ce"],
+          ["ce", 60, "Full timed CE mock #1", "", "", "comp.ce.exam"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
@@ -183,7 +183,7 @@ window.TCF = (function () {
         [
           ["voc", 10, "New words: politics & civic life", "", "", "vocab.new.gouvernement"],
           ["gra", 25, "Final targeted drill", "", "", "grammar"],
-          ["ce", 60, "Full timed CE mock #2", "", "", "comp.ce"],
+          ["ce", 60, "Full timed CE mock #2", "", "", "comp.ce.exam"],
         ],
         [
           ["eo", 40, "Orale simulation #2", "", "", "speaking.t3"],
@@ -199,7 +199,7 @@ window.TCF = (function () {
           ["bil", 30, "Same-day review", "Review every wrong or weak answer.", "", "progress.scores"],
         ],
         [
-          ["ce", 60, "Full timed CE mock", "39 questions, 60 minutes.", "", "comp.ce"],
+          ["ce", 60, "Full timed CE mock", "39 questions, 60 minutes.", "", "comp.ce.exam"],
           ["bil", 30, "Same-day review", "", "", "progress.scores"],
         ],
         [
@@ -1004,10 +1004,10 @@ window.TCF = (function () {
       level: "B1", type: "Annonce", title: "Médiathèque du Plateau : ce qui change en octobre",
       text: "À partir du 1er octobre, la médiathèque du Plateau élargit ses horaires : elle sera ouverte du mardi au samedi de 10 h à 20 h, et le dimanche de 13 h à 17 h. Elle restera fermée le lundi.\n\nL'inscription devient gratuite pour tous les résidents de la ville, sur présentation d'une preuve d'adresse de moins de trois mois. Les non-résidents paieront 30 $ par an.\n\nNouveauté : chaque mercredi soir, un atelier de conversation en français est proposé aux nouveaux arrivants. Les places sont limitées à douze personnes ; il faut s'inscrire à l'accueil ou sur le site de la médiathèque.\n\nEnfin, les usagers pourront désormais emprunter jusqu'à quinze documents à la fois, pour une durée de quatre semaines.",
       questions: [
-        { q: "Quand la médiathèque est-elle fermée à partir d'octobre ?", options: ["Le lundi", "Le dimanche", "Le mercredi soir", "Le samedi après-midi"], answer: 0, why: "« Elle restera fermée le lundi. »" },
-        { q: "Que faut-il présenter pour s'inscrire gratuitement ?", options: ["Une preuve d'adresse récente", "Une carte de résident permanent", "Un passeport valide", "Un reçu de 30 $"], answer: 0, why: "« sur présentation d'une preuve d'adresse de moins de trois mois »" },
-        { q: "L'atelier du mercredi soir s'adresse surtout…", options: ["aux personnes récemment installées", "aux enfants du quartier", "aux non-résidents", "aux bénévoles de la médiathèque"], answer: 0, why: "« proposé aux nouveaux arrivants »" },
-        { q: "Quel changement concerne les emprunts ?", options: ["On peut emprunter plus de documents à la fois", "Les emprunts sont limités à quatre documents", "Les emprunts deviennent payants", "On peut garder les documents quinze semaines"], answer: 0, why: "« jusqu'à quinze documents à la fois, pour une durée de quatre semaines »" },
+        { q: "Quand la médiathèque est-elle fermée à partir d'octobre ?", options: ["Le lundi, toute la journée", "Le dimanche, toute la journée", "Le mercredi soir, après l'atelier", "Le samedi après-midi"], answer: 0, why: "« Elle restera fermée le lundi. » On Sundays it opens from 13 h to 17 h." },
+        { q: "Que faut-il présenter pour s'inscrire gratuitement ?", options: ["Une preuve d'adresse récente", "Une carte de résident permanent", "Un passeport encore valide", "Un reçu de paiement de 30 $"], answer: 0, why: "« sur présentation d'une preuve d'adresse de moins de trois mois »" },
+        { q: "L'atelier du mercredi soir s'adresse surtout…", options: ["aux personnes récemment installées", "aux enfants et aux adolescents du quartier", "aux non-résidents qui paient l'inscription", "aux bénévoles de la médiathèque"], answer: 0, why: "« proposé aux nouveaux arrivants »" },
+        { q: "Quel changement concerne les emprunts ?", options: ["On peut emprunter plus de documents à la fois", "Les emprunts sont limités à quatre documents", "Les emprunts deviennent payants pour tous", "On peut garder les documents quinze semaines"], answer: 0, why: "« jusqu'à quinze documents à la fois, pour une durée de quatre semaines »" },
       ],
     },
     co: {
@@ -1539,19 +1539,19 @@ window.TCF = (function () {
     level: "B1", type: "Courriel", title: "Objet : report de la réunion des locataires",
     text: "Bonjour à tous,\n\nLa réunion des locataires prévue le jeudi 12 mars est reportée au mardi 17 mars, à 19 h, dans la salle commune du rez-de-chaussée. Nous avons dû changer la date, car la salle sera occupée par des travaux de peinture la semaine prochaine.\n\nÀ l'ordre du jour : l'augmentation des charges annoncée par le propriétaire, le remplacement des laveuses au sous-sol et l'organisation de la fête des voisins en juin.\n\nSi vous ne pouvez pas être présent, vous pouvez envoyer vos questions par courriel avant le 15 mars ; nous les transmettrons au propriétaire. Un compte rendu sera ensuite affiché près des boîtes aux lettres.\n\nMerci de votre participation,\nLe comité des locataires",
     questions: [
-      { q: "Pourquoi la réunion a-t-elle été déplacée ?", options: ["La salle ne sera pas disponible à cause de travaux", "Le propriétaire ne peut pas venir", "Trop peu de locataires étaient disponibles", "Le comité veut attendre la fête des voisins"], answer: 0, why: "« la salle sera occupée par des travaux de peinture »" },
-      { q: "Quel sujet ne sera PAS abordé pendant la réunion ?", options: ["Le montant du loyer", "L'augmentation des charges", "Les machines à laver", "Une fête entre voisins"], answer: 0, why: "The agenda mentions les charges, not le loyer: a classic TCF distractor." },
-      { q: "Que peuvent faire les locataires absents ?", options: ["Envoyer leurs questions à l'avance", "Voter par courriel", "Appeler le propriétaire", "Assister à une deuxième réunion"], answer: 0, why: "« vous pouvez envoyer vos questions par courriel avant le 15 mars »" },
-      { q: "Comment les locataires seront-ils informés de ce qui s'est dit ?", options: ["Par un document affiché dans l'immeuble", "Par un courriel du propriétaire", "Par une lettre dans chaque boîte", "Lors de la fête des voisins"], answer: 0, why: "« Un compte rendu sera ensuite affiché près des boîtes aux lettres. »" },
+      { q: "Pourquoi la réunion a-t-elle été déplacée ?", options: ["La salle sera occupée par des travaux", "Le propriétaire ne peut pas venir le 12", "Trop peu de locataires étaient disponibles", "Le comité préfère attendre la fête de juin"], answer: 0, why: "« la salle sera occupée par des travaux de peinture »" },
+      { q: "Quel sujet ne sera PAS abordé pendant la réunion ?", options: ["L'augmentation du loyer", "L'augmentation des charges", "Les laveuses du sous-sol", "La fête des voisins"], answer: 0, why: "The agenda mentions les charges, not le loyer: a classic TCF distractor." },
+      { q: "Que peuvent faire les locataires absents ?", options: ["Envoyer leurs questions avant le 15 mars", "Voter par courriel sur l'ordre du jour", "Appeler directement le propriétaire", "Assister à une deuxième réunion en juin"], answer: 0, why: "« vous pouvez envoyer vos questions par courriel avant le 15 mars »" },
+      { q: "Comment les locataires seront-ils informés de ce qui s'est dit ?", options: ["Par un compte rendu affiché dans l'immeuble", "Par un courriel envoyé par le propriétaire lui-même", "Par une lettre dans chaque boîte aux lettres", "Lors de la fête des voisins, au mois de juin prochain"], answer: 0, why: "« Un compte rendu sera ensuite affiché près des boîtes aux lettres. » Near the mailboxes, not in them." },
     ],
   }, {
     level: "B2", type: "Article d'opinion", title: "Le télétravail, une liberté qui a un prix",
     text: "Depuis la pandémie, le télétravail s'est imposé comme un acquis que peu de salariés accepteraient d'abandonner. On vante volontiers ses bienfaits : moins de temps perdu dans les transports, une meilleure concentration, davantage de souplesse pour concilier vie professionnelle et vie familiale. Ces avantages sont réels, et il serait malhonnête de les nier.\n\nPourtant, cette liberté nouvelle a un coût que l'on mesure encore mal. Pour les jeunes recrues, d'abord : comment apprendre un métier quand on ne voit ses collègues qu'à travers un écran ? Les savoir-faire informels, ces conseils glissés au détour d'un couloir, se transmettent difficilement en visioconférence. Pour les entreprises, ensuite, qui constatent un affaiblissement du sentiment d'appartenance et une hausse des démissions chez les employés les moins intégrés.\n\nFaut-il pour autant revenir au bureau cinq jours sur cinq ? Certainement pas. Mais plutôt que d'opposer présence et distance, les organisations gagneraient à définir des règles claires : des journées communes au bureau pour les réunions et l'accompagnement des nouveaux, et des journées à domicile pour le travail qui exige de la concentration. Le télétravail n'est ni une panacée ni une menace ; c'est un outil, dont la valeur dépend entièrement de la manière dont on s'en sert.",
     questions: [
-      { q: "Quelle est la position de l'auteur sur le télétravail ?", options: ["Il en reconnaît les avantages mais souhaite qu'il soit mieux encadré", "Il pense qu'il faut revenir au bureau à temps plein", "Il estime que ses inconvénients sont exagérés", "Il le considère comme une menace pour les entreprises"], answer: 0, why: "He concedes the benefits (« Ces avantages sont réels ») and then argues for clear rules." },
-      { q: "Selon l'auteur, pourquoi les nouveaux employés sont-ils particulièrement touchés ?", options: ["Ils apprennent moins bien les savoir-faire transmis de manière informelle", "Ils n'ont pas l'équipement nécessaire", "Ils préfèrent travailler au bureau", "Ils démissionnent plus souvent que les autres"], answer: 0, why: "« Les savoir-faire informels… se transmettent difficilement en visioconférence. » The resignations concern les employés les moins intégrés, not specifically new hires." },
-      { q: "Que signifie « un acquis » dans le premier paragraphe ?", options: ["Un avantage considéré comme définitivement obtenu", "Une compétence apprise au travail", "Un achat récent", "Une obligation légale"], answer: 0, why: "Un acquis = a right or benefit people consider permanently won." },
-      { q: "Que propose l'auteur à la fin du texte ?", options: ["Alterner des journées au bureau et à la maison selon le type de travail", "Laisser chaque salarié choisir librement", "Interdire les réunions en visioconférence", "Réserver le télétravail aux employés expérimentés"], answer: 0, why: "« des journées communes au bureau… et des journées à domicile pour le travail qui exige de la concentration »" },
+      { q: "Quelle est la position de l'auteur sur le télétravail ?", options: ["Il en reconnaît les avantages mais souhaite qu'il soit mieux encadré", "Il pense qu'il faut revenir au bureau cinq jours sur cinq", "Il estime que ses inconvénients sont largement exagérés par les entreprises", "Il le voit avant tout comme une menace pour les entreprises"], answer: 0, why: "He concedes the benefits (« Ces avantages sont réels ») and then argues for clear rules." },
+      { q: "Selon l'auteur, pourquoi les nouveaux employés sont-ils particulièrement touchés ?", options: ["Ils apprennent mal les savoir-faire transmis de façon informelle", "Ils n'ont pas l'équipement nécessaire pour travailler chez eux", "Ils préfèrent de loin travailler au bureau avec leurs collègues", "Ils démissionnent plus souvent que les employés expérimentés"], answer: 0, why: "« Les savoir-faire informels… se transmettent difficilement en visioconférence. » The resignations concern les employés les moins intégrés, not specifically new hires." },
+      { q: "Que signifie « un acquis » dans le premier paragraphe ?", options: ["Un avantage que l'on considère comme obtenu pour de bon", "Une compétence apprise au travail avec l'expérience", "Un achat récent fait par l'entreprise pour ses salariés", "Une obligation prévue par la loi pour tous les employeurs"], answer: 0, why: "Un acquis = a right or benefit people consider permanently won." },
+      { q: "Que propose l'auteur à la fin du texte ?", options: ["Alterner bureau et maison selon le type de travail", "Laisser chaque salarié choisir librement son lieu de travail", "Interdire les réunions en visioconférence dans l'entreprise", "Réserver le télétravail aux employés les plus expérimentés"], answer: 0, why: "« des journées communes au bureau… et des journées à domicile pour le travail qui exige de la concentration »" },
     ],
   }];
   COMP.coSets = [COMP.co, {
@@ -1622,6 +1622,14 @@ window.TCF = (function () {
       ],
     },
     comp: "Compréhension orale: 39 multiple-choice items in 35 minutes, four options and one correct answer, each recording heard only once, items getting harder from A1 to C2: everyday dialogues, phone calls, interviews, public announcements, radio and TV news and programmes, and talks on concrete or abstract topics at standard speed. Compréhension écrite: 39 items in 60 minutes, from notices, ads, menus, timetables and letters to opinion articles and long, complex or literary texts. Distractors reuse words from the document in misleading ways.",
+    /* The CE practice exam: 39 items in 60 minutes, one document per item, in level blocks from A1 to C2.
+       Each block is [level, items, points per correct item]. TCF prep sites quote 3, 9, 15, 21 and 26
+       points; 33 for items 36–39 is what brings the total to 699. */
+    ceExam: {
+      minutes: 60,
+      blocks: [["A1", 4, 3], ["A2", 6, 9], ["B1", 9, 15], ["B2", 10, 21], ["C1", 6, 26], ["C2", 4, 33]],
+      note: "An estimate from the points per level that TCF prep sites use. France Éducation International scores the real test with item response theory and doesn't publish its method.",
+    },
   };
   EXAM[0].note = "Multiple choice, four options, one correct. Each recording is heard once, and questions get harder as you go (A1 → C2). Some items use Canadian accents or contexts.";
   EXAM[1].note = "Multiple choice, four options, from notices, ads and letters up to opinion articles and long, complex texts, in rising difficulty.";

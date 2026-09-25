@@ -180,6 +180,8 @@
   const EXAM_BRIEF = "EXAM: " + TC.brief + " Score bands: " + TC.bands;
   const EE_RUBRIC = "TCF CANADA WRITING RULES: " + TC.ee.rules + " Correctors mark with standardized grids; the published criteria are: " + TC.ee.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
   const EO_RUBRIC = "TCF CANADA SPEAKING RULES: " + TC.eo.rules + " Criteria: " + TC.eo.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
+  // For generated reading questions: on the real test the right answer doesn't stand out by its length.
+  const OPTIONS_RULE = "Make the four options parallel: similar length, the same grammatical form and the same amount of detail. The correct option must not be the longest or the most precise one, and which option is longest should vary from question to question. Distractors must be plausible and reuse words from the text in misleading ways, as on the real test.";
   const PROFILE = EXAM_BRIEF + "\nLEARNER PROFILE: adult B1 learner of French preparing the TCF Canada, target NCLC 7 (B2) in all four skills. Write explanations in English. Known recurring errors: " + T.KNOWN_ERRORS.join("; ") + ".";
 
   /* =============== UI state =============== */
@@ -212,7 +214,10 @@
       chatIn: "",
       covered: {},
     },
-    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, playing: false, exam: false, script: false, cache: {}, failed: {}, inflight: {}, queued: false },
+    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, playing: false, exam: false, script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null } },
+    cx: null, // the CE practice exam being taken or reviewed
+    cxGen: null, // progress while Claude writes a practice exam
+    cxReady: null, // a practice exam from Claude, ready to start
     form: {},
     confirm: "",
   };
@@ -277,6 +282,8 @@
     const r = timerRemaining();
     document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
     document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timer.running ? "Pause" : timerStarted() ? "Resume" : "Start"; });
+    // The practice exam is handed in at 0:00, as on the real test.
+    if (timer.running && r <= 0 && timer.home === "comp.ce.exam" && ui.cx && !ui.cx.done) { examSubmit("time"); return; }
     if (timer.running && r <= 0 && !timer.alerted) { timer.alerted = true; toast(`Time's up: ${timer.label}. The clock keeps counting overtime.`); }
     const steps = document.querySelectorAll(".steps li[data-until]");
     if (steps.length && timer.home === "speaking.t3") {
@@ -994,20 +1001,54 @@
     s.src = "sample";
     s.sampleIdx = k;
     s.key = key;
+    // Built-in sets list their topics in themes; the heading and the saved attempt use the one being practised.
+    s.theme = arr(s.themes).includes(ui.c.theme) ? ui.c.theme : arr(s.themes)[0] || "";
     return s;
   }
+  // Every saved attempt for one skill, newest first. Attempts saved before sets had ids are matched to
+  // their built-in set by title; older Claude attempts are grouped by title.
+  function compAttempts(skill) {
+    const byTitle = new Map(samplesFor(skill).map((s) => [s.title, s]));
+    return list("comp").filter((c2) => c2.skill === skill).map((c2) => {
+      const b = !c2.setId && c2.src === "sample" ? byTitle.get(c2.title) : null;
+      const setId = c2.setId || (b && b.id) || (c2.src === "claude" ? "claude-t-" + slug(c2.title) : "");
+      return Object.assign({}, c2, { setId, theme: c2.theme || (b && arr(b.themes)[0]) || "" });
+    }).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  }
+  // Per set: its attempts (newest first), the best one and when it was last done.
+  function compStats(skill, attempts) {
+    const m = new Map();
+    for (const a of attempts || compAttempts(skill)) {
+      if (!a.setId || a.src === "logged") continue;
+      const s = m.get(a.setId) || { attempts: [], best: null, last: 0 };
+      s.attempts.push(a);
+      if (a.total && (!s.best || a.score / a.total > s.best.score / s.best.total)) s.best = a;
+      s.last = Math.max(s.last, a.ts || 0);
+      m.set(a.setId, s);
+    }
+    return m;
+  }
+  // The next built-in set at this level (and topic): one not done yet, going on from the current set,
+  // or else the one done longest ago.
   function findSample(skill, lvl, theme, after) {
-    const all = samplesFor(skill);
+    const all = samplesFor(skill), stats = compStats(skill);
+    let pick = -1, oldest = Infinity;
     for (let k = 1; k <= all.length; k++) {
       const i = (((after + k) % all.length) + all.length) % all.length;
-      if (i !== after && all[i].level === lvl && (!theme || arr(all[i].themes).includes(theme))) return i;
+      const s = all[i];
+      if (i === after || s.level !== lvl || (theme && !arr(s.themes).includes(theme))) continue;
+      const st = s.id && stats.get(s.id);
+      if (!st) return i;
+      if (st.last < oldest) { oldest = st.last; pick = i; }
     }
-    return -1;
+    return pick;
   }
   function compReset(skill) {
     ui.c.ans[skill] = {};
     ui.c.submitted[skill] = false;
     ui.c.saved[skill] = null;
+    ui.c.review[skill] = null;
+    ui.c.t0[skill] = Date.now();
     if (skill === "co") { ui.c.plays = 0; ui.c.script = false; stopAudio(); }
   }
   // Keep the tab showing a set for the current level and theme: one already made for it, a matching
@@ -1015,13 +1056,15 @@
   function ensureCompSet(skill) {
     const key = compKey(skill);
     const cur = ui.c.set[skill];
-    if (cur && cur.key === key) return;
+    // A set picked before the saved history loaded is picked again once it has, unless it's been started.
+    const untouched = !Object.keys(ui.c.ans[skill]).length && !ui.c.submitted[skill] && !(skill === "co" && ui.c.plays);
+    if (cur && cur.key === key && !(cur.early && loaded && untouched)) return;
     if (busy["c-gen-" + skill] || ui.c.inflight[key]) return;
     compReset(skill);
     if (ui.c.cache[key]) { ui.c.set[skill] = prepSet(ui.c.cache[key]); return; }
     const lvl = compLevel(), th = ui.c.theme;
     const i = findSample(skill, lvl, th, -1);
-    if (i >= 0) { ui.c.set[skill] = sampleSet(skill, i, key); return; }
+    if (i >= 0) { ui.c.set[skill] = sampleSet(skill, i, key); ui.c.set[skill].early = !loaded; return; }
     if (th && claudeOn() && !ui.c.failed[key]) {
       ui.c.set[skill] = null;
       if (!ui.c.queued) { ui.c.queued = true; setTimeout(() => { ui.c.queued = false; compGenerate(skill); }, 0); }
@@ -1030,6 +1073,7 @@
     const j = findSample(skill, lvl, "", -1);
     ui.c.set[skill] = sampleSet(skill, j < 0 ? 0 : j, key);
     ui.c.set[skill].fallback = !!th;
+    ui.c.set[skill].early = !loaded;
   }
   async function compGenerate(skill) {
     if (busy["c-gen-" + skill]) return;
@@ -1041,7 +1085,7 @@
     const theme = th ? `${th.label} (${th.en})` : "any everyday or social topic typical of the TCF Canada (work, housing, services, health, environment, technology, culture, settling in Canada)";
     let prompt;
     if (skill === "ce") {
-      prompt = `${EXAM_BRIEF}\n${TC.comp}\n\nWrite one TCF Canada Compréhension écrite item set at CEFR ${lvl}. Theme: ${theme}. Choose a realistic document type for that level (notice, email, advertisement, article, opinion piece, regulation). Length: ${lvl === "B1" ? "130–180" : "220–300"} words in French, with paragraph breaks as \\n\\n. Then 4 multiple-choice questions in French, 4 options each, exactly one correct, testing gist, specific details and inference${lvl === "B2" ? ", including the writer's intention or opinion" : ""}. Distractors must be plausible and reuse words from the text in misleading ways, as on the real test.\nReply with only JSON: {"title": "...", "type": "document type", "text": "...", "questions": [{"q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "English explanation quoting the text"}]}`;
+      prompt = `${EXAM_BRIEF}\n${TC.comp}\n\nWrite one TCF Canada Compréhension écrite item set at CEFR ${lvl}. Theme: ${theme}. Choose a realistic document type for that level (notice, email, advertisement, article, opinion piece, regulation). Length: ${lvl === "B1" ? "130–180" : "220–300"} words in French, with paragraph breaks as \\n\\n. Then 4 multiple-choice questions in French, 4 options each, exactly one correct, testing gist, specific details and inference${lvl === "B2" ? ", including the writer's intention or opinion" : ""}. ${OPTIONS_RULE}\nReply with only JSON: {"title": "...", "type": "document type", "text": "...", "questions": [{"q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "English explanation quoting the text"}]}`;
     } else {
       prompt = `${EXAM_BRIEF}\n${TC.comp}\n\nWrite one TCF Canada Compréhension orale item set at CEFR ${lvl}. Theme: ${theme}. Write the script of a realistic recording of a kind the TCF Canada uses (${lvl === "B1" ? "a phone message, a public announcement or an everyday dialogue" : "a radio interview, a news report or a discussion"}): ${lvl === "B1" ? "90–150" : "160–230"} words of natural spoken French, with speakers labelled A and B (or A alone). The TCF Canada includes Canadian contexts, so make roughly one set in three Canadian (Québec places and vocabulary). The script will be read by text-to-speech, so write times, prices and numbers in words (« neuf heures et demie », « trente dollars ») and avoid abbreviations. Then 4 multiple-choice questions in French, 4 options each, exactly one correct, testing gist, details and inference, with plausible distractors.\nReply with only JSON: {"title": "short title", "context": "one French sentence describing the situation, shown before listening", "lines": [{"speaker": "A", "text": "..."}], "questions": [{"q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "English explanation quoting the script"}]}`;
     }
@@ -1053,7 +1097,7 @@
         .map((q) => ({ q: str(q.q), options: q.options.map(str), answer: q.answer, why: str(q.why) }));
       const lines = arr(out.lines).filter((l) => l && l.text).map((l) => ({ speaker: str(l.speaker || "A").slice(0, 3), text: str(l.text) }));
       if (qs.length >= 2 && (skill === "ce" ? !!out.text : lines.length > 0)) {
-        set = prepSet({ level: lvl, title: str(out.title), type: str(out.type), text: str(out.text), context: str(out.context), lines, questions: qs, src: "claude", theme: themeId, themes: themeId ? [themeId] : [], key });
+        set = prepSet({ id: "claude-" + uid(), level: lvl, title: str(out.title), type: str(out.type), text: str(out.text), context: str(out.context), lines, questions: qs, src: "claude", theme: themeId, themes: themeId ? [themeId] : [], key });
       } else toast("The set didn't come back complete. Try again.");
     }
     delete ui.c.inflight[key];
@@ -1073,7 +1117,16 @@
     ui.c.submitted[skill] = true;
     const id = uid();
     ui.c.saved[skill] = id;
-    put("comp", id, { skill, level: set.level || compLevel(), title: set.title, theme: set.theme || "", date: todayStr(), ts: Date.now(), score, total: set.questions.length, src: set.src || "sample", gaps: {} });
+    const doc = {
+      skill, level: set.level || compLevel(), title: set.title, theme: set.theme || "", date: todayStr(), ts: Date.now(), score, total: set.questions.length, src: set.src || "sample", gaps: {},
+      setId: set.id || "", answers: set.questions.map((q, i) => (ans[i] == null ? null : ans[i])),
+      secs: Math.round((Date.now() - (ui.c.t0[skill] || Date.now())) / 1000), timed: timer.home === "comp." + skill && timerStarted(),
+    };
+    // Claude's sets exist only in this page's memory, so the attempt keeps a copy to reopen from the history.
+    if (set.src === "claude") doc.snap = snapOf(set);
+    put("comp", id, doc);
+    ui.c.open[doc.theme ? `${skill}:t:${doc.theme}` : `${skill}:g:mixed`] = true;
+    ui.c.open[`${skill}:s:${doc.setId}`] = true;
     autoTick("comp." + skill);
     if (skill === "co") ui.c.script = true;
     render(true);
@@ -1086,6 +1139,288 @@
     doc.gaps = doc.gaps || {};
     doc.gaps[i] = kind;
     put("comp", id, doc);
+  }
+  // What an attempt keeps of a Claude set so it can be opened again later.
+  const snapOf = (set) => ({
+    level: set.level, type: set.type || "", title: set.title, text: set.text || "", context: set.context || "", lines: arr(set.lines), theme: set.theme || "", themes: arr(set.themes),
+    questions: set.questions.map((q) => ({ q: q.q, options: q.options, answer: q.answer, why: q.why })),
+  });
+  // Put a set from the history tree back on the page: a built-in set by id, or a Claude set from the copy
+  // saved with an attempt. The level and topic follow the set, so ensureCompSet keeps it.
+  function compLoad(skill, setId, attempt) {
+    const all = samplesFor(skill);
+    const i = all.findIndex((s) => s.id === setId);
+    const snap = i >= 0 ? null : (attempt && attempt.snap) || (compAttempts(skill).find((a) => a.setId === setId && a.snap) || {}).snap;
+    const base = i >= 0 ? all[i] : snap;
+    if (!base) { toast("This set's text wasn't saved, so it can't be opened again."); return false; }
+    ui.c.skill = skill;
+    ui.c.level = base.level || ui.c.level;
+    ui.c.theme = arr(base.themes).includes(ui.c.theme) ? ui.c.theme : base.theme || arr(base.themes)[0] || "";
+    const key = compKey(skill);
+    compReset(skill);
+    ui.c.set[skill] = i >= 0 ? sampleSet(skill, i, key) : prepSet(Object.assign(clone(snap), { id: setId, src: "claude", key }));
+    return true;
+  }
+  // Show a past attempt: its set, the answers given, the right ones and the explanations.
+  function compReview(skill, attemptId) {
+    const a = compAttempts(skill).find((x) => x.id === attemptId);
+    if (!a || !compLoad(skill, a.setId, a)) return;
+    ui.c.ans[skill] = {};
+    arr(a.answers).forEach((k, i) => { if (k != null) ui.c.ans[skill][i] = k; });
+    ui.c.submitted[skill] = true;
+    ui.c.saved[skill] = a.id;
+    ui.c.review[skill] = a;
+    if (skill === "co") ui.c.script = true;
+  }
+
+  /* =============== comprehension history =============== */
+  const mins = (secs) => (secs > 0 && secs < 7200 ? `${Math.max(1, Math.round(secs / 60))} min` : "");
+  const cefrOf = (v) => ["A1", "A2", "B1", "B2", "C1", "C2"][Math.max(0, Math.min(5, Math.floor((v - 100) / 100)))];
+  const scorePill = (a) => `<span class="pill ${a.total && a.score / a.total >= 0.7 ? "ok" : ""}">${a.score}/${a.total}</span>`;
+  const nclcTag = (v) => { const n = nclcOf("ce", v); return `<span class="tag7 ${n >= 7 ? "ok" : "no"}">NCLC ${nclcLabel(n)}</span>`; };
+  const levelCounts = (b) => (b ? Object.entries(b).map(([l, v]) => `${l} ${v[0]}/${v[1]}`).join(" · ") : "");
+  // A branch of the tree. Its open state lives in ui.c.open, because render() replaces the whole view.
+  const branch = (id, summary, body) => `<details class="h-node" data-node="${esc(id)}" ${ui.c.open[id] ? "open" : ""}><summary>${summary}</summary><div class="h-kids">${body}</div></details>`;
+
+  // One attempt at a set: date, score, time taken, and the questions missed with their gap tags.
+  function attemptRow(skill, a, qs) {
+    const gaps = a.gaps || {};
+    const hasAns = !!qs && Array.isArray(a.answers);
+    const missed = hasAns ? qs.map((q, i) => (a.answers[i] === q.answer ? -1 : i)).filter((i) => i >= 0) : Object.keys(gaps).map(Number);
+    const tags = missed.map((i) => `<span class="miss">Q${i + 1} ✗${gaps[i] ? " · " + (gaps[i] === "vocab" ? "vocabulary" : "comprehension") : ""}</span>`).join("");
+    return `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}${mins(a.secs) ? `<span class="small muted">${mins(a.secs)}</span>` : ""}${a.timed ? `<span class="pill info">timed</span>` : ""}${tags}${hasAns ? `<button class="btn ghost sm" data-act="c-review" data-skill="${skill}" data-id="${esc(a.id)}">Review</button>` : ""}</div>`;
+  }
+  // A set: not done yet (with a button to open it), or its attempts, newest first.
+  function setBranch(skill, set, st) {
+    const head = `<span class="lv">${esc(set.level || "")}</span><span class="h-name">${typo(set.title)}</span>${set.type ? `<span class="small muted">${esc(set.type)}</span>` : ""}${set.src === "claude" ? `<span class="pill info">from Claude</span>` : ""}`;
+    const open = `data-act="c-open" data-skill="${skill}" data-set="${esc(set.id)}"`;
+    if (!st) return `<div class="h-row">${head}<span class="h-meta">Not done yet</span><button class="btn sm" ${open}>Open</button></div>`;
+    const n = st.attempts.length;
+    const meta = `${n} attempt${n > 1 ? "s" : ""} · best ${st.best ? `${st.best.score}/${st.best.total}` : "—"} · last ${shortDate(st.attempts[0].date)}`;
+    const body = st.attempts.map((a) => attemptRow(skill, a, set.questions)).join("")
+      + (set.questions ? `<div class="row"><button class="btn sm" ${open}>Retake this set</button></div>` : `<p class="small muted">This set's text wasn't saved, so it can't be opened again.</p>`);
+    return branch(`${skill}:s:${set.id}`, `${head}<span class="h-meta">${meta}</span>`, body);
+  }
+  // A topic: how far each level is done (✓ all, 1/2 some, ○ none), then its sets.
+  function topicBranch(skill, t, sets, stats) {
+    const lv = ["B1", "B2"].map((l) => {
+      const at = sets.filter((s) => s.level === l && s.src !== "claude");
+      if (!at.length) return "";
+      const done = at.filter((s) => stats.has(s.id));
+      const best = at.length === 1 && done.length ? stats.get(done[0].id).best : null;
+      const txt = !done.length ? `${l} ○` : done.length < at.length ? `${l} ${done.length}/${at.length}` : `${l} ✓${best ? ` best ${best.score}/${best.total}` : ""}`;
+      return `<span class="lv ${done.length && done.length === at.length ? "done" : ""}">${txt}</span>`;
+    }).join("");
+    const n = sets.reduce((x, s) => x + (stats.has(s.id) ? stats.get(s.id).attempts.length : 0), 0);
+    return branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : "not started"}</span>`, sets.map((s) => setBranch(skill, s, stats.get(s.id))).join(""));
+  }
+  // Practice exams: the built-in ones (listed even before they're done) and Claude's.
+  function examsBranch(attempts) {
+    const done = attempts.filter((a) => a.kind === "exam");
+    const builtIn = T.COMP.ceExams || [];
+    const ids = [...new Set(builtIn.map((e) => e.id).concat(done.map((a) => a.setId)))];
+    const rows = ids.map((id) => {
+      const ex = builtIn.find((e) => e.id === id);
+      const as = done.filter((a) => a.setId === id);
+      const head = `<span class="lv">A1–C2</span><span class="h-name">${esc(ex ? ex.title : as[0].title)}</span>${ex ? "" : `<span class="pill info">from Claude</span>`}`;
+      if (!as.length) return `<div class="h-row">${head}<span class="h-meta">Not done yet</span><a class="btn sm" href="#comp.ce.exam">Open</a></div>`;
+      const best = as.reduce((b, a) => ((a.est || 0) > (b.est || 0) ? a : b));
+      const body = as.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}${mins(a.secs) ? " · " + mins(a.secs) : ""}${a.timeUp ? " · time ran out" : ""}</span><span class="small muted">${levelCounts(a.byLevel)}</span>${ex || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("");
+      return branch(`ce:x:${id}`, `${head}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
+    }).join("");
+    const last = done[0];
+    return branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "not started"}</span>`, rows);
+  }
+  // Everything done in one skill, as a tree: topic → set → attempt, then practice exams, Claude sets with
+  // no topic and scores logged from elsewhere. Built-in sets not done yet are listed too, so gaps show.
+  function historyTree(skill) {
+    const attempts = compAttempts(skill);
+    const stats = compStats(skill, attempts);
+    const builtins = samplesFor(skill).map((s) => Object.assign({}, s, { src: "sample" }));
+    // Claude's sets, taken from their attempts: the newest title and level, and the saved text if there is one.
+    const claude = new Map();
+    for (const a of attempts) {
+      if (a.src !== "claude") continue;
+      const c = claude.get(a.setId) || { id: a.setId, level: a.level, title: a.title, theme: a.theme || "", src: "claude", type: "", questions: null };
+      if (!c.questions && a.snap) Object.assign(c, { type: a.snap.type || "", questions: arr(a.snap.questions) });
+      claude.set(a.setId, c);
+    }
+    const claudeSets = [...claude.values()];
+    const done = builtins.filter((s) => stats.has(s.id)).length;
+    const practice = attempts.filter((a) => a.src !== "logged" && a.kind !== "exam").length;
+    const topics = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats)).join("");
+    const mixed = claudeSets.filter((c) => !COMP_TOPICS.some((t) => t.id === c.theme));
+    const logged = attempts.filter((a) => a.src === "logged");
+    return `<section class="sec" id="c-hist">
+      <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} built-in sets done · ${practice} attempt${practice === 1 ? "" : "s"}</span></div>
+      ${attempts.length ? "" : `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>`}
+      <div class="tree">${topics}
+        ${skill === "ce" ? examsBranch(attempts) : ""}
+        ${mixed.length ? branch(`${skill}:g:mixed`, `<span class="h-name">Sujets variés</span><span class="h-meta">Claude sets with no topic</span>`, mixed.map((s) => setBranch(skill, s, stats.get(s.id))).join("")) : ""}
+        ${logged.length ? branch(`${skill}:g:logged`, `<span class="h-name">Logged from elsewhere</span><span class="h-meta">${logged.length} score${logged.length > 1 ? "s" : ""}</span>`, logged.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}<span>${esc(a.title)}</span><span class="lv">${esc(a.level || "")}</span></div>`).join("")) : ""}
+      </div>
+    </section>`;
+  }
+
+  /* =============== CE practice exam (Examen blanc) =============== */
+  // 39 items in 60 minutes, one document each, in the level blocks of TCF_CANADA.ceExam. The estimate adds
+  // the points of the items answered correctly; the official scale starts at 100.
+  const goTo = (hash) => { if (location.hash === hash) render(true); else location.hash = hash; };
+  function examScore(exam, ans) {
+    const pts = Object.fromEntries(TC.ceExam.blocks.map(([l, , p]) => [l, p]));
+    const byLevel = {};
+    let correct = 0, raw = 0;
+    exam.items.forEach((it, i) => {
+      const b = (byLevel[it.level] = byLevel[it.level] || [0, 0]);
+      b[1]++;
+      if (ans[i] === it.answer) { b[0]++; correct++; raw += pts[it.level] || 0; }
+    });
+    return { correct, total: exam.items.length, byLevel, est: Math.min(699, Math.max(100, raw)) };
+  }
+  function examStart(exam) {
+    if (ui.cx && !ui.cx.done) { goTo("#comp.ce.exam"); return; }
+    const ex = clone(exam);
+    ex.src = ex.src || "built-in";
+    ex.items.forEach((it) => { it.order = shuffle(it.options.map((_, j) => j)); });
+    ui.cx = { exam: ex, i: 0, ans: {}, done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
+    if (exam === ui.cxReady) ui.cxReady = null;
+    timerSet(TC.ceExam.minutes * 60, "Examen blanc CE", "comp.ce.exam");
+    timerStart();
+    goTo("#comp.ce.exam");
+    window.scrollTo(0, 0);
+  }
+  function examSubmit(reason) {
+    const cx = ui.cx;
+    if (!cx || cx.done) return;
+    const secs = timer.home === "comp.ce.exam" ? Math.round(timer.total - timerRemaining()) : Math.round((Date.now() - cx.t0) / 1000);
+    timerSet(0, "", ""); // stops the exam clock and hides it from the sidebar
+    const r = examScore(cx.exam, cx.ans);
+    const id = uid();
+    Object.assign(cx, { done: true, confirm: false, quit: false, attemptId: id, result: Object.assign(r, { secs, timeUp: reason === "time", date: todayStr() }) });
+    const doc = {
+      skill: "ce", kind: "exam", level: "A1–C2", title: cx.exam.title, theme: "", date: todayStr(), ts: Date.now(),
+      score: r.correct, total: r.total, src: cx.exam.src === "claude" ? "exam-claude" : "exam", gaps: {},
+      setId: cx.exam.id, answers: cx.exam.items.map((_, i) => (cx.ans[i] == null ? null : cx.ans[i])),
+      secs, timed: true, timeUp: reason === "time", est: r.est, byLevel: r.byLevel,
+    };
+    // Claude's exams exist only in this page's memory, so the attempt keeps a copy for review.
+    if (cx.exam.src === "claude") doc.snap = { id: cx.exam.id, title: cx.exam.title, src: "claude", items: cx.exam.items.map((it) => { const o = Object.assign({}, it); delete o.order; return o; }) };
+    put("comp", id, doc);
+    // Every practice exam goes into the score log that the Phase 4–5 criteria read, labelled as an estimate.
+    put("mocks", uid(), { date: todayStr(), ts: Date.now(), label: `${cx.exam.title} · CE (site estimate)`, ce: r.est, compId: id });
+    ui.c.open["ce:g:exams"] = true;
+    ui.c.open["ce:x:" + cx.exam.id] = true;
+    autoTick("comp.ce.exam");
+    toast(reason === "time" ? "Time's up: your exam was handed in, and its estimated score added to Progress." : "Handed in. The estimated score is also in Progress → Scores and NCLC.");
+    render(true);
+    window.scrollTo(0, 0);
+  }
+  function examReview(attemptId) {
+    if (ui.cx && !ui.cx.done) { toast("Finish or quit the exam in progress first."); return; }
+    const a = compAttempts("ce").find((x) => x.id === attemptId);
+    const exam = a && ((T.COMP.ceExams || []).find((e) => e.id === a.setId) || a.snap);
+    if (!exam) { toast("This exam's text wasn't saved, so it can't be reviewed."); return; }
+    const ex = clone(exam);
+    ex.items.forEach((it) => { it.order = it.options.map((_, j) => j); });
+    const ans = {};
+    arr(a.answers).forEach((k, i) => { if (k != null) ans[i] = k; });
+    ui.cx = { exam: ex, i: 0, ans, done: true, confirm: false, quit: false, attemptId: a.id, result: { correct: a.score, total: a.total, est: a.est, byLevel: a.byLevel, secs: a.secs, timeUp: a.timeUp, date: a.date, review: true } };
+    goTo("#comp.ce.exam");
+  }
+  // Claude writes a fresh exam in six batches, one per level, each checked before it's kept.
+  const EXAM_KINDS = {
+    A1: ["very short everyday documents: signs, notices, short text messages, small ads and timetables", "15–40", "a detail stated directly"],
+    A2: ["short practical documents: simple emails, building notices, ads, programmes and notes", "40–80", "a detail stated directly or the purpose of the message"],
+    B1: ["everyday documents and short articles: formal emails, job ads, local news, forum posts, rules and reviews", "80–150", "a detail, the purpose or a simple inference"],
+    B2: ["articles, editorials, opinion pieces, reports and interviews on social questions", "150–230", "the writer's opinion, an argument or an inference"],
+    C1: ["complex argumentative or analytical texts: essays, analyses and opinion columns with nuance and implicit positions", "200–300", "implicit meaning, the structure of the argument or the tone"],
+    C2: ["demanding texts: original literary passages (a narrative with implicit emotion or irony) and dense essays", "250–350", "implicit meaning, irony, tone or the effect of a stylistic choice"],
+  };
+  function examPrompt(lvl, n) {
+    const [kinds, words, tests] = EXAM_KINDS[lvl];
+    return `${EXAM_BRIEF}\n${TC.comp}\n\nWrite ${n} TCF Canada Compréhension écrite items at CEFR ${lvl} for a full practice exam. Each item is its own document: ${kinds}, ${words} words each, in French, with paragraph breaks as \\n\\n. Vary the topics (daily life, work, housing, health, environment, society, culture, science, education, immigration) and the document types, and set about a third of them in Canada (Québec places, dollars, Canadian vocabulary). After each document, write ONE question in French testing ${tests}, with 4 options in French and exactly one correct. ${OPTIONS_RULE} Explain each answer in English, quoting the document.\nReply with only JSON: {"items": [{"type": "document type in French", "title": "short title", "text": "...", "q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "..."}]}`;
+  }
+  async function examGenerate() {
+    if (ui.cxGen || (ui.cx && !ui.cx.done)) return;
+    ui.cxGen = { step: 0, total: TC.ceExam.blocks.length, lvl: "", items: [] };
+    render(true);
+    for (const [lvl, n] of TC.ceExam.blocks) {
+      Object.assign(ui.cxGen, { step: ui.cxGen.step + 1, lvl });
+      let got = [];
+      for (let tries = 0; tries < 2 && got.length < n; tries++) {
+        const out = await ask("cx-gen", examPrompt(lvl, n), lvl[0] === "C" ? { tier: "complex" } : undefined);
+        if (!ui.cxGen) return; // stopped
+        if (!out) { ui.cxGen = null; render(true); return; } // ask() has said why
+        got = arr(out.items).filter((x) => x && x.text && x.q && Array.isArray(x.options) && x.options.length === 4 && Number.isInteger(x.answer) && x.answer >= 0 && x.answer < 4)
+          .map((x) => ({ level: lvl, type: str(x.type), title: str(x.title), text: str(x.text), q: str(x.q), options: x.options.map(str), answer: x.answer, why: str(x.why) }));
+      }
+      if (got.length < n) { ui.cxGen = null; toast(`Claude didn't finish the ${lvl} questions. Try again.`); render(true); return; }
+      ui.cxGen.items.push(...got.slice(0, n));
+    }
+    ui.cxReady = { id: "cx-" + uid(), title: `Examen de Claude · ${shortDate(todayStr())}`, src: "claude", items: ui.cxGen.items };
+    ui.cxGen = null;
+    render(true);
+  }
+  // A slim panel on the CE practice page that leads to the exam.
+  function examCta() {
+    const last = compAttempts("ce").find((a) => a.kind === "exam");
+    const running = ui.cx && !ui.cx.done;
+    return `<section class="panel flat row between"><div class="stack tight"><p class="h3">Examen blanc</p><p class="small muted">The full reading test: 39 questions in 60 minutes, from A1 to C2, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}.` : ""}</p></div><a class="btn ${running ? "primary" : ""}" href="#comp.ce.exam">${running ? "Back to the exam" : "Go to the exam"}</a></section>`;
+  }
+  // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
+  function examView() {
+    const spec = TC.ceExam, cx = ui.cx;
+    const back = `<div><a class="btn ghost sm" href="#comp.ce">← Practice sets</a></div>`;
+    if (ui.cxGen) {
+      const g = ui.cxGen;
+      return `${back}<section class="panel stack"><p class="h3 thinking">Claude is writing your exam: the ${esc(g.lvl)} questions (${g.step} of ${g.total})</p><p class="small muted">Six batches, from A1 to C2. It usually takes one to three minutes, and you can practise on another page meanwhile.</p><div><button class="btn sm" data-act="x-gen-stop">Stop</button></div></section>`;
+    }
+    if (cx && !cx.done) {
+      const it = cx.exam.items[cx.i], n = cx.exam.items.length;
+      const answered = Object.keys(cx.ans).length, blanks = n - answered;
+      const mine = timer.home === "comp.ce.exam";
+      const clock = `<div class="timer"><span class="clock" ${mine ? "data-timer" : ""}>${mine ? fmtClock(timerRemaining()) : "—"}</span>${mine ? `<button class="btn sm" data-act="timer-toggle" data-home="comp.ce.exam" data-sec="${spec.minutes * 60}" data-label="Examen blanc CE" data-timer-btn>${timer.running ? "Pause" : "Resume"}</button>` : ""}</div>`;
+      const nav = `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((x, j) => `<button data-act="x-go" data-i="${j}" class="${cx.ans[j] != null ? "done" : ""}" aria-current="${j === cx.i}" aria-label="Question ${j + 1}${cx.ans[j] != null ? ", answered" : ""}">${j + 1}</button>`).join("")}</nav>`;
+      return `${back}
+        <div class="row between"><p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p>${clock}</div>
+        ${nav}
+        <article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p>${it.title ? `<h3>${typo(it.title)}</h3>` : ""}<p class="fr">${typo(it.text)}</p></article>
+        <div class="stack tight"><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${it.order.map((k) => `<label class="opt"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${typo(it.options[k])}</span></label>`).join("")}</div></div>
+        <div class="row between"><div class="row"><button class="btn" data-act="x-prev" ${cx.i === 0 ? "disabled" : ""}>← Previous</button><button class="btn" data-act="x-next" ${cx.i === n - 1 ? "disabled" : ""}>Next →</button></div><span class="small muted" id="x-count">${answered} of ${n} answered</span><button class="btn primary" data-act="x-finish">Hand in</button></div>
+        ${cx.confirm ? `<div class="notice warn">${blanks} question${blanks > 1 ? "s are" : " is"} still blank and will count as wrong.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-submit">Hand in anyway</button><button class="btn sm" data-act="x-keep">Keep going</button></div></div>` : ""}
+        <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
+    }
+    if (cx && cx.done) {
+      const r = cx.result;
+      const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
+      const review = cx.exam.items.map((it, j) => {
+        const a = cx.ans[j], ok = a === it.answer;
+        const opts = it.order.map((k) => `<div class="opt ${k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${typo(it.options[k])}</span></div>`).join("");
+        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)} · <span class="${ok ? "ok-t" : "miss"}">${ok ? "✓" : a == null ? "blank" : "✗"}</span> · ${typo(it.title || it.type)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
+      }).join("");
+      return `${back}
+        <section class="panel stack">
+          <p class="eyebrow">${esc(cx.exam.title)} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
+          <div class="row"><span class="scorebig">≈ ${r.est}</span>${nclcTag(r.est)}<span class="pill">${cefrOf(r.est)}</span></div>
+          <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in reading is 453–498.</p>
+          <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
+          <p class="small muted">${esc(spec.note)}${r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
+          <div class="row"><button class="btn" data-act="x-close">Done</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a></div>
+        </section>
+        <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see the document, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
+    }
+    const exams = compAttempts("ce").filter((a) => a.kind === "exam");
+    const starts = (T.COMP.ceExams || []).map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}`; }).join("");
+    return `${back}
+      <section class="panel stack">
+        <p class="h3">Examen blanc · Compréhension écrite</p>
+        <p>39 questions in 60 minutes, one document each, getting harder from A1 to C2, as on the TCF Canada.</p>
+        <ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>
+        <p class="small muted">${esc(spec.note)}</p>
+        <div class="row">${starts}${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>
+        ${ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
+      </section>
+      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}</span>${(T.COMP.ceExams || []).some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
   /* =============== criteria & scores =============== */
@@ -1125,8 +1460,10 @@
         const co = ms.filter((m) => m.co >= 458).length, ce = ms.filter((m) => m.ce >= 453).length;
         return { ok: co >= 2 && ce >= 2, note: `CO ${Math.min(co, 2)}/2 · CE ${Math.min(ce, 2)}/2` };
       }
+      // Only entries with all four skills are full mocks, so a partial entry (a CE practice exam, say) doesn't break a run.
+      const full = ms.filter((m) => ["co", "ce", "ee", "eo"].every((k) => m[k] != null && m[k] !== ""));
       let runN = 0, best = 0;
-      for (const m of ms) { const all = m.co >= 458 && m.ce >= 453 && m.ee >= 10 && m.eo >= 10; runN = all ? runN + 1 : 0; best = Math.max(best, runN); }
+      for (const m of full) { const all = m.co >= 458 && m.ce >= 453 && m.ee >= 10 && m.eo >= 10; runN = all ? runN + 1 : 0; best = Math.max(best, runN); }
       return { ok: best >= 2, note: `${Math.min(best, 2)}/2 consecutive` };
     }
     return { ok: false };
@@ -1306,7 +1643,7 @@
     const s = settings(), P = T.PHASES[s.phase - 1];
     const counts = errorCounts(21).slice(0, 5).map(([c, v]) => `${CAT[c]}: ${v.n}`).join("; ") || "nothing logged yet";
     const open = list("homework").filter((h) => !h.done).map((h) => h.text);
-    const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "speaking.t1", "speaking.t2", "speaking.t3", "comp.co", "comp.ce"]);
+    const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "speaking.t1", "speaking.t2", "speaking.t3", "comp.co", "comp.ce", "comp.ce.exam"]);
     const prompt = `You set daily homework for a TCF Canada learner.\n${PROFILE}\nCurrent phase: ${s.phase}, ${P.name}: ${P.goal}\nMost frequent error categories over the last 3 weeks: ${counts}.\nOpen homework already assigned: ${open.join(" | ") || "none"}.\nSuggest 3 short, concrete homework tasks for tomorrow (5–15 minutes each), each aimed at one weakness, and say where to do it in the app, using one of: ${routes.join(", ")}.\nReply with only JSON: {"homework": [{"text": "task in English, with French examples if useful", "go": "one of the routes"}]}`;
     const out = await ask("hw-suggest", prompt);
     if (!out) return;
@@ -1815,6 +2152,9 @@
     render(args) {
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
+      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant, and the listening sets are recorded in one natural voice. On the real test each recording plays once. Everything you do is kept in your history at the bottom of the page.</small></h1></header>`;
+      const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">CE · Lecture<small>reading</small></a></nav>`;
+      if (skill === "ce" && args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView()}</div></div>`;
       ensureCompSet(skill);
       const lvl = compLevel();
       const key = compKey(skill);
@@ -1826,7 +2166,8 @@
       const score = set && submitted ? set.questions.filter((q, i) => ans[i] === q.answer).length : 0;
       const savedDoc = ui.c.saved[skill] && S.comp.get(ui.c.saved[skill]);
       const gaps = (savedDoc && savedDoc.gaps) || {};
-      const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">CE · Lecture<small>reading</small></a></nav>`;
+      const stats = compStats(skill);
+      const doneN = samplesFor(skill).filter((s) => stats.has(s.id)).length;
       const newBtn = claudeBtn("c-gen-" + skill, "c-new", th ? `New ${esc(themeLabel(th))} set from Claude` : "New set from Claude", `data-skill="${skill}"`, "btn ghost");
       // Offer "another built-in set" only when there is one to switch to at this level (and topic).
       const matching = samplesFor(skill).filter((x) => x.level === lvl && (!th || arr(x.themes).includes(th))).length;
@@ -1835,6 +2176,7 @@
         <div class="seg" role="group" aria-label="Level">${["B1", "B2"].map((l) => `<button data-act="c-level" data-l="${l}" aria-pressed="${lvl === l}">${l}</button>`).join("")}</div>
         <select id="c-theme" data-change="c-theme" aria-label="Topic"><option value="">Any topic</option>${COMP_TOPICS.map((t2) => `<option value="${t2.id}" ${th === t2.id ? "selected" : ""}>${esc(t2.label)}</option>`).join("")}</select>
         ${nextBtn}${newBtn}
+        <button class="btn ghost" data-act="c-hist-jump">History · ${doneN} of ${samplesFor(skill).length} done ↓</button>
       </div>`;
       const tagLine = (kind) => `${kind} · ${esc((set && set.level) || lvl)}${set && set.theme ? " · " + esc(themeLabel(set.theme)) : ""}${set && set.src === "sample" ? " · built-in set" : " · from Claude"}`;
       let material;
@@ -1861,6 +2203,10 @@
         </article>`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
+      const rv = ui.c.review[skill];
+      const reviewNote = rv && set ? `<p class="notice small">You're looking at your attempt from ${shortDate(rv.date)} (${rv.score}/${rv.total}). “Try this set again” starts a new one.</p>` : "";
+      // The exam gives about 92 seconds per question, so a 4-question set is about 6 minutes.
+      const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Time yourself: the exam gives about 1½ minutes per question.</span>${timerUI("comp.ce", "Lecture CE", [[360, "6:00 · exam pace"], [1200, "20:00"], [1800, "30:00"]])}</div>` : "";
       const qs = set ? `<ol class="qs">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
         return `<li><p class="fr">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
@@ -1871,14 +2217,14 @@
         ${miss ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `<span class="scorebig">${score}/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
+        <div class="row">${submitted ? `<span class="scorebig">${score}/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${skill === "ce" ? `<span class="small muted">One set can't be converted to the 100–699 scale. The Examen blanc gives an estimate.</span>` : ""}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
-      const hist = list("comp").filter((x) => x.skill === skill).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 10);
       return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant, and the listening sets are recorded in one natural voice. On the real test each recording plays once.</small></h1></header>
+        ${head}
         ${tabs}
+        ${skill === "ce" ? examCta() : ""}
         ${controls}
-        <div class="stack">${fallback}${material}${qs}</div>
+        <div class="stack">${reviewNote}${fallback}${timerRow}${material}${qs}</div>
         <div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
             <p class="small muted">${skill === "co" ? "Real voices at exam speed. Past papers aren't published, so the closest thing is practice written by the test's own designers at France Éducation International and its partners." : "Practice questions written by the test's designers and France Éducation International."} Log your scores here to keep them with the rest.</p>
@@ -1889,7 +2235,7 @@
             <div class="row"><button class="btn" data-act="c-log" data-skill="${skill}">Log ${skill.toUpperCase()} score at ${esc(lvl)}</button></div>
           </section>
         </div>
-        <section class="sec"><h2 class="h2">Recent ${skill.toUpperCase()} scores</h2>${hist.length ? `<div class="history">${hist.map((h) => `<span class="pill ${h.total && h.score / h.total >= 0.7 ? "ok" : ""}">${shortDate(h.date)} · ${esc(h.level || "")}${h.theme ? " · " + esc(themeLabel(h.theme)) : ""} · ${h.score}/${h.total}</span>`).join("")}</div>` : `<p class="small muted">Your first set becomes your baseline.</p>`}</section>
+        ${historyTree(skill)}
       </div>`;
     },
   };
@@ -2120,6 +2466,28 @@
       toast("Score logged.");
       render(true);
     },
+    "c-open": (el) => { if (compLoad(el.dataset.skill, el.dataset.set)) { render(true); window.scrollTo({ top: 0, behavior: "smooth" }); } },
+    "c-review": (el) => { compReview(el.dataset.skill, el.dataset.id); render(true); window.scrollTo({ top: 0, behavior: "smooth" }); },
+    "c-hist-jump": () => { const h = document.getElementById("c-hist"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); },
+    "x-start": (el) => { const e = (T.COMP.ceExams || []).find((x) => x.id === el.dataset.id); if (e) examStart(e); },
+    "x-start-ready": () => { if (ui.cxReady) examStart(ui.cxReady); },
+    "x-gen": examGenerate,
+    "x-gen-stop": () => { const c = busy["cx-gen"]; ui.cxGen = null; if (c) c.abort(); render(true); },
+    "x-go": (el) => { if (ui.cx) { ui.cx.i = Number(el.dataset.i); ui.cx.confirm = false; render(true); } },
+    "x-prev": () => { if (ui.cx && ui.cx.i > 0) { ui.cx.i--; render(true); window.scrollTo(0, 0); } },
+    "x-next": () => { if (ui.cx && ui.cx.i < ui.cx.exam.items.length - 1) { ui.cx.i++; render(true); window.scrollTo(0, 0); } },
+    "x-finish": () => {
+      const cx = ui.cx;
+      if (!cx || cx.done) return;
+      if (Object.keys(cx.ans).length < cx.exam.items.length && !cx.confirm) { cx.confirm = true; render(true); return; }
+      examSubmit("done");
+    },
+    "x-submit": () => examSubmit("done"),
+    "x-keep": () => { if (ui.cx) { ui.cx.confirm = false; ui.cx.quit = false; render(true); } },
+    "x-quit": () => { if (ui.cx) { ui.cx.quit = true; render(true); } },
+    "x-quit-yes": () => { ui.cx = null; timerSet(0, "", ""); render(true); },
+    "x-review": (el) => examReview(el.dataset.id),
+    "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
     "p-phase": (el) => { saveSettings({ phase: Number(el.dataset.n) }); toast(`Phase ${el.dataset.n}: ${T.PHASES[Number(el.dataset.n) - 1].name}.`); },
     "m-add": () => {
       const f = ui.form;
@@ -2157,6 +2525,16 @@
     "v-theme": (el) => { ui.vTheme = el.value; render(true); },
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
     "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); },
+    // Updates the navigator in place rather than re-rendering, so the chosen option keeps focus.
+    "x-ans": (el) => {
+      const cx = ui.cx;
+      if (!cx || cx.done) return;
+      cx.ans[cx.i] = Number(el.dataset.k);
+      const b = document.querySelector(`.qnav [data-i="${cx.i}"]`);
+      if (b) { b.classList.add("done"); b.setAttribute("aria-label", `Question ${cx.i + 1}, answered`); }
+      const c = document.getElementById("x-count");
+      if (c) c.textContent = `${Object.keys(cx.ans).length} of ${cx.exam.items.length} answered`;
+    },
     "c-exam": (el) => { ui.c.exam = el.checked; render(true); },
     rate: (el) => { saveSettings({ rate: Number(el.value) }); if (audioEl) audioEl.playbackRate = Number(el.value); },
   };
@@ -2179,6 +2557,8 @@
     fn(el, e);
   });
   document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent']")) e.preventDefault(); });
+  // Keep the history tree's open branches across re-renders. "toggle" doesn't bubble, so listen while it's captured.
+  document.addEventListener("toggle", (e) => { const d = e.target; if (d && d.dataset && d.dataset.node) ui.c.open[d.dataset.node] = d.open; }, true);
   document.addEventListener("change", (e) => {
     const el = e.target;
     const fn = el.dataset && CHANGES[el.dataset.change];
