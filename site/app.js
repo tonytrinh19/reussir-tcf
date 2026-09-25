@@ -126,6 +126,36 @@
     render(false);
   }
 
+  // Run locally with `npm start`: progress lives in the server's SQLite file (see server/).
+  async function tryServer() {
+    if (!/^https?:$/.test(location.protocol)) return false;
+    let data;
+    try {
+      const r = await fetch("/api/data", { cache: "no-store" });
+      if (!r.ok || !/json/.test(r.headers.get("content-type") || "")) return false;
+      data = await r.json();
+    } catch (_) { return false; }
+    const req = (method, c, id, body) => fetch(`/api/data/${encodeURIComponent(c)}/${encodeURIComponent(id)}`, {
+      method, headers: body ? { "Content-Type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined,
+    }).then((r) => { if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { code: r.status === 413 ? "quota_exceeded" : "http" }); });
+    // First run on the server: bring over anything this browser had saved on its own.
+    const empty = COLLS.every((c) => !Object.keys(data[c] || {}).length);
+    let carried = [];
+    if (empty) {
+      try {
+        const old = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+        for (const c of COLLS) for (const [id, v] of Object.entries(old[c] || {})) { (data[c] = data[c] || {})[id] = v; carried.push([c, id, v]); }
+      } catch (_) { carried = []; }
+    }
+    for (const c of COLLS) for (const [id, v] of Object.entries(data[c] || {})) if (!S[c].has(id)) S[c].set(id, v);
+    backend = { kind: "server", set: (c, id, d) => req("PUT", c, id, d), del: (c, id) => req("DELETE", c, id) };
+    carried.forEach(([c, id, v]) => run(["set", c, id, v]));
+    loaded = true;
+    flushPending();
+    render(false);
+    return true;
+  }
+
   function useDb(db) {
     let first = 0;
     for (const c of COLLS) {
@@ -1756,7 +1786,7 @@
   }
   function paintFoot() {
     const s = settings(), P = T.PHASES[s.phase - 1];
-    const store = backend.kind === "db" ? `<span class="status-dot on"></span>Progress saved on claude.ai` : backend.kind === "local" ? `<span class="status-dot warn"></span>Progress saved in this browser only` : `<span class="status-dot"></span>Loading your progress…`;
+    const store = backend.kind === "db" ? `<span class="status-dot on"></span>Progress saved on claude.ai` : backend.kind === "server" ? `<span class="status-dot on"></span>Progress saved on this computer` : backend.kind === "local" ? `<span class="status-dot warn"></span>Progress saved in this browser only` : `<span class="status-dot"></span>Loading your progress…`;
     const cl = sample ? `<span class="status-dot on"></span>Claude ready` : claudeState === "pending" ? `<span class="status-dot"></span>Connecting to Claude…` : claudeState === "off" ? `<span class="status-dot"></span>Claude off (reload to allow)` : "";
     const tm = timer.total && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}"><span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
     footEl.innerHTML = `<div class="phase"><b>Phase ${s.phase} · ${esc(P.name)}</b>Semaine ${weekNo()} · ${esc(P.weeks)}</div>${tm}<div>${store}</div>${cl ? `<div>${cl}</div>` : ""}<button type="button" class="theme-btn" data-act="theme" data-theme-btn></button>`;
@@ -2764,7 +2794,7 @@
           <p class="small muted">From your roadmap notes: for sessions from September 1, 2026, re-marking requests for Expression écrite and orale aren't being accepted for about a year. Treat every mock as the one real attempt.</p>
         </section>
 
-        <p class="small muted">${backend.kind === "db" ? "Everything here is saved to this page on claude.ai, so it follows you to any device where you open it." : backend.kind === "local" ? "Everything here is saved in this browser only. Open the page on claude.ai to keep it with your account." : ""}</p>
+        <p class="small muted">${backend.kind === "db" ? "Everything here is saved to this page on claude.ai, so it follows you to any device where you open it." : backend.kind === "server" ? "Everything here is saved in the local database (data/tcf.sqlite), separately from the claude.ai page. Claude's corrections and extra sets work only on claude.ai." : backend.kind === "local" ? "Everything here is saved in this browser only. Open the page on claude.ai to keep it with your account." : ""}</p>
       </div>`;
     },
     after(args) {
@@ -3112,7 +3142,7 @@
     route = parseRoute(location.hash);
     render(true);
     const c = window.claude;
-    if (!c || typeof c.use !== "function") { claudeState = "none"; useLocal(); return; }
+    if (!c || typeof c.use !== "function") { claudeState = "none"; tryServer().then((ok) => { if (!ok) useLocal(); }); return; }
     c.use("sample").then((s) => { sample = s || null; claudeState = s ? "ready" : "none"; render(false); }, () => { claudeState = "none"; render(false); });
     c.use("db").then((db) => { if (db) useDb(db); else useLocal(); }, () => useLocal());
   }

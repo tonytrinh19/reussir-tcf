@@ -42,6 +42,13 @@
     - Every recording lasts at least 2 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
     - Each set has a `cast`, which the site ignores: a note on the scene and, for each speaker (two at most), a Gemini voice, a Microsoft voice and a delivery note. Montreal French Gemini voices for Canadian settings, Paris French otherwise; Microsoft `vivienne` for women and narrators, `remy` for men.
   - `audio/`: the recordings. The user prefers Gemini, then Vivienne, then Rémy, and never Denise. They're made with Microsoft voices now and replaced by Gemini 3.8 Flash TTS takes over time. Sets without a recording, such as Claude's extra sets, fall back to the browser's best French voice.
+- `server/`: runs the site locally on the user's Mac, with progress in SQLite. No npm dependencies; it needs Node 22.13+ for the built-in `node:sqlite`.
+  - `npm start` serves `site/` at http://localhost:4173 and keeps progress in `data/tcf.sqlite` (git-ignored; `TCF_DB` and `PORT` override).
+  - `db.js`: one `docs` table (`coll`, `id`, `data` JSON, `updated`), using the same collections as the claude.ai page.
+  - `server.js`: `GET /api/data` returns every collection; `PUT`/`DELETE /api/data/<coll>/<id>` write one document. Audio is served with byte ranges so Safari can play and seek it.
+  - `npm run import -- file.json` merges an export (`{coll: {id: doc}}`) into the database. A claude.ai export can be made with ArtifactData.
+  - `app.js` picks its store at boot: the claude.ai `db` when `window.claude` exists, then this server, then the browser's localStorage. On first run with an empty database, it copies over whatever that browser had in localStorage.
+  - The local site and the claude.ai page keep separate progress. Claude features (corrections, extra sets, "Suggest 3") only work on claude.ai.
 - `tools/make_audio.py` (+ `tools/export_co.js`): records the listening sets. `tools/recordings.json` notes which voices made each file, from which version of the script.
   - `python3 tools/make_audio.py` records new or changed sets with Microsoft voices (edge-tts) and deletes audio that no set uses. `--force` re-records every set; set ids re-record just those. A recording under 2 minutes fails.
   - `--gemini` records Gemini takes, one request per set, into `~/Library/Application Support/tcf-reussir/gemini/`. It checks each take by transcribing it with `gemini-3.8-flash` and stops at the free tier's limit of 10 requests a day. `--status` shows progress. `--use-gemini` puts the ready takes on the site, and runs only when the user says so.
