@@ -310,15 +310,17 @@
     return P.days[d] || null;
   }
   const blockKey = (phase, i) => `p${phase}b${i}`;
+  // A day is judged against its plan as it was when ticked (doc.total), so later edits to the templates don't rewrite past days.
   function dayStats(date) {
     const doc = S.days.get(date);
     const phase = (doc && doc.phase) || settings().phase;
     const plan = planFor(phase, date);
     if (!plan) return null;
     const done = (doc && doc.done) || {};
+    const total = (doc && doc.total) || plan.length;
     let n = 0;
-    plan.forEach((b, i) => { if (done[blockKey(phase, i)]) n++; });
-    return { n, total: plan.length, phase };
+    for (let i = 0; i < total; i++) if (done[blockKey(phase, i)]) n++;
+    return { n, total, phase };
   }
   function setBlock(date, key, val) {
     const cur = S.days.get(date);
@@ -326,6 +328,8 @@
     doc.done = doc.done || {};
     if (val) doc.done[key] = true; else delete doc.done[key];
     doc.phase = doc.phase || settings().phase;
+    const plan = planFor(doc.phase, date);
+    if (plan) doc.total = plan.length;
     put("days", date, doc);
   }
   function autoTick(token) {
@@ -345,19 +349,21 @@
       if (loose || token === go || token.startsWith(go + ".")) {
         doc.done[key] = true;
         doc.phase = s.phase;
+        doc.total = plan.length;
         put("days", t, doc);
         toast(`Ticked off in today's plan: ${plan[i][2]}.`);
         return;
       }
     }
   }
-  function activeDay(date) { const doc = S.days.get(date); return !!(doc && doc.done && Object.keys(doc.done).length); }
+  // A day counts toward the streak only when every block in its plan is ticked.
+  function dayComplete(date) { const st = dayStats(date); return !!(st && st.total && st.n >= st.total); }
   function streak() {
     let d = todayStr();
-    if (!activeDay(d)) d = addDays(d, -1);
+    if (!dayComplete(d)) d = addDays(d, -1);
     let n = 0;
     for (let k = 0; k < 400; k++) {
-      if (activeDay(d)) n++;
+      if (dayComplete(d)) n++;
       else if (dow(d) !== 6) break;
       d = addDays(d, -1);
     }
@@ -1300,7 +1306,7 @@
   }
   function streakCard() {
     const n = streak();
-    return `<section class="panel stack tight"><div class="row between"><h2 class="h3">Régularité</h2><span class="pill ${n ? "ok" : ""}">${n}-day streak</span></div>${heatmap(8)}<p class="small muted">Sundays don't break a streak.</p></section>`;
+    return `<section class="panel stack tight"><div class="row between"><h2 class="h3">Régularité</h2><span class="pill ${n ? "ok" : ""}">${n}-day streak</span></div>${heatmap(8)}<p class="small muted">A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></section>`;
   }
   async function suggestHomework() {
     const s = settings(), P = T.PHASES[s.phase - 1];
