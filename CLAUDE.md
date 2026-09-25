@@ -55,7 +55,22 @@
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
 - Republish `site/index.html` to that URL, with `data.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tct (remote `origin`, branch `main`).
-- Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks.
+- Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
   - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads.
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
   - A finished CE practice exam is saved with `kind: "exam"`. It also adds a `mocks` entry, labelled as a site estimate.
+- History keeps only two kinds of record, shown in Progrès → Historique:
+  - **Unfinished attempts** live in `inprogress`, one record per activity:
+    - `drill--<topic>--<set>` and `drill--mixed`
+    - `prod--<topic>`
+    - `ce--<setId>` and `co--<setId>`
+    - `exam--ce`
+    - `writing--t1…t3`
+    - `speaking--t1…t3`
+
+    A record is written at the first real answer or keystroke (typing is saved 1.5 s after it stops). It's deleted when the attempt is submitted or discarded. Nothing is saved when something is only opened or generated.
+  - **Finished attempts** keep what's needed to review them:
+    - Drill rounds keep every question with the answer given (`items`). A "retry the misses" round only adds `retry: {score, total}` to its round.
+    - Production checks keep `text` and `fb`.
+    - Speaking attempts keep the Tâche 2 conversation (`chat`).
+  - **Claude's follow-up homework** (from writing corrections and "Suggest 3") is saved only when the learner presses Add.
