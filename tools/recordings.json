@@ -55,13 +55,13 @@
   }
  },
  "co-education-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-27",
+  "engine": "gemini",
   "hash": "6bd474299884",
-  "seconds": 149.9,
+  "seconds": 141.2,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-tutor-7"
   }
  },
  "co-environnement-b1": {
@@ -74,13 +74,13 @@
   }
  },
  "co-environnement-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-27",
+  "engine": "gemini",
   "hash": "2803693caa64",
-  "seconds": 151.4,
+  "seconds": 120.9,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-fr-podcaster-8",
+   "B": "fr-fr-advisor-7"
   }
  },
  "co-famille-b1": {
@@ -131,13 +131,13 @@
   }
  },
  "co-immigration-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-27",
+  "engine": "gemini",
   "hash": "004efd3c663d",
-  "seconds": 160.8,
+  "seconds": 139.8,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-ca-podcaster-8",
+   "B": "fr-ca-assistant-6"
   }
  },
  "co-logement-b1": {
@@ -161,12 +161,12 @@
   }
  },
  "co-quotidien-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-27",
+  "engine": "gemini",
   "hash": "8d6569359355",
-  "seconds": 144.9,
+  "seconds": 129.3,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-9"
   }
  },
  "co-sante-b1": {
@@ -225,12 +225,12 @@
   }
  },
  "co-technologie-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-27",
+  "engine": "gemini",
   "hash": "4b6fd4e76f43",
-  "seconds": 131.5,
+  "seconds": 122.4,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-podcaster-2"
   }
  },
  "co-tourisme-b1": {
@@ -282,12 +282,12 @@
   }
  },
  "co-travail-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-27",
+  "engine": "gemini",
   "hash": "6a04ae867b45",
-  "seconds": 146.5,
+  "seconds": 135.6,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-podcaster-12"
   }
  }
 }
