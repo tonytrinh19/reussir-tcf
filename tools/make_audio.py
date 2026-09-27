@@ -440,6 +440,30 @@ def take_ready(status, s):
     return bool(t) and t.get("hash") == content_hash(s) and os.path.exists(take_path(s))
 
 
+def gemini_pace(st, sets):
+    """The range of seconds per script word in the Gemini takes (kept or not) of the current scripts,
+    read with the current pace instruction, at each level."""
+    by_id, pace = {s["id"]: s for s in sets}, {}
+    for bucket in ("takes", "fails"):
+        for k, v in st[bucket].items():
+            s = by_id.get(k)
+            if s and v.get("hash") == content_hash(s) and v.get("pace") == PACE[s["level"]] and v.get("seconds"):
+                r = v["seconds"] / len(script_words(s))
+                lo, hi = pace.get(s["level"], (r, r))
+                pace[s["level"]] = (min(lo, r), max(hi, r))
+    return pace
+
+
+def expected_problem(pace, s):
+    """Why a script can't give a 2–4 minute take even at the slowest (or fastest) pace Gemini has read
+    its level so far, with the length it would get; None when it can, or before any take of its level."""
+    if s["level"] not in pace:
+        return None
+    lo, hi = pace[s["level"]]
+    n = len(script_words(s))
+    return ("too short", hi * n) if hi * n < MIN_SECONDS else ("too long", lo * n) if lo * n > MAX_SECONDS else None
+
+
 def load_status():
     st = load_json(os.path.join(CACHE, "status.json"), {})
     st.setdefault("takes", {})
@@ -474,20 +498,30 @@ def run_gemini(sets):
     print("Gemini: %d set%s to record" % (len(todo), "" if len(todo) == 1 else "s"), flush=True)
     try:
         for s in todo:
+            # Checked before each request, so the first takes of a level already spare the rest.
+            expected = expected_problem(gemini_pace(st, sets), s)
+            if expected:
+                print("%-22s %s  skipped: script %s for Gemini's pace (%d words, ~%s)" % (
+                    s["id"], s["level"], expected[0], len(script_words(s)), clock(expected[1])), flush=True)
+                continue
             h = content_hash(s)
             speech = gemini_speak(s, key)
             sec = (len(speech) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
-            err, missed, extra = compare(script_words(s), words(transcript(speech, key)))
-            problem = length_problem(sec) or ("%d words skipped in a row" % missed if missed >= MAX_GAP
+            # A take outside 2–4 minutes can't be kept, so it isn't worth a transcription request.
+            problem = length_problem(sec)
+            err, missed, extra = (None, 0, 0) if problem else compare(script_words(s), words(transcript(speech, key)))
+            problem = problem or ("%d words skipped in a row" % missed if missed >= MAX_GAP
                        else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else "")
+            checked = "not checked     " if err is None else "%2.0f%% word errors" % (err * 100)
             if problem:
                 f = st["fails"].get(s["id"], {"count": 0})
-                st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "wer": round(err, 3), "problem": problem, "seconds": round(sec, 1), "pace": PACE[s["level"]], "date": today()}
-                print("%-22s %s  %2.0f%% word errors  NOT KEPT (%s)" % (s["id"], clock(sec), err * 100, problem), flush=True)
+                st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "wer": None if err is None else round(err, 3), "problem": problem,
+                                        "seconds": round(sec, 1), "pace": PACE[s["level"]], "date": today()}
+                print("%-22s %s  %s  NOT KEPT (%s)" % (s["id"], clock(sec), checked, problem), flush=True)
             else:
                 encode(silence(LEAD_IN) + speech + silence(TAIL), take_path(s, h))
                 voices = {sp: s["cast"][sp]["gemini"] for sp in speakers(s)}
-                st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "wer": round(err, 3), "voices": voices, "date": today()}
+                st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "wer": round(err, 3), "voices": voices, "pace": PACE[s["level"]], "date": today()}
                 st["fails"].pop(s["id"], None)
                 print("%-22s %s  %2.0f%% word errors  ready (%s)" % (s["id"], clock(sec), err * 100, ", ".join(voices.values())), flush=True)
             save_json(status_file, st)
@@ -529,7 +563,7 @@ def use_gemini(sets, ids):
 
 def status(sets):
     st, manifest = load_status(), load_json(MANIFEST, {})
-    counts = {}
+    pace, counts = gemini_pace(st, sets), {}
     for s in sets:
         m = manifest.get(s["id"])
         if not m or not os.path.exists(os.path.join(AUDIO, s["id"] + ".mp4")):
@@ -539,8 +573,9 @@ def status(sets):
             counts[m["engine"]] = counts.get(m["engine"], 0) + 1
         t = st["takes"].get(s["id"])
         fails = st["fails"].get(s["id"], {}).get("count", 0)
+        expected = expected_problem(pace, s)
         gem = ("on the site" if on_site_gemini(manifest, s) else "ready %s" % clock(t["seconds"]) if take_ready(st, s)
-               else "failed %d×" % fails if fails else "to do")
+               else "failed %d×" % fails if fails else "script %s (~%s)" % (expected[0], clock(expected[1])) if expected else "to do")
         print("%-22s %s %4d words  site: %-52s gemini: %s" % (s["id"], s["level"], len(script_words(s)), site, gem))
     ready = sum(take_ready(st, s) for s in sets if not on_site_gemini(manifest, s))
     print("\nSite: %s · Gemini takes waiting to go on the site: %d" % (", ".join("%d %s" % (n, e) for e, n in sorted(counts.items())) or "none", ready))
