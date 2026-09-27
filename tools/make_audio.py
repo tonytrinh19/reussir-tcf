@@ -466,6 +466,9 @@ def run_gemini(sets):
     manifest = load_json(MANIFEST, {})
     done = [s for s in sets if on_site_gemini(manifest, s)]
     todo = [s for s in sets if s not in done and not take_ready(st, s) and st["fails"].get(s["id"], {}).get("count", 0) < 2]
+    for s in done:  # converted: the cached copy is no longer needed
+        if st["takes"].pop(s["id"], None) and os.path.exists(take_path(s)):
+            os.remove(take_path(s))
     if done:
         print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s to record" % (len(todo), "" if len(todo) == 1 else "s"), flush=True)
@@ -509,18 +512,18 @@ def use_gemini(sets, ids):
     for s in sets:
         if ids and s["id"] not in ids:
             continue
-        if not take_ready(st, s):
+        if on_site_gemini(manifest, s) or not take_ready(st, s):
             if ids:
                 print("%-22s %s" % (s["id"], "already on the site" if on_site_gemini(manifest, s) else "no Gemini take for the current script"))
             continue
-        # Move the take onto the site; from now on recordings.json is its record.
-        shutil.move(take_path(s), os.path.join(AUDIO, s["id"] + ".mp4"))
-        t = st["takes"].pop(s["id"])
+        # Copied, not moved: the cached take is deleted by the next --gemini run once the
+        # recordings.json it reads (main's, for the routine) says the set is converted.
+        shutil.copyfile(take_path(s), os.path.join(AUDIO, s["id"] + ".mp4"))
+        t = st["takes"][s["id"]]
         manifest[s["id"]] = {"engine": "gemini", "voices": t["voices"], "hash": t["hash"], "seconds": t["seconds"], "date": today()}
         print("%-22s %s  on the site (%s)" % (s["id"], clock(t["seconds"]), ", ".join(t["voices"].values())))
         used += 1
     save_json(MANIFEST, manifest)
-    save_json(os.path.join(CACHE, "status.json"), st)
     print("Put %d Gemini recording%s on the site" % (used, "" if used == 1 else "s"))
 
 
