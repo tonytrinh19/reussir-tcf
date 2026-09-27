@@ -8,13 +8,15 @@ Microsoft voices (edge-tts) make the site's recordings. Gemini 3.8 Flash TTS rec
 scripts in the background, one request per set; its free tier allows 10 requests a day, so a daily
 scheduled task runs --gemini until the limit. Gemini takes are checked against the script, wait in
 a folder outside the repo, and replace the Microsoft files only when asked (--use-gemini).
-tools/recordings.json notes which voices made each file and the script it was made from.
+tools/recordings.json notes which voices made each file and the script it was made from. It is the
+record of what has been converted: --gemini never records a set that is already on the site with
+Gemini for its current script, and --force leaves those sets alone unless they're named.
 
 Needs: python3 -m pip install --user edge-tts ; node ; macOS afconvert.
 Gemini also needs an API key in ~/.config/gemini/api_key (or $GEMINI_API_KEY).
 
 Usage: python3 tools/make_audio.py               record new or changed sets with Microsoft
-       python3 tools/make_audio.py --force       re-record every set with Microsoft
+       python3 tools/make_audio.py --force       re-record every set with Microsoft (except Gemini ones)
        python3 tools/make_audio.py co-sante-b2   re-record one set with Microsoft
        python3 tools/make_audio.py --gemini      record Gemini takes until the daily limit
        python3 tools/make_audio.py --use-gemini  put the ready Gemini takes on the site (all, or set ids)
@@ -268,7 +270,7 @@ def run_microsoft(sets, force, ids):
         if ids:
             if s["id"] in ids:
                 todo.append(s)
-        elif force or not os.path.exists(f) or not m or m.get("hash") != content_hash(s):
+        elif not os.path.exists(f) or not m or m.get("hash") != content_hash(s) or force and not on_site_gemini(manifest, s):
             todo.append(s)
     print("Recording %d of %d sets with Microsoft voices" % (len(todo), len(sets)), flush=True)
     if todo:
@@ -426,6 +428,13 @@ def take_path(s, h=None):
     return os.path.join(CACHE, "%s-%s.mp4" % (s["id"], h or content_hash(s)))
 
 
+def on_site_gemini(manifest, s):
+    """The site already plays a Gemini recording of this set's current script (read from
+    recordings.json, so it works in the routine's copy of the repo, which has no audio files)."""
+    m = manifest.get(s["id"]) or {}
+    return m.get("engine") == "gemini" and m.get("hash") == content_hash(s)
+
+
 def take_ready(status, s):
     t = status["takes"].get(s["id"])
     return bool(t) and t.get("hash") == content_hash(s) and os.path.exists(take_path(s))
@@ -454,7 +463,11 @@ def run_gemini(sets):
     # A failure under an older pace instruction doesn't count against the set.
     level = {s["id"]: s["level"] for s in sets}
     st["fails"] = {k: v for k, v in st["fails"].items() if v.get("pace") == PACE[level[k]]}
-    todo = [s for s in sets if not take_ready(st, s) and st["fails"].get(s["id"], {}).get("count", 0) < 2]
+    manifest = load_json(MANIFEST, {})
+    done = [s for s in sets if on_site_gemini(manifest, s)]
+    todo = [s for s in sets if s not in done and not take_ready(st, s) and st["fails"].get(s["id"], {}).get("count", 0) < 2]
+    if done:
+        print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s to record" % (len(todo), "" if len(todo) == 1 else "s"), flush=True)
     try:
         for s in todo:
@@ -477,12 +490,12 @@ def run_gemini(sets):
             save_json(status_file, st)
     except DailyLimit:
         print("Stopped at Gemini's daily limit (10 requests on the free tier). The next run continues.", flush=True)
-    ready = sum(take_ready(st, s) for s in sets)
+    ready = sum(take_ready(st, s) for s in sets if s not in done)
     stuck = [k for k, v in st["fails"].items() if v.get("count", 0) >= 2]
-    print("Gemini: %d of %d ready" % (ready, len(sets)))
+    print("Gemini: %d of %d ready (%d on the site, %d waiting to go on it)" % (len(done) + ready, len(sets), len(done), ready))
     if stuck:
         print("Failed twice, needs a look: " + ", ".join(sorted(stuck)))
-    if ready == len(sets):
+    if len(done) + ready == len(sets):
         print("ALL READY" + ("" if st.get("announced") else " (new)"))
         st["announced"] = True
     else:
@@ -498,13 +511,16 @@ def use_gemini(sets, ids):
             continue
         if not take_ready(st, s):
             if ids:
-                print("%-22s no Gemini take for the current script" % s["id"])
+                print("%-22s %s" % (s["id"], "already on the site" if on_site_gemini(manifest, s) else "no Gemini take for the current script"))
             continue
-        shutil.copyfile(take_path(s), os.path.join(AUDIO, s["id"] + ".mp4"))
-        t = st["takes"][s["id"]]
+        # Move the take onto the site; from now on recordings.json is its record.
+        shutil.move(take_path(s), os.path.join(AUDIO, s["id"] + ".mp4"))
+        t = st["takes"].pop(s["id"])
         manifest[s["id"]] = {"engine": "gemini", "voices": t["voices"], "hash": t["hash"], "seconds": t["seconds"], "date": today()}
+        print("%-22s %s  on the site (%s)" % (s["id"], clock(t["seconds"]), ", ".join(t["voices"].values())))
         used += 1
     save_json(MANIFEST, manifest)
+    save_json(os.path.join(CACHE, "status.json"), st)
     print("Put %d Gemini recording%s on the site" % (used, "" if used == 1 else "s"))
 
 
@@ -520,10 +536,11 @@ def status(sets):
             counts[m["engine"]] = counts.get(m["engine"], 0) + 1
         t = st["takes"].get(s["id"])
         fails = st["fails"].get(s["id"], {}).get("count", 0)
-        gem = "ready %s" % clock(t["seconds"]) if take_ready(st, s) else "failed %d×" % fails if fails else "to do"
+        gem = ("on the site" if on_site_gemini(manifest, s) else "ready %s" % clock(t["seconds"]) if take_ready(st, s)
+               else "failed %d×" % fails if fails else "to do")
         print("%-22s %s %4d words  site: %-52s gemini: %s" % (s["id"], s["level"], len(script_words(s)), site, gem))
-    ready = sum(take_ready(st, s) for s in sets)
-    print("\nSite: %s · Gemini takes ready: %d of %d" % (", ".join("%d %s" % (n, e) for e, n in sorted(counts.items())) or "none", ready, len(sets)))
+    ready = sum(take_ready(st, s) for s in sets if not on_site_gemini(manifest, s))
+    print("\nSite: %s · Gemini takes waiting to go on the site: %d" % (", ".join("%d %s" % (n, e) for e, n in sorted(counts.items())) or "none", ready))
 
 
 def main():
