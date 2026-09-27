@@ -39,7 +39,7 @@
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
   - `exam-ce.js`: the built-in CE practice exam (Examen blanc). It has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). Its score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
   - `comp-co.js`: all 31 built-in listening (CO) sets, one B1 and one B2 for every topic. Each plays `audio/<id>.mp4`.
-    - Every recording lasts at least 2 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
+    - Every recording lasts 2 to 4 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
     - Each set has a `cast`, which the site ignores: a note on the scene and, for each speaker (two at most), a Gemini voice, a Microsoft voice and a delivery note. Montreal French Gemini voices for Canadian settings, Paris French otherwise; Microsoft `vivienne` for women and narrators, `remy` for men.
   - `audio/`: the recordings. The user prefers Gemini, then Vivienne, then Rémy, and never Denise. They're made with Microsoft voices now and replaced by Gemini 3.8 Flash TTS takes over time. Sets without a recording, such as Claude's extra sets, fall back to the browser's best French voice.
 - `server/`: runs the site locally on the user's Mac, with progress in SQLite. No npm dependencies; it needs Node 22.13+ for the built-in `node:sqlite`.
@@ -50,12 +50,14 @@
   - `app.js` picks its store at boot: the claude.ai `db` when `window.claude` exists, then this server, then the browser's localStorage. On first run with an empty database, it copies over whatever that browser had in localStorage.
   - The local site and the claude.ai page keep separate progress. Claude features (corrections, extra sets, "Suggest 3") only work on claude.ai.
 - `tools/make_audio.py` (+ `tools/export_co.js`): records the listening sets. `tools/recordings.json` notes which voices made each file, from which version of the script.
-  - `python3 tools/make_audio.py` records new or changed sets with Microsoft voices (edge-tts) and deletes audio that no set uses. `--force` re-records every set; set ids re-record just those. A recording under 2 minutes fails.
+  - `python3 tools/make_audio.py` records new or changed sets with Microsoft voices (edge-tts) and deletes audio that no set uses. `--force` re-records every set; set ids re-record just those. A recording under 2 minutes or over 4 fails.
   - `--gemini` records Gemini takes, one request per set, into `~/Library/Application Support/tcf-reussir/gemini/`. It checks each take by transcribing it with `gemini-3.8-flash` and stops at the free tier's limit of 10 requests a day. `--status` shows progress. `--use-gemini` puts the ready takes on the site, and runs only when the user says so.
-  - The daily scheduled task `co-gemini-audio` runs `--gemini` at 00:30 Pacific, just after Google's daily reset, and reminds the user once every take is ready.
+    - A take outside 2–4 minutes, or with skipped, added or misread words, isn't kept. After two failures a set waits for a look. Changing a level's `PACE` instruction clears its earlier failures.
+    - Gemini reads fast, so B1 asks for a slow pace. Its first instruction ("unhurried") gave about 180 words a minute, which made the B1 takes last about 1:50.
+  - The daily scheduled task `co-gemini-audio` runs `--gemini` at 00:30 Pacific, just after Google's daily reset, and reminds the user once every take is ready. It runs `~/.claude/scheduled-tasks/co-gemini-audio/run.sh`, one command so its permission can be saved. The script records from `origin/main` in a temp folder, so changes to the recorder reach the routine only once they're merged.
   - Gemini reads its key from `~/.config/gemini/api_key`, which the user saves; never type or print the key. Microsoft needs `python3 -m pip install --user edge-tts`. Both need node and macOS `afconvert`.
   - After editing `comp-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`.
-- `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of at least 2 minutes and that no audio file is left over.
+- `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 2 to 4 minutes and that no audio file is left over.
 - `tools/check_ce.js`: checks the CE sets and the practice exam.
   - Structure: unique ids, a B1 and a B2 set for every topic, 4 options per question, and the exam's level blocks.
   - Option lengths: the right answer must not stand out as the longest or shortest option.

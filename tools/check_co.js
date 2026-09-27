@@ -1,7 +1,7 @@
 // Checks the built-in Compréhension orale sets (comp-co.js) and their recordings: the structure, a B1
 // and a B2 set for every topic, 6 questions per set, a cast for every speaker, the script length,
 // option lengths that don't give the right answer away, and that every set has an up-to-date
-// recording of at least 2 minutes, with no audio file left over.
+// recording of 2 to 4 minutes, with no audio file left over.
 // Run: node tools/check_co.js   (prints stats; exits 1 if anything fails)
 const crypto = require("crypto");
 const fs = require("fs");
@@ -17,7 +17,7 @@ const T = window.TCF;
 const LIMITS = { longestMin: 0.15, longest: 0.3, shortestMin: 0.15, shortest: 0.35, ratioMin: 0.9, ratioMax: 1.1, maxRatio: 1.4 };
 const QUESTIONS = 6;
 const MIN_WORDS = { B1: 300, B2: 380 }; // at least 2 minutes at about 150 (B1) and 180 (B2) words a minute
-const MIN_SECONDS = 120;
+const MIN_SECONDS = 120, MAX_SECONDS = 240;
 const MS_VOICES = ["vivienne", "remy"];
 const errors = [];
 const fail = (msg) => errors.push(msg);
@@ -116,7 +116,7 @@ sets.forEach((s) => {
   else if (!m) fail(`${s.id}: missing from tools/recordings.json (run python3 tools/make_audio.py)`);
   else {
     if (m.hash !== hashOf(s)) fail(`${s.id}: the recording is older than the script (run python3 tools/make_audio.py)`);
-    if (!(m.seconds >= MIN_SECONDS)) fail(`${s.id}: the recording lasts ${m.seconds} s, under 2 minutes`);
+    if (!(m.seconds >= MIN_SECONDS && m.seconds <= MAX_SECONDS)) fail(`${s.id}: the recording lasts ${m.seconds} s; it must last 2 to 4 minutes`);
     secs.push(m.seconds);
     engines[m.engine] = (engines[m.engine] || 0) + 1;
   }
