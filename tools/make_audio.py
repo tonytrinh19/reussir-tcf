@@ -7,7 +7,7 @@ Rémy), a Gemini voice and a delivery note. Recordings last 2 to 4 minutes.
 Microsoft voices (edge-tts) make the site's recordings. Gemini 3.8 Flash TTS records the same
 scripts in the background, one request per set; its free tier allows 10 requests a day, so a daily
 scheduled task runs --gemini until the limit. Gemini takes are checked against the script, wait in
-a folder outside the repo, and replace the Microsoft files only when asked (--use-gemini).
+a folder outside the repo, and replace the Microsoft files with --use-gemini (the routine runs it).
 tools/recordings.json notes which voices made each file and the script it was made from. It is the
 record of what has been converted: --gemini never records a set that is already on the site with
 Gemini for its current script, and --force leaves those sets alone unless they're named.
