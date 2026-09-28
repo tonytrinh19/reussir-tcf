@@ -767,7 +767,7 @@
       ids = themeCards(th, cards).filter((c) => !S.srs.has(c.id)).slice(0, ui.vCount).map((c) => c.id);
       if (!ids.length) { toast("No new cards left in this theme. Build more with Claude, or pick another theme."); return; }
     }
-    ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false };
+    ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false, edit: false };
     render(true);
     window.scrollTo(0, 0);
   }
@@ -2200,22 +2200,89 @@
     const st = S.srs.get(id);
     const th = THEME[c.theme];
     const enFirst = ui.vDir === "en-fr";
-    const front = enFirst ? `<p class="prompt">${esc(c.en)}</p>` : `<p class="answer">${typo(c.fr)}</p>`;
-    const back = enFirst ? `<p class="answer">${typo(c.fr)}</p>` : `<p class="prompt">${esc(c.en)}</p>`;
+    const front = cardSide(c, enFirst ? "en" : "fr");
+    const back = cardSide(c, enFirst ? "fr" : "en");
     let buttons;
     if (v.mode === "new") buttons = `<button class="btn primary" data-act="v-grade" data-ok="1">Got it, next <span class="kbd">2</span></button><button class="btn" data-act="v-grade" data-ok="0">I already know this <span class="kbd">3</span></button>`;
     else if (!v.shown) buttons = `<button class="btn primary" data-act="v-show">Show answer <span class="kbd">Space</span></button>`;
     else buttons = `<button class="btn" data-act="v-grade" data-ok="0">Missed <span class="kbd">1</span></button><button class="btn primary" data-act="v-grade" data-ok="1">Got it <span class="kbd">2</span></button>`;
     return `<div class="wrap">
-      <div class="row between"><span class="eyebrow">${v.mode === "new" ? "Learning new cards" : "Review"} · ${v.i + 1} / ${v.queue.length}</span><button class="btn ghost sm" data-act="v-quit">End session</button></div>
+      <div class="row between"><span class="eyebrow">${v.mode === "new" ? "Learning new cards" : "Review"} · ${v.i + 1} / ${v.queue.length}</span><span class="row"><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
       <div class="bar"><i style="width:${(v.i / v.queue.length) * 100}%"></i></div>
       <section class="panel flash">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
-        ${front}
+        ${v.edit ? vocabEditForm(id) : `${front}
         ${v.shown ? back + (c.ex ? `<p class="ex">${c.ex.split("\n").map((l) => typo(l)).join("<br>")}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
-        <div class="row">${buttons}</div>
+        <div class="row">${buttons}</div>`}
       </section>
     </div>`;
+  }
+  // One side of a card: the French or the English, then your notes for that side.
+  function cardSide(c, lang) {
+    const note = str(lang === "fr" ? c.frNote : c.enNote).trim();
+    const lines = note ? note.split("\n").map((l) => (lang === "fr" ? typo(l) : esc(l))).join("<br>") : "";
+    return lang === "fr" ? `<p class="answer">${typo(c.fr)}</p>${lines ? `<p class="note fr">${lines}</p>` : ""}`
+      : `<p class="prompt">${esc(c.en)}</p>${lines ? `<p class="note">${lines}</p>` : ""}`;
+  }
+  // Editing a card in the middle of a session. The card keeps its id, so its review progress stays; a
+  // built-in or Anki card is saved to your cards under that same id, and can go back to the original.
+  const CARD_FIELDS = ["fr", "en", "frNote", "enNote", "ex"];
+  function vocabEditForm(id) {
+    const f = (k) => formVal("ve-" + k);
+    const note = (t) => `<span class="muted" style="font-weight:400">${t}</span>`;
+    const restore = !(DECK.has(id) && S.cards.has(id)) ? "" : ui.confirm === "ve-restore"
+      ? `<button class="btn danger" data-act="v-edit-restore">Restore the original</button><button class="btn ghost" data-act="confirm-cancel">Keep my edits</button>`
+      : `<button class="btn ghost" data-act="confirm" data-key="ve-restore">Restore the original</button>`;
+    return `<div class="stack" style="text-align:left">
+      <div class="grid2">
+        <div class="stack tight"><p class="eyebrow">French side</p>
+          <label class="field">French<input type="text" id="ve-fr" data-input="form" data-k="ve-fr" value="${f("fr")}" lang="fr" autocomplete="off"></label>
+          <label class="field">Notes ${note("definition, synonyms, grammar…")}<textarea id="ve-frNote" data-input="form" data-k="ve-frNote" rows="3" lang="fr">${f("frNote")}</textarea></label>
+        </div>
+        <div class="stack tight"><p class="eyebrow">English side</p>
+          <label class="field">English<input type="text" id="ve-en" data-input="form" data-k="ve-en" value="${f("en")}" autocomplete="off"></label>
+          <label class="field">Notes ${note("meaning, usage, a reminder…")}<textarea id="ve-enNote" data-input="form" data-k="ve-enNote" rows="3">${f("enNote")}</textarea></label>
+        </div>
+      </div>
+      <label class="field">Examples ${note("in French, one per line, shown when the card flips")}<textarea id="ve-ex" data-input="form" data-k="ve-ex" rows="3" lang="fr">${f("ex")}</textarea></label>
+      <p class="small muted">Notes show with their side of the card. Your review progress stays with the card.</p>
+      <div class="row" style="justify-content:flex-start"><button class="btn primary" data-act="v-edit-save">Save <span class="kbd">⌘↵</span></button><button class="btn ghost" data-act="v-edit-cancel">Cancel <span class="kbd">Esc</span></button>${restore}</div>
+    </div>`;
+  }
+  function vocabEditOpen() {
+    const v = ui.vocab;
+    if (!v || v.finished || v.edit) return;
+    const c = allCards().get(v.queue[v.i]);
+    if (!c) return;
+    CARD_FIELDS.forEach((k) => { ui.form["ve-" + k] = str(c[k]); });
+    v.edit = true;
+    v.shown = true; // the form shows both sides anyway
+    ui.confirm = "";
+    render(true);
+    const el = document.getElementById("ve-fr");
+    if (el) el.focus();
+  }
+  function vocabEditClose() {
+    if (ui.vocab) ui.vocab.edit = false;
+    ui.confirm = "";
+    render(true);
+  }
+  function vocabEditSave() {
+    const v = ui.vocab;
+    if (!v || !v.edit) return;
+    const id = v.queue[v.i];
+    const c = allCards().get(id);
+    const val = (k) => str(ui.form["ve-" + k]).trim();
+    if (!c) return;
+    if (!val("fr") || !val("en")) { toast("Both sides need some text."); return; }
+    const doc = Object.assign({}, c, { edited: todayStr() });
+    delete doc.id;
+    CARD_FIELDS.forEach((k) => { if (val(k)) doc[k] = val(k); else delete doc[k]; });
+    put("cards", id, doc);
+    v.edit = false;
+    ui.confirm = "";
+    toast("Card saved.");
+    render(true);
   }
   function vocabDone() {
     const v = ui.vocab;
@@ -3054,6 +3121,17 @@
     "v-show": () => { if (ui.vocab) { ui.vocab.shown = true; render(true); } },
     "v-grade": (el) => vocabGrade(el.dataset.ok === "1"),
     "v-quit": () => { ui.vocab = null; render(true); },
+    "v-edit": () => vocabEditOpen(),
+    "v-edit-save": () => vocabEditSave(),
+    "v-edit-cancel": () => vocabEditClose(),
+    "v-edit-restore": () => {
+      const v = ui.vocab, id = v && v.queue[v.i];
+      if (id && DECK.has(id)) remove("cards", id);
+      if (v) v.edit = false;
+      ui.confirm = "";
+      toast("The card is back to the original.");
+      render(true);
+    },
     "v-close": () => { ui.vocab = null; render(true); },
     "v-count": (el) => { ui.vCount = Number(el.dataset.n); render(true); },
     "v-dir": (el) => { ui.vDir = el.dataset.dir; lsSet("tcf-vdir", ui.vDir); render(true); },
@@ -3255,6 +3333,11 @@
     if (t && t.id === "drill-in" && e.key === "Enter") { e.preventDefault(); if (ui.drill && ui.drill.checked) drillNext(); else drillCheck(); return; }
     if (t && t.id === "hw-new" && e.key === "Enter") { e.preventDefault(); addHomework(); return; }
     if (t && t.id === "chat-in" && e.key === "Enter") { e.preventDefault(); chatSend(); return; }
+    if (route.view === "vocab" && ui.vocab && ui.vocab.edit) {
+      if (e.key === "Escape") { e.preventDefault(); vocabEditClose(); }
+      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); vocabEditSave(); }
+      return;
+    }
     if (t && t.closest && t.closest("input, textarea, select, button, a, [contenteditable]")) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (route.view === "grammar" && ui.drill && !ui.drill.done) {
@@ -3265,6 +3348,7 @@
     }
     if (route.view === "vocab" && ui.vocab && !ui.vocab.finished) {
       const v = ui.vocab;
+      if (e.key === "e" || e.key === "E") { e.preventDefault(); vocabEditOpen(); return; }
       if (v.mode === "new") { if (e.key === "2" || e.key === "Enter") { e.preventDefault(); vocabGrade(true); } else if (e.key === "3") { e.preventDefault(); vocabGrade(false); } return; }
       if (!v.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); v.shown = true; render(true); }
       else if (v.shown && e.key === "1") { e.preventDefault(); vocabGrade(false); }
