@@ -65,12 +65,12 @@
   }
  },
  "co-environnement-b1": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-28",
+  "engine": "gemini",
   "hash": "e4aabce18303",
-  "seconds": 128.4,
+  "seconds": 123.4,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-1"
   }
  },
  "co-environnement-b2": {
@@ -121,13 +121,13 @@
   }
  },
  "co-immigration-b1": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-28",
+  "engine": "gemini",
   "hash": "3cc8c059a74b",
-  "seconds": 140.2,
+  "seconds": 127.4,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-ca-csagent-2",
+   "B": "fr-fr-tutor-5"
   }
  },
  "co-immigration-b2": {
@@ -216,12 +216,12 @@
   }
  },
  "co-technologie-b1": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-28",
+  "engine": "gemini",
   "hash": "00effed10ec1",
-  "seconds": 134.5,
+  "seconds": 135.3,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-ca-tutor-1"
   }
  },
  "co-technologie-b2": {
@@ -272,13 +272,13 @@
   }
  },
  "co-travail-b1": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-28",
+  "engine": "gemini",
   "hash": "bec71a473848",
-  "seconds": 155.4,
+  "seconds": 131.3,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-ca-advisor-1",
+   "B": "fr-ca-tutor-4"
   }
  },
  "co-travail-b2": {

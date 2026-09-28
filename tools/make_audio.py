@@ -310,6 +310,10 @@ class DailyLimit(Exception):
     pass
 
 
+class Busy(Exception):
+    """Gemini still answers 5xx (e.g. 503 "high demand") after every retry."""
+
+
 def api_key():
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key and os.path.exists(KEY_FILE):
@@ -320,7 +324,8 @@ def api_key():
     return key
 
 
-def gemini(path, body, key, tries=4):
+def gemini(path, body, key, tries=6):
+    """Retries rate limits and server errors; a 5xx spell waits 15 s, 30 s, … up to about 8 minutes in all."""
     data = json.dumps(body).encode()
     for attempt in range(tries):
         req = urllib.request.Request(GEMINI_API + path, data=data, method="POST", headers={"x-goog-api-key": key, "Content-Type": "application/json"})
@@ -333,8 +338,10 @@ def gemini(path, body, key, tries=4):
                 raise DailyLimit(msg[:300])
             if e.code in (429, 500, 502, 503, 504) and attempt < tries - 1:
                 wait = re.search(r"retry in ([\d.]+)\s*s", msg)
-                time.sleep(float(wait.group(1)) + 1 if wait else 10 * 2 ** attempt)
+                time.sleep(float(wait.group(1)) + 1 if wait else 15 * 2 ** attempt)
                 continue
+            if e.code in (500, 502, 503, 504):
+                raise Busy("Gemini API error %s: %s" % (e.code, msg[:300]))
             raise RuntimeError("Gemini API error %s: %s" % (e.code, msg[:300]))
         except urllib.error.URLError:
             if attempt == tries - 1:
@@ -527,6 +534,8 @@ def run_gemini(sets):
             save_json(status_file, st)
     except DailyLimit:
         print("Stopped at Gemini's daily limit (10 requests on the free tier). The next run continues.", flush=True)
+    except Busy as e:
+        print("Stopped: Gemini stayed unavailable after every retry (%s). The next run continues." % str(e).split(":")[0], flush=True)
     ready = sum(take_ready(st, s) for s in sets if s not in done)
     stuck = [k for k, v in st["fails"].items() if v.get("count", 0) >= 2]
     print("Gemini: %d of %d ready (%d on the site, %d waiting to go on it)" % (len(done) + ready, len(sets), len(done), ready))
