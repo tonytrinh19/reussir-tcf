@@ -216,7 +216,7 @@
   window.addEventListener("pagehide", ipFlush);
 
   /* =============== settings & derived state =============== */
-  const DEFAULTS = { phase: 1, startDate: "", rate: 0.9, fixes: {}, criteria: {} };
+  const DEFAULTS = { phase: 1, startDate: "", fixes: {}, criteria: {} };
   function settings() {
     const s = S.settings.get("main") || {};
     const out = Object.assign({}, DEFAULTS, s);
@@ -282,6 +282,7 @@
       viewing: null,
     },
     hist: { filter: "all", limit: 30, open: null },
+    rep: { open: null },
     hwSug: null,
     c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, playing: false, exam: false, script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null } },
     cx: null, // the CE practice exam being taken or reviewed
@@ -1150,8 +1151,6 @@
     if (set.audio) {
       const a = new Audio(set.audio);
       audioEl = a;
-      a.playbackRate = Number(settings().rate) || 0.9;
-      try { a.preservesPitch = true; } catch (_) {}
       let fell = false;
       const fallback = () => { if (fell || token !== playToken) return; fell = true; audioEl = null; speakSet(set, token); };
       a.onended = () => donePlaying(token);
@@ -1165,7 +1164,6 @@
   function speakSet(set, token) {
     if (!synth) { toast("This browser can't read text aloud. Use the transcript instead."); donePlaying(token); return; }
     const v = bestVoice();
-    const rate = Number(settings().rate) || 0.9;
     let k = 0;
     // One line at a time, one voice, with a longer pause when the speaker changes.
     const next = () => {
@@ -1175,7 +1173,6 @@
       const turn = k < set.lines.length && set.lines[k].speaker !== ln.speaker;
       const u = new SpeechSynthesisUtterance(ttsText(ln.text));
       if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "fr-FR";
-      u.rate = rate;
       let done = false;
       const go = () => { if (done) return; done = true; setTimeout(next, turn ? 700 : 300); };
       u.onend = go;
@@ -2480,7 +2477,6 @@
       } else if (skill === "ce") {
         material = `<article class="sheet"><p class="eyebrow">${tagLine(esc(set.type || "Document"))}</p><h3>${typo(set.title)}</h3><p class="fr">${typo(set.text)}</p></article>`;
       } else {
-        const s = settings();
         const va = bestVoice();
         const recorded = !!set.audio;
         const canPlay = recorded || !!synth;
@@ -2488,7 +2484,6 @@
         const multi = new Set(set.lines.map((l) => l.speaker)).size > 1;
         material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}
           ${canPlay ? `<div class="row">${ui.c.playing ? `<button class="btn" data-act="c-stop">Stop</button>` : `<button class="btn primary" data-act="c-play" ${ui.c.exam && ui.c.plays >= 1 ? "disabled" : ""}>${ui.c.plays ? "Play again" : "Play"}</button>`}
-            <label class="field inline">Speed<select data-change="rate" id="c-rate">${[[0.8, "Slow"], [0.9, "Steady"], [1, "Natural"]].map(([r, l]) => `<option value="${r}" ${Number(s.rate) === r ? "selected" : ""}>${l}</option>`).join("")}</select></label>
             <label class="check small"><input type="checkbox" data-change="c-exam" ${ui.c.exam ? "checked" : ""}><span>Exam mode: one listen</span></label>
             <span class="small muted num">Played ${ui.c.plays}×</span></div>
             <p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
@@ -2700,11 +2695,159 @@
     return `<section class="panel stack tight"><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
   }
 
+  /* =============== progress report (Progrès → Évolution) =============== */
+  // Built from the finished attempts; it keeps nothing of its own. Each group (a writing task, a listening
+  // or reading level, a drill set) lists every attempt oldest first, and compares the first scored
+  // attempt with the latest. Each group's open state lives in ui.c.open, like the other trees.
+  const REP_CHAIN = 10;
+  function repBadge(change) {
+    if (!change) return "";
+    const [d, unit] = change;
+    return `<span class="pill ${d > 0 ? "ok" : d < 0 ? "bad" : ""}">${d > 0 ? "▲ +" : d < 0 ? "▼ −" : "= "}${Math.abs(d)}${unit}</span>`;
+  }
+  const repOpenBtn = (id) => `<button class="btn ghost sm" data-act="rep-open" data-id="${esc(id)}">${ui.rep.open === id ? "Close" : "Open"}</button>`;
+  // Change in a score out of a total: in answers when both totals match, otherwise in percentage points.
+  const repFracChange = (f, l) => (f.total === l.total ? [l.score - f.score, ""] : [Math.round((l.score / l.total - f.score / f.total) * 100), " pts"]);
+  // rows: [{id, date, v (the score, or null if not scored), show, pill, meta, tags, btn, sub, review}], oldest first.
+  function repGroup(id, head, rows, change, suffix, extra) {
+    const scored = rows.filter((r) => r.v != null);
+    const chain = scored.slice(-REP_CHAIN).map((r) => r.show).join(" → ");
+    const last = rows[rows.length - 1];
+    const summary = `${head}${chain ? `<span class="num">${scored.length > REP_CHAIN ? "… → " : ""}${chain}${suffix || ""}</span>` : ""}${scored.length > 1 ? repBadge(change(scored[0], scored[scored.length - 1])) : ""}<span class="h-meta">${rows.length} attempt${rows.length > 1 ? "s" : ""} · last ${shortDate(last.date)}</span>`;
+    const body = rows.map((r) => `<div class="h-att"><span class="num">${shortDate(r.date)}</span>${r.pill}${r.meta || ""}${r.tags || ""}<span style="margin-left:auto">${r.btn || ""}</span>${r.sub ? `<span class="small muted fr" style="flex-basis:100%">${r.sub}</span>` : ""}</div>${r.review && ui.rep.open === r.id ? `<div>${r.review()}</div>` : ""}`).join("") + (extra || "");
+    return { html: branch(id, summary, body), trend: scored.length > 1 ? change(scored[0], scored[scored.length - 1])[0] : null, ts: last.ts || 0 };
+  }
+  // Mistakes per 100 words in each category, first corrected attempt → latest, so a longer text doesn't look worse.
+  function repMistakes(a, b) {
+    const count = (w) => { const m = {}; for (const e of w.fb.errors) { const c = catOf(e.category); m[c] = (m[c] || 0) + 1; } return m; };
+    const ca = count(a), cb = count(b);
+    const per = (n, w) => Math.round((n / w.words) * 1000) / 10;
+    const cats = [...new Set(Object.keys(ca).concat(Object.keys(cb)))].sort((x, y) => (ca[y] || 0) - (ca[x] || 0) || (cb[y] || 0) - (cb[x] || 0));
+    const title = `<p class="h3">Mistakes per 100 words <span class="small muted">· first corrected attempt (${shortDate(a.date)}) → latest (${shortDate(b.date)})</span></p>`;
+    if (!cats.length) return `<div class="stack tight">${title}<p class="small muted">No mistakes in either attempt.</p></div>`;
+    const rows = cats.map((c) => {
+      const x = per(ca[c] || 0, a), y = per(cb[c] || 0, b);
+      const [cls, label] = !x ? ["bad", "new"] : !y ? ["ok", "fixed ✓"] : y < x ? ["ok", "fewer"] : y > x ? ["bad", "more"] : ["warn", "repeating"];
+      return `<tr><th>${esc(CAT[c])}</th><td class="num" style="white-space:nowrap" title="${ca[c] || 0} → ${cb[c] || 0} mistakes">${x} → ${y}</td><td><span class="pill ${cls}">${label}</span></td></tr>`;
+    }).join("");
+    return `<div class="stack tight">${title}<div class="table-wrap"><table class="crit"><tbody>${rows}</tbody></table></div></div>`;
+  }
+  // Écrit: one group per task, across prompts. A prompt you've answered before is tagged, with which try it is.
+  function repWriting() {
+    const all = list("writing").sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    return ["t1", "t2", "t3"].map((task) => {
+      const ws = all.filter((w) => w.task === task);
+      if (!ws.length) return null;
+      const W = T.WRITING[task];
+      const tries = new Map();
+      const rows = ws.map((w) => {
+        const key = str(w.prompt).replace(/\s+/g, " ").trim();
+        const n = (tries.get(key) || 0) + 1;
+        tries.set(key, n);
+        const fb = w.fb, sc = fb && fb.score20 != null ? fb.score20 : null;
+        const errs = fb && Array.isArray(fb.errors) ? fb.errors.length : null;
+        return {
+          id: w.id, date: w.date, ts: w.ts, v: sc, show: String(sc),
+          pill: sc != null ? `<span class="pill ${sc >= 10 ? "ok" : ""}">${sc}/20 · ${esc(fb.level)}</span>` : `<span class="pill">${fb && fb.level ? esc(fb.level) : "not corrected"}</span>`,
+          meta: `<span class="small muted">${w.words} words${errs != null ? ` · ${errs} mistake${errs === 1 ? "" : "s"}` : ""}</span>`,
+          sub: typo(clip(w.prompt, 90)),
+          tags: n > 1 ? `<span class="pill info">same prompt · try ${n}</span>` : "",
+          btn: repOpenBtn(w.id),
+          review: () => writingFb(w.id, w, "rep-close"),
+        };
+      });
+      const corrected = ws.filter((w) => w.fb && Array.isArray(w.fb.errors) && w.words > 0);
+      const extra = corrected.length > 1 ? repMistakes(corrected[0], corrected[corrected.length - 1])
+        : `<p class="small muted">Correct ${corrected.length ? "another" : "a"} ${esc(W.name)} with Claude to compare your mistakes.</p>`;
+      const head = `<span class="h-name">${esc(W.name)}</span><span class="small muted">${esc(W.kind)}</span>`;
+      return repGroup("rep:ee:" + task, head, rows, (f, l) => [l.v - f.v, ""], " /20", `<div class="stack tight" style="padding-top:8px">${extra}</div>`);
+    }).filter(Boolean);
+  }
+  // Compréhension: one group per skill and level, across sets, plus the CE practice exams.
+  function repComp() {
+    const out = [];
+    for (const skill of ["co", "ce"]) {
+      const as = compAttempts(skill).slice().reverse();
+      const sets = as.filter((a) => a.kind !== "exam");
+      const levels = [...new Set(sets.map((a) => a.level || ""))].sort();
+      for (const lvl of levels) {
+        const tries = new Map();
+        const rows = sets.filter((a) => (a.level || "") === lvl).map((a) => {
+          const retry = a.setId && a.src !== "logged";
+          const n = retry ? (tries.get(a.setId) || 0) + 1 : 1;
+          if (retry) tries.set(a.setId, n);
+          const canOpen = a.src !== "logged" && (samplesFor(skill).some((s) => s.id === a.setId) || a.snap);
+          return {
+            id: a.id, date: a.date, ts: a.ts, v: a.total ? a.score / a.total : null, show: `${a.score}/${a.total}`, score: a.score, total: a.total,
+            pill: scorePill(a),
+            meta: `<span class="small">${typo(a.title || "")}</span>${mins(a.secs) ? `<span class="small muted">${mins(a.secs)}</span>` : ""}${a.timed ? `<span class="pill info">timed</span>` : ""}${a.src === "logged" ? `<span class="pill">logged</span>` : ""}`,
+            tags: n > 1 ? `<span class="pill info">same set · try ${n}</span>` : "",
+            btn: canOpen ? `<button class="btn ghost sm" data-act="h-comp" data-skill="${skill}" data-id="${esc(a.id)}">Open</button>` : "",
+          };
+        });
+        const head = `<span class="sk ${skill}">${skill.toUpperCase()}</span>${lvl ? `<span class="lv">${esc(lvl)}</span>` : ""}<span class="h-name">${skill === "co" ? "Listening sets" : "Reading sets"}</span>`;
+        out.push(repGroup(`rep:${skill}:${lvl || "other"}`, head, rows, repFracChange));
+      }
+      const exams = as.filter((a) => a.kind === "exam");
+      if (exams.length) {
+        const rows = exams.map((a) => ({
+          id: a.id, date: a.date, ts: a.ts, v: a.est, show: "≈" + a.est,
+          pill: `<span class="pill">≈${a.est}</span>${nclcTag(a.est)}`,
+          meta: `<span class="small muted">${a.score}/${a.total} · ${typo(a.title || "")}</span>`,
+          btn: (T.COMP.ceExams || []).some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Open</button>` : "",
+        }));
+        out.push(repGroup("rep:ce:exam", `<span class="sk ce">CE</span><span class="lv">A1–C2</span><span class="h-name">Examens blancs</span>`, rows, (f, l) => [l.v - f.v, ""]));
+      }
+    }
+    return out;
+  }
+  // Grammaire: one group per drill set, most recent first. "Retry the misses" rounds are part of their round.
+  function repDrills() {
+    const groups = new Map();
+    for (const d of list("drills").filter((x) => x.set !== "prod" && x.src !== "retry").sort((a, b) => (a.ts || 0) - (b.ts || 0))) {
+      const k = d.topic === "mixed" ? "mixed" : `${d.topic}.${d.set}`;
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(d);
+    }
+    return [...groups.entries()].map(([k, ds]) => {
+      const tp = TOPIC[ds[0].topic], st = tp && tp.sets.find((x) => x.id === ds[0].set);
+      const name = k === "mixed" ? "Mixed review" : `${tp ? tp.title : ds[0].topic} · ${st ? st.title : ds[0].name || ds[0].set}`;
+      const rows = ds.map((d) => ({
+        id: d.id, date: d.date, ts: d.ts, v: d.total ? d.score / d.total : null, show: `${d.score}/${d.total}`, score: d.score, total: d.total,
+        pill: scorePill(d),
+        meta: `${d.src === "claude" ? `<span class="pill info">Claude's items</span>` : ""}${d.retry ? `<span class="small muted">retried the misses: ${d.retry.score}/${d.retry.total}</span>` : ""}`,
+        btn: repOpenBtn(d.id),
+        review: () => drillReview(d),
+      }));
+      const head = `${st && st.level ? `<span class="lv">${esc(st.level)}</span>` : ""}<span class="h-name">${typo(name)}</span>`;
+      return repGroup("rep:gr:" + k, head, rows, repFracChange);
+    }).sort((a, b) => b.ts - a.ts);
+  }
+  function reportView(head, tabs) {
+    const parts = [
+      ["Écrit", "Claude's score out of 20 on each corrected task, across prompts. 10/20 is NCLC 7.", repWriting()],
+      ["Compréhension", "Your score on each listening and reading set. Sets differ in difficulty, so read the trend over several sets.", repComp()],
+      ["Grammaire", "Your score on each drill round. Every round draws different questions from its set.", repDrills()],
+    ].filter(([, , gs]) => gs.length);
+    const trends = parts.flatMap(([, , gs]) => gs.map((g) => g.trend)).filter((t) => t != null);
+    const tally = [[trends.filter((t) => t > 0).length, "improving"], [trends.filter((t) => t === 0).length, "holding steady"], [trends.filter((t) => t < 0).length, "slipping"]];
+    return `<div class="wrap">
+      ${head}
+      ${tabs}
+      <p class="lede">How your scores have moved in each writing task, listening and reading level, and drill set: every attempt in order, and the change from your first to your latest. Open any attempt to see it again.</p>
+      ${trends.length ? `<div class="stats">${tally.map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div><p class="small muted">Out of the ${trends.length} group${trends.length === 1 ? "" : "s"} you've done more than once, comparing your first and latest score.</p>` : ""}
+      ${parts.length ? parts.map(([h, note, gs]) => `<section class="sec"><div class="sec-head"><h2 class="h2">${h}</h2><span class="small muted">${note}</span></div><div class="tree">${gs.map((g) => g.html).join("")}</div></section>`).join("")
+        : `<p class="empty">Finish a writing task, a listening or reading set, or a drill round, and your progress shows here.</p>`}
+    </div>`;
+  }
+
   VIEWS.progress = {
     render(args) {
       const head = `<header class="stack tight"><h1 class="title">Progrès<small>Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</small></h1></header>`;
-      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${args[0] !== "history"}">Vue d'ensemble<small>overview</small></a><a href="#progress.history" role="tab" aria-selected="${args[0] === "history"}">Historique<small>history</small></a></nav>`;
-      if (args[0] === "history") return historyView(head, tabs);
+      const tab = args[0] === "history" || args[0] === "report" ? args[0] : "";
+      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a></nav>`;
+      if (tab === "history") return historyView(head, tabs);
+      if (tab === "report") return reportView(head, tabs);
       const s = settings();
       const P = T.PHASES[s.phase - 1];
       const crit = T.CRITERIA[s.phase] || [];
@@ -2875,6 +3018,8 @@
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
+    "rep-open": (el) => { ui.rep.open = ui.rep.open === el.dataset.id ? null : el.dataset.id; render(true); },
+    "rep-close": () => { ui.rep.open = null; render(true); },
     // Reading and listening attempts open on the Compréhension page, which already shows a set with your answers.
     "h-comp": (el) => { compReview(el.dataset.skill, el.dataset.id); goTo("#comp." + el.dataset.skill); window.scrollTo(0, 0); },
     // A "Review" link elsewhere opens that attempt in the history, scrolled into view.
@@ -3058,7 +3203,6 @@
       examKeep();
     },
     "c-exam": (el) => { ui.c.exam = el.checked; render(true); },
-    rate: (el) => { saveSettings({ rate: Number(el.value) }); if (audioEl) audioEl.playbackRate = Number(el.value); },
   };
   const INPUTS = {
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
