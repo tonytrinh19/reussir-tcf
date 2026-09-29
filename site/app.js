@@ -52,6 +52,10 @@
   /* =============== light / dark (white by default; the choice stays in this browser) =============== */
   const ICON_MOON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.2 14.6A8.5 8.5 0 0 1 9.4 3.8a8.5 8.5 0 1 0 10.8 10.8z"/></svg>`;
   const ICON_SUN = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>`;
+  const ICON_PLAY = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5.2v13.6L18.8 12z"/></svg>`;
+  const ICON_PAUSE = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.5 5h4v14h-4zM13.5 5h4v14h-4z"/></svg>`;
+  const ICON_STOP = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect fill="currentColor" x="6" y="6" width="12" height="12" rx="1.5"/></svg>`;
+  const ICON_REPLAY = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M5.4 9.6A7 7 0 1 0 12 5"/><path fill="currentColor" d="M8.3 5l4.3-3.2v6.4z"/></svg>`;
   const isDark = () => document.documentElement.classList.contains("dark");
   function paintTheme() {
     const dark = isDark();
@@ -284,7 +288,7 @@
     hist: { filter: "all", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
-    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, playing: false, exam: false, script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null } },
+    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null } },
     cx: null, // the CE practice exam being taken or reviewed
     cxGen: null, // progress while Claude writes a practice exam
     cxReady: null, // a practice exam from Claude, ready to start
@@ -1127,24 +1131,45 @@
       .replace(/\betc\./g, "et cetera")
       .replace(/\s+/g, " ").trim();
   }
+  // The listening player: ui.c.player is "idle" (ready to play from the start), "playing", "paused" or
+  // "ended" (played to the end, so the main button offers a replay). ui.c.plays still counts listens from
+  // the start, which is what makes a set count as started, but it isn't shown.
   let playToken = 0;
   let audioEl = null;
+  let ttsNext = null; // the browser voice's next line, when a pause fell between two lines
   function stopAudio() {
     playToken++;
-    try { if (synth) synth.cancel(); } catch (_) {}
+    ttsNext = null;
+    try { if (synth) { synth.cancel(); if (synth.paused) synth.resume(); } } catch (_) {}
     if (audioEl) { try { audioEl.pause(); } catch (_) {} audioEl = null; }
-    ui.c.playing = false;
+    ui.c.player = "idle";
   }
-  function donePlaying(token) { if (token !== playToken) return; audioEl = null; ui.c.playing = false; if (routeView() === "comp") render(false); }
-  // Built-in sets play their recording (one natural neural voice). Sets without one, like Claude's extra
-  // sets, fall back to the browser's best French voice.
+  function donePlaying(token) { if (token !== playToken) return; audioEl = null; ui.c.player = "ended"; if (routeView() === "comp") render(false); }
+  function coPause() {
+    if (ui.c.player !== "playing") return;
+    if (audioEl) { try { audioEl.pause(); } catch (_) {} }
+    else if (synth) { try { synth.pause(); } catch (_) {} }
+    ui.c.player = "paused";
+    render(true);
+  }
+  function coResume() {
+    if (ui.c.player !== "paused") return;
+    ui.c.player = "playing";
+    if (audioEl) { const pr = audioEl.play(); if (pr && pr.catch) pr.catch(() => {}); }
+    else if (synth) {
+      try { synth.resume(); } catch (_) {}
+      if (ttsNext) { const f = ttsNext; ttsNext = null; f(); }
+    }
+    render(true);
+  }
+  // Play from the start (Play, or Replay once it has ended). Built-in sets play their recording; sets
+  // without one, like Claude's extra sets, fall back to the browser's best French voice.
   function coPlay() {
     const set = ui.c.set.co;
     if (!set) return;
-    if (ui.c.exam && ui.c.plays >= 1) { toast("Exam mode: one listen only, like the real test."); return; }
     stopAudio();
     const token = playToken;
-    ui.c.playing = true;
+    ui.c.player = "playing";
     ui.c.plays++;
     compKeep("co");
     render(true);
@@ -1152,7 +1177,9 @@
       const a = new Audio(set.audio);
       audioEl = a;
       let fell = false;
-      const fallback = () => { if (fell || token !== playToken) return; fell = true; audioEl = null; speakSet(set, token); };
+      // A recording that can't play falls back to the browser's voice. A play() interrupted by Pause
+      // (AbortError) isn't a failure.
+      const fallback = (e) => { if (fell || token !== playToken || (e && e.name === "AbortError")) return; fell = true; audioEl = null; speakSet(set, token); };
       a.onended = () => donePlaying(token);
       a.onerror = fallback;
       const pr = a.play();
@@ -1161,6 +1188,13 @@
     }
     speakSet(set, token);
   }
+  // Play ▸ Pause ▸ Resume, then Replay once the recording has ended; Stop goes back to the start.
+  function playerHTML() {
+    const st = ui.c.player;
+    const [act, icon, label] = st === "playing" ? ["c-pause", ICON_PAUSE, "Pause"] : st === "paused" ? ["c-resume", ICON_PLAY, "Resume"]
+      : st === "ended" ? ["c-play", ICON_REPLAY, "Replay"] : ["c-play", ICON_PLAY, "Play"];
+    return `<div class="player" role="group" aria-label="Recording"><button class="btn primary" data-act="${act}">${icon}${label}</button><button class="btn" data-act="c-stop" ${st === "playing" || st === "paused" ? "" : "disabled"}>${ICON_STOP}Stop</button></div>`;
+  }
   function speakSet(set, token) {
     if (!synth) { toast("This browser can't read text aloud. Use the transcript instead."); donePlaying(token); return; }
     const v = bestVoice();
@@ -1168,6 +1202,7 @@
     // One line at a time, one voice, with a longer pause when the speaker changes.
     const next = () => {
       if (token !== playToken) return;
+      if (ui.c.player === "paused") { ttsNext = next; return; }
       if (k >= set.lines.length) { donePlaying(token); return; }
       const ln = set.lines[k++];
       const turn = k < set.lines.length && set.lines[k].speaker !== ln.speaker;
@@ -2568,9 +2603,7 @@
         const weak = !recorded && (!va || voiceScore(va) < 30);
         const multi = new Set(set.lines.map((l) => l.speaker)).size > 1;
         material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}
-          ${canPlay ? `<div class="row">${ui.c.playing ? `<button class="btn" data-act="c-stop">Stop</button>` : `<button class="btn primary" data-act="c-play" ${ui.c.exam && ui.c.plays >= 1 ? "disabled" : ""}>${ui.c.plays ? "Play again" : "Play"}</button>`}
-            <label class="check small"><input type="checkbox" data-change="c-exam" ${ui.c.exam ? "checked" : ""}><span>Exam mode: one listen</span></label>
-            <span class="small muted num">Played ${ui.c.plays}×</span></div>
+          ${canPlay ? `${playerHTML()}
             <p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
             ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
           : `<p class="notice warn small">This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.</p>`}
@@ -3217,6 +3250,8 @@
     "c-submit": (el) => compSubmit(el.dataset.skill),
     "c-reset": (el) => { const sk = el.dataset.skill; compReset(sk); if (ui.c.set[sk]) prepSet(ui.c.set[sk]); render(true); },
     "c-play": coPlay,
+    "c-pause": coPause,
+    "c-resume": coResume,
     "c-stop": () => { stopAudio(); render(true); },
     "c-script": () => { ui.c.script = true; render(true); },
     "c-gap": (el) => compGap(ui.c.skill, el.dataset.i, el.dataset.k),
@@ -3298,7 +3333,6 @@
       if (c) c.textContent = `${Object.keys(cx.ans).length} of ${cx.exam.items.length} answered`;
       examKeep();
     },
-    "c-exam": (el) => { ui.c.exam = el.checked; render(true); },
   };
   const INPUTS = {
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },

@@ -411,6 +411,10 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .opt input { margin-top: 4px; accent-color: var(--accent); }
 .opt.ok { border-color: var(--green); background: var(--green-soft); }
 .opt.bad { border-color: var(--red); background: var(--red-soft); }
+.player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.player .btn { gap: 7px; }
+.player .btn:first-child { min-width: 7.5em; }
+.player .btn svg { width: 15px; height: 15px; flex: none; }
 .transcript { display: grid; gap: 6px; }
 .transcript p { font-family: var(--f-text); font-size: 16px; }
 .transcript p b { font-family: var(--f-ui); font-size: 12px; color: var(--ink-3); margin-right: 6px; }

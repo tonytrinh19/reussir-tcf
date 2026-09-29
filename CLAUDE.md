@@ -39,6 +39,8 @@
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
   - `exam-ce.js`: the built-in CE practice exam (Examen blanc). It has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). Its score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
   - `comp-co.js`: all 31 built-in listening (CO) sets, one B1 and one B2 for every topic. Each plays `audio/<id>.mp4`.
+    - The player has one main button (Play, Pause, Resume, then Replay once the recording ends) and Stop, which goes back to the start. It works the same for the browser voice.
+    - There's no exam mode and no listen count on screen. `ui.c.plays` still counts listens from the start, because the first listen is what makes a set count as started.
     - Every recording lasts 2 to 4 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
     - Each set has a `cast`, which the site ignores: a note on the scene and, for each speaker (two at most), a Gemini voice, a Microsoft voice and a delivery note. Microsoft `vivienne` for women and narrators, `remy` for men.
     - Gemini voices are **Paris French** (`fr-fr-*`), even in Canadian settings: the user wants to train on the accent most of the real test uses (decided 2026-09-28).
