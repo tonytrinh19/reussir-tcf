@@ -170,22 +170,22 @@
   }
  },
  "co-sante-b1": {
-  "date": "2026-09-28",
-  "engine": "microsoft",
+  "date": "2026-09-29",
+  "engine": "gemini",
   "hash": "45184b723989",
-  "seconds": 146.2,
+  "seconds": 120.2,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-advisor-9",
+   "B": "fr-fr-advisor-4"
   }
  },
  "co-sante-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-29",
+  "engine": "gemini",
   "hash": "0721e2db9267",
-  "seconds": 143.0,
+  "seconds": 150.4,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-5"
   }
  },
  "co-science-b1": {
@@ -207,12 +207,12 @@
   }
  },
  "co-societe-b1": {
-  "date": "2026-09-28",
-  "engine": "microsoft",
+  "date": "2026-09-29",
+  "engine": "gemini",
   "hash": "ea8b10168b79",
-  "seconds": 136.9,
+  "seconds": 126.8,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-9"
   }
  },
  "co-technologie-b1": {
