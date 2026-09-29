@@ -30,6 +30,19 @@
 - `01`–`04-*.md`: the roadmap (assessment and phases, grammar progression, weekly study system, vocabulary/speaking/writing).
 - `site/`: the practice website.
   - `index.html`: page shell and CSS. White by default; dark mode is a manual toggle that adds the `dark` class to `<html>`. No purple palette.
+    - Its hidden sprite holds the brand kit's shapes (below): the maple leaf `#leaf`, the icons `#i-…`, the é tile's clip, the stamp ring `#ring34` and the ink texture `#ink`. `icon.svg` (favicon) and `icon-180.png` (home screen) are the é tile.
+  - The look comes from the **Réussir le TCF Brand Kit** (https://claude.ai/artifact/7EmNeRS2SyqVjGBxTdLwwh, made in a design chat). Follow it for any visual change: a school notebook, blue ink, the teacher's red pen, and a maple leaf for Canada.
+    - **Logo:** the é tile (Seyès paper, a cursive é whose accent is a maple leaf) with the wordmark, in the sidebar and phone top bar.
+    - **Icons:** 24 px grid, 1.75 stroke, in the text colour with one red-pen detail (`.pen`, `--pen`). In the navigation the red only shows on the current page. Skill chips, side cards, Progrès sections and the Compréhension tabs carry them too.
+    - **Rémy, le petit chef:** a Paris rat in a toque, in five moods (`remy()` in `app.js`), always speaking French with the English underneath.
+      - On Aujourd'hui (today only), by day: first visit, halfway ("Encore N minutes"), plan finished (cheering, with the streak in words), back after a break (4+ days since anything was done), Sunday rest.
+      - With headphones above a listening set before it's checked, and with glasses and a red pen over a writing correction (the count of mistakes and the main category).
+    - **Rewards,** all worked out from progress already saved, with no new data:
+      - The streak leaf: Pousse 1–6 days, Doré 7–13, Orangé 14–29, Rouge érable 30+. It shows in the sidebar and on Régularité.
+      - The "Très bien !" stamp lands on a day's header once all its blocks are ticked. It lands with a thunk only right after the last tick (`ui.thunk`).
+      - Eight stamps in Progrès: first full day, 7 and 30 days in a row (longest streak ever), a drill round with no misses, 100 cards in the SRS, the Phase 1 criteria, a CE practice exam, and NCLC 7 in any skill of a logged score.
+    - **Boarding pass:** the phases as one flight from B1 to NCLC 7. The week places the plane, and the gate is today's first open block. The small version is at the foot of the sidebar; the full one is at the top of Progrès.
+    - **L'expression du jour:** a French saying on a taped notebook scrap on Aujourd'hui, changing daily, from `EXPRESSIONS` in `data.js`. Some are from Québec, and say so.
   - `data.js`: curriculum content plus the `TCF_CANADA` spec.
   - `anki.js`: the learner's own Anki deck, "Mes cartes Anki" (100 cards from `~/French/french-cards.apkg`), loaded right after `data.js`.
     - Cards that duplicated it were removed from the built-in themes.
@@ -71,7 +84,7 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tct (remote `origin`, branch `main`).
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
