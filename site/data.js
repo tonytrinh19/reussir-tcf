@@ -1678,5 +1678,52 @@ window.TCF = (function () {
     { name: "RFI Français facile", url: "https://francaisfacile.rfi.fr/fr/", what: "Journal en français facile: ten minutes of news read slowly, with transcripts.", skills: ["co", "ce"] },
   ];
 
-  return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, SPEAKING, COMP, NCLC, EXAM, AUTOFAIL, CRITERIA, TCF_CANADA };
+  /* L'expression du jour (brand kit): a new saying every morning on a scrap of notebook paper, on Aujourd'hui.
+     [French, English: the literal meaning, then what it means]. A few are from Québec, and say so. */
+  const EXPRESSIONS = [
+    ["C'est en forgeant qu'on devient forgeron.", "Literally “it's by forging that you become a blacksmith”: practice makes perfect."],
+    ["Petit à petit, l'oiseau fait son nid.", "Literally “little by little, the bird builds its nest”: slow, steady work gets there."],
+    ["Qui ne tente rien n'a rien.", "Literally “who tries nothing has nothing”: nothing ventured, nothing gained."],
+    ["Il ne faut pas mettre la charrue avant les bœufs.", "Literally “don't put the plough before the oxen”: don't put the cart before the horse."],
+    ["Vouloir, c'est pouvoir.", "Literally “to want is to be able”: where there's a will, there's a way."],
+    ["Les petits ruisseaux font les grandes rivières.", "Literally “little streams make great rivers”: small efforts add up."],
+    ["Paris ne s'est pas fait en un jour.", "Literally “Paris wasn't built in a day”: the French take on “Rome wasn't built in a day”."],
+    ["Mieux vaut tard que jamais.", "Literally “better late than never”, word for word."],
+    ["Avoir le cœur sur la main.", "Literally “to have your heart on your hand”: to be very generous."],
+    ["Poser un lapin à quelqu'un.", "Literally “to put a rabbit on someone”: to stand someone up."],
+    ["Avoir un chat dans la gorge.", "Literally “to have a cat in your throat”: to have a frog in your throat."],
+    ["Coûter les yeux de la tête.", "Literally “to cost the eyes of your head”: to cost an arm and a leg."],
+    ["Tomber dans les pommes.", "Literally “to fall into the apples”: to faint."],
+    ["Mettre les bouchées doubles.", "Literally “to take double mouthfuls”: to work twice as hard to catch up."],
+    ["Il pleut des cordes.", "Literally “it's raining ropes”: it's pouring."],
+    ["Être dans la lune.", "Literally “to be in the moon”: to be daydreaming."],
+    ["Avoir du pain sur la planche.", "Literally “to have bread on the board”: to have a lot of work ahead."],
+    ["Donner sa langue au chat.", "Literally “to give your tongue to the cat”: to give up guessing."],
+    ["Chercher la petite bête.", "Literally “to look for the little beast”: to nitpick."],
+    ["Avoir le cafard.", "Literally “to have the cockroach”: to feel down."],
+    ["Appeler un chat un chat.", "Literally “to call a cat a cat”: to call a spade a spade."],
+    ["Faire d'une pierre deux coups.", "Literally “to make two hits with one stone”: to kill two birds with one stone."],
+    ["Ce n'est pas la mer à boire.", "Literally “it's not the sea to drink”: it's not that hard."],
+    ["Remettre les pendules à l'heure.", "Literally “to set the clocks to the right time”: to set the record straight."],
+    ["Avoir plus d'une corde à son arc.", "Literally “to have more than one string to your bow”: to have more than one skill or option."],
+    ["Qui vivra verra.", "Literally “who lives will see”: time will tell."],
+    ["L'habit ne fait pas le moine.", "Literally “the habit doesn't make the monk”: don't judge a book by its cover."],
+    ["Il faut battre le fer pendant qu'il est chaud.", "Literally “strike the iron while it's hot”: seize the moment."],
+    ["Après la pluie, le beau temps.", "Literally “after the rain, fine weather”: good times follow hard ones."],
+    ["Chaque chose en son temps.", "Literally “each thing in its time”: one thing at a time."],
+    ["Il n'y a pas de fumée sans feu.", "Literally “there's no smoke without fire”: rumours usually hold some truth."],
+    ["Tourner autour du pot.", "Literally “to turn around the pot”: to beat around the bush."],
+    ["Mettre la main à la pâte.", "Literally “to put your hand in the dough”: to pitch in and help."],
+    ["Être comme un poisson dans l'eau.", "Literally “to be like a fish in water”: to be completely at ease."],
+    ["Voir la vie en rose.", "Literally “to see life in pink”: to look on the bright side."],
+    ["Avoir la main verte.", "Literally “to have the green hand”: to have a green thumb."],
+    ["Les doigts dans le nez.", "Literally “fingers in the nose”: easily, hands down (informal)."],
+    ["Il fait un froid de canard.", "Literally “it's duck cold”: it's freezing."],
+    ["Lâche pas la patate !", "Québec. Literally “don't let go of the potato!”: hang in there, don't give up."],
+    ["C'est de valeur.", "Québec. Literally “it's of value”: what a pity, that's too bad."],
+    ["Tomber en amour.", "Québec. “To fall in love”, where France says tomber amoureux."],
+    ["Avoir de la misère à comprendre.", "Québec. Literally “to have misery understanding”: to have a hard time understanding."],
+  ];
+
+  return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, SPEAKING, COMP, NCLC, EXAM, AUTOFAIL, CRITERIA, TCF_CANADA, EXPRESSIONS };
 })();

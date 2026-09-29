@@ -294,6 +294,7 @@
     cxReady: null, // a practice exam from Claude, ready to start
     form: {},
     confirm: "",
+    thunk: null, // a day whose stamp should land with a thunk on the next Today render
   };
 
   /* =============== Claude (sample capability) =============== */
@@ -432,6 +433,7 @@
         doc.phase = s.phase;
         doc.total = plan.length;
         put("days", t, doc);
+        if (dayComplete(t)) ui.thunk = t;
         toast(`Ticked off in today's plan: ${plan[i][2]}.`);
         return;
       }
@@ -449,6 +451,161 @@
       d = addDays(d, -1);
     }
     return n;
+  }
+
+  /* =============== brand kit (the "Réussir le TCF Brand Kit" design) =============== */
+  // The shapes live in index.html's sprite: the icons (#i-…), the maple leaf (#leaf), the stamp ring and its ink.
+  // Everything here is worked out from progress already saved: the kit adds no data of its own.
+  const ico = (name, cls) => `<svg class="ico${cls ? " " + cls : ""}" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const leafSvg = (cls) => `<svg class="${cls || ""}" viewBox="0 0 24 26" aria-hidden="true"><use href="#leaf" width="24" height="26"/></svg>`;
+  const SK_ICON = { voc: "vocab", gra: "grammar", co: "listen", ce: "read", ee: "writing", eo: "speaking", bil: "bilan" };
+  // Numbers in words, the way Rémy says them (digits from 100).
+  const FR_UNITS = "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize dix-sept dix-huit dix-neuf".split(" ");
+  const FR_TENS = { 2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante", 6: "soixante" };
+  function frNum(n) {
+    if (n < 20) return FR_UNITS[n];
+    if (n < 70) { const u = n % 10; return FR_TENS[Math.floor(n / 10)] + (u === 0 ? "" : u === 1 ? " et un" : "-" + FR_UNITS[u]); }
+    if (n < 80) return "soixante" + (n === 71 ? " et onze" : "-" + FR_UNITS[n - 60]);
+    if (n < 100) return "quatre-vingt" + (n === 80 ? "s" : "-" + FR_UNITS[n - 80]);
+    return String(n);
+  }
+  const EN_ONES = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen".split(" ");
+  const EN_TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  const enNum = (n) => (n < 20 ? EN_ONES[n] : n < 100 ? EN_TENS[Math.floor(n / 10)] + (n % 10 ? "-" + EN_ONES[n % 10] : "") : String(n));
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  // The streak leaf turns like a Québec autumn the longer the streak runs.
+  const TIERS = [null, { name: "Pousse", to: 6 }, { name: "Doré", to: 13 }, { name: "Orangé", to: 29 }, { name: "Rouge érable", to: Infinity }];
+  const tierOf = (n) => (n >= 30 ? 4 : n >= 14 ? 3 : n >= 7 ? 2 : n >= 1 ? 1 : 0);
+  const streakPill = (n) => { const t = tierOf(n); return t ? `<span class="streak t${t}" title="Série : ${TIERS[t].name}">${leafSvg()}${n} jour${n > 1 ? "s" : ""}</span>` : ""; };
+  // The longest run of complete days so far (Sundays neither count nor break it; today can't break it), for the stamps.
+  function longestStreak() {
+    const dates = [...S.days.keys()].filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+    const end = todayStr();
+    let best = 0, run = 0;
+    for (let d = dates[0], k = 0; d && d <= end && k < 3000; d = addDays(d, 1), k++) {
+      if (dayComplete(d)) best = Math.max(best, ++run);
+      else if (dow(d) !== 6 && d !== end) run = 0;
+    }
+    return best;
+  }
+
+  // Rémy, le petit chef: a little Paris rat in a chef's toque, with a maple leaf pinned on for Canada. Five moods.
+  const REMY_BODY = `<path class="r-tail" d="M82 124C100 132 114 120 108 106C104 96 110 88 117 90"/><ellipse class="r-fur" cx="60" cy="113" rx="26" ry="24"/><ellipse class="r-belly" cx="60" cy="117" rx="16" ry="15.5"/><ellipse class="r-feet" cx="48" cy="136" rx="8" ry="4"/><ellipse class="r-feet" cx="72" cy="136" rx="8" ry="4"/><path class="r-scarf" d="M43 88.5Q60 94 77 88.5L62.5 105Q60 108 57.5 105z"/><circle class="r-fur" cx="27" cy="38" r="15"/><circle class="r-earin" cx="27" cy="38" r="9.5"/><circle class="r-fur" cx="93" cy="38" r="15"/><circle class="r-earin" cx="93" cy="38" r="9.5"/><path class="r-fur" d="M60 34C79 34 91 47 90 62C89 77 76 89 60 91C44 89 31 77 30 62C29 47 41 34 60 34z"/><ellipse class="r-belly" cx="60" cy="77" rx="15" ry="11"/><ellipse class="r-blush" cx="39.5" cy="70.5" rx="5" ry="3"/><ellipse class="r-blush" cx="80.5" cy="70.5" rx="5" ry="3"/>`;
+  const REMY_EYES = `<ellipse class="r-eye" cx="48" cy="58.5" rx="5" ry="6"/><ellipse class="r-eye" cx="72" cy="58.5" rx="5" ry="6"/><circle class="r-glint" cx="49.9" cy="56.2" r="1.9"/><circle class="r-glint" cx="73.9" cy="56.2" r="1.9"/>`;
+  const REMY_SMILE = `<rect class="r-tooth" x="57.3" y="78.6" width="2.6" height="4.4" rx=".8"/><rect class="r-tooth" x="60.1" y="78.6" width="2.6" height="4.4" rx=".8"/><path class="r-line" d="M60 75.2v3M54.5 78q2.8 2.6 5.5.2q2.7 2.4 5.5-.2"/>`;
+  const REMY_NOSE = `<ellipse class="r-nose" cx="60" cy="71.5" rx="5.2" ry="3.8"/><ellipse class="r-noseshine" cx="58.3" cy="70.4" rx="1.8" ry="1"/><path class="r-whisk" d="M45.5 74.5 31 70.5M45 77.5 30 77.5M45.5 80.5 31 84.5M74.5 74.5 89 70.5M75 77.5 90 77.5M74.5 80.5 89 84.5"/>`;
+  const REMY_TOQUE = `<path class="r-toque" d="M42 36V27.5C36 26 33.5 21 35.5 16.5C37.5 12 43 10.5 47 12.5C48.5 6.5 54 3 60 3C66 3 71.5 6.5 73 12.5C77 10.5 82.5 12 84.5 16.5C86.5 21 84 26 78 27.5V36z"/><path class="r-toqueline" d="M42 30H78M49.5 26.5V30M60 25.5V30M70.5 26.5V30"/><use class="r-pin" href="#leaf" x="66" y="30.8" width="6.4" height="6.9"/>`;
+  const REMY_ARM_L = `<ellipse class="r-dark" cx="37.5" cy="112" rx="6" ry="10" transform="rotate(18 37.5 112)"/>`;
+  const REMY = {
+    bonjour: { label: "Rémy the rat, waving hello", face: REMY_EYES + REMY_SMILE,
+      extra: `${REMY_ARM_L}<ellipse class="r-dark" cx="91" cy="93" rx="6" ry="10.5" transform="rotate(38 91 93)"/><path class="k-motion" d="M101.5 79q4.5 4.5 2.8 10.5M106.5 74.5q7 6.5 4.2 16"/>` },
+    bravo: { label: "Rémy the rat, cheering",
+      face: `<path class="r-line r-thick" d="M42.5 60Q48 53.5 53.5 60M66.5 60Q72 53.5 77.5 60"/><path class="r-mouth" d="M53.8 78.2Q60 90 66.2 78.2Q60 81 53.8 78.2z"/><rect class="r-tooth" x="57.4" y="78.9" width="2.5" height="3.6" rx=".7"/><rect class="r-tooth" x="60.1" y="78.9" width="2.5" height="3.6" rx=".7"/><path class="r-line" d="M60 75.2v3.2"/>`,
+      extra: `<ellipse class="r-dark" cx="29" cy="93" rx="6" ry="10.5" transform="rotate(-38 29 93)"/><ellipse class="r-dark" cx="91" cy="93" rx="6" ry="10.5" transform="rotate(38 91 93)"/><use class="k-c1" href="#leaf" x="2" y="6" width="12" height="13" transform="rotate(-28 8 12.5)"/><use class="k-c2" href="#leaf" x="102" y="4" width="12" height="13" transform="rotate(22 108 10.5)"/><use class="k-c3" href="#leaf" x="1" y="62" width="10" height="11" transform="rotate(35 6 67.5)"/><use class="k-c4" href="#leaf" x="109" y="62" width="10" height="11" transform="rotate(-18 114 67.5)"/>` },
+    ecoute: { label: "Rémy the rat, listening with headphones",
+      face: `<ellipse class="r-eye" cx="49.6" cy="58" rx="5" ry="6"/><ellipse class="r-eye" cx="73.6" cy="58" rx="5" ry="6"/><circle class="r-glint" cx="51.5" cy="55.6" r="1.9"/><circle class="r-glint" cx="75.5" cy="55.6" r="1.9"/>${REMY_SMILE}`,
+      top: `<path class="k-hp" d="M31 52C27 14 93 14 89 52"/>`,
+      extra: `${REMY_ARM_L}<ellipse class="r-dark" cx="82.5" cy="112" rx="6" ry="10" transform="rotate(-18 82.5 112)"/><rect class="k-hpc" x="23" y="45" width="11" height="20" rx="5"/><rect class="k-hpc" x="86" y="45" width="11" height="20" rx="5"/>` },
+    correction: { label: "Rémy the rat, with glasses and a red pen", face: REMY_EYES + REMY_SMILE,
+      extra: `<g class="k-glass"><circle cx="48" cy="58.5" r="8.6"/><circle cx="72" cy="58.5" r="8.6"/><path d="M56.6 57.4q3.4-2.2 6.8 0M39.4 57l-5-2M80.6 57l5-2" fill="none"/></g>${REMY_ARM_L}<g transform="rotate(-32 88 106)"><rect class="k-penbody" x="84.8" y="86" width="6.4" height="28" rx="2.2"/><rect class="k-pencap" x="84.8" y="86" width="6.4" height="8.5" rx="2"/><path class="k-pentip" d="M85.1 113.6 88 121 90.9 113.6z"/></g><ellipse class="r-dark" cx="84" cy="108" rx="6" ry="9.5" transform="rotate(-20 84 108)"/>` },
+    cafe: { label: "Rémy the rat, holding a coffee",
+      face: `<path class="r-line r-thick" d="M42.5 58Q48 62.5 53.5 58M66.5 58Q72 62.5 77.5 58"/>${REMY_SMILE}`,
+      extra: `<path class="k-steam" d="M55 104q-2.2-2.6 0-5.2M65 104q-2.2-2.6 0-5.2"/><rect class="k-mug" x="48" y="107" width="24" height="20" rx="4.2"/><path class="k-mugh" d="M72 111.5h3a4.6 4.6 0 0 1 0 9.2h-3"/><use class="k-mugleaf" href="#leaf" x="54.6" y="111" width="10.8" height="11.7"/><ellipse class="r-dark" cx="47" cy="118" rx="5.6" ry="8" transform="rotate(28 47 118)"/><ellipse class="r-dark" cx="73.5" cy="120" rx="5.6" ry="7.5" transform="rotate(-28 73.5 120)"/>` },
+  };
+  function remy(mood) {
+    const m = REMY[mood] || REMY.bonjour;
+    return `<svg class="mascot" viewBox="0 0 120 140" role="img" aria-label="${m.label}">${REMY_BODY}${m.face}${REMY_NOSE}${m.top || ""}${REMY_TOQUE}${m.extra}</svg>`;
+  }
+  // Rémy and his line: always in French, with the English underneath.
+  const greet = (mood, fr, en, cls) => `<div class="greet${cls ? " " + cls : ""}">${remy(mood)}<p class="bubble"><span lang="fr">${typo(fr)}</span><small>${esc(en)}</small></p></div>`;
+  // The last day before `date` with anything done: a ticked block or a finished attempt.
+  function lastActive(date) {
+    let last = "";
+    const see = (d) => { if (d && d < date && d > last) last = d; };
+    for (const d of S.days.keys()) { const st = dayStats(d); if (st && st.n) see(d); }
+    ["drills", "comp", "writing", "speaking"].forEach((c) => list(c).forEach((x) => see(x.date)));
+    return last;
+  }
+  // What Rémy says on Aujourd'hui: first visit of the day, halfway, plan finished, or back after a break.
+  function remyToday(plan, doneN, left) {
+    const t = todayStr();
+    if (!plan) return ["bonjour", "Dimanche, c'est repos. Quelques cartes, si tu veux.", "Sunday is a rest day. A few cards, if you like."];
+    if (doneN >= plan.length) {
+      const n = streak();
+      return n > 1 ? ["bravo", `Journée validée ! ${cap(frNum(n))} jours d'affilée.`, `Day done! ${cap(enNum(n))} days in a row.`]
+        : ["bravo", "Journée validée ! Premier jour de la série.", "Day done! Day one of a streak."];
+    }
+    if (doneN > 0) return ["bonjour", `Bonjour ! Encore ${left} minutes aujourd'hui.`, `Hello! ${left} minutes to go today.`];
+    const last = lastActive(t);
+    if (last && daysBetween(last, t) >= 4) return ["cafe", "Un petit café, et on s'y remet ?", "A quick coffee, and back to it?"];
+    return ["bonjour", "Bonjour ! Ta séance du jour t'attend.", "Hello! Today's session is waiting."];
+  }
+  // "Journée validée": the teacher's stamp on the day's header once every block is ticked.
+  const tbStamp = (date) => `<svg class="tb-stamp" id="tb-stamp" data-date="${date}" viewBox="0 0 176 66" role="img" aria-label="Stamp: Très bien !"><g filter="url(#ink)"><rect class="tb-o" x="2.5" y="2.5" width="171" height="61" rx="11"/><rect class="tb-i" x="8.5" y="8.5" width="159" height="49" rx="7"/><use class="tb-leaf" href="#leaf" x="18" y="17" width="29" height="31.5" transform="rotate(-8 32.5 32.75)"/><text x="109" y="39.5" text-anchor="middle">TRÈS BIEN&#160;!</text></g></svg>`;
+
+  // Tampons: a teacher's rubber stamp for each milestone, in a different ink each.
+  const STAMPS = [
+    { name: "Première séance", ring: "PREMIÈRE SÉANCE ★ ", reps: 3, icon: "today", ink: "--accent", rot: -8, got: "Your first full day's plan", todo: "To earn: a full day's plan", earned: () => [...S.days.keys()].some((d) => dayComplete(d)) },
+    { name: "7 jours d'affilée", ring: "7 JOURS D'AFFILÉE ★ ", reps: 3, num: "7", ink: "--red", rot: 7, got: "Seven days in a row", todo: "To earn: seven days in a row", earned: (x) => x.best >= 7 },
+    { name: "Zéro faute", ring: "ZÉRO FAUTE ★ ", reps: 4, icon: "bilan", ink: "--green", rot: -4, got: "A drill round with no misses", todo: "To earn: a drill round with no misses", earned: () => list("drills").some((d) => d.set !== "prod" && d.total > 0 && d.score >= d.total) },
+    { name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", ink: "--amber", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: () => S.srs.size >= 100 },
+    { name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
+    { name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
+    { name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first CE practice exam", todo: "To earn: first CE practice exam", earned: () => list("comp").some((c) => c.kind === "exam") },
+    { name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => list("mocks").some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+  ];
+  function stampSVG(st, on) {
+    const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
+      : `<use class="st-leaf" href="#leaf" x="35.5" y="33" width="29" height="31.5"/><text class="st-n" x="50" y="${st.num.length > 1 ? 54.5 : 55}" text-anchor="middle"${st.num.length > 1 ? ' style="font-size:11px"' : ""}>${st.num}</text>`;
+    const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(st.reps))}</textPath></text>${center}`;
+    return `<svg class="stamp ${on ? "on" : "off"}" viewBox="0 0 100 100" role="img" aria-label="${esc(st.name)}, ${on ? "earned" : "still to earn"}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
+  }
+  function stampShelf() {
+    const x = { best: longestStreak() };
+    const got = STAMPS.map((st) => !!st.earned(x));
+    const n = got.filter(Boolean).length;
+    return `<section class="sec" id="sec-stamps"><div class="sec-head"><h2 class="h2 with-ico">${ico("stamp")}Tampons · Stamps</h2><span class="small muted">A teacher's stamp for each milestone, worked out from what you've done: ${n} of ${STAMPS.length} so far.</span></div>
+      <div class="stamps">${STAMPS.map((st, i) => `<figure class="stamp-cell">${stampSVG(st, got[i])}<figcaption><b>${esc(st.name)}</b><small>${esc(got[i] ? st.got : st.todo)}</small></figcaption></figure>`).join("")}</div></section>`;
+  }
+
+  // Carte d'embarquement: the five phases as one flight from B1 to NCLC 7. The plane moves each week, and the gate
+  // is today's first open block. A small version sits at the foot of the sidebar.
+  function passWeeks() {
+    const starts = T.PHASES.map((p) => Number((String(p.weeks).match(/\d+/) || [1])[0]));
+    const total = Number((String(T.PHASES[T.PHASES.length - 1].weeks).match(/(\d+)\D*$/) || [0, 21])[1]);
+    return { starts, total };
+  }
+  function flightSVG(mini) {
+    const s = settings(), w = weekNo(), { starts, total } = passWeeks();
+    const X = (k) => +(10 + ((Math.min(Math.max(k, 1), total + 1) - 1) / total) * 274).toFixed(2);
+    const x = X(w);
+    const dots = starts.map((k, i) => {
+      const n = i + 1, past = n < s.phase, cur = n === s.phase, cx = X(k);
+      return `<circle cx="${cx}" cy="20" r="4.2" style="fill:var(${past ? "--accent" : "--surface"});stroke:var(${past || cur ? "--accent" : "--rule-2"})" stroke-width="2"/>${mini ? "" : `<text x="${cx}" y="37" text-anchor="middle" style="font:${cur ? 700 : 500} 10px var(--f-ui);fill:var(${cur ? "--ink" : "--ink-3"})">${n}</text>`}`;
+    }).join("");
+    return `<svg class="flight" viewBox="0 0 300 ${mini ? 30 : 40}" role="img" aria-label="Week ${w} of ${total}: Phase ${s.phase} of ${T.PHASES.length}"><path d="M${x} 20H284" style="stroke:var(--rule-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 6"/><path d="M10 20H${x}" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"/>${dots}<use href="#leaf" x="285" y="11.5" width="15" height="16.3" style="fill:var(--leaf-4)"/><g transform="translate(${+(x - 10).toFixed(2)} 10) rotate(45 10 10)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-plane" style="fill:var(--surface)"/></svg></g></svg>`;
+  }
+  const BARCODE = `<svg class="barcode" viewBox="0 0 118 46" preserveAspectRatio="none" aria-hidden="true">${[[0, 1], [2, 2], [5, 3], [10, 4], [16, 1], [18, 2], [21, 3], [27, 4], [34, 1], [37, 2], [41, 3], [47, 4], [54, 1], [57, 2], [61, 3], [65, 4], [70, 1], [74, 2], [79, 3], [83, 4], [88, 1], [92, 2], [97, 3], [102, 4], [108, 1], [110, 2], [113, 3]].map(([x, w]) => `<rect x="${x}" y="0" width="${w}" height="46"/>`).join("")}</svg>`;
+  function passHTML() {
+    const s = settings(), P = T.PHASES[s.phase - 1], { total } = passWeeks();
+    const t = todayStr(), plan = planFor(s.phase, t), done = (S.days.get(t) || {}).done || {};
+    const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k)]) : -1;
+    const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${clip(plan[open][2], 26)}`;
+    const mins = plan ? `${plan.reduce((a, b) => a + b[1], 0)} min` : "Repos";
+    return `<div class="pass"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
+      <div class="route"><div class="city"><small>Départ · From</small><b>B1</b><span>Where you started</span></div>${flightSVG(false)}<div class="city r"><small>Arrivée · To</small><b>NCLC&#160;7</b><span>All four skills</span></div></div>
+      <dl class="fields"><div><dt>Phase</dt><dd>${s.phase} · ${esc(P.name)}</dd></div><div><dt>Semaine · Week</dt><dd>${weekNo()} sur ${total}</dd></div><div><dt>Porte · Gate</dt><dd>${esc(gate)}</dd></div><div><dt>Aujourd'hui · Today</dt><dd>${mins}</dd></div></dl></div>
+      <div class="pass-stub"><div class="seat"><small>Siège · Seat</small><b>7A</b></div>${BARCODE}</div></div>`;
+  }
+  const miniPass = () => { const s = settings(), P = T.PHASES[s.phase - 1]; return `<a class="mini-pass" href="#progress"><span class="top"><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase ${s.phase} · ${esc(P.name)}</b>${flightSVG(true)}<span>Semaine ${weekNo()} · ${esc(P.weeks)}</span></a>`; };
+
+  // L'expression du jour: a new saying every morning, on a scrap of notebook paper.
+  function expressionCard() {
+    const xs = arr(T.EXPRESSIONS);
+    if (!xs.length) return "";
+    const [fr, en] = xs[((daysBetween("2026-01-01", todayStr()) % xs.length) + xs.length) % xs.length];
+    return `<figure class="note-card seyes"><span class="tape" aria-hidden="true"></span><p class="eyebrow">Expression du jour</p><p class="fr" lang="fr">${typo(fr)}</p><p class="en">${esc(en)}</p></figure>`;
   }
 
   /* =============== errors =============== */
@@ -1675,7 +1832,7 @@
     const last = compAttempts("ce").find((a) => a.kind === "exam");
     const running = ui.cx && !ui.cx.done;
     const paused = !running && ipGet("exam--ce");
-    return `<section class="panel flat row between"><div class="stack tight"><p class="h3">Examen blanc</p><p class="small muted">The full reading test: 39 questions in 60 minutes, from A1 to C2, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="exam--ce">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#comp.ce.exam">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
+    return `<section class="panel flat row between"><div class="stack tight"><p class="h3 with-ico">${ico("exam")}Examen blanc</p><p class="small muted">The full reading test: 39 questions in 60 minutes, from A1 to C2, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="exam--ce">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#comp.ce.exam">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
   }
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
   function examView() {
@@ -1838,8 +1995,8 @@
     const s = settings(), P = T.PHASES[s.phase - 1];
     const store = backend.kind === "db" ? `<span class="status-dot on"></span>Progress saved on claude.ai` : backend.kind === "server" ? `<span class="status-dot on"></span>Progress saved on this computer` : backend.kind === "local" ? `<span class="status-dot warn"></span>Progress saved in this browser only` : `<span class="status-dot"></span>Loading your progress…`;
     const cl = sample ? `<span class="status-dot on"></span>Claude ready` : claudeState === "pending" ? `<span class="status-dot"></span>Connecting to Claude…` : claudeState === "off" ? `<span class="status-dot"></span>Claude off (reload to allow)` : "";
-    const tm = timer.total && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}"><span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
-    footEl.innerHTML = `<div class="phase"><b>Phase ${s.phase} · ${esc(P.name)}</b>Semaine ${weekNo()} · ${esc(P.weeks)}</div>${tm}<div>${store}</div>${cl ? `<div>${cl}</div>` : ""}<button type="button" class="theme-btn" data-act="theme" data-theme-btn></button>`;
+    const tm = timer.total && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}">${ico("timer")}<span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
+    footEl.innerHTML = `${miniPass()}${tm}${streakPill(streak())}<div>${store}</div>${cl ? `<div>${cl}</div>` : ""}<button type="button" class="theme-btn" data-act="theme" data-theme-btn></button>`;
     paintTheme();
   }
   function confirmBtn(key, label, act, attrs) {
@@ -1854,7 +2011,7 @@
   }
 
   /* shared bits */
-  const skChip = (k) => `<span class="sk ${k}">${T.SKILLS[k].code}</span>`;
+  const skChip = (k) => `<span class="sk ${k}">${SK_ICON[k] ? ico(SK_ICON[k]) : ""}${T.SKILLS[k].code}</span>`;
   function errList(errs, withCat) {
     if (!errs || !errs.length) return `<p class="pen-ok">Aucune faute relevée.</p>`;
     return `<ul class="errs">${errs.map((e) => `<li><div class="fix"><span class="pen-wrong">${esc(e.wrong)}</span><span class="pen-right">${esc(e.right)}</span>${withCat && e.category ? `<span class="pill">${esc(CAT[catOf(e.category)])}</span>` : ""}</div>${e.why ? `<p class="why">${esc(e.why)}</p>` : ""}</li>`).join("")}</ul>`;
@@ -1876,7 +2033,7 @@
       const plan = planFor(s.phase, sel);
       const doc = S.days.get(sel);
       const done = (doc && doc.done) || {};
-      let body;
+      let body, rm = null;
       if (!plan) {
         body = `<div class="panel stack"><h2 class="h2">Repos</h2><p class="lede">Sunday is a rest day in every phase. If you want something light, review your due cards or reread this week's corrections, but it isn't on the plan.</p><div class="row"><a class="btn" href="#vocab">Due cards</a><a class="btn" href="#progress.errors">This week's errors</a></div></div>`;
       } else {
@@ -1884,6 +2041,7 @@
         const doneN = plan.filter((b, i) => done[blockKey(s.phase, i)]).length;
         const doneMin = plan.reduce((a, b, i) => a + (done[blockKey(s.phase, i)] ? b[1] : 0), 0);
         const pnote = T.PLAN[s.phase].note;
+        if (sel === t) rm = remyToday(plan, doneN, mins - doneMin);
         body = `<div class="stack">
           <div class="progress-line"><span class="num"><b>${doneN}</b> of ${plan.length} blocks · ${doneMin} of ${mins} min</span><div class="bar"><i style="width:${(doneN / plan.length) * 100}%"></i></div></div>
           <ol class="blocks">${plan.map((b, i) => {
@@ -1901,17 +2059,28 @@
           ${pnote ? `<p class="small muted">${esc(pnote)}</p>` : ""}
         </div>`;
       }
+      if (!plan && sel === t) rm = remyToday(null);
       return `<div class="wrap">
         <header class="cahier-head seyes">
           <p class="date-hand">${frDate(sel)}</p>
           <div class="meta"><b>Phase ${s.phase} · ${esc(P.name)}</b><span>Semaine ${weekNo()}</span><span>${esc(P.weeks)}</span>${sel !== t ? `<button class="btn ghost sm" data-act="day" data-date="${t}">Back to today</button>` : ""}</div>
+          ${dayComplete(sel) ? tbStamp(sel) : ""}
+          ${rm ? greet(rm[0], rm[1], rm[2]) : ""}
         </header>
         <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
-          <aside class="side">${continueCard()}${homeworkCard()}${watchCard()}${streakCard()}</aside>
+          <aside class="side">${continueCard()}${expressionCard()}${homeworkCard()}${watchCard()}${streakCard()}</aside>
         </div>
       </div>`;
+    },
+    // The day's stamp lands with a thunk right after its last block is ticked (not on every redraw).
+    after() {
+      const el = ui.thunk && document.getElementById("tb-stamp");
+      if (!el || el.dataset.date !== ui.thunk) return;
+      ui.thunk = null;
+      if (typeof el.animate !== "function" || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+      el.animate([{ transform: "rotate(-11deg) scale(1.4)", opacity: 0.3 }, { transform: "rotate(-11deg) scale(.95)", opacity: 1, offset: 0.55 }, { transform: "rotate(-11deg) scale(1)", opacity: 1 }], { duration: 500, easing: "cubic-bezier(.2, .8, .3, 1.25)" });
     },
   };
   function homeworkCard() {
@@ -1927,7 +2096,7 @@
     const sug = arr(ui.hwSug);
     const suggestions = sug.length ? `<div class="stack tight"><p class="small muted">Claude's suggestions. Nothing is saved unless you add it.</p><ul class="hw">${sug.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(h.text)}${h.go ? `<small><a href="#${esc(h.go)}">Open</a></small>` : ""}</span><button class="btn sm" data-act="hw-sug-add" data-i="${i}">Add</button></li>`).join("")}</ul><div><button class="btn ghost sm" data-act="hw-sug-clear">Dismiss</button></div></div>` : "";
     return `<section class="panel stack tight">
-      <div class="row between"><h2 class="h3">Devoirs · Homework</h2></div>
+      <div class="row between"><h2 class="h3 with-ico">${ico("homework")}Devoirs · Homework</h2></div>
       ${items}
       <div class="row"><input type="text" id="hw-new" data-input="form" data-k="hw" value="${formVal("hw")}" placeholder="Add a task…" style="flex:1"><button class="btn sm" data-act="hw-add">Add</button></div>
       ${suggestions || `<div>${claudeBtn("hw-suggest", "hw-suggest", "Suggest 3 from my error log", "", "btn ghost sm")}</div>`}
@@ -1935,8 +2104,8 @@
   }
   function watchCard() {
     const t3 = top3();
-    if (!t3.length) return `<section class="panel stack tight"><h2 class="h3">Watch for today</h2><p class="small muted">Your most frequent error categories show up here once corrections start coming in. From your history so far: pronominal verbs, imperative + pronoun, elision.</p></section>`;
-    return `<section class="panel stack tight"><h2 class="h3">Watch for today</h2><ul class="hw">${t3.map(([c, v]) => {
+    if (!t3.length) return `<section class="panel stack tight"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2><p class="small muted">Your most frequent error categories show up here once corrections start coming in. From your history so far: pronominal verbs, imperative + pronoun, elision.</p></section>`;
+    return `<section class="panel stack tight"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2><ul class="hw">${t3.map(([c, v]) => {
       const tp = TOPIC[c];
       return `<li style="grid-template-columns:minmax(0,1fr) auto"><span><b>${esc(CAT[c])}</b> <span class="muted">×${v.n}</span><small><span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</small></span>${tp ? `<a class="btn ghost sm" href="#grammar.${c}">Drill</a>` : ""}</li>`;
     }).join("")}</ul></section>`;
@@ -1958,8 +2127,9 @@
     return `<div class="heat" aria-label="Last ${weeks} weeks of practice">${cells}</div>`;
   }
   function streakCard() {
-    const n = streak();
-    return `<section class="panel stack tight"><div class="row between"><h2 class="h3">Régularité</h2><span class="pill ${n ? "ok" : ""}">${n}-day streak</span></div>${heatmap(8)}<p class="small muted">A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></section>`;
+    const n = streak(), t = tierOf(n);
+    const next = t === 4 ? "Rouge érable from day 30: the leaf stays red. " : t ? `${TIERS[t].name} until day ${TIERS[t].to}, then ${TIERS[t + 1].name.toLowerCase()}. ` : "";
+    return `<section class="panel stack tight"><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${heatmap(8)}<p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></section>`;
   }
   async function suggestHomework() {
     const s = settings(), P = T.PHASES[s.phase - 1];
@@ -2413,6 +2583,15 @@
     },
     after() { updateMeters(); },
   };
+  // What Rémy says over a correction: how many mistakes to fix, and the category most of them are in.
+  function remyMarks(errs) {
+    const n = arr(errs).length;
+    if (!n) return ["Aucune faute relevée. Très bien !", "No mistakes found. Very good!"];
+    const top = errorCountsOf(errs)[0];
+    const most = top && top[1] >= 2 ? `, mostly ${CAT[top[0]].toLowerCase()}` : "";
+    return [`${cap(frNum(n))} faute${n > 1 ? "s" : ""} à revoir.`, `${cap(enNum(n))} mistake${n > 1 ? "s" : ""} to fix${most}.`];
+  }
+  const errorCountsOf = (errs) => Object.entries(arr(errs).reduce((m, e) => { const c = catOf(e.category); m[c] = (m[c] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]);
   function writingFb(id, doc, closeAct) {
     const W = T.WRITING[doc.task] || T.WRITING.t1;
     const fb = doc.fb;
@@ -2425,6 +2604,7 @@
     return `<section class="panel fb" id="w-fb">
       ${head}
       <div class="fb-head"><span class="level">${fb.score20 != null ? `${fb.score20}<small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : fb.nclc ? `About NCLC ${esc(fb.nclc)} · ` : ""}Claude's estimate on the TCF Canada scale, not an official score.</span><p>${esc(fb.summary)}</p></div></div>
+      ${greet("correction", ...remyMarks(fb.errors), "sm")}
       <div class="flags">
         ${flag(inRange, `${doc.words} words, inside ${W.min}–${W.max}`, `${doc.words} words, outside ${W.min}–${W.max}`)}
         ${flag(fb.compliance.on_topic, "On topic", "Off topic")}
@@ -2490,7 +2670,7 @@
   function speakT1(P) {
     return `<div class="grid2">
       <section class="panel stack">
-        <div class="row between"><p class="h3">Timer</p><span class="small muted">2 min on exam day, no preparation</span></div>
+        <div class="row between"><p class="h3 with-ico">${ico("timer")}Timer</p><span class="small muted">2 min on exam day, no preparation</span></div>
         ${timerUI("speaking.t1", "Tâche 1 oral", [[120, "2:00 exam"], [60, "1:00"]])}
         <p class="h3">Structure</p>
         <ol class="steps">${P.structure.map((x) => `<li style="grid-template-columns:minmax(0,1fr)"><b>${esc(x)}</b></li>`).join("")}</ol>
@@ -2524,7 +2704,7 @@
       </section>
       <div class="grid2">
         <section class="panel stack">
-          <div class="row between"><p class="h3">Timer</p><span class="small muted">2 min prep, then 3 min 30</span></div>
+          <div class="row between"><p class="h3 with-ico">${ico("timer")}Timer</p><span class="small muted">2 min prep, then 3 min 30</span></div>
           ${timerUI("speaking.t2", "Tâche 2 oral", [[120, "2:00 prep"], [210, "3:30 talk"]])}
           <p class="h3">Useful phrases</p>
           <ul class="phrases">${P.phrases.map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
@@ -2565,7 +2745,7 @@
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
       const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant, and the listening sets are recorded with natural voices, 2 to 4 minutes each. On the real test each recording plays once. Everything you do is kept in your history at the bottom of the page.</small></h1></header>`;
-      const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">CE · Lecture<small>reading</small></a></nav>`;
+      const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
       if (skill === "ce" && args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView()}</div></div>`;
       ensureCompSet(skill);
       const lvl = compLevel();
@@ -2602,7 +2782,8 @@
         const canPlay = recorded || !!synth;
         const weak = !recorded && (!va || voiceScore(va) < 30);
         const multi = new Set(set.lines.map((l) => l.speaker)).size > 1;
-        material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}
+        const listen = canPlay && !submitted ? greet("ecoute", "Écoute bien : les réponses viennent dans l'ordre des questions.", "Listen closely: the answers come in the same order as the questions.", "sm") : "";
+        material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}${listen}
           ${canPlay ? `${playerHTML()}
             <p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
             ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
@@ -2994,6 +3175,8 @@
         ${head}
         ${tabs}
 
+        <section class="sec" id="sec-pass"><div class="sec-head"><h2 class="h2 with-ico">${ico("plane")}Carte d'embarquement · Boarding pass</h2><span class="small muted">The five phases as one flight from B1 to NCLC 7. The plane moves each week; the gate is today's first open block.</span></div>${passHTML()}</section>
+
         <section class="panel stack">
           <div class="row between"><p class="h3">Phase ${s.phase} · ${esc(P.name)} <span class="muted">· ${esc(P.weeks)}</span></p><span class="small muted">Semaine ${weekNo()}</span></div>
           <p class="small">${esc(P.goal)}</p>
@@ -3003,8 +3186,10 @@
           ${allMet && s.phase < 5 ? `<div class="notice"><b>Every Phase ${s.phase} criterion is met.</b> Move to Phase ${s.phase + 1} when you're ready. <button class="btn sm primary" data-act="p-phase" data-n="${s.phase + 1}">Start Phase ${s.phase + 1}</button></div>` : ""}
         </section>
 
+        ${stampShelf()}
+
         <section class="sec" id="sec-errors">
-          <div class="sec-head"><h2 class="h2">Error log</h2><span class="small muted">From Claude's corrections of your writing and speaking, plus anything you add.</span></div>
+          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing and speaking, plus anything you add.</span></div>
           ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<p class="empty">No errors logged yet. Correct a writing task with Claude, or add one below.</p>`}
           ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p><p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>
             ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
@@ -3021,7 +3206,7 @@
         </section>
 
         <section class="sec" id="sec-scores">
-          <div class="sec-head"><h2 class="h2">Scores and NCLC</h2><span class="small muted">IRCC scores each skill on its own and never averages. Your weakest skill is your real result for that skill.</span></div>
+          <div class="sec-head"><h2 class="h2 with-ico">${ico("target")}Scores and NCLC</h2><span class="small muted">IRCC scores each skill on its own and never averages. Your weakest skill is your real result for that skill.</span></div>
           ${weakest ? `<div class="notice ${weakest[2] >= 7 ? "" : "warn"}"><b>Weakest right now: ${esc(weakest[1])}</b>, NCLC ${nclcLabel(weakest[2])}. ${weakest[2] >= 7 ? "Every logged skill is at NCLC 7 or above." : "Spend most of your spare time here, not on your strongest skill."}</div>` : ""}
           <div class="table-wrap"><table class="nclc"><thead><tr><th>NCLC</th><th>CEFR</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th></tr></thead><tbody>${T.NCLC.map((r) => `<tr class="${r.n === 7 ? "target" : ""}"><td>${r.nclc}${r.n === 7 ? " · your target" : ""}</td><td>${r.cefr}</td><td>${r.coR}</td><td>${r.ceR}</td><td>${r.eR}</td><td>${r.eR}</td></tr>`).join("")}</tbody></table></div>
           <div class="panel stack"><p class="h3">Log a mock or real test</p>
@@ -3311,7 +3496,11 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
-    tick: (el) => setBlock(el.dataset.date, el.dataset.key, el.checked),
+    tick: (el) => {
+      const d = el.dataset.date, was = dayComplete(d);
+      setBlock(d, el.dataset.key, el.checked);
+      if (!was && dayComplete(d)) ui.thunk = d;
+    },
     "hw-done": (el) => { const cur = S.homework.get(el.dataset.id); if (cur) put("homework", el.dataset.id, Object.assign(clone(cur), { done: el.checked, doneOn: el.checked ? todayStr() : null })); },
     "w-check": (el) => { ui.w.checks[ui.w.task][el.dataset.k] = el.checked; if (str(ui.w.text[ui.w.task]).trim()) writingKeep(ui.w.task, 0); },
     "sp-rubric": (el) => { const t = ui.sp.task; ui.sp.rubric[t] = ui.sp.rubric[t] || {}; ui.sp.rubric[t][el.dataset.k] = el.checked; spKeep(t, 0); },

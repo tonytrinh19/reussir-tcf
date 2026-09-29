@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Réussir le TCF favicon (Brand Kit, 16 px version): the é in blue school ink, its accent a maple leaf. -->
+  <style>
+    .bg { fill: #FFFFFF; } .edge { fill: none; stroke: #D3D9E0; stroke-width: 1.5; }
+    .e { fill: none; stroke: #1565C0; stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; } .leaf { fill: #C62F24; }
+    @media (prefers-color-scheme: dark) { .bg { fill: #23262B; } .edge { stroke: #3C4047; } .e { stroke: #7DB6F7; } .leaf { fill: #FF7C70; } }
+  </style>
+  <defs>
+    <symbol id="leaf" viewBox="-1900 -2050 3800 4120"><path d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></symbol>
+  </defs>
+  <rect class="bg" width="100" height="100" rx="22"/>
+  <rect class="edge" x=".75" y=".75" width="98.5" height="98.5" rx="21.5"/>
+  <path class="e" d="M20 72C30 72 50 67 58 58C64 51 62 44 53 44C44 44 37 52 37 61C37 71 44 76.5 53 76.5C63 76.5 72 71 80 63"/>
+  <use class="leaf" href="#leaf" x="40" y="4" width="30" height="32.5" transform="rotate(24 55 20.25)"/>
+</svg>
