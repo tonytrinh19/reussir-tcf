@@ -3,8 +3,9 @@
    The correct option is listed first; the app shuffles the options.
 
    Each set plays audio/<id>.mp4, made by tools/make_audio.py from the set's cast: a note on the
-   scene and, for every speaker, a Gemini voice (Montreal French for Canadian settings, Paris French
-   otherwise), a Microsoft voice (vivienne or remy) and a delivery note. The site ignores the cast.
+   scene and, for every speaker, a Gemini voice (Paris French), a Microsoft voice (vivienne or remy) and
+   a delivery note. The site ignores the cast. The Montréal (fr-ca) voices left are in sets already
+   recorded with Gemini; they're kept for now and will be re-recorded with Paris voices eventually.
    After editing, run: node tools/check_co.js and python3 tools/make_audio.py */
 (function () {
   "use strict";
@@ -239,7 +240,7 @@
       ["Que peut-on faire si toutes les parcelles sont prises ?", ["S'inscrire sur une liste d'attente", "Louer une parcelle dans un autre quartier", "Partager la parcelle d'un voisin", "Revenir au centre en octobre"], "« on peut s'inscrire sur une liste d'attente : chaque année, quelques places se libèrent en juin »"],
     ], {
       scene: "A neighbourhood radio announcement in Montréal's Rosemont district; cheerful and relaxed.",
-      N: v("fr-ca-podcaster-1", "vivienne", "A young neighbourhood radio host, clear, friendly and upbeat."),
+      N: v("fr-fr-podcaster-9", "vivienne", "A young neighbourhood radio host, clear, friendly and upbeat."),
     }),
 
     /* ---------- Éducation ---------- */
@@ -292,8 +293,8 @@
       ["Pourquoi le patient doit-il arriver plus tôt ?", ["Pour changer son adresse à l'accueil", "Pour refaire une prise de sang", "Pour rencontrer la docteure Lemieux", "Pour trouver une place de stationnement gratuite"], "« vous avez déménagé : arrivez quinze minutes plus tôt pour mettre à jour votre adresse à l'accueil »"],
     ], {
       scene: "A phone call from a medical clinic in Montréal to a patient; polite and reassuring.",
-      A: v("fr-ca-csagent-3", "vivienne", "A clinic receptionist in her twenties, warm, polite and efficient."),
-      B: v("fr-ca-assistant-5", "remy", "A patient in his forties, relaxed, with a little dry humour."),
+      A: v("fr-fr-advisor-9", "vivienne", "A clinic receptionist in her twenties, warm, polite and efficient."),
+      B: v("fr-fr-advisor-4", "remy", "A patient in his forties, relaxed, with a little dry humour."),
     }),
     set("co-sante-b2", "B2", "sante", "Le sommeil des adolescents", "Vous écoutez un reportage à la radio.", [
       ["N", "Les adolescents dorment de moins en moins. Selon plusieurs études, une majorité d'entre eux dort moins de huit heures par nuit, alors que les médecins en recommandent entre huit et dix. Et ce manque de sommeil ne se rattrape pas vraiment le week-end : dormir jusqu'à midi le dimanche dérègle encore davantage l'horloge interne."],
@@ -333,7 +334,7 @@
       ["Qu'est-ce qui aura lieu le 22 octobre ?", ["Un débat entre les candidats à la mairie", "La publication des résultats", "L'envoi des avis par la poste", "La révision de la liste électorale"], "« un débat entre les candidats à la mairie aura lieu le 22 octobre à 19 h »"],
     ], {
       scene: "A public information message from a Québec city; clear, neutral and reassuring.",
-      N: v("fr-ca-advisor-5", "remy", "A municipal announcer in his fifties, clear, friendly and measured."),
+      N: v("fr-fr-podcaster-12", "remy", "A municipal announcer in his fifties, clear, friendly and measured."),
     }),
     set("co-gouvernement-b2", "B2", "gouvernement", "Consulter les citoyens : pour quoi faire ?", "Vous écoutez une chronique à la radio.", [
       ["N", "Nouveau parc, nouvelle ligne de tramway, transformation d'un quartier : de plus en plus de projets publics passent par une consultation citoyenne. Sur le papier, l'idée est excellente. Qui connaît mieux un quartier que ceux qui y vivent ?"],
@@ -373,7 +374,7 @@
       ["Qu'est-ce qui changera à partir de maintenant ?", ["Le salaire minimum sera revu chaque année", "Le salaire minimum sera fixé par les syndicats", "Les pourboires seront inclus dans les prix", "Les restaurants fermeront plus tôt"], "« le salaire minimum sera désormais révisé chaque année, en fonction de l'inflation »"],
     ], {
       scene: "A morning news bulletin on a Québec radio station; clear and neutral.",
-      N: v("fr-ca-podcaster-7", "vivienne", "A news anchor in her late forties, confident, clear and neutral."),
+      N: v("fr-fr-podcaster-11", "vivienne", "A news anchor in her late forties, confident, clear and neutral."),
     }),
     set("co-economie-b2", "B2", "economie", "L'inflation expliquée", "Vous écoutez une chronique économique à la radio.", [
       ["N", "On en parle partout, mais sait-on vraiment ce qu'est l'inflation ? En termes simples, c'est la hausse générale et durable des prix. On la mesure en suivant le prix d'un grand nombre de produits et de services achetés par les ménages. Quand l'inflation est de trois pour cent, un panier de courses qui coûtait cent euros l'an dernier en coûte cent trois aujourd'hui."],
@@ -419,7 +420,7 @@
       ["Que répond le propriétaire au sujet du stationnement ?", ["Rien ne change cette année", "Il deviendra payant en juillet", "Les places seront réservées aux voisins", "Il sera fermé pendant les travaux"], "« rien ne change pour le stationnement cette année »"],
     ], {
       scene: "A phone call between a Montréal landlord and his tenant; polite and practical, with a little tension about the rent.",
-      A: v("fr-ca-csagent-5", "remy", "A landlord around sixty, friendly, clear and a bit businesslike."),
+      A: v("fr-fr-tutor-6", "remy", "A landlord around sixty, friendly, clear and a bit businesslike."),
       B: v("fr-fr-advisor-12", "vivienne", "A tenant in her thirties, polite, worried about the rent, then pleased."),
     }),
     set("co-logement-b2", "B2", ["logement", "societe"], "Le retour à la campagne", "Une journaliste interroge un sociologue à la radio.", [
@@ -444,8 +445,8 @@
       ["Que pense-t-il de l'avenir de cette tendance ?", ["Certains reviendront, mais beaucoup resteront", "Tout le monde reviendra bientôt en ville", "Les entreprises vont toutes fermer leurs bureaux", "La tendance va surtout concerner les retraités"], "« certains vont revenir en ville, c'est certain. Mais pour beaucoup, le choix est fait »"],
     ], {
       scene: "A radio interview on a Québec station about moving from the city to the regions; relaxed and thoughtful.",
-      A: v("fr-ca-podcaster-5", "vivienne", "A radio host in her late twenties, calm, velvety and unhurried."),
-      B: v("fr-ca-advisor-2", "remy", "A sociologist in his forties, warm, engaging and nuanced."),
+      A: v("fr-fr-advisor-7", "vivienne", "A radio host in her late twenties, calm, velvety and unhurried."),
+      B: v("fr-fr-advisor-2", "remy", "A sociologist in his forties, warm, engaging and nuanced."),
     }),
 
     /* ---------- Transports ---------- */
@@ -466,7 +467,7 @@
       ["Que se passera-t-il ce soir ?", ["La billetterie fermera à 20 h", "Les distributrices ne marcheront pas", "Les contrôles seront supprimés", "Le dernier train partira à 20 h"], "« la billetterie fermera exceptionnellement à 20 h ce soir »"],
     ], {
       scene: "Public address announcements in a commuter train station near Montréal; clear, calm and slightly formal.",
-      N: v("fr-ca-concierge-8", "vivienne", "A station announcer, crisp, clear and calm, pronouncing numbers carefully."),
+      N: v("fr-fr-concierge-6", "vivienne", "A station announcer, crisp, clear and calm, pronouncing numbers carefully."),
     }),
     set("co-transports-b2", "B2", "transports", "Voitures électriques : la solution ?", "Une animatrice interroge un spécialiste des transports.", [
       ["A", "Les ventes de voitures électriques augmentent rapidement. Est-ce la solution pour réduire la pollution liée aux transports ?"],
@@ -490,8 +491,8 @@
       ["Quelle est l'idée de sa dernière phrase ?", ["Le mieux est de moins utiliser la voiture", "Il faut acheter le modèle électrique le plus récent", "Les voitures à essence polluent moins", "Il faut partager toutes les voitures"], "« la meilleure voiture, c'est souvent celle qu'on n'a pas besoin d'utiliser »"],
     ], {
       scene: "A Québec radio interview about electric cars; lively but informative.",
-      A: v("fr-ca-podcaster-3", "vivienne", "A young radio host, bright, clear and curious."),
-      B: v("fr-ca-techagent-2", "remy", "A transport specialist around fifty, warm, engaging and pragmatic."),
+      A: v("fr-fr-podcaster-9", "vivienne", "A young radio host, bright, clear and curious."),
+      B: v("fr-fr-concierge-4", "remy", "A transport specialist around fifty, warm, engaging and pragmatic."),
     }),
 
     /* ---------- Famille ---------- */
@@ -517,8 +518,8 @@
       ["Que propose Émilie à Julien et à sa copine ?", ["Manger des pizzas et regarder un film", "Dormir chez eux jusqu'au dimanche matin", "Venir au mariage après le coucher des enfants", "Ramener les enfants chez leurs grands-parents"], "« Il y a des pizzas au congélateur, servez-vous. Et vous pouvez regarder un film »"],
     ], {
       scene: "A phone call between two friends near Montréal; warm, casual and a little rushed.",
-      A: v("fr-ca-assistant-4", "vivienne", "A mother in her thirties, lively, grateful and a bit hurried."),
-      B: v("fr-ca-assistant-8", "remy", "A friend in his thirties, easy-going, cheerful and helpful."),
+      A: v("fr-fr-advisor-12", "vivienne", "A mother in her thirties, lively, grateful and a bit hurried."),
+      B: v("fr-fr-podcaster-2", "remy", "A friend in his thirties, easy-going, cheerful and helpful."),
     }),
     set("co-famille-b2", "B2", "famille", "Rester chez ses parents à trente ans", "Vous écoutez une chronique à la radio.", [
       ["N", "Ils ont vingt-cinq, parfois trente ans, un emploi, et ils vivent toujours chez leurs parents. Longtemps perçue comme un échec, cette situation est de plus en plus courante. Au Canada, plus d'un tiers des jeunes adultes de vingt à trente-quatre ans habitent encore avec au moins un de leurs parents."],
@@ -538,7 +539,7 @@
       ["Où se trouve la solution, selon beaucoup d'experts ?", ["Dans la construction de logements abordables", "Dans des règles plus strictes à la maison", "Dans l'aide financière des grands-parents", "Dans le départ des jeunes à l'étranger"], "« construire davantage de logements abordables permettrait aux jeunes de partir quand ils le souhaitent »"],
     ], {
       scene: "A society chronicle on a Québec radio station; warm, thoughtful and engaging.",
-      N: v("fr-ca-storyteller-1", "vivienne", "A radio columnist in her late twenties, warm, engaging and natural."),
+      N: v("fr-fr-podcaster-1", "vivienne", "A radio columnist in her late twenties, warm, engaging and natural."),
     }),
     /* ---------- Sécurité ---------- */
     set("co-crime-b1", "B1", "crime", "Vols de vélos : les conseils de la police", "Vous écoutez un message de prévention à la radio.", [
@@ -642,7 +643,7 @@
       ["Pourquoi faut-il revenir à l'autobus à l'heure ?", ["Le guide ne pourra pas attendre", "Le téléphérique des chutes ferme à midi", "La boutique ferme bientôt", "Il va bientôt pleuvoir"], "« nous ne pourrons pas attendre les retardataires, car d'autres groupes nous attendent »"],
     ], {
       scene: "A guided bus tour of Québec City; friendly, proud of the city and relaxed.",
-      N: v("fr-ca-concierge-3", "remy", "A tour guide in his fifties, confident, clear and enthusiastic."),
+      N: v("fr-fr-podcaster-4", "remy", "A tour guide in his fifties, confident, clear and enthusiastic."),
     }),
     set("co-tourisme-b2", "B2", "tourisme", "Le tourisme lent", "Un journaliste interroge une spécialiste du voyage.", [
       ["A", "On parle beaucoup du tourisme lent. En quoi est-ce différent d'un voyage classique ?"],
