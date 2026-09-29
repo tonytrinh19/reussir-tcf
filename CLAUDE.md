@@ -74,6 +74,7 @@
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.
   - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads.
+    - The listening history lists only sets finished or started (an `inprogress` record, including Claude sets never finished). The reading history also lists the built-in sets not done yet (`HISTORY_ACTIVE_ONLY` in `app.js`).
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
   - A finished CE practice exam is saved with `kind: "exam"`. It also adds a `mocks` entry, labelled as a site estimate.
 - History keeps only two kinds of record, shown in Progrès → Historique:
