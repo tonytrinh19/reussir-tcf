@@ -1,0 +1,148 @@
+{
+  "id": "co-immigration-b1-2",
+  "level": "B1",
+  "theme": "immigration",
+  "title": "Un premier titre de séjour",
+  "context": "Un homme arrivé récemment à Lyon appelle la préfecture pour demander son premier titre de séjour.",
+  "lines": [
+    {
+      "speaker": "A",
+      "text": "Préfecture du Rhône, service des étrangers, bonjour. Que puis-je faire pour vous ?"
+    },
+    {
+      "speaker": "B",
+      "text": "Bonjour madame. Je suis arrivé à Lyon il y a trois mois avec un visa de travail, et il se termine fin novembre. Je voudrais savoir comment demander mon premier titre de séjour."
+    },
+    {
+      "speaker": "A",
+      "text": "Très bien. Aujourd'hui, la demande se fait d'abord en ligne, sur le site de l'administration. Vous créez un compte, vous remplissez le formulaire et vous déposez vos documents numérisés. Ensuite, nous vous envoyons un rendez-vous pour venir prendre vos empreintes."
+    },
+    {
+      "speaker": "B",
+      "text": "D'accord. Et quels documents faut-il préparer ?"
+    },
+    {
+      "speaker": "A",
+      "text": "Votre passeport, votre visa, un justificatif de domicile de moins de trois mois, par exemple une facture d'électricité, trois photos d'identité récentes et votre contrat de travail. Si vous êtes marié, ajoutez aussi votre acte de mariage traduit en français."
+    },
+    {
+      "speaker": "B",
+      "text": "Je suis célibataire, donc ça va. Mais je n'ai pas encore de facture à mon nom, parce que j'habite chez un collègue pour le moment."
+    },
+    {
+      "speaker": "A",
+      "text": "Dans ce cas, votre collègue vous fait une attestation d'hébergement. Il la signe, il joint une copie de sa pièce d'identité et une facture à son nom. C'est tout à fait accepté."
+    },
+    {
+      "speaker": "B",
+      "text": "Parfait. Et combien de temps faut-il attendre ?"
+    },
+    {
+      "speaker": "A",
+      "text": "En ce moment, comptez environ six semaines entre le dépôt en ligne et le rendez-vous. Alors, n'attendez pas le dernier moment : faites votre demande cette semaine. Quand votre dossier est complet, vous recevez une attestation qui vous permet de continuer à travailler, même si votre visa se termine."
+    },
+    {
+      "speaker": "B",
+      "text": "Ah, c'est rassurant. Est-ce qu'il y a des frais à payer ?"
+    },
+    {
+      "speaker": "A",
+      "text": "Oui, deux cent vingt-cinq euros, en timbres fiscaux. Vous pouvez les acheter en ligne, mais attention : vous les payez seulement quand on vous le demande, pas avant."
+    },
+    {
+      "speaker": "B",
+      "text": "Entendu. Une dernière question : est-ce que je peux venir directement au guichet pour poser mes questions ?"
+    },
+    {
+      "speaker": "A",
+      "text": "Non, l'accueil se fait uniquement sur rendez-vous. Mais vous pouvez nous appeler du lundi au vendredi, de neuf heures à midi."
+    },
+    {
+      "speaker": "B",
+      "text": "Merci beaucoup, madame, vous m'avez beaucoup aidé."
+    },
+    {
+      "speaker": "A",
+      "text": "Je vous en prie. Bonne journée, et bonne installation à Lyon !"
+    }
+  ],
+  "questions": [
+    {
+      "q": "Pourquoi l'homme appelle-t-il la préfecture ?",
+      "options": [
+        "Pour demander son premier titre de séjour.",
+        "Pour faire prolonger son visa de travail.",
+        "Pour changer l'adresse de son dossier.",
+        "Pour prendre rendez-vous avec son employeur."
+      ],
+      "answer": 0,
+      "why": "He says: « Je voudrais savoir comment demander mon premier titre de séjour. »"
+    },
+    {
+      "q": "Comment la demande se fait-elle d'abord ?",
+      "options": [
+        "En ligne, sur le site de l'administration.",
+        "Au guichet, avec un formulaire papier.",
+        "Par courrier, avec des copies certifiées.",
+        "Par téléphone, avec une conseillère."
+      ],
+      "answer": 0,
+      "why": "The agent says: « la demande se fait d'abord en ligne, sur le site de l'administration »."
+    },
+    {
+      "q": "Comment l'homme peut-il prouver son adresse ?",
+      "options": [
+        "Avec une attestation signée par son collègue.",
+        "Avec une facture d'électricité à son nom.",
+        "Avec le contrat de location de son collègue.",
+        "Avec une facture traduite de son ancien pays."
+      ],
+      "answer": 0,
+      "why": "He has no bill in his name, so « votre collègue vous fait une attestation d'hébergement. Il la signe »."
+    },
+    {
+      "q": "En ce moment, combien de temps faut-il attendre avant le rendez-vous ?",
+      "options": [
+        "Environ six semaines.",
+        "Environ trois mois.",
+        "Environ deux semaines.",
+        "Jusqu'à la fin de novembre."
+      ],
+      "answer": 0,
+      "why": "« En ce moment, comptez environ six semaines entre le dépôt en ligne et le rendez-vous. »"
+    },
+    {
+      "q": "Que dit la conseillère sur les frais ?",
+      "options": [
+        "On les paie seulement quand on le demande.",
+        "Il faut les payer avant de déposer le dossier.",
+        "Ils sont remboursés si le dossier est refusé.",
+        "Ils sont payés directement par l'employeur."
+      ],
+      "answer": 0,
+      "why": "« vous les payez seulement quand on vous le demande, pas avant »."
+    },
+    {
+      "q": "Que comprend-on sur l'accueil de la préfecture ?",
+      "options": [
+        "On ne peut pas s'y présenter sans rendez-vous.",
+        "On peut y aller le matin, sans attendre.",
+        "Il est fermé pendant tout le mois de novembre.",
+        "Il répond aux questions seulement par courriel."
+      ],
+      "answer": 0,
+      "why": "« l'accueil se fait uniquement sur rendez-vous », so he can't just go to the counter; the phone line is open in the morning."
+    }
+  ],
+  "cast": {
+    "scene": "A phone call to the foreigners' office of the Rhône préfecture in Lyon: practical, friendly and reassuring.",
+    "A": {
+      "ms": "vivienne",
+      "style": "A préfecture agent in her forties, clear, patient and helpful."
+    },
+    "B": {
+      "ms": "remy",
+      "style": "A newcomer in his thirties, polite, a little anxious, then relieved."
+    }
+  }
+}

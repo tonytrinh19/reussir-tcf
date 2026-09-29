@@ -40,6 +40,9 @@
   - `exam-ce.js`: the built-in CE practice exam (Examen blanc). It has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). Its score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
   - `comp-co.js`: all 31 built-in listening (CO) sets, one B1 and one B2 for every topic. Each plays `audio/<id>.mp4`.
     - The player has one main button (Play, Pause, Resume, then Replay once the recording ends) and Stop, which goes back to the start. It works the same for the browser voice.
+    - More sets per topic come from the CO page's **Request a new … set** button (claude.ai only). It adds a request to the `cosets` collection. The nightly routine writes the set on the Mac, checks it, records it with Vivienne and Rémy, and uploads the recording to the artifact's asset store. `tools/co_new_set.md` has the rules and the steps.
+    - A ready set joins its topic and level after the built-in one, as "set 2 of 2 · from Claude", with its own attempts. **Another set** switches between the sets at a level and topic.
+    - Claude's sets can be deleted from the page, which deletes the recording too; their attempts keep a copy and stay in the history. Reading sets still come instantly from Claude, in the page.
     - There's no exam mode and no listen count on screen. `ui.c.plays` still counts listens from the start, because the first listen is what makes a set count as started.
     - Every recording lasts 2 to 4 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
     - Each set has a `cast`, which the site ignores: a note on the scene and, for each speaker (two at most), a Gemini voice, a Microsoft voice and a delivery note. Microsoft `vivienne` for women and narrators, `remy` for men.
@@ -60,10 +63,13 @@
     - A take outside 2–4 minutes, or with skipped, added or misread words, isn't kept. After two failures a set waits for a look. Changing a level's `PACE` instruction clears its earlier failures.
     - To save requests, a take outside 2–4 minutes isn't transcribed. Before each request, the script's word count is checked against the slowest and fastest pace Gemini has read that level with the current instruction; a script that can't reach 2–4 minutes is skipped until it's rewritten (`--status` shows the expected length).
     - Gemini reads fast, so B1 asks for a slow pace. Its first instruction ("unhurried") gave about 180 words a minute, which made the B1 takes last about 1:50.
-  - The daily scheduled task `co-gemini-audio` runs `--gemini` at 00:30 Pacific, just after Google's daily reset. It runs `~/.claude/scheduled-tasks/co-gemini-audio/run.sh`, a single command so its permission can be saved. The script works in a throwaway worktree of `origin/main`: it records, runs `--use-gemini` and `check_co.js`, then commits the new recordings and **pushes them straight to main**, as the user chose on 2026-09-27. Changes to the recorder reach the routine only once they're merged. When all 31 sets are converted, the routine reminds the user once and turns itself off. The live site is still republished only when the user asks.
+  - The daily scheduled task `co-gemini-audio` runs `--gemini` at 00:30 Pacific, just after Google's daily reset. It runs `~/.claude/scheduled-tasks/co-gemini-audio/run.sh`, a single command so its permission can be saved. The script works in a throwaway worktree of `origin/main`: it records, runs `--use-gemini` and `check_co.js`, then commits the new recordings and **pushes them straight to main**, as the user chose on 2026-09-27. Changes to the recorder reach the routine only once they're merged. When all 31 sets are converted, it reminds the user once. The live site is still republished only when the user asks.
+    - Its second job is making the requested listening sets. `~/.claude/scheduled-tasks/co-gemini-audio/extra.sh` (a copy of `tools/co_extra.sh`) runs `spec`, `check` and `record` from `origin/main`, and the routine follows `tools/co_new_set.md`. It uses the ArtifactData and Artifact tools on the live site: requests in `cosets`, recordings uploaded as assets. It never republishes the page.
   - Gemini reads its key from `~/.config/gemini/api_key`, which the user saves; never type or print the key. Microsoft needs `python3 -m pip install --user edge-tts`. Both need node and macOS `afconvert`.
   - After editing `comp-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`.
 - `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 2 to 4 minutes and that no audio file is left over.
+  - `--one set.json` checks one requested set with the same rules (B1 300–340 words, B2 380–430). The right answer can be the longest or the shortest option in at most 2 of the 6 questions.
+  - `python3 tools/make_audio.py --one set.json --out set.mp4` records such a set with Microsoft voices, and fails outside 2–4 minutes.
 - `tools/check_ce.js`: checks the CE sets and the practice exam.
   - Structure: unique ids, a B1 and a B2 set for every topic, 4 options per question, and the exam's level blocks.
   - Option lengths: the right answer must not stand out as the longest or shortest option.
@@ -71,9 +77,13 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress), `sample` (Claude features) and `assets` (the recordings of Claude's listening sets).
 - GitHub: https://github.com/tonytrinh19/reussir-tct (remote `origin`, branch `main`).
-- Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
+- Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress, cosets.
+  - `cosets` holds requested listening sets, keyed by the set's id for good (`co-<topic>-b1-2`…). A number is never reused, because attempts keep the id.
+    - A request: `{status: "requested", level, theme, n, avoid: [titles already on that topic and level], requested}`.
+    - The routine turns it into `status: "ready"`, adding `title`, `context`, `lines`, `questions`, `cast`, `audio: {asset, seconds, voices}` and `made`, or into `status: "failed"` with a `reason`.
+    - The recording is served at `/_blob/<asset>`.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.

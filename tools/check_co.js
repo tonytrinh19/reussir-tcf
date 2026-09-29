@@ -3,6 +3,7 @@
 // option lengths that don't give the right answer away, and that every set has an up-to-date
 // recording of 2 to 4 minutes, with no audio file left over.
 // Run: node tools/check_co.js   (prints stats; exits 1 if anything fails)
+//      node tools/check_co.js --one set.json   (checks one set written for a request; see tools/co_new_set.md)
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
@@ -60,6 +61,61 @@ function lengthReport(label, qs) {
   if (shortest / n > LIMITS.shortest || shortest / n < LIMITS.shortestMin) fail(`${label}: the right answer is the shortest option in ${pct(shortest / n)} of questions (keep it between ${pct(LIMITS.shortestMin)} and ${pct(LIMITS.shortest)})`);
   if (mean < LIMITS.ratioMin || mean > LIMITS.ratioMax) fail(`${label}: mean length ratio ${mean.toFixed(2)} is outside ${LIMITS.ratioMin}–${LIMITS.ratioMax}`);
   over.forEach((w) => fail(`${w}: the right answer is more than ${LIMITS.maxRatio}× the average length of the others`));
+}
+
+/* ---------- one set written for a request from the CO page (tools/co_new_set.md) ---------- */
+// node tools/check_co.js --one set.json: the same rules as the built-in sets, applied to one set. The
+// option-length shares that check_ce.js applies to a whole collection become "at most 2 of the 6".
+const MAX_WORDS = { B1: 340, B2: 430 };
+function checkOne(s) {
+  const where = s.id || "the set";
+  if (!/^co-[a-z]+-b[12]-\d+$/.test(s.id || "")) fail(`${where}: the id must be the request's document id, like co-immigration-b1-2`);
+  if (!["B1", "B2"].includes(s.level)) fail(`${where}: level must be B1 or B2`);
+  if (!TOPICS.includes(s.theme)) fail(`${where}: unknown topic ${s.theme}`);
+  else if (s.id && s.level && !s.id.startsWith(`co-${s.theme}-${String(s.level).toLowerCase()}-`)) fail(`${where}: the id doesn't match the topic and level`);
+  if (!s.title || !s.context) fail(`${where}: missing title or context`);
+  const lines = Array.isArray(s.lines) ? s.lines : [];
+  if (!lines.length || lines.some((l) => !l || !l.speaker || !String(l.text || "").trim())) fail(`${where}: every line needs a speaker and some text`);
+  const speakers = [...new Set(lines.map((l) => l && l.speaker))];
+  if (speakers.length > 2) fail(`${where}: ${speakers.length} speakers; use at most 2 (N alone, or A and B)`);
+  const cast = s.cast || {};
+  if (!cast.scene) fail(`${where}: the cast needs a scene note`);
+  speakers.forEach((sp) => {
+    const c = cast[sp];
+    if (!c) { fail(`${where}: speaker ${sp} has no cast entry`); return; }
+    if (!MS_VOICES.includes(c.ms)) fail(`${where}: speaker ${sp} needs a Microsoft voice (${MS_VOICES.join(" or ")})`);
+    if (!c.style) fail(`${where}: speaker ${sp} needs a delivery note`);
+  });
+  const n = words(lines.map((l) => l && l.text).join(" "));
+  if (MIN_WORDS[s.level] && (n < MIN_WORDS[s.level] || n > MAX_WORDS[s.level])) fail(`${where}: ${n} words; ${s.level} needs ${MIN_WORDS[s.level]}–${MAX_WORDS[s.level]}`);
+  const qs = Array.isArray(s.questions) ? s.questions : [];
+  if (qs.length !== QUESTIONS) fail(`${where}: needs ${QUESTIONS} questions, has ${qs.length}`);
+  let longest = 0, shortest = 0;
+  qs.forEach((q, j) => {
+    const w = `${where} Q${j + 1}`;
+    if (!q || !checkQuestion(w, q)) return;
+    const L = q.options.map((o) => String(o).length), others = L.slice(1);
+    const ratio = L[0] / (others.reduce((a, b) => a + b, 0) / others.length);
+    if (ratio > LIMITS.maxRatio) fail(`${w}: the right answer is ${ratio.toFixed(2)}× the average length of the others (at most ${LIMITS.maxRatio}×)`);
+    if (L[0] > Math.max(...others)) longest++;
+    if (L[0] < Math.min(...others)) shortest++;
+  });
+  if (longest > 2) fail(`${where}: the right answer is the longest option in ${longest} of the ${qs.length} questions (at most 2)`);
+  if (shortest > 2) fail(`${where}: the right answer is the shortest option in ${shortest} of the ${qs.length} questions (at most 2)`);
+  return n;
+}
+if (process.argv.includes("--one")) {
+  const file = process.argv[process.argv.indexOf("--one") + 1];
+  let s = null;
+  try { s = JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { console.log(`Can't read ${file}: ${e.message}`); process.exit(1); }
+  const n = checkOne(s || {});
+  if (errors.length) {
+    console.log(`${errors.length} problem${errors.length > 1 ? "s" : ""}:`);
+    errors.forEach((e) => console.log("  - " + e));
+    process.exit(1);
+  }
+  console.log(`OK: ${s.id} · ${s.level} · ${s.theme} · ${n} words · ${s.questions.length} questions`);
+  process.exit(0);
 }
 
 /* ---------- sets ---------- */

@@ -21,6 +21,9 @@ Usage: python3 tools/make_audio.py               record new or changed sets with
        python3 tools/make_audio.py --gemini      record Gemini takes until the daily limit
        python3 tools/make_audio.py --use-gemini  put the ready Gemini takes on the site (all, or set ids)
        python3 tools/make_audio.py --status      show each set's recording
+       python3 tools/make_audio.py --one set.json --out set.mp4
+                                                 record one set written for a request from the CO page
+                                                 (tools/co_new_set.md) with Microsoft; fails outside 2–4 min
 """
 import array
 import asyncio
@@ -232,7 +235,7 @@ def ask_for_better_mp3():
     aiohttp.ClientWebSocketResponse.send_str = send_str
 
 
-async def ms_record(s, sem):
+async def ms_record(s, sem, out=None):
     import edge_tts
     async with sem:
         lines, pauses = s["lines"], LEAD_IN + TAIL
@@ -255,11 +258,28 @@ async def ms_record(s, sem):
                     parts.append(silence(gap))
                     pauses += gap
             parts.append(silence(TAIL))
-            sec = encode(b"".join(parts), os.path.join(AUDIO, s["id"] + ".mp4"))
+            sec = encode(b"".join(parts), out or os.path.join(AUDIO, s["id"] + ".mp4"))
     wpm = len(script_words(s)) / max(1, sec - pauses) * 60
     voices = {sp: s["cast"][sp]["ms"] for sp in speakers(s)}
     print("%-22s %s %s  %3.0f words/min  %s%s" % (s["id"], s["level"], clock(sec), wpm, "+".join(dict.fromkeys(voices.values())), ("  " + length_problem(sec).upper()) if length_problem(sec) else ""), flush=True)
     return {"engine": "microsoft", "voices": voices, "hash": content_hash(s), "seconds": round(sec, 1), "date": today()}
+
+
+def record_one(path, out):
+    """Record one set written for a request from the CO page (tools/co_new_set.md) into `out`, with the
+    Microsoft voices of its cast. Prints {"seconds", "voices"} as JSON; a recording outside 2–4 minutes
+    is deleted and fails, so the script can be lengthened or shortened and recorded again."""
+    s = load_json(path, None)
+    if not s or not s.get("lines") or not s.get("cast") or s.get("level") not in ("B1", "B2"):
+        sys.exit("Not a set: %s needs level, lines and cast (check it with node tools/check_co.js --one)" % path)
+    s.setdefault("id", os.path.splitext(os.path.basename(out))[0])
+    ask_for_better_mp3()
+    entry = asyncio.run(ms_record(s, asyncio.Semaphore(1), out))
+    problem = length_problem(entry["seconds"])
+    if problem:
+        os.remove(out)
+        sys.exit("The recording is %s (%s); it must last 2 to 4 minutes." % (problem, clock(entry["seconds"])))
+    print(json.dumps({"seconds": entry["seconds"], "voices": entry["voices"]}))
 
 
 def run_microsoft(sets, force, ids):
@@ -591,6 +611,13 @@ def status(sets):
 
 
 def main():
+    if "--one" in sys.argv:
+        i, argv = sys.argv.index("--one"), sys.argv
+        out = argv[argv.index("--out") + 1] if "--out" in argv and argv.index("--out") + 1 < len(argv) else None
+        if i + 1 >= len(argv) or argv[i + 1].startswith("--") or not out:
+            sys.exit("Usage: python3 tools/make_audio.py --one set.json --out set.mp4")
+        record_one(argv[i + 1], out)
+        return
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
     sets = load_sets()

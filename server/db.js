@@ -5,7 +5,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress"];
+const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress", "cosets"];
 const DEFAULT_FILE = path.resolve(__dirname, "..", "data", "tcf.sqlite");
 
 function loadSqlite() {

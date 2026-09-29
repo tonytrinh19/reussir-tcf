@@ -72,7 +72,7 @@
   }
 
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
-  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress"];
+  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress", "cosets"];
   const S = {};
   COLLS.forEach((c) => { S[c] = new Map(); });
   const LS_KEY = "tcf-reussir-data-v1";
@@ -298,6 +298,7 @@
 
   /* =============== Claude (sample capability) =============== */
   let sample = null;
+  let assetsApi = null; // the artifact's asset store, where Claude's listening sets keep their recording
   let claudeState = "pending"; // pending | ready | none | off
   const busy = {};
   const SAMPLE_COPY = {
@@ -1217,7 +1218,33 @@
     next();
   }
 
-  const samplesFor = (skill) => (skill === "ce" ? T.COMP.ceSets : T.COMP.coSets);
+  // Listening sets Claude made on request (tools/co_new_set.md), kept in `cosets` with their recording in the
+  // artifact's asset store. A document starts as a request from the CO page ("requested"); the nightly
+  // routine turns it into a set ("ready"), or says why it couldn't ("failed"). Ready sets join the built-in
+  // ones on their topic and level, after them, in the order they were made.
+  function coExtras() {
+    return [...S.cosets.entries()].filter(([, d]) => d && d.status === "ready" && d.audio && d.audio.asset && arr(d.lines).length && arr(d.questions).length)
+      .map(([id, d]) => ({ id, level: d.level, themes: [d.theme], title: str(d.title), context: str(d.context), lines: arr(d.lines), questions: arr(d.questions), audio: "/_blob/" + d.audio.asset, n: d.n || 0, by: "claude" }))
+      .sort((a, b) => a.themes[0].localeCompare(b.themes[0]) || a.level.localeCompare(b.level) || a.n - b.n);
+  }
+  const samplesFor = (skill) => (skill === "ce" ? T.COMP.ceSets : T.COMP.coSets.concat(coExtras()));
+  // The sets at one level, on one topic (or on any): built-in first, then Claude's.
+  const topicSets = (skill, lvl, th) => samplesFor(skill).filter((x) => x.level === lvl && (!th || arr(x.themes).includes(th)));
+  // Requests still waiting to be made, or that couldn't be, at one level on one topic.
+  const coRequests = (lvl, th) => [...S.cosets.entries()].filter(([, d]) => d && d.status !== "ready" && d.level === lvl && d.theme === th)
+    .map(([id, d]) => Object.assign({ id }, d)).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  // A request's id is the set's id for good (co-<topic>-b1-2…), so its attempts stay its own: a number is
+  // never reused, even after a set is deleted, because its attempts keep its id.
+  function coRequest(lvl, th) {
+    if (!th || !THEME[th]) { toast("Pick a topic first."); return; }
+    const base = `co-${th}-${lvl.toLowerCase()}-`;
+    const used = [...S.cosets.keys()].concat(compAttempts("co").map((a) => a.setId), [...S.inprogress.values()].map((x) => x && x.setId))
+      .filter((id) => typeof id === "string" && id.startsWith(base)).map((id) => Number(id.slice(base.length)) || 0);
+    const n = Math.max(1, ...used) + 1;
+    const avoid = topicSets("co", lvl, th).map((x) => x.title);
+    put("cosets", base + n, { status: "requested", level: lvl, theme: th, n, avoid, requested: todayStr(), ts: Date.now() });
+    toast(`Requested. Claude writes it and records it with Vivienne and Rémy on your Mac tonight.`);
+  }
   // Topics for comprehension sets: the vocabulary themes, minus the two that are language lists rather than topics.
   const COMP_TOPICS = T.VOCAB.filter((t2) => t2.id !== "connecteurs" && t2.id !== "pieges" && !t2.own);
   function compLevel() { return ui.c.level || phaseInfo().level; }
@@ -1228,7 +1255,7 @@
     const all = samplesFor(skill);
     const k = ((i % all.length) + all.length) % all.length;
     const s = prepSet(clone(all[k]));
-    s.src = "sample";
+    s.src = s.by === "claude" ? "claude" : "sample";
     s.sampleIdx = k;
     s.key = key;
     // Built-in sets list their topics in themes; the heading and the saved attempt use the one being practised.
@@ -1510,11 +1537,12 @@
     const activeOnly = !!HISTORY_ACTIVE_ONLY[skill];
     const attempts = compAttempts(skill);
     const stats = compStats(skill, attempts);
-    const builtins = samplesFor(skill).map((s) => Object.assign({}, s, { src: "sample" }));
-    // Claude's sets, taken from their attempts: the newest title and level, and the saved text if there is one.
+    const builtins = samplesFor(skill).map((s) => Object.assign({}, s, { src: s.by === "claude" ? "claude" : "sample" }));
+    const known = new Set(builtins.map((s) => s.id));
+    // Claude's other sets, taken from their attempts: the newest title and level, and the saved text if there is one.
     const claude = new Map();
     for (const a of attempts) {
-      if (a.src !== "claude") continue;
+      if (a.src !== "claude" || known.has(a.setId)) continue;
       const c = claude.get(a.setId) || { id: a.setId, level: a.level, title: a.title, theme: a.theme || "", src: "claude", type: "", questions: null };
       if (!c.questions && a.snap) Object.assign(c, { type: a.snap.type || "", questions: arr(a.snap.questions) });
       claude.set(a.setId, c);
@@ -1522,7 +1550,7 @@
     // A Claude set started but never finished exists only in its in-progress record, which keeps a copy of it.
     if (activeOnly) {
       for (const ip of list("inprogress")) {
-        if (ip.kind !== "comp" || ip.skill !== skill || ip.src !== "claude" || !ip.setId || claude.has(ip.setId)) continue;
+        if (ip.kind !== "comp" || ip.skill !== skill || ip.src !== "claude" || !ip.setId || claude.has(ip.setId) || known.has(ip.setId)) continue;
         const snap = ip.snap || {};
         claude.set(ip.setId, { id: ip.setId, level: ip.level, title: ip.title, theme: ip.theme || "", src: "claude", type: snap.type || "", questions: arr(snap.questions) });
       }
@@ -1535,7 +1563,7 @@
     const logged = attempts.filter((a) => a.src === "logged");
     const empty = activeOnly ? !topics && !mixed.length && !logged.length : !attempts.length;
     return `<section class="sec" id="c-hist">
-      <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} built-in sets done · ${practice} attempt${practice === 1 ? "" : "s"}</span></div>
+      <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} sets done · ${practice} attempt${practice === 1 ? "" : "s"}</span></div>
       ${empty ? `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>` : ""}
       <div class="tree">${topics}
         ${skill === "ce" ? examsBranch(attempts) : ""}
@@ -2580,17 +2608,32 @@
       const gaps = (savedDoc && savedDoc.gaps) || {};
       const stats = compStats(skill);
       const doneN = samplesFor(skill).filter((s) => stats.has(s.id)).length;
-      const newBtn = claudeBtn("c-gen-" + skill, "c-new", th ? `New ${esc(themeLabel(th))} set from Claude` : "New set from Claude", `data-skill="${skill}"`, "btn ghost");
-      // Offer "another built-in set" only when there is one to switch to at this level (and topic).
-      const matching = samplesFor(skill).filter((x) => x.level === lvl && (!th || arr(x.themes).includes(th))).length;
-      const nextBtn = !th || matching > 1 ? `<button class="btn" data-act="c-next" data-skill="${skill}" ${loading ? "disabled" : ""}>Another built-in set</button>` : "";
+      // Listening sets are requested here and made on the Mac overnight, with their recording (coRequest), so
+      // only on claude.ai, where the routine reads the requests. Reading keeps Claude's instant sets.
+      const newBtn = skill === "co" ? (th && backend.kind === "db" ? `<button class="btn ghost" data-act="co-request">Request a new ${esc(themeLabel(th))} set</button>` : "")
+        : claudeBtn("c-gen-" + skill, "c-new", th ? `New ${esc(themeLabel(th))} set from Claude` : "New set from Claude", `data-skill="${skill}"`, "btn ghost");
+      // Offer another set only when there is one to switch to at this level (and topic).
+      const sameSets = topicSets(skill, lvl, th);
+      const matching = sameSets.length;
+      const nextBtn = !th || matching > 1 ? `<button class="btn" data-act="c-next" data-skill="${skill}" ${loading ? "disabled" : ""}>${skill === "ce" ? "Another built-in set" : th ? `Another set · ${matching} on this topic` : "Another set"}</button>` : "";
+      // A set Claude made can be deleted; its attempts stay in the history.
+      const delBtn = skill === "co" && set && set.by === "claude" && backend.kind === "db" ? (ui.confirm === "co-del"
+        ? `<button class="btn danger" data-act="co-del" data-id="${esc(set.id)}">Delete this set for good</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>`
+        : `<button class="btn ghost" data-act="confirm" data-key="co-del">Delete this set</button>`) : "";
       const controls = `<div class="row">
         <div class="seg" role="group" aria-label="Level">${["B1", "B2"].map((l) => `<button data-act="c-level" data-l="${l}" aria-pressed="${lvl === l}">${l}</button>`).join("")}</div>
         <select id="c-theme" data-change="c-theme" aria-label="Topic"><option value="">Any topic</option>${COMP_TOPICS.map((t2) => `<option value="${t2.id}" ${th === t2.id ? "selected" : ""}>${esc(t2.label)}</option>`).join("")}</select>
-        ${nextBtn}${newBtn}
+        ${nextBtn}${newBtn}${delBtn}
         <button class="btn ghost" data-act="c-hist-jump">History · ${doneN} of ${samplesFor(skill).length} done ↓</button>
       </div>`;
-      const tagLine = (kind) => `${kind} · ${esc((set && set.level) || lvl)}${set && set.theme ? " · " + esc(themeLabel(set.theme)) : ""}${set && set.src === "sample" ? " · built-in set" : " · from Claude"}`;
+      // Which of the topic's sets this is, when it has more than one at this level.
+      const pos = set && th ? sameSets.findIndex((x) => x.id === set.id) : -1;
+      const nth = skill === "co" && pos >= 0 && matching > 1 ? ` · set ${pos + 1} of ${matching}` : "";
+      const tagLine = (kind) => `${kind} · ${esc((set && set.level) || lvl)}${set && set.theme ? " · " + esc(themeLabel(set.theme)) : ""}${nth}${set && set.src === "sample" ? " · built-in set" : " · from Claude"}`;
+      // Requested listening sets on this topic and level: waiting for tonight, or couldn't be made.
+      const reqNote = skill === "co" && th ? coRequests(lvl, th).map((r) => r.status === "failed"
+        ? `<div class="notice warn small">A new ${esc(themeLabel(th))} ${esc(lvl)} set couldn't be made${r.reason ? `: ${esc(r.reason)}` : "."}<div class="row" style="margin-top:8px"><button class="btn sm" data-act="co-req-retry" data-id="${esc(r.id)}">Try again tonight</button><button class="btn sm ghost" data-act="co-req-cancel" data-id="${esc(r.id)}">Remove</button></div></div>`
+        : `<div class="notice small">A new ${esc(themeLabel(th))} ${esc(lvl)} set is requested (${shortDate(r.requested)}). Claude writes it and records it with Vivienne and Rémy on your Mac tonight, then it appears here. <button class="btn sm ghost" data-act="co-req-cancel" data-id="${esc(r.id)}">Cancel</button></div>`).join("") : "";
       let material;
       if (loading) {
         material = `<article class="sheet"><p class="eyebrow">${skill === "co" ? "Enregistrement" : "Document"} · ${esc(lvl)}${th ? " · " + esc(themeLabel(th)) : ""}</p><h3 class="thinking">Claude is writing a new ${skill === "co" ? "listening" : "reading"} set${th ? " on " + esc(themeLabel(th)) : ""}</h3><p class="small muted">This usually takes 10–40 seconds. It stays here if you switch back to this theme later.</p></article>`;
@@ -2632,7 +2675,7 @@
         ${tabs}
         ${skill === "ce" ? examCta() : ""}
         ${controls}
-        <div class="stack">${reviewNote}${fallback}${timerRow}${material}${qs}</div>
+        <div class="stack">${reviewNote}${fallback}${reqNote}${timerRow}${material}${qs}</div>
         <div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
             <p class="small muted">${skill === "co" ? "Real voices at exam speed. Past papers aren't published, so the closest thing is practice written by the test's own designers at France Éducation International and its partners." : "Practice questions written by the test's designers and France Éducation International."} Log your scores here to keep them with the rest.</p>
@@ -3237,13 +3280,32 @@
     "c-level": (el) => { ui.c.level = el.dataset.l; render(true); },
     "c-next": (el) => {
       const sk = el.dataset.skill, key = compKey(sk), cur = ui.c.set[sk];
-      const after = cur && cur.src === "sample" ? cur.sampleIdx : -1;
+      const after = cur && Number.isInteger(cur.sampleIdx) ? cur.sampleIdx : -1;
       let i = findSample(sk, compLevel(), ui.c.theme, after);
       if (i < 0) i = findSample(sk, compLevel(), "", after);
       if (i < 0) i = after + 1;
       compReset(sk);
       ui.c.set[sk] = sampleSet(sk, i, key);
       if (ui.c.theme && !arr(ui.c.set[sk].themes).includes(ui.c.theme)) ui.c.set[sk].fallback = true;
+      render(true);
+    },
+    "co-request": () => { coRequest(compLevel(), ui.c.theme); render(true); },
+    "co-req-cancel": (el) => { const d = S.cosets.get(el.dataset.id); if (d && d.status !== "ready") remove("cosets", el.dataset.id); render(true); },
+    "co-req-retry": (el) => {
+      const d = S.cosets.get(el.dataset.id);
+      if (d && d.status === "failed") put("cosets", el.dataset.id, Object.assign({}, d, { status: "requested", reason: "", requested: todayStr(), ts: Date.now() }));
+      render(true);
+    },
+    "co-del": (el) => {
+      const id = el.dataset.id, d = S.cosets.get(id);
+      ui.confirm = "";
+      if (!d || d.status !== "ready") return;
+      if (assetsApi && d.audio && d.audio.asset) assetsApi.delete(d.audio.asset).catch(() => {});
+      remove("cosets", id);
+      ipDrop(compIpId("co", id));
+      const cur = ui.c.set.co;
+      if (cur && cur.id === id) { compReset("co"); ui.c.set.co = null; }
+      toast("Set deleted. Your attempts at it stay in your history.");
       render(true);
     },
     "c-new": (el) => { const sk = el.dataset.skill; const key = compKey(sk); delete ui.c.cache[key]; delete ui.c.failed[key]; compReset(sk); ui.c.set[sk] = null; compGenerate(sk); },
@@ -3425,6 +3487,7 @@
     if (!c || typeof c.use !== "function") { claudeState = "none"; tryServer().then((ok) => { if (!ok) useLocal(); }); return; }
     c.use("sample").then((s) => { sample = s || null; claudeState = s ? "ready" : "none"; render(false); }, () => { claudeState = "none"; render(false); });
     c.use("db").then((db) => { if (db) useDb(db); else useLocal(); }, () => useLocal());
+    c.use("assets").then((a) => { assetsApi = a || null; }, () => {});
   }
   boot();
 })();
