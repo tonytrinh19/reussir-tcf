@@ -1421,28 +1421,34 @@
   function setBranch(skill, set, st) {
     const head = `<span class="lv">${esc(set.level || "")}</span><span class="h-name">${typo(set.title)}</span>${set.type ? `<span class="small muted">${esc(set.type)}</span>` : ""}${set.src === "claude" ? `<span class="pill info">from Claude</span>` : ""}`;
     const open = `data-act="c-open" data-skill="${skill}" data-set="${esc(set.id)}"`;
-    // A set you've started but not submitted says so, and opening it brings your answers back.
+    // A set you've started but not submitted says so, and opening it brings your answers back. Resuming
+    // goes through its in-progress record, which also holds the copy of a Claude set never finished.
     const ip = ipGet(compIpId(skill, set.id));
     const going = ip ? `<span class="pill warn">In progress · ${Object.keys(ip.answers || {}).length}/${ip.total || arr(set.questions).length}</span>` : "";
-    if (!st) return `<div class="h-row">${head}${going}<span class="h-meta">${ip ? "" : "Not done yet"}</span><button class="btn sm ${ip ? "primary" : ""}" ${open}>${ip ? "Resume" : "Open"}</button></div>`;
+    if (!st) return `<div class="h-row">${head}${going}<span class="h-meta">${ip ? "" : "Not done yet"}</span>${ip ? `<button class="btn sm primary" data-act="ip-resume" data-id="${esc(compIpId(skill, set.id))}">Resume</button>` : `<button class="btn sm" ${open}>Open</button>`}</div>`;
     const n = st.attempts.length;
     const meta = `${n} attempt${n > 1 ? "s" : ""} · best ${st.best ? `${st.best.score}/${st.best.total}` : "—"} · last ${shortDate(st.attempts[0].date)}`;
     const body = st.attempts.map((a) => attemptRow(skill, a, set.questions)).join("")
       + (set.questions ? `<div class="row"><button class="btn sm ${ip ? "primary" : ""}" ${open}>${ip ? "Resume your new attempt" : "Retake this set"}</button></div>` : `<p class="small muted">This set's text wasn't saved, so it can't be opened again.</p>`);
     return branch(`${skill}:s:${set.id}`, `${head}${going}<span class="h-meta">${meta}</span>`, body);
   }
-  // A topic: how far each level is done (✓ all, 1/2 some, ○ none), then its sets.
-  function topicBranch(skill, t, sets, stats) {
+  // A topic: how far each level is done (✓ all, 1/2 some, ○ none), then its sets. With activeOnly, only
+  // the sets finished or started are listed, a level with nothing finished gets no badge, and a topic
+  // with nothing to list is left out.
+  function topicBranch(skill, t, sets, stats, activeOnly) {
+    const shown = activeOnly ? sets.filter((s) => stats.has(s.id) || ipGet(compIpId(skill, s.id))) : sets;
+    if (!shown.length) return "";
     const lv = ["B1", "B2"].map((l) => {
       const at = sets.filter((s) => s.level === l && s.src !== "claude");
       if (!at.length) return "";
       const done = at.filter((s) => stats.has(s.id));
+      if (activeOnly && !done.length) return "";
       const best = at.length === 1 && done.length ? stats.get(done[0].id).best : null;
       const txt = !done.length ? `${l} ○` : done.length < at.length ? `${l} ${done.length}/${at.length}` : `${l} ✓${best ? ` best ${best.score}/${best.total}` : ""}`;
       return `<span class="lv ${done.length && done.length === at.length ? "done" : ""}">${txt}</span>`;
     }).join("");
     const n = sets.reduce((x, s) => x + (stats.has(s.id) ? stats.get(s.id).attempts.length : 0), 0);
-    return branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : "not started"}</span>`, sets.map((s) => setBranch(skill, s, stats.get(s.id))).join(""));
+    return branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : activeOnly ? "in progress" : "not started"}</span>`, shown.map((s) => setBranch(skill, s, stats.get(s.id))).join(""));
   }
   // Practice exams: the built-in ones (listed even before they're done) and Claude's.
   function examsBranch(attempts) {
@@ -1462,8 +1468,11 @@
     return branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "not started"}</span>`, rows);
   }
   // Everything done in one skill, as a tree: topic → set → attempt, then practice exams, Claude sets with
-  // no topic and scores logged from elsewhere. Built-in sets not done yet are listed too, so gaps show.
+  // no topic and scores logged from elsewhere. The reading history also lists the built-in sets not done
+  // yet, so gaps show; the listening history lists only the sets you've finished or started.
+  const HISTORY_ACTIVE_ONLY = { co: true, ce: false };
   function historyTree(skill) {
+    const activeOnly = !!HISTORY_ACTIVE_ONLY[skill];
     const attempts = compAttempts(skill);
     const stats = compStats(skill, attempts);
     const builtins = samplesFor(skill).map((s) => Object.assign({}, s, { src: "sample" }));
@@ -1475,15 +1484,24 @@
       if (!c.questions && a.snap) Object.assign(c, { type: a.snap.type || "", questions: arr(a.snap.questions) });
       claude.set(a.setId, c);
     }
+    // A Claude set started but never finished exists only in its in-progress record, which keeps a copy of it.
+    if (activeOnly) {
+      for (const ip of list("inprogress")) {
+        if (ip.kind !== "comp" || ip.skill !== skill || ip.src !== "claude" || !ip.setId || claude.has(ip.setId)) continue;
+        const snap = ip.snap || {};
+        claude.set(ip.setId, { id: ip.setId, level: ip.level, title: ip.title, theme: ip.theme || "", src: "claude", type: snap.type || "", questions: arr(snap.questions) });
+      }
+    }
     const claudeSets = [...claude.values()];
     const done = builtins.filter((s) => stats.has(s.id)).length;
     const practice = attempts.filter((a) => a.src !== "logged" && a.kind !== "exam").length;
-    const topics = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats)).join("");
+    const topics = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats, activeOnly)).join("");
     const mixed = claudeSets.filter((c) => !COMP_TOPICS.some((t) => t.id === c.theme));
     const logged = attempts.filter((a) => a.src === "logged");
+    const empty = activeOnly ? !topics && !mixed.length && !logged.length : !attempts.length;
     return `<section class="sec" id="c-hist">
       <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} built-in sets done · ${practice} attempt${practice === 1 ? "" : "s"}</span></div>
-      ${attempts.length ? "" : `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>`}
+      ${empty ? `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>` : ""}
       <div class="tree">${topics}
         ${skill === "ce" ? examsBranch(attempts) : ""}
         ${mixed.length ? branch(`${skill}:g:mixed`, `<span class="h-name">Sujets variés</span><span class="h-meta">Claude sets with no topic</span>`, mixed.map((s) => setBranch(skill, s, stats.get(s.id))).join("")) : ""}
