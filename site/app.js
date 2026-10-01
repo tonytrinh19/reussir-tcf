@@ -5,6 +5,9 @@
   const viewEl = document.getElementById("view");
   const footEl = document.getElementById("rail-foot");
   const toastEl = document.getElementById("toast");
+  // On phones the navigation sticks to the top of the screen; --rail-h lets the listening controls stick just below it.
+  const railEl = document.querySelector(".rail");
+  if (railEl && window.ResizeObserver) new ResizeObserver(() => document.documentElement.style.setProperty("--rail-h", railEl.offsetHeight + "px")).observe(railEl);
 
   /* =============== helpers =============== */
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -56,6 +59,8 @@
   const ICON_PAUSE = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.5 5h4v14h-4zM13.5 5h4v14h-4z"/></svg>`;
   const ICON_STOP = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect fill="currentColor" x="6" y="6" width="12" height="12" rx="1.5"/></svg>`;
   const ICON_REPLAY = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M5.4 9.6A7 7 0 1 0 12 5"/><path fill="currentColor" d="M8.3 5l4.3-3.2v6.4z"/></svg>`;
+  const ICON_BACK = ICON_REPLAY;
+  const ICON_FWD = `<svg viewBox="0 0 24 24" aria-hidden="true"><g transform="matrix(-1 0 0 1 24 0)"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M5.4 9.6A7 7 0 1 0 12 5"/><path fill="currentColor" d="M8.3 5l4.3-3.2v6.4z"/></g></svg>`;
   const isDark = () => document.documentElement.classList.contains("dark");
   function paintTheme() {
     const dark = isDark();
@@ -252,6 +257,12 @@
   const EO_RUBRIC = "TCF CANADA SPEAKING RULES: " + TC.eo.rules + " Criteria: " + TC.eo.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
   // For generated reading questions: on the real test the right answer doesn't stand out by its length.
   const OPTIONS_RULE = "Make the four options parallel: similar length, the same grammatical form and the same amount of detail. The correct option must not be the longest or the most precise one, and which option is longest should vary from question to question. Distractors must be plausible and reuse words from the text in misleading ways, as on the real test.";
+  // A reading item at one level, as on the real test: the document, its length, what the question asks and how the options work.
+  const ceLevelBrief = (lvl) => { const L = TC.ceLevels[lvl]; return `On the real test, ${lvl} items are questions ${L.items}. Each document is ${L.docs}, ${L.words[0]}–${L.words[1]} words. Its question asks ${L.asks}. ${TC.ceItemRule}`; };
+  // A built-in or Claude reading set is this many documents, one question each.
+  const CE_SET_SIZE = 4;
+  // Exam pace for one reading question, in seconds: 60 minutes for 39 items is quicker at A1–A2 and slower at C1–C2.
+  const CE_PACE = { B1: 90, B2: 105 };
   const PROFILE = EXAM_BRIEF + "\nLEARNER PROFILE: adult B1 learner of French preparing the TCF Canada, target NCLC 7 (B2) in all four skills. Write explanations in English. Known recurring errors: " + T.KNOWN_ERRORS.join("; ") + ".";
 
   /* =============== UI state =============== */
@@ -346,20 +357,40 @@
 
   /* =============== timer =============== */
   const timer = { total: 0, left: 0, base: 0, t0: 0, running: false, label: "", home: "", iv: 0, alerted: false };
-  const timerRemaining = () => (timer.running ? timer.base - (Date.now() - timer.t0) / 1000 : timer.left);
+  // After 0:00 the clock counts overtime, but only up to half the time that was set (at least 1 minute, at
+  // most 10), so a clock left running in a tab you've left doesn't count on for hours. It's worked out from
+  // the time it started, so it stops at the same point even if the page was in the background.
+  const timerCap = () => Math.min(600, Math.max(60, Math.round(timer.total / 2)));
+  const timerRemaining = () => (timer.running ? Math.max(-timerCap(), timer.base - (Date.now() - timer.t0) / 1000) : timer.left);
   const timerStarted = () => timer.running || (timer.total > 0 && Math.abs(timer.left - timer.total) > 0.5);
+  const timerCapped = () => timer.total > 0 && timerRemaining() <= -timerCap() + 0.5;
+  const timerBtnLabel = () => (timer.running ? "Pause" : timerCapped() ? "Restart" : timerStarted() ? "Resume" : "Start");
   function fmtClock(sec) { const neg = sec < -0.5; const s = Math.abs(Math.round(sec)); return (neg ? "+" : "") + Math.floor(s / 60) + ":" + pad(s % 60); }
   function timerSet(sec, label, home) { timerPause(); timer.total = timer.left = sec; timer.label = label; timer.home = home; timer.alerted = false; }
-  function timerStart() { if (timer.running || !timer.total) return; timer.base = timer.left; timer.t0 = Date.now(); timer.running = true; clearInterval(timer.iv); timer.iv = setInterval(paintTimer, 250); }
+  function timerStart() {
+    if (timer.running || !timer.total) return;
+    // A clock that stopped at the end of its overtime starts again from the full time.
+    if (timerCapped()) { timer.left = timer.total; timer.alerted = false; }
+    timer.base = timer.left; timer.t0 = Date.now(); timer.running = true;
+    clearInterval(timer.iv); timer.iv = setInterval(paintTimer, 250);
+  }
   function timerPause() { if (!timer.running) return; timer.left = timerRemaining(); timer.running = false; clearInterval(timer.iv); }
   function timerElapsedMin(home) { return timer.home === home && timerStarted() ? Math.max(1, Math.round((timer.total - timerRemaining()) / 60)) : null; }
   function paintTimer() {
     const r = timerRemaining();
-    document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
-    document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timer.running ? "Pause" : timerStarted() ? "Resume" : "Start"; });
     // The practice exam is handed in at 0:00, as on the real test.
     if (timer.running && r <= 0 && timer.home === "comp.ce.exam" && ui.cx && !ui.cx.done) { examSubmit("time"); return; }
-    if (timer.running && r <= 0 && !timer.alerted) { timer.alerted = true; toast(`Time's up: ${timer.label}. The clock keeps counting overtime.`); }
+    const cap = timerCap(), capMin = Math.round(cap / 60);
+    if (timer.running && r <= -cap) {
+      timerPause();
+      toast(timer.alerted ? `${timer.label}: the clock stopped after ${capMin} min of overtime.` : `Time's up: ${timer.label}. The clock stopped after ${capMin} min of overtime.`);
+      timer.alerted = true;
+    } else if (timer.running && r <= 0 && !timer.alerted) {
+      timer.alerted = true;
+      toast(`Time's up: ${timer.label}. The clock counts overtime for up to ${capMin} min, then stops.`);
+    }
+    document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
+    document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timerBtnLabel(); });
     const steps = document.querySelectorAll(".steps li[data-until]");
     if (steps.length && timer.home === "speaking.t3") {
       const el = timer.total - r;
@@ -375,7 +406,7 @@
     const mine = timer.home === home;
     const cur = mine ? timer.total : presets[0][0];
     const clock = mine ? fmtClock(timerRemaining()) : fmtClock(presets[0][0]);
-    const btn = mine && timer.running ? "Pause" : mine && timerStarted() ? "Resume" : "Start";
+    const btn = mine ? timerBtnLabel() : "Start";
     return `<div class="timer">
       <span class="clock" ${mine ? "data-timer" : ""}>${clock}</span>
       <button class="btn sm primary" data-act="timer-toggle" data-home="${home}" data-sec="${cur}" data-label="${esc(label)}" ${mine ? "data-timer-btn" : ""}>${btn}</button>
@@ -1290,7 +1321,8 @@
   }
   // The listening player: ui.c.player is "idle" (ready to play from the start), "playing", "paused" or
   // "ended" (played to the end, so the main button offers a replay). ui.c.plays still counts listens from
-  // the start, which is what makes a set count as started, but it isn't shown.
+  // the start, which is what makes a set count as started, but it isn't shown. A recording can be moved
+  // 5 seconds back or forward, or along its position bar; the browser voice can't, so those stay off.
   let playToken = 0;
   let audioEl = null;
   let ttsNext = null; // the browser voice's next line, when a pause fell between two lines
@@ -1301,7 +1333,8 @@
     if (audioEl) { try { audioEl.pause(); } catch (_) {} audioEl = null; }
     ui.c.player = "idle";
   }
-  function donePlaying(token) { if (token !== playToken) return; audioEl = null; ui.c.player = "ended"; if (routeView() === "comp") render(false); }
+  // A recording that has ended stays loaded, so it can still be wound back from the end.
+  function donePlaying(token) { if (token !== playToken) return; ui.c.player = "ended"; if (routeView() === "comp") render(false); }
   function coPause() {
     if (ui.c.player !== "playing") return;
     if (audioEl) { try { audioEl.pause(); } catch (_) {} }
@@ -1339,6 +1372,7 @@
       const fallback = (e) => { if (fell || token !== playToken || (e && e.name === "AbortError")) return; fell = true; audioEl = null; speakSet(set, token); };
       a.onended = () => donePlaying(token);
       a.onerror = fallback;
+      a.ontimeupdate = a.onloadedmetadata = a.ondurationchange = paintPlayer;
       const pr = a.play();
       if (pr && pr.catch) pr.catch(fallback);
       return;
@@ -1346,11 +1380,41 @@
     speakSet(set, token);
   }
   // Play ▸ Pause ▸ Resume, then Replay once the recording has ended; Stop goes back to the start.
+  // 5 seconds back and forward, and the position bar, work once a recording has started.
   function playerHTML() {
     const st = ui.c.player;
     const [act, icon, label] = st === "playing" ? ["c-pause", ICON_PAUSE, "Pause"] : st === "paused" ? ["c-resume", ICON_PLAY, "Resume"]
       : st === "ended" ? ["c-play", ICON_REPLAY, "Replay"] : ["c-play", ICON_PLAY, "Play"];
-    return `<div class="player" role="group" aria-label="Recording"><button class="btn primary" data-act="${act}">${icon}${label}</button><button class="btn" data-act="c-stop" ${st === "playing" || st === "paused" ? "" : "disabled"}>${ICON_STOP}Stop</button></div>`;
+    const a = audioEl, dur = a && isFinite(a.duration) ? a.duration : 0, cur = a ? a.currentTime || 0 : 0;
+    const off = a ? "" : `disabled title="${ui.c.set.co && !ui.c.set.co.audio ? "The browser voice can't skip" : "Press Play first"}"`;
+    const skip = (d, ic, txt, name) => `<button class="btn skip" data-act="c-skip" data-d="${d}" aria-label="${name}" ${off}>${ic}${txt}</button>`;
+    return `<div class="player" role="group" aria-label="Recording">
+      ${skip(-5, ICON_BACK, "−5 s", "5 seconds back")}<button class="btn primary" data-act="${act}">${icon}${label}</button>${skip(5, ICON_FWD, "+5 s", "5 seconds forward")}
+      <button class="btn" data-act="c-stop" ${st === "playing" || st === "paused" ? "" : "disabled"}>${ICON_STOP}Stop</button>
+      <div class="seek"><input type="range" min="0" max="${dur.toFixed(1)}" step="0.1" value="${cur.toFixed(1)}" data-input="c-seek" data-change="c-seek" data-player-seek aria-label="Position in the recording" ${dur ? "" : "disabled"}><span class="num small" data-player-time>${fmtClock(cur)} / ${dur ? fmtClock(dur) : "–:––"}</span></div>
+    </div>`;
+  }
+  // The position bar and the time follow the recording without redrawing the page. A bar being dragged is left alone.
+  function paintPlayer() {
+    const a = audioEl;
+    if (!a) return;
+    const dur = isFinite(a.duration) ? a.duration : 0, cur = a.currentTime || 0;
+    document.querySelectorAll("[data-player-seek]").forEach((el) => {
+      if (dur) { el.max = dur.toFixed(1); el.disabled = false; }
+      if (!(pointerDown && document.activeElement === el)) el.value = cur.toFixed(1);
+    });
+    document.querySelectorAll("[data-player-time]").forEach((el) => { el.textContent = `${fmtClock(cur)} / ${dur ? fmtClock(dur) : "–:––"}`; });
+  }
+  // Move within the recording. Going back from the end turns the main button into Resume.
+  function coSeek(t) {
+    const a = audioEl;
+    if (!a) return;
+    const dur = isFinite(a.duration) ? a.duration : Infinity;
+    a.currentTime = Math.max(0, Math.min(dur - 0.1, t));
+    paintPlayer();
+  }
+  function coSeekDone() {
+    if (ui.c.player === "ended" && audioEl && !audioEl.ended) { ui.c.player = "paused"; render(true); }
   }
   function speakSet(set, token) {
     if (!synth) { toast("This browser can't read text aloud. Use the transcript instead."); donePlaying(token); return; }
@@ -1502,7 +1566,7 @@
     const theme = th ? `${th.label} (${th.en})` : "any everyday or social topic typical of the TCF Canada (work, housing, services, health, environment, technology, culture, settling in Canada)";
     let prompt;
     if (skill === "ce") {
-      prompt = `${EXAM_BRIEF}\n${TC.comp}\n\nWrite one TCF Canada Compréhension écrite item set at CEFR ${lvl}. Theme: ${theme}. Choose a realistic document type for that level (notice, email, advertisement, article, opinion piece, regulation). Length: ${lvl === "B1" ? "130–180" : "220–300"} words in French, with paragraph breaks as \\n\\n. Then 4 multiple-choice questions in French, 4 options each, exactly one correct, testing gist, specific details and inference${lvl === "B2" ? ", including the writer's intention or opinion" : ""}. ${OPTIONS_RULE}\nReply with only JSON: {"title": "...", "type": "document type", "text": "...", "questions": [{"q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "English explanation quoting the text"}]}`;
+      prompt = `${EXAM_BRIEF}\n${TC.comp}\n\nWrite one TCF Canada Compréhension écrite practice set at CEFR ${lvl}. Theme: ${theme}. As on the real test, the set is ${CE_SET_SIZE} separate documents, each followed by ONE question, all in French, with paragraph breaks as \\n\\n. ${ceLevelBrief(lvl)} Give each document a different type and a different angle on the theme, and set one or two of them in Canada (Québec places, dollars, Canadian vocabulary). Each question has 4 options in French, exactly one correct. ${OPTIONS_RULE} Explain each answer in English, quoting the document.\nReply with only JSON: {"title": "short French title for the set", "items": [{"type": "document type in French", "title": "short title", "text": "...", "q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "..."}]}`;
     } else {
       prompt = `${EXAM_BRIEF}\n${TC.comp}\n\nWrite one TCF Canada Compréhension orale item set at CEFR ${lvl}. Theme: ${theme}. Write the script of a realistic recording of a kind the TCF Canada uses (${lvl === "B1" ? "a phone call, a series of public announcements or an everyday conversation" : "a radio interview, a report or a chronicle"}) that lasts 2 to 4 minutes when read aloud: ${lvl === "B1" ? "300–340" : "380–430"} words of natural spoken French, with at most two speakers, labelled A and B (or A alone). The TCF Canada includes Canadian contexts, so make roughly one set in three Canadian (Québec places and vocabulary). The script will be read by text-to-speech, so write times, prices and numbers in words (« neuf heures et demie », « trente dollars ») and avoid abbreviations. Then 6 multiple-choice questions in French, in the order the answers come up in the recording, 4 options each, exactly one correct, testing gist, details and inference. ${OPTIONS_RULE}\nReply with only JSON: {"title": "short title", "context": "one French sentence describing the situation, shown before listening", "lines": [{"speaker": "A", "text": "..."}], "questions": [{"q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "English explanation quoting the script"}]}`;
     }
@@ -1510,11 +1574,13 @@
     const out = await ask("c-gen-" + skill, prompt);
     let set = null;
     if (out) {
-      const qs = arr(out.questions).filter((q) => q && q.q && Array.isArray(q.options) && q.options.length >= 2 && Number.isInteger(q.answer) && q.answer >= 0 && q.answer < q.options.length)
-        .map((q) => ({ q: str(q.q), options: q.options.map(str), answer: q.answer, why: str(q.why) }));
+      // A reading set is a list of documents, each with its question; a listening set is one script with its questions.
+      const raw = skill === "ce" ? arr(out.items).filter((x) => x && x.text).map((x) => Object.assign({}, x, { doc: { type: str(x.type), title: str(x.title), text: str(x.text) } })) : arr(out.questions);
+      const qs = raw.filter((q) => q && q.q && Array.isArray(q.options) && q.options.length >= 2 && Number.isInteger(q.answer) && q.answer >= 0 && q.answer < q.options.length)
+        .map((q) => Object.assign({ q: str(q.q), options: q.options.map(str), answer: q.answer, why: str(q.why) }, q.doc ? { doc: q.doc } : {}));
       const lines = arr(out.lines).filter((l) => l && l.text).map((l) => ({ speaker: str(l.speaker || "A").slice(0, 3), text: str(l.text) }));
-      if (qs.length >= 2 && (skill === "ce" ? !!out.text : lines.length > 0)) {
-        set = prepSet({ id: "claude-" + uid(), level: lvl, title: str(out.title), type: str(out.type), text: str(out.text), context: str(out.context), lines, questions: qs, src: "claude", theme: themeId, themes: themeId ? [themeId] : [], key });
+      if (skill === "ce" ? qs.length >= 3 : qs.length >= 2 && lines.length > 0) {
+        set = prepSet({ id: "claude-" + uid(), level: lvl, title: str(out.title), type: skill === "ce" ? `${qs.length} documents` : str(out.type), text: "", context: str(out.context), lines, questions: qs, src: "claude", theme: themeId, themes: themeId ? [themeId] : [], key });
       } else toast("The set didn't come back complete. Try again.");
     }
     delete ui.c.inflight[key];
@@ -1561,7 +1627,7 @@
   // What an attempt keeps of a Claude set so it can be opened again later.
   const snapOf = (set) => ({
     level: set.level, type: set.type || "", title: set.title, text: set.text || "", context: set.context || "", lines: arr(set.lines), theme: set.theme || "", themes: arr(set.themes),
-    questions: set.questions.map((q) => ({ q: q.q, options: q.options, answer: q.answer, why: q.why })),
+    questions: set.questions.map((q) => Object.assign({ q: q.q, options: q.options, answer: q.answer, why: q.why }, q.doc ? { doc: q.doc } : {})),
   });
   // Put a set from the history tree back on the page: a built-in set by id, or a Claude set from the copy
   // saved with an attempt. The level and topic follow the set, so ensureCompSet keeps it.
@@ -1592,6 +1658,16 @@
     if (skill === "co") ui.c.script = true;
   }
 
+  // After a reading set: the last three sets at its level, next to the phase goal of 70%, and where that
+  // level sits on the real test. One set is too short for a 100–699 score; the Examen blanc estimates one.
+  function ceTrend(lvl) {
+    const L = TC.ceLevels[lvl];
+    const xs = list("comp").filter((c2) => c2.skill === "ce" && c2.level === lvl && c2.total).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 3);
+    const right = xs.reduce((n, c2) => n + c2.score, 0), total = xs.reduce((n, c2) => n + c2.total, 0);
+    const trend = total ? `Your last ${xs.length > 1 ? xs.length + " " + lvl + " sets" : lvl + " set"}: ${Math.round((100 * right) / total)}% right, and the phase goal is 70%. ` : "";
+    return `${trend}${L ? `${lvl} items are questions ${L.items} on the real test. ` : ""}One set is too short for a 100–699 score; the Examen blanc estimates one.`;
+  }
+
   /* =============== comprehension history =============== */
   const mins = (secs) => (secs > 0 && secs < 7200 ? `${Math.max(1, Math.round(secs / 60))} min` : "");
   const cefrOf = (v) => ["A1", "A2", "B1", "B2", "C1", "C2"][Math.max(0, Math.min(5, Math.floor((v - 100) / 100)))];
@@ -1609,94 +1685,101 @@
     const tags = missed.map((i) => `<span class="miss">Q${i + 1} ✗${gaps[i] ? " · " + (gaps[i] === "vocab" ? "vocabulary" : "comprehension") : ""}</span>`).join("");
     return `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}${mins(a.secs) ? `<span class="small muted">${mins(a.secs)}</span>` : ""}${a.timed ? `<span class="pill info">timed</span>` : ""}${tags}${hasAns ? `<button class="btn ghost sm" data-act="c-review" data-skill="${skill}" data-id="${esc(a.id)}">Review</button>` : ""}</div>`;
   }
-  // A set: not done yet (with a button to open it), or its attempts, newest first.
+  // A set: started and not finished yet (with Resume), or its attempts, newest first.
   function setBranch(skill, set, st) {
-    const head = `<span class="lv">${esc(set.level || "")}</span><span class="h-name">${typo(set.title)}</span>${set.type ? `<span class="small muted">${esc(set.type)}</span>` : ""}${set.src === "claude" ? `<span class="pill info">from Claude</span>` : ""}`;
+    const head = `<span class="lv">${esc(set.level || "")}</span><span class="h-name">${typo(set.title)}</span>${set.type ? `<span class="small muted">${esc(set.type)}</span>` : ""}${set.src === "claude" ? `<span class="pill info">from Claude</span>` : set.src === "retired" ? `<span class="pill">earlier version</span>` : ""}`;
     const open = `data-act="c-open" data-skill="${skill}" data-set="${esc(set.id)}"`;
     // A set you've started but not submitted says so, and opening it brings your answers back. Resuming
     // goes through its in-progress record, which also holds the copy of a Claude set never finished.
     const ip = ipGet(compIpId(skill, set.id));
     const going = ip ? `<span class="pill warn">In progress · ${Object.keys(ip.answers || {}).length}/${ip.total || arr(set.questions).length}</span>` : "";
-    if (!st) return `<div class="h-row">${head}${going}<span class="h-meta">${ip ? "" : "Not done yet"}</span>${ip ? `<button class="btn sm primary" data-act="ip-resume" data-id="${esc(compIpId(skill, set.id))}">Resume</button>` : `<button class="btn sm" ${open}>Open</button>`}</div>`;
+    if (!st) return `<div class="h-row">${head}${going}<span class="h-meta"></span>${ip ? `<button class="btn sm primary" data-act="ip-resume" data-id="${esc(compIpId(skill, set.id))}">Resume</button>` : `<button class="btn sm" ${open}>Open</button>`}</div>`;
     const n = st.attempts.length;
     const meta = `${n} attempt${n > 1 ? "s" : ""} · best ${st.best ? `${st.best.score}/${st.best.total}` : "—"} · last ${shortDate(st.attempts[0].date)}`;
     const body = st.attempts.map((a) => attemptRow(skill, a, set.questions)).join("")
-      + (set.questions ? `<div class="row"><button class="btn sm ${ip ? "primary" : ""}" ${open}>${ip ? "Resume your new attempt" : "Retake this set"}</button></div>` : `<p class="small muted">This set's text wasn't saved, so it can't be opened again.</p>`);
+      + (set.questions ? `<div class="row"><button class="btn sm ${ip ? "primary" : ""}" ${open}>${ip ? "Resume your new attempt" : "Retake this set"}</button></div>`
+        : `<p class="small muted">${set.src === "retired" ? "This set has since been replaced, so it can't be opened again." : "This set's text wasn't saved, so it can't be opened again."}</p>`);
     return branch(`${skill}:s:${set.id}`, `${head}${going}<span class="h-meta">${meta}</span>`, body);
   }
-  // A topic: how far each level is done (✓ all, 1/2 some, ○ none), then its sets. With activeOnly, only
-  // the sets finished or started are listed, a level with nothing finished gets no badge, and a topic
-  // with nothing to list is left out.
-  function topicBranch(skill, t, sets, stats, activeOnly) {
-    const shown = activeOnly ? sets.filter((s) => stats.has(s.id) || ipGet(compIpId(skill, s.id))) : sets;
+  // A topic: the sets finished or started, with a badge for each level that has one finished (✓ all of
+  // that level, 1/2 some). A topic with nothing to list is left out.
+  function topicBranch(skill, t, sets, stats) {
+    const shown = sets.filter((s) => stats.has(s.id) || ipGet(compIpId(skill, s.id)));
     if (!shown.length) return "";
     const lv = ["B1", "B2"].map((l) => {
-      const at = sets.filter((s) => s.level === l && s.src !== "claude");
-      if (!at.length) return "";
+      const at = sets.filter((s) => s.level === l && s.src === "sample");
       const done = at.filter((s) => stats.has(s.id));
-      if (activeOnly && !done.length) return "";
-      const best = at.length === 1 && done.length ? stats.get(done[0].id).best : null;
-      const txt = !done.length ? `${l} ○` : done.length < at.length ? `${l} ${done.length}/${at.length}` : `${l} ✓${best ? ` best ${best.score}/${best.total}` : ""}`;
-      return `<span class="lv ${done.length && done.length === at.length ? "done" : ""}">${txt}</span>`;
+      if (!done.length) return "";
+      const best = at.length === 1 ? stats.get(done[0].id).best : null;
+      const txt = done.length < at.length ? `${l} ${done.length}/${at.length}` : `${l} ✓${best ? ` best ${best.score}/${best.total}` : ""}`;
+      return `<span class="lv ${done.length === at.length ? "done" : ""}">${txt}</span>`;
     }).join("");
     const n = sets.reduce((x, s) => x + (stats.has(s.id) ? stats.get(s.id).attempts.length : 0), 0);
-    return branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : activeOnly ? "in progress" : "not started"}</span>`, shown.map((s) => setBranch(skill, s, stats.get(s.id))).join(""));
+    return branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : "in progress"}</span>`, shown.map((s) => setBranch(skill, s, stats.get(s.id))).join(""));
   }
-  // Practice exams: the built-in ones (listed even before they're done) and Claude's.
+  // Practice exams done or in progress: the built-in ones and Claude's.
   function examsBranch(attempts) {
     const done = attempts.filter((a) => a.kind === "exam");
     const builtIn = T.COMP.ceExams || [];
-    const ids = [...new Set(builtIn.map((e) => e.id).concat(done.map((a) => a.setId)))];
+    const paused = ipGet("exam--ce");
+    const ids = [...new Set(done.map((a) => a.setId).concat(paused ? [paused.examId] : []))];
+    if (!ids.length) return "";
     const rows = ids.map((id) => {
       const ex = builtIn.find((e) => e.id === id);
       const as = done.filter((a) => a.setId === id);
-      const head = `<span class="lv">A1–C2</span><span class="h-name">${esc(ex ? ex.title : as[0].title)}</span>${ex ? "" : `<span class="pill info">from Claude</span>`}`;
-      if (!as.length) return `<div class="h-row">${head}<span class="h-meta">Not done yet</span><a class="btn sm" href="#comp.ce.exam">Open</a></div>`;
+      const title = ex ? ex.title : as.length ? as[0].title : paused.title;
+      const src = ex ? "" : /claude/.test(str((as[0] || paused).src)) ? `<span class="pill info">from Claude</span>` : `<span class="pill">earlier version</span>`;
+      const head = `<span class="lv">A1–C2</span><span class="h-name">${esc(title)}</span>${src}`;
+      const going = paused && paused.examId === id ? `<span class="pill warn">In progress · ${esc(ipProgress(paused))}</span>` : "";
+      if (!as.length) return `<div class="h-row">${head}${going}<span class="h-meta"></span><button class="btn sm primary" data-act="ip-resume" data-id="exam--ce">Resume</button></div>`;
       const best = as.reduce((b, a) => ((a.est || 0) > (b.est || 0) ? a : b));
       const body = as.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}${mins(a.secs) ? " · " + mins(a.secs) : ""}${a.timeUp ? " · time ran out" : ""}</span><span class="small muted">${levelCounts(a.byLevel)}</span>${ex || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("");
-      return branch(`ce:x:${id}`, `${head}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
+      return branch(`ce:x:${id}`, `${head}${going}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
     }).join("");
     const last = done[0];
-    return branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "not started"}</span>`, rows);
+    return branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "in progress"}</span>`, rows);
   }
   // Everything done in one skill, as a tree: topic → set → attempt, then practice exams, Claude sets with
-  // no topic and scores logged from elsewhere. The reading history also lists the built-in sets not done
-  // yet, so gaps show; the listening history lists only the sets you've finished or started.
-  const HISTORY_ACTIVE_ONLY = { co: true, ce: false };
+  // no topic, built-in sets since replaced and scores logged from elsewhere. Only sets you've finished or
+  // started are listed.
   function historyTree(skill) {
-    const activeOnly = !!HISTORY_ACTIVE_ONLY[skill];
     const attempts = compAttempts(skill);
     const stats = compStats(skill, attempts);
     const builtins = samplesFor(skill).map((s) => Object.assign({}, s, { src: "sample" }));
     // Claude's sets, taken from their attempts: the newest title and level, and the saved text if there is one.
-    const claude = new Map();
+    // A built-in set that has since been replaced keeps its attempts, without its text.
+    const claude = new Map(), retired = new Map();
     for (const a of attempts) {
-      if (a.src !== "claude") continue;
-      const c = claude.get(a.setId) || { id: a.setId, level: a.level, title: a.title, theme: a.theme || "", src: "claude", type: "", questions: null };
-      if (!c.questions && a.snap) Object.assign(c, { type: a.snap.type || "", questions: arr(a.snap.questions) });
-      claude.set(a.setId, c);
+      if (a.kind === "exam" || !a.setId) continue;
+      if (a.src === "claude") {
+        const c = claude.get(a.setId) || { id: a.setId, level: a.level, title: a.title, theme: a.theme || "", src: "claude", type: "", questions: null };
+        if (!c.questions && a.snap) Object.assign(c, { type: a.snap.type || "", questions: arr(a.snap.questions) });
+        claude.set(a.setId, c);
+      } else if (a.src === "sample" && !builtins.some((s) => s.id === a.setId) && !retired.has(a.setId)) {
+        retired.set(a.setId, { id: a.setId, level: a.level, title: a.title, src: "retired", type: "", questions: null });
+      }
     }
     // A Claude set started but never finished exists only in its in-progress record, which keeps a copy of it.
-    if (activeOnly) {
-      for (const ip of list("inprogress")) {
-        if (ip.kind !== "comp" || ip.skill !== skill || ip.src !== "claude" || !ip.setId || claude.has(ip.setId)) continue;
-        const snap = ip.snap || {};
-        claude.set(ip.setId, { id: ip.setId, level: ip.level, title: ip.title, theme: ip.theme || "", src: "claude", type: snap.type || "", questions: arr(snap.questions) });
-      }
+    for (const ip of list("inprogress")) {
+      if (ip.kind !== "comp" || ip.skill !== skill || ip.src !== "claude" || !ip.setId || claude.has(ip.setId)) continue;
+      const snap = ip.snap || {};
+      claude.set(ip.setId, { id: ip.setId, level: ip.level, title: ip.title, theme: ip.theme || "", src: "claude", type: snap.type || "", questions: arr(snap.questions) });
     }
     const claudeSets = [...claude.values()];
     const done = builtins.filter((s) => stats.has(s.id)).length;
     const practice = attempts.filter((a) => a.src !== "logged" && a.kind !== "exam").length;
-    const topics = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats, activeOnly)).join("");
+    const topics = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats)).join("");
     const mixed = claudeSets.filter((c) => !COMP_TOPICS.some((t) => t.id === c.theme));
     const logged = attempts.filter((a) => a.src === "logged");
-    const empty = activeOnly ? !topics && !mixed.length && !logged.length : !attempts.length;
+    const exams = skill === "ce" ? examsBranch(attempts) : "";
+    const empty = !topics && !exams && !mixed.length && !retired.size && !logged.length;
     return `<section class="sec" id="c-hist">
       <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} built-in sets done · ${practice} attempt${practice === 1 ? "" : "s"}</span></div>
       ${empty ? `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>` : ""}
       <div class="tree">${topics}
-        ${skill === "ce" ? examsBranch(attempts) : ""}
+        ${exams}
         ${mixed.length ? branch(`${skill}:g:mixed`, `<span class="h-name">Sujets variés</span><span class="h-meta">Claude sets with no topic</span>`, mixed.map((s) => setBranch(skill, s, stats.get(s.id))).join("")) : ""}
+        ${retired.size ? branch(`${skill}:g:retired`, `<span class="h-name">Earlier sets</span><span class="h-meta">built-in sets since replaced</span>`, [...retired.values()].map((s) => setBranch(skill, s, stats.get(s.id))).join("")) : ""}
         ${logged.length ? branch(`${skill}:g:logged`, `<span class="h-name">Logged from elsewhere</span><span class="h-meta">${logged.length} score${logged.length > 1 ? "s" : ""}</span>`, logged.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}<span>${esc(a.title)}</span><span class="lv">${esc(a.level || "")}</span></div>`).join("")) : ""}
       </div>
     </section>`;
@@ -1794,17 +1877,8 @@
     goTo("#comp.ce.exam");
   }
   // Claude writes a fresh exam in six batches, one per level, each checked before it's kept.
-  const EXAM_KINDS = {
-    A1: ["very short everyday documents: signs, notices, short text messages, small ads and timetables", "15–40", "a detail stated directly"],
-    A2: ["short practical documents: simple emails, building notices, ads, programmes and notes", "40–80", "a detail stated directly or the purpose of the message"],
-    B1: ["everyday documents and short articles: formal emails, job ads, local news, forum posts, rules and reviews", "80–150", "a detail, the purpose or a simple inference"],
-    B2: ["articles, editorials, opinion pieces, reports and interviews on social questions", "150–230", "the writer's opinion, an argument or an inference"],
-    C1: ["complex argumentative or analytical texts: essays, analyses and opinion columns with nuance and implicit positions", "200–300", "implicit meaning, the structure of the argument or the tone"],
-    C2: ["demanding texts: original literary passages (a narrative with implicit emotion or irony) and dense essays", "250–350", "implicit meaning, irony, tone or the effect of a stylistic choice"],
-  };
   function examPrompt(lvl, n) {
-    const [kinds, words, tests] = EXAM_KINDS[lvl];
-    return `${EXAM_BRIEF}\n${TC.comp}\n\nWrite ${n} TCF Canada Compréhension écrite items at CEFR ${lvl} for a full practice exam. Each item is its own document: ${kinds}, ${words} words each, in French, with paragraph breaks as \\n\\n. Vary the topics (daily life, work, housing, health, environment, society, culture, science, education, immigration) and the document types, and set about a third of them in Canada (Québec places, dollars, Canadian vocabulary). After each document, write ONE question in French testing ${tests}, with 4 options in French and exactly one correct. ${OPTIONS_RULE} Explain each answer in English, quoting the document.\nReply with only JSON: {"items": [{"type": "document type in French", "title": "short title", "text": "...", "q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "..."}]}`;
+    return `${EXAM_BRIEF}\n${TC.comp}\n\nWrite ${n} TCF Canada Compréhension écrite items at CEFR ${lvl} for a full practice exam. Each item is its own document in French, with paragraph breaks as \\n\\n, followed by ONE question in French with 4 options in French and exactly one correct. ${ceLevelBrief(lvl)} Vary the topics (daily life, work, housing, health, environment, society, culture, science, education, immigration) and the document types, and set about a third of them in Canada (Québec places, dollars, Canadian vocabulary). ${OPTIONS_RULE} Explain each answer in English, quoting the document.\nReply with only JSON: {"items": [{"type": "document type in French", "title": "short title", "text": "...", "q": "...", "options": ["A", "B", "C", "D"], "answer": 0, "why": "..."}]}`;
   }
   async function examGenerate() {
     if (ui.cxGen || (ui.cx && !ui.cx.done)) return;
@@ -2744,7 +2818,7 @@
     render(args) {
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
-      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant, and the listening sets are recorded with natural voices, 2 to 4 minutes each. On the real test each recording plays once. Everything you do is kept in your history at the bottom of the page.</small></h1></header>`;
+      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page.</small></h1></header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
       if (skill === "ce" && args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView()}</div></div>`;
       ensureCompSet(skill);
@@ -2775,7 +2849,9 @@
       if (loading) {
         material = `<article class="sheet"><p class="eyebrow">${skill === "co" ? "Enregistrement" : "Document"} · ${esc(lvl)}${th ? " · " + esc(themeLabel(th)) : ""}</p><h3 class="thinking">Claude is writing a new ${skill === "co" ? "listening" : "reading"} set${th ? " on " + esc(themeLabel(th)) : ""}</h3><p class="small muted">This usually takes 10–40 seconds. It stays here if you switch back to this theme later.</p></article>`;
       } else if (skill === "ce") {
-        material = `<article class="sheet"><p class="eyebrow">${tagLine(esc(set.type || "Document"))}</p><h3>${typo(set.title)}</h3><p class="fr">${typo(set.text)}</p></article>`;
+        material = set.text
+          ? `<article class="sheet"><p class="eyebrow">${tagLine(esc(set.type || "Document"))}</p><h3>${typo(set.title)}</h3><p class="fr">${typo(set.text)}</p></article>`
+          : `<div class="stack tight"><p class="eyebrow">${tagLine(esc(set.type || "Documents"))}</p><p class="h3">${typo(set.title)}</p><p class="small muted">As on the test, each document has one question. Read it, then answer.</p></div>`;
       } else {
         const va = bestVoice();
         const recorded = !!set.audio;
@@ -2783,22 +2859,24 @@
         const weak = !recorded && (!va || voiceScore(va) < 30);
         const multi = new Set(set.lines.map((l) => l.speaker)).size > 1;
         const listen = canPlay && !submitted ? greet("ecoute", "Écoute bien : les réponses viennent dans l'ordre des questions.", "Listen closely: the answers come in the same order as the questions.", "sm") : "";
+        // The controls get their own strip, which stays on screen while you scroll down to the questions.
         material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}${listen}
-          ${canPlay ? `${playerHTML()}
-            <p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
+          ${canPlay ? `<p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
             ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
           : `<p class="notice warn small">This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.</p>`}
-          ${ui.c.script || !canPlay ? `<div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b>${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div>` : `<button class="btn ghost sm" data-act="c-script">Show the transcript</button>`}
-        </article>`;
+        </article>
+        ${canPlay ? `<div class="player-dock">${playerHTML()}</div>` : ""}
+        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b>${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : `<div><button class="btn ghost sm" data-act="c-script">Show the transcript</button></div>`}`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
       const rv = ui.c.review[skill];
       const reviewNote = rv && set ? `<p class="notice small">You're looking at your attempt from ${shortDate(rv.date)} (${rv.score}/${rv.total}). “Try this set again” starts a new one.</p>` : "";
-      // The exam gives about 92 seconds per question, so a 4-question set is about 6 minutes.
-      const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Time yourself: the exam gives about 1½ minutes per question.</span>${timerUI("comp.ce", "Lecture CE", [[360, "6:00 · exam pace"], [1200, "20:00"], [1800, "30:00"]])}</div>` : "";
-      const qs = set ? `<ol class="qs">${set.questions.map((q, i) => {
+      const pace = set ? (CE_PACE[set.level] || 90) * set.questions.length : 0;
+      const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Time yourself: at exam pace, ${set.questions.length} ${esc(set.level || lvl)} questions take about ${Math.round(pace / 60)} minutes.</span>${timerUI("comp.ce", "Lecture CE", [[pace, `${fmtClock(pace)} · exam pace`], [1200, "20:00"], [1800, "30:00"]])}</div>` : "";
+      const docOf = (q, i) => (q.doc ? `<article class="sheet"><p class="eyebrow">Document ${i + 1}${q.doc.type ? ` · ${esc(q.doc.type)}` : ""}</p>${q.doc.title ? `<h3>${typo(q.doc.title)}</h3>` : ""}<p class="fr">${typo(q.doc.text)}</p></article>` : "");
+      const qs = set ? `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
-        return `<li><p class="fr">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
+        return `<li>${docOf(q, i)}<p class="fr q">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
           const st = submitted ? (k === q.answer ? "ok" : ans[i] === k ? "bad" : "") : "";
           return `<label class="opt ${st}"><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
         }).join("")}</div>
@@ -2806,7 +2884,7 @@
         ${miss ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `<span class="scorebig">${score}/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${skill === "ce" ? `<span class="small muted">One set can't be converted to the 100–699 scale. The Examen blanc gives an estimate.</span>` : ""}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
+        <div class="row">${submitted ? `<span class="scorebig">${score}/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : ""}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       return `<div class="wrap">
         ${head}
@@ -2890,6 +2968,11 @@
   // drafts from the old browser-only store move into the saved ones.
   function hydrate() {
     hydrated = true;
+    // An unfinished built-in set or exam whose content has since been replaced can't be picked up again.
+    for (const ip of list("inprogress")) {
+      if (ip.kind === "comp" && ip.src !== "claude" && !samplesFor(ip.skill).some((s) => s.id === ip.setId)) ipDrop(ip.id);
+      if (ip.kind === "exam" && !ip.snap && !(T.COMP.ceExams || []).some((e) => e.id === ip.examId)) ipDrop(ip.id);
+    }
     ["t1", "t2", "t3"].forEach((t) => {
       const legacy = lsGet("tcf-draft-" + t, "");
       if (!writingRestore(t) && legacy.trim()) { ui.w.text[t] = legacy; writingKeep(t, 0); }
@@ -3438,6 +3521,7 @@
     "c-pause": coPause,
     "c-resume": coResume,
     "c-stop": () => { stopAudio(); render(true); },
+    "c-skip": (el) => { if (audioEl) { coSeek((audioEl.currentTime || 0) + Number(el.dataset.d)); coSeekDone(); } },
     "c-script": () => { ui.c.script = true; render(true); },
     "c-gap": (el) => compGap(ui.c.skill, el.dataset.i, el.dataset.k),
     "c-log": (el) => {
@@ -3496,6 +3580,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "c-seek": () => coSeekDone(),
     tick: (el) => {
       const d = el.dataset.date, was = dayComplete(d);
       setBlock(d, el.dataset.key, el.checked);
@@ -3524,6 +3609,7 @@
     },
   };
   const INPUTS = {
+    "c-seek": (el) => coSeek(Number(el.value) || 0),
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
     "w-text": onWText,
     prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); prodKeep(t); },

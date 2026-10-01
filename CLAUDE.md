@@ -49,10 +49,17 @@
     - Their Anki review progress was copied into the `srs` collection under ids `anki--<slug of the French side>`. Changing a card's French side in `anki.js` resets its progress. Editing it on the site doesn't (see `cards` below).
     - Keep one copy of each word across all decks.
   - `app.js`: the app logic.
+    - One timer serves every page (writing, speaking, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
+    - As on the real test, a set is four separate documents with one question each (`questions[i].doc`), not one text with four questions. Claude's sets use the same shape; ones saved before the change still show their single text.
+    - They're pitched like the real test's items, as `TCF_CANADA.ceLevels` in `data.js` describes for each level: B1 (questions 11–19) is everyday texts of 70–150 words, asking what a document is for or what we learn from it as a whole; B2 (20–29) is articles and opinion pieces of 140–260 words, asking the writer's position, intention or what's implied. The calibration comes from France Éducation International's sample items and the Manuel du candidat.
+    - The right answer rewords the document; the wrong options reuse its words. Never ask which option is NOT true.
+    - Set ids end in `-s1` (`ce-<topic>-<level>-s1`). The sets before them had other ids, so their old attempts can't be shown against new questions; unfinished attempts at sets that no longer exist are cleared at load.
   - `exam-ce.js`: the built-in CE practice exam (Examen blanc). It has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). Its score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
+    - Its B1 and B2 items follow `ceLevels` like the practice sets. Its id became `ce-exam-1-v2` when they were rewritten.
   - `comp-co.js`: all 31 built-in listening (CO) sets, one B1 and one B2 for every topic. Each plays `audio/<id>.mp4`.
-    - The player has one main button (Play, Pause, Resume, then Replay once the recording ends) and Stop, which goes back to the start. It works the same for the browser voice.
+    - The player has one main button (Play, Pause, Resume, then Replay once the recording ends), 5 seconds back and forward, Stop, which goes back to the start, and a position bar. Skipping and the bar need a recording, so they're off for the browser voice.
+    - The controls sit in their own strip between the document and the questions, and it stays on screen (below the phone's top bar, `--rail-h`) while you scroll down to answer.
     - There's no exam mode and no listen count on screen. `ui.c.plays` still counts listens from the start, because the first listen is what makes a set count as started.
     - Every recording lasts 2 to 4 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
     - Each set has a `cast`, which the site ignores: a note on the scene and, for each speaker (two at most), a Gemini voice, a Microsoft voice and a delivery note. Microsoft `vivienne` for women and narrators, `remy` for men.
@@ -78,9 +85,11 @@
   - After editing `comp-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`.
 - `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 2 to 4 minutes and that no audio file is left over.
 - `tools/check_ce.js`: checks the CE sets and the practice exam.
-  - Structure: unique ids, a B1 and a B2 set for every topic, 4 options per question, and the exam's level blocks.
+  - Structure: unique ids, a B1 and a B2 set for every topic, four documents per set with one question each, at least three kinds of document, 4 options per question, and the exam's level blocks.
+  - Lengths: B1 and B2 documents keep to the word counts in `TCF_CANADA.ceLevels`.
   - Option lengths: the right answer must not stand out as the longest or shortest option.
-  - Run `node tools/check_ce.js` after editing `comp-ce.js`, the CE sets in `data.js` or `exam-ce.js`.
+  - Word matching: the right answer can't be the option that shares the most words with the document more than 30% of the time, or the fewest more than 40%, and on average it mustn't share more than the wrong options. Otherwise the answer could be found by matching words instead of understanding.
+  - Run `node tools/check_ce.js` after editing `comp-ce.js` or `exam-ce.js`.
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
@@ -91,7 +100,7 @@
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.
   - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads.
-    - The listening history lists only sets finished or started (an `inprogress` record, including Claude sets never finished). The reading history also lists the built-in sets not done yet (`HISTORY_ACTIVE_ONLY` in `app.js`).
+    - Both histories list only sets finished or started (an `inprogress` record, including Claude sets never finished), and practice exams likewise. Attempts at built-in sets that have since been replaced go under "Earlier sets", without their text.
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
   - A finished CE practice exam is saved with `kind: "exam"`. It also adds a `mocks` entry, labelled as a site estimate.
 - History keeps only two kinds of record, shown in Progrès → Historique:
