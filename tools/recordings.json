@@ -37,21 +37,21 @@
   }
  },
  "co-economie-b1": {
-  "date": "2026-09-28",
-  "engine": "microsoft",
+  "date": "2026-09-30",
+  "engine": "gemini",
   "hash": "d9fec14c7fc7",
-  "seconds": 129.9,
+  "seconds": 125.8,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-11"
   }
  },
  "co-economie-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-30",
+  "engine": "gemini",
   "hash": "4977657e0cc2",
-  "seconds": 137.7,
+  "seconds": 133.3,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-advisor-4"
   }
  },
  "co-education-b2": {
@@ -103,21 +103,21 @@
   }
  },
  "co-gouvernement-b1": {
-  "date": "2026-09-28",
-  "engine": "microsoft",
+  "date": "2026-09-30",
+  "engine": "gemini",
   "hash": "568932721eec",
-  "seconds": 126.8,
+  "seconds": 126.1,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-podcaster-12"
   }
  },
  "co-gouvernement-b2": {
-  "date": "2026-09-25",
-  "engine": "microsoft",
+  "date": "2026-09-30",
+  "engine": "gemini",
   "hash": "8a57082eda8e",
-  "seconds": 139.3,
+  "seconds": 135.4,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-podcaster-4"
   }
  },
  "co-immigration-b1": {
@@ -141,13 +141,13 @@
   }
  },
  "co-logement-b1": {
-  "date": "2026-09-28",
-  "engine": "microsoft",
+  "date": "2026-09-30",
+  "engine": "gemini",
   "hash": "dcab1b06b15d",
-  "seconds": 156.6,
+  "seconds": 127.4,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-fr-tutor-6",
+   "B": "fr-fr-advisor-12"
   }
  },
  "co-logement-b2": {
