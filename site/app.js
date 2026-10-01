@@ -283,6 +283,7 @@
       text: { t1: lsGet("tcf-draft-t1", ""), t2: lsGet("tcf-draft-t2", ""), t3: lsGet("tcf-draft-t3", "") },
       checks: { t1: {}, t2: {}, t3: {} },
       viewing: null,
+      copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
     },
     sp: {
       task: "t1",
@@ -1122,6 +1123,64 @@
     render(true);
     const fe = document.getElementById("w-fb");
     if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  // Everything another AI needs to correct a draft the way the TCF Canada would: the official rules,
+  // criteria and score bands, the task and its subject, the learner, the draft, and what to send back.
+  // For when Claude can't correct it (unavailable, or out of usage).
+  function wCopyPrompt(task) {
+    const W = T.WRITING[task], p = wPrompt(task);
+    const text = str(ui.w.text[task]).trim();
+    const docs = task === "t3" && p.docs ? p.docs.map((d, k) => `\n\nDOCUMENT ${k + 1} (${d.who}) :\n${d.text}`).join("") : "";
+    const ps = paragraphs(text);
+    const parts = task === "t3" ? ` Part 1 (my first paragraph): ${ps[0] ? countWords(ps[0]) : 0} words (TCF Canada: 40–60). Part 2 (everything after it): ${ps.slice(1).reduce((n, x) => n + countWords(x), 0)} words (TCF Canada: 80–120).` : "";
+    const asks = [
+      "A score out of 20 on the TCF Canada scale, with the CEFR and NCLC levels it corresponds to. If the word count is outside the range, the text is off-topic or the instructions aren't followed, cap the score as the TCF Canada would.",
+      `A level and one sentence for each criterion: ${TC.ee.criteria.map(([n]) => n).join(", ")}.`,
+      ...(task === "t3" ? ["Whether part 1 compares both documents' viewpoints, and whether my own position comes only in part 2."] : []),
+      "Every grammar, spelling, agreement and word-choice mistake, most important first, as: wrong → right (why).",
+      "My whole text corrected, keeping my ideas and paragraph breaks.",
+      "Three phrases from my text rewritten at B2 level, and the three things I should work on first.",
+    ];
+    return [
+      "You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct my text and grade it strictly the way the TCF Canada does, using the rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.",
+      `${EE_RUBRIC}\nSCORE BANDS: ${TC.bands}`,
+      `TASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. My word count: ${countWords(text)}.${parts}`,
+      `SUBJECT:\n${p.q}${docs}`,
+      `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.`,
+      `MY TEXT:\n"""\n${text}\n"""`,
+      `Reply in English with:\n${asks.map((a, i) => `${i + 1}. ${a}`).join("\n")}`,
+    ].join("\n\n");
+  }
+  // Copy to the clipboard. The page can run in a frame where the Clipboard API is blocked, so fall back
+  // to a hidden text box; if that fails too, the caller shows the text to copy by hand.
+  async function copyText(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (_) {}
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return !!ok;
+    } catch (_) { return false; }
+  }
+  async function writingCopy() {
+    const task = ui.w.task;
+    if (!str(ui.w.text[task]).trim()) { toast("Write your text first: there's nothing to evaluate yet."); return; }
+    const text = wCopyPrompt(task);
+    if (await copyText(text)) {
+      ui.w.copyOut = null;
+      toast(`Copied: the task, the TCF Canada rules and your draft (${countWords(ui.w.text[task])} words). Paste it into any AI chat.`);
+      render(true);
+      return;
+    }
+    ui.w.copyOut = { task, text };
+    render(true);
+    const el = document.getElementById("w-copy-out");
+    if (el) { el.focus(); el.select(); }
   }
   function writingSave() {
     const task = ui.w.task;
@@ -2643,7 +2702,8 @@
           <label class="check"><input type="checkbox" id="chk-words" disabled><span>Word count inside ${W.min}–${W.max}. Outside the range, a task can be marked “A1 non atteint” however good the French.</span></label>
           ${checks.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="w-check" data-k="${k}" ${ch[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}
         </section>
-        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-save">Finish without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Finish without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        ${ui.w.copyOut && ui.w.copyOut.task === task ? `<section class="panel stack tight"><p class="h3">Copy this into another AI</p><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p><textarea id="w-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.w.copyOut.text)}</textarea><div class="row"><button class="btn sm ghost" data-act="w-copy-close">Close</button></div></section>` : ""}
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
         <section class="sec"><div class="sec-head"><h2 class="h2">History</h2><span class="small muted">${hist.length ? `${hist.length} most recent` : ""}</span></div>
           ${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Task</th><th>Words</th><th>Level</th><th></th></tr></thead><tbody>${hist.map((w) => {
@@ -3476,6 +3536,8 @@
       if (ta) ta.focus();
     },
     "w-correct": writingCorrect,
+    "w-copy": writingCopy,
+    "w-copy-close": () => { ui.w.copyOut = null; render(true); },
     "w-save": writingSave,
     "w-clear": () => { const t = ui.w.task; ipDrop("writing--" + t); ui.w.text[t] = ""; ui.w.checks[t] = {}; ui.confirm = ""; render(true); },
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },

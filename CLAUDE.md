@@ -50,6 +50,7 @@
     - Keep one copy of each word across all decks.
   - `app.js`: the app logic.
     - One timer serves every page (writing, speaking, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
+    - Each writing task has "Copy for another AI", for when Claude can't correct the draft. It copies one prompt: the TCF Canada writing rules, criteria and score bands, the task and its subject (with the Tâche 3 documents), the word counts, the learner's recurring errors, the draft, and what to send back. If the browser blocks the clipboard, the prompt is shown selected, to copy by hand.
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
     - As on the real test, a set is four separate documents with one question each (`questions[i].doc`), not one text with four questions. Claude's sets use the same shape; ones saved before the change still show their single text.
     - They're pitched like the real test's items, as `TCF_CANADA.ceLevels` in `data.js` describes for each level: B1 (questions 11–19) is everyday texts of 70–150 words, asking what a document is for or what we learn from it as a whole; B2 (20–29) is articles and opinion pieces of 140–260 words, asking the writer's position, intention or what's implied. The calibration comes from France Éducation International's sample items and the Manuel du candidat.
