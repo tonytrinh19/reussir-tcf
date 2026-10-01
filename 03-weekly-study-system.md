@@ -18,7 +18,7 @@ A literal 20-week, day-by-day calendar would mostly be the same shape repeated w
 **Tuesday**
 - *Vocab (10 min):* Review only.
 - *Grammar (25 min, imperative + pronoun):* Rapid-fire 20-item flashcard drill (*envoie-moi, donne-le-moi, ne me l'envoie pas*). Check: ≥18/20 before moving on; if not, repeat tomorrow instead of adding new material.
-- *Reading (20 min):* One untimed CE-style passage + questions. Check: were misses vocabulary gaps or comprehension gaps?
+- *Reading (20 min):* One untimed CE set (four short documents, one question each). Check: were misses vocabulary gaps or comprehension gaps?
 - *Speaking (35 min, Orale Tâche 1 baseline):* Record a full self-introduction cold, listen back once, note 2–3 concrete fixes (don't re-record yet).
 - *Wrap-up (10 min):* Error log + listen-back notes.
 

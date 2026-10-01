@@ -47,7 +47,7 @@ window.TCF = (function () {
         [
           ["voc", 10, "Review only", "Spaced-repetition review. No new cards today.", "Recall each card cold.", "vocab.review"],
           ["gra", 25, "Imperative + pronoun, rapid fire", "20-item drill: envoie-moi, donne-le-moi, ne me l'envoie pas.", "18/20 or better. If not, repeat tomorrow instead of adding new material.", "grammar.imperatif"],
-          ["ce", 20, "Untimed reading passage", "One CE-style passage with questions, no timer.", "For each miss: vocabulary gap or comprehension gap?", "comp.ce"],
+          ["ce", 20, "Untimed reading set", "One CE set (four short documents, one question each), no timer.", "For each miss: vocabulary gap or comprehension gap?", "comp.ce"],
           ["eo", 35, "Orale Tâche 1 baseline", "Record a full self-introduction cold. Listen back once and note 2–3 concrete fixes. Don't re-record yet.", "2–3 fixes written down.", "speaking.t1"],
           ["bil", 10, "Error log + listen-back notes", "Log today's errors and your listen-back notes.", "", "progress.errors"],
         ],
@@ -1001,16 +1001,6 @@ window.TCF = (function () {
 
   /* Comprehension samples, so the page works before any set is generated. */
   const COMP = {
-    ce: {
-      level: "B1", type: "Annonce", title: "Médiathèque du Plateau : ce qui change en octobre",
-      text: "À partir du 1er octobre, la médiathèque du Plateau élargit ses horaires : elle sera ouverte du mardi au samedi de 10 h à 20 h, et le dimanche de 13 h à 17 h. Elle restera fermée le lundi.\n\nL'inscription devient gratuite pour tous les résidents de la ville, sur présentation d'une preuve d'adresse de moins de trois mois. Les non-résidents paieront 30 $ par an.\n\nNouveauté : chaque mercredi soir, un atelier de conversation en français est proposé aux nouveaux arrivants. Les places sont limitées à douze personnes ; il faut s'inscrire à l'accueil ou sur le site de la médiathèque.\n\nEnfin, les usagers pourront désormais emprunter jusqu'à quinze documents à la fois, pour une durée de quatre semaines.",
-      questions: [
-        { q: "Quand la médiathèque est-elle fermée à partir d'octobre ?", options: ["Le lundi, toute la journée", "Le dimanche, toute la journée", "Le mercredi soir, après l'atelier", "Le samedi après-midi"], answer: 0, why: "« Elle restera fermée le lundi. » On Sundays it opens from 13 h to 17 h." },
-        { q: "Que faut-il présenter pour s'inscrire gratuitement ?", options: ["Une preuve d'adresse récente", "Une carte de résident permanent", "Un passeport encore valide", "Un reçu de paiement de 30 $"], answer: 0, why: "« sur présentation d'une preuve d'adresse de moins de trois mois »" },
-        { q: "L'atelier du mercredi soir s'adresse surtout…", options: ["aux personnes récemment installées", "aux enfants et aux adolescents du quartier", "aux non-résidents qui paient l'inscription", "aux bénévoles de la médiathèque"], answer: 0, why: "« proposé aux nouveaux arrivants »" },
-        { q: "Quel changement concerne les emprunts ?", options: ["On peut emprunter plus de documents à la fois", "Les emprunts sont limités à quatre documents", "Les emprunts deviennent payants pour tous", "On peut garder les documents quinze semaines"], answer: 0, why: "« jusqu'à quinze documents à la fois, pour une durée de quatre semaines »" },
-      ],
-    },
     resources: [
       { name: "TV5Monde Apprendre", url: "https://apprendre.tv5monde.com/fr", what: "Short videos with exercises, sorted by CEFR level up to B2." },
       { name: "RFI Français facile", url: "https://francaisfacile.rfi.fr/fr/", what: "Journal en français facile: ten minutes of news read slowly, with transcripts." },
@@ -1555,26 +1545,8 @@ window.TCF = (function () {
     ["Consommer local, est-ce vraiment meilleur pour l'environnement ?", "Is buying local really better for the environment?"],
   );
 
-  /* More built-in comprehension sets (B1 and B2), so practice works without generating. */
-  COMP.ceSets = [COMP.ce, {
-    level: "B1", type: "Courriel", title: "Objet : report de la réunion des locataires",
-    text: "Bonjour à tous,\n\nLa réunion des locataires prévue le jeudi 12 mars est reportée au mardi 17 mars, à 19 h, dans la salle commune du rez-de-chaussée. Nous avons dû changer la date, car la salle sera occupée par des travaux de peinture la semaine prochaine.\n\nÀ l'ordre du jour : l'augmentation des charges annoncée par le propriétaire, le remplacement des laveuses au sous-sol et l'organisation de la fête des voisins en juin.\n\nSi vous ne pouvez pas être présent, vous pouvez envoyer vos questions par courriel avant le 15 mars ; nous les transmettrons au propriétaire. Un compte rendu sera ensuite affiché près des boîtes aux lettres.\n\nMerci de votre participation,\nLe comité des locataires",
-    questions: [
-      { q: "Pourquoi la réunion a-t-elle été déplacée ?", options: ["La salle sera occupée par des travaux", "Le propriétaire ne peut pas venir le 12", "Trop peu de locataires étaient disponibles", "Le comité préfère attendre la fête de juin"], answer: 0, why: "« la salle sera occupée par des travaux de peinture »" },
-      { q: "Quel sujet ne sera PAS abordé pendant la réunion ?", options: ["L'augmentation du loyer", "L'augmentation des charges", "Les laveuses du sous-sol", "La fête des voisins"], answer: 0, why: "The agenda mentions les charges, not le loyer: a classic TCF distractor." },
-      { q: "Que peuvent faire les locataires absents ?", options: ["Envoyer leurs questions avant le 15 mars", "Voter par courriel sur l'ordre du jour", "Appeler directement le propriétaire", "Assister à une deuxième réunion en juin"], answer: 0, why: "« vous pouvez envoyer vos questions par courriel avant le 15 mars »" },
-      { q: "Comment les locataires seront-ils informés de ce qui s'est dit ?", options: ["Par un compte rendu affiché dans l'immeuble", "Par un courriel envoyé par le propriétaire lui-même", "Par une lettre dans chaque boîte aux lettres", "Lors de la fête des voisins, au mois de juin prochain"], answer: 0, why: "« Un compte rendu sera ensuite affiché près des boîtes aux lettres. » Near the mailboxes, not in them." },
-    ],
-  }, {
-    level: "B2", type: "Article d'opinion", title: "Le télétravail, une liberté qui a un prix",
-    text: "Depuis la pandémie, le télétravail s'est imposé comme un acquis que peu de salariés accepteraient d'abandonner. On vante volontiers ses bienfaits : moins de temps perdu dans les transports, une meilleure concentration, davantage de souplesse pour concilier vie professionnelle et vie familiale. Ces avantages sont réels, et il serait malhonnête de les nier.\n\nPourtant, cette liberté nouvelle a un coût que l'on mesure encore mal. Pour les jeunes recrues, d'abord : comment apprendre un métier quand on ne voit ses collègues qu'à travers un écran ? Les savoir-faire informels, ces conseils glissés au détour d'un couloir, se transmettent difficilement en visioconférence. Pour les entreprises, ensuite, qui constatent un affaiblissement du sentiment d'appartenance et une hausse des démissions chez les employés les moins intégrés.\n\nFaut-il pour autant revenir au bureau cinq jours sur cinq ? Certainement pas. Mais plutôt que d'opposer présence et distance, les organisations gagneraient à définir des règles claires : des journées communes au bureau pour les réunions et l'accompagnement des nouveaux, et des journées à domicile pour le travail qui exige de la concentration. Le télétravail n'est ni une panacée ni une menace ; c'est un outil, dont la valeur dépend entièrement de la manière dont on s'en sert.",
-    questions: [
-      { q: "Quelle est la position de l'auteur sur le télétravail ?", options: ["Il en reconnaît les avantages mais souhaite qu'il soit mieux encadré", "Il pense qu'il faut revenir au bureau cinq jours sur cinq", "Il estime que ses inconvénients sont largement exagérés par les entreprises", "Il le voit avant tout comme une menace pour les entreprises"], answer: 0, why: "He concedes the benefits (« Ces avantages sont réels ») and then argues for clear rules." },
-      { q: "Selon l'auteur, pourquoi les nouveaux employés sont-ils particulièrement touchés ?", options: ["Ils apprennent mal les savoir-faire transmis de façon informelle", "Ils n'ont pas l'équipement nécessaire pour travailler chez eux", "Ils préfèrent de loin travailler au bureau avec leurs collègues", "Ils démissionnent plus souvent que les employés expérimentés"], answer: 0, why: "« Les savoir-faire informels… se transmettent difficilement en visioconférence. » The resignations concern les employés les moins intégrés, not specifically new hires." },
-      { q: "Que signifie « un acquis » dans le premier paragraphe ?", options: ["Un avantage que l'on considère comme obtenu pour de bon", "Une compétence apprise au travail avec l'expérience", "Un achat récent fait par l'entreprise pour ses salariés", "Une obligation prévue par la loi pour tous les employeurs"], answer: 0, why: "Un acquis = a right or benefit people consider permanently won." },
-      { q: "Que propose l'auteur à la fin du texte ?", options: ["Alterner bureau et maison selon le type de travail", "Laisser chaque salarié choisir librement son lieu de travail", "Interdire les réunions en visioconférence dans l'entreprise", "Réserver le télétravail aux employés les plus expérimentés"], answer: 0, why: "« des journées communes au bureau… et des journées à domicile pour le travail qui exige de la concentration »" },
-    ],
-  }];
+  /* The built-in reading sets are in comp-ce.js. */
+  COMP.ceSets = [];
 
   /* ================= TCF Canada: the exam this whole site targets =================
      Source: Manuel du candidat TCF Canada (France Éducation International, ex-CIEP) and
@@ -1608,7 +1580,21 @@ window.TCF = (function () {
         ["Aisance", "fluency and continuity, getting around a missing word (only partly visible in a transcript)"],
       ],
     },
-    comp: "Compréhension orale: 39 multiple-choice items in 35 minutes, four options and one correct answer, each recording heard only once, items getting harder from A1 to C2: everyday dialogues, phone calls, interviews, public announcements, radio and TV news and programmes, and talks on concrete or abstract topics at standard speed. Compréhension écrite: 39 items in 60 minutes, from notices, ads, menus, timetables and letters to opinion articles and long, complex or literary texts. Distractors reuse words from the document in misleading ways.",
+    comp: "Compréhension orale: 39 multiple-choice items in 35 minutes, four options and one correct answer, each recording heard only once, items getting harder from A1 to C2: everyday dialogues, phone calls, interviews, public announcements, radio and TV news and programmes, and talks on concrete or abstract topics at standard speed. Compréhension écrite: 39 items in 60 minutes, one document and one question each, from notices, ads, menus, timetables and letters to opinion articles and long, complex or literary texts. Distractors reuse words from the document in misleading ways.",
+    /* A reading item at each level: one document and one question. The documents follow the Manuel du
+       candidat's list for each level, and the questions follow France Éducation International's sample
+       items, where even the easy ones reword the document and the wrong options reuse its words. `items`
+       are the question numbers on the real test. check_ce.js holds the built-in B1 and B2 documents to
+       these lengths; app.js gives all of this to Claude when it writes reading sets and exams. */
+    ceLevels: {
+      A1: { items: "1–4", words: [15, 40], docs: "very short everyday documents: signs, notices, short text messages, small ads and timetables", asks: "a detail stated directly" },
+      A2: { items: "5–10", words: [40, 80], docs: "short practical documents: simple emails and letters, building notices, ads, programmes and notes", asks: "a detail, or what the writer asks for or proposes (« Que doit faire… ? », « Que propose… ? »)" },
+      B1: { items: "11–19", words: [70, 150], docs: "an everyday text about daily life or work: a personal or semi-formal email or letter, a forum post, a short news item, a practical article, a detailed notice or ad, a testimonial", asks: "what the document is for or what we learn from it as a whole: its purpose, a request or proposal, a cause, a change, or what the writer thinks or feels (« Quel est le but de ce message ? », « Qu'apprend-on dans ce texte ? », « Pourquoi… ? »). Answering often means putting two pieces of information together" },
+      B2: { items: "20–29", words: [140, 260], docs: "an article or report in which the writer takes a position on a concrete or abstract subject: a news analysis, an editorial or opinion column, a review, an open letter, a reader's letter, an interview extract", asks: "the main idea, the writer's position, intention or attitude, what is implied, or what a study, example or quotation is there to show (« Quelle est la position de l'auteur ? », « Que reproche l'auteur à… ? », « Que laisse entendre… ? »). The writer's real view often comes after a concession (certes… mais, pourtant, reste que)" },
+      C1: { items: "30–35", words: [200, 300], docs: "a complex argumentative or analytical text: an essay, an analysis or an opinion column with nuance and implicit positions", asks: "implicit meaning, the structure of the argument or the tone" },
+      C2: { items: "36–39", words: [250, 350], docs: "a demanding text: a literary passage (a narrative with implicit emotion or irony) or a dense essay", asks: "implicit meaning, irony, tone or the effect of a stylistic choice" },
+    },
+    ceItemRule: "The right answer rewords the document instead of copying its words. Each wrong option reuses words or facts from the document but gets them wrong: a detail that is there but doesn't answer the question, a view the writer reports and then rejects, an overgeneralisation (toujours, tous, seulement), a cause and effect swapped, or an assumption the text doesn't support. Never ask which option is NOT in the text.",
     /* The CE practice exam: 39 items in 60 minutes, one document per item, in level blocks from A1 to C2.
        Each block is [level, items, points per correct item]. TCF prep sites quote 3, 9, 15, 21 and 26
        points; 33 for items 36–39 is what brings the total to 699. */
@@ -1664,11 +1650,7 @@ window.TCF = (function () {
   SPEAKING.t3.tests = "An expression d'un point de vue: 4 min 30, no preparation, answering a question the examiner chooses. Spontaneous, continuous and convincing.";
   SPEAKING.t3.prompts.unshift(["Si vous aviez une activité humanitaire, laquelle choisiriez-vous ? Expliquez pourquoi.", "The official example from the TCF Canada manual."]);
 
-  /* Comprehension: themes and accents on the built-in sets, and the official practice partners. */
-  const tag = (set, themes, accent) => Object.assign(set, { themes }, accent ? { accent } : {});
-  tag(COMP.ceSets[0], ["quotidien"]);
-  tag(COMP.ceSets[1], ["logement", "quotidien"]);
-  tag(COMP.ceSets[2], ["travail"]);
+  /* Comprehension: the official practice partners. */
   COMP.resources = [
     { name: "TV5MONDE · S'entraîner au TCF", url: "https://apprendre.tv5monde.com/fr/tcf", what: "The official preparation partner: 560 questions in listening, language structure and reading, written by the test's own designers and validated by France Éducation International. Real audio and video.", skills: ["co", "ce"] },
     { name: "RFI · Diplômes et tests", url: "https://francaisfacile.rfi.fr/fr/dipl%C3%B4mes-tests/", what: "TCF listening series from A2 to C1, made with France Éducation International, in exam conditions.", skills: ["co"] },
