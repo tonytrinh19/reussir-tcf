@@ -1613,21 +1613,24 @@
     ui.c.player = "playing";
     ui.c.plays++;
     compKeep("co");
-    render(true);
     if (set.audio) {
       const a = new Audio(set.audio);
       audioEl = a;
       let fell = false;
-      // A recording that can't play falls back to the browser's voice. A play() interrupted by Pause
-      // (AbortError) isn't a failure.
-      const fallback = (e) => { if (fell || token !== playToken || (e && e.name === "AbortError")) return; fell = true; audioEl = null; speakSet(set, token); };
+      // A recording that can't play falls back to the browser's voice, which can't skip. A play()
+      // interrupted by Pause (AbortError) isn't a failure.
+      const fallback = (e) => { if (fell || token !== playToken || (e && e.name === "AbortError")) return; fell = true; audioEl = null; if (routeView() === "comp") render(false); speakSet(set, token); };
       a.onended = () => donePlaying(token);
       a.onerror = fallback;
       a.ontimeupdate = a.onloadedmetadata = a.ondurationchange = paintPlayer;
+      // Drawn only now that the recording is set, so the 5-second buttons are on from the start. Before,
+      // they waited for some other redraw, and after the answers were checked none came.
+      render(true);
       const pr = a.play();
       if (pr && pr.catch) pr.catch(fallback);
       return;
     }
+    render(true);
     speakSet(set, token);
   }
   // Play ▸ Pause ▸ Resume, then Replay once the recording has ended; Stop goes back to the start.
