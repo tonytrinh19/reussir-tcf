@@ -2286,6 +2286,12 @@
     const parts = t.split(".");
     return { view: VIEWS[parts[0]] ? parts[0] : "today", args: parts.slice(1) };
   }
+  // On claude.ai the page runs in a frame that reloads without the part after #, so a refresh always landed
+  // on Aujourd'hui. The page is remembered for this tab and reopened when the address names none; a new tab
+  // still starts on Aujourd'hui. Storage can be blocked, so this is only a convenience.
+  const PAGE_KEY = "tcf-reussir-page";
+  function rememberPage() { try { sessionStorage.setItem(PAGE_KEY, [route.view].concat(route.args).join(".")); } catch (_) {} }
+  function rememberedPage() { try { return sessionStorage.getItem(PAGE_KEY) || ""; } catch (_) { return ""; } }
   const routeView = () => route.view;
   let pendingRender = false, raf = 0, pointerDown = false;
   function scheduleRender() {
@@ -4145,6 +4151,7 @@
     const r = parseRoute(location.hash);
     const same = r.view === route.view && r.args.join(".") === route.args.join(".");
     route = r;
+    rememberPage();
     ui.confirm = "";
     ui.applied = "";
     render(true);
@@ -4153,7 +4160,8 @@
 
   /* =============== boot =============== */
   function boot() {
-    route = parseRoute(location.hash);
+    route = parseRoute(location.hash || rememberedPage());
+    rememberPage();
     render(true);
     const c = window.claude;
     if (!c || typeof c.use !== "function") { claudeState = "none"; tryServer().then((ok) => { if (!ok) useLocal(); }); return; }
