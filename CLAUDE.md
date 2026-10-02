@@ -50,12 +50,26 @@
     - A round asks the sentences not had yet before any come back. A rule missed in the last two weeks gets extra sentences, up to 40% of the round: one for each such rule, then a second and third for rules with more misses among their last five answers. They're never the missed sentence itself. The rest of the round takes the rules in turn.
     - "Retry the misses" swaps each missed sentence for another on the same rule, preferring ones never asked; a sentence comes back unchanged only when its rule has no other.
     - The app recognises a sentence by its topic, cue and question, so rewording one makes it a new sentence. Keep each sentence once per topic.
-  - `anki.js`: the learner's own Anki deck, "Mes cartes Anki" (100 cards from `~/French/french-cards.apkg`), loaded right after `drills.js`.
+  - `proofread.js`: the texts for Find the mistakes. There are 10 B1 messages with 4 mistakes each, and 10 B2 letters, articles and opinions with 5 each.
+    - The mistakes are of the kinds the learner makes: `KNOWN_ERRORS` plus patterns from their own corrections (malgré + clause, participer à, si + conditionnel, gender agreement…).
+    - In a text, `{n}` marks the n-th mistake, as whole words. A mistake is `[what the text says, [accepted corrections], category, why]`.
+    - Everything outside the marks must be correct French. Watch elision at the edges: if the word before a mark would elide, put it inside the mark (`{2} compte`, with "j'ai rendu").
+  - `anki.js`: the learner's own Anki deck, "Mes cartes Anki" (100 cards from `~/French/french-cards.apkg`), loaded after `drills.js` and `proofread.js`.
     - Cards that duplicated it were removed from the built-in themes.
     - Their Anki review progress was copied into the `srs` collection under ids `anki--<slug of the French side>`. Changing a card's French side in `anki.js` resets its progress. Editing it on the site doesn't (see `cards` below).
     - Keep one copy of each word across all decks.
   - `app.js`: the app logic.
     - One timer serves every page (writing, speaking, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
+    - Grammaire has three ways to practise across topics, above the topic list: the mixed review, Your mistakes and Find the mistakes.
+    - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item. Speaking isn't included, because its transcripts come from dictation.
+      - The cue is what the learner wrote. The question is the sentence with a gap where the correction goes, taken from Claude's corrected text when the correction is found there. Otherwise it's the learner's sentence with the draft's other corrections applied.
+      - The same mistake made again counts once, and every correction given for it is accepted. "(e)" forms are expanded.
+      - Left out: punctuation-only changes, corrections longer than 14 words, and mistakes the learner hides. Hidden ones are kept in `settings.main.mineHidden`, by their normalised wording.
+      - Rounds of 10 go: new mistakes (the most often made first), then the ones missed last time, then the ones right once, then fixed ones. A mistake is fixed after two right answers in a row.
+      - Rounds are saved in `drills` with topic `mine`, set `errors`. A mistake is recognised by its wording alone.
+    - **Find the mistakes** (`#grammar.hunt`) gives a text from `proofread.js`: the first not done at the level (B1 in Phases 1–2, B2 after, switchable), or else the one done longest ago.
+      - The learner taps the words that look wrong, then types a correction for each mistake found. A mistake is caught when it's both found and corrected.
+      - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). Nothing is kept before it's checked, since a text takes a few minutes.
     - Each writing task has "Copy for another AI", for when Claude can't correct the draft. It copies one prompt: the TCF Canada writing rules, criteria and score bands, the task and its subject (with the Tâche 3 documents), the word counts, the learner's recurring errors, the draft, and what to send back. If the browser blocks the clipboard, the prompt is shown selected, to copy by hand.
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
     - As on the real test, a set is four separate documents with one question each (`questions[i].doc`), not one text with four questions. Claude's sets use the same shape; ones saved before the change still show their single text.
@@ -91,7 +105,8 @@
   - Gemini reads its key from `~/.config/gemini/api_key`, which the user saves; never type or print the key. Microsoft needs `python3 -m pip install --user edge-tts`. Both need node and macOS `afconvert`.
   - After editing `comp-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`.
 - `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 2 to 4 minutes and that no audio file is left over.
-- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks and the mixed review name sets that exist. Run it after editing `drills.js`.
+- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks and the mixed review name sets that exist. Run it after editing `drills.js` or `proofread.js`.
+  - It also checks the Find the mistakes texts: each mistake marked once, as whole words, with corrections that differ from it; 4 mistakes for B1 and 5 for B2; 60–120 words for B1 and 100–180 for B2; and no missed elision in the corrected text or outside the planted mistakes.
 - `tools/check_ce.js`: checks the CE sets and the practice exam.
   - Structure: unique ids, a B1 and a B2 set for every topic, four documents per set with one question each, at least three kinds of document, 4 options per question, and the exam's level blocks.
   - Lengths: B1 and B2 documents keep to the word counts in `TCF_CANADA.ceLevels`.
@@ -101,7 +116,7 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
@@ -113,7 +128,7 @@
   - A finished CE practice exam is saved with `kind: "exam"`. It also adds a `mocks` entry, labelled as a site estimate.
 - History keeps only two kinds of record, shown in Progrès → Historique:
   - **Unfinished attempts** live in `inprogress`, one record per activity:
-    - `drill--<topic>--<set>` and `drill--mixed`
+    - `drill--<topic>--<set>` (`drill--mine--errors` for Your mistakes) and `drill--mixed`
     - `prod--<topic>`
     - `ce--<setId>` and `co--<setId>`
     - `exam--ce`
