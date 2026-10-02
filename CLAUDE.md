@@ -81,6 +81,7 @@
   - `comp-co.js`: all 31 built-in listening (CO) sets, one B1 and one B2 for every topic. Each plays `audio/<id>.mp4`.
     - The player has one main button (Play, Pause, Resume, then Replay once the recording ends), 5 seconds back and forward, Stop, which goes back to the start, and a position bar. Skipping and the bar need a recording, so they're off for the browser voice.
     - The controls sit in their own strip between the document and the questions, and it stays on screen (below the phone's top bar, `--rail-h`) while you scroll down to answer.
+    - The transcript stays hidden until the learner shows it or checks their answers. The same button, just below the strip, hides it again. When the browser has no French voice and there's no recording, the transcript is the set, so it's always shown.
     - There's no exam mode and no listen count on screen. `ui.c.plays` still counts listens from the start, because the first listen is what makes a set count as started.
     - Every recording lasts 2 to 4 minutes (B1 300–340 words, B2 380–430) and has 6 questions, with option lengths held to the same rule as CE.
     - Each set has a `cast`, which the site ignores: a note on the scene and, for each speaker (two at most), a Gemini voice, a Microsoft voice and a delivery note. Microsoft `vivienne` for women and narrators, `remy` for men.

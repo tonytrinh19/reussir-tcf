@@ -3294,13 +3294,15 @@
         const multi = new Set(set.lines.map((l) => l.speaker)).size > 1;
         const listen = canPlay && !submitted ? greet("ecoute", "Écoute bien : les réponses viennent dans l'ordre des questions.", "Listen closely: the answers come in the same order as the questions.", "sm") : "";
         // The controls get their own strip, which stays on screen while you scroll down to the questions.
+        // One button shows and hides the transcript, in the same place. Without a voice the transcript is the set, so it stays.
         material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}${listen}
           ${canPlay ? `<p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
             ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
           : `<p class="notice warn small">This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.</p>`}
         </article>
         ${canPlay ? `<div class="player-dock">${playerHTML()}</div>` : ""}
-        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b>${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : `<div><button class="btn ghost sm" data-act="c-script">Show the transcript</button></div>`}`;
+        ${canPlay ? `<div><button class="btn ghost sm" id="c-script" data-act="c-script" aria-expanded="${!!ui.c.script}">${ui.c.script ? "Hide" : "Show"} the transcript</button></div>` : ""}
+        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b>${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
       const rv = ui.c.review[skill];
@@ -3969,7 +3971,7 @@
     "c-resume": coResume,
     "c-stop": () => { stopAudio(); render(true); },
     "c-skip": (el) => { if (audioEl) { coSeek((audioEl.currentTime || 0) + Number(el.dataset.d)); coSeekDone(); } },
-    "c-script": () => { ui.c.script = true; render(true); },
+    "c-script": () => { ui.c.script = !ui.c.script; render(true); },
     "c-gap": (el) => compGap(ui.c.skill, el.dataset.i, el.dataset.k),
     "c-log": (el) => {
       const sc = Number(ui.form["cl-score"]), tot = Number(ui.form["cl-total"]);
