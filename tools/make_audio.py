@@ -27,12 +27,14 @@ import asyncio
 import base64
 import datetime
 import hashlib
+import http.client
 import io
 import json
 import math
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -65,6 +67,11 @@ MAX_WER, MAX_GAP = 0.08, 5  # a take fails over 8% word errors, or with 5+ words
 # Gemini reads fast: "unhurried" still gave B1 about 180 words a minute (1:50), so B1 asks for a slow pace.
 PACE = {"B1": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
         "B2": "Speak at a natural pace."}
+# One stuck request used to hold the whole batch past the routine's limit, with nothing printed.
+# Each attempt now waits at most REQUEST_TIMEOUT for Gemini to answer, a failed attempt (an error
+# code, a dropped connection or a timeout) is retried after 15 s, 30 s, 60 s, and the batch stops
+# cleanly once it has run BATCH_MINUTES, so the rest of run.sh still puts the ready takes on the site.
+REQUEST_TIMEOUT, TRIES, BATCH_MINUTES = 240, 4, 40
 
 
 def tts_text(s):
@@ -311,7 +318,15 @@ class DailyLimit(Exception):
 
 
 class Busy(Exception):
-    """Gemini still answers 5xx (e.g. 503 "high demand") after every retry."""
+    """Gemini still fails (5xx such as 503 "high demand", a dropped connection, a timeout) after every retry,
+    or the batch has run out of time."""
+
+
+DEADLINE = [None]  # time.monotonic() after which no new attempt starts (set by run_gemini)
+
+
+def out_of_time():
+    return DEADLINE[0] is not None and time.monotonic() >= DEADLINE[0]
 
 
 def api_key():
@@ -324,29 +339,38 @@ def api_key():
     return key
 
 
-def gemini(path, body, key, tries=6):
-    """Retries rate limits and server errors; a 5xx spell waits 15 s, 30 s, … up to about 8 minutes in all."""
+def gemini(path, body, key, what):
+    """One request, retried on rate limits, server errors, dropped connections and timeouts.
+    Every failed attempt prints a line, so a bad night shows what Gemini did."""
     data = json.dumps(body).encode()
-    for attempt in range(tries):
+    for attempt in range(TRIES):
+        if out_of_time():
+            raise Busy("out of time: the batch ran %d minutes" % BATCH_MINUTES)
         req = urllib.request.Request(GEMINI_API + path, data=data, method="POST", headers={"x-goog-api-key": key, "Content-Type": "application/json"})
+        start = time.monotonic()
+        wait = 15 * 2 ** attempt
         try:
-            with urllib.request.urlopen(req, timeout=600) as r:
+            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as r:
                 return json.loads(r.read())
         except urllib.error.HTTPError as e:
             msg = e.read().decode("utf-8", "replace")
             if e.code == 429 and "per day" in msg:
                 raise DailyLimit(msg[:300])
-            if e.code in (429, 500, 502, 503, 504) and attempt < tries - 1:
-                wait = re.search(r"retry in ([\d.]+)\s*s", msg)
-                time.sleep(float(wait.group(1)) + 1 if wait else 15 * 2 ** attempt)
-                continue
-            if e.code in (500, 502, 503, 504):
-                raise Busy("Gemini API error %s: %s" % (e.code, msg[:300]))
-            raise RuntimeError("Gemini API error %s: %s" % (e.code, msg[:300]))
-        except urllib.error.URLError:
-            if attempt == tries - 1:
-                raise
-            time.sleep(5)
+            if e.code not in (429, 500, 502, 503, 504):
+                raise RuntimeError("Gemini API error %s: %s" % (e.code, msg[:300]))
+            hint = re.search(r"retry in ([\d.]+)\s*s", msg)
+            wait = float(hint.group(1)) + 1 if hint else wait
+            problem = "error %s" % e.code
+        except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
+            reason = getattr(e, "reason", e)
+            problem = ("no answer in %d s" % REQUEST_TIMEOUT if isinstance(reason, (TimeoutError, socket.timeout))
+                       else "%s (%s)" % (type(reason).__name__, str(reason)[:80] or "connection lost"))
+        took = time.monotonic() - start
+        if attempt == TRIES - 1:
+            print("    %s: attempt %d of %d failed after %.0f s: %s. Giving up." % (what, attempt + 1, TRIES, took, problem), flush=True)
+            raise Busy("%s, %d tries" % (problem, TRIES))
+        print("    %s: attempt %d of %d failed after %.0f s: %s. Retrying in %.0f s." % (what, attempt + 1, TRIES, took, problem, wait), flush=True)
+        time.sleep(wait)
 
 
 def to_pcm(raw, mime):
@@ -387,7 +411,7 @@ def gemini_request(s):
 
 
 def gemini_speak(s, key):
-    r = gemini("/interactions", gemini_request(s), key)
+    r = gemini("/interactions", gemini_request(s), key, "take")
     pcm = [to_pcm(base64.b64decode(c["data"]), c.get("mime_type") or c.get("mimeType"))
            for step in r.get("steps", []) for c in step.get("content", []) if c.get("type") == "audio" and c.get("data")]
     if not pcm:
@@ -407,7 +431,7 @@ def transcript(pcm, key):
         {"inline_data": {"mime_type": "audio/wav", "data": audio}},
         {"text": "Transcris cet enregistrement en français, mot pour mot, sans rien corriger. Écris les nombres en toutes lettres, comme ils sont prononcés. Réponds uniquement avec la transcription."},
     ]}]}
-    r = gemini("/models/%s:generateContent" % GEMINI_CHECK, body, key)
+    r = gemini("/models/%s:generateContent" % GEMINI_CHECK, body, key, "transcription")
     return "".join(p.get("text", "") for c in r.get("candidates", [])[:1] for p in c.get("content", {}).get("parts", []))
 
 
@@ -503,8 +527,11 @@ def run_gemini(sets):
     if done:
         print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s to record" % (len(todo), "" if len(todo) == 1 else "s"), flush=True)
+    DEADLINE[0] = time.monotonic() + BATCH_MINUTES * 60
     try:
         for s in todo:
+            if out_of_time():
+                raise Busy("out of time: the batch ran %d minutes" % BATCH_MINUTES)
             # Checked before each request, so the first takes of a level already spare the rest.
             expected = expected_problem(gemini_pace(st, sets), s)
             if expected:
@@ -512,6 +539,7 @@ def run_gemini(sets):
                     s["id"], s["level"], expected[0], len(script_words(s)), clock(expected[1])), flush=True)
                 continue
             h = content_hash(s)
+            print("%-22s %s  recording… (%s)" % (s["id"], s["level"], time.strftime("%H:%M:%S")), flush=True)
             speech = gemini_speak(s, key)
             sec = (len(speech) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
             # A take outside 2–4 minutes can't be kept, so it isn't worth a transcription request.
@@ -535,7 +563,8 @@ def run_gemini(sets):
     except DailyLimit:
         print("Stopped at Gemini's daily limit (10 requests on the free tier). The next run continues.", flush=True)
     except Busy as e:
-        print("Stopped: Gemini stayed unavailable after every retry (%s). The next run continues." % str(e).split(":")[0], flush=True)
+        print("Stopped: %s. The next run continues." % ("the batch ran out of time" if str(e).startswith("out of time")
+              else "Gemini stayed unavailable after every retry (%s)" % e), flush=True)
     ready = sum(take_ready(st, s) for s in sets if s not in done)
     stuck = [k for k, v in st["fails"].items() if v.get("count", 0) >= 2]
     print("Gemini: %d of %d ready (%d on the site, %d waiting to go on it)" % (len(done) + ready, len(sets), len(done), ready))
