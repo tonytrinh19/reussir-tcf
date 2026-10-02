@@ -668,10 +668,85 @@
   function top3() { const r = errorCounts(21); return (r.length ? r : errorCounts(0)).slice(0, 3); }
 
   /* =============== drills: data =============== */
-  // Each item carries its set's instruction, so it still says what to do in the mixed review and retries.
-  function normItem(raw, kind, topic, ask) {
-    if (kind === "choice") return { kind, topic, ask: ask || "", q: raw[0], options: raw[1].slice(), a: [raw[1][0]], why: raw[2] || "" };
-    return { kind: "type", topic, ask: ask || "", src: raw[0] || "", q: raw[1], a: Array.isArray(raw[2]) ? raw[2] : [raw[2]], why: raw[3] || "" };
+  // Each item carries its set's instruction, so it still says what to do in the mixed review and retries,
+  // and its set and point (the rule it tests, from drills.js), so a retry can find another sentence on that rule.
+  function normItem(raw, kind, topic, ask, set) {
+    if (kind === "choice") return { kind, topic, set, ask: ask || "", q: raw[0], options: raw[1].slice(), a: [raw[1][0]], why: raw[2] || "", point: raw[3] || "" };
+    return { kind: "type", topic, set, ask: ask || "", src: raw[0] || "", q: raw[1], a: Array.isArray(raw[2]) ? raw[2] : [raw[2]], why: raw[3] || "", point: raw[4] || "" };
+  }
+  const setItems = (tid, st) => st.items.map((r) => normItem(r, st.kind, tid, st.ask, st.id));
+  // A sentence's identity across rounds: its topic, cue and question.
+  const itemKey = (topic, it) => `${topic}|${norm(it.src)}|${norm(it.q)}`;
+  let BANK = null;
+  // The built-in sentence a saved question was, if it's still in a set, with its set and point.
+  function bankItem(topic, it) {
+    if (!BANK) BANK = new Map(T.TOPICS.flatMap((tp) => tp.sets.flatMap((st) => setItems(tp.id, st).map((x) => [itemKey(tp.id, x), x]))));
+    return BANK.get(itemKey(topic, it)) || null;
+  }
+  // Every answer to a drill sentence, oldest first, from finished rounds and their retries.
+  function drillLog() {
+    const log = [];
+    for (const d of list("drills")) {
+      if (d.set === "prod") continue;
+      arr(d.items).forEach((it) => log.push({ key: itemKey(it.topic || d.topic, it), ts: d.ts || 0, ok: !!it.ok }));
+      if (d.retry) arr(d.retry.items).forEach((it) => log.push({ key: itemKey(it.topic || d.topic, it), ts: d.retry.ts || d.ts || 0, ok: !!it.ok }));
+    }
+    return log.sort((a, b) => a.ts - b.ts);
+  }
+  // When each sentence was last asked, and whether it was right then.
+  const drillSeen = (log) => new Map((log || drillLog()).map((e) => [e.key, e]));
+  // Oldest first: sentences never asked, then the ones asked longest ago. Ties are in random order.
+  const byAge = (items, seen) => shuffle(items).sort((a, b) => ((seen.get(itemKey(a.topic, a)) || {}).ts || 0) - ((seen.get(itemKey(b.topic, b)) || {}).ts || 0));
+  // A round's sentences. Nothing repeats until the set is used up, because the ones not asked yet come first.
+  // Rules missed in the last two weeks get extra sentences, up to 40% of the round in all: one for each such
+  // rule, then a second for those with two or more misses among their last five answers, then a third. They're
+  // sentences other than the missed ones, so a rule that keeps tripping you up comes back worded differently,
+  // and the extra practice fades once you get it right again. The rest of the round takes the rules in turn,
+  // so each gets its share on top.
+  function pickRound(pool, n, log) {
+    const seen = drillSeen(log);
+    const since = Date.now() - 14 * 864e5;
+    const pointOf = new Map(pool.map((it) => [itemKey(it.topic, it), it.point]));
+    const last = new Map();
+    log.forEach((e) => { const p = pointOf.get(e.key); if (p && e.ts >= since) last.set(p, (last.get(p) || []).concat(e.ok).slice(-5)); });
+    const weak = [...last.entries()].map(([p, oks]) => [p, oks.filter((ok) => !ok).length]).filter(([, m]) => m > 0).sort((a, b) => b[1] - a[1]);
+    const missed = (it) => { const s = seen.get(itemKey(it.topic, it)); return s && !s.ok && s.ts >= since; };
+    const order = byAge(pool, seen);
+    const out = new Set();
+    let room = Math.floor(n * 0.4);
+    for (let pass = 0; pass < 3 && room > 0; pass++) {
+      for (const [point, misses] of weak) {
+        if (room <= 0 || misses <= pass) continue;
+        const it = order.find((x) => x.point === point && !out.has(x) && !missed(x));
+        if (it) { out.add(it); room--; }
+      }
+    }
+    const rules = shuffle([...new Set(order.map((x) => x.point))]);
+    for (const fresh of [true, false]) {
+      for (let added = true; added && out.size < n;) {
+        added = false;
+        for (const p of rules) {
+          const it = out.size < n && order.find((x) => x.point === p && !out.has(x) && !(fresh && seen.has(itemKey(x.topic, x))));
+          if (it) { out.add(it); added = true; }
+        }
+      }
+    }
+    return shuffle([...out]);
+  }
+  // Retry the misses: each missed sentence is swapped for another on the same rule, preferring ones never
+  // asked. A sentence comes back as it was only when its rule has no other (or it isn't from a built-in set).
+  function retryItems(d) {
+    const seen = drillSeen();
+    const used = new Set(d.items.map((it) => itemKey(it.topic || d.topic, it)));
+    return d.items.filter((it, k) => !(d.results[k] && d.results[k].ok)).map((it) => {
+      const tid = it.topic || d.topic;
+      const b = bankItem(tid, it);
+      const st = b && b.point && TOPIC[tid].sets.find((x) => x.id === b.set);
+      const pick = st ? byAge(setItems(tid, st).filter((x) => x.point === b.point && !used.has(itemKey(tid, x))), seen)[0] : null;
+      const next = pick ? Object.assign({}, pick, { fresh: true }) : Object.assign({}, it);
+      used.add(itemKey(tid, next));
+      return next;
+    });
   }
   function drillsFor(topic, set) {
     return list("drills").filter((d) => d.topic === topic && (!set || d.set === set) && d.src !== "retry").sort((a, b) => (a.ts || 0) - (b.ts || 0));
@@ -718,13 +793,13 @@
       const phase = settings().phase;
       const allowed = phase <= 1 ? ["B1"] : phase === 2 ? ["B1", "B1+"] : ["B1+", "B2"];
       const pick = [["pronominaux", "pc", 4], ["imperatif", "main", 4], ["interrogative", "main", 4], ["subjonctif", "formation", 3]];
+      const log = drillLog();
       items = [];
       pick.forEach(([tid, sid, n]) => {
         const sets = TOPIC[tid].sets;
         let pool = sets.filter((x) => allowed.includes(x.level));
         if (!pool.length) pool = [sets.find((x) => x.id === sid)];
-        const all = pool.flatMap((st) => st.items.map((r) => normItem(r, st.kind, tid, st.ask)));
-        items.push(...shuffle(all).slice(0, n));
+        items.push(...pickRound(pool.flatMap((st) => setItems(tid, st)), n, log));
       });
       items = shuffle(items);
       title = "Mixed review · " + allowed.join(" and ");
@@ -736,7 +811,7 @@
       title = set.title;
       if (o.items) items = o.items;
       else if (o.gen && ui.gen[tp.id + "." + set.id]) items = ui.gen[tp.id + "." + set.id].slice();
-      else items = shuffle(set.items.map((r) => normItem(r, set.kind, tp.id, set.ask))).slice(0, set.take);
+      else items = pickRound(setItems(tp.id, set), set.take, drillLog());
     }
     items = items.map((it) => Object.assign({}, it, it.kind === "choice" ? { order: shuffle(it.options.map((_, k) => k)) } : {}));
     ui.drill = { topic: topicId, set: setId, title, items, i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: o.src || (o.gen ? "claude" : "bank"), saved: null, parent: o.parent || null };
@@ -800,17 +875,24 @@
     const d = ui.drill;
     d.done = true;
     const score = d.results.filter((r) => r && r.ok).length;
-    // A retry round's score goes on the round it came from rather than into a record of its own.
+    // A retry round goes on the round it came from rather than into a record of its own. Its questions are
+    // kept too, so its new sentences count as asked.
     if (d.src === "retry") {
       const cur = d.parent && S.drills.get(d.parent);
-      if (cur) put("drills", d.parent, Object.assign(clone(cur), { retry: { score, total: d.items.length, date: todayStr() } }));
+      if (cur) put("drills", d.parent, Object.assign(clone(cur), { retry: { score, total: d.items.length, date: todayStr(), ts: Date.now(), items: roundItems(d) } }));
       render(true);
       return;
     }
     const id = uid();
     d.saved = id;
-    // Every question is kept with the answer given, so the round can be reviewed from the history.
-    const items = d.items.map((it, k) => {
+    put("drills", id, { topic: d.topic, set: d.set, name: d.title, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, items: roundItems(d) });
+    ipDrop(drillIpId(d));
+    autoTick(`grammar.${d.topic}.${d.set}`);
+    render(true);
+  }
+  // Every question is kept with the answer given, so the round can be reviewed from the history.
+  function roundItems(d) {
+    return d.items.map((it, k) => {
       const r = d.results[k] || {};
       const o = { kind: it.kind, q: it.q, a: it.a, why: it.why || "", given: str(r.given), ok: !!r.ok };
       if (it.src) o.src = it.src;
@@ -819,14 +901,10 @@
       if (it.topic && it.topic !== d.topic) o.topic = it.topic;
       return o;
     });
-    put("drills", id, { topic: d.topic, set: d.set, name: d.title, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, items });
-    ipDrop(drillIpId(d));
-    autoTick(`grammar.${d.topic}.${d.set}`);
-    render(true);
   }
   function drillRetry() {
     const d = ui.drill;
-    const items = d.items.filter((it, k) => !(d.results[k] && d.results[k].ok)).map((it) => Object.assign({}, it));
+    const items = retryItems(d);
     if (!items.length) return;
     const parent = d.src === "retry" ? d.parent : d.saved;
     if (d.topic === "mixed") {
@@ -853,8 +931,10 @@
       const cur = rid && S.drills.get(rid);
       if (cur) {
         const doc = clone(cur);
-        if (d.src === "retry") doc.retry = Object.assign({}, doc.retry, { score });
-        else {
+        if (d.src === "retry") {
+          doc.retry = Object.assign({}, doc.retry, { score });
+          if (Array.isArray(doc.retry.items) && doc.retry.items[k]) Object.assign(doc.retry.items[k], { ok: true, overturned: true });
+        } else {
           doc.score = score;
           if (Array.isArray(doc.items) && doc.items[k]) Object.assign(doc.items[k], { ok: true, overturned: true });
         }
@@ -871,7 +951,7 @@
       ? `Each item: {"q": "French sentence with ___ for the gap", "options": ["the correct option", "distractor", "distractor"], "why": "short English explanation"}. The FIRST option must be the correct one.`
       : `Each item: {"src": "optional cue or source sentence shown above the question (can be empty)", "q": "French sentence with exactly one ___ gap, with the infinitive or cue in parentheses when needed", "a": ["every acceptable answer for the gap, exactly as it should be typed"], "why": "short English explanation"}.`;
     const example = set.kind === "choice" ? JSON.stringify({ q: ex[0], options: ex[1], why: ex[2] }) : JSON.stringify({ src: ex[0], q: ex[1], a: ex[2], why: ex[3] });
-    const avoid = set.items.slice(0, 8).map((x) => (set.kind === "choice" ? x[0] : x[1] === "___" ? x[0] : x[1])).join(" / ");
+    const avoid = shuffle(set.items).slice(0, 12).map((x) => (set.kind === "choice" ? x[0] : x[1] === "___" ? x[0] : x[1])).join(" / ");
     const lvl = set.level || "B1";
     const levelNote = lvl === "B2"
       ? "Target level B2: longer sentences with subordinate clauses, compound tenses and TCF-register vocabulary (work, housing, immigration, environment, public debate). Include the traps a B2 grader looks for."
@@ -2354,7 +2434,7 @@
     }
     const done = d.results.filter((r) => r && r.ok).length;
     return `<section class="panel drill" id="drill-area">
-      <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? " · retrying misses" : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
+      <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? (d.items.some((x) => x.fresh) ? " · your misses, in new sentences" : " · retrying misses") : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
       <div class="bar"><i style="width:${(d.i / n) * 100}%"></i></div>
       ${drillAsk(d, it)}
       ${it.src ? `<p class="src">${typo(it.src)}</p>` : ""}
@@ -2390,6 +2470,7 @@
       <div class="row"><span class="scorebig">${score}/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
       ${breakdown}
       ${misses.length ? `<div class="stack tight"><p class="h3">Review</p><ul class="misses">${misses.map(({ it, k, r }) => `<li>
+          ${it.point ? `<p><span class="pill">${esc(it.point)}</span></p>` : ""}
           ${it.ask ? `<p class="small muted">${esc(it.ask)}</p>` : ""}
           ${it.src ? `<p class="small muted fr">${typo(it.src)}</p>` : ""}
           <p class="fr">${typo(it.q).replace("___", "<b>___</b>")}</p>
@@ -2398,10 +2479,11 @@
           ${r.claude ? `<p class="small ${r.claude.correct ? "" : "muted"}"><b>${r.claude.correct ? "Claude: your answer works too. Counted as correct." : "Claude: not quite."}</b> ${esc(r.claude.explanation)}</p>` : it.kind === "type" && !r.ok ? `<div>${claudeBtn("dispute-" + k, "drill-dispute", "Is my answer also correct?", `data-k="${k}"`, "btn ghost sm")}</div>` : ""}
         </li>`).join("")}</ul></div>` : `<p class="pen-ok">Sans faute !</p>`}
       <div class="row">
-        ${misses.some((x) => !x.r.ok) ? `<button class="btn primary" data-act="drill-retry">Retry the misses</button>` : ""}
+        ${misses.some((x) => !x.r.ok) ? `<button class="btn primary" data-act="drill-retry" title="Each sentence you missed comes back as a new sentence on the same rule, when the set has one">Retry the misses</button>` : ""}
         ${d.topic !== "mixed" ? `<button class="btn" data-act="drill-start" data-topic="${d.topic}" data-set="${d.set}">New round</button>` : `<button class="btn" data-act="drill-start" data-topic="mixed" data-set="main">New round</button>`}
         <button class="btn ghost" data-act="drill-close">Close</button>
       </div>
+      ${misses.some((x) => !x.r.ok && x.it.point) ? `<p class="small muted">Retrying asks a new sentence on each rule you missed. A new round starts with sentences you haven't had yet and gives extra room to the rules you keep missing.</p>` : ""}
     </section>`;
   }
   function grammarTopic(tp, setArg) {
@@ -2412,7 +2494,9 @@
     const coreSet = tp.criterion.set;
     const b2Set = tp.sets.find((x) => x.level === "B2");
     const nextSet = m.ok && b2Set ? b2Set.id : coreSet;
+    const seen = drillSeen();
     const sets = tp.sets.map((st) => {
+      const unseen = setItems(tp.id, st).filter((x) => !seen.has(itemKey(tp.id, x))).length;
       const n = drillsFor(tp.id, st.id).length;
       const best = n ? pct(bestPct(tp.id, st.id)) : "—";
       const isNext = st.id === nextSet;
@@ -2423,7 +2507,7 @@
       return `<div class="set-row">
         <div class="stack tight" style="gap:4px">
           <span class="row" style="gap:8px"><span class="lvl ${st.level === "B2" ? "b2" : ""}">${esc(st.level)}</span><b>${esc(st.title)}</b>${isNext ? `<span class="pill info">Up next</span>` : ""}</span>
-          <span class="small muted">${Math.min(st.take, st.items.length)} per round from ${st.items.length} · ${st.kind === "choice" ? "multiple choice" : "type the answer"} · best ${best}${st.id === coreSet ? " · counts toward mastery" : ""}</span>
+          <span class="small muted">${Math.min(st.take, st.items.length)} per round · ${unseen ? `${unseen} of ${st.items.length} sentences not had yet` : `all ${st.items.length} sentences had, oldest first`} · ${st.kind === "choice" ? "multiple choice" : "type the answer"} · best ${best}${st.id === coreSet ? " · counts toward mastery" : ""}</span>
         </div>
         <span class="row">${startBtns}${claudeBtn("gen-" + tp.id + "." + st.id, "drill-gen", "New items from Claude", `data-topic="${tp.id}" data-set="${st.id}"`, "btn sm")}</span>
       </div>`;
@@ -3061,16 +3145,19 @@
   function drillReview(d) {
     const items = arr(d.items);
     const qs = items.length ? items : arr(d.misses).map((m) => ({ q: m.q, src: m.src, a: [m.a], given: m.given, ok: false }));
-    return `<div class="stack tight">
-      ${items.length ? "" : `<p class="small muted">This round is from before whole rounds were saved, so only the questions you missed are here.</p>`}
-      <ul class="misses">${qs.map((it) => `<li>
+    const li = (it) => `<li>
         ${it.ask ? `<p class="small muted">${esc(it.ask)}</p>` : ""}
         ${it.src ? `<p class="small muted fr">${typo(it.src)}</p>` : ""}
         <p class="fr">${typo(it.q).replace("___", "<b>___</b>")}</p>
         <p>${it.ok ? `<span class="pen-ok">${esc(it.given)}</span>${it.overturned ? ` <span class="small muted">· accepted by Claude</span>` : ""}` : `<span class="pen-wrong">${esc(it.given || "—")}</span> <span class="pen-right">${esc(arr(it.a)[0] || "")}</span>`}</p>
         ${it.why ? `<p class="small muted">${typo(it.why)}</p>` : ""}
-      </li>`).join("")}</ul>
+      </li>`;
+    const again = d.retry ? arr(d.retry.items) : [];
+    return `<div class="stack tight">
+      ${items.length ? "" : `<p class="small muted">This round is from before whole rounds were saved, so only the questions you missed are here.</p>`}
+      <ul class="misses">${qs.map(li).join("")}</ul>
       ${d.retry ? `<p class="small">Retried the misses: ${d.retry.score}/${d.retry.total}.</p>` : ""}
+      ${again.length ? `<ul class="misses">${again.map(li).join("")}</ul>` : ""}
     </div>`;
   }
   function prodReview(d) {

@@ -44,7 +44,13 @@
     - **Boarding pass:** the phases as one flight from B1 to NCLC 7. The week places the plane, and the gate is today's first open block. The small version is at the foot of the sidebar; the full one is at the top of Progrès.
     - **L'expression du jour:** a French saying on a taped notebook scrap on Aujourd'hui, changing daily, from `EXPRESSIONS` in `data.js`. Some are from Québec, and say so.
   - `data.js`: curriculum content plus the `TCF_CANADA` spec.
-  - `anki.js`: the learner's own Anki deck, "Mes cartes Anki" (100 cards from `~/French/french-cards.apkg`), loaded right after `data.js`.
+  - `drills.js`: every grammar drill set, loaded right after `data.js`, which keeps the topics themselves.
+    - Each set's sentences are grouped by the rule they test (the set's `points`), and each item ends with its point.
+    - Every set holds at least three rounds of sentences (3 × `take`), and every point at least 4, so a learner who needs more rounds than planned doesn't get the same sentences again. Repetition made rounds boring, and later scores reflected memory rather than the rule.
+    - A round asks the sentences not had yet before any come back. A rule missed in the last two weeks gets extra sentences, up to 40% of the round: one for each such rule, then a second and third for rules with more misses among their last five answers. They're never the missed sentence itself. The rest of the round takes the rules in turn.
+    - "Retry the misses" swaps each missed sentence for another on the same rule, preferring ones never asked; a sentence comes back unchanged only when its rule has no other.
+    - The app recognises a sentence by its topic, cue and question, so rewording one makes it a new sentence. Keep each sentence once per topic.
+  - `anki.js`: the learner's own Anki deck, "Mes cartes Anki" (100 cards from `~/French/french-cards.apkg`), loaded right after `drills.js`.
     - Cards that duplicated it were removed from the built-in themes.
     - Their Anki review progress was copied into the `srs` collection under ids `anki--<slug of the French side>`. Changing a card's French side in `anki.js` resets its progress. Editing it on the site doesn't (see `cards` below).
     - Keep one copy of each word across all decks.
@@ -85,6 +91,7 @@
   - Gemini reads its key from `~/.config/gemini/api_key`, which the user saves; never type or print the key. Microsoft needs `python3 -m pip install --user edge-tts`. Both need node and macOS `afconvert`.
   - After editing `comp-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`.
 - `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 2 to 4 minutes and that no audio file is left over.
+- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks and the mixed review name sets that exist. Run it after editing `drills.js`.
 - `tools/check_ce.js`: checks the CE sets and the practice exam.
   - Structure: unique ids, a B1 and a B2 set for every topic, four documents per set with one question each, at least three kinds of document, 4 options per question, and the exam's level blocks.
   - Lengths: B1 and B2 documents keep to the word counts in `TCF_CANADA.ceLevels`.
@@ -94,7 +101,7 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
@@ -115,7 +122,7 @@
 
     A record is written at the first real answer or keystroke (typing is saved 1.5 s after it stops). It's deleted when the attempt is submitted or discarded. Nothing is saved when something is only opened or generated.
   - **Finished attempts** keep what's needed to review them:
-    - Drill rounds keep every question with the answer given (`items`). A "retry the misses" round only adds `retry: {score, total}` to its round.
+    - Drill rounds keep every question with the answer given (`items`). A "retry the misses" round adds `retry: {score, total, items}` to its round instead of a record of its own; its questions count as asked.
     - Production checks keep `text` and `fb`.
     - Speaking attempts keep the Tâche 2 conversation (`chat`).
   - **Claude's follow-up homework** (from writing corrections and "Suggest 3") is saved only when the learner presses Add.
