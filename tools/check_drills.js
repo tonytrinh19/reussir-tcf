@@ -6,7 +6,9 @@
 //    sentence on the rule that was missed;
 //  - no sentence appears twice in a topic, because the app recognises a sentence it has asked by its wording;
 //  - the answer fits the elision around the gap (j'___ needs a vowel, je ___ can't take one).
-// It also checks that the plan's grammar blocks and the mixed review point at sets that exist.
+// It also checks that the plan's grammar blocks and the mixed review point at sets that exist, and the texts
+// of Find the mistakes (proofread.js): each mistake marked once, as whole words, with real corrections; the
+// length for the level; and no elision slip in the corrected text or outside the planted mistakes.
 // Run: node tools/check_drills.js   (prints a line per set; exits 1 if anything fails)
 const fs = require("fs");
 const path = require("path");
@@ -14,6 +16,7 @@ global.window = {};
 const site = path.join(__dirname, "..", "site");
 require(path.join(site, "data.js"));
 require(path.join(site, "drills.js"));
+require(path.join(site, "proofread.js"));
 const T = window.TCF;
 
 const ROUNDS = 3;
@@ -100,6 +103,54 @@ for (const tp of T.TOPICS) {
     console.log(`${where.padEnd(24)} ${String(s.level).padEnd(3)} ${String(items.length).padStart(3)} sentences = ${(items.length / s.take).toFixed(1)} rounds of ${s.take} · points ${per.join("/")}`);
   }
 }
+
+// Find the mistakes (proofread.js).
+const PR_MISTAKES = { B1: 4, B2: 5 };
+const PR_WORDS = { B1: [60, 120], B2: [100, 180] };
+const words = (str) => (String(str).match(/\S+/g) || []).filter((x) => /[\p{L}\p{N}]/u.test(x)).length;
+// A word that should have elided: je ai, que il, de un, si il…
+const SLIP = /(^|[\s'’«(])(?:je|me|te|se|ne|de|que|lorsque|puisque|jusque) (?=[aeiouyâàéèêëîïôûù])|(^|[\s«(])si (?=ils?\b)/gi;
+const prIds = new Set();
+(T.PROOFREAD || []).forEach((p, i) => {
+  const w = `proofread ${p.id || "#" + (i + 1)}`;
+  if (!text(p.id) || prIds.has(p.id)) fail(`${w}: missing or repeated id`);
+  prIds.add(p.id);
+  if (!PR_MISTAKES[p.level]) { fail(`${w}: level must be B1 or B2`); return; }
+  if (!text(p.kind) || !text(p.title)) fail(`${w}: needs a kind and a title`);
+  const ms = Array.isArray(p.mistakes) ? p.mistakes : [];
+  if (ms.length !== PR_MISTAKES[p.level]) fail(`${w}: ${p.level} texts have ${PR_MISTAKES[p.level]} mistakes, this has ${ms.length}`);
+  const marks = (p.text.match(/\{\d+\}/g) || []).map((m) => Number(m.slice(1, -1)));
+  if (marks.some((k) => k >= ms.length)) fail(`${w}: a mark has no mistake`);
+  ms.forEach(([wrong, rights, cat, why], k) => {
+    const m = `${w}, mistake ${k + 1}`;
+    if (marks.filter((x) => x === k).length !== 1) fail(`${m}: must be marked exactly once, as {${k}}`);
+    if (!text(wrong) || !/\p{L}/u.test(wrong)) fail(`${m}: no text`);
+    if (!Array.isArray(rights) || !rights.length || !rights.every(text)) fail(`${m}: needs its corrections`);
+    else if (rights.some((r) => norm(r) === norm(wrong))) fail(`${m}: lists itself as a correction`);
+    if (!T.CATEGORIES[cat]) fail(`${m}: unknown category ${cat}`);
+    if (!text(why)) fail(`${m}: no explanation`);
+  });
+  // Marks are whole words, since the page lets you tap words: a space, « or the start before; a space,
+  // punctuation or the end after.
+  for (const m of p.text.matchAll(/\{\d+\}/g)) {
+    const before = p.text[m.index - 1], after = p.text[m.index + m[0].length];
+    if (before !== undefined && !/[\s«(]/.test(before)) fail(`${w}: ${m[0]} must start a word`);
+    if (after !== undefined && !/[\s.,;:!?»)…]/.test(after)) fail(`${w}: ${m[0]} must end a word`);
+  }
+  let shown = "";
+  const spans = [];
+  p.text.split(/(\{\d+\})/).forEach((part) => {
+    const m = part.match(/^\{(\d+)\}$/);
+    if (m && ms[+m[1]]) { spans.push([shown.length, shown.length + ms[+m[1]][0].length]); shown += ms[+m[1]][0]; } else shown += part;
+  });
+  const fixed = p.text.replace(/\{(\d+)\}/g, (_, k) => (ms[k] && Array.isArray(ms[k][1]) ? ms[k][1][0] : ""));
+  const slips = (s2) => [...s2.matchAll(SLIP)].map((m) => m.index + (m[1] || m[2] || "").length);
+  slips(fixed).forEach((at) => fail(`${w}: the corrected text keeps a missed elision at "${fixed.slice(at, at + 16)}…"`));
+  slips(shown).filter((at) => !spans.some(([a, b]) => at >= a && at < b)).forEach((at) => fail(`${w}: a missed elision outside the planted mistakes, at "${shown.slice(at, at + 16)}…"`));
+  const n = words(shown), [lo, hi] = PR_WORDS[p.level];
+  if (n < lo || n > hi) fail(`${w}: ${n} words, outside ${lo}–${hi} for ${p.level}`);
+  console.log(`${w.padEnd(24)} ${p.level}  ${String(n).padStart(3)} words · ${ms.length} mistakes`);
+});
 
 // The plan links each grammar block to a topic (grammar.<topic>) or one of its sets (grammar.<topic>.<set>).
 for (const [phase, p] of Object.entries(T.PLAN)) {

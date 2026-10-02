@@ -270,6 +270,8 @@
   const ui = {
     day: null,
     drill: null,
+    hunt: null, // the Find the mistakes text being done: its id, the words tapped, then what was found and typed
+    huntLevel: "",
     gen: {},
     prod: {},
     vocab: null,
@@ -675,8 +677,11 @@
     return { kind: "type", topic, set, ask: ask || "", src: raw[0] || "", q: raw[1], a: Array.isArray(raw[2]) ? raw[2] : [raw[2]], why: raw[3] || "", point: raw[4] || "" };
   }
   const setItems = (tid, st) => st.items.map((r) => normItem(r, st.kind, tid, st.ask, st.id));
-  // A sentence's identity across rounds: its topic, cue and question.
-  const itemKey = (topic, it) => `${topic}|${norm(it.src)}|${norm(it.q)}`;
+  // A sentence's identity across rounds: its topic, cue and question. One of your own mistakes is known by
+  // what you wrote alone, since the sentence shown around it can change.
+  const itemKey = (topic, it) => (topic === "mine" ? `mine|${norm(it.src)}` : `${topic}|${norm(it.src)}|${norm(it.q)}`);
+  // Names for the drill records that aren't one topic's set.
+  const DRILL_NAMES = { mixed: "Mixed review", mine: "Your mistakes", hunt: "Find the mistakes" };
   let BANK = null;
   // The built-in sentence a saved question was, if it's still in a set, with its set and point.
   function bankItem(topic, it) {
@@ -748,6 +753,108 @@
       return next;
     });
   }
+  /* =============== your own mistakes =============== */
+  // Every mistake from Claude's corrections of your writing and production checks, and from the error log, as a
+  // drill item. What you wrote is the cue; your sentence is the question, with a gap where the mistake was and
+  // the draft's other corrections applied, so the words around it are right; the correction is the answer.
+  // A mistake made again counts once, with every correction given for it accepted. Left out: changes of
+  // punctuation only (answers are checked without punctuation), rewrites longer than MINE_WORDS words, which
+  // don't make a fair typed answer, and the mistakes you hide. Speaking isn't included: its transcripts come
+  // from dictation, which garbles words.
+  const MINE_WORDS = 14;
+  // "arrivé(e)" → arrivé, arrivée (at most two such brackets).
+  function variants(s) {
+    let out = [str(s).trim()];
+    for (let k = 0; k < 2; k++) out = out.flatMap((x) => { const m = x.match(/\(([^()\s]{1,3})\)/); return m ? [x.replace(m[0], ""), x.replace(m[0], m[1])] : [x]; });
+    return out;
+  }
+  const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const wordRe = (w, flags) => new RegExp(`(?<![\\p{L}\\p{N}])${reEsc(w)}(?![\\p{L}\\p{N}])`, "u" + (flags || ""));
+  const unbracket = (x) => str(x).replace(/\(([^()\s]{1,3})\)/g, "");
+  const sentencesOf = (t) => str(t).split(/\n+|(?<=[.!?…])\s+/).filter((x) => x.trim());
+  const overlap = (a, b) => { const A = new Set(norm(a).split(" ")); return norm(b).split(" ").filter((x) => A.has(x)).length; };
+  // The sentence a mistake was in, with a gap where the correction goes, cut to about ten words on each side.
+  // It comes from Claude's corrected text when the correction is there (exact: every word around the gap is
+  // right). Otherwise it's your sentence with the draft's other corrections applied.
+  function mistakeContext(text, corrected, wrong, a, errs) {
+    const re = wordRe(wrong);
+    const orig = sentencesOf(text).find((x) => re.test(x)) || "";
+    let gapped = "", exact = false, best = -1;
+    for (const sen of sentencesOf(unbracket(corrected))) {
+      for (const r of a) {
+        const m = wordRe(r).exec(sen);
+        const score = m ? overlap(orig, sen) : -1;
+        if (score > best) { best = score; gapped = sen.slice(0, m.index) + "___" + sen.slice(m.index + r.length); exact = true; }
+      }
+    }
+    if (!gapped && orig) {
+      const m = re.exec(orig);
+      let before = orig.slice(0, m.index), after = orig.slice(m.index + wrong.length);
+      for (const e of arr(errs)) {
+        const w = str(e.wrong).trim(), r = variants(str(e.right).split(/\s+\/\s+/)[0])[0];
+        if (!w || !r || w.includes(wrong) || wrong.includes(w)) continue;
+        before = before.replace(wordRe(w, "g"), () => r);
+        after = after.replace(wordRe(w, "g"), () => r);
+      }
+      gapped = unbracket(before) + "___" + unbracket(after);
+    }
+    if (!gapped) return { q: "___", exact };
+    const ws = gapped.trim().split(/\s+/);
+    const i = ws.findIndex((x) => x.includes("___"));
+    const from = Math.max(0, i - 10), to = Math.min(ws.length, i + 11);
+    return { q: (from ? "… " : "") + ws.slice(from, to).join(" ") + (to < ws.length ? " …" : ""), exact };
+  }
+  function myMistakes() {
+    const hidden = new Set(arr(settings().mineHidden));
+    const found = new Map();
+    const add = (e, src) => {
+      const wrong = str(e.wrong).trim(), key = norm(wrong);
+      const a = [...new Set(str(e.right).split(/\s+\/\s+/).flatMap(variants).filter((r) => r && norm(r) !== key))];
+      if (!key || hidden.has(key) || !a.length) return;
+      if (countWords(wrong) > MINE_WORDS || a.some((r) => countWords(r) > MINE_WORDS)) return;
+      const ctx = src.text ? mistakeContext(src.text, src.corrected, wrong, a, src.errs) : { q: "___", exact: false };
+      const cur = found.get(key);
+      if (!cur) {
+        found.set(key, { key, wrong, a, n: 1, ts: src.ts || 0, from: src.from, cat: catOf(e.category || src.cat), why: str(e.why), q: ctx.q, exact: ctx.exact, has: !!src.text, seenAt: src.ts || 0 });
+        return;
+      }
+      cur.n++;
+      cur.ts = Math.max(cur.ts, src.ts || 0);
+      a.forEach((r) => { if (!cur.a.some((x) => norm(x) === norm(r))) cur.a.push(r); });
+      if (!cur.why && e.why) cur.why = str(e.why);
+      // The sentence shown: one taken from a corrected text beats one rebuilt from your draft, and a newer one an older one.
+      if (src.text && (ctx.exact > cur.exact || (ctx.exact === cur.exact && (!cur.has || (src.ts || 0) >= cur.seenAt)))) Object.assign(cur, { q: ctx.q, exact: ctx.exact, from: src.from, has: true, seenAt: src.ts || 0 });
+    };
+    for (const w of list("writing")) {
+      const W = T.WRITING[w.task];
+      if (w.fb) arr(w.fb.errors).forEach((e) => add(e, { ts: w.ts, text: w.text, corrected: w.fb.corrected, errs: w.fb.errors, from: `your ${W ? W.name : "writing"} of ${shortDate(w.date)}` }));
+    }
+    for (const d of list("drills")) {
+      if (d.set !== "prod" || !d.fb) continue;
+      const tp = TOPIC[d.topic];
+      arr(d.fb.errors).forEach((e) => add(e, { ts: d.ts, text: d.text, corrected: d.fb.improved, errs: d.fb.errors, cat: d.topic, from: `your ${tp ? tp.title : "production"} check of ${shortDate(d.date)}` }));
+    }
+    for (const e of list("errors")) add(e, { ts: e.ts, from: "your error log" });
+    return [...found.values()];
+  }
+  const mineItem = (m) => ({ kind: "type", topic: "mine", set: "errors", ask: `In ${m.from}, you wrote the words above. Type them corrected.`, src: `« ${m.wrong} »`, q: m.q, a: m.a.slice(), why: m.why || `${CAT[m.cat]}.`, point: CAT[m.cat] });
+  // Where each mistake stands: new (never practised), missed last time, right once, or fixed (right the last two times).
+  function mineStatus() {
+    const hist = new Map();
+    drillLog().forEach((e) => { if (e.key.startsWith("mine|")) hist.set(e.key, (hist.get(e.key) || []).concat(e)); });
+    return myMistakes().map((m) => {
+      const h = hist.get("mine|" + m.key) || [], last = h[h.length - 1], prev = h[h.length - 2];
+      return Object.assign(m, { state: !last ? "new" : !last.ok ? "missed" : prev && prev.ok ? "fixed" : "once", seen: last ? last.ts : 0 });
+    });
+  }
+  // A round: new mistakes first (the ones made most often, then the newest), then the ones missed last time,
+  // then the ones right once, then fixed ones, longest ago first, so they come back to check they stay fixed.
+  function mineRound(n) {
+    const tier = { new: 0, missed: 1, once: 2, fixed: 3 };
+    const ms = mineStatus().sort((a, b) => tier[a.state] - tier[b.state] || (a.state === "new" ? b.n - a.n || b.ts - a.ts : a.seen - b.seen));
+    return shuffle(ms.slice(0, n)).map(mineItem);
+  }
+
   function drillsFor(topic, set) {
     return list("drills").filter((d) => d.topic === topic && (!set || d.set === set) && d.src !== "retry").sort((a, b) => (a.ts || 0) - (b.ts || 0));
   }
@@ -804,6 +911,11 @@
       items = shuffle(items);
       title = "Mixed review · " + allowed.join(" and ");
       setId = "main";
+    } else if (topicId === "mine") {
+      items = o.items || mineRound(10);
+      if (!items.length) { toast("No mistakes to practise yet."); return; }
+      title = "Your mistakes";
+      setId = "errors";
     } else {
       const tp = TOPIC[topicId];
       set = tp.sets.find((x) => x.id === setId) || tp.sets[0];
@@ -826,7 +938,7 @@
     const d = ui.drill;
     if (!d || d.done || d.src === "retry" || !d.results.some(Boolean)) return;
     const tp = TOPIC[d.topic];
-    ipSave(drillIpId(d), { kind: "drill", title: tp ? `${tp.title} · ${d.title}` : d.title, route: tp ? "grammar." + d.topic : "grammar.mixed", topic: d.topic, set: d.set, name: d.title, src: d.src, items: d.items, results: d.results, i: d.i });
+    ipSave(drillIpId(d), { kind: "drill", title: tp ? `${tp.title} · ${d.title}` : d.title, route: "grammar." + d.topic, topic: d.topic, set: d.set, name: d.title, src: d.src, items: d.items, results: d.results, i: d.i });
   }
   function drillResume(ip) {
     const items = arr(ip.items);
@@ -2362,6 +2474,8 @@
     render(args) {
       const id = args[0];
       if (id === "mixed") return grammarMixed();
+      if (id === "mine") return grammarMine();
+      if (id === "hunt") return grammarHunt();
       const tp = id && TOPIC[id];
       return tp ? grammarTopic(tp, args[1]) : grammarIndex();
     },
@@ -2369,6 +2483,11 @@
       const d = ui.drill;
       const el = document.getElementById("drill-in");
       if (el && d && !d.checked && document.activeElement !== el) el.focus({ preventScroll: true });
+      const h = ui.hunt;
+      if (h && h.found && !h.verdicts && !isTyping(document.activeElement)) {
+        const fix = [...document.querySelectorAll('[data-input="pr-fix"]')].find((x) => !x.value);
+        if (fix) fix.focus({ preventScroll: true });
+      }
     },
   };
   function statusPill(m) {
@@ -2380,7 +2499,7 @@
     const s = settings();
     return `<div class="wrap">
       <header class="stack tight"><h1 class="title">Grammaire<small>Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</small></h1></header>
-      <div class="row"><a class="btn primary" href="#grammar.mixed">Mixed review · 15 items</a><span class="small muted">Pronominal verbs, imperative, embedded questions and subjonctif together.</span></div>
+      ${practiceRows()}
       <ol class="topics">${T.TOPICS.map((tp) => {
         const m = topicMastery(tp);
         const last = drillsFor(tp.id).filter((d) => d.set !== "prod").slice(-1)[0];
@@ -2483,7 +2602,7 @@
         ${d.topic !== "mixed" ? `<button class="btn" data-act="drill-start" data-topic="${d.topic}" data-set="${d.set}">New round</button>` : `<button class="btn" data-act="drill-start" data-topic="mixed" data-set="main">New round</button>`}
         <button class="btn ghost" data-act="drill-close">Close</button>
       </div>
-      ${misses.some((x) => !x.r.ok && x.it.point) ? `<p class="small muted">Retrying asks a new sentence on each rule you missed. A new round starts with sentences you haven't had yet and gives extra room to the rules you keep missing.</p>` : ""}
+      ${d.topic !== "mine" && misses.some((x) => !x.r.ok && x.it.point) ? `<p class="small muted">Retrying asks a new sentence on each rule you missed. A new round starts with sentences you haven't had yet and gives extra room to the rules you keep missing.</p>` : ""}
     </section>`;
   }
   function grammarTopic(tp, setArg) {
@@ -2568,6 +2687,177 @@
       ${active ? drillBox("mixed") : `<section class="panel stack tight" id="drill-area"><p class="small muted">A fresh random mix every round.</p><div class="row">${startBtns}</div></section>`}
       <section class="stack tight"><p class="h3">History</p>${recentRounds("mixed")}</section>
     </div>`;
+  }
+
+  // The ways to practise across topics, above the topic list.
+  function practiceRows() {
+    const ms = mineStatus(), todo = ms.filter((m) => m.state !== "fixed").length;
+    const row = (href, title, note, primary) => `<div class="set-row"><span class="stack tight" style="gap:2px"><b>${title}</b><span class="small muted">${note}</span></span><a class="btn ${primary ? "primary " : ""}sm" href="${href}">Open</a></div>`;
+    return `<section class="panel stack tight">
+      ${row("#grammar.mixed", "Mixed review · 15 items", "Pronominal verbs, imperative, embedded questions and subjonctif together.", true)}
+      ${row("#grammar.mine", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, from Claude's corrections and your error log.` : "The mistakes from Claude's corrections and your error log, as a drill.")}
+      ${row("#grammar.hunt", "Find the mistakes", "Proofread a short text: tap the mistakes, then correct them.")}
+    </section>`;
+  }
+  function grammarMine() {
+    const active = ui.drill && ui.drill.topic === "mine";
+    const ms = mineStatus();
+    const count = (st) => ms.filter((m) => m.state === st).length;
+    const fixed = count("fixed"), hidden = arr(settings().mineHidden).length;
+    const ip = ipGet("drill--mine--errors");
+    const startBtns = ip
+      ? `<button class="btn primary" data-act="ip-resume" data-id="drill--mine--errors">Resume · ${arr(ip.results).filter(Boolean).length}/${arr(ip.items).length}</button><button class="btn" data-act="drill-start" data-topic="mine" data-set="errors" data-fresh="1">Start over</button>`
+      : `<button class="btn primary" data-act="drill-start" data-topic="mine" data-set="errors">Practise ${Math.min(10, ms.length)}</button>`;
+    const STATE = { missed: ["Missed last time", "bad"], new: ["New", "info"], once: ["Right once", ""], fixed: ["Fixed", "ok"] };
+    const order = Object.keys(STATE);
+    const rows = ms.slice().sort((a, b) => order.indexOf(a.state) - order.indexOf(b.state) || b.n - a.n || b.ts - a.ts).map((m) => `<li><div class="fix"><span class="pen-wrong">${esc(m.wrong)}</span><span class="pen-right">${esc(m.a[0])}</span><span class="pill ${STATE[m.state][1]}">${STATE[m.state][0]}</span>${m.n > 1 ? `<span class="pill warn">made ${m.n}×</span>` : ""}<span class="pill">${esc(CAT[m.cat])}</span><button class="btn ghost sm" data-act="mine-hide" data-k="${esc(m.key)}" title="Not a real mistake? Leave it out of this drill">Hide</button></div>${m.why ? `<p class="why">${esc(m.why)}</p>` : ""}</li>`).join("");
+    const intro = ms.length
+      ? `<p><b>${ms.length - fixed} of your ${ms.length} mistakes</b> to practise${count("new") ? `, ${count("new")} of them new` : ""}${fixed ? ` · ${fixed} fixed` : ""}.</p>
+        <p class="small muted">A round starts with new mistakes (the ones you made most often first), then the ones you haven't fixed. A mistake is fixed once you get it right twice in a row; fixed ones come back when the others run out.</p>
+        <div class="row">${startBtns}</div>`
+      : `<p class="empty">Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.</p>`;
+    return `<div class="wrap">
+      <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
+      <header class="stack tight"><p class="eyebrow">Mes erreurs</p><h1 class="title">Your mistakes<small>Every mistake from Claude's corrections of your writing and production checks, and from your error log. You see what you wrote, in your own sentence, and type it corrected.</small></h1></header>
+      ${active ? drillBox("mine") : `<section class="panel stack tight" id="drill-area">${intro}</section>`}
+      ${ms.length ? `<details class="fold"><summary>All your mistakes · ${ms.length}</summary><ul class="errs" style="margin-top:10px">${rows}</ul></details>` : ""}
+      ${hidden ? `<p class="small muted">${hidden} hidden from this drill. <button class="btn ghost sm" data-act="mine-unhide">Show them again</button></p>` : ""}
+      <section class="stack tight"><p class="h3">History</p>${recentRounds("mine")}</section>
+    </div>`;
+  }
+
+  /* =============== find the mistakes =============== */
+  // A text from proofread.js as tokens: words (with any punctuation attached) and the spaces between them. Each
+  // word knows the mistake it belongs to (-1 for none), so a tap on any word of a mistake finds it without the
+  // page showing where the mistake starts or ends.
+  const PR = T.PROOFREAD || [];
+  function prTokens(pr) {
+    const out = [];
+    pr.text.split(/(\{\d+\})/).forEach((part) => {
+      const m = part.match(/^\{(\d+)\}$/), k = m ? Number(m[1]) : -1;
+      (m ? pr.mistakes[k][0] : part).split(/(\s+)/).forEach((w) => { if (w) out.push(/^\s+$/.test(w) ? { sp: w } : { w, k }); });
+    });
+    return out;
+  }
+  // The text: tappable while looking for mistakes, then marked: mistakes found, mistakes missed (numbered) and
+  // words tapped that were fine.
+  function prText(pr, h) {
+    const toks = prTokens(pr), picks = new Set(h.picks), numbered = new Set();
+    const cls = (k, i) => (k >= 0 ? (h.found[k] ? "pr-found" : "pr-missed") : picks.has(i) ? "pr-false" : "");
+    let html = "";
+    toks.forEach((t, i) => {
+      const prev = toks[i - 1] || {}, next = toks[i + 1] || {};
+      if (t.sp) {
+        if (/\n/.test(t.sp)) html += "</p><p>";
+        else if (/^[?!:;»]/.test(next.w || "") || /«$/.test(prev.w || "")) html += NB;
+        else if (h.found && prev.k >= 0 && prev.k === next.k) html += `<span class="pr-w ${cls(prev.k)}"> </span>`;
+        else html += " ";
+        return;
+      }
+      if (!/[\p{L}\p{N}]/u.test(t.w)) { html += esc(t.w); return; }
+      if (!h.found) { html += `<span class="pr-w${picks.has(i) ? " sel" : ""}" data-act="pr-tok" data-i="${i}">${esc(t.w)}</span>`; return; }
+      const num = t.k >= 0 && !numbered.has(t.k) ? (numbered.add(t.k), `<sup class="pr-n">${t.k + 1}</sup>`) : "";
+      html += `${num}<span class="pr-w ${cls(t.k, i)}">${esc(t.w)}</span>`;
+    });
+    return `<div class="pr-text" lang="fr"><p>${html}</p></div>`;
+  }
+  const prCorrected = (pr) => `<div class="pr-text" lang="fr"><p>${pr.text.split(/(\{\d+\})/).map((part) => { const m = part.match(/^\{(\d+)\}$/); return m ? `<b class="pr-fix">${typo(pr.mistakes[Number(m[1])][1][0])}</b>` : typo(part).replace(/\n+/g, "</p><p>"); }).join("")}</p></div>`;
+  // The sentence a mistake is in, with a gap in its place and the other mistakes corrected, for the history.
+  function prSentence(pr, k) {
+    const full = pr.text.replace(/\{(\d+)\}/g, (_, j) => (Number(j) === k ? "\u0000" : pr.mistakes[Number(j)][1][0]));
+    return (full.split(/\n+|(?<=[.!?…])\s+/).find((x) => x.includes("\u0000")) || "\u0000").replace("\u0000", "___").trim();
+  }
+  const huntLevel = () => ui.huntLevel || (settings().phase <= 2 ? "B1" : "B2");
+  // The next text at a level: the first not done yet, or else the one done longest ago.
+  function huntNext(level) {
+    const last = new Map();
+    list("drills").forEach((d) => { if (d.topic === "hunt") last.set(d.text, Math.max(last.get(d.text) || 0, d.ts || 0)); });
+    const pool = PR.filter((p) => p.level === level);
+    return pool.find((p) => !last.has(p.id)) || pool.slice().sort((a, b) => last.get(a.id) - last.get(b.id))[0] || null;
+  }
+  function huntStart() {
+    const pr = huntNext(huntLevel());
+    if (!pr) return;
+    ui.hunt = { id: pr.id, picks: [], found: null, extra: 0, fixes: {}, verdicts: null };
+    render(true);
+    const el = document.getElementById("drill-area");
+    if (el) el.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  function huntTap(i) {
+    const h = ui.hunt;
+    if (!h || h.found) return;
+    h.picks = h.picks.includes(i) ? h.picks.filter((x) => x !== i) : h.picks.concat(i);
+    render(true);
+  }
+  function huntCheck() {
+    const h = ui.hunt, pr = h && PR.find((x) => x.id === h.id);
+    if (!pr || h.found) return;
+    if (!h.picks.length) { toast("Tap the words you think are wrong first."); return; }
+    const toks = prTokens(pr);
+    h.found = pr.mistakes.map((_, k) => h.picks.some((i) => toks[i] && toks[i].k === k));
+    h.extra = h.picks.filter((i) => toks[i] && toks[i].k < 0).length;
+    if (h.found.some(Boolean)) render(true); else huntFinish();
+  }
+  // Scores each mistake (caught = found and corrected) and saves the text as a finished round in drills.
+  function huntFinish() {
+    const h = ui.hunt, pr = h && PR.find((x) => x.id === h.id);
+    if (!pr || !h.found || h.verdicts) return;
+    document.querySelectorAll('[data-input="pr-fix"]').forEach((el) => { h.fixes[el.dataset.k] = el.value; });
+    if (h.found.some((f, k) => f && !str(h.fixes[k]).trim())) { toast("Type a correction for each mistake you found."); return; }
+    h.verdicts = pr.mistakes.map(([, a], k) => (h.found[k] ? checkAnswer({ a }, str(h.fixes[k])) : "missed"));
+    const items = pr.mistakes.map(([wrong, a, , why], k) => ({ kind: "type", src: `« ${wrong} »`, q: prSentence(pr, k), a, why: (h.found[k] ? "" : "Not spotted. ") + why, given: h.found[k] ? str(h.fixes[k]) : "", ok: h.verdicts[k] === "ok" }));
+    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", items });
+    render(true);
+  }
+  function grammarHunt() {
+    const lvl = huntLevel(), h = ui.hunt, pr = h && PR.find((x) => x.id === h.id);
+    const done = new Set(list("drills").filter((d) => d.topic === "hunt").map((d) => d.text));
+    const pool = PR.filter((p) => p.level === lvl), left = pool.filter((p) => !done.has(p.id)).length;
+    const levels = `<div class="seg" role="group" aria-label="Level">${[["B1", "B1 · messages"], ["B2", "B2 · letters and articles"]].map(([l, label]) => `<button data-act="pr-level" data-l="${l}" aria-pressed="${lvl === l}">${label}</button>`).join("")}</div>`;
+    return `<div class="wrap">
+      <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
+      <header class="stack tight"><p class="eyebrow">Relecture</p><h1 class="title">Find the mistakes<small>A short text like the ones the TCF asks you to write, with a few mistakes of the kinds you make. Tap the words that look wrong, then correct them: the proofreading pass to do on every draft before you hand it in.</small></h1></header>
+      ${pr ? huntBox(pr, h) : `<section class="panel stack tight" id="drill-area"><div class="row">${levels}<span class="small muted">${left ? `${left} of ${pool.length} texts not done yet` : `All ${pool.length} done: the one done longest ago comes back`}</span></div><div class="row"><button class="btn primary" data-act="pr-start">Start a text</button></div></section>`}
+      <section class="stack tight"><p class="h3">History</p>${recentRounds("hunt")}</section>
+    </div>`;
+  }
+  function huntBox(pr, h) {
+    const n = pr.mistakes.length;
+    const head = `<div class="drill-head"><span class="eyebrow">${esc(pr.kind)} · ${esc(pr.level)}</span><span class="small muted num">${n} mistakes</span></div><p class="h3">${typo(pr.title)}</p>`;
+    if (!h.found) {
+      return `<section class="panel drill" id="drill-area">${head}
+        <p class="small muted">This text has ${n} mistakes. Tap each word that looks wrong (tap it again to unmark it), then check.</p>
+        ${prText(pr, h)}
+        <div class="row"><button class="btn primary" data-act="pr-check">Check · ${h.picks.length} marked</button><button class="btn ghost sm" data-act="pr-close">Close</button></div>
+      </section>`;
+    }
+    const fk = pr.mistakes.map((_, k) => k).filter((k) => h.found[k]);
+    const extra = h.extra ? `${h.extra} word${h.extra > 1 ? "s" : ""} marked that ${h.extra > 1 ? "were" : "was"} fine` : "";
+    if (!h.verdicts) {
+      return `<section class="panel drill" id="drill-area">${head}
+        <p>You found <b>${fk.length} of ${n}</b>${extra ? `, and ${extra}` : ""}. Now correct the ones you found. The ones you missed are in red; their corrections come after.</p>
+        ${prText(pr, h)}
+        <ol class="pr-fixes">${fk.map((k) => `<li><span class="pr-n">${k + 1}</span><span class="src">« ${typo(pr.mistakes[k][0])} »</span><input class="blank" type="text" data-input="pr-fix" data-k="${k}" value="${esc(str(h.fixes[k]))}" size="${Math.max(10, Math.min(34, pr.mistakes[k][0].length + 6))}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" lang="fr" aria-label="Correction for mistake ${k + 1}"></li>`).join("")}</ol>
+        ${accentBar()}
+        <div class="row"><button class="btn primary" data-act="pr-finish">Check my corrections</button></div>
+      </section>`;
+    }
+    const caught = h.verdicts.filter((v) => v === "ok").length;
+    const LABEL = { ok: ["Caught", "ok"], accent: ["Check the accents", "bad"], bad: ["Not quite", "bad"], missed: ["Not spotted", "bad"] };
+    return `<section class="panel drill" id="drill-area">${head}
+      <div class="row"><span class="scorebig">${caught}/${n}</span><span class="muted">caught: found and corrected · found ${fk.length} of ${n}${extra ? ` · ${extra}` : ""}</span></div>
+      ${prText(pr, h)}
+      <ul class="misses">${pr.mistakes.map(([wrong, a, cat, why], k) => `<li>
+        <p class="row" style="gap:6px"><span class="pr-n">${k + 1}</span><span class="pill ${LABEL[h.verdicts[k]][1]}">${LABEL[h.verdicts[k]][0]}</span><span class="pill">${esc(CAT[catOf(cat)])}</span></p>
+        <p><span class="pen-wrong">${esc(wrong)}</span> <span class="pen-right">${esc(a[0])}</span></p>
+        ${h.found[k] && h.verdicts[k] !== "ok" ? `<p class="small">You wrote: ${esc(str(h.fixes[k]))}</p>` : ""}
+        ${a.length > 1 ? `<p class="small muted">Also accepted: ${a.slice(1).map(esc).join(" · ")}</p>` : ""}
+        <p class="small muted">${typo(why)}</p>
+      </li>`).join("")}</ul>
+      ${caught === n && !h.extra ? `<p class="pen-ok">Sans faute !</p>` : ""}
+      <details class="fold"><summary>The corrected text</summary>${prCorrected(pr)}</details>
+      <div class="row"><button class="btn primary" data-act="pr-start">Next text</button><button class="btn ghost" data-act="pr-close">Close</button></div>
+    </section>`;
   }
 
   /* =============== view: vocab =============== */
@@ -2832,7 +3122,7 @@
       </div>
       ${fb.compliance.notes || (t3 && t3.notes) ? `<p class="small">${esc([fb.compliance.notes, t3 && t3.notes].filter(Boolean).join(" "))}</p>` : ""}
       ${criteriaTable(fb.criteria, "Graded against the criteria France Éducation International publishes for the TCF Canada. Its internal marking grids aren't public, so treat the score as an estimate.")}
-      <div class="stack tight"><p class="h3">Corrections <span class="muted small">· ${fb.errors.length}</span></p>${errList(fb.errors, true)}</div>
+      <div class="stack tight"><p class="h3">Corrections <span class="muted small">· ${fb.errors.length}</span></p>${errList(fb.errors, true)}${fb.errors.length ? `<a class="small" href="#grammar.mine">Practise these in Your mistakes →</a>` : ""}</div>
       ${fb.upgrades.length ? `<div class="stack tight"><p class="h3">B1 → B2 upgrades</p><ul class="upgrades">${fb.upgrades.map((u) => `<li><span>${typo(u.from)}</span><span class="arrow">→</span><b>${typo(u.to)}</b></li>`).join("")}</ul></div>` : ""}
       ${fb.strengths.length ? `<div class="stack tight"><p class="h3">What worked</p><ul class="small" style="margin:0;padding-left:20px">${fb.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
       ${fb.corrected ? `<details class="fold"><summary>Corrected text</summary><p class="corrected seyes" style="margin-top:10px">${esc(fb.corrected)}</p></details>` : ""}
@@ -3131,7 +3421,7 @@
       const tp = TOPIC[d.topic];
       if (d.set === "prod") { out.push({ kind: "prod", id: d.id, ts: d.ts || 0, date: d.date, title: tp && tp.prod ? `${tp.title} · ${tp.prod.title}` : "Production", result: d.score >= 1 ? "Passed" : "Not yet", doc: d }); continue; }
       const st = tp && tp.sets.find((x) => x.id === d.set);
-      const name = d.topic === "mixed" ? d.name || "Mixed review" : `${tp ? tp.title : d.topic} · ${d.name || (st ? st.title : d.set)}`;
+      const name = d.topic === "hunt" ? `${DRILL_NAMES.hunt} · ${d.name}` : DRILL_NAMES[d.topic] ? d.name || DRILL_NAMES[d.topic] : `${tp ? tp.title : d.topic} · ${d.name || (st ? st.title : d.set)}`;
       out.push({ kind: "drill", id: d.id, ts: d.ts || 0, date: d.date, title: name, result: `${d.score}/${d.total}${d.retry ? ` · retry ${d.retry.score}/${d.retry.total}` : ""}`, doc: d });
     }
     for (const c of list("comp")) {
@@ -3340,7 +3630,7 @@
     }
     return [...groups.entries()].map(([k, ds]) => {
       const tp = TOPIC[ds[0].topic], st = tp && tp.sets.find((x) => x.id === ds[0].set);
-      const name = k === "mixed" ? "Mixed review" : `${tp ? tp.title : ds[0].topic} · ${st ? st.title : ds[0].name || ds[0].set}`;
+      const name = DRILL_NAMES[ds[0].topic] || `${tp ? tp.title : ds[0].topic} · ${st ? st.title : ds[0].name || ds[0].set}`;
       const rows = ds.map((d) => ({
         id: d.id, date: d.date, ts: d.ts, v: d.total ? d.score / d.total : null, show: `${d.score}/${d.total}`, score: d.score, total: d.total,
         pill: scorePill(d),
@@ -3419,7 +3709,7 @@
         ${stampShelf()}
 
         <section class="sec" id="sec-errors">
-          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing and speaking, plus anything you add.</span></div>
+          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing and speaking, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
           ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<p class="empty">No errors logged yet. Correct a writing task with Claude, or add one below.</p>`}
           ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p><p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>
             ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
@@ -3580,6 +3870,14 @@
     },
     "drill-close": () => { ui.drill = null; render(true); },
     "drill-retry": drillRetry,
+    "mine-hide": (el) => { saveSettings({ mineHidden: [...new Set(arr(settings().mineHidden).concat(el.dataset.k))] }); toast("Hidden: it won't come up in Your mistakes again."); },
+    "mine-unhide": () => { saveSettings({ mineHidden: [] }); toast("Your hidden mistakes are back."); },
+    "pr-start": huntStart,
+    "pr-tok": (el) => huntTap(Number(el.dataset.i)),
+    "pr-check": huntCheck,
+    "pr-finish": huntFinish,
+    "pr-level": (el) => { ui.huntLevel = el.dataset.l; render(true); },
+    "pr-close": () => { ui.hunt = null; render(true); },
     "drill-dispute": (el) => drillDispute(Number(el.dataset.k)),
     accent: (el) => insertAccent(el.dataset.ch),
     "prod-check": (el) => prodCheck(el.dataset.topic),
@@ -3760,6 +4058,7 @@
   const INPUTS = {
     "c-seek": (el) => coSeek(Number(el.value) || 0),
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
+    "pr-fix": (el) => { if (ui.hunt) ui.hunt.fixes[el.dataset.k] = el.value; },
     "w-text": onWText,
     prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); prodKeep(t); },
     "sp-notes": (el) => { ui.sp.notes[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
@@ -3808,6 +4107,12 @@
     const t = e.target;
     if (t && t.id === "drill-in" && e.key === "Enter") { e.preventDefault(); if (ui.drill && ui.drill.checked) drillNext(); else drillCheck(); return; }
     if (t && t.id === "hw-new" && e.key === "Enter") { e.preventDefault(); addHomework(); return; }
+    if (t && t.dataset && t.dataset.input === "pr-fix" && e.key === "Enter") {
+      e.preventDefault();
+      const all = [...document.querySelectorAll('[data-input="pr-fix"]')], next = all[all.indexOf(t) + 1];
+      if (next) next.focus(); else huntFinish();
+      return;
+    }
     if (t && t.id === "chat-in" && e.key === "Enter") { e.preventDefault(); chatSend(); return; }
     if (route.view === "vocab" && ui.vocab && ui.vocab.edit) {
       if (e.key === "Escape") { e.preventDefault(); vocabEditClose(); }

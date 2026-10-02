@@ -468,6 +468,23 @@ label.check input { margin-top: 3px; width: 17px; height: 17px; accent-color: va
 .verdict .why { color: var(--ink-2); font-size: 14px; }
 .misses { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .misses li { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 6px; }
+/* Find the mistakes: words marked in red pen, then found (green), missed (red) and fine but marked (crossed) */
+.pr-text { font: 400 18px/1.8 var(--f-text); }
+.pr-text p { margin: 0 0 10px; }
+.pr-text p:last-child { margin-bottom: 0; }
+.pr-w { border-radius: 3px; }
+.pr-w[data-act] { cursor: pointer; }
+.pr-w[data-act]:hover { background: var(--sunk); }
+.pr-w.sel { background: var(--red-soft); text-decoration: underline wavy var(--pen); text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
+.pr-w.pr-found { background: var(--green-soft); }
+.pr-w.pr-missed { background: var(--red-soft); text-decoration: underline var(--red); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.pr-w.pr-false { color: var(--ink-3); text-decoration: line-through var(--ink-3); }
+.pr-n { display: inline-block; min-width: 1.5em; padding: 0 5px; border-radius: 999px; background: var(--ink); color: var(--paper); font: 700 11px/1.6 var(--f-ui); text-align: center; }
+.pr-text sup.pr-n { font-size: 10px; line-height: 1.5; margin-right: 2px; vertical-align: super; }
+.pr-fixes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.pr-fixes li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.pr-fixes .blank { font-size: 18px; }
+.pr-fix { color: var(--green); font-weight: 600; }
 .scorebig { font: 600 44px/1 var(--f-text); font-variant-numeric: tabular-nums; }
 .history { display: flex; flex-wrap: wrap; gap: 6px; }
 
@@ -707,6 +724,7 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 600; }
 
 <script src="data.js"></script>
 <script src="drills.js"></script>
+<script src="proofread.js"></script>
 <script src="anki.js"></script>
 <script src="comp-ce.js"></script>
 <script src="exam-ce.js"></script>
