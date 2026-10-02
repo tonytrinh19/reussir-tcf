@@ -20,7 +20,8 @@ Usage: python3 tools/make_audio.py               record new or changed sets with
        python3 tools/make_audio.py co-sante-b2   re-record one set with Microsoft
        python3 tools/make_audio.py --gemini      record Gemini takes until the daily limit
        python3 tools/make_audio.py --use-gemini  put the ready Gemini takes on the site (all, or set ids)
-       python3 tools/make_audio.py --status      show each set's recording
+       python3 tools/make_audio.py --status      show each set's recording and the script targets
+       python3 tools/make_audio.py --word-counts each script's spoken word count, as JSON (for check_co.js)
 """
 import array
 import asyncio
@@ -34,6 +35,7 @@ import math
 import os
 import re
 import shutil
+import statistics
 import socket
 import subprocess
 import sys
@@ -47,12 +49,19 @@ import wave
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIO = os.path.join(ROOT, "site", "audio")
 MANIFEST = os.path.join(ROOT, "tools", "recordings.json")
+TARGETS = os.path.join(ROOT, "tools", "word-targets.json")
 CACHE = os.path.expanduser("~/Library/Application Support/tcf-reussir/gemini")
 KEY_FILE = os.path.expanduser("~/.config/gemini/api_key")
 
 SR = 24000
 GAP_SAME, GAP_TURN, LEAD_IN, TAIL = 0.45, 0.8, 0.4, 0.6
-MIN_SECONDS, MAX_SECONDS = 120, 240  # every recording lasts 2 to 4 minutes
+# Length is judged by the script's word count, not the take's duration, so a take isn't thrown away
+# for being a second short. A script needs enough words for about 2:15 at Gemini's pace for its
+# level, learned from every Gemini read so far (DEFAULT_WPM until a level has one); tools/word-targets.json
+# holds the current numbers for tools/check_co.js. A take outside 1:45–4:00 still means something went wrong.
+TARGET_SECONDS = 135
+DEFAULT_WPM = {"B1": 160, "B2": 185}  # Gemini's median on 2026-10-02, from 9 takes at each level
+MIN_SECONDS, MAX_SECONDS = 105, 240
 TARGET_DB, PEAK_DB = -21.0, -1.0  # every recording equally loud, with no clipping
 BITRATE = 64000
 
@@ -293,7 +302,7 @@ def run_microsoft(sets, force, ids):
     save_json(MANIFEST, manifest)
     bad = ["%s (%s)" % (s["id"], length_problem(manifest[s["id"]]["seconds"])) for s in todo if length_problem(manifest[s["id"]]["seconds"])]
     if bad:
-        sys.exit("Recordings must last 2 to 4 minutes; change the script: " + ", ".join(bad))
+        sys.exit("Recordings must last 1:45 to 4 minutes; change the script: " + ", ".join(bad))
 
 
 def length_problem(sec):
@@ -485,28 +494,37 @@ def take_ready(status, s):
     return bool(t) and t.get("hash") == content_hash(s) and os.path.exists(take_path(s))
 
 
-def gemini_pace(st, sets):
-    """The range of seconds per script word in the Gemini takes (kept or not) of the current scripts,
-    read with the current pace instruction, at each level."""
-    by_id, pace = {s["id"]: s for s in sets}, {}
-    for bucket in ("takes", "fails"):
-        for k, v in st[bucket].items():
-            s = by_id.get(k)
-            if s and v.get("hash") == content_hash(s) and v.get("pace") == PACE[s["level"]] and v.get("seconds"):
-                r = v["seconds"] / len(script_words(s))
-                lo, hi = pace.get(s["level"], (r, r))
-                pace[s["level"]] = (min(lo, r), max(hi, r))
-    return pace
+def gemini_wpm(st, sets, manifest):
+    """Gemini's median words a minute at each level, from every read of a current script with the
+    current pace instruction: the recordings on the site and the takes kept, failed or not checked yet.
+    Takes that skipped or added words are left out, since their length doesn't match the script."""
+    by_id, rates = {s["id"]: s for s in sets}, {}
+    reads = [(k, v) for k, v in manifest.items() if v.get("engine") == "gemini"]
+    reads += [(k, v) for b in ("takes", "fails", "unchecked") for k, v in st[b].items()
+              if b != "fails" or not re.search(r"skipped|added", v.get("problem", ""))]
+    for k, v in reads:
+        s = by_id.get(k)
+        if s and v.get("hash") == content_hash(s) and v.get("pace", PACE[s["level"]]) == PACE[s["level"]] and v.get("seconds"):
+            rates.setdefault(s["level"], {})[k] = len(script_words(s)) / (v["seconds"] - LEAD_IN - TAIL) * 60
+    return {lv: (statistics.median(rates[lv].values()) if rates.get(lv) else DEFAULT_WPM[lv], len(rates.get(lv, {}))) for lv in PACE}
 
 
-def expected_problem(pace, s):
-    """Why a script can't give a 2–4 minute take even at the slowest (or fastest) pace Gemini has read
-    its level so far, with the length it would get; None when it can, or before any take of its level."""
-    if s["level"] not in pace:
-        return None
-    lo, hi = pace[s["level"]]
-    n = len(script_words(s))
-    return ("too short", hi * n) if hi * n < MIN_SECONDS else ("too long", lo * n) if lo * n > MAX_SECONDS else None
+def word_targets(st, sets, manifest):
+    """The fewest words a script needs for about 2:15 at each level, and the most that stays under 4
+    minutes; saved to tools/word-targets.json when they change."""
+    out = {}
+    for lv, (wpm, n) in gemini_wpm(st, sets, manifest).items():
+        speech = lambda sec: (sec - LEAD_IN - TAIL) * wpm / 60
+        out[lv] = {"wpm": round(wpm, 1), "minWords": math.ceil(speech(TARGET_SECONDS)), "maxWords": math.floor(speech(MAX_SECONDS)), "reads": n}
+    if load_json(TARGETS, {}) != out:
+        save_json(TARGETS, out)
+    return out
+
+
+def expected_problem(targets, s):
+    """Why a script is too short (or long) for Gemini, with its word count and the level's target; None when it's fine."""
+    t, n = targets[s["level"]], len(script_words(s))
+    return ("too short", n, t["minWords"]) if n < t["minWords"] else ("too long", n, t["maxWords"]) if n > t["maxWords"] else None
 
 
 def load_status():
@@ -551,11 +569,11 @@ def run_gemini(sets):
         for s in todo:
             if out_of_time():
                 raise Busy("out of time: the batch ran %d minutes" % BATCH_MINUTES)
-            # Checked before each request, so the first takes of a level already spare the rest.
-            expected = expected_problem(gemini_pace(st, sets), s)
+            # Checked before each request, with the targets learned from every take so far.
+            expected = expected_problem(word_targets(st, sets, manifest), s)
             if expected:
-                print("%-22s %s  skipped: script %s for Gemini's pace (%d words, ~%s)" % (
-                    s["id"], s["level"], expected[0], len(script_words(s)), clock(expected[1])), flush=True)
+                print("%-22s %s  skipped: script %s (%d words, the target is %s %d for about 2:15 at Gemini's pace)" % (
+                    s["id"], s["level"], expected[0], expected[1], "at least" if expected[0] == "too short" else "at most", expected[2]), flush=True)
                 continue
             h = content_hash(s)
             speech = load_unchecked(st, s)
@@ -568,7 +586,7 @@ def run_gemini(sets):
             if not length_problem(sec) and s["id"] not in st["unchecked"]:
                 # Saved before the check, so a transcription outage doesn't throw the recording away.
                 write_wav(speech, unchecked_path(s, h))
-                st["unchecked"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "date": today()}
+                st["unchecked"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "pace": PACE[s["level"]], "date": today()}
                 save_json(status_file, st)
             # A take outside 2–4 minutes can't be kept, so it isn't worth a transcription request.
             problem = length_problem(sec)
@@ -608,6 +626,7 @@ def run_gemini(sets):
     else:
         st["announced"] = False
     save_json(status_file, st)
+    word_targets(st, sets, manifest)
 
 
 def use_gemini(sets, ids):
@@ -624,16 +643,17 @@ def use_gemini(sets, ids):
         # recordings.json it reads (main's, for the routine) says the set is converted.
         shutil.copyfile(take_path(s), os.path.join(AUDIO, s["id"] + ".mp4"))
         t = st["takes"][s["id"]]
-        manifest[s["id"]] = {"engine": "gemini", "voices": t["voices"], "hash": t["hash"], "seconds": t["seconds"], "date": today()}
+        manifest[s["id"]] = {"engine": "gemini", "voices": t["voices"], "hash": t["hash"], "seconds": t["seconds"], "pace": t["pace"], "date": today()}
         print("%-22s %s  on the site (%s)" % (s["id"], clock(t["seconds"]), ", ".join(t["voices"].values())))
         used += 1
     save_json(MANIFEST, manifest)
+    word_targets(st, sets, manifest)
     print("Put %d Gemini recording%s on the site" % (used, "" if used == 1 else "s"))
 
 
 def status(sets):
     st, manifest = load_status(), load_json(MANIFEST, {})
-    pace, counts = gemini_pace(st, sets), {}
+    targets, counts = word_targets(st, sets, manifest), {}
     for s in sets:
         m = manifest.get(s["id"])
         if not m or not os.path.exists(os.path.join(AUDIO, s["id"] + ".mp4")):
@@ -643,14 +663,15 @@ def status(sets):
             counts[m["engine"]] = counts.get(m["engine"], 0) + 1
         t = st["takes"].get(s["id"])
         fails = st["fails"].get(s["id"], {}).get("count", 0)
-        expected = expected_problem(pace, s)
+        expected = expected_problem(targets, s)
         u = st["unchecked"].get(s["id"])
         gem = ("on the site" if on_site_gemini(manifest, s) else "ready %s" % clock(t["seconds"]) if take_ready(st, s)
                else "recorded %s, not checked yet" % clock(u["seconds"]) if u and u.get("hash") == content_hash(s)
-               else "failed %d×" % fails if fails else "script %s (~%s)" % (expected[0], clock(expected[1])) if expected else "to do")
+               else "failed %d×" % fails if fails else "script %s (%d words, target %d)" % expected if expected else "to do")
         print("%-22s %s %4d words  site: %-52s gemini: %s" % (s["id"], s["level"], len(script_words(s)), site, gem))
     ready = sum(take_ready(st, s) for s in sets if not on_site_gemini(manifest, s))
     print("\nSite: %s · Gemini takes waiting to go on the site: %d" % (", ".join("%d %s" % (n, e) for e, n in sorted(counts.items())) or "none", ready))
+    print("Script targets for about 2:15: " + " · ".join("%s at least %d words (Gemini reads %.0f a minute, from %d reads)" % (lv, t["minWords"], t["wpm"], t["reads"]) for lv, t in targets.items()))
 
 
 def main():
@@ -660,7 +681,9 @@ def main():
     unknown = [a for a in args if a not in {s["id"] for s in sets}]
     if unknown:
         sys.exit("Unknown set id: " + ", ".join(unknown))
-    if "--status" in flags:
+    if "--word-counts" in flags:  # for tools/check_co.js, so both count the spoken words the same way
+        print(json.dumps({s["id"]: len(script_words(s)) for s in sets}))
+    elif "--status" in flags:
         status(sets)
     elif "--gemini" in flags:
         run_gemini(sets)

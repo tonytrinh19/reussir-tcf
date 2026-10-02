@@ -1,7 +1,11 @@
 // Checks the built-in Compréhension orale sets (comp-co.js) and their recordings: the structure, a B1
 // and a B2 set for every topic, 6 questions per set, a cast for every speaker, the script length,
 // option lengths that don't give the right answer away, and that every set has an up-to-date
-// recording of 2 to 4 minutes, with no audio file left over.
+// recording of 1:45 to 4 minutes, with no audio file left over.
+// Script length is a word count: enough for about 2:15 at Gemini's pace for the level, as learned by
+// tools/make_audio.py and saved in tools/word-targets.json. A set not yet recorded with Gemini that is
+// too short is listed for rewriting (the recorder skips it) but doesn't fail the check, so a small
+// change in the learned pace never blocks the nightly push.
 // Run: node tools/check_co.js   (prints stats; exits 1 if anything fails)
 const crypto = require("crypto");
 const fs = require("fs");
@@ -16,12 +20,14 @@ const T = window.TCF;
 // The same option limits as tools/check_ce.js: on the real test no option stands out.
 const LIMITS = { longestMin: 0.15, longest: 0.3, shortestMin: 0.15, shortest: 0.35, ratioMin: 0.9, ratioMax: 1.1, maxRatio: 1.4 };
 const QUESTIONS = 6;
-const MIN_WORDS = { B1: 300, B2: 380 }; // at least 2 minutes at about 150 (B1) and 180 (B2) words a minute
-const MIN_SECONDS = 120, MAX_SECONDS = 240;
+const targetsFile = path.join(root, "tools", "word-targets.json");
+const TARGETS = JSON.parse(fs.readFileSync(targetsFile, "utf8"));
+// Spoken words (numbers spelled out, l'homme as two), counted by the recorder that learned the targets.
+const spoken = JSON.parse(require("child_process").execFileSync("python3", ["-B", path.join(root, "tools", "make_audio.py"), "--word-counts"], { encoding: "utf8" }));
+const MIN_SECONDS = 105, MAX_SECONDS = 240; // a recording outside 1:45–4:00 means something went wrong
 const MS_VOICES = ["vivienne", "remy"];
 const errors = [];
 const fail = (msg) => errors.push(msg);
-const words = (s) => (String(s || "").match(/\S+/g) || []).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 const pct = (x) => Math.round(x * 100) + "%";
 const TOPICS = T.VOCAB.filter((t) => t.id !== "connecteurs" && t.id !== "pieges" && !t.own).map((t) => t.id);
 
@@ -67,6 +73,9 @@ const sets = T.COMP.coSets || [];
 const ids = new Set();
 const setQs = [];
 const wc = { B1: [], B2: [] };
+const short = [];
+const manifestFile = path.join(root, "tools", "recordings.json");
+const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, "utf8")) : {};
 sets.forEach((s, i) => {
   const where = `set ${s.id || "#" + i} (${s.title})`;
   if (!s.id) fail(`${where}: no id`);
@@ -90,9 +99,13 @@ sets.forEach((s, i) => {
     if (!MS_VOICES.includes(c.ms)) fail(`${where}: speaker ${sp} needs a Microsoft voice (${MS_VOICES.join(" or ")})`);
     if (!c.style) fail(`${where}: speaker ${sp} needs a delivery note`);
   });
-  const n = words(lines.map((l) => l.text).join(" "));
-  if (MIN_WORDS[s.level] && n < MIN_WORDS[s.level]) fail(`${where}: ${n} words, needs at least ${MIN_WORDS[s.level]} for 2 minutes`);
-  if (wc[s.level]) wc[s.level].push(n);
+  const t = TARGETS[s.level], sw = spoken[s.id];
+  const m = manifest[s.id];
+  const onGemini = m && m.engine === "gemini" && m.hash === hashOf(s);
+  if (!t) fail(`${where}: tools/word-targets.json has no ${s.level} target`);
+  else if (sw > t.maxWords) fail(`${where}: ${sw} spoken words, at most ${t.maxWords} to stay under 4 minutes`);
+  else if (sw < t.minWords && !onGemini) short.push(`${s.id} (${sw} spoken words, needs ${t.minWords})`);
+  if (wc[s.level]) wc[s.level].push(sw);
   if (!Array.isArray(s.questions) || s.questions.length !== QUESTIONS) fail(`${where}: needs ${QUESTIONS} questions`);
   (s.questions || []).forEach((q, j) => { const w = `${s.id} Q${j + 1}`; if (checkQuestion(w, q)) setQs.push({ where: w, q }); });
 });
@@ -100,12 +113,10 @@ TOPICS.forEach((t) => ["B1", "B2"].forEach((l) => {
   if (!sets.some((s) => s.level === l && (s.themes || []).includes(t))) fail(`topic ${t}: no ${l} set`);
 }));
 const range = (xs) => (xs.length ? `${Math.min(...xs)}–${Math.max(...xs)} words (average ${Math.round(xs.reduce((a, b) => a + b, 0) / xs.length)})` : "none");
-console.log(`Listening sets: ${sets.length} · B1 ${range(wc.B1)} · B2 ${range(wc.B2)}`);
+console.log(`Listening sets: ${sets.length} · spoken words B1 ${range(wc.B1)} · B2 ${range(wc.B2)}`);
 lengthReport("Questions", setQs);
 
 /* ---------- recordings ---------- */
-const manifestFile = path.join(root, "tools", "recordings.json");
-const manifest = fs.existsSync(manifestFile) ? JSON.parse(fs.readFileSync(manifestFile, "utf8")) : {};
 const audioDir = path.join(site, "audio");
 const files = fs.existsSync(audioDir) ? fs.readdirSync(audioDir).filter((f) => f.endsWith(".mp4")) : [];
 const secs = [];
@@ -116,7 +127,7 @@ sets.forEach((s) => {
   else if (!m) fail(`${s.id}: missing from tools/recordings.json (run python3 tools/make_audio.py)`);
   else {
     if (m.hash !== hashOf(s)) fail(`${s.id}: the recording is older than the script (run python3 tools/make_audio.py)`);
-    if (!(m.seconds >= MIN_SECONDS && m.seconds <= MAX_SECONDS)) fail(`${s.id}: the recording lasts ${m.seconds} s; it must last 2 to 4 minutes`);
+    if (!(m.seconds >= MIN_SECONDS && m.seconds <= MAX_SECONDS)) fail(`${s.id}: the recording lasts ${m.seconds} s; it must last 1:45 to 4 minutes`);
     secs.push(m.seconds);
     engines[m.engine] = (engines[m.engine] || 0) + 1;
   }
@@ -125,6 +136,9 @@ files.filter((f) => !ids.has(f.replace(/\.mp4$/, ""))).forEach((f) => fail(`site
 Object.keys(manifest).filter((id) => !ids.has(id)).forEach((id) => fail(`tools/recordings.json: ${id} is not a set`));
 const clock = (x) => { const t = Math.round(x); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
 console.log(`Recordings: ${secs.length} · ${Object.entries(engines).map(([e, n]) => `${e} ${n}`).join(" · ") || "none"}${secs.length ? ` · ${clock(Math.min(...secs))}–${clock(Math.max(...secs))}` : ""}`);
+
+console.log(`Script targets for about 2:15: ${Object.entries(TARGETS).map(([l, t]) => `${l} ${t.minWords}+ words (${Math.round(t.wpm)} a minute, ${t.reads} reads)`).join(" · ")}`);
+if (short.length) console.log(`\nToo short for Gemini, rewrite before it records them (${short.length}):\n  - ${short.join("\n  - ")}`);
 
 if (errors.length) {
   console.log(`\n${errors.length} problem${errors.length > 1 ? "s" : ""}:`);
