@@ -466,6 +466,20 @@ def on_site_gemini(manifest, s):
     return m.get("engine") == "gemini" and m.get("hash") == content_hash(s)
 
 
+def unchecked_path(s, h=None):
+    """A take that came back but couldn't be checked yet (e.g. the transcription got 503s): the raw
+    speech, kept so the next run checks it without spending another recording request."""
+    return os.path.join(CACHE, "%s-%s.unchecked.wav" % (s["id"], h or content_hash(s)))
+
+
+def load_unchecked(st, s):
+    u = st["unchecked"].get(s["id"])
+    if not u or u.get("hash") != content_hash(s) or not os.path.exists(unchecked_path(s)):
+        return None
+    with wave.open(unchecked_path(s)) as w:
+        return w.readframes(w.getnframes())
+
+
 def take_ready(status, s):
     t = status["takes"].get(s["id"])
     return bool(t) and t.get("hash") == content_hash(s) and os.path.exists(take_path(s))
@@ -499,6 +513,7 @@ def load_status():
     st = load_json(os.path.join(CACHE, "status.json"), {})
     st.setdefault("takes", {})
     st.setdefault("fails", {})
+    st.setdefault("unchecked", {})
     return st
 
 
@@ -510,10 +525,10 @@ def run_gemini(sets):
     # Forget takes and failures for scripts that have changed, and delete their files.
     current = {(s["id"], content_hash(s)) for s in sets}
     for f in os.listdir(CACHE):
-        m = re.match(r"(.+)-([0-9a-f]{12})\.mp4$", f)
+        m = re.match(r"(.+)-([0-9a-f]{12})\.(?:mp4|unchecked\.wav)$", f)
         if m and (m.group(1), m.group(2)) not in current:
             os.remove(os.path.join(CACHE, f))
-    for bucket in ("takes", "fails"):
+    for bucket in ("takes", "fails", "unchecked"):
         st[bucket] = {k: v for k, v in st[bucket].items() if (k, v.get("hash")) in current}
     # A failure under an older pace instruction doesn't count against the set.
     level = {s["id"]: s["level"] for s in sets}
@@ -521,9 +536,13 @@ def run_gemini(sets):
     manifest = load_json(MANIFEST, {})
     done = [s for s in sets if on_site_gemini(manifest, s)]
     todo = [s for s in sets if s not in done and not take_ready(st, s) and st["fails"].get(s["id"], {}).get("count", 0) < 2]
-    for s in done:  # converted: the cached copy is no longer needed
+    for s in done:  # converted: the cached copies are no longer needed
         if st["takes"].pop(s["id"], None) and os.path.exists(take_path(s)):
             os.remove(take_path(s))
+        if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s)):
+            os.remove(unchecked_path(s))
+    # Takes already recorded but not checked go first: they cost no recording request.
+    todo.sort(key=lambda s: s["id"] not in st["unchecked"])
     if done:
         print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s to record" % (len(todo), "" if len(todo) == 1 else "s"), flush=True)
@@ -539,9 +558,18 @@ def run_gemini(sets):
                     s["id"], s["level"], expected[0], len(script_words(s)), clock(expected[1])), flush=True)
                 continue
             h = content_hash(s)
-            print("%-22s %s  recording… (%s)" % (s["id"], s["level"], time.strftime("%H:%M:%S")), flush=True)
-            speech = gemini_speak(s, key)
+            speech = load_unchecked(st, s)
+            if speech is not None:
+                print("%-22s %s  checking the take recorded on %s… (%s)" % (s["id"], s["level"], st["unchecked"][s["id"]]["date"], time.strftime("%H:%M:%S")), flush=True)
+            else:
+                print("%-22s %s  recording… (%s)" % (s["id"], s["level"], time.strftime("%H:%M:%S")), flush=True)
+                speech = gemini_speak(s, key)
             sec = (len(speech) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
+            if not length_problem(sec) and s["id"] not in st["unchecked"]:
+                # Saved before the check, so a transcription outage doesn't throw the recording away.
+                write_wav(speech, unchecked_path(s, h))
+                st["unchecked"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "date": today()}
+                save_json(status_file, st)
             # A take outside 2–4 minutes can't be kept, so it isn't worth a transcription request.
             problem = length_problem(sec)
             err, missed, extra = (None, 0, 0) if problem else compare(script_words(s), words(transcript(speech, key)))
@@ -559,6 +587,8 @@ def run_gemini(sets):
                 st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "wer": round(err, 3), "voices": voices, "pace": PACE[s["level"]], "date": today()}
                 st["fails"].pop(s["id"], None)
                 print("%-22s %s  %2.0f%% word errors  ready (%s)" % (s["id"], clock(sec), err * 100, ", ".join(voices.values())), flush=True)
+            if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s, h)):
+                os.remove(unchecked_path(s, h))
             save_json(status_file, st)
     except DailyLimit:
         print("Stopped at Gemini's daily limit (10 requests on the free tier). The next run continues.", flush=True)
@@ -568,6 +598,8 @@ def run_gemini(sets):
     ready = sum(take_ready(st, s) for s in sets if s not in done)
     stuck = [k for k, v in st["fails"].items() if v.get("count", 0) >= 2]
     print("Gemini: %d of %d ready (%d on the site, %d waiting to go on it)" % (len(done) + ready, len(sets), len(done), ready))
+    if st["unchecked"]:
+        print("Recorded, not checked yet (kept for the next run): " + ", ".join(sorted(st["unchecked"])))
     if stuck:
         print("Failed twice, needs a look: " + ", ".join(sorted(stuck)))
     if len(done) + ready == len(sets):
@@ -612,7 +644,9 @@ def status(sets):
         t = st["takes"].get(s["id"])
         fails = st["fails"].get(s["id"], {}).get("count", 0)
         expected = expected_problem(pace, s)
+        u = st["unchecked"].get(s["id"])
         gem = ("on the site" if on_site_gemini(manifest, s) else "ready %s" % clock(t["seconds"]) if take_ready(st, s)
+               else "recorded %s, not checked yet" % clock(u["seconds"]) if u and u.get("hash") == content_hash(s)
                else "failed %d×" % fails if fails else "script %s (~%s)" % (expected[0], clock(expected[1])) if expected else "to do")
         print("%-22s %s %4d words  site: %-52s gemini: %s" % (s["id"], s["level"], len(script_words(s)), site, gem))
     ready = sum(take_ready(st, s) for s in sets if not on_site_gemini(manifest, s))
