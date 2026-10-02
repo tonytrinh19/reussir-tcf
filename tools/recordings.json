@@ -1,9 +1,9 @@
 {
  "co-consommation-b1": {
-  "date": "2026-09-25",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "702f272bb52b",
-  "seconds": 138.2,
+  "hash": "7602731128cc",
+  "seconds": 149.4,
   "voices": {
    "N": "vivienne"
   }
@@ -18,10 +18,10 @@
   }
  },
  "co-crime-b1": {
-  "date": "2026-09-25",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "1cb9c64d5de6",
-  "seconds": 130.0,
+  "hash": "6b86613aaa0f",
+  "seconds": 153.5,
   "voices": {
    "N": "remy"
   }
@@ -84,20 +84,20 @@
   }
  },
  "co-famille-b1": {
-  "date": "2026-09-28",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "b8cb26938f4c",
-  "seconds": 144.6,
+  "hash": "f0904791086b",
+  "seconds": 152.5,
   "voices": {
    "A": "vivienne",
    "B": "remy"
   }
  },
  "co-famille-b2": {
-  "date": "2026-09-28",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "7c8ea93393ec",
-  "seconds": 140.7,
+  "hash": "ab57519b72ed",
+  "seconds": 147.8,
   "voices": {
    "N": "vivienne"
   }
@@ -189,19 +189,19 @@
   }
  },
  "co-science-b1": {
-  "date": "2026-09-25",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "45d10a8bcb97",
-  "seconds": 134.1,
+  "hash": "5556fcebb415",
+  "seconds": 148.6,
   "voices": {
    "N": "remy"
   }
  },
  "co-science-b2": {
-  "date": "2026-09-25",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "4fc0e4f9226a",
-  "seconds": 146.7,
+  "hash": "fac1403cc63c",
+  "seconds": 150.5,
   "voices": {
    "N": "vivienne"
   }
@@ -234,29 +234,29 @@
   }
  },
  "co-tourisme-b1": {
-  "date": "2026-09-28",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "5adf92165471",
-  "seconds": 135.5,
+  "hash": "ffc7cf481983",
+  "seconds": 145.5,
   "voices": {
    "N": "remy"
   }
  },
  "co-tourisme-b2": {
-  "date": "2026-09-25",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "a21a8c82237a",
-  "seconds": 146.0,
+  "hash": "331f5fd3d721",
+  "seconds": 152.1,
   "voices": {
    "A": "remy",
    "B": "vivienne"
   }
  },
  "co-transports-b1": {
-  "date": "2026-09-28",
+  "date": "2026-10-02",
   "engine": "microsoft",
-  "hash": "6f4eb5cda9a7",
-  "seconds": 136.5,
+  "hash": "84b05b9350bf",
+  "seconds": 146.2,
   "voices": {
    "N": "vivienne"
   }

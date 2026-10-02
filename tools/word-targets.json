@@ -1,0 +1,14 @@
+{
+ "B1": {
+  "maxWords": 635,
+  "minWords": 357,
+  "reads": 9,
+  "wpm": 159.6
+ },
+ "B2": {
+  "maxWords": 736,
+  "minWords": 414,
+  "reads": 9,
+  "wpm": 185.0
+ }
+}
