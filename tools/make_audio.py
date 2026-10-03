@@ -40,6 +40,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unicodedata
 import urllib.error
@@ -77,9 +78,11 @@ MAX_WER, MAX_GAP = 0.08, 5  # a take fails over 8% word errors, or with 5+ words
 PACE = {"B1": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
         "B2": "Speak at a natural pace."}
 # One stuck request used to hold the whole batch past the routine's limit, with nothing printed.
-# Each attempt now waits at most REQUEST_TIMEOUT for Gemini to answer, a failed attempt (an error
-# code, a dropped connection or a timeout) is retried after 15 s, 30 s, 60 s, and the batch stops
-# cleanly once it has run BATCH_MINUTES, so the rest of run.sh still puts the ready takes on the site.
+# Each attempt now gets at most REQUEST_TIMEOUT in all for Gemini's whole answer, and never runs past
+# the batch's BATCH_MINUTES. A failed attempt (an error code, a dropped connection or no full answer)
+# is retried after 15 s, 30 s, 60 s, and the batch stops cleanly at BATCH_MINUTES, so the rest of
+# run.sh still puts the ready takes on the site. urlopen's own timeout only covers each wait for the
+# next bytes, so an answer that trickled in once held a request for over an hour (2026-10-03).
 REQUEST_TIMEOUT, TRIES, BATCH_MINUTES = 240, 4, 40
 
 
@@ -334,6 +337,27 @@ class Busy(Exception):
 DEADLINE = [None]  # time.monotonic() after which no new attempt starts (set by run_gemini)
 
 
+def fetch(req, limit):
+    """The answer to one request, or TimeoutError once it has taken `limit` seconds in all.
+    It runs in a thread so the limit holds however slowly the bytes arrive; a stuck thread is left behind."""
+    box = {}
+
+    def run():
+        try:
+            with urllib.request.urlopen(req, timeout=limit) as r:
+                box["data"] = r.read()
+        except BaseException as e:
+            box["error"] = e
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
+    t.join(limit)
+    if t.is_alive():
+        raise TimeoutError("no full answer")
+    if "error" in box:
+        raise box["error"]
+    return box["data"]
+
+
 def out_of_time():
     return DEADLINE[0] is not None and time.monotonic() >= DEADLINE[0]
 
@@ -359,8 +383,8 @@ def gemini(path, body, key, what):
         start = time.monotonic()
         wait = 15 * 2 ** attempt
         try:
-            with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as r:
-                return json.loads(r.read())
+            limit = REQUEST_TIMEOUT if DEADLINE[0] is None else max(1, min(REQUEST_TIMEOUT, DEADLINE[0] - start))
+            return json.loads(fetch(req, limit))
         except urllib.error.HTTPError as e:
             msg = e.read().decode("utf-8", "replace")
             if e.code == 429 and "per day" in msg:
@@ -372,7 +396,7 @@ def gemini(path, body, key, what):
             problem = "error %s" % e.code
         except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
             reason = getattr(e, "reason", e)
-            problem = ("no answer in %d s" % REQUEST_TIMEOUT if isinstance(reason, (TimeoutError, socket.timeout))
+            problem = ("no full answer in %.0f s" % (time.monotonic() - start) if isinstance(reason, (TimeoutError, socket.timeout))
                        else "%s (%s)" % (type(reason).__name__, str(reason)[:80] or "connection lost"))
         took = time.monotonic() - start
         if attempt == TRIES - 1:
