@@ -151,13 +151,14 @@
   }
  },
  "co-logement-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-03",
+  "engine": "gemini",
   "hash": "77ff4aff99d2",
-  "seconds": 162.0,
+  "pace": "Speak at a natural pace.",
+  "seconds": 141.9,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-advisor-2"
   }
  },
  "co-quotidien-b2": {
