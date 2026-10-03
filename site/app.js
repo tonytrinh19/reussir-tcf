@@ -216,10 +216,12 @@
     ipLast.delete(id);
     if (S.inprogress.has(id)) remove("inprogress", id);
   }
-  // Typing is saved 1.5 s after it stops; save it at once if the page is hidden or closed meanwhile.
+  // Typing is saved 1.5 s after it stops; save it at once if the page is hidden or closed meanwhile, along with
+  // this tab's copy of what's on screen (for a refresh).
   function ipFlush() {
     [...ipPending.values()].forEach((p) => { clearTimeout(p.t); p.write(); });
     examKeep();
+    tabSave();
   }
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") ipFlush(); });
   window.addEventListener("pagehide", ipFlush);
@@ -302,7 +304,7 @@
     hist: { filter: "all", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
-    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null } },
+    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
     cx: null, // the CE practice exam being taken or reviewed
     cxGen: null, // progress while Claude writes a practice exam
     cxReady: null, // a practice exam from Claude, ready to start
@@ -1633,6 +1635,25 @@
     render(true);
     speakSet(set, token);
   }
+  // After a refresh: the recording is loaded again, paused where it was (or at its end), so Resume carries on
+  // from there. It doesn't play by itself. One that can't load goes back to Play.
+  function coRemount(pos) {
+    const set = ui.c.set.co;
+    if (!set || !set.audio || set.id !== pos.id) return;
+    stopAudio();
+    const token = playToken;
+    const a = new Audio(set.audio);
+    audioEl = a;
+    a.preload = "auto";
+    a.onended = () => donePlaying(token);
+    a.onerror = () => { if (token !== playToken) return; audioEl = null; ui.c.player = "idle"; if (routeView() === "comp") render(false); };
+    a.ontimeupdate = a.ondurationchange = paintPlayer;
+    a.onloadedmetadata = () => {
+      if (token === playToken && isFinite(a.duration)) { try { a.currentTime = Math.max(0, Math.min(Number(pos.t) || 0, a.duration - 0.1)); } catch (_) {} }
+      paintPlayer();
+    };
+    ui.c.player = pos.ended ? "ended" : "paused";
+  }
   // Play ▸ Pause ▸ Resume, then Replay once the recording has ended; Stop goes back to the start.
   // 5 seconds back and forward, and the position bar, work once a recording has started.
   function playerHTML() {
@@ -1763,9 +1784,13 @@
     const cur = ui.c.set[skill];
     // A set picked before the saved history loaded is picked again once it has, unless it's been started.
     const untouched = !Object.keys(ui.c.ans[skill]).length && !ui.c.submitted[skill] && !(skill === "co" && ui.c.plays);
-    if (cur && cur.key === key && !(cur.early && loaded && untouched)) return;
+    if (cur && cur.key === key && !(cur.early && loaded && untouched)) {
+      if (cur.id && (loaded || !cur.early)) ui.c.shown[key] = { id: cur.id, saved: ui.c.submitted[skill] ? ui.c.saved[skill] : null };
+      return;
+    }
     if (busy["c-gen-" + skill] || ui.c.inflight[key]) return;
     compReset(skill);
+    if (compBack(skill, key)) return;
     const lvl = compLevel(), th = ui.c.theme;
     // A set you started at this level and topic comes back first, with your answers.
     const ip = compUnfinished(skill, lvl, th);
@@ -1783,6 +1808,25 @@
     ui.c.set[skill].fallback = !!th;
     ui.c.set[skill].early = !loaded;
     compRestore(skill);
+  }
+  // Switching level or topic and back brings back the set you had open there, as you left it: with your
+  // answers so far, or checked, with its results.
+  function compBack(skill, key) {
+    const last = ui.c.shown[key];
+    if (!last) return false;
+    const i = samplesFor(skill).findIndex((s) => s.id === last.id);
+    const cached = ui.c.cache[key];
+    const set = i >= 0 ? sampleSet(skill, i, key) : cached && cached.id === last.id ? prepSet(cached) : null;
+    if (!set) return false;
+    ui.c.set[skill] = set;
+    const a = last.saved && S.comp.get(last.saved);
+    if (a) {
+      arr(a.answers).forEach((k, j) => { if (k != null) ui.c.ans[skill][j] = k; });
+      ui.c.submitted[skill] = true;
+      ui.c.saved[skill] = last.saved;
+      if (skill === "co") ui.c.script = true;
+    } else compRestore(skill);
+    return true;
   }
   // A set is kept from its first answer (or first listen), so switching topic or reloading keeps the answers.
   // Claude's sets exist only in memory, so their record keeps a copy of the set.
@@ -1955,11 +1999,15 @@
         : `<p class="small muted">${set.src === "retired" ? "This set has since been replaced, so it can't be opened again." : "This set's text wasn't saved, so it can't be opened again."}</p>`);
     return branch(`${skill}:s:${set.id}`, `${head}${going}<span class="h-meta">${meta}</span>`, body);
   }
+  // When a set was last touched: its latest attempt, or your latest answer if it's in progress. The tree is
+  // ordered by it, newest first, like every history on the site.
+  const setLast = (skill, s, stats) => Math.max((stats.get(s.id) || {}).last || 0, (ipGet(compIpId(skill, s.id)) || {}).updated || 0);
+  const byLast = (skill, stats) => (a, b) => setLast(skill, b, stats) - setLast(skill, a, stats);
   // A topic: the sets finished or started, with a badge for each level that has one finished (✓ all of
   // that level, 1/2 some). A topic with nothing to list is left out.
   function topicBranch(skill, t, sets, stats) {
-    const shown = sets.filter((s) => stats.has(s.id) || ipGet(compIpId(skill, s.id)));
-    if (!shown.length) return "";
+    const shown = sets.filter((s) => stats.has(s.id) || ipGet(compIpId(skill, s.id))).sort(byLast(skill, stats));
+    if (!shown.length) return null;
     const lv = ["B1", "B2"].map((l) => {
       const at = sets.filter((s) => s.level === l && s.src === "sample");
       const done = at.filter((s) => stats.has(s.id));
@@ -1969,15 +2017,16 @@
       return `<span class="lv ${done.length === at.length ? "done" : ""}">${txt}</span>`;
     }).join("");
     const n = sets.reduce((x, s) => x + (stats.has(s.id) ? stats.get(s.id).attempts.length : 0), 0);
-    return branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : "in progress"}</span>`, shown.map((s) => setBranch(skill, s, stats.get(s.id))).join(""));
+    return { html: branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : "in progress"}</span>`, shown.map((s) => setBranch(skill, s, stats.get(s.id))).join("")), last: setLast(skill, shown[0], stats) };
   }
   // Practice exams done or in progress: the built-in ones and Claude's.
   function examsBranch(attempts) {
     const done = attempts.filter((a) => a.kind === "exam");
     const builtIn = T.COMP.ceExams || [];
     const paused = ipGet("exam--ce");
-    const ids = [...new Set(done.map((a) => a.setId).concat(paused ? [paused.examId] : []))];
-    if (!ids.length) return "";
+    const lastOf = (id) => Math.max((done.find((a) => a.setId === id) || {}).ts || 0, paused && paused.examId === id ? paused.updated || 0 : 0);
+    const ids = [...new Set(done.map((a) => a.setId).concat(paused ? [paused.examId] : []))].sort((a, b) => lastOf(b) - lastOf(a));
+    if (!ids.length) return null;
     const rows = ids.map((id) => {
       const ex = builtIn.find((e) => e.id === id);
       const as = done.filter((a) => a.setId === id);
@@ -1991,11 +2040,11 @@
       return branch(`ce:x:${id}`, `${head}${going}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
     }).join("");
     const last = done[0];
-    return branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "in progress"}</span>`, rows);
+    return { html: branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "in progress"}</span>`, rows), last: lastOf(ids[0]) };
   }
-  // Everything done in one skill, as a tree: topic → set → attempt, then practice exams, Claude sets with
-  // no topic, built-in sets since replaced and scores logged from elsewhere. Only sets you've finished or
-  // started are listed.
+  // Everything done in one skill, as a tree: topic → set → attempt, with practice exams, Claude sets with no
+  // topic, built-in sets since replaced and scores logged from elsewhere alongside. Only sets you've finished
+  // or started are listed, and every level of the tree is newest first.
   function historyTree(skill) {
     const attempts = compAttempts(skill);
     const stats = compStats(skill, attempts);
@@ -2022,20 +2071,21 @@
     const claudeSets = [...claude.values()];
     const done = builtins.filter((s) => stats.has(s.id)).length;
     const practice = attempts.filter((a) => a.src !== "logged" && a.kind !== "exam").length;
-    const topics = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats)).join("");
+    const groups = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats)).filter(Boolean);
+    const exams = skill === "ce" ? examsBranch(attempts) : null;
+    if (exams) groups.push(exams);
+    // A group of sets: listed newest first, and placed by its newest.
+    const setGroup = (id, name, meta, sets) => { const xs = sets.slice().sort(byLast(skill, stats)); groups.push({ html: branch(id, `<span class="h-name">${name}</span><span class="h-meta">${meta}</span>`, xs.map((s) => setBranch(skill, s, stats.get(s.id))).join("")), last: setLast(skill, xs[0], stats) }); };
     const mixed = claudeSets.filter((c) => !COMP_TOPICS.some((t) => t.id === c.theme));
+    if (mixed.length) setGroup(`${skill}:g:mixed`, "Sujets variés", "Claude sets with no topic", mixed);
+    if (retired.size) setGroup(`${skill}:g:retired`, "Earlier sets", "built-in sets since replaced", [...retired.values()]);
     const logged = attempts.filter((a) => a.src === "logged");
-    const exams = skill === "ce" ? examsBranch(attempts) : "";
-    const empty = !topics && !exams && !mixed.length && !retired.size && !logged.length;
+    if (logged.length) groups.push({ html: branch(`${skill}:g:logged`, `<span class="h-name">Logged from elsewhere</span><span class="h-meta">${logged.length} score${logged.length > 1 ? "s" : ""}</span>`, logged.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}<span>${esc(a.title)}</span><span class="lv">${esc(a.level || "")}</span></div>`).join("")), last: logged[0].ts || 0 });
+    groups.sort((a, b) => b.last - a.last);
     return `<section class="sec" id="c-hist">
-      <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} built-in sets done · ${practice} attempt${practice === 1 ? "" : "s"}</span></div>
-      ${empty ? `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>` : ""}
-      <div class="tree">${topics}
-        ${exams}
-        ${mixed.length ? branch(`${skill}:g:mixed`, `<span class="h-name">Sujets variés</span><span class="h-meta">Claude sets with no topic</span>`, mixed.map((s) => setBranch(skill, s, stats.get(s.id))).join("")) : ""}
-        ${retired.size ? branch(`${skill}:g:retired`, `<span class="h-name">Earlier sets</span><span class="h-meta">built-in sets since replaced</span>`, [...retired.values()].map((s) => setBranch(skill, s, stats.get(s.id))).join("")) : ""}
-        ${logged.length ? branch(`${skill}:g:logged`, `<span class="h-name">Logged from elsewhere</span><span class="h-meta">${logged.length} score${logged.length > 1 ? "s" : ""}</span>`, logged.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}<span>${esc(a.title)}</span><span class="lv">${esc(a.level || "")}</span></div>`).join("")) : ""}
-      </div>
+      <div class="sec-head"><h2 class="h2">Your ${skill === "ce" ? "reading" : "listening"} history</h2><span class="small muted">${done} of ${builtins.length} built-in sets done · ${practice} attempt${practice === 1 ? "" : "s"}, newest first</span></div>
+      ${groups.length ? "" : `<p class="small muted">Nothing yet. Your first set becomes your baseline.</p>`}
+      <div class="tree">${groups.map((g) => g.html).join("")}</div>
     </section>`;
   }
 
@@ -2292,6 +2342,82 @@
   const PAGE_KEY = "tcf-reussir-page";
   function rememberPage() { try { sessionStorage.setItem(PAGE_KEY, [route.view].concat(route.args).join(".")); } catch (_) {} }
   function rememberedPage() { try { return sessionStorage.getItem(PAGE_KEY) || ""; } catch (_) { return ""; } }
+
+  // A refresh used to drop whatever was on screen: the drill question you were on, a text half proofread, a
+  // vocabulary session, the clock, where the recording was. So the page's working state (ui, the clock and the
+  // recording's position) is also kept in this tab's sessionStorage, saved as you go, and put back when the
+  // page loads, before anything is drawn. It's only saved once your progress has loaded, so it never holds the
+  // empty page from before. Unfinished attempts stay the record: one changed since this copy was saved (on
+  // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
+  // is dropped rather than misread.
+  const TAB_KEY = "tcf-reussir-tab", TAB_V = 1;
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "sp", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied"];
+  let tabAt = 0; // when the copy put back was saved; 0 when there was none
+  let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
+  let tabUndo = null; // ui as it was before, in case the copy can't be drawn
+  let tabY = null; // where the page was scrolled
+  let tabSaveT = 0;
+  function tabSave() {
+    clearTimeout(tabSaveT);
+    tabSaveT = 0;
+    if (!hydrated) return;
+    try {
+      const u = {};
+      TAB_UI.forEach((k) => { u[k] = ui[k]; });
+      // The player and Claude's requests in flight don't survive a reload.
+      u.c = Object.assign({}, ui.c);
+      ["player", "inflight", "queued", "failed"].forEach((k) => delete u.c[k]);
+      u.w = Object.assign({}, ui.w, { copyOut: null });
+      const set = ui.c.set.co;
+      const audio = audioEl && set && set.audio ? { id: set.id, t: audioEl.currentTime || 0, ended: ui.c.player === "ended" } : null;
+      const tm = timer.total ? { total: timer.total, left: timer.left, base: timer.base, t0: timer.t0, running: timer.running, label: timer.label, home: timer.home, alerted: timer.alerted } : null;
+      sessionStorage.setItem(TAB_KEY, JSON.stringify({ v: TAB_V, at: Date.now(), y: window.scrollY, ui: u, timer: tm, audio }));
+    } catch (_) {
+      // A copy that can't be updated would bring back an older state, so drop it.
+      try { sessionStorage.removeItem(TAB_KEY); } catch (_2) {}
+    }
+  }
+  const tabSoon = () => { if (!tabSaveT) tabSaveT = setTimeout(tabSave, 400); };
+  function tabRestore() {
+    let s = null;
+    try { s = JSON.parse(sessionStorage.getItem(TAB_KEY) || "null"); } catch (_) { s = null; }
+    if (!s || s.v !== TAB_V || !s.ui) return;
+    tabUndo = clone(Object.fromEntries(TAB_UI.map((k) => [k, ui[k]])));
+    try {
+      for (const k of TAB_UI) {
+        const v = s.ui[k];
+        if (v === undefined) continue;
+        // Objects are merged, so a key added since keeps its default.
+        if (ui[k] && typeof ui[k] === "object" && !Array.isArray(ui[k]) && v && typeof v === "object") Object.assign(ui[k], v);
+        else ui[k] = v;
+      }
+      if (s.timer) {
+        Object.assign(timer, s.timer);
+        // A running clock carries on from when it started, so the time spent reloading counts, as on the real test.
+        if (timer.running) { clearInterval(timer.iv); timer.iv = setInterval(paintTimer, 250); }
+      }
+      if (s.audio) coRemount(s.audio);
+      tabAt = Number(s.at) || 0;
+      tabY = Number.isFinite(s.y) ? s.y : null;
+      tabCheck = true;
+      try { history.scrollRestoration = "manual"; } catch (_) {}
+    } catch (e) {
+      console.warn("Couldn't restore this tab", e);
+      tabDrop();
+    }
+  }
+  // The copy put back couldn't be used: start from a clean page instead, and forget it. Your drafts and
+  // unfinished attempts are then put back from your progress, as on a first visit, by hydrating again.
+  function tabDrop() {
+    if (tabUndo) TAB_UI.forEach((k) => { ui[k] = tabUndo[k]; });
+    timerSet(0, "", "");
+    stopAudio();
+    tabAt = 0;
+    tabY = null;
+    tabCheck = false;
+    hydrated = false;
+    try { sessionStorage.removeItem(TAB_KEY); } catch (_) {}
+  }
   const routeView = () => route.view;
   let pendingRender = false, raf = 0, pointerDown = false;
   function scheduleRender() {
@@ -2302,7 +2428,9 @@
     return !!el && (el.tagName === "TEXTAREA" || el.tagName === "SELECT" || (el.tagName === "INPUT" && !/^(checkbox|radio|button|submit|range|reset)$/i.test(el.type)));
   }
   function render(force) {
-    if (loaded && !hydrated) hydrate();
+    // The first draw with your progress loaded can change what's on screen (a newer copy of the round, say),
+    // so it isn't put off while a field has focus; the field, its text and the caret are kept.
+    if (loaded && !hydrated) { hydrate(); force = true; }
     const ae = document.activeElement;
     const typing = isTyping(ae) && viewEl.contains(ae);
     if (typing && !force) { pendingRender = true; paintFoot(); return; }
@@ -2311,16 +2439,27 @@
     const sel = typing && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd, ae.scrollTop] : null;
     const v = VIEWS[route.view];
     let html;
-    try { html = v.render(route.args); } catch (e) { console.error(e); html = `<div class="wrap"><div class="notice warn">Something went wrong drawing this page: ${esc(e && e.message)}</div></div>`; }
+    try { html = v.render(route.args); } catch (e) {
+      console.error(e);
+      // A state brought back from before the refresh that can't be drawn is dropped, rather than coming back on every refresh.
+      if (tabCheck) { tabDrop(); render(force); return; }
+      html = `<div class="wrap"><div class="notice warn">Something went wrong drawing this page: ${esc(e && e.message)}</div></div>`;
+    }
     viewEl.innerHTML = html;
     if (fid) {
       const el = document.getElementById(fid);
       if (el) { try { el.focus({ preventScroll: true }); if (sel && typeof el.setSelectionRange === "function") { el.setSelectionRange(sel[0], sel[1]); el.scrollTop = sel[2]; } } catch (_) {} }
     }
     try { if (v.after) v.after(route.args); } catch (e) { console.error(e); }
+    if (hydrated) {
+      tabCheck = false;
+      // Back where the page was before the refresh, once everything on it has loaded.
+      if (tabY != null) { window.scrollTo(0, tabY); tabY = null; }
+    }
     paintNav();
     paintFoot();
     paintTimer();
+    tabSoon();
   }
   function paintNav() {
     document.querySelectorAll("[data-nav]").forEach((a) => { if (a.dataset.nav === route.view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
@@ -3418,12 +3557,29 @@
       if (ip.kind === "comp" && ip.src !== "claude" && !samplesFor(ip.skill).some((s) => s.id === ip.setId)) ipDrop(ip.id);
       if (ip.kind === "exam" && !ip.snap && !(T.COMP.ceExams || []).some((e) => e.id === ip.examId)) ipDrop(ip.id);
     }
+    // After a refresh, this tab's copy of what was on screen is kept, unless the attempt's record has changed
+    // since (on another device, say). A record that didn't get saved before the refresh is saved again.
+    const newer = (id) => { const ip = ipGet(id); return !!ip && (ip.updated || 0) > tabAt; };
     ["t1", "t2", "t3"].forEach((t) => {
       const legacy = lsGet("tcf-draft-" + t, "");
-      if (!writingRestore(t) && legacy.trim()) { ui.w.text[t] = legacy; writingKeep(t, 0); }
+      if (!tabAt || newer("writing--" + t)) { if (!writingRestore(t) && legacy.trim()) { ui.w.text[t] = legacy; writingKeep(t, 0); } }
       if (legacy) lsSet("tcf-draft-" + t, "");
-      spRestore(t);
+      if (!tabAt || newer("speaking--" + t)) spRestore(t);
     });
+    if (!tabAt) return;
+    try {
+      const d = ui.drill;
+      if (d && !d.done && d.src !== "retry") { if (newer(drillIpId(d))) drillResume(ipGet(drillIpId(d))); else drillKeep(); }
+      ["ce", "co"].forEach((sk) => {
+        const set = ui.c.set[sk];
+        if (!set || !set.id || ui.c.submitted[sk]) return;
+        if (newer(compIpId(sk, set.id))) compRestore(sk); else compKeep(sk);
+      });
+      if (ui.cx && !ui.cx.done) {
+        // An exam carried on elsewhere is picked up from there, with its own clock.
+        if (newer("exam--ce")) { ui.cx = null; if (timer.home === "comp.ce.exam") timerSet(0, "", ""); } else examKeep();
+      }
+    } catch (e) { console.warn(e); }
   }
   function finishedAttempts() {
     const out = [];
@@ -3527,8 +3683,9 @@
 
   /* =============== progress report (Progrès → Évolution) =============== */
   // Built from the finished attempts; it keeps nothing of its own. Each group (a writing task, a listening
-  // or reading level, a drill set) lists every attempt oldest first, and compares the first scored
-  // attempt with the latest. Each group's open state lives in ui.c.open, like the other trees.
+  // or reading level, a drill set) lists every attempt newest first, like every history on the site, and
+  // compares the first scored attempt with the latest. Groups come in the order of their latest attempt.
+  // Each group's open state lives in ui.c.open, like the other trees.
   const REP_CHAIN = 10;
   function repBadge(change) {
     if (!change) return "";
@@ -3539,12 +3696,13 @@
   // Change in a score out of a total: in answers when both totals match, otherwise in percentage points.
   const repFracChange = (f, l) => (f.total === l.total ? [l.score - f.score, ""] : [Math.round((l.score / l.total - f.score / f.total) * 100), " pts"]);
   // rows: [{id, date, v (the score, or null if not scored), show, pill, meta, tags, btn, sub, review}], oldest first.
+  // They're listed newest first; the chain of scores in the summary still reads oldest → latest.
   function repGroup(id, head, rows, change, suffix, extra) {
     const scored = rows.filter((r) => r.v != null);
     const chain = scored.slice(-REP_CHAIN).map((r) => r.show).join(" → ");
     const last = rows[rows.length - 1];
     const summary = `${head}${chain ? `<span class="num">${scored.length > REP_CHAIN ? "… → " : ""}${chain}${suffix || ""}</span>` : ""}${scored.length > 1 ? repBadge(change(scored[0], scored[scored.length - 1])) : ""}<span class="h-meta">${rows.length} attempt${rows.length > 1 ? "s" : ""} · last ${shortDate(last.date)}</span>`;
-    const body = rows.map((r) => `<div class="h-att"><span class="num">${shortDate(r.date)}</span>${r.pill}${r.meta || ""}${r.tags || ""}<span style="margin-left:auto">${r.btn || ""}</span>${r.sub ? `<span class="small muted fr" style="flex-basis:100%">${r.sub}</span>` : ""}</div>${r.review && ui.rep.open === r.id ? `<div>${r.review()}</div>` : ""}`).join("") + (extra || "");
+    const body = rows.slice().reverse().map((r) => `<div class="h-att"><span class="num">${shortDate(r.date)}</span>${r.pill}${r.meta || ""}${r.tags || ""}<span style="margin-left:auto">${r.btn || ""}</span>${r.sub ? `<span class="small muted fr" style="flex-basis:100%">${r.sub}</span>` : ""}</div>${r.review && ui.rep.open === r.id ? `<div>${r.review()}</div>` : ""}`).join("") + (extra || "");
     return { html: branch(id, summary, body), trend: scored.length > 1 ? change(scored[0], scored[scored.length - 1])[0] : null, ts: last.ts || 0 };
   }
   // Mistakes per 100 words in each category, first corrected attempt → latest, so a longer text doesn't look worse.
@@ -3591,7 +3749,7 @@
         : `<p class="small muted">Correct ${corrected.length ? "another" : "a"} ${esc(W.name)} with Claude to compare your mistakes.</p>`;
       const head = `<span class="h-name">${esc(W.name)}</span><span class="small muted">${esc(W.kind)}</span>`;
       return repGroup("rep:ee:" + task, head, rows, (f, l) => [l.v - f.v, ""], " /20", `<div class="stack tight" style="padding-top:8px">${extra}</div>`);
-    }).filter(Boolean);
+    }).filter(Boolean).sort((a, b) => b.ts - a.ts);
   }
   // Compréhension: one group per skill and level, across sets, plus the CE practice exams.
   function repComp() {
@@ -3629,7 +3787,7 @@
         out.push(repGroup("rep:ce:exam", `<span class="sk ce">CE</span><span class="lv">A1–C2</span><span class="h-name">Examens blancs</span>`, rows, (f, l) => [l.v - f.v, ""]));
       }
     }
-    return out;
+    return out.sort((a, b) => b.ts - a.ts);
   }
   // Grammaire: one group per drill set, most recent first. "Retry the misses" rounds are part of their round.
   function repDrills() {
@@ -3664,7 +3822,7 @@
     return `<div class="wrap">
       ${head}
       ${tabs}
-      <p class="lede">How your scores have moved in each writing task, listening and reading level, and drill set: every attempt in order, and the change from your first to your latest. Open any attempt to see it again.</p>
+      <p class="lede">How your scores have moved in each writing task, listening and reading level, and drill set: every attempt, newest first, and the change from your first to your latest. Open any attempt to see it again.</p>
       ${trends.length ? `<div class="stats">${tally.map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div><p class="small muted">Out of the ${trends.length} group${trends.length === 1 ? "" : "s"} you've done more than once, comparing your first and latest score.</p>` : ""}
       ${parts.length ? parts.map(([h, note, gs]) => `<section class="sec"><div class="sec-head"><h2 class="h2">${h}</h2><span class="small muted">${note}</span></div><div class="tree">${gs.map((g) => g.html).join("")}</div></section>`).join("")
         : `<p class="empty">Finish a writing task, a listening or reading set, or a drill round, and your progress shows here.</p>`}
@@ -3970,6 +4128,7 @@
       compReset(sk);
       ui.c.set[sk] = sampleSet(sk, i, key);
       if (ui.c.theme && !arr(ui.c.set[sk].themes).includes(ui.c.theme)) ui.c.set[sk].fallback = true;
+      compRestore(sk);
       render(true);
     },
     "c-new": (el) => { const sk = el.dataset.skill; const key = compKey(sk); delete ui.c.cache[key]; delete ui.c.failed[key]; compReset(sk); ui.c.set[sk] = null; compGenerate(sk); },
@@ -4085,6 +4244,7 @@
     if (!fn) return;
     if (el.tagName === "A") e.preventDefault();
     fn(el, e);
+    tabSoon();
   });
   document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent']")) e.preventDefault(); });
   // Keep the history tree's open branches across re-renders. "toggle" doesn't bubble, so listen while it's captured.
@@ -4093,11 +4253,13 @@
     const el = e.target;
     const fn = el.dataset && CHANGES[el.dataset.change];
     if (fn) fn(el, e);
+    tabSoon();
   });
   document.addEventListener("input", (e) => {
     const el = e.target;
     const fn = el.dataset && INPUTS[el.dataset.input];
     if (fn) fn(el, e);
+    tabSoon();
   });
   document.addEventListener("focusin", (e) => {
     const el = e.target;
@@ -4162,6 +4324,7 @@
   function boot() {
     route = parseRoute(location.hash || rememberedPage());
     rememberPage();
+    tabRestore();
     render(true);
     const c = window.claude;
     if (!c || typeof c.use !== "function") { claudeState = "none"; tryServer().then((ok) => { if (!ok) useLocal(); }); return; }

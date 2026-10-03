@@ -61,6 +61,11 @@
   - `app.js`: the app logic.
     - One timer serves every page (writing, speaking, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
     - Each page has its own address after `#` (`#comp.co`, `#grammar.hunt`). On claude.ai the page runs in a frame that reloads without it, so the current page is also kept in the tab's sessionStorage (`tcf-reussir-page`) and reopened after a refresh. A new tab starts on Aujourd'hui.
+    - A refresh keeps whatever you were doing, on claude.ai and locally. What's on screen (`ui`, the clock and the recording's position) is also kept in the tab's sessionStorage (`tcf-reussir-tab`) and put back before anything is drawn. That covers the drill question you're on with what you'd typed, Find the mistakes, a vocabulary session, the Compréhension set with its level and topic, the practice exam and its clock, a recording (paused where it was) and where the page was scrolled.
+      - It's saved as you go, but only once your progress has loaded, so it never holds the empty page from before.
+      - Unfinished attempts stay the record: one changed since the copy was saved (on another device, say) wins over it. A copy that can't be drawn is dropped.
+      - Bump `TAB_V` in `app.js` when the shape of `ui` changes, so an older copy is dropped rather than misread.
+    - Switching level or topic in Compréhension and back brings back the set you had there, as you left it: with your answers so far, or checked, with its results.
     - Grammaire has three ways to practise across topics, above the topic list: the mixed review, Your mistakes and Find the mistakes.
     - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item. Speaking isn't included, because its transcripts come from dictation.
       - The cue is what the learner wrote. The question is the sentence with a gap where the correction goes, taken from Claude's corrected text when the correction is found there. Otherwise it's the learner's sentence with the draft's other corrections applied.
@@ -70,7 +75,7 @@
       - Rounds are saved in `drills` with topic `mine`, set `errors`. A mistake is recognised by its wording alone.
     - **Find the mistakes** (`#grammar.hunt`) gives a text from `proofread.js`: the first not done at the level (B1 in Phases 1–2, B2 after, switchable), or else the one done longest ago.
       - The learner taps the words that look wrong, then types a correction for each mistake found. A mistake is caught when it's both found and corrected.
-      - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). Nothing is kept before it's checked, since a text takes a few minutes.
+      - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). A text in progress isn't an unfinished attempt, since it takes a few minutes, but a refresh keeps it.
     - Each writing task has "Copy for another AI", for when Claude can't correct the draft. It copies one prompt: the TCF Canada writing rules, criteria and score bands, the task and its subject (with the Tâche 3 documents), the word counts, the learner's recurring errors, the draft, and what to send back. If the browser blocks the clipboard, the prompt is shown selected, to copy by hand.
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
     - As on the real test, a set is four separate documents with one question each (`questions[i].doc`), not one text with four questions. Claude's sets use the same shape; ones saved before the change still show their single text.
@@ -127,7 +132,7 @@
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.
-  - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads.
+  - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads. The tree is newest first at every level: topics and sets by their latest attempt (or answer, while in progress), then the attempts.
     - Both histories list only sets finished or started (an `inprogress` record, including Claude sets never finished), and practice exams likewise. Attempts at built-in sets that have since been replaced go under "Earlier sets", without their text.
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
   - A finished CE practice exam is saved with `kind: "exam"`. It also adds a `mocks` entry, labelled as a site estimate.
@@ -148,5 +153,6 @@
   - **Claude's follow-up homework** (from writing corrections and "Suggest 3") is saved only when the learner presses Add.
 - Progrès → Évolution is the progress report. It's built from the finished attempts and saves nothing of its own; every attempt stays a separate record.
   - Groups: each writing task (across prompts), each listening or reading level, the CE practice exams, and each drill set. Speaking isn't included: its feedback has a level but no score.
-  - Each group lists every attempt oldest first, linked so it can be opened again. It compares the first scored attempt with the latest (▲/▼), and tags a retry of the same writing prompt or comprehension set.
+  - Each group lists every attempt newest first, linked so it can be opened again, and groups come in the order of their latest attempt. The chain of scores in a group's summary reads oldest → latest. It compares the first scored attempt with the latest (▲/▼), and tags a retry of the same writing prompt or comprehension set.
+- Every history list on the site is newest first, oldest at the bottom.
   - Writing tasks also compare mistakes per 100 words in each category, from the first corrected attempt to the latest: fixed, fewer, repeating, more or new.
