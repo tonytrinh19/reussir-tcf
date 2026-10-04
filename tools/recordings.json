@@ -254,12 +254,13 @@
   }
  },
  "co-transports-b1": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-04",
+  "engine": "gemini",
   "hash": "6176c6e272a5",
-  "seconds": 155.7,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 172.4,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-concierge-6"
   }
  },
  "co-transports-b2": {
