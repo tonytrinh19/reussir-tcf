@@ -2255,7 +2255,8 @@
         <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see the document, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
     }
     const exams = compAttempts("ce").filter((a) => a.kind === "exam");
-    const starts = (T.COMP.ceExams || []).map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}`; }).join("");
+    // One row per built-in exam, so each note sits by its own exam. The ones not done yet are the primary choice.
+    const starts = (T.COMP.ceExams || []).map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<div class="row"><button class="btn ${prev ? "" : "primary"}" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}</div>`; }).join("");
     const paused = ipGet("exam--ce");
     return `${back}
       <section class="panel stack">
@@ -2264,7 +2265,7 @@
         <ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>
         <p class="small muted">${esc(spec.note)}</p>
         ${paused ? `<div class="notice"><b>You have an unfinished exam:</b> ${esc(paused.title)}, ${esc(ipProgress(paused))}. Pick it up where you stopped, or discard it to start another.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="exam--ce">Resume</button>${discardBtn("exam--ce")}</div></div>`
-          : `<div class="row">${starts}${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>`}
+          : `<div class="stack tight">${starts}<div class="row">${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div></div>`}
         ${ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
       </section>
       ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}</span>${(T.COMP.ceExams || []).some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
