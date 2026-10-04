@@ -2186,6 +2186,7 @@
   }
   async function examGenerate() {
     if (ui.cxGen || (ui.cx && !ui.cx.done)) return;
+    ui.cx = null; // results asked for a new exam close, so its progress and "ready" notice show
     ui.cxGen = { step: 0, total: TC.ceExam.blocks.length, lvl: "", items: [] };
     render(true);
     for (const [lvl, n] of TC.ceExam.blocks) {
@@ -2243,6 +2244,12 @@
         const opts = it.order.map((k) => `<div class="opt ${k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${typo(it.options[k])}</span></div>`).join("");
         return `<details class="fold"><summary>${j + 1} · ${esc(it.level)} · <span class="${ok ? "ok-t" : "miss"}">${ok ? "✓" : a == null ? "blank" : "✗"}</span> · ${typo(it.title || it.type)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
       }).join("");
+      // What to do next, right from the results: the built-in exams not done yet, a retake, a new one from Claude, or the list.
+      const doneIds = new Set(compAttempts("ce").filter((a) => a.kind === "exam").map((a) => a.setId));
+      const fresh = (T.COMP.ceExams || []).filter((e) => e.id !== cx.exam.id && !doneIds.has(e.id));
+      const next = fresh.map((e) => `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>`).join("")
+        + `<button class="btn" data-act="x-retake">Retake ${esc(cx.exam.title)}</button>${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}`
+        + `<button class="btn ghost" data-act="x-close">All exams</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a>`;
       return `${back}
         <section class="panel stack">
           <p class="eyebrow">${esc(cx.exam.title)} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
@@ -2250,7 +2257,8 @@
           <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in reading is 453–498.</p>
           <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
           <p class="small muted">${esc(spec.note)}${r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
-          <div class="row"><button class="btn" data-act="x-close">Done</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a></div>
+          <div class="row">${next}</div>
+          <p class="small muted">A retake asks questions you've already seen, so its score reads high.</p>
         </section>
         <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see the document, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
     }
@@ -4172,6 +4180,8 @@
     "x-quit-yes": () => { ui.cx = null; ipDrop("exam--ce"); timerSet(0, "", ""); render(true); },
     "x-review": (el) => examReview(el.dataset.id),
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
+    // The same exam again, from its results: a built-in one from the bank, one of Claude's from the copy on screen.
+    "x-retake": () => { const cx = ui.cx; if (!cx) return; examStart((T.COMP.ceExams || []).find((e) => e.id === cx.exam.id) || cx.exam); },
     "p-phase": (el) => { saveSettings({ phase: Number(el.dataset.n) }); toast(`Phase ${el.dataset.n}: ${T.PHASES[Number(el.dataset.n) - 1].name}.`); },
     "m-add": () => {
       const f = ui.form;
