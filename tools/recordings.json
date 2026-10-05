@@ -18,22 +18,24 @@
   }
  },
  "co-crime-b1": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "002275f9fb5e",
-  "seconds": 158.9,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 155.3,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-advisor-2"
   }
  },
  "co-crime-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "2759a5b02c45",
-  "seconds": 159.4,
+  "pace": "Speak at a natural pace.",
+  "seconds": 147.3,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-fr-podcaster-6",
+   "B": "fr-fr-csagent-3"
   }
  },
  "co-economie-b1": {
@@ -84,22 +86,24 @@
   }
  },
  "co-famille-b1": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "2c4705cf3ad4",
-  "seconds": 156.2,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 112.8,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-advisor-12",
+   "B": "fr-fr-podcaster-2"
   }
  },
  "co-famille-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "4fae832b20bc",
-  "seconds": 150.7,
+  "pace": "Speak at a natural pace.",
+  "seconds": 133.6,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-1"
   }
  },
  "co-gouvernement-b1": {
@@ -190,21 +194,23 @@
   }
  },
  "co-science-b1": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "47f78eedbee8",
-  "seconds": 154.3,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 136.8,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-training-4"
   }
  },
  "co-science-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "82dda30fa3c4",
-  "seconds": 152.2,
+  "pace": "Speak at a natural pace.",
+  "seconds": 143.6,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-tutor-4"
   }
  },
  "co-societe-b1": {
@@ -264,13 +270,14 @@
   }
  },
  "co-transports-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-05",
+  "engine": "gemini",
   "hash": "e693515291ed",
-  "seconds": 151.1,
+  "pace": "Speak at a natural pace.",
+  "seconds": 126.1,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-concierge-4"
   }
  },
  "co-travail-b1": {
