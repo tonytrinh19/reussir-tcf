@@ -15,9 +15,12 @@ Gemini for its current script, and --force leaves those sets alone unless they'r
 Needs: python3 -m pip install --user edge-tts ; node ; macOS afconvert.
 Gemini also needs an API key in ~/.config/gemini/api_key (or $GEMINI_API_KEY).
 
-Usage: python3 tools/make_audio.py               record new or changed sets with Microsoft
+The CO practice exam (site/exam-co.js) is recorded the same way, item by item, into
+site/audio/<exam id>/NN.mp4, with Microsoft voices only for now: the Gemini commands leave it out.
+
+Usage: python3 tools/make_audio.py               record new or changed sets and exam items with Microsoft
        python3 tools/make_audio.py --force       re-record every set with Microsoft (except Gemini ones)
-       python3 tools/make_audio.py co-sante-b2   re-record one set with Microsoft
+       python3 tools/make_audio.py co-sante-b2   re-record one set (or exam item, co-exam-1-07) with Microsoft
        python3 tools/make_audio.py --gemini      record Gemini takes until the daily limit
        python3 tools/make_audio.py --use-gemini  put the ready Gemini takes on the site (all, or set ids)
        python3 tools/make_audio.py --status      show each set's recording and the script targets
@@ -66,9 +69,22 @@ MIN_SECONDS, MAX_SECONDS = 105, 240
 TARGET_DB, PEAK_DB = -21.0, -1.0  # every recording equally loud, with no clipping
 BITRATE = 64000
 
-# Microsoft neural voices, slowed per level to about 150 (B1) and 180 (B2) words a minute.
-MS_VOICES = {"vivienne": "fr-FR-VivienneMultilingualNeural", "remy": "fr-FR-RemyMultilingualNeural"}
+# Microsoft neural voices, slowed per level to about 150 (B1) and 180 (B2) words a minute. Sylvie and Jean,
+# from Québec, speak in a few of the exam's B2–C2 items, as the real test has some Québec French.
+MS_VOICES = {"vivienne": "fr-FR-VivienneMultilingualNeural", "remy": "fr-FR-RemyMultilingualNeural",
+             "sylvie": "fr-CA-SylvieNeural", "jean": "fr-CA-JeanNeural"}
 MS_RATE = {("vivienne", "B1"): "-28%", ("vivienne", "B2"): "-20%", ("remy", "B1"): "-22%", ("remy", "B2"): "-5%"}
+# The exam runs from A1 to C2: slow and clear at A1–A2 (about 130 words a minute), the sets' pace at B1 and
+# B2, close to natural speed at C1–C2 (about 185). Its narrator reads every question at the same steady pace.
+EXAM_RATE = {
+    "vivienne": {"A1": "-30%", "A2": "-30%", "B1": "-28%", "B2": "-20%", "C1": "-12%", "C2": "-12%"},
+    "remy": {"A1": "-15%", "A2": "-15%", "B1": "-22%", "B2": "-5%", "C1": "-8%", "C2": "-6%"},
+    "sylvie": {"A1": "-25%", "A2": "-25%", "B1": "-20%", "B2": "-12%", "C1": "-6%", "C2": "-4%"},
+    "jean": {"A1": "-22%", "A2": "-22%", "B1": "-18%", "B2": "-8%", "C1": "-4%", "C2": "-2%"},
+}
+QUESTION_RATE = "-22%"
+# In the exam, a pause after each spoken option (A, B, C, D) and before the narrator's question.
+GAP_OPTION, GAP_QUESTION = 0.9, 1.6
 
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta"
 GEMINI_TTS = "gemini-3.8-flash-tts"
@@ -105,6 +121,17 @@ def tts_text(s):
 def load_sets():
     out = subprocess.run(["node", os.path.join(ROOT, "tools", "export_co.js")], check=True, capture_output=True, text=True).stdout
     return json.loads(out)
+
+
+def load_exam():
+    """The practice exam's items, each with an id (co-exam-1-07), its recording and the length its level allows."""
+    out = subprocess.run(["node", os.path.join(ROOT, "tools", "export_co.js"), "--exam"], check=True, capture_output=True, text=True).stdout
+    return json.loads(out)
+
+
+def out_path(s):
+    """Where a set's or an exam item's recording goes."""
+    return os.path.join(ROOT, "site", s["file"]) if "file" in s else os.path.join(AUDIO, s["id"] + ".mp4")
 
 
 def content_hash(s):
@@ -251,6 +278,23 @@ def ask_for_better_mp3():
     aiohttp.ClientWebSocketResponse.send_str = send_str
 
 
+def ms_rate(s, line):
+    who = s["cast"][line["speaker"]]["ms"]
+    if "exam" not in s:
+        return MS_RATE[(who, s["level"])]
+    return QUESTION_RATE if line["speaker"] == "Q" else EXAM_RATE[who][s["level"]]
+
+
+def gap_after(s, i):
+    """The silence after line i: longer before an exam's spoken option or its question, and at a change of speaker."""
+    line, nxt = s["lines"][i], s["lines"][i + 1]
+    if "exam" in s and nxt["speaker"] == "Q":
+        return GAP_QUESTION
+    if "exam" in s and s["kind"] in ("pic", "reply") and re.match(r"[ABCD]\. ", nxt["text"]):
+        return GAP_OPTION
+    return GAP_TURN if nxt["speaker"] != line["speaker"] else GAP_SAME
+
+
 async def ms_record(s, sem):
     import edge_tts
     async with sem:
@@ -262,7 +306,7 @@ async def ms_record(s, sem):
                 mp3 = os.path.join(tmp, "l%02d.mp3" % i)
                 for attempt in range(3):
                     try:
-                        await edge_tts.Communicate(tts_text(line["text"]), MS_VOICES[who["ms"]], rate=MS_RATE[(who["ms"], s["level"])]).save(mp3)
+                        await edge_tts.Communicate(tts_text(line["text"]), MS_VOICES[who["ms"]], rate=ms_rate(s, line)).save(mp3)
                         break
                     except Exception:
                         if attempt == 2:
@@ -270,28 +314,30 @@ async def ms_record(s, sem):
                         await asyncio.sleep(2)
                 parts.append(decode(mp3))
                 if i + 1 < len(lines):
-                    gap = GAP_TURN if lines[i + 1]["speaker"] != line["speaker"] else GAP_SAME
+                    gap = gap_after(s, i)
                     parts.append(silence(gap))
                     pauses += gap
             parts.append(silence(TAIL))
-            sec = encode(b"".join(parts), os.path.join(AUDIO, s["id"] + ".mp4"))
+            os.makedirs(os.path.dirname(out_path(s)), exist_ok=True)
+            sec = encode(b"".join(parts), out_path(s))
     wpm = len(script_words(s)) / max(1, sec - pauses) * 60
     voices = {sp: s["cast"][sp]["ms"] for sp in speakers(s)}
-    print("%-22s %s %s  %3.0f words/min  %s%s" % (s["id"], s["level"], clock(sec), wpm, "+".join(dict.fromkeys(voices.values())), ("  " + length_problem(sec).upper()) if length_problem(sec) else ""), flush=True)
+    problem = length_problem(sec, s)
+    print("%-22s %s %s  %3.0f words/min  %s%s" % (s["id"], s["level"], clock(sec), wpm, "+".join(dict.fromkeys(voices.values())), ("  " + problem.upper()) if problem else ""), flush=True)
     return {"engine": "microsoft", "voices": voices, "hash": content_hash(s), "seconds": round(sec, 1), "date": today()}
 
 
-def run_microsoft(sets, force, ids):
+def run_microsoft(sets, items, force, ids):
     manifest = load_json(MANIFEST, {})
     todo = []
-    for s in sets:
-        m, f = manifest.get(s["id"]), os.path.join(AUDIO, s["id"] + ".mp4")
+    for s in sets + items:
+        m, f = manifest.get(s["id"]), out_path(s)
         if ids:
             if s["id"] in ids:
                 todo.append(s)
         elif not os.path.exists(f) or not m or m.get("hash") != content_hash(s) or force and not on_site_gemini(manifest, s):
             todo.append(s)
-    print("Recording %d of %d sets with Microsoft voices" % (len(todo), len(sets)), flush=True)
+    print("Recording %d of %d sets and exam items with Microsoft voices" % (len(todo), len(sets) + len(items)), flush=True)
     if todo:
         ask_for_better_mp3()
         os.makedirs(AUDIO, exist_ok=True)
@@ -301,24 +347,32 @@ def run_microsoft(sets, force, ids):
             return await asyncio.gather(*(ms_record(s, sem) for s in todo))
         for s, entry in zip(todo, asyncio.run(go())):
             manifest[s["id"]] = entry
-    prune(sets, manifest)
+    prune(sets, items, manifest)
     save_json(MANIFEST, manifest)
-    bad = ["%s (%s)" % (s["id"], length_problem(manifest[s["id"]]["seconds"])) for s in todo if length_problem(manifest[s["id"]]["seconds"])]
+    bad = ["%s (%s)" % (s["id"], length_problem(manifest[s["id"]]["seconds"], s)) for s in todo if length_problem(manifest[s["id"]]["seconds"], s)]
     if bad:
-        sys.exit("Recordings must last 1:45 to 4 minutes; change the script: " + ", ".join(bad))
+        sys.exit("Recordings must last 1:45 to 4 minutes (exam items: what their level allows); change the script: " + ", ".join(bad))
 
 
-def length_problem(sec):
-    return "too short" if sec < MIN_SECONDS else "too long" if sec > MAX_SECONDS else ""
+def length_problem(sec, s=None):
+    lo, hi = s["secs"] if s and "secs" in s else (MIN_SECONDS, MAX_SECONDS)
+    return "too short" if sec < lo else "too long" if sec > hi else ""
 
 
-def prune(sets, manifest):
-    """Delete recordings (and manifest entries) that no set uses any more."""
-    ids = {s["id"] for s in sets}
+def prune(sets, items, manifest):
+    """Delete recordings (and manifest entries) that no set or exam item uses any more."""
+    ids = {s["id"] for s in sets + items}
     for f in sorted(os.listdir(AUDIO)) if os.path.isdir(AUDIO) else []:
         if f.endswith(".mp4") and f[:-4] not in ids:
             os.remove(os.path.join(AUDIO, f))
             print("Removed site/audio/%s: no set uses it" % f)
+    used = {out_path(s) for s in items}
+    for exam in sorted({s["exam"] for s in items}):
+        folder = os.path.join(AUDIO, exam)
+        for f in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
+            if f.endswith(".mp4") and os.path.join(folder, f) not in used:
+                os.remove(os.path.join(folder, f))
+                print("Removed site/audio/%s/%s: no exam item uses it" % (exam, f))
     for k in [k for k in manifest if k not in ids]:
         del manifest[k]
 
@@ -702,11 +756,13 @@ def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
     sets = load_sets()
-    unknown = [a for a in args if a not in {s["id"] for s in sets}]
+    # The Gemini commands and --status keep to the sets; only the Microsoft run and the word counts see the exam.
+    items = load_exam() if not flags & {"--status", "--gemini", "--use-gemini"} else []
+    unknown = [a for a in args if a not in {s["id"] for s in sets + items}]
     if unknown:
         sys.exit("Unknown set id: " + ", ".join(unknown))
     if "--word-counts" in flags:  # for tools/check_co.js, so both count the spoken words the same way
-        print(json.dumps({s["id"]: len(script_words(s)) for s in sets}))
+        print(json.dumps({s["id"]: len(script_words(s)) for s in sets + items}))
     elif "--status" in flags:
         status(sets)
     elif "--gemini" in flags:
@@ -714,7 +770,7 @@ def main():
     elif "--use-gemini" in flags:
         use_gemini(sets, set(args))
     else:
-        run_microsoft(sets, "--force" in flags, set(args))
+        run_microsoft(sets, items, "--force" in flags, set(args))
 
 
 if __name__ == "__main__":

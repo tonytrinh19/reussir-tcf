@@ -897,6 +897,33 @@ window.TCF = (function () {
       blocks: [["A1", 4, 3], ["A2", 6, 9], ["B1", 9, 15], ["B2", 10, 21], ["C1", 6, 26], ["C2", 4, 33]],
       note: "An estimate from the points per level that TCF prep sites use. France Éducation International scores the real test with item response theory and doesn't publish its method.",
     },
+    /* A listening item at each level. The kinds of item follow the official samples in the Manuel du candidat
+       (FEI, version D, 2022, pp. 48–51): a picture with four spoken statements, a spoken question with four
+       spoken replies, then a document (a dialogue, then radio pieces and talks) followed by the spoken question,
+       with four written options. Each recording plays once and the question comes after it. The levels, the
+       short reading pause before each recording, the short answer window after it and the clip lengths follow
+       guides to the computer-based TCF Canada, which agree with one another. `secs` is the recording, the
+       spoken question included, and `words` its spoken words; check_co.js holds the built-in exam to them. */
+    coLevels: {
+      A1: { items: "1–4", secs: [10, 20], words: [18, 34], docs: "a picture of an everyday scene, with four short spoken statements (A to D), one of which describes it", asks: "which statement matches the picture" },
+      A2: { items: "5–10", secs: [10, 25], words: [20, 60], docs: "a spoken question with four spoken replies (A to D), then short everyday documents: a voicemail, a public announcement, a short exchange", asks: "the reply that fits the question, or a detail, what someone wants or has to do" },
+      B1: { items: "11–19", secs: [20, 35], words: [50, 85], docs: "a conversation, a phone call, a news brief or practical information on the radio", asks: "the purpose, a reason, a decision, or what someone thinks or will do" },
+      B2: { items: "20–29", secs: [28, 50], words: [80, 135], docs: "radio: an interview, a report, a testimony, a discussion on a concrete subject", asks: "the speaker's position, intention or attitude, the main idea, or what is implied" },
+      C1: { items: "30–35", secs: [40, 65], words: [115, 185], docs: "a talk, a debate or a radio column on an abstract subject, with nuance", asks: "implicit meaning, the structure of the argument, or a nuanced position" },
+      C2: { items: "36–39", secs: [45, 70], words: [130, 200], docs: "dense speech at natural speed: an expert discussion, a reading, an ironic column", asks: "implicit meaning, irony, an attitude or the effect of a remark" },
+    },
+    /* The CO practice exam: 39 items in 35 minutes, in the same level blocks and points as the CE one. Items 1–4
+       are pictures and 5–7 questions with spoken replies; the rest are documents. Before each recording there's a
+       pause to read (seconds, by level; questions with spoken replies have nothing to read), and after it a window
+       to answer, then the next item starts by itself. */
+    coExam: {
+      minutes: 35,
+      blocks: [["A1", 4, 3], ["A2", 6, 9], ["B1", 9, 15], ["B2", 10, 21], ["C1", 6, 26], ["C2", 4, 33]],
+      kinds: [["pic", 4], ["reply", 3], ["doc", 32]],
+      read: { A1: 8, A2: 8, B1: 8, B2: 8, C1: 10, C2: 10, reply: 3 },
+      answer: { A1: 7, A2: 7, B1: 7, B2: 7, C1: 10, C2: 10 },
+      note: "An estimate from the points per level that TCF prep sites use. France Éducation International scores the real test with item response theory and doesn't publish its method.",
+    },
   };
   EXAM[0].note = "Multiple choice, four options, one correct. Each recording is heard once, and questions get harder as you go (A1 → C2). Some items use Canadian accents or contexts.";
   EXAM[1].note = "Multiple choice, four options, from notices, ads and letters up to opinion articles and long, complex texts, in rising difficulty.";

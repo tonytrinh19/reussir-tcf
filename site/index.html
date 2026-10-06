@@ -630,6 +630,21 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .qnav button { height: 32px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--surface); color: var(--ink-2); font: 600 13px/1 var(--f-ui); font-variant-numeric: tabular-nums; cursor: pointer; }
 .qnav button.done { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
 .qnav button[aria-current="true"] { outline: 2px solid var(--ink); outline-offset: 1px; }
+/* the CO practice exam: the phase strip, the drawing on notebook paper, the A–D buttons and the progress strip */
+.cox-phase { gap: 12px; min-height: 30px; }
+.cox-bar { flex: 1; max-width: 360px; }
+.cox-bar > i { background: var(--accent); transition: width .2s linear; }
+.pic-card { --mx: 40px; margin: 0; padding: 14px 18px 10px 52px; border: 1px solid var(--rule); border-radius: 6px; justify-self: start; width: min(100%, 480px); }
+svg.scene { display: block; width: 100%; height: auto; color: var(--accent); }
+.letters { display: flex; flex-wrap: wrap; gap: 10px; }
+.opt.letter { width: 64px; height: 56px; padding: 0; justify-content: center; align-items: center; position: relative; font: 600 22px/1 var(--f-ui); }
+.opt.letter input { position: absolute; opacity: 0; pointer-events: none; }
+.opt.letter:has(input:checked), .opts .opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt.letter:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cox-strip span { display: grid; place-items: center; height: 28px; border: 1px solid var(--rule-2); border-radius: 4px; color: var(--ink-3); font: 600 12.5px/1 var(--f-ui); font-variant-numeric: tabular-nums; }
+.cox-strip span.done { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+.cox-strip span[aria-current="true"] { outline: 2px solid var(--ink); outline-offset: 1px; color: var(--ink); }
+audio.cox-audio { width: 100%; max-width: 420px; height: 36px; }
 .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .links li { display: grid; gap: 2px; }
 .links a { font-weight: 600; }
@@ -751,5 +766,6 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 600; }
 <script src="anki.js"></script>
 <script src="comp-ce.js"></script>
 <script src="exam-ce.js"></script>
+<script src="exam-co.js"></script>
 <script src="comp-co.js"></script>
 <script src="app.js"></script>
