@@ -8,9 +8,17 @@ A quick note on scope: fully detailing all ~20 vocabulary themes with every requ
 
 ## Section 5 — Vocabulary System
 
-**Daily target:** ~15 new items/day on active-learning days, spaced-repetition review only on the other days (see the weekly templates in Document 3 — this is already built into the schedule, not extra work on top of it).
+**Daily target:** 10–15 new cards on Monday, Wednesday and Friday, spaced-repetition review only on the other days (see the weekly templates in Document 3 — this is already built into the schedule, not extra work on top of it).
 
-**Spaced repetition, simply:** New item → review next day → review 2 days later → review 4 days later → review a week later → review two weeks later. Any flashcard app that supports custom intervals works (Anki is the standard choice and free); the specific app matters far less than actually running the intervals. An item you keep missing goes into a "priority" pile and gets reviewed daily until it sticks, bypassing the normal interval.
+**Spaced repetition, as the site runs it:** New card → review next day → 2 days later → 4 days → a week → two weeks → then every 30 days. A card you miss goes into a "priority" pile and comes back daily until you get it twice in a row. The 30-day ceiling suits a test about four months away: the best gap between reviews is roughly 10–20% of the time left before the test (Cepeda et al., 2008).
+
+**Which words first:** the common ones. At B1 you know roughly 2,500–3,250 words; B2 is roughly 3,250–4,000 (Milton; Nation), so about a thousand more to go, most of them frequent, general words plus the TCF topic vocabulary below. A rare word you'll meet once a year costs as many reviews as a common one: *édicter* has taken 14 reviews and 4 misses. FLELex (cental.uclouvain.be/flelex) lists French words by how often they appear at each CEFR level; when in doubt, keep the B1/B2 words and drop the rest.
+
+**Which direction:** English → French for the theme decks, so you practise producing the word you'll need in writing and speaking (you learn in the direction you practise: Webb, 2009). French → English is fine for words you only need to recognise when reading.
+
+**Cards you keep missing:** after 4 misses, the card says so. Rewrite it with an example sentence of your own (Edit card, E), or split it when it mixes look-alikes (*tandis que* contrast vs. *alors que*; *puisque* vs. *parce que*). A rewritten card usually stops being a problem; the same card reviewed again usually doesn't.
+
+**From what you read and hear:** when a word keeps coming up in your easy listening or reading, add it (Mon carnet): two or three a session at most. Words met in context and chosen by you stick better than words from a list.
 
 **What to prioritize:** Collocations and verb+preposition pairs over isolated nouns — *s'engager à faire qch* is worth more than *l'engagement* alone, because it teaches you how the word actually gets used in a sentence. A single new connector (*par ailleurs, en revanche, il n'en demeure pas moins que*) is worth more than five new nouns, because connectors are what make writing/speaking sound B2 regardless of topic.
 
@@ -91,12 +99,39 @@ A quick note on scope: fully detailing all ~20 vocabulary themes with every requ
 
 ---
 
+## Section 5b — Easy listening and reading (every day)
+
+Added 6 October 2026. This is the input half of the plan: 20 minutes a day, outside your study time (commute, cooking, before bed), on the site as each day's last block (Écoute libre / Lecture libre).
+
+- **What counts:** French you can follow without pausing. You understand listening once you know about 95% of its words (van Zeeland & Schmitt, 2013), and reading comfortably needs closer to 98%. If you're lost every few sentences, go easier, not harder: the gains come from quantity, and quantity only happens when it's easy. Extensive reading programmes help adults most, and longer ones help more (Jeon & Day, 2016).
+- **How:** don't rewind or look words up as you go; follow the story and guess from the context. Pick what you'd enjoy in English too.
+- **Where:**
+  - Listening: RFI's *Journal en français facile* (ten minutes of news a day, read slowly, with the transcript), InnerFrench (a podcast in clear French for intermediate learners; start with the early episodes), TV5MONDE Apprendre (short videos by level), and a few times a week Radio-Canada OHdio for the Canadian accent the TCF Canada sometimes uses.
+  - Reading: the RFI transcripts, graded readers (Lectures CLE en français facile, Hachette *Lire en français facile*, A1–B2: start at B1), Vikidia (simple encyclopedia articles), and ICI Radio-Canada Info once B2 is in reach.
+
+---
+
 ## Section 6 — Speaking Framework (Expression Orale)
 
 TCF Canada Orale is one-on-one with an examiner, ~12 minutes total including 2 minutes of preparation, 3 tasks of escalating difficulty.
 
+### How to practise (off the site, about 2 hours a week)
+
+You practise speaking your own way (decided 6 October 2026): with an AI voice app, a person, or recordings on your phone. Whatever you use, these work:
+
+- **A little most days, rather than one long session.** Spacing works for speaking too, and the site's plan is lightest on Tuesday and Thursday, so put the longer sessions there.
+- **Talk to someone who answers back, whenever you can.** Conversation with feedback is where speaking gains come from (Mackey & Goo, 2007), and practising with chatbots gives moderate gains and lowers anxiety (2024–25 meta-analyses). The exam is a conversation with an examiner: practise being interrupted, asked to clarify, and asked a follow-up.
+- **4/3/2.** Tell the same story three times, in 4 minutes, then 3, then 2 (Nation). Repeating a task under growing time pressure builds fluency: fewer pauses, longer runs, the same content.
+- **Redo a task after feedback.** Repeating a task you've had feedback on is what makes the corrections stick, for speaking as for writing.
+- **Shadowing.** Play a recording you've already understood (a listening set with its transcript works) and speak along a fraction of a second behind it. It trains your ear and your rhythm together (Hamada, 2019).
+- **Record yourself and listen back once,** noting two or three concrete fixes.
+- **Learn set phrases, not scripts.** Learners who use ready-made phrases are rated more fluent (Boers et al., 2006). Learn the phrases below, and the *shape* of each task, never a memorised answer.
+
+**Pronunciation, briefly:** explicit pronunciation practice works (Lee, Jang & Plonsky, 2015), especially with feedback. For an English speaker the usual priorities are the nasal vowels (*an / on / in*: *vent, vont, vin*), *u* vs. *ou* (*rue / roue*), the vowel that keeps its quality instead of sliding (*café*, not "café-y"), liaison and linking (*les_enfants*, *vous_avez*), the mostly silent *e* (*samedi* = "sam'di"), and stress on the last syllable of each phrase rather than on each word. Shadowing helps all of these.
+
 ### Tâche 1 — Se présenter
-**Tests:** Ease and fluency talking about yourself — background, family, work/studies, interests.
+**Tests:** Ease and fluency talking about yourself — background, family, work/studies, interests. On the exam it's an *entretien dirigé*: 2 minutes, no preparation, with an examiner you don't know asking the questions, so prepare content for 2 minutes of answers, not a 1-minute monologue.
+**The examiner may ask:** *Pouvez-vous vous présenter ? · D'où venez-vous et depuis quand vivez-vous ici ? · Pourquoi avez-vous choisi le Canada ? · Parlez-moi de votre travail ou de vos études. · Comment se passe une journée typique pour vous ? · Que faites-vous pendant votre temps libre ? · Qu'est-ce qui vous plaît dans votre ville ? · Quels sont vos projets pour les prochaines années ?*
 **Structure:** Greeting → name/background → living situation/family → work or studies → interests → natural closing.
 **Useful phrases:** *Je m'appelle... · Je viens de... · Actuellement, je... · Ce qui me passionne, c'est... · Dans mes loisirs, j'aime...*
 **B2 patterns:** Vary your connectors instead of chaining *et*; slip in one relative clause (*le domaine dans lequel je travaille...*); don't stay locked in the present tense — mention one past-tense detail (*j'ai déménagé à Vancouver il y a environ deux ans*).
@@ -109,6 +144,8 @@ TCF Canada Orale is one-on-one with an examiner, ~12 minutes total including 2 m
 **B2 patterns:** Correctly formed embedded questions (see Document 2, Topic 7 — this task is where that grammar point earns its keep in real time); mix question types instead of only yes/no.
 **How to develop ideas quickly:** Keep a mental checklist template (price / location / timing / conditions) you can adapt to any scenario instead of freezing.
 **Common mistake:** Carrying inversion into what should be an embedded question — under time pressure this is exactly where Topic 7's error tends to resurface. Running out of questions too early (aim for 5–6 solid ones).
+**Timing on the exam:** 2 minutes to prepare (short notes allowed), then 3 min 30 of questions.
+**Scenarios to practise:** finding someone to look after your cat for two weeks (the official example: ask about experience, prices, availability, conditions) · renting an apartment from its owner (rent, charges, neighbourhood, move-in date) · signing up for a cooking class · volunteering with an association · joining a gym · buying a second-hand bike from an ad · booking an organised trip to the Gaspésie · a summer day camp for your child · renting a car for a weekend · evening French classes · a part-time job in a café.
 
 ### Tâche 3 — Point de vue sans préparation (4:30 min, no prep)
 **Tests:** Spontaneous, continuous, convincing speech defending a position on a societal question, with zero preparation time — where most B1 candidates plateau.
@@ -128,6 +165,8 @@ TCF Canada Orale is one-on-one with an examiner, ~12 minutes total including 2 m
 **Recovering from a missing word:** Paraphrase around it (*le mot m'échappe, mais c'est quand...*), reach for a near-synonym, or describe the thing's function. Don't freeze, and don't switch to English.
 **Common B1-plateau mistakes:** A one-sided argument (no concession, however good the grammar, reads as B1); running out of content before 4:30 and padding with repetition instead of a genuinely new angle; sounding over-rehearsed — memorize the *shape* above, never a script.
 
+**A timing guide for 4:30** (run it with your phone's timer): restate the question by 0:15 · your position by 0:30 · reason 1 and its example by 1:40 · the concession and pivot by 2:30 · reason 2 and its example by 3:45 · the nuanced close by 4:30.
+
 **Progressive practice prompts:**
 - *Préférez-vous vivre en ville ou à la campagne?* [City or countryside?]
 - *Le sport doit-il être obligatoire à l'école?* [Should sport be mandatory in school?]
@@ -137,6 +176,8 @@ TCF Canada Orale is one-on-one with an examiner, ~12 minutes total including 2 m
 - *La technologie nous rend-elle plus isolés ou plus connectés?* [Does technology make us more isolated or more connected?]
 - *Faut-il réguler davantage l'intelligence artificielle?* [Should AI be regulated more?]
 - *L'immigration est-elle une richesse ou un défi pour un pays?* [Is immigration an asset or a challenge for a country?] — good one to argue from both sides, deliberately, as a drill.
+- *Si vous aviez une activité humanitaire, laquelle choisiriez-vous ? Expliquez pourquoi.* [The official example from the TCF Canada manual.]
+- *La semaine de quatre jours devrait-elle devenir la norme ?* · *Faut-il interdire les voitures dans les centres-villes ?* · *Les études universitaires devraient-elles être gratuites ?* · *Vaut-il mieux vivre dans le même pays toute sa vie ?* · *Faut-il interdire les réseaux sociaux aux moins de 16 ans ?* · *Le tourisme de masse fait-il plus de mal que de bien ?* · *Faut-il apprendre plusieurs langues dès l'école primaire ?* · *Consommer local, est-ce vraiment meilleur pour l'environnement ?*
 
 ---
 
@@ -168,12 +209,26 @@ This is the task with the recurring gap, so the template below is built specific
 
 **Comparing viewpoints correctly:** Never present the two documents as saying the same thing, and never address only one. Name each stance explicitly, even briefly, before moving on.
 
+### Every task: proofread, then rewrite
+- **A 3-minute proofreading pass before you submit,** one thing at a time: accents, agreement (gender and number), elision, then verbs with their prepositions (*participer à*, *échapper à*). Spelling and agreement were your weakest criteria in the first corrections, and they're the cheapest points to win back.
+- **Find the mistakes, once a week,** trains the same eye on someone else's text.
+- **On Saturdays, rewrite your best piece from memory:** reread the correction, close it, write it again, then compare. Getting the corrected form out of memory is what makes it stick; rereading the correction doesn't (Dunlosky et al., 2013).
+
 **Progressive writing prompts** (same escalation logic as the speaking prompts — practice arguing either side):
 - *Faut-il interdire les téléphones portables au collège?* [Should phones be banned in middle school?]
 - *Le télétravail est-il bénéfique pour les salariés?* [Is remote work good for employees?]
 - *Les grandes villes devraient-elles limiter la voiture individuelle?* [Should big cities restrict private cars?]
 - *La technologie renforce-t-elle ou affaiblit-elle les liens sociaux?* [Does technology strengthen or weaken social bonds?]
 - *Faut-il taxer davantage les entreprises qui polluent?* [Should companies that pollute be taxed more?]
+
+---
+
+## Section 8 — Exam strategy (CO and CE)
+
+- **Never leave a blank.** On the TCF a wrong answer costs nothing; only right answers score. On your first reading practice exam, 8 blank answers were 8 lost guesses.
+- **Reading (CE), 39 questions in 60 minutes:** the early items are short, so bank time there. Checkpoints: item 10 by about 9 minutes, item 19 by about 22, item 29 by about 40, then the hardest ten in the last 20. If you're behind at a checkpoint, guess the question you're stuck on and move on. In the last two minutes, give every unanswered question a guess.
+- **Listening (CO), 39 questions in 35 minutes:** each recording plays once, and the short pause before it is for reading the four options, so read them: they tell you what to listen for. The question itself comes after the recording. Answer before the next item starts, even with a guess.
+- **Practise under the same rules:** listening sets once through before you replay them, reading sets at exam pace, and mocks on the real clock.
 
 ---
 

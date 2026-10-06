@@ -6,6 +6,18 @@ Ordered by priority, not alphabetically. The "common mistakes" line under each t
 
 ---
 
+## How to practise any topic
+
+This part was added on 6 October 2026, after your own results showed the classic trap: pronominal verbs went 4 → 6 → 8 → 9/10 in one evening, then 5/10 a week later. Practice bunched into one sitting feels like mastery and fades; practice spread out sticks (Kim & Webb, 2022; Soderstrom & Bjork, 2015). Mixing topics helps too (Nakata & Suzuki, 2019). So, for every topic below:
+
+- **One round, then Retry the misses.** Two rounds at most in a sitting. A third round in a row mostly measures what's still in your short-term memory.
+- **Come back a week later.** The weekly plan gives each topic one slot a week, and the topic keeps coming back after its phase in the Saturday mixed review, which draws from every topic you've practised so far.
+- **Only the day's first round counts.** A mastery criterion below is met when the day's first round reaches the target on two days at least a week apart (three days for the imperative). That first round is the closest thing to test day.
+- **Your mistakes, twice a week.** It turns every correction of your writing into a typed question. Retrieving the right form beats rereading the correction.
+- **Use it the same week.** Put the structure in your next piece of writing on purpose: a drill that never reaches your writing hasn't done its job.
+
+---
+
 ### 1. Pronominal verbs (verbes pronominaux)
 **Why it matters:** Your #1 flagged systematic error. It touches nearly every past-tense sentence you write, so it multiplies across everything else in this document.
 **Already know (B1):** Present-tense reflexive conjugation (*je me lève, tu te lèves*).
@@ -138,6 +150,12 @@ Ordered by priority, not alphabetically. The "common mistakes" line under each t
 | False cognates from English | "having a good time" ≠ *avoir un bon temps* | Use *s'amuser / passer un bon moment* instead |
 | *les* vs. *des* | *les* = definite (specific/generic); *des* = indefinite plural | *J'aime les chats.* vs. *J'ai des chats.* |
 | *leur* vs. *ses* | *leur* = their (multiple owners, one thing); *ses* = his/her (one owner) | *leur maison* (their house) vs. *ses enfants* (his/her kids) |
+| Verb + preposition (from your corrections) | Learn the verb with its preposition, as one card | *participer à* un festival · *échapper à* l'embouteillage · *venir* voir (no *à* before the infinitive) |
+| *plus de* vs. *plus des* | *plus de* + noun, never *plus des* | *vendre plus de billets* |
+| *sur Internet* | No article | *trouver un vélo sur Internet* |
+| *dernier* after the noun | For "last" in time, *dernier* follows the noun | *la semaine dernière*, *le mois dernier* (not *la dernière semaine*) |
+| *actuellement* | It means "currently", never "actually" (*en fait*) | *Actuellement, je suis étudiant.* · *En fait, je préfère le train.* |
+| *après que* vs. *après* + infinitive | Different subject: *après que* + indicative; same subject: *après* + past infinitive (never *après de*) | *Après qu'il est parti, on a continué.* · *Après avoir fini, il est parti.* |
 
 ---
 

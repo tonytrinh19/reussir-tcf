@@ -77,6 +77,8 @@
   }
 
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
+  // "speaking" holds the attempts saved before the Oral page was removed. The site no longer reads it, but it
+  // stays in the list so a save to this browser's storage keeps them.
   const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress"];
   const S = {};
   COLLS.forEach((c) => { S[c] = new Map(); });
@@ -191,7 +193,7 @@
 
   /* =============== unfinished attempts =============== */
   // One `inprogress` record per unfinished activity: a drill round, a comprehension set, the practice exam,
-  // a writing draft, a speaking attempt. It's written at the first real answer or keystroke, never when
+  // a writing draft. It's written at the first real answer or keystroke, never when
   // something is only opened or generated, and it's deleted when the attempt is submitted or discarded.
   const ipPending = new Map();
   const ipLast = new Map();
@@ -260,7 +262,6 @@
   const TC = T.TCF_CANADA;
   const EXAM_BRIEF = "EXAM: " + TC.brief + " Score bands: " + TC.bands;
   const EE_RUBRIC = "TCF CANADA WRITING RULES: " + TC.ee.rules + " Correctors mark with standardized grids; the published criteria are: " + TC.ee.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
-  const EO_RUBRIC = "TCF CANADA SPEAKING RULES: " + TC.eo.rules + " Criteria: " + TC.eo.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
   // For generated reading questions: on the real test the right answer doesn't stand out by its length.
   const OPTIONS_RULE = "Make the four options parallel: similar length, the same grammatical form and the same amount of detail. The correct option must not be the longest or the most precise one, and which option is longest should vary from question to question. Distractors must be plausible and reuse words from the text in misleading ways, as on the real test.";
   // A reading item at one level, as on the real test: the document, its length, what the question asks and how the options work.
@@ -292,18 +293,6 @@
       checks: { t1: {}, t2: {}, t3: {} },
       viewing: null,
       copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
-    },
-    sp: {
-      task: "t1",
-      t2: dayIndex, t3: dayIndex,
-      rubric: { t1: {}, t2: {}, t3: {} },
-      notes: { t1: "", t2: "", t3: "" },
-      trans: { t1: "", t2: "", t3: "" },
-      fb: { t1: null, t2: null, t3: null },
-      chat: null,
-      chatIn: "",
-      covered: {},
-      viewing: null,
     },
     hist: { filter: "all", limit: 30, open: null },
     rep: { open: null },
@@ -401,16 +390,6 @@
     }
     document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
     document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timerBtnLabel(); });
-    const steps = document.querySelectorAll(".steps li[data-until]");
-    if (steps.length && timer.home === "speaking.t3") {
-      const el = timer.total - r;
-      const on = timerStarted();
-      steps.forEach((li) => {
-        const f = +li.dataset.from, u = +li.dataset.until;
-        li.classList.toggle("active", on && el >= f && el < u);
-        li.classList.toggle("past", on && el >= u);
-      });
-    }
   }
   function timerUI(home, label, presets) {
     const mine = timer.home === home;
@@ -499,7 +478,7 @@
   // Everything here is worked out from progress already saved: the kit adds no data of its own.
   const ico = (name, cls) => `<svg class="ico${cls ? " " + cls : ""}" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   const leafSvg = (cls) => `<svg class="${cls || ""}" viewBox="0 0 24 26" aria-hidden="true"><use href="#leaf" width="24" height="26"/></svg>`;
-  const SK_ICON = { voc: "vocab", gra: "grammar", co: "listen", ce: "read", ee: "writing", eo: "speaking", bil: "bilan" };
+  const SK_ICON = { voc: "vocab", gra: "grammar", co: "listen", ce: "read", ee: "writing", bil: "bilan" };
   // Numbers in words, the way Rémy says them (digits from 100).
   const FR_UNITS = "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize dix-sept dix-huit dix-neuf".split(" ");
   const FR_TENS = { 2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante", 6: "soixante" };
@@ -565,7 +544,7 @@
     let last = "";
     const see = (d) => { if (d && d < date && d > last) last = d; };
     for (const d of S.days.keys()) { const st = dayStats(d); if (st && st.n) see(d); }
-    ["drills", "comp", "writing", "speaking"].forEach((c) => list(c).forEach((x) => see(x.date)));
+    ["drills", "comp", "writing"].forEach((c) => list(c).forEach((x) => see(x.date)));
     return last;
   }
   // What Rémy says on Aujourd'hui: first visit of the day, halfway, plan finished, or back after a break.
@@ -655,10 +634,6 @@
     for (const w of list("writing")) {
       const W = T.WRITING[w.task];
       arr(w.fb && w.fb.errors).forEach((e) => out.push(Object.assign({}, e, { date: w.date, ts: w.ts || 0, src: (W ? W.name : "Écrit") + " écrit" })));
-    }
-    for (const sp of list("speaking")) {
-      const P = T.SPEAKING[sp.task];
-      arr(sp.fb && sp.fb.errors).forEach((e) => out.push(Object.assign({}, e, { date: sp.date, ts: sp.ts || 0, src: (P ? P.name : "Oral") + " oral" })));
     }
     for (const e of list("errors")) out.push(Object.assign({}, e, { src: "Logged by you", manual: true }));
     return out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -766,8 +741,7 @@
   // the draft's other corrections applied, so the words around it are right; the correction is the answer.
   // A mistake made again counts once, with every correction given for it accepted. Left out: changes of
   // punctuation only (answers are checked without punctuation), rewrites longer than MINE_WORDS words, which
-  // don't make a fair typed answer, and the mistakes you hide. Speaking isn't included: its transcripts come
-  // from dictation, which garbles words.
+  // don't make a fair typed answer, and the mistakes you hide.
   const MINE_WORDS = 14;
   // "arrivé(e)" → arrivé, arrivée (at most two such brackets).
   function variants(s) {
@@ -866,7 +840,27 @@
     return list("drills").filter((d) => d.topic === topic && (!set || d.set === set) && d.src !== "retry").sort((a, b) => (a.ts || 0) - (b.ts || 0));
   }
   function bestPct(topic, set) { const xs = drillsFor(topic, set).filter((d) => d.total); return xs.length ? Math.max(...xs.map((d) => d.score / d.total)) : 0; }
-  function perfectDays(topic, set, p) { return new Set(drillsFor(topic, set).filter((d) => d.total && d.score / d.total >= p - 1e-9).map((d) => d.date)).size; }
+  // Mastery is judged on what you still know a week later. A round right after another mostly shows what's
+  // fresh in memory, so only the first round of the set each day counts, and it has to reach the target on
+  // `need` days, the first and last at least a week apart.
+  function coldMet(topic, set, p, need) {
+    const firsts = new Map();
+    drillsFor(topic, set).forEach((d) => { if (d.total && !firsts.has(d.date)) firsts.set(d.date, d); });
+    const days = [...firsts.values()].filter((d) => d.score / d.total >= p - 1e-9).map((d) => d.date).sort();
+    const n = days.length;
+    return { ok: n >= need && daysBetween(days[0], days[n - 1]) >= 7, n, need, p, tried: firsts.size };
+  }
+  function coldNote(m) {
+    if (!m.tried) return "No attempts yet";
+    if (m.ok) return `Done: the day's first round at ${pct(m.p)} on ${m.need} days, a week apart`;
+    if (m.n >= m.need) return `${m.n} days at ${pct(m.p)}, but less than a week apart: try again next week`;
+    return `${m.n} of ${m.need} days so far: the day's first round at ${pct(m.p)}, a week apart`;
+  }
+  // The first try at each comprehension set, oldest first. A set logged from elsewhere counts on its own.
+  function firstTries(xs) {
+    const seen = new Set();
+    return xs.slice().sort((p, q) => (p.ts || 0) - (q.ts || 0)).filter((c2) => { const k = c2.setId || c2.id; if (seen.has(k)) return false; seen.add(k); return true; });
+  }
   function writingZero(cat) {
     const ws = list("writing").filter((w) => w.fb && Array.isArray(w.fb.errors)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 2);
     if (ws.length < 2) return { ok: false, note: `${ws.length}/2 corrected writing submissions so far` };
@@ -878,14 +872,8 @@
     const c = tp.criterion;
     const parts = [];
     if (c.set) {
-      const n = drillsFor(tp.id, c.set).length;
-      if (c.days) {
-        const k = perfectDays(tp.id, c.set, c.pct);
-        parts.push({ ok: k >= c.days, note: `${k}/${c.days} separate days at ${pct(c.pct)}` });
-      } else {
-        const b = bestPct(tp.id, c.set);
-        parts.push({ ok: n > 0 && b >= c.pct - 1e-9, note: n ? `Best ${pct(b)} (target ${pct(c.pct)})` : "No attempts yet" });
-      }
+      const m = coldMet(tp.id, c.set, c.pct, c.days || 2);
+      parts.push({ ok: m.ok, note: coldNote(m) });
     }
     if (c.writing) parts.push(writingZero(c.writing));
     if (c.prod) parts.push({ ok: prodMet(tp.id), note: prodMet(tp.id) ? "Production task passed" : "Production task not passed yet" });
@@ -903,17 +891,31 @@
     const o = opts || {};
     let items, title, set;
     if (topicId === "mixed") {
+      // Every topic of this phase and the earlier ones that you've drilled (Phase 1's four until you have), so
+      // what you learned weeks ago keeps coming back. The topics missed most in the last two weeks come first,
+      // then the ones practised longest ago, and the 15 questions are dealt among them in turn.
       // Difficulty follows the phase: B1 in Phase 1, B1 + B1+ in Phase 2, B1+ and B2 from Phase 3.
       const phase = settings().phase;
       const allowed = phase <= 1 ? ["B1"] : phase === 2 ? ["B1", "B1+"] : ["B1+", "B2"];
-      const pick = [["pronominaux", "pc", 4], ["imperatif", "main", 4], ["interrogative", "main", 4], ["subjonctif", "formation", 3]];
       const log = drillLog();
+      const since = Date.now() - 14 * 864e5;
+      const missed = new Map();
+      for (const d of list("drills")) {
+        if (d.set === "prod" || (d.ts || 0) < since) continue;
+        arr(d.items).concat(d.retry ? arr(d.retry.items) : []).forEach((it) => { if (!it.ok) { const k = it.topic || d.topic; missed.set(k, (missed.get(k) || 0) + 1); } });
+      }
+      const lastTs = (id) => { const ds = drillsFor(id); return ds.length ? ds[ds.length - 1].ts || 0 : 0; };
+      let tps = T.TOPICS.filter((tp) => tp.phase <= phase && drillsFor(tp.id).some((d) => d.set !== "prod"));
+      if (!tps.length) tps = ["pronominaux", "imperatif", "interrogative", "subjonctif"].map((id) => TOPIC[id]);
+      tps.sort((p, q) => (missed.get(q.id) || 0) - (missed.get(p.id) || 0) || lastTs(p.id) - lastTs(q.id));
+      const share = new Map();
+      for (let k = 0; k < 15; k++) { const id = tps[k % tps.length].id; share.set(id, (share.get(id) || 0) + 1); }
       items = [];
-      pick.forEach(([tid, sid, n]) => {
-        const sets = TOPIC[tid].sets;
-        let pool = sets.filter((x) => allowed.includes(x.level));
-        if (!pool.length) pool = [sets.find((x) => x.id === sid)];
-        items.push(...pickRound(pool.flatMap((st) => setItems(tid, st)), n, log));
+      tps.forEach((tp) => {
+        if (!share.get(tp.id)) return;
+        let pool = tp.sets.filter((x) => allowed.includes(x.level));
+        if (!pool.length) pool = [tp.sets.find((x) => x.id === tp.criterion.set) || tp.sets[0]];
+        items.push(...pickRound(pool.flatMap((st) => setItems(tp.id, st)), share.get(tp.id), log));
       });
       items = shuffle(items);
       title = "Mixed review · " + allowed.join(" and ");
@@ -1222,7 +1224,7 @@
   const GRAB_WORDS = 12; // the longest selection the button offers to save
   const grabBtn = document.getElementById("grab-btn");
   const grabEl = document.getElementById("grab");
-  const GRAB_PAGES = { today: "Aujourd'hui", grammar: "Grammaire", vocab: "Vocabulaire", writing: "Écrit", speaking: "Oral", comp: "Compréhension", progress: "Progrès" };
+  const GRAB_PAGES = { today: "Aujourd'hui", grammar: "Grammaire", vocab: "Vocabulaire", writing: "Écrit", comp: "Compréhension", progress: "Progrès" };
   let grabSel = null; // what the button would save, read from the selection when the button appeared
   let grabT = 0, grabHold = 0, grabHtml = "";
   // The words selected, without the spaces, quotes and punctuation around them.
@@ -1714,119 +1716,6 @@
       g.docs = [{ who: str(d[0].who), text: str(d[0].text) }, { who: str(d[1].who), text: str(d[1].text) }];
     }
     ui.w.gen[task] = g;
-    render(true);
-  }
-
-  /* =============== speaking =============== */
-  function spPrompt(task) {
-    const P = T.SPEAKING[task];
-    if (task === "t2") return P.scenarios[ui.sp.t2 % P.scenarios.length];
-    if (task === "t3") return P.prompts[ui.sp.t3 % P.prompts.length][0];
-    return "Présentez-vous.";
-  }
-  function spSave(task) {
-    const P = T.SPEAKING[task];
-    const rub = ui.sp.rubric[task] || {};
-    const doc = { task, date: todayStr(), ts: Date.now(), prompt: spPrompt(task), rubric: Object.assign({}, rub), score: P.rubric ? P.rubric.filter((r) => rub[r[0]]).length : null, of: P.rubric ? P.rubric.length : null, notes: ui.sp.notes[task] || "", transcript: ui.sp.trans[task] || "", fb: ui.sp.fb[task] || null };
-    if (task === "t2" && ui.sp.chat) {
-      const turns = spTurns();
-      doc.transcript = turns.filter((t) => t.role === "user").map((t) => t.content).join("\n");
-      doc.chat = turns;
-    }
-    put("speaking", uid(), doc);
-    autoTick("speaking." + task);
-    spClear(task);
-    toast("Attempt saved.");
-    render(true);
-  }
-  // The role-play without the hidden instructions Claude plays from.
-  const spTurns = () => (ui.sp.chat ? ui.sp.chat.turns.filter((t) => !t.rules).map((t) => ({ role: t.role, content: t.content })) : []);
-  function spClear(task) {
-    ipDrop("speaking--" + task);
-    ui.sp.rubric[task] = {};
-    ui.sp.notes[task] = "";
-    ui.sp.trans[task] = "";
-    ui.sp.fb[task] = null;
-    if (task === "t2") { ui.sp.chat = null; ui.sp.covered = {}; }
-  }
-  // A speaking attempt is kept from its first tick, note, transcript or question to the examiner.
-  function spKeep(task, delay) {
-    const P = T.SPEAKING[task];
-    const rubric = ui.sp.rubric[task] || {}, notes = ui.sp.notes[task] || "", trans = ui.sp.trans[task] || "", fb = ui.sp.fb[task] || null;
-    const chat = task === "t2" ? spTurns() : [];
-    const covered = task === "t2" ? ui.sp.covered : {};
-    const any = Object.values(rubric).some(Boolean) || notes.trim() || trans.trim() || fb || chat.some((t) => t.role === "user") || Object.values(covered).some(Boolean);
-    if (!any) { ipDrop("speaking--" + task); return; }
-    ipSave("speaking--" + task, { kind: "speaking", title: P.name + " oral", route: "speaking." + task, task, idx: task === "t1" ? 0 : ui.sp[task], prompt: spPrompt(task), rubric, notes, trans, fb, chat, covered }, delay);
-  }
-  function spRestore(task) {
-    const ip = ipGet("speaking--" + task);
-    if (!ip) return false;
-    if (task !== "t1" && Number.isFinite(ip.idx)) ui.sp[task] = ip.idx;
-    ui.sp.rubric[task] = Object.assign({}, ip.rubric);
-    ui.sp.notes[task] = str(ip.notes);
-    ui.sp.trans[task] = str(ip.trans);
-    ui.sp.fb[task] = ip.fb || null;
-    if (task === "t2") {
-      ui.sp.covered = Object.assign({}, ip.covered);
-      ui.sp.chat = arr(ip.chat).length ? { turns: [{ role: "user", content: chatRules(), rules: true }].concat(arr(ip.chat).map((t) => ({ role: t.role, content: str(t.content) }))) } : null;
-    }
-    return true;
-  }
-  async function spFeedback(task) {
-    const P = T.SPEAKING[task];
-    const text = str(ui.sp.trans[task]).trim();
-    if (text.length < 20) { toast("Paste or type what you said first."); return; }
-    const structure = (P.steps ? P.steps.map((s) => s.label) : P.structure).join(" → ");
-    const crit = TC.eo.criteria.filter(([n]) => task === "t2" || n !== "Interaction").map(([n]) => n);
-    const prompt = `You are a certified TCF Canada Expression orale examiner (France Éducation International). Grade strictly the way the TCF Canada does, using the rules and criteria below; don't use DELF, TEF or TCF tout public grading. The learner practised ${P.name} (${P.kind}) and pasted a transcript of what they said. It may come from phone dictation, so ignore punctuation and capitalization, and don't judge pronunciation, which a transcript can't show.\n\n${EO_RUBRIC}\n\nPrompt: ${spPrompt(task)}\nExpected structure: ${structure}\n${PROFILE}\nTranscript:\n"""\n${text}\n"""\nReply with only JSON: {"level": "A1 | A2 | B1 | B2 | C1 | C2", "summary": "2–3 sentences in English", "criteria": [{"name": "one of: ${crit.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in English"}] (one entry per criterion, in that order), "structure": [{"step": "step name", "done": true or false, "comment": "short"}], "errors": [{"wrong": "...", "right": "...", "category": "one of: ${Object.keys(CAT).join(", ")}", "why": "short English explanation"}], "next_time": ["2–3 concrete things to do differently"]}`;
-    const out = await ask("sp-fb-" + task, prompt);
-    if (!out) return;
-    ui.sp.fb[task] = { level: str(out.level), summary: str(out.summary), criteria: cleanCriteria(out.criteria), structure: arr(out.structure).filter((s) => s && s.step).map((s) => ({ step: str(s.step), done: !!s.done, comment: str(s.comment) })), errors: cleanErrors(out.errors), next: arr(out.next_time).map(str).filter(Boolean) };
-    spKeep(task, 0);
-    render(true);
-  }
-  function chatRules() {
-    return `You are the examiner in the TCF Canada Expression orale (France Éducation International), Tâche 2, exercice en interaction: after 2 minutes of preparation the candidate has 3 min 30 to obtain information from you by asking questions, in an everyday situation where the prompt sets both roles. You play this role: ${spPrompt("t2")} The candidate asks you questions to get information. Stay in role for the whole conversation. Answer in natural spoken French, 1–3 sentences, inventing consistent, realistic details (prices in dollars, Canadian places). Don't correct the candidate or comment on their French during the role-play. If they write in English, answer in French anyway. Begin now with one short greeting in role, and nothing else.`;
-  }
-  async function chatCall() {
-    const c = ui.sp.chat;
-    const turns = c.turns.map((t) => ({ role: t.role, content: t.content }));
-    const text = await ask("chat", turns, { json: false, tier: "quick", cache: false });
-    if (text == null || ui.sp.chat !== c) return;
-    c.turns.push({ role: "assistant", content: text });
-    spKeep("t2", 0);
-    render(true);
-    scrollChat();
-  }
-  function chatStart() {
-    ui.sp.chat = { turns: [{ role: "user", content: chatRules(), rules: true }] };
-    ui.sp.fb.t2 = null;
-    chatCall();
-  }
-  function chatSend() {
-    const c = ui.sp.chat;
-    const el = document.getElementById("chat-in");
-    const v = str(el ? el.value : ui.sp.chatIn).trim();
-    if (!c || !v || busy.chat) return;
-    c.turns.push({ role: "user", content: v });
-    if (c.turns.length > 40) c.turns.splice(1, 2);
-    ui.sp.chatIn = "";
-    spKeep("t2", 0);
-    chatCall();
-  }
-  function scrollChat() { const el = document.getElementById("chat-log"); if (el) el.scrollTop = el.scrollHeight; }
-  async function chatEnd() {
-    const c = ui.sp.chat;
-    const qs = c ? c.turns.filter((t) => t.role === "user" && !t.rules).map((t) => t.content) : [];
-    if (!qs.length) { toast("Ask at least one question first."); return; }
-    const crit = TC.eo.criteria.map(([n]) => n);
-    const prompt = `You are a certified TCF Canada Expression orale examiner (France Éducation International). Evaluate the candidate's questions from a TCF Canada Tâche 2 (exercice en interaction) role-play, strictly by TCF Canada standards.\n\n${EO_RUBRIC}\n\nScenario: ${spPrompt("t2")}\nCandidate's messages, in order:\n${qs.map((q, i) => `${i + 1}. ${q}`).join("\n")}\n\n${PROFILE}\nCheck the number of questions (aim for 5–6 or more), variety (open vs yes/no), register (vouvoiement), correct question formation (especially embedded questions: no inversion, conjugated verb; and correct inversion in direct questions), and coverage of price, place, schedule and conditions. The exchange was typed, so don't judge pronunciation or fluency.\nReply with only JSON: {"count": number, "coverage": {"prix": true or false, "lieu": true or false, "horaires": true or false, "conditions": true or false}, "summary": "2–3 sentences in English", "criteria": [{"name": "one of: ${crit.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in English"}] (one entry per criterion except Aisance, in that order), "errors": [{"wrong": "...", "right": "...", "category": "interrogative, or another id from: ${Object.keys(CAT).join(", ")}", "why": "short English explanation"}], "better_questions": ["3 stronger B2-level questions they could have asked"]}`;
-    const out = await ask("chat-end", prompt);
-    if (!out) return;
-    const cov = out.coverage || {};
-    ui.sp.fb.t2 = { level: "", summary: str(out.summary), criteria: cleanCriteria(out.criteria), count: Number(out.count) || qs.length, coverage: { prix: !!cov.prix, lieu: !!cov.lieu, horaires: !!cov.horaires, conditions: !!cov.conditions }, errors: cleanErrors(out.errors), next: arr(out.better_questions).map(str).filter(Boolean), better: true };
-    spKeep("t2", 0);
     render(true);
   }
 
@@ -2837,30 +2726,41 @@
     const [kind, a, b, x] = c.auto.split(":");
     if (kind === "writingZero") return writingZero(a);
     if (kind === "drill") {
-      const n = drillsFor(a, b).length, best = bestPct(a, b);
-      return { ok: n > 0 && best >= Number(x) - 1e-9, note: n ? `Best so far ${pct(best)}` : "No attempts yet" };
+      const m = coldMet(a, b, Number(x), 2);
+      return { ok: m.ok, note: coldNote(m) };
     }
     if (kind === "baseline") {
-      const eo = list("speaking").some((s) => s.task === "t1");
       const co = list("comp").some((c2) => c2.skill === "co");
       const ce = list("comp").some((c2) => c2.skill === "ce");
-      return { ok: eo && co && ce, note: `Tâche 1 ${eo ? "✓" : "—"} · CO ${co ? "✓" : "—"} · CE ${ce ? "✓" : "—"}` };
+      return { ok: co && ce, note: `CO ${co ? "✓" : "—"} · CE ${ce ? "✓" : "—"}` };
     }
     if (kind === "t3ok") {
       const ok = list("writing").some((w) => w.task === "t3" && w.fb && w.fb.tache3 && w.fb.tache3.compared_both && w.fb.tache3.opinion_after_comparison && w.words >= 120 && w.words <= 180);
       return { ok, note: ok ? "Done" : "Needs a corrected Tâche 3 that passes both structure checks and the word count" };
     }
+    // comp:<level>:<share>[:timed]: your first try at each of the last 3 sets at that level, in CO and in CE
+    // (with "timed", CE only counts sets done on the clock). A retake mostly shows what you remember of the set.
     if (kind === "comp") {
-      const th = Number(b);
+      const th = Number(b), clock = x === "timed";
       const res = ["co", "ce"].map((sk) => {
-        const xs = list("comp").filter((c2) => c2.skill === sk && c2.level === a && c2.total).sort((p, q) => (q.ts || 0) - (p.ts || 0)).slice(0, 3);
+        const xs = firstTries(list("comp").filter((c2) => c2.skill === sk && c2.level === a && c2.total && c2.kind !== "exam" && (!clock || sk !== "ce" || c2.timed))).slice(-3);
         return [sk, xs.length ? xs.reduce((s2, c2) => s2 + c2.score / c2.total, 0) / xs.length : null];
       });
-      return { ok: res.every(([, v]) => v != null && v >= th), note: res.map(([sk, v]) => `${sk.toUpperCase()} ${v == null ? "—" : pct(v)}`).join(" · ") + ` (last 3 sets at ${a})` };
+      return { ok: res.every(([, v]) => v != null && v >= th), note: res.map(([sk, v]) => `${sk.toUpperCase()} ${v == null ? "—" : pct(v)}`).join(" · ") + ` (first tries, last 3 sets at ${a}${clock ? ", CE on the clock" : ""})` };
     }
-    if (kind === "eoT3") {
-      const ok = list("speaking").some((s2) => s2.task === "t3" && s2.rubric && s2.rubric.full);
-      return { ok, note: ok ? "Logged" : "Tick “Spoke 3+ minutes” on a saved Tâche 3 attempt" };
+    // pace:<skill>:<level>:<share>: one set at that level answered at exam pace (CE_PACE seconds a question) with that share right.
+    if (kind === "pace") {
+      const per = CE_PACE[b] || 90, th = Number(x);
+      const xs = list("comp").filter((c2) => c2.skill === a && c2.level === b && c2.total && c2.kind !== "exam" && c2.secs > 0);
+      const ok = xs.some((c2) => c2.secs <= per * c2.total && c2.score / c2.total >= th - 1e-9);
+      const quick = xs.slice().sort((p, q) => p.secs / p.total - q.secs / q.total)[0];
+      return { ok, note: ok ? "Done" : quick ? `Your quickest set: ${Math.round(quick.secs / quick.total)} s a question (exam pace: ${per} s)` : "No attempts yet" };
+    }
+    // examFull:<skill>: a practice exam with every question answered before the time ran out.
+    if (kind === "examFull") {
+      const exams = list("comp").filter((c2) => c2.kind === "exam" && c2.skill === a);
+      const ok = exams.some((c2) => !c2.timeUp && arr(c2.answers).length && arr(c2.answers).every((v) => v != null));
+      return { ok, note: ok ? "Done" : exams.length ? "Not yet: answer every question, guessing the last ones if time runs short" : "No practice exam yet" };
     }
     if (kind === "mocks") {
       const ms = list("mocks").sort((p, q) => str(p.date).localeCompare(str(q.date)));
@@ -2911,8 +2811,8 @@
   // empty page from before. Unfinished attempts stay the record: one changed since this copy was saved (on
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
-  const TAB_KEY = "tcf-reussir-tab", TAB_V = 1;
-  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "sp", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab"];
+  const TAB_KEY = "tcf-reussir-tab", TAB_V = 2;
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -3175,7 +3075,7 @@
     const s = settings(), P = T.PHASES[s.phase - 1];
     const counts = errorCounts(21).slice(0, 5).map(([c, v]) => `${CAT[c]}: ${v.n}`).join("; ") || "nothing logged yet";
     const open = list("homework").filter((h) => !h.done).map((h) => h.text);
-    const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "speaking.t1", "speaking.t2", "speaking.t3", "comp.co", "comp.ce", "comp.ce.exam"]);
+    const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "comp.co", "comp.ce", "comp.ce.exam", "comp.co.exam"]);
     const prompt = `You set daily homework for a TCF Canada learner.\n${PROFILE}\nCurrent phase: ${s.phase}, ${P.name}: ${P.goal}\nMost frequent error categories over the last 3 weeks: ${counts}.\nOpen homework already assigned: ${open.join(" | ") || "none"}.\nSuggest 3 short, concrete homework tasks for tomorrow (5–15 minutes each), each aimed at one weakness, and say where to do it in the app, using one of: ${routes.join(", ")}.\nReply with only JSON: {"homework": [{"text": "task in English, with French examples if useful", "go": "one of the routes"}]}`;
     const out = await ask("hw-suggest", prompt);
     if (!out) return;
@@ -3522,6 +3422,7 @@
     h.verdicts = pr.mistakes.map(([, a], k) => (h.found[k] ? checkAnswer({ a }, str(h.fixes[k])) : "missed"));
     const items = pr.mistakes.map(([wrong, a, , why], k) => ({ kind: "type", src: `« ${wrong} »`, q: prSentence(pr, k), a, why: (h.found[k] ? "" : "Not spotted. ") + why, given: h.found[k] ? str(h.fixes[k]) : "", ok: h.verdicts[k] === "ok" }));
     put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", items });
+    autoTick("grammar.hunt");
     render(true);
   }
   function grammarHunt() {
@@ -3658,7 +3559,7 @@
       <section class="panel flash">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
         ${v.edit ? vocabEditForm(id) : `${front}
-        ${v.shown ? back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
+        ${v.shown ? back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
         <div class="row">${buttons}</div>`}
       </section>
     </div>`;
@@ -3847,125 +3748,32 @@
     </section>`;
   }
 
-  /* =============== view: speaking =============== */
-  VIEWS.speaking = {
-    render(args) {
-      if (args[0] && T.SPEAKING[args[0]]) ui.sp.task = args[0];
-      const task = ui.sp.task, P = T.SPEAKING[task];
-      const tabs = `<nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#speaking.${k}" role="tab" aria-selected="${k === task}">${T.SPEAKING[k].name}<small>${esc(T.SPEAKING[k].kind)}</small></a>`).join("")}</nav>`;
-      const body = task === "t1" ? speakT1(P) : task === "t2" ? speakT2(P) : speakT3(P);
-      const hist = list("speaking").filter((x) => x.task === task).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 12);
-      return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Expression orale<small>This page can't use your microphone. Record yourself with your phone's voice memos while the timer runs, then listen back once.${claudeOn() ? " Paste a transcript (phone dictation works) if you want Claude's feedback." : ""}</small></h1></header>
-        ${tabs}
-        <p class="small muted">${esc(P.tests)}</p>
-        ${body}
-        <section class="sec"><h2 class="h2">Attempts</h2>${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Prompt</th><th>Self-score</th><th>Notes</th><th></th></tr></thead><tbody>${hist.map((h) => `<tr><td class="n">${shortDate(h.date)}</td><td class="small fr">${typo(h.prompt || "")}</td><td class="n">${h.of ? `${h.score}/${h.of}` : "—"}</td><td class="small">${esc(h.notes || "")}${h.fb && h.fb.level ? ` <span class="pill">${esc(h.fb.level)}</span>` : ""}</td><td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn ghost sm" data-act="sp-open" data-id="${esc(h.id)}">${ui.sp.viewing === h.id ? "Close" : "Open"}</button>${confirmBtn("sp-del-" + h.id, "Delete this attempt", "sp-del", `data-id="${esc(h.id)}"`)}</span></td></tr>${ui.sp.viewing === h.id ? `<tr><td colspan="5">${spReview(h)}</td></tr>` : ""}`).join("")}</tbody></table></div>` : `<p class="small muted">Saved attempts collect here, so you can compare this week's recording notes with last week's.</p>`}</section>
-      </div>`;
-    },
-    after() { scrollChat(); },
-  };
-  function rubricBlock(task, P) {
-    const r = ui.sp.rubric[task] || {};
-    return `<section class="stack tight"><p class="h3">Self-review</p>
-      ${P.rubric ? P.rubric.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="sp-rubric" data-k="${k}" ${r[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("") : ""}
-      <label class="field">2–3 concrete fixes for next time<textarea id="sp-notes" data-input="sp-notes" rows="3" placeholder="e.g. vary connectors: d'ailleurs, en plus; add one past-tense detail">${esc(ui.sp.notes[task])}</textarea></label>
-    </section>`;
-  }
-  function transcriptBlock(task) {
-    const fb = ui.sp.fb[task];
-    return `<section class="stack tight"><p class="h3">Transcript <span class="small muted">· optional</span></p>
-      <textarea id="sp-trans" data-input="sp-trans" rows="5" lang="fr" spellcheck="false" placeholder="Paste what you said, from your phone's dictation or typed from the recording.">${esc(ui.sp.trans[task])}</textarea>
-      <div class="row">${claudeBtn("sp-fb-" + task, "sp-fb", "Get feedback from Claude", `data-task="${task}"`, "btn")}</div>
-      ${fb ? spFbHTML(fb) : ""}
-    </section>`;
-  }
-  function spFbHTML(fb, saved) {
-    return `<div class="panel flat stack">
-      ${fb.level ? `<div class="fb-head"><span class="level">${esc(fb.level)}</span><p>${esc(fb.summary)}</p></div>` : `<p>${esc(fb.summary)}</p>`}
-      ${criteriaTable(fb.criteria, "TCF Canada speaking criteria. Pronunciation can't be judged from a transcript.")}
-      ${fb.coverage ? `<div class="flags">${fb.count ? `<span class="pill">${fb.count} questions</span>` : ""}${Object.entries(fb.coverage).map(([k, v]) => `<span class="pill ${v ? "ok" : "bad"}">${v ? "✓" : "✗"} ${esc(k)}</span>`).join("")}</div>` : ""}
-      ${fb.structure && fb.structure.length ? `<ul class="hw">${fb.structure.map((st) => `<li style="grid-template-columns:auto minmax(0,1fr)"><b style="color:var(${st.done ? "--green" : "--red"})">${st.done ? "✓" : "✗"}</b><span>${esc(st.step)}${st.comment ? `<small>${esc(st.comment)}</small>` : ""}</span></li>`).join("")}</ul>` : ""}
-      <div class="stack tight"><p class="h3">Corrections</p>${errList(fb.errors, true)}</div>
-      ${fb.next && fb.next.length ? `<div class="stack tight"><p class="h3">${fb.better ? "Stronger questions" : "Next time"}</p><ul class="small" style="margin:0;padding-left:20px">${fb.next.map((x) => `<li class="${fb.better ? "fr" : ""}">${typo(x)}</li>`).join("")}</ul></div>` : ""}
-      ${saved ? "" : `<p class="small muted">Save the attempt to add these corrections to your error log.</p>`}
+  /* =============== view: comprehension =============== */
+  // Easy French every day (#comp.free.co, #comp.free.ce): the plan's last block, done outside study time.
+  // The page says how to do it, lists the sources (T.COMP.free) and ticks today's block.
+  function freeView(skill) {
+    const co = skill === "co";
+    const src = arr((T.COMP.free || {})[skill]);
+    const tabs = `<nav class="tabs" role="tablist"><a href="#comp.free.co" role="tab" aria-selected="${co}">${ico("listen")}Écoute libre<small>easy listening</small></a><a href="#comp.free.ce" role="tab" aria-selected="${!co}">${ico("read")}Lecture libre<small>easy reading</small></a></nav>`;
+    const tips = [
+      co ? "Pick something you can follow without pausing: you know nearly every word. If you're lost every few sentences, go easier, not harder." : "Pick something you can read without stopping: you know nearly every word. If every line has a new one, go easier, not harder.",
+      co ? "Don't rewind for every word. Follow the story, and let the rest wash over you." : "Don't look words up as you go. Read on, and guess from the context.",
+      "Choose what you'd enjoy in English too. Twenty minutes you look forward to beat an hour you put off.",
+      co ? "A few times a week, pick a Canadian source: the TCF Canada uses some Canadian accents." : "A word that keeps coming back is worth a card: add it in Vocabulaire, two or three a session at most.",
+    ];
+    return `<div class="wrap">
+      <header class="stack tight"><h1 class="title">${co ? "Écoute libre" : "Lecture libre"}<small>Easy French every day, outside your study time: on your commute, while you cook, before bed. It's the input half of the plan, and it's how vocabulary and speed grow.</small></h1></header>
+      ${tabs}
+      <div class="grid2">
+        <section class="panel stack" style="align-content:start"><p class="h3">How to do it</p><ul class="small" style="margin:0;padding-left:20px">${tips.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>
+        <section class="panel stack" style="align-content:start"><p class="h3">Where to find it</p><ul class="links">${src.map((r) => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)} ↗</a><span class="small muted">${esc(r.what)}</span></li>`).join("")}</ul></section>
+      </div>
+      <div class="row"><button class="btn primary" data-act="free-done" data-skill="${skill}">Done for today</button><span class="small muted">Ticks today's easy listening or reading block.</span></div>
     </div>`;
   }
-  function speakT1(P) {
-    return `<div class="grid2">
-      <section class="panel stack">
-        <div class="row between"><p class="h3 with-ico">${ico("timer")}Timer</p><span class="small muted">2 min on exam day, no preparation</span></div>
-        ${timerUI("speaking.t1", "Tâche 1 oral", [[120, "2:00 exam"], [60, "1:00"]])}
-        <p class="h3">Structure</p>
-        <ol class="steps">${P.structure.map((x) => `<li style="grid-template-columns:minmax(0,1fr)"><b>${esc(x)}</b></li>`).join("")}</ol>
-      </section>
-      <section class="panel stack">
-        <p class="h3">The examiner may ask</p>
-        <ul class="phrases">${arr(P.questions).map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
-        <p class="h3">Useful phrases</p>
-        <ul class="phrases">${P.phrases.map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
-        <p class="small"><b>Plateau mistake:</b> ${esc(P.mistake)}</p>
-      </section>
-    </div>
-    <section class="panel stack">${rubricBlock("t1", P)}${transcriptBlock("t1")}<div class="row"><button class="btn primary" data-act="sp-save" data-task="t1">Save this attempt</button></div></section>`;
-  }
-  function speakT2(P) {
-    const sc = spPrompt("t2");
-    const c = ui.sp.chat;
-    const cov = ui.sp.covered;
-    const chat = c ? `<div class="chat" id="chat-log">${c.turns.filter((t) => !t.rules).map((t) => `<div class="msg ${t.role === "user" ? "me" : "them"}"><small>${t.role === "user" ? "Vous" : "Examinateur"}</small>${typo(t.content)}</div>`).join("")}${busy.chat ? `<div class="msg them"><small>Examinateur</small><span class="thinking">…</span></div>` : ""}</div>
-      <div class="row"><input type="text" id="chat-in" data-input="chat-in" value="${esc(ui.sp.chatIn)}" lang="fr" spellcheck="false" autocomplete="off" placeholder="Posez votre question…" style="flex:1"><button class="btn primary" data-act="chat-send" ${busy.chat ? "disabled" : ""}>Send</button></div>
-      ${accentBar()}
-      <div class="row">${claudeBtn("chat-end", "chat-end", "End and get feedback", "", "btn")}<button class="btn ghost sm" data-act="chat-reset">Start over</button></div>`
-      : claudeOn()
-        ? `<p class="small muted">Claude plays the examiner in role. Type your questions in French. Aim for 5–6 well-formed ones, broad first, then specifics, then logistics.</p><div>${claudeBtn("chat", "chat-start", "Start the role-play", "", "btn primary")}</div>`
-        : `<p class="small muted">Say your questions out loud to an imaginary examiner. Aim for 5–6 well-formed ones: broad first, then specifics, then logistics. Tap each topic above as you cover it.</p>`;
-    return `<section class="panel prompt-card">
-        <div class="row between"><span class="eyebrow">Scénario</span><button class="btn sm" data-act="sp-next" data-task="t2">Another scenario</button>${ui.confirm === "sp-switch-t2" ? `<span class="row"><span class="small">This attempt would be discarded.</span><button class="btn sm danger" data-act="sp-next" data-task="t2">Discard and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button></span>` : ""}</div>
-        <p class="fr">${typo(sc)}</p>
-        <div class="chips">${P.checklist.map((k) => `<button class="chip" data-act="chip" data-k="${esc(k)}" aria-pressed="${!!cov[k]}">${esc(k)}</button>`).join("")}</div>
-        <p class="small muted">Tap each topic as you cover it: your mental checklist for any scenario.</p>
-      </section>
-      <div class="grid2">
-        <section class="panel stack">
-          <div class="row between"><p class="h3 with-ico">${ico("timer")}Timer</p><span class="small muted">2 min prep, then 3 min 30</span></div>
-          ${timerUI("speaking.t2", "Tâche 2 oral", [[120, "2:00 prep"], [210, "3:30 talk"]])}
-          <p class="h3">Useful phrases</p>
-          <ul class="phrases">${P.phrases.map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
-          <p class="small"><b>Watch:</b> ${esc(P.mistake)}</p>
-        </section>
-        <section class="panel stack"><p class="h3">${c || claudeOn() ? "Role-play with Claude" : "Your questions"}</p>${chat}${ui.sp.fb.t2 ? spFbHTML(ui.sp.fb.t2) : ""}</section>
-      </div>
-      <section class="panel stack">${rubricBlock("t2", P)}<div class="row"><button class="btn primary" data-act="sp-save" data-task="t2">Save this attempt</button></div></section>`;
-  }
-  function speakT3(P) {
-    const pr = P.prompts[ui.sp.t3 % P.prompts.length];
-    let from = 0;
-    const steps = P.steps.map((st) => { const li = `<li data-from="${from}" data-until="${st.until}"><span class="t">${fmtClock(from)}</span><b>${esc(st.label)}</b><small>${typo(st.hint)}</small></li>`; from = st.until; return li; }).join("");
-    return `<section class="panel prompt-card">
-        <div class="row between"><span class="eyebrow">Sujet · no preparation</span><button class="btn sm" data-act="sp-next" data-task="t3">Another prompt</button>${ui.confirm === "sp-switch-t3" ? `<span class="row"><span class="small">This attempt would be discarded.</span><button class="btn sm danger" data-act="sp-next" data-task="t3">Discard and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button></span>` : ""}</div>
-        <p class="fr" style="font-size:22px">${typo(pr[0])}</p>
-        <p class="small muted">${esc(pr[1])}</p>
-      </section>
-      <div class="grid2">
-        <section class="panel stack">
-          <div class="row between"><p class="h3">Guided timer</p><span class="small muted">4 min 30</span></div>
-          ${timerUI("speaking.t3", "Tâche 3 oral", [[270, "4:30 exam"]])}
-          <ol class="steps">${steps}</ol>
-          <p class="small muted">The highlighted step moves with the clock, so you can hear whether your shape holds for the full 4:30.</p>
-        </section>
-        <section class="panel stack">
-          <p class="h3">Phrases</p>
-          <ul class="phrases">${P.phrases.map(([k, v]) => `<li><b>${esc(k)}</b>${typo(v)}</li>`).join("")}</ul>
-          <p class="small"><b>Plateau mistakes:</b> ${esc(P.mistake)}</p>
-        </section>
-      </div>
-      <section class="panel stack">${rubricBlock("t3", P)}${transcriptBlock("t3")}<div class="row"><button class="btn primary" data-act="sp-save" data-task="t3">Save this attempt</button></div></section>`;
-  }
-
-  /* =============== view: comprehension =============== */
   VIEWS.comp = {
     render(args) {
+      if (args[0] === "free") return freeView(args[1] === "ce" ? "ce" : "co");
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
       const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</small></h1></header>`;
@@ -4062,9 +3870,9 @@
   /* =============== view: progress =============== */
   /* =============== history =============== */
   // Only two kinds of entry: unfinished attempts (the inprogress records) and finished ones (drill rounds,
-  // production checks, reading and listening sets, practice exams, writing tasks, speaking attempts).
-  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit", speaking: "Oral" };
-  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"], ["speaking", "Oral"]];
+  // production checks, reading and listening sets, practice exams, writing tasks).
+  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit" };
+  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"]];
   const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind);
   const clip = (s, n) => { const t = str(s).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
   function whenOf(ts) {
@@ -4078,17 +3886,6 @@
     if (ip.kind === "comp") return `${Object.keys(ip.answers || {}).length} of ${ip.total || "?"} answered${ip.plays ? ` · played ${ip.plays}×` : ""}`;
     if (ip.kind === "exam") return `${Object.keys(ip.ans || {}).length} of ${ip.total} answered${ip.left != null ? ` · ${Math.ceil(ip.left / 60)} min left` : ""}`;
     if (ip.kind === "writing" || ip.kind === "prod") return `${countWords(str(ip.text))} words`;
-    if (ip.kind === "speaking") {
-      const bits = [];
-      const n = Object.values(ip.rubric || {}).filter(Boolean).length;
-      if (n) bits.push(`${n} ticked`);
-      if (str(ip.notes).trim()) bits.push("notes");
-      if (str(ip.trans).trim()) bits.push("transcript");
-      const q = arr(ip.chat).filter((t) => t.role === "user").length;
-      if (q) bits.push(`${q} question${q > 1 ? "s" : ""} asked`);
-      if (ip.fb) bits.push("feedback");
-      return bits.join(" · ") || "started";
-    }
     return "";
   }
   function ipResume(id) {
@@ -4098,8 +3895,7 @@
     if (ip.kind === "prod") { ui.prod[ip.topic] = { text: str(ip.text) }; goTo("#" + ip.route); return; }
     if (ip.kind === "comp") { if (compLoad(ip.skill, ip.setId, ip)) { goTo("#comp." + ip.skill); window.scrollTo(0, 0); } return; }
     if (ip.kind === "exam") { examResume(ip); return; }
-    if (ip.kind === "writing") { writingRestore(ip.task); ui.w.task = ip.task; goTo("#writing." + ip.task); return; }
-    if (ip.kind === "speaking") { spRestore(ip.task); ui.sp.task = ip.task; goTo("#speaking." + ip.task); }
+    if (ip.kind === "writing") { writingRestore(ip.task); ui.w.task = ip.task; goTo("#writing." + ip.task); }
   }
   function ipDiscard(id) {
     const ip = ipGet(id);
@@ -4111,12 +3907,11 @@
       if (ip.kind === "comp") { const set = ui.c.set[ip.skill]; if (set && set.id === ip.setId && !ui.c.submitted[ip.skill]) compReset(ip.skill); }
       if (ip.kind === "exam" && examRunning() && skillOf(ui.cx) === skillOf(ip)) { if (skillOf(ip) === "co") coxStop(); ui.cx = null; timerSet(0, "", ""); }
       if (ip.kind === "writing") { ui.w.text[ip.task] = ""; ui.w.checks[ip.task] = {}; }
-      if (ip.kind === "speaking") spClear(ip.task);
     }
     toast("Discarded.");
     render(true);
   }
-  // Once saved progress has loaded, writing drafts and speaking attempts fill their pages back in, and
+  // Once saved progress has loaded, writing drafts fill their pages back in, and
   // drafts from the old browser-only store move into the saved ones.
   function hydrate() {
     hydrated = true;
@@ -4124,6 +3919,8 @@
     for (const ip of list("inprogress")) {
       if (ip.kind === "comp" && ip.src !== "claude" && !samplesFor(ip.skill).some((s) => s.id === ip.setId)) ipDrop(ip.id);
       if (ip.kind === "exam" && !ip.snap && !XSPEC[skillOf(ip)].bank().some((e) => e.id === ip.examId)) ipDrop(ip.id);
+      // The Oral page was removed (2026-10-06): an unfinished speaking attempt has nowhere to go back to.
+      if (ip.kind === "speaking") ipDrop(ip.id);
     }
     // After a refresh, this tab's copy of what was on screen is kept, unless the attempt's record has changed
     // since (on another device, say). A record that didn't get saved before the refresh is saved again.
@@ -4132,7 +3929,6 @@
       const legacy = lsGet("tcf-draft-" + t, "");
       if (!tabAt || newer("writing--" + t)) { if (!writingRestore(t) && legacy.trim()) { ui.w.text[t] = legacy; writingKeep(t, 0); } }
       if (legacy) lsSet("tcf-draft-" + t, "");
-      if (!tabAt || newer("speaking--" + t)) spRestore(t);
     });
     if (!tabAt) return;
     try {
@@ -4165,7 +3961,6 @@
       out.push({ kind: exam ? "exam" : "comp", id: c.id, ts: c.ts || 0, date: c.date, title: `${c.skill === "co" ? "CO" : "CE"} · ${exam ? c.title : `${c.title || ""}${c.level ? " · " + c.level : ""}`}`, result: exam ? `≈${c.est} · ${c.score}/${c.total}` : `${c.score}/${c.total}${c.src === "logged" ? " · logged" : ""}`, doc: c });
     }
     for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : "not corrected", doc: w }); }
-    for (const s of list("speaking")) { const P = T.SPEAKING[s.task]; out.push({ kind: "speaking", id: s.id, ts: s.ts || 0, date: s.date, title: `${P ? P.name : "Oral"} · ${clip(s.prompt, 80)}`, result: [s.of ? `self ${s.score}/${s.of}` : "", s.fb && s.fb.level ? s.fb.level : ""].filter(Boolean).join(" · ") || "saved", doc: s }); }
     return out.sort((a, b) => b.ts - a.ts);
   }
   function drillReview(d) {
@@ -4194,23 +3989,10 @@
       ${fb ? `<div class="verdict ${fb.pass ? "ok" : "bad"}"><p><b>${fb.pass ? "Criterion met." : "Not yet."}</b> ${esc(fb.comment)}</p></div>${errList(fb.errors)}${fb.improved ? `<div class="stack tight"><p class="eyebrow">Improved version</p><p class="fr" style="white-space:pre-line">${typo(fb.improved)}</p></div>` : ""}` : ""}
     </div>`;
   }
-  function spReview(s) {
-    const P = T.SPEAKING[s.task];
-    const ticks = P && P.rubric ? `<ul class="hw">${P.rubric.map(([k, l]) => `<li style="grid-template-columns:auto minmax(0,1fr)"><b style="color:var(${s.rubric && s.rubric[k] ? "--green" : "--ink-3"})">${s.rubric && s.rubric[k] ? "✓" : "○"}</b><span>${esc(l)}</span></li>`).join("")}</ul>` : "";
-    const chat = arr(s.chat);
-    return `<div class="stack tight">
-      <p class="fr small">${typo(s.prompt || "")}</p>
-      ${ticks}
-      ${s.notes ? `<p class="small"><b>Fixes for next time:</b> ${esc(s.notes)}</p>` : ""}
-      ${chat.length ? `<div class="stack tight"><p class="h3">The conversation</p>${chat.map((t) => `<p class="small"><b>${t.role === "user" ? "You" : "Examiner"}:</b> <span class="fr">${typo(t.content)}</span></p>`).join("")}</div>` : s.transcript ? `<div class="stack tight"><p class="h3">Transcript</p><p class="fr" style="white-space:pre-line">${typo(s.transcript)}</p></div>` : ""}
-      ${s.fb ? spFbHTML(s.fb, true) : ""}
-    </div>`;
-  }
   function reviewOf(x) {
     if (x.kind === "drill") return drillReview(x.doc);
     if (x.kind === "prod") return prodReview(x.doc);
     if (x.kind === "writing") return writingFb(x.id, x.doc, "h-close");
-    if (x.kind === "speaking") return spReview(x.doc);
     return "";
   }
   function historyOpenBtn(x) {
@@ -4239,7 +4021,7 @@
         ${ips.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Section</th><th>Attempt</th><th>Last change</th><th></th></tr></thead><tbody>${ipRows}</tbody></table></div>` : `<p class="small muted">Nothing unfinished.</p>`}
       </section>
       <section class="sec"><div class="sec-head"><h2 class="h2">Finished</h2><span class="small muted">${all.length} attempt${all.length === 1 ? "" : "s"}, newest first. Open one to see the questions, your answers and the results.</span></div>
-        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, writing tasks and speaking attempts collect here.</p>`}
+        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.</p>`}
       </section>
     </div>`;
   }
@@ -4426,7 +4208,6 @@
         [list("drills").filter((d) => d.set !== "prod").length, "drill rounds"],
         [[...S.srs.keys()].length, "cards learned"],
         [list("writing").length, "writing tasks"],
-        [list("speaking").length, "speaking attempts"],
         [list("comp").length, "CO / CE sets"],
       ];
       return `<div class="wrap">
@@ -4440,6 +4221,7 @@
           <p class="small">${esc(P.goal)}</p>
           <div class="row"><div class="seg" role="group" aria-label="Phase">${T.PHASES.map((ph) => `<button data-act="p-phase" data-n="${ph.n}" aria-pressed="${ph.n === s.phase}">${ph.n}</button>`).join("")}</div>
             <label class="field" style="grid-auto-flow:column;align-items:center;gap:8px">Week 1 started<input type="date" id="p-start" data-change="start-date" value="${esc(s.startDate)}"></label></div>
+          <p class="small muted">A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.</p>
           <ul class="criteria">${critHTML}</ul>
           ${allMet && s.phase < 5 ? `<div class="notice"><b>Every Phase ${s.phase} criterion is met.</b> Move to Phase ${s.phase + 1} when you're ready. <button class="btn sm primary" data-act="p-phase" data-n="${s.phase + 1}">Start Phase ${s.phase + 1}</button></div>` : ""}
         </section>
@@ -4447,7 +4229,7 @@
         ${stampShelf()}
 
         <section class="sec" id="sec-errors">
-          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing and speaking, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
+          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
           ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<p class="empty">No errors logged yet. Correct a writing task with Claude, or add one below.</p>`}
           ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p><p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>
             ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
@@ -4690,24 +4472,13 @@
     "timer-toggle": (el) => { timerAct(el, "toggle"); if (el.dataset.home === "comp.ce.exam") examKeep(); },
     "timer-reset": (el) => timerAct(el, "reset"),
     "timer-preset": (el) => timerAct(el, "preset"),
-    // A new prompt ends the attempt in progress, so ask first when there is one.
-    "sp-next": (el) => {
-      const t = el.dataset.task;
-      if (ipGet("speaking--" + t) && ui.confirm !== "sp-switch-" + t) { ui.confirm = "sp-switch-" + t; render(true); return; }
-      ui.confirm = "";
-      spClear(t);
-      ui.sp[t]++;
+    "free-done": (el) => {
+      const t = todayStr(), n = () => (dayStats(t) || {}).n || 0, before = n(), sk = el.dataset.skill;
+      autoTick(`comp.free.${sk}`);
+      if (n() === before) autoTick(`comp.free.${sk === "co" ? "ce" : "co"}`);
+      if (n() === before) toast("Nothing to tick: today's plan has no open easy listening or reading block.");
       render(true);
     },
-    "sp-save": (el) => spSave(el.dataset.task),
-    "sp-fb": (el) => spFeedback(el.dataset.task),
-    "sp-del": (el) => { ui.confirm = ""; if (ui.sp.viewing === el.dataset.id) ui.sp.viewing = null; remove("speaking", el.dataset.id); },
-    "sp-open": (el) => { ui.sp.viewing = ui.sp.viewing === el.dataset.id ? null : el.dataset.id; render(true); },
-    chip: (el) => { const k = el.dataset.k; ui.sp.covered[k] = !ui.sp.covered[k]; spKeep("t2", 0); render(true); },
-    "chat-start": chatStart,
-    "chat-send": chatSend,
-    "chat-end": chatEnd,
-    "chat-reset": () => { const c = busy.chat; if (c) c.abort(); ui.sp.chat = null; ui.sp.fb.t2 = null; spKeep("t2", 0); render(true); },
     "c-level": (el) => { ui.c.level = el.dataset.l; render(true); },
     "c-next": (el) => {
       const sk = el.dataset.skill, key = compKey(sk), cur = ui.c.set[sk];
@@ -4800,7 +4571,6 @@
     },
     "hw-done": (el) => { const cur = S.homework.get(el.dataset.id); if (cur) put("homework", el.dataset.id, Object.assign(clone(cur), { done: el.checked, doneOn: el.checked ? todayStr() : null })); },
     "w-check": (el) => { ui.w.checks[ui.w.task][el.dataset.k] = el.checked; if (str(ui.w.text[ui.w.task]).trim()) writingKeep(ui.w.task, 0); },
-    "sp-rubric": (el) => { const t = ui.sp.task; ui.sp.rubric[t] = ui.sp.rubric[t] || {}; ui.sp.rubric[t][el.dataset.k] = el.checked; spKeep(t, 0); },
     crit: (el) => { const s = settings(); s.criteria[el.dataset.id] = el.checked; saveSettings({ criteria: s.criteria }); },
     "start-date": (el) => { if (/^\d{4}-\d{2}-\d{2}$/.test(el.value)) saveSettings({ startDate: el.value }); },
     fix: (el) => { const s = settings(); s.fixes[el.dataset.k] = el.value.trim(); saveSettings({ fixes: s.fixes }); },
@@ -4829,9 +4599,6 @@
     "pr-fix": (el) => { if (ui.hunt) ui.hunt.fixes[el.dataset.k] = el.value; },
     "w-text": onWText,
     prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); prodKeep(t); },
-    "sp-notes": (el) => { ui.sp.notes[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
-    "sp-trans": (el) => { ui.sp.trans[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
-    "chat-in": (el) => { ui.sp.chatIn = el.value; },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
     grab: (el) => { if (ui.grab) ui.grab[el.dataset.k] = el.value; },
   };
@@ -4895,7 +4662,6 @@
       if (next) next.focus(); else huntFinish();
       return;
     }
-    if (t && t.id === "chat-in" && e.key === "Enter") { e.preventDefault(); chatSend(); return; }
     if (route.view === "vocab" && ui.vocab && ui.vocab.edit) {
       if (e.key === "Escape") { e.preventDefault(); vocabEditClose(); }
       else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); vocabEditSave(); }
