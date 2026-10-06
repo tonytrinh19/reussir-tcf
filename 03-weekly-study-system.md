@@ -2,11 +2,42 @@
 
 *Document 3 of 4. Companion to 01-assessment-and-roadmap.md and 02-grammar-progression.md.*
 
-A literal 20-week, day-by-day calendar would mostly be the same shape repeated with different vocabulary swapped in — not actually more useful, just longer. Instead: **one template week per phase.** Run the same shape every week of that phase, refreshing prompts/drill content each time. When a phase's exit criteria (Document 1) are met, move to the next template. Each day runs ~90–110 minutes, inside your stated 1.5–2 h budget, and Sunday is left as a rest day throughout.
+A literal 20-week, day-by-day calendar would mostly be the same shape repeated with different vocabulary swapped in — not actually more useful, just longer. Instead: **one template week per phase.** Run the same shape every week of that phase, refreshing prompts/drill content each time. When a phase's exit criteria (Document 1) are met, move to the next template. Sunday is left as a rest day throughout.
+
+## The shape of a day (from Phase 2, revised 6 October 2026)
+
+- **The site's blocks, about 75 minutes:** cards, one grammar topic, a listening or reading set, a writing task. They're the Aujourd'hui page.
+- **Easy French, 20 minutes, outside study time:** listening or reading you can follow without pausing, on your commute or while you cook (Document 4, section 5b). It's the last block of every day.
+- **Speaking, your way, with the rest of your 1.5–2 h:** see the box below. It isn't on the site.
+
+Why the change: a balanced course gives roughly equal time to four strands, meaning-focused input (listening and reading for meaning), meaning-focused output (writing and speaking), deliberate language study, and fluency practice (Nation). Here's a Phase 2 week before and after, in minutes:
+
+| Strand | Before | After |
+|---|---|---|
+| Input: easy French, plus the listening and reading in the sets | ~70 | ~190 |
+| Output: writing on the site, speaking on your own | 210 | ~245 |
+| Language study: grammar and cards | 195 | 180 |
+| Fluency: exam-pace reading, single-listen sets, timed writing | ~0 | built into the sets and tasks |
+
+**Rules for every week:**
+- Grammar: one round, then Retry the misses, and two rounds at most in a sitting. Only the day's first round counts toward a criterion, and each topic comes back a week later (Document 2).
+- Listening: once through without pausing, like the exam, then again with the transcript, finding where each miss was said.
+- Reading: at exam pace (about 90 seconds a question at B1, 105 at B2), and nothing left blank: a wrong answer costs nothing on the TCF.
+- Sunday stays a rest day. Easy French that day is welcome but not on the plan.
+
+> **Speaking, on your own schedule.** You chose to practise speaking off the site. It's still a quarter of your result, and your baseline was A2 against the 10/20 you need, so keep **about 2 hours a week**, a little on most days rather than one long session. The site's plan is lightest on **Tuesday and Thursday**, so put the longer sessions there.
+> - **Phase 2:** Tâche 1 as a 2-minute interview about yourself, Tâche 2 role-plays (getting information by asking questions), first short runs of Tâche 3.
+> - **Phase 3:** Tâche 3 at the full 4:30, and one full 12-minute simulation a week.
+> - **Phase 4:** two full simulations a week at the real 12 minutes, on the light Tuesdays and Saturdays.
+> - **Phase 5:** one full speaking mock in the mock week, and your part of the dress rehearsal.
+>
+> How to practise, whatever you use, is in Document 4, section 6.
 
 ---
 
 ## Phase 1 template (Weeks 1–3) — Foundation Repair
+
+*Kept as you ran it, except that its two speaking sessions (Tuesday and Thursday) now happen off the site.*
 
 **Monday**
 - *Vocab (10 min, spaced-rep):* Review yesterday's items + add 10–15 new (daily life, connectors: *mais, donc, alors, cependant*). Output: updated deck. Check: recall each cold, no peeking.
@@ -52,48 +83,56 @@ A literal 20-week, day-by-day calendar would mostly be the same shape repeated w
 
 ## Phase 2 template (Weeks 4–8) — B1+ Consolidation
 
-**Monday:** Vocab, work/employment terms (10 min) → Grammar, séquence des temps sentence set (30 min) → Listening, untimed CO MCQ set #1 (25 min) → Writing, Tâche 1 (35 min).
-**Tuesday:** Vocab review (10 min) → Grammar, si-clauses type 1 & 2 drill (30 min) → Reading, CE MCQ set (25 min) → Speaking, Orale Tâche 1+2 practice — self-intro plus a role-play asking questions to get information about a given scenario (35 min).
-**Wednesday:** Vocab, education/health terms (10 min) → Grammar, relative-pronoun sentence-combining drill (30 min) → Listening, CO MCQ set #2 (25 min) → Writing, Tâche 2 (35 min).
-**Thursday:** Vocab review (10 min) → Grammar, object pronouns + y/en substitution drill (30 min) → Reading, CE MCQ set #2 (25 min) → Speaking, re-record Tâche 1+2 and compare (35 min).
-**Friday:** Vocab, family/society terms (10 min) → Grammar, micro-error checklist review (*c'est/il est*, prepositions, *seul/seulement* — 25 min) → Writing, **first full Tâche 3 attempt using the mandatory two-document-comparison template** (40 min) → wrap-up (10 min).
-**Saturday capstone:** Timed CO + CE sets back to back (40 min combined) → submit best writing for correction (30 min) → review the week's error log (20 min).
+**Monday:** Cards + 10–15 new: work & employment (10 min) → Grammar, séquence des temps, one round (20) → Listening set, once through, then with the transcript (25) → Tâche 1 on a 15-minute clock, then 3 minutes of proofreading (30) → Easy listening, outside study time (20).
+**Tuesday:** Card review (10) → Grammar, si-clauses types 1 & 2 (20) → Reading set at exam pace, 6 minutes for 4 B1 questions, nothing blank (25) → Your mistakes (10) → Easy reading (20).
+**Wednesday:** Cards + new: education & health (10) → Grammar, relative pronouns (20) → Listening set #2 (25) → Tâche 2 on a 20-minute clock, then proofreading (30) → Easy listening (20).
+**Thursday:** Card review (10) → Grammar, object pronouns + y / en (20) → Reading set #2 at exam pace; move up to B2 once B1 sets are at 3/4 (25) → Find the mistakes (10) → Easy reading (20).
+**Friday:** Cards + new: family & society (10) → Your mistakes (15) → Tâche 3 with the two-part template, 25-minute clock, then proofreading (40) → Plan next week: pick the two mistakes you'll watch for (10) → Easy listening (20).
+**Saturday:** Mixed review of every topic so far (15) → Timed CO and CE sets back to back, listening once only (40) → Rewrite your best piece of the week from memory, then compare (25) → Easy listening (20).
 
-Check each day against Document 1's Phase 2 exit criteria, not against "did I finish the list."
+Once in the phase: the CO practice exam on a Saturday instead of the timed sets, as your listening baseline. Check each day against Document 1's Phase 2 exit criteria, not against "did I finish the list".
 
 ---
 
 ## Phase 3 template (Weeks 9–14) — B2 Development
 
-**Monday:** Vocab, environment/climate (10 min) → Grammar, subjonctif-vs-conditionnel contrastive drill after *afin que/avant que* (30 min) → Listening, full-length timed CO set, B2 material (30 min) → Writing, Tâche 1 under real time pressure (20 min).
-**Tuesday:** Vocab review (10 min) → Grammar, concession "yes, but" paragraph drill (30 min) → Reading, full-length timed CE set (30 min) → Speaking, Orale Tâche 3 practice — structure an argument in under 30 seconds of thinking, speak for 3+ minutes (35 min).
-**Wednesday:** Vocab, technology/social media (10 min) → Grammar, reported-speech transformation drill (30 min) → Listening, CO set #2 (30 min) → Writing, Tâche 2 timed (25 min).
-**Thursday:** Vocab review (10 min) → Grammar, conditionnel + passive voice combined drill (30 min) → Reading, CE set #2 (30 min) → Speaking, full 3-task Orale simulation on the real ~12-minute clock, self-scored.
-**Friday:** Vocab, government/economy/society (10 min) → Grammar, gérondif/participles drill (25 min) → Writing, full Tâche 3 under real time pressure (35 min) → wrap-up (10 min).
-**Saturday capstone:** One full timed mock of whichever single skill is currently weakest (up to 60 min) → error review (30 min).
+**Monday:** Cards + new: environment & climate (10) → Grammar, subjonctif vs conditionnel after *afin que / avant que* (20) → B2 listening set (25) → Tâche 1 on a 15-minute clock (30) → Easy listening (20).
+**Tuesday:** Card review (10) → Grammar, concession "yes, but" (20) → Timed B2 reading set, about 7 minutes for 4 questions (25) → Your mistakes (10) → Easy reading (20).
+**Wednesday:** Cards + new: technology & social media (10) → Grammar, reported speech (20) → B2 listening set #2 (25) → Tâche 2 on a 20-minute clock (30) → Easy listening (20).
+**Thursday:** Card review (10) → Grammar, conditionnel + passive voice (20) → Timed B2 reading set #2 (25) → Find the mistakes, B2 (10) → Easy reading (20).
+**Friday:** Cards + new: government & economy (10) → Grammar, gérondif + participles (20) → Your mistakes (10) → Tâche 3 on a 25-minute clock (40) → Plan next week (10) → Easy listening (20).
+**Saturday:** Mixed review (15) → One full timed mock of whichever skill is currently weakest; if that's speaking, do it your way and log the score (60) → Same-day review of every wrong or weak answer (20) → Easy listening (20).
+
+Once in the phase: the second CE practice exam as a Saturday mock.
 
 ---
 
 ## Phase 4 template (Weeks 15–18) — B2 + TCF Specialization
 
-No new grammar content from here — every grammar block is a targeted re-drill of whatever the week's mocks actually surfaced, pulled from the original error list.
+No new grammar content from here — every grammar block is a targeted re-drill of whatever the week's mocks actually surfaced, plus Your mistakes.
 
-**Monday:** Vocab, consumerism/crime-safety (10 min) → targeted grammar drill (30 min) → full timed CE mock #1 (60 min).
-**Tuesday:** Vocab review (10 min) → full timed Orale simulation, real 12-minute clock, self-scored against structure/register/Tâche 3 spontaneity (~40 min incl. review).
-**Wednesday:** Vocab, science/tourism (10 min) → targeted grammar drill (30 min) → full timed CO mock #1 (60 min).
-**Thursday:** Vocab review (10 min) → full timed Écrite mock, real 60-minute clock, all 3 tasks — checking specifically for word-count discipline and the Tâche 3 comparison structure (60 min).
-**Friday:** Vocab, politics/civic life (10 min) → final targeted grammar drill (25 min) → full timed CE mock #2 (60 min).
-**Saturday capstone:** Full timed Orale simulation #2 (~40 min incl. review) → check the error log against the original error-patterns list — confirm which items are genuinely resolved, not just improved (30 min).
+**Monday:** Cards + new: consumerism & crime (10) → Targeted grammar drill (20) → Full timed CE mock, 60 minutes, nothing blank (60) → Easy listening (20).
+**Tuesday:** Card review (10) → Your mistakes (15) → Timed reading set, B2 or C1 (25) → Easy reading (20). Light, to leave room for a speaking simulation.
+**Wednesday:** Cards + new: science & tourism (10) → Targeted grammar drill (20) → Full timed CO mock, 35 minutes: the CO practice exam, then TV5MONDE's and RFI's TCF practice (35) → Same-day review: which trap caught you each time? (25) → Easy listening (20).
+**Thursday:** Card review (10) → Full timed Écrite mock, all 3 tasks on the real 60-minute clock, checking word counts and the Tâche 3 comparison (60) → Review the corrections (15) → Easy reading (20).
+**Friday:** Cards + new: politics & civic life (10) → Your mistakes (15) → Timed reading set (25) → Plan next week (10) → Easy listening (20).
+**Saturday:** Mixed review (15) → Check the error log against the original error list: which items are genuinely resolved, not just improved? (30) → Easy listening (20). Light, for the second speaking simulation.
 
 ---
 
 ## Phase 5 (Weeks 19–21) — Mocks & Final Optimization
 
-This phase is diagnostic-driven rather than content-driven, so it doesn't get a fixed daily template — what you do each day depends on what the previous day's mock showed.
+This phase is diagnostic-driven rather than content-driven: what you do each day depends on what the previous day's mock showed. The site's template is a starting shape:
 
-- **Early in the phase:** one full timed mock per skill (CO, CE, Écrite, Orale), spread across the week, each followed by a same-day review of every wrong/weak answer.
+**Monday:** Card review (10) → Full timed CO mock (35) → Same-day review (30) → Easy listening (20).
+**Tuesday:** Card review (10) → Full timed CE mock, nothing blank (60) → Same-day review (30) → Easy reading (20).
+**Wednesday:** Card review (10) → Full timed Écrite mock (60) → Same-day review (30) → Easy listening (20).
+**Thursday:** Card review (10) → Your mistakes (15) → Timed reading set (25) → Easy reading (20). Your speaking mock goes here.
+**Friday:** Your weakest skill against NCLC 7, most of the time (60) → Mixed review (15) → Card review (10) → Easy listening (20).
+**Saturday (optional):** A full dress rehearsal: all four skills back to back at the real length (~2h47), ideally at the time of day you've booked.
+
 - **Mid-phase:** identify your single lowest-scoring skill against the NCLC 7 band (remember — no averaging) and redirect the *majority* of remaining study time there. Keep the other three warm with one lighter session each per week, not zero.
-- **One full dress rehearsal:** if your schedule allows it, sit all four skills back to back in one sitting at the real total length (~2h47), ideally at the same time of day you've booked for the actual exam.
+- **Keep the card reviews and the easy French going until the exam:** they hold what you've built.
 - **Final week:** light review only — no new material. Confirm booking, ID requirements, and test-centre/computer-based logistics. Rest the day before the real exam.
 
 ---

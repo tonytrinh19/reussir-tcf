@@ -44,6 +44,12 @@
     - **Boarding pass:** the phases as one flight from B1 to NCLC 7. The week places the plane, and the gate is today's first open block. The small version is at the foot of the sidebar; the full one is at the top of Progrès.
     - **L'expression du jour:** a French saying on a taped notebook scrap on Aujourd'hui, changing daily, from `EXPRESSIONS` in `data.js`. Some are from Québec, and say so.
   - `data.js`: curriculum content plus the `TCF_CANADA` spec.
+    - `PLAN` holds the weekly templates shown on Aujourd'hui. On 2026-10-06 they were rebuilt from a review of the research (spacing, retrieval, Nation's four strands, extensive input, fluency) against the learner's first two weeks; the reasoning and sources are in `01-assessment-and-roadmap.md` ("Review, 6 October 2026").
+      - Each grammar topic gets one slot a week, at most two rounds a sitting, with Your mistakes twice a week, Find the mistakes once and the mixed review on Saturdays. Reading sets are at exam pace, and listening sets are played once before the transcript.
+      - Every day ends with 20 minutes of easy listening or reading outside study time (`comp.free.co` or `comp.free.ce`), which the user chose on 2026-10-06. It counts toward the day like any block.
+      - Speaking isn't in the plan: the user asked on 2026-10-06 for the Oral page to be removed and practises speaking off the site. The roadmap's speaking advice (Documents 3 and 4) stays general.
+    - `CRITERIA`: a `drill:` rule and a topic's mastery count only the day's first round of the set, and need the target on two days at least 7 days apart (3 for the imperative; `coldMet` in `app.js`), since a round right after another mostly shows short-term memory (decided 2026-10-06). `comp:` counts the first try at each set (`:timed` makes CE count only sets done on the clock); `pace:` wants one set at exam pace (`CE_PACE` seconds a question) with the target score; `examFull:` a practice exam with every question answered before time ran out. Speaking checks are ticked by hand.
+    - `COMP.free`: the sources on the easy-French page (`#comp.free.co`, `#comp.free.ce`), which also explains how to do it and has "Done for today" to tick the block.
   - `drills.js`: every grammar drill set, loaded right after `data.js`, which keeps the topics themselves.
     - Each set's sentences are grouped by the rule they test (the set's `points`), and each item ends with its point.
     - Every set holds at least three rounds of sentences (3 × `take`), and every point at least 4, so a learner who needs more rounds than planned doesn't get the same sentences again. Repetition made rounds boring, and later scores reflected memory rather than the rule.
@@ -59,7 +65,7 @@
     - Their Anki review progress was copied into the `srs` collection under ids `anki--<slug of the French side>`. Changing a card's French side in `anki.js` resets its progress. Editing it on the site doesn't (see `cards` below).
     - Keep one copy of each word across all decks.
   - `app.js`: the app logic.
-    - One timer serves every page (writing, speaking, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
+    - One timer serves every page (writing, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
     - Each page has its own address after `#` (`#comp.co`, `#grammar.hunt`). On claude.ai the page runs in a frame that reloads without it, so the current page is also kept in the tab's sessionStorage (`tcf-reussir-page`) and reopened after a refresh. A new tab starts on Aujourd'hui.
     - A refresh keeps whatever you were doing, on claude.ai and locally. What's on screen (`ui`, the clock and the recording's position) is also kept in the tab's sessionStorage (`tcf-reussir-tab`) and put back before anything is drawn. That covers the drill question you're on with what you'd typed, Find the mistakes, a vocabulary session, the Compréhension set with its level and topic, the practice exam and its clock, a recording (paused where it was) and where the page was scrolled.
       - It's saved as you go, but only once your progress has loaded, so it never holds the empty page from before.
@@ -67,7 +73,9 @@
       - Bump `TAB_V` in `app.js` when the shape of `ui` changes, so an older copy is dropped rather than misread.
     - Switching level or topic in Compréhension and back brings back the set you had there, as you left it: with your answers so far, or checked, with its results.
     - Grammaire has three ways to practise across topics, above the topic list: the mixed review, Your mistakes and Find the mistakes.
-    - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item. Speaking isn't included, because its transcripts come from dictation.
+    - The **mixed review** takes every topic of the current and earlier phases that has been drilled (the four Phase 1 topics before any), most-missed in the last two weeks first, then the ones practised longest ago, and deals its 15 questions among them in turn, from each topic's sets at the phase's levels.
+    - A card missed 4 or more times says so in a review and suggests rewriting it with your own example, or splitting it.
+    - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item.
       - The cue is what the learner wrote. The question is the sentence with a gap where the correction goes, taken from Claude's corrected text when the correction is found there. Otherwise it's the learner's sentence with the draft's other corrections applied.
       - The same mistake made again counts once, and every correction given for it is accepted. "(e)" forms are expanded.
       - Left out: punctuation-only changes, corrections longer than 14 words, and mistakes the learner hides. Hidden ones are kept in `settings.main.mineHidden`, by their normalised wording.
@@ -172,7 +180,7 @@
     - the option-length limits, and `check_ce.js`'s word-matching rule for B1–B2;
     - a total of 30–34 minutes with the pauses;
     - no left-over files in the exam folder.
-- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks and the mixed review name sets that exist. Run it after editing `drills.js` or `proofread.js`.
+- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks name topics and sets that exist and every topic's criterion set exists (the mixed review falls back to it). Run it after editing `drills.js` or `proofread.js`.
   - It also checks the Find the mistakes texts: each mistake marked once, as whole words, with corrections that differ from it; 4 mistakes for B1 and 5 for B2; 60–120 words for B1 and 100–180 for B2; and no missed elision in the corrected text or outside the planted mistakes.
 - `tools/check_ce.js`: checks the CE sets and the practice exams.
   - Structure: unique ids, a B1 and a B2 set for every topic, four documents per set with one question each, at least three kinds of document, 4 options per question, and the exam's level blocks.
@@ -186,6 +194,7 @@
 - Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-1/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
+  - `speaking` holds the attempts saved before the Oral page was removed (2026-10-06). The site no longer reads it, but it stays in `COLLS` so nothing is lost; an unfinished speaking attempt is dropped at load.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.
@@ -202,16 +211,14 @@
     - `ce--<setId>` and `co--<setId>`
     - `exam--ce` and `exam--co` (a CO exam is kept from its start, with its phase and how far into the recording it was)
     - `writing--t1…t3`
-    - `speaking--t1…t3`
 
     A record is written at the first real answer or keystroke (typing is saved 1.5 s after it stops). It's deleted when the attempt is submitted or discarded. Nothing is saved when something is only opened or generated.
   - **Finished attempts** keep what's needed to review them:
     - Drill rounds keep every question with the answer given (`items`). A "retry the misses" round adds `retry: {score, total, items}` to its round instead of a record of its own; its questions count as asked.
     - Production checks keep `text` and `fb`.
-    - Speaking attempts keep the Tâche 2 conversation (`chat`).
   - **Claude's follow-up homework** (from writing corrections and "Suggest 3") is saved only when the learner presses Add.
 - Progrès → Évolution is the progress report. It's built from the finished attempts and saves nothing of its own; every attempt stays a separate record.
-  - Groups: each writing task (across prompts), each listening or reading level, each skill's practice exams, and each drill set. Speaking isn't included: its feedback has a level but no score.
+  - Groups: each writing task (across prompts), each listening or reading level, each skill's practice exams, and each drill set. Speaking isn't practised on the site.
   - Each group lists every attempt newest first, linked so it can be opened again, and groups come in the order of their latest attempt. The chain of scores in a group's summary reads oldest → latest. It compares the first scored attempt with the latest (▲/▼), and tags a retry of the same writing prompt or comprehension set.
 - Every history list on the site is newest first, oldest at the bottom.
   - Writing tasks also compare mistakes per 100 words in each category, from the first corrected attempt to the latest: fixed, fewer, repeating, more or new.

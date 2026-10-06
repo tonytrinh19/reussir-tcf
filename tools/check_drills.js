@@ -6,11 +6,11 @@
 //    sentence on the rule that was missed;
 //  - no sentence appears twice in a topic, because the app recognises a sentence it has asked by its wording;
 //  - the answer fits the elision around the gap (j'___ needs a vowel, je ___ can't take one).
-// It also checks that the plan's grammar blocks and the mixed review point at sets that exist, and the texts
-// of Find the mistakes (proofread.js): each mistake marked once, as whole words, with real corrections; the
-// length for the level; and no elision slip in the corrected text or outside the planted mistakes.
+// It also checks that the plan's grammar blocks and every topic's criterion set exist (the mixed review falls
+// back to that set), and the texts of Find the mistakes (proofread.js): each mistake marked once, as whole
+// words, with real corrections; the length for the level; and no elision slip in the corrected text or outside
+// the planted mistakes.
 // Run: node tools/check_drills.js   (prints a line per set; exits 1 if anything fails)
-const fs = require("fs");
 const path = require("path");
 global.window = {};
 const site = path.join(__dirname, "..", "site");
@@ -158,19 +158,17 @@ for (const [phase, p] of Object.entries(T.PLAN)) {
     const route = b[5] || "";
     if (!route.startsWith("grammar.")) return;
     const [, tid, sid] = route.split(".");
-    if (tid === "mixed") return;
+    if (["mixed", "mine", "hunt"].includes(tid)) return;
     const tp = T.TOPICS.find((t) => t.id === tid);
     if (!tp) fail(`plan phase ${phase}, day ${d + 1}: ${route} names no topic`);
     else if (sid && !(tp.sets || []).some((s) => s.id === sid)) fail(`plan phase ${phase}, day ${d + 1}: ${route} names no set`);
   }));
 }
-// The mixed review's topics and sets are listed in app.js (startDrill).
-const app = fs.readFileSync(path.join(site, "app.js"), "utf8");
-const m = app.match(/const pick = (\[\[[^;]*\]\]);/);
-if (!m) fail("app.js: couldn't find the mixed review's list of sets");
-else JSON.parse(m[1]).forEach(([tid, sid]) => {
-  const tp = T.TOPICS.find((t) => t.id === tid);
-  if (!tp || !(tp.sets || []).some((s) => s.id === sid)) fail(`mixed review: ${tid}.${sid} doesn't exist`);
+// The mixed review takes each practised topic's sets at the phase's levels, falling back to the set its
+// criterion names, so every topic's criterion set has to exist.
+T.TOPICS.forEach((tp) => {
+  const sid = tp.criterion && tp.criterion.set;
+  if (sid && !(tp.sets || []).some((s) => s.id === sid)) fail(`${tp.id}: criterion set ${sid} doesn't exist`);
 });
 
 console.log(`\n${T.TOPICS.length} topics · ${total} sentences`);

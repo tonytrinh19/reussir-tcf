@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>Réussir le TCF</title>
 <script>try { if (localStorage.getItem("tcf-theme") === "dark") document.documentElement.classList.add("dark"); } catch (e) {}</script>
-<meta name="description" content="Daily TCF Canada practice toward NCLC 7: today's plan, grammar drills, spaced-repetition vocabulary, timed writing with corrections, speaking practice and progress.">
+<meta name="description" content="Daily TCF Canada practice toward NCLC 7: today's plan, grammar drills, spaced-repetition vocabulary, timed writing with corrections, listening and reading practice, and progress.">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -557,26 +557,6 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .upgrades li { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-family: var(--f-text); }
 .upgrades li .arrow { color: var(--ink-3); font-family: var(--f-ui); }
 
-/* ---------- speaking ---------- */
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: s; }
-.steps li { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 2px 12px; padding: 10px 12px; border-radius: 6px; border: 1px solid transparent; }
-.steps li .t { font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; padding-top: 2px; }
-.steps li b { font-weight: 600; }
-.steps li small { grid-column: 2; color: var(--ink-3); font-size: 13px; }
-.steps li.active { background: var(--accent-soft); border-color: var(--accent); }
-.steps li.past b { color: var(--ink-3); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--rule-2); background: var(--surface); font-size: 13px; cursor: pointer; }
-.chip[aria-pressed="true"] { background: var(--green-soft); border-color: var(--green); color: var(--green); }
-.phrases { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.phrases li { font-family: var(--f-text); font-size: 16px; }
-.phrases li b { font-family: var(--f-ui); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-right: 8px; }
-.chat { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; padding: 4px; }
-.msg { max-width: 82%; padding: 10px 13px; border-radius: 10px; font: 400 16px/1.45 var(--f-text); }
-.msg.them { background: var(--sunk); justify-self: start; border-bottom-left-radius: 3px; }
-.msg.me { background: var(--accent-soft); justify-self: end; border-bottom-right-radius: 3px; }
-.msg small { display: block; font: 600 11px/1.4 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 2px; }
-
 /* ---------- comprehension ---------- */
 .sheet { padding: 22px 24px; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); display: grid; gap: 12px; }
 .sheet h3 { font: 600 19px/1.3 var(--f-text); }
@@ -720,7 +700,6 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 600; }
     <symbol id="i-grammar" viewBox="0 0 24 24"><path d="M3.5 6.5h17M3.5 17.5h11M3.5 12h3M18.5 12h2"/><rect class="pen" x="8.8" y="9.6" width="7.4" height="4.8" rx="1.2"/></symbol>
     <symbol id="i-vocab" viewBox="0 0 24 24"><path d="M7.5 7.5V5A1.5 1.5 0 0 1 9 3.5h10A1.5 1.5 0 0 1 20.5 5v8a1.5 1.5 0 0 1-1.5 1.5h-.5"/><rect x="3.5" y="7.5" width="15" height="13" rx="1.5"/><path d="M7 11.5h5"/><path class="pen" d="M7 16h8"/></symbol>
     <symbol id="i-writing" viewBox="0 0 24 24"><g transform="rotate(45 12 12)"><path d="M12 21.5 7.9 13.4a1.2 1.2 0 0 1 .1-1.3L10 8.5h4l2 3.6a1.2 1.2 0 0 1 .1 1.3z"/><path d="M10 8.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4"/><path d="M12 21.5v-6.4"/><circle cx="12" cy="13.6" r="1.1"/></g><path class="pen" d="M7 20.4c1.3-1 2.6-1 3.9 0s2.6 1 3.9 0 2.6-1 3.9 0"/></symbol>
-    <symbol id="i-speaking" viewBox="0 0 24 24"><path d="M6 4.5h12A2.5 2.5 0 0 1 20.5 7v7a2.5 2.5 0 0 1-2.5 2.5h-6.5L7 20v-3.5H6A2.5 2.5 0 0 1 3.5 14V7A2.5 2.5 0 0 1 6 4.5z"/><path class="pen" stroke-width="2.7" d="M8.5 10.6h.01M12 10.6h.01M15.5 10.6h.01"/></symbol>
     <symbol id="i-comp" viewBox="0 0 24 24"><path d="M12 11.3c-1.8-1.1-4-1.4-6.5-1.1v9.3c2.5-.3 4.7 0 6.5 1.1 1.8-1.1 4-1.4 6.5-1.1v-9.3c-2.5-.3-4.7 0-6.5 1.1zM12 11.3v9.3"/><path d="M4 11.5V10a8 8 0 0 1 16 0v1.5"/><rect class="pen" x="2.5" y="11" width="3" height="5.5" rx="1.3"/><rect class="pen" x="18.5" y="11" width="3" height="5.5" rx="1.3"/></symbol>
     <symbol id="i-progress" viewBox="0 0 24 24"><path d="M2.5 20.5 9 10.5l3.2 4.8 2.4-3.3 6.9 8.5z"/><path d="M9 10.5V3.5"/><path class="pen" d="M9 3.8h5.6l-1.5 1.9 1.5 1.9H9"/></symbol>
     <symbol id="i-bilan" viewBox="0 0 24 24"><path d="M8.5 4.5H7A2 2 0 0 0 5 6.5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-13a2 2 0 0 0-2-2h-1.5"/><rect x="8.5" y="2.8" width="7" height="3.4" rx="1.2"/><path class="pen" d="M8.3 12.2l1.5 1.5 2.8-2.8M8.3 17.2l1.5 1.5 2.8-2.8"/><path d="M14.8 12.6h1.7M14.8 17.6h1.7"/></symbol>
@@ -748,7 +727,6 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 600; }
       <a href="#grammar" data-nav="grammar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grammar"/></svg>Grammaire <small>Drills</small></a>
       <a href="#vocab" data-nav="vocab"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-vocab"/></svg>Vocabulaire <small>Cards</small></a>
       <a href="#writing" data-nav="writing"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-writing"/></svg>Écrit <small>EE</small></a>
-      <a href="#speaking" data-nav="speaking"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-speaking"/></svg>Oral <small>EO</small></a>
       <a href="#comp" data-nav="comp"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-comp"/></svg>Compréhension <small>CO · CE</small></a>
       <a href="#progress" data-nav="progress"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-progress"/></svg>Progrès <small>Log</small></a>
     </nav>
