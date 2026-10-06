@@ -247,6 +247,10 @@
   }
   const phaseInfo = () => T.PHASES[settings().phase - 1];
 
+  // Mon carnet: the words and phrases you save from any page (select them, then "Save to cards"). It has no
+  // built-in cards. It's your own deck, like Mes cartes Anki, so it's starred in every phase.
+  T.VOCAB.unshift({ id: "carnet", label: "Mon carnet", en: "What you saved from the site: select a word or phrase on any page", own: true, cards: [] });
+  T.PHASES.forEach((p) => p.vocab.unshift("carnet"));
   const TOPIC = Object.fromEntries(T.TOPICS.map((t) => [t.id, t]));
   const THEME = Object.fromEntries(T.VOCAB.map((t) => [t.id, t]));
   const CAT = T.CATEGORIES;
@@ -311,6 +315,7 @@
     form: {},
     confirm: "",
     thunk: null, // a day whose stamp should land with a thunk on the next Today render
+    grab: null, // the "Save to your cards" panel, while it's open
   };
 
   /* =============== Claude (sample capability) =============== */
@@ -1120,6 +1125,8 @@
     return m;
   }
   const themeCards = (th, cards) => [...(cards || allCards()).values()].filter((c) => c.theme === th);
+  // A card you haven't started yet. One saved without a meaning waits under À chercher instead.
+  const isNew = (c) => !S.srs.has(c.id) && !!str(c.en).trim();
   function dueIds(cards) {
     const t = todayStr();
     const m = cards || allCards();
@@ -1151,7 +1158,7 @@
       if (!ids.length) { toast("Nothing is due today."); return; }
     } else {
       const th = ui.vTheme || defaultTheme();
-      ids = themeCards(th, cards).filter((c) => !S.srs.has(c.id)).slice(0, ui.vCount).map((c) => c.id);
+      ids = themeCards(th, cards).filter(isNew).slice(0, ui.vCount).map((c) => c.id);
       if (!ids.length) { toast("No new cards left in this theme. Build more with Claude, or pick another theme."); return; }
     }
     ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false, edit: false };
@@ -1179,7 +1186,7 @@
     const s = settings();
     const cards = allCards();
     const order = T.PHASES[s.phase - 1].vocab.concat(T.VOCAB.map((t) => t.id));
-    return order.find((th) => THEME[th] && themeCards(th, cards).some((c) => !S.srs.has(c.id))) || order[0] || T.VOCAB[0].id;
+    return order.find((th) => THEME[th] && themeCards(th, cards).some(isNew)) || order[0] || T.VOCAB[0].id;
   }
   async function vocabBuild(theme) {
     const th = THEME[theme];
@@ -1197,6 +1204,307 @@
       n++;
     }
     toast(n ? `Added ${n} cards to ${th.label}.` : "No new cards came back. Try again.");
+  }
+  // Deleting one of your own cards also drops its review progress. Built-in and Anki cards can't be deleted.
+  function cardDelete(id) {
+    if (DECK.has(id) || !S.cards.has(id)) return;
+    remove("cards", id);
+    if (S.srs.has(id)) remove("srs", id);
+    ui.confirm = "";
+    toast("Card deleted.");
+  }
+
+  /* =============== saving words from any page =============== */
+  // Select a word or phrase on any page (a reading document, a transcript, a correction…) and a "Save to
+  // cards" button appears under it. The card keeps the sentence it came from as its example, the words as you
+  // saw them (seen) and where they were (src). It goes to Mon carnet, Mes cartes Anki or any theme. With a
+  // meaning it joins your reviews from tomorrow; without one it waits under "À chercher" on Vocabulaire.
+  const GRAB_WORDS = 12; // the longest selection the button offers to save
+  const grabBtn = document.getElementById("grab-btn");
+  const grabEl = document.getElementById("grab");
+  const GRAB_PAGES = { today: "Aujourd'hui", grammar: "Grammaire", vocab: "Vocabulaire", writing: "Écrit", speaking: "Oral", comp: "Compréhension", progress: "Progrès" };
+  let grabSel = null; // what the button would save, read from the selection when the button appeared
+  let grabT = 0, grabHold = 0, grabHtml = "";
+  // The words selected, without the spaces, quotes and punctuation around them.
+  const grabClean = (s) => str(s).replace(/\s+/g, " ").replace(/^[\s.,;:!?…«»“”"'’()[\]–—-]+|[\s.,;:!?…«»“”"'’()[\]–—-]+$/g, "");
+  // The text of part of a page without the speaker names, and with a space where one block ends and the next begins.
+  function textOf(frag) {
+    frag.querySelectorAll(".who").forEach((x) => x.remove());
+    frag.querySelectorAll("p, li, div, br, td, th, h1, h2, h3, h4, dd, dt").forEach((x) => x.after(" "));
+    return frag.textContent;
+  }
+  // The sentence a selection sits in, within its paragraph. A very long one is cut to the words around it.
+  function grabSentence(r) {
+    const start = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement;
+    const block = start && start.closest("p, li, td, th, dd, dt, blockquote, figcaption, h1, h2, h3, h4, label, summary");
+    if (!block || !viewEl.contains(block) || !block.contains(r.endContainer)) return "";
+    const pre = document.createRange();
+    pre.setStart(block, 0);
+    pre.setEnd(r.startContainer, r.startOffset);
+    const text = textOf(block.cloneNode(true));
+    const a = textOf(pre.cloneContents()).length, b = a + textOf(r.cloneContents()).length;
+    // A sentence ends at . ! ? or … (and any closing quote) before a space, or at a line break.
+    let s = 0, e = text.length;
+    const re = /[.!?…]+(?:\s?[»”"’)\]])*(?=\s|$)|\n/g;
+    for (let m; (m = re.exec(text));) {
+      const x = m.index + m[0].length;
+      if (x <= a) s = x;
+      else if (x >= b) { e = x; break; }
+    }
+    let before = text.slice(s, a), after = text.slice(b, e);
+    if (countWords(text.slice(s, e)) > 40) {
+      const wb = before.trim().split(/\s+/), wa = after.trim().split(/\s+/);
+      if (wb.length > 15) before = "… " + wb.slice(-15).join(" ") + (/\s$/.test(before) ? " " : "");
+      if (wa.length > 15) after = (/^\s/.test(after) ? " " : "") + wa.slice(0, 15).join(" ") + " …";
+    }
+    return (before + text.slice(a, b) + after).replace(/\s+/g, " ").trim();
+  }
+  // Where a selection was made: the page, then the title of the document it's in.
+  function grabSource(host) {
+    const v = route.view;
+    let page = GRAB_PAGES[v] || "";
+    if (v === "comp") {
+      const set = ui.c.set[ui.c.skill];
+      if (ui.c.skill === "ce" && route.args[1] === "exam") page = ui.cx ? ui.cx.exam.title : "Examen blanc";
+      else page = (ui.c.skill === "co" ? "Compréhension orale" : "Compréhension écrite") + (set && set.title && !set.questions.some((q) => q.doc) ? " · " + grabClean(set.title) : "");
+    } else if (v === "grammar" && TOPIC[route.args[0]]) page += " · " + TOPIC[route.args[0]].title;
+    const sheet = host.closest(".sheet, .doc");
+    const h = sheet && sheet.querySelector("h3");
+    const doc = h ? grabClean(h.textContent) : "";
+    return doc && !page.includes(doc) ? `${page} · ${doc}` : page;
+  }
+  // Shows the button under a selection of a few words on the page, and hides it otherwise.
+  function grabCheck() {
+    clearTimeout(grabT);
+    grabT = 0;
+    if (!grabBtn || Date.now() - grabHold < 1000) return; // no button in an older page shell, or it's being pressed
+    const sel = window.getSelection ? window.getSelection() : null;
+    const r = sel && sel.rangeCount && !sel.isCollapsed ? sel.getRangeAt(0) : null;
+    const node = r && r.commonAncestorContainer;
+    const host = node && (node.nodeType === 1 ? node : node.parentElement);
+    const ok = host && viewEl.contains(host) && !host.closest("input, textarea, select, button, [contenteditable], .who");
+    const text = ok ? grabClean(textOf(r.cloneContents())) : "";
+    if (!text || !/\p{L}/u.test(text) || countWords(text) > GRAB_WORDS) { grabBtn.hidden = true; grabSel = null; return; }
+    grabSel = { text, ex: grabSentence(r), src: grabSource(host) };
+    const rects = r.getClientRects();
+    const box = rects.length ? rects[rects.length - 1] : r.getBoundingClientRect();
+    grabBtn.hidden = false;
+    const left = Math.max(8, Math.min(box.left, document.documentElement.clientWidth - grabBtn.offsetWidth - 8));
+    grabBtn.style.left = Math.round(left + window.scrollX) + "px";
+    grabBtn.style.top = Math.round(box.bottom + window.scrollY + 10) + "px";
+  }
+  // The same French as a card's, give or take an article, the notes in brackets, or the other half of "amener / emmener".
+  const cardKeys = (fr) => str(fr).replace(/\([^)]*\)/g, " ").split(/\s\/\s|;/).map((p) => norm(p).replace(/^(?:(?:les|le|la|une|un) |l')/, "")).filter(Boolean);
+  function grabFind(fr) {
+    const want = new Set(cardKeys(fr));
+    if (!want.size) return null;
+    for (const c of allCards().values()) if (cardKeys(c.fr).concat(cardKeys(c.seen)).some((k) => want.has(k))) return c;
+    return null;
+  }
+  function grabOpen() {
+    const g = grabSel;
+    grabHold = 0;
+    if (grabBtn) grabBtn.hidden = true;
+    if (!g) return;
+    const dup = grabFind(g.text), th = settings().grabTheme;
+    ui.grab = { fr: g.text, seen: g.text, en: "", note: "", ex: norm(g.ex) === norm(g.text) ? "" : g.ex, src: g.src, theme: THEME[th] ? th : "carnet", dup: dup ? dup.id : "", force: false };
+    paintGrab(true);
+    // Straight to the meaning with a mouse; on a phone the keyboard waits until you tap a field.
+    if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) { const el = document.getElementById(dup ? "grab-add" : "grab-en"); if (el) el.focus({ preventScroll: true }); }
+  }
+  function grabClose() {
+    ui.grab = null;
+    paintGrab(true);
+  }
+  const exLines = (ex) => str(ex).split("\n").map((l) => l.trim()).filter(Boolean);
+  function grabHTML() {
+    const g = ui.grab;
+    const dup = g.dup && !g.force ? allCards().get(g.dup) : null;
+    const head = `<div class="row between"><p class="h3 with-ico">${ico("vocab")}Save to your cards</p><button class="x" data-act="grab-close" title="Close" aria-label="Close">×</button></div>`;
+    if (dup) {
+      const has = !g.ex || exLines(dup.ex).some((l) => norm(l) === norm(g.ex));
+      return `${head}
+        <p class="small">It's already in <b>${esc(themeLabel(dup.theme))}</b>:</p>
+        <div class="grab-dup"><p class="fr">${typo(dup.fr)}</p><p class="small">${dup.en ? esc(dup.en) : `<span class="muted">No meaning yet</span>`}</p></div>
+        ${g.ex ? `<p class="small muted">${has ? "This sentence is already one of its examples." : "You can add the sentence you found it in to that card's examples."}</p>` : ""}
+        <div class="row">${has ? "" : `<button class="btn primary" id="grab-add" data-act="grab-add-ex">Add the sentence to it</button>`}<button class="btn" data-act="grab-force">Make a new card anyway</button><button class="btn ghost" data-act="grab-close">Cancel</button></div>`;
+    }
+    const label = (k, more) => `<span>${k}${more ? ` <span class="muted" style="font-weight:400">· ${more}</span>` : ""}</span>`;
+    return `${head}
+      <label class="field">${label("French")}<input type="text" id="grab-fr" data-input="grab" data-k="fr" value="${esc(g.fr)}" lang="fr" autocomplete="off" spellcheck="false"></label>
+      <label class="field">${label("English", "or leave it for later")}<input type="text" id="grab-en" data-input="grab" data-k="en" value="${esc(g.en)}" autocomplete="off"></label>
+      ${claudeOn() ? `<div class="row">${claudeBtn("grab", "grab-claude", "Fill in with Claude", "", "btn sm")}<span class="small muted">the meaning in this sentence</span></div>` : ""}
+      <label class="field">${label("Note", "optional, shown with the English")}<input type="text" id="grab-note" data-input="grab" data-k="note" value="${esc(g.note)}" autocomplete="off"></label>
+      <label class="field">${label("Example", "the sentence it came from")}<textarea id="grab-ex" data-input="grab" data-k="ex" rows="3" lang="fr" spellcheck="false">${esc(g.ex)}</textarea></label>
+      <label class="field">${label("Deck")}<select id="grab-th" data-change="grab-theme">${T.VOCAB.map((th) => `<option value="${th.id}" ${th.id === g.theme ? "selected" : ""}>${esc(th.label)}</option>`).join("")}</select></label>
+      ${g.src ? `<p class="small muted">From ${esc(g.src)}</p>` : ""}
+      <div class="row"><button class="btn primary" data-act="grab-save">Save <span class="kbd">↵</span></button><button class="btn ghost" data-act="grab-close">Cancel <span class="kbd">Esc</span></button></div>`;
+  }
+  // The panel sits outside the page, so drawing the page leaves it alone. It isn't redrawn while you type in it;
+  // when it is, the field you're in keeps its focus and caret.
+  function paintGrab(force) {
+    if (!grabEl) return;
+    if (!ui.grab) { if (!grabEl.hidden || grabHtml) { grabEl.hidden = true; grabEl.innerHTML = grabHtml = ""; } return; }
+    const ae = document.activeElement;
+    const inside = !!ae && grabEl.contains(ae);
+    if (!force && inside && isTyping(ae)) return;
+    const html = grabHTML();
+    if (html === grabHtml && !grabEl.hidden) return;
+    const fid = inside ? ae.id : "";
+    const sel = fid && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd] : null;
+    grabEl.innerHTML = grabHtml = html;
+    grabEl.hidden = false;
+    const el = fid && document.getElementById(fid);
+    if (el) { try { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) el.setSelectionRange(sel[0], sel[1]); } catch (_) {} }
+  }
+  // What Claude is told when it fills in a card: the French side in the decks' style, and the meaning in that sentence.
+  const GRAB_BRIEF = `You're making French flashcards for a B1 learner preparing the TCF Canada (aiming for B2). The learner selected each word or phrase on a practice page, in the sentence given.
+- "fr": the French side in dictionary form. A verb in the infinitive, with its usual preposition and "(+ inf.)", "(+ subj.)", "qqch" or "qqn" when useful. An adjective in the masculine singular, adding the feminine when it's irregular. A noun with its article, adding "(nm)" or "(nf)" after an elided "l'". Keep a fixed expression whole. Keep the learner's words when they're already in this form.
+- "en": a short English meaning, the one used in that sentence, at most 8 words.
+- "note": at most 12 words in English, only when useful: the register (familiar, formal), Québec usage, a false friend, or a grammar point. Don't repeat the French. Otherwise "".`;
+  async function grabClaude() {
+    const g = ui.grab;
+    if (!g || !str(g.fr).trim()) return;
+    const out = await ask("grab", `${GRAB_BRIEF}\n\nSelected: «${str(g.fr).trim()}»\nSentence: «${str(g.ex).trim() || str(g.fr).trim()}»\nReply with only JSON: {"fr": "...", "en": "...", "note": "..."}`);
+    if (!out || ui.grab !== g) return;
+    if (str(out.fr).trim()) g.fr = str(out.fr).trim();
+    if (str(out.en).trim()) g.en = str(out.en).trim();
+    g.note = str(out.note).trim();
+    const dup = grabFind(g.fr);
+    if (dup && !g.force) g.dup = dup.id;
+    paintGrab(true);
+    tabSoon();
+  }
+  function grabSave() {
+    const g = ui.grab;
+    if (!g) return;
+    const fr = str(g.fr).replace(/\s+/g, " ").trim(), en = str(g.en).trim(), note = str(g.note).trim(), ex = str(g.ex).trim();
+    if (!fr) { toast("The French side needs some text."); return; }
+    const dup = g.force ? null : grabFind(fr);
+    if (dup) { g.dup = dup.id; paintGrab(true); return; }
+    const theme = THEME[g.theme] ? g.theme : "carnet";
+    const id = "c-" + uid();
+    const doc = { fr, en, theme, created: todayStr(), ts: Date.now(), by: "you", seen: g.seen };
+    if (ex && norm(ex) !== norm(fr)) doc.ex = ex;
+    if (note) doc.enNote = note;
+    if (g.src) doc.src = g.src;
+    put("cards", id, doc);
+    if (en) srsLearn(id, false);
+    if (settings().grabTheme !== theme) saveSettings({ grabTheme: theme });
+    grabClose();
+    toast(en ? `Saved to ${THEME[theme].label}. It comes up in your reviews from tomorrow.` : `Saved to ${THEME[theme].label}. Give it a meaning under À chercher on Vocabulaire.`);
+  }
+  // The words were already on a card: the sentence joins its examples, and a card you weren't reviewing yet joins your reviews.
+  function grabAddEx() {
+    const g = ui.grab;
+    const c = g && allCards().get(g.dup);
+    if (!c) return;
+    const exs = exLines(c.ex);
+    if (g.ex && !exs.some((l) => norm(l) === norm(g.ex))) exs.push(str(g.ex).trim());
+    const doc = Object.assign({}, c, { ex: exs.join("\n"), edited: todayStr() });
+    delete doc.id;
+    if (!doc.seen) doc.seen = g.seen;
+    put("cards", c.id, doc);
+    const joins = !!str(c.en).trim() && !S.srs.has(c.id);
+    if (joins) srsLearn(c.id, false);
+    grabClose();
+    toast(`Added to « ${c.fr} » in ${themeLabel(c.theme)}.${joins ? " It comes up in your reviews from tomorrow." : ""}`);
+  }
+
+  // Words you saved from a page are marked wherever they come up, with the CSS Custom Highlight API, which leaves
+  // the page itself unchanged. Browsers without it just don't mark them. Not on Vocabulaire, where the cards are.
+  let markKey = "", markRe = null;
+  const markPat = (s) => reEsc(s).replace(/['’]/g, "['’]").replace(/ /g, "\\s+");
+  function paintMarks() {
+    const H = window.CSS && CSS.highlights;
+    if (!H || typeof Highlight !== "function") return;
+    const forms = route.view === "vocab" ? [] : [...new Set(list("cards").map((c) => grabClean(c.seen)).filter((s) => s.length > 1))].sort((a, b) => b.length - a.length);
+    if (!forms.length) { H.delete("saved"); return; }
+    const key = forms.join("|");
+    if (key !== markKey) { markKey = key; markRe = new RegExp(`(?<![\\p{L}\\p{N}])(?:${forms.map(markPat).join("|")})(?![\\p{L}\\p{N}])`, "giu"); }
+    const ranges = [];
+    const walk = document.createTreeWalker(viewEl, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest("button, select, textarea, input, script, style, .who") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+    for (let n; (n = walk.nextNode()) && ranges.length < 500;) {
+      markRe.lastIndex = 0;
+      for (let m; (m = markRe.exec(n.data));) { const r = new Range(); r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length); ranges.push(r); }
+    }
+    H.set("saved", new Highlight(...ranges));
+  }
+  // A card's examples, with the words you saved in bold.
+  function exHTML(c) {
+    const re = grabClean(c.seen).length > 1 ? new RegExp(`(?<![\\p{L}\\p{N}])${markPat(grabClean(c.seen))}(?![\\p{L}\\p{N}])`, "giu") : null;
+    return exLines(c.ex).map((l) => {
+      if (!re) return typo(l);
+      let out = "", at = 0;
+      for (const m of l.matchAll(re)) { out += typo(l.slice(at, m.index)) + `<b>${typo(m[0])}</b>`; at = m.index + m[0].length; }
+      return out + typo(l.slice(at));
+    }).join("<br>");
+  }
+
+  // Cards saved without a meaning wait on Vocabulaire, out of your reviews, until they have one. Newest first.
+  const waitingCards = () => list("cards").filter((c) => c.fr && !str(c.en).trim()).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  const waitVal = (id, k) => str(ui.form[`wt-${k}-${id}`]);
+  function waitPanel() {
+    const ws = waitingCards();
+    if (!ws.length) return "";
+    const filled = ws.filter((c) => waitVal(c.id, "en").trim()).length;
+    const rows = ws.map((c) => {
+      const f = (k, label, extra) => `<label class="field">${label}<input type="text" id="wt-${k}-${c.id}" data-input="form" data-k="wt-${k}-${c.id}" value="${esc(ui.form[`wt-${k}-${c.id}`] != null ? ui.form[`wt-${k}-${c.id}`] : k === "fr" ? c.fr : "")}" autocomplete="off" ${extra || ""}></label>`;
+      return `<li class="stack tight">
+        <div class="wait-fields">${f("fr", "French", `lang="fr" spellcheck="false"`)}${f("en", "English")}${f("note", `<span>Note <span class="muted" style="font-weight:400">· optional</span></span>`)}</div>
+        ${c.ex ? `<p class="fr small">${exHTML(c)}</p>` : ""}
+        <div class="row between"><span class="small muted">${esc(themeLabel(c.theme))}${c.src ? ` · from ${esc(c.src)}` : ""}</span><span class="row"><button class="btn sm" data-act="wt-save" data-id="${esc(c.id)}">Save</button>${confirmBtn("wt-del-" + c.id, "Delete this card", "wt-del", `data-id="${esc(c.id)}"`)}</span></div>
+      </li>`;
+    }).join("");
+    return `<section class="panel stack">
+      <div class="row between"><p class="h3">À chercher · ${ws.length} saved without a meaning</p><span class="row">${claudeBtn("wt-fill", "wt-fill", "Fill them in with Claude", "", "btn sm")}${filled ? `<button class="btn sm primary" data-act="wt-save-all">Save the ${filled} with a meaning</button>` : ""}</span></div>
+      <p class="small muted">They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p>
+      <ul class="wait-list">${rows}</ul>
+    </section>`;
+  }
+  async function waitFill() {
+    const ws = waitingCards().filter((c) => !waitVal(c.id, "en").trim()).slice(0, 25);
+    if (!ws.length) { toast("They all have a meaning already. Check them, then save."); return; }
+    const items = ws.map((c, i) => ({ i, selected: grabClean(c.seen) || c.fr, sentence: str(c.ex).split("\n")[0] || c.fr }));
+    const out = await ask("wt-fill", `${GRAB_BRIEF}\n\nThe items:\n${JSON.stringify(items)}\nReply with only JSON: {"cards": [{"i": the item's i, "fr": "...", "en": "...", "note": "..."}]}`);
+    if (!out) return;
+    let n = 0;
+    for (const r of arr(out.cards)) {
+      const c = r && ws[Number(r.i)];
+      if (!c || !str(r.en).trim()) continue;
+      if (str(r.fr).trim()) ui.form[`wt-fr-${c.id}`] = str(r.fr).trim();
+      ui.form[`wt-en-${c.id}`] = str(r.en).trim();
+      ui.form[`wt-note-${c.id}`] = str(r.note).trim();
+      n++;
+    }
+    toast(n ? `Claude filled in ${n}. Check each one, then save it.` : "No meanings came back. Try again.");
+    render(true);
+  }
+  // Saving a meaning puts the card in your reviews. If its French is now word for word the same as another
+  // card's, the sentence goes to that card instead, so each word keeps one card.
+  function waitSave(id) {
+    const c = S.cards.get(id);
+    if (!c) return false;
+    const fr = waitVal(id, "fr").trim() || c.fr, en = waitVal(id, "en").trim(), note = waitVal(id, "note").trim();
+    if (!en) return false;
+    ["fr", "en", "note"].forEach((k) => { delete ui.form[`wt-${k}-${id}`]; });
+    const same = [...allCards().values()].find((x) => x.id !== id && x.en && norm(x.fr) === norm(fr));
+    if (same) {
+      const exs = exLines(same.ex);
+      exLines(c.ex).forEach((l) => { if (!exs.some((x) => norm(x) === norm(l))) exs.push(l); });
+      const doc = Object.assign({}, same, { ex: exs.join("\n"), edited: todayStr() });
+      delete doc.id;
+      if (!doc.seen) doc.seen = c.seen;
+      put("cards", same.id, doc);
+      if (!S.srs.has(same.id)) srsLearn(same.id, false);
+      remove("cards", id);
+      return "merged";
+    }
+    const doc = Object.assign({}, c, { fr, en });
+    if (note) doc.enNote = note; else delete doc.enNote;
+    put("cards", id, doc);
+    if (!S.srs.has(id)) srsLearn(id, false);
+    return true;
   }
 
   /* =============== writing =============== */
@@ -2360,7 +2668,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 1;
-  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "sp", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied"];
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "sp", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -2468,6 +2776,9 @@
     paintNav();
     paintFoot();
     paintTimer();
+    paintGrab();
+    paintMarks();
+    grabCheck();
     tabSoon();
   }
   function paintNav() {
@@ -3035,8 +3346,8 @@
     const theme = ui.vTheme && THEME[ui.vTheme] ? ui.vTheme : (args[0] === "new" && THEME[args[1]] ? args[1] : defaultTheme());
     const phaseThemes = T.PHASES[s.phase - 1].vocab;
     const opts = T.VOCAB.slice().sort((a, b) => (phaseThemes.includes(b.id) ? 1 : 0) - (phaseThemes.includes(a.id) ? 1 : 0))
-      .map((th) => { const left = themeCards(th.id, cards).filter((c) => !S.srs.has(c.id)).length; return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${phaseThemes.includes(th.id) ? "★ " : ""}${esc(th.label)} · ${left} new</option>`; }).join("");
-    const left = themeCards(theme, cards).filter((c) => !S.srs.has(c.id)).length;
+      .map((th) => { const left = themeCards(th.id, cards).filter(isNew).length; return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${phaseThemes.includes(th.id) ? "★ " : ""}${esc(th.label)} · ${left} new</option>`; }).join("");
+    const left = themeCards(theme, cards).filter(isNew).length;
     const rows = T.VOCAB.map((th) => {
       const cs = themeCards(th.id, cards);
       const lr = cs.filter((c) => S.srs.has(c.id)).length;
@@ -3045,10 +3356,11 @@
         <td><b class="fr">${esc(th.label)}</b><br><span class="small muted">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
         <td class="n">${lr} / ${cs.length}</td><td class="n">${ms}</td>
         <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
-      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}</span><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : "new"}</span></li>`; }).join("")}</ul></details></td></tr>`;
+      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="row"><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning"}</span>${DECK.has(c.id) ? "" : confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</span></li>`; }).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire<small>Spaced repetition: a new card comes back after 1, 2, 4, 7, then 14 days. Anything you miss joins a priority pile reviewed daily until you get it right twice.</small></h1></header>
+      <header class="stack tight"><h1 class="title">Vocabulaire<small>Spaced repetition: a new card comes back after 1, 2, 4, 7, then 14 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</small></h1></header>
+      ${waitPanel()}
       <div class="grid2">
         <section class="panel stack">
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
@@ -3099,7 +3411,7 @@
       <section class="panel flash">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
         ${v.edit ? vocabEditForm(id) : `${front}
-        ${v.shown ? back + (c.ex ? `<p class="ex">${c.ex.split("\n").map((l) => typo(l)).join("<br>")}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
+        ${v.shown ? back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
         <div class="row">${buttons}</div>`}
       </section>
     </div>`;
@@ -3409,7 +3721,7 @@
     render(args) {
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
-      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page.</small></h1></header>`;
+      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</small></h1></header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
       if (skill === "ce" && args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView()}</div></div>`;
       ensureCompSet(skill);
@@ -3459,7 +3771,7 @@
         </article>
         ${canPlay ? `<div class="player-dock">${playerHTML()}</div>` : ""}
         ${canPlay ? `<div><button class="btn ghost sm" id="c-script" data-act="c-script" aria-expanded="${!!ui.c.script}">${ui.c.script ? "Hide" : "Show"} the transcript</button></div>` : ""}
-        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b>${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
+        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
       const rv = ui.c.review[skill];
@@ -4078,6 +4390,27 @@
     "v-count": (el) => { ui.vCount = Number(el.dataset.n); render(true); },
     "v-dir": (el) => { ui.vDir = el.dataset.dir; lsSet("tcf-vdir", ui.vDir); render(true); },
     "v-build": (el) => vocabBuild(el.dataset.theme),
+    "card-del": (el) => cardDelete(el.dataset.id),
+    "grab-open": () => grabOpen(),
+    "grab-close": () => grabClose(),
+    "grab-save": () => grabSave(),
+    "grab-claude": () => grabClaude(),
+    "grab-add-ex": () => grabAddEx(),
+    "grab-force": () => { if (!ui.grab) return; ui.grab.force = true; paintGrab(true); const el = document.getElementById("grab-en"); if (el) el.focus({ preventScroll: true }); },
+    "wt-fill": () => waitFill(),
+    "wt-save": (el) => {
+      const r = waitSave(el.dataset.id);
+      if (!r) { toast("Add the English first."); return; }
+      toast(r === "merged" ? "That card was already there, so the sentence went to it." : "Saved. It comes up in your reviews from tomorrow.");
+      render(true);
+    },
+    "wt-save-all": () => {
+      const rs = waitingCards().filter((c) => waitVal(c.id, "en").trim()).map((c) => waitSave(c.id));
+      const merged = rs.filter((r) => r === "merged").length;
+      toast(`Saved ${rs.length}. They come up in your reviews from tomorrow.${merged ? ` ${merged} ${merged > 1 ? "were" : "was"} already a card, so the sentence went to it.` : ""}`);
+      render(true);
+    },
+    "wt-del": (el) => cardDelete(el.dataset.id),
     "v-add": () => {
       const fr = str(ui.form["card-fr"]).trim(), en = str(ui.form["card-en"]).trim();
       if (!fr || !en) { toast("Fill in both the French and the English."); return; }
@@ -4221,6 +4554,7 @@
     "start-date": (el) => { if (/^\d{4}-\d{2}-\d{2}$/.test(el.value)) saveSettings({ startDate: el.value }); },
     fix: (el) => { const s = settings(); s.fixes[el.dataset.k] = el.value.trim(); saveSettings({ fixes: s.fixes }); },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
+    "grab-theme": (el) => { if (ui.grab) ui.grab.theme = el.value; },
     "v-theme": (el) => { ui.vTheme = el.value; render(true); },
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
     "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); compKeep(ui.c.skill); },
@@ -4246,6 +4580,7 @@
     "sp-trans": (el) => { ui.sp.trans[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
     "chat-in": (el) => { ui.sp.chatIn = el.value; },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
+    grab: (el) => { if (ui.grab) ui.grab[el.dataset.k] = el.value; },
   };
 
   document.addEventListener("click", (e) => {
@@ -4257,7 +4592,11 @@
     fn(el, e);
     tabSoon();
   });
-  document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent']")) e.preventDefault(); });
+  document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent'], #grab-btn")) e.preventDefault(); });
+  // The button follows the selection once it settles, so it doesn't flicker while you drag across the words.
+  document.addEventListener("selectionchange", () => { clearTimeout(grabT); grabT = setTimeout(grabCheck, 250); });
+  if (grabBtn) grabBtn.addEventListener("pointerdown", () => { grabHold = Date.now(); });
+  window.addEventListener("resize", () => { if (grabBtn && !grabBtn.hidden) grabCheck(); });
   // Keep the history tree's open branches across re-renders. "toggle" doesn't bubble, so listen while it's captured.
   document.addEventListener("toggle", (e) => { const d = e.target; if (d && d.dataset && d.dataset.node) ui.c.open[d.dataset.node] = d.open; }, true);
   document.addEventListener("change", (e) => {
@@ -4289,6 +4628,12 @@
   });
   document.addEventListener("keydown", (e) => {
     const t = e.target;
+    if (ui.grab && t && t.closest && t.closest("#grab")) {
+      if (e.key === "Escape") { e.preventDefault(); grabClose(); }
+      else if (e.key === "Enter" && !e.isComposing && (e.metaKey || e.ctrlKey || t.tagName === "INPUT") && (ui.grab.force || !ui.grab.dup)) { e.preventDefault(); grabSave(); }
+      return;
+    }
+    if (ui.grab && e.key === "Escape" && !(route.view === "vocab" && ui.vocab && ui.vocab.edit)) { e.preventDefault(); grabClose(); return; }
     if (t && t.id === "drill-in" && e.key === "Enter") { e.preventDefault(); if (ui.drill && ui.drill.checked) drillNext(); else drillCheck(); return; }
     if (t && t.id === "hw-new" && e.key === "Enter") { e.preventDefault(); addHomework(); return; }
     if (t && t.dataset && t.dataset.input === "pr-fix" && e.key === "Enter") {
