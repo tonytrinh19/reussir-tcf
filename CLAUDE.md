@@ -76,6 +76,13 @@
     - **Find the mistakes** (`#grammar.hunt`) gives a text from `proofread.js`: the first not done at the level (B1 in Phases 1–2, B2 after, switchable), or else the one done longest ago.
       - The learner taps the words that look wrong, then types a correction for each mistake found. A mistake is caught when it's both found and corrected.
       - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). A text in progress isn't an unfinished attempt, since it takes a few minutes, but a refresh keeps it.
+    - **Save to cards:** selecting a word or phrase (up to 12 words) anywhere on a page, outside text boxes, shows a "Save to cards" button under it. The user asked for this on 2026-10-05, to keep words met in a reading text for review.
+      - The button opens a panel (outside `#view`, kept in `ui.grab` across a refresh). It's filled in with the words, the sentence they're in as the example, and where they were (the page, then the document's title). Speaker names in transcripts (`.who`) are left out.
+      - The meaning can be typed, or filled in by Claude: the dictionary form, the meaning in that sentence and a short note. It can also be left for later.
+      - The deck is **Mon carnet** by default (a deck of its own with no built-in cards, defined in `app.js`), or Mes cartes Anki, or any theme. The last one chosen is kept in `settings.main.grabTheme`.
+      - A card with a meaning joins the reviews from tomorrow, without going through New cards. One without a meaning waits under **À chercher** at the top of Vocabulaire, out of the reviews, until it gets one there; Claude can fill them all in. If its French then matches another card word for word, its sentence goes to that card instead.
+      - Words already on a card (the same French, give or take an article, brackets or one half of "a / b") show that card instead. Its sentence can be added to the card's examples, which also starts a card not reviewed yet, or a new card can be made anyway.
+      - Saved words are marked like a highlighter pen wherever they come up again (the CSS Custom Highlight API, which leaves the page unchanged), except on Vocabulaire. On the back of a card, they're in bold in its examples.
     - Each writing task has "Copy for another AI", for when Claude can't correct the draft. It copies one prompt: the TCF Canada writing rules, criteria and score bands, the task and its subject (with the Tâche 3 documents), the word counts, the learner's recurring errors, the draft, and what to send back. If the browser blocks the clipboard, the prompt is shown selected, to copy by hand.
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
     - As on the real test, a set is four separate documents with one question each (`questions[i].doc`), not one text with four questions. Claude's sets use the same shape; ones saved before the change still show their single text.
@@ -139,6 +146,8 @@
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.
+    - Cards saved from a page also keep `seen` (the words as selected, which get marked on the pages), `src` (where they were found, shown on the back) and `ts`. One with an empty `en` is waiting for a meaning.
+    - Your own cards can be deleted from the deck list on Vocabulaire, which drops their `srs` progress too. Built-in and Anki cards can't.
   - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads. The tree is newest first at every level: topics and sets by their latest attempt (or answer, while in progress), then the attempts.
     - Both histories list only sets finished or started (an `inprogress` record, including Claude sets never finished), and practice exams likewise. Attempts at built-in sets that have since been replaced go under "Earlier sets", without their text.
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
