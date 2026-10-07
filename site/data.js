@@ -16,10 +16,10 @@ window.TCF = (function () {
 
   const PHASES = [
     { n: 1, name: "Foundation Repair", weeks: "Weeks 1–3", level: "B1",
-      goal: "Stop the recurring mechanical errors before building on top of them, and get honest CO, CE and EO baselines.",
+      goal: "Stop the recurring mechanical errors before building on top of them, and get honest CO and CE baselines.",
       vocab: ["connecteurs", "quotidien", "immigration"] },
     { n: 2, name: "B1+ Consolidation", weeks: "Weeks 4–8", level: "B1",
-      goal: "Close the remaining B1 gaps and bring listening, reading and speaking into a weekly rhythm.",
+      goal: "Close the remaining B1 gaps, read at exam pace, and take in easy French every day.",
       vocab: ["travail", "education", "sante", "famille", "societe"] },
     { n: 3, name: "B2 Development", weeks: "Weeks 9–14", level: "B2",
       goal: "Build the B2 grammar toolkit and make a first real run at the B2 ceiling in all four skills.",
@@ -48,7 +48,6 @@ window.TCF = (function () {
           ["voc", 10, "Review only", "Spaced-repetition review. No new cards today.", "Recall each card cold.", "vocab.review"],
           ["gra", 25, "Imperative + pronoun, rapid fire", "20-item drill: envoie-moi, donne-le-moi, ne me l'envoie pas.", "18/20 or better. If not, repeat tomorrow instead of adding new material.", "grammar.imperatif"],
           ["ce", 20, "Untimed reading set", "One CE set (four short documents, one question each), no timer.", "For each miss: vocabulary gap or comprehension gap?", "comp.ce"],
-          ["eo", 35, "Orale Tâche 1 baseline", "Record a full self-introduction cold. Listen back once and note 2–3 concrete fixes. Don't re-record yet.", "2–3 fixes written down.", "speaking.t1"],
           ["bil", 10, "Error log + listen-back notes", "Log today's errors and your listen-back notes.", "", "progress.errors"],
         ],
         [
@@ -62,7 +61,6 @@ window.TCF = (function () {
           ["voc", 10, "Review the week", "Spaced-repetition review of this week's cards.", "", "vocab.review"],
           ["gra", 30, "Subjonctif présent", "Conjugate 15 verbs after il faut que, regular and irregular stems.", "Irregular stems are where slips happen: flag them.", "grammar.subjonctif.formation"],
           ["ce", 20, "Second CE diagnostic", "Another untimed reading segment.", "", "comp.ce"],
-          ["eo", 35, "Re-record Tâche 1", "Apply Tuesday's fixes and re-record the same self-introduction.", "Listen to both back to back: measurably smoother?", "speaking.t1"],
           ["bil", 5, "Log your errors", "", "", "progress.errors"],
         ],
         [
@@ -80,139 +78,173 @@ window.TCF = (function () {
       ],
     },
     2: {
-      note: "Check each day against the Phase 2 exit criteria, not against “did I finish the list”.",
+      note: "Grammar: one round, then Retry the misses, and two rounds at most in a sitting. Only the day's first round counts toward a criterion, and each topic comes back a week later. Easy listening and reading go outside your study time. Once this phase, take the CO Examen blanc on a Saturday instead of the timed sets, as your listening baseline.",
       days: [
         [
-          ["voc", 10, "New words: work & employment", "10–15 new cards.", "", "vocab.new.travail"],
-          ["gra", 30, "Séquence des temps", "Imparfait, passé composé or plus-que-parfait? Watch for implied anteriority.", "8/10+ is the Phase 2 target (baseline 6/10).", "grammar.sequence"],
-          ["co", 25, "CO MCQ set #1", "Untimed listening, multiple choice.", "", "comp.co"],
-          ["ee", 35, "Tâche 1", "Full draft to a fresh prompt.", "Inside 60–120 words?", "writing.t1"],
+          ["voc", 10, "Cards + 10–15 new: work & employment", "Due cards first, then the new ones. Theme cards English → French, so you practise producing the words.", "Recall each card before you flip it.", "vocab.new.travail"],
+          ["gra", 20, "Séquence des temps", "One round, then Retry the misses. Imparfait, passé composé or plus-que-parfait? Watch for implied anteriority.", "8/10+ on the day's first round is the Phase 2 target (baseline 6/10).", "grammar.sequence"],
+          ["co", 25, "Listening set: once through, then dig in", "Play it once without pausing and answer, like the exam. Then replay it with the transcript and find where each miss was said.", "For each miss: vocabulary gap or comprehension gap?", "comp.co"],
+          ["ee", 30, "Tâche 1 on the clock", "A fresh prompt, 15 minutes. Then 3 minutes of proofreading: accents, agreement, elision, verb + preposition.", "Inside 60–120 words?", "writing.t1"],
+          ["co", 20, "Easy listening", "Outside your study time: commute or chores. French you can follow without pausing, and no dictionary.", "You understood nearly everything.", "comp.free.co"],
+        ],
+        [
+          ["voc", 10, "Review only", "Spaced-repetition review. No new cards today.", "Recall each card cold.", "vocab.review"],
+          ["gra", 20, "Si-clauses, types 1 & 2", "One round, then Retry the misses.", "", "grammar.si"],
+          ["ce", 25, "Reading set at exam pace", "Start the timer at exam pace: 6 minutes for 4 B1 questions. Answer every question, guessing if you must, then go back over each miss untimed.", "Done in time, nothing blank? For each miss: vocabulary gap or comprehension gap?", "comp.ce"],
+          ["gra", 10, "Your mistakes", "One round of the mistakes from your own corrected writing.", "", "grammar.mine"],
+          ["ce", 20, "Easy reading", "Outside your study time: a graded reader or an easy article. Read on without stopping for every word.", "You understood nearly everything.", "comp.free.ce"],
+        ],
+        [
+          ["voc", 10, "Cards + 10–15 new: education & health", "", "", "vocab.new.education"],
+          ["gra", 20, "Relative pronouns", "One round, then Retry the misses: qui, que, où, dont, lequel.", "", "grammar.relatifs"],
+          ["co", 25, "Listening set #2: once through, then dig in", "Once without pausing, answer, then replay it with the transcript.", "", "comp.co"],
+          ["ee", 30, "Tâche 2 on the clock", "120–150 words in 20 minutes, then the 3-minute proofreading pass.", "Inside 120–150 words?", "writing.t2"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["gra", 30, "Si-clauses, types 1 & 2", "Complete-the-sentence drill.", "", "grammar.si"],
-          ["ce", 25, "CE MCQ set", "", "", "comp.ce"],
-          ["eo", 35, "Orale Tâches 1 + 2", "Self-introduction, then a role-play asking questions to get information about a scenario.", "5–6 well-formed questions.", "speaking.t2"],
+          ["gra", 20, "Object pronouns + y / en", "One round, then Retry the misses.", "", "grammar.pronoms"],
+          ["ce", 25, "Reading set #2 at exam pace", "Exam pace, nothing blank. Move up to B2 sets once your B1 sets are at 3/4 or better.", "", "comp.ce"],
+          ["gra", 10, "Find the mistakes", "One text: tap what looks wrong, then correct it. It's the eye you need to proofread your own writing.", "", "grammar.hunt"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
-          ["voc", 10, "New words: education & health", "", "", "vocab.new.education"],
-          ["gra", 30, "Relative pronouns", "Sentence-combining drill: qui, que, où, dont, lequel.", "", "grammar.relatifs"],
-          ["co", 25, "CO MCQ set #2", "", "", "comp.co"],
-          ["ee", 35, "Tâche 2", "", "Inside 120–150 words?", "writing.t2"],
+          ["voc", 10, "Cards + 10–15 new: family & society", "", "", "vocab.new.famille"],
+          ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
+          ["ee", 40, "Tâche 3 on the clock", "The two-part template: compare both documents (40–60 words), then your position (80–120). 25 minutes, then the proofreading pass.", "Part 1 names both positions; 120–180 words.", "writing.t3"],
+          ["bil", 10, "Plan next week", "Look at your criteria and this week's misses. Pick the two mistakes you'll watch for in next week's writing.", "", "progress"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
-          ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["gra", 30, "Object pronouns + y / en", "Substitution drill.", "", "grammar.pronoms"],
-          ["ce", 25, "CE MCQ set #2", "", "", "comp.ce"],
-          ["eo", 35, "Re-record Tâches 1 + 2", "Re-record and compare with Tuesday.", "", "speaking.t1"],
-        ],
-        [
-          ["voc", 10, "New words: family & society", "", "", "vocab.new.famille"],
-          ["gra", 25, "Micro-error checklist", "c'est / il est, prepositions with places, seul / seulement…", "", "grammar.micro"],
-          ["ee", 40, "First full Tâche 3", "Use the mandatory template: compare both documents before your opinion.", "Paragraph 1 names both positions; 120–180 words.", "writing.t3"],
-          ["bil", 10, "Wrap-up", "Log the week's errors.", "", "progress.errors"],
-        ],
-        [
-          ["co", 20, "Timed CO set", "CO and CE back to back, 40 minutes combined.", "", "comp.co"],
-          ["ce", 20, "Timed CE set", "", "", "comp.ce"],
-          ["ee", 30, "Submit your best writing", "For full correction.", "", "writing"],
-          ["bil", 20, "Review the week's error log", "", "", "progress.errors"],
+          ["gra", 15, "Mixed review", "Questions from every topic you've practised so far, Phase 1 included.", "Which topic is still weakest? Give it next week's extra round.", "grammar.mixed"],
+          ["co", 20, "Timed CO set", "Back to back with the CE set. Listen once only.", "", "comp.co"],
+          ["ce", 20, "Timed CE set", "Exam pace, nothing blank.", "", "comp.ce"],
+          ["ee", 25, "Rewrite from memory", "Reread the correction of your best piece this week, close it, and write it again from memory. Then compare.", "Are the corrected forms in your rewrite?", "writing"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
       ],
     },
     3: {
-      note: "B2 material from here. Timed sets every time.",
+      note: "B2 material from here, timed every time. Grammar as in Phase 2: one round, then Retry the misses; the day's first round is the one that counts. Once this phase, CE Examen blanc 2 as a Saturday mock. Easy listening and reading stay outside your study time.",
       days: [
         [
-          ["voc", 10, "New words: environment & climate", "", "", "vocab.new.environnement"],
-          ["gra", 30, "Subjonctif vs conditionnel", "Contrastive drill after afin que / avant que: your named gap.", "12/15+ is the Phase 3 target.", "grammar.subjonctif.contraste"],
-          ["co", 30, "Timed CO set, B2", "Full-length listening set.", "", "comp.co"],
-          ["ee", 20, "Tâche 1 under time pressure", "15 minutes on the clock.", "", "writing.t1"],
+          ["voc", 10, "Cards + 10–15 new: environment & climate", "", "", "vocab.new.environnement"],
+          ["gra", 20, "Subjonctif vs conditionnel", "Contrastive drill after afin que / avant que: your named gap.", "12/15+ on the day's first round is the Phase 3 target.", "grammar.subjonctif.contraste"],
+          ["co", 25, "B2 listening set: once through, then dig in", "Once without pausing, answer, then replay it with the transcript.", "", "comp.co"],
+          ["ee", 30, "Tâche 1 on the clock", "15 minutes, then the proofreading pass.", "", "writing.t1"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["gra", 30, "Concession: yes, but", "State a position, concede with bien que / alors que, pivot back.", "", "grammar.concession"],
-          ["ce", 30, "Timed CE set", "", "", "comp.ce"],
-          ["eo", 35, "Orale Tâche 3", "Structure an argument in under 30 seconds of thinking, then speak for 3+ minutes.", "", "speaking.t3"],
+          ["gra", 20, "Concession: yes, but", "State a position, concede with bien que / alors que, pivot back.", "", "grammar.concession"],
+          ["ce", 25, "Timed B2 reading set", "Exam pace: about 7 minutes for 4 B2 questions. Nothing blank.", "", "comp.ce"],
+          ["gra", 10, "Your mistakes", "", "", "grammar.mine"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
-          ["voc", 10, "New words: technology & social media", "", "", "vocab.new.technologie"],
-          ["gra", 30, "Reported speech", "Direct → reported, checking tense and time expressions.", "", "grammar.discours"],
-          ["co", 30, "CO set #2", "", "", "comp.co"],
-          ["ee", 25, "Tâche 2, timed", "20 minutes on the clock.", "", "writing.t2"],
+          ["voc", 10, "Cards + 10–15 new: technology & social media", "", "", "vocab.new.technologie"],
+          ["gra", 20, "Reported speech", "Direct → reported, checking tense and time expressions.", "", "grammar.discours"],
+          ["co", 25, "B2 listening set #2", "Once without pausing, then with the transcript.", "", "comp.co"],
+          ["ee", 30, "Tâche 2 on the clock", "20 minutes, then the proofreading pass.", "", "writing.t2"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["gra", 30, "Conditionnel + passive voice", "", "", "grammar.conditionnel"],
-          ["ce", 30, "CE set #2", "", "", "comp.ce"],
-          ["eo", 35, "Full Orale simulation", "All three tasks on the real ~12-minute clock, self-scored.", "", "speaking.t1"],
+          ["gra", 20, "Conditionnel + passive voice", "", "", "grammar.conditionnel"],
+          ["ce", 25, "Timed B2 reading set #2", "", "", "comp.ce"],
+          ["gra", 10, "Find the mistakes", "A B2 text.", "", "grammar.hunt"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
-          ["voc", 10, "New words: government & economy", "", "", "vocab.new.gouvernement"],
-          ["gra", 25, "Gérondif + participles", "", "", "grammar.gerondif"],
-          ["ee", 35, "Full Tâche 3, timed", "25 minutes on the clock.", "", "writing.t3"],
-          ["bil", 10, "Wrap-up", "", "", "progress.errors"],
+          ["voc", 10, "Cards + 10–15 new: government & economy", "", "", "vocab.new.gouvernement"],
+          ["gra", 20, "Gérondif + participles", "", "", "grammar.gerondif"],
+          ["gra", 10, "Your mistakes", "", "", "grammar.mine"],
+          ["ee", 40, "Tâche 3 on the clock", "25 minutes, then the proofreading pass.", "Part 1 compares both documents; 120–180 words.", "writing.t3"],
+          ["bil", 10, "Plan next week", "", "", "progress"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
-          ["bil", 60, "Full mock: weakest skill", "One full timed mock of whichever single skill is currently weakest.", "", "progress.scores"],
-          ["bil", 30, "Error review", "", "", "progress.errors"],
+          ["gra", 15, "Mixed review", "Every topic you've practised so far.", "", "grammar.mixed"],
+          ["bil", 60, "Full mock: weakest skill", "One full timed mock of whichever skill is currently weakest. Log the score in Progrès → Scores.", "", "progress.scores"],
+          ["bil", 20, "Same-day review", "Every wrong or weak answer: why was it wrong, and what was the trap?", "", "progress.scores"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
       ],
     },
     4: {
-      note: "No new grammar. Every grammar block re-drills whatever this week's mocks surfaced.",
+      note: "No new grammar. Every grammar block re-drills what the week's mocks surfaced, plus Your mistakes. CO mocks: the CO Examen blanc, then TV5MONDE's and RFI's TCF practice (log those scores on the CO page). Easy listening and reading stay outside your study time.",
       days: [
         [
-          ["voc", 10, "New words: consumerism & crime", "", "", "vocab.new.consommation"],
-          ["gra", 30, "Targeted grammar drill", "Pick the topic your latest mock exposed.", "", "grammar"],
-          ["ce", 60, "Full timed CE mock #1", "", "", "comp.ce.exam"],
+          ["voc", 10, "Cards + 10–15 new: consumerism & crime", "", "", "vocab.new.consommation"],
+          ["gra", 20, "Targeted grammar drill", "Pick the topic your latest mock exposed.", "", "grammar"],
+          ["ce", 60, "Full timed CE mock", "Examen blanc 2, then Claude's new exams. 39 questions, 60 minutes, nothing blank.", "", "comp.ce.exam"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["eo", 40, "Full Orale simulation", "Real 12-minute clock, self-scored on structure, register and Tâche 3 spontaneity.", "", "speaking.t3"],
+          ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
+          ["ce", 25, "Timed reading set", "B2, or C1 once B2 is steady.", "", "comp.ce"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
-          ["voc", 10, "New words: science & tourism", "", "", "vocab.new.science"],
-          ["gra", 30, "Targeted grammar drill", "", "", "grammar"],
-          ["co", 60, "Full timed CO mock #1", "", "", "comp.co"],
+          ["voc", 10, "Cards + 10–15 new: science & tourism", "", "", "vocab.new.science"],
+          ["gra", 20, "Targeted grammar drill", "", "", "grammar"],
+          ["co", 35, "Full timed CO mock", "39 questions, 35 minutes, each recording heard once.", "", "comp.co.exam"],
+          ["bil", 25, "Same-day review", "Every miss: which trap caught you?", "", "progress.scores"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
           ["ee", 60, "Full timed Écrite mock", "All three tasks on the real 60-minute clock.", "Word counts on all three tasks; comparison present in Tâche 3.", "writing.t1"],
+          ["bil", 15, "Review the corrections", "", "", "progress.errors"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
-          ["voc", 10, "New words: politics & civic life", "", "", "vocab.new.gouvernement"],
-          ["gra", 25, "Final targeted drill", "", "", "grammar"],
-          ["ce", 60, "Full timed CE mock #2", "", "", "comp.ce.exam"],
+          ["voc", 10, "Cards + 10–15 new: politics & civic life", "", "", "vocab.new.gouvernement"],
+          ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
+          ["ce", 25, "Timed reading set", "", "", "comp.ce"],
+          ["bil", 10, "Plan next week", "", "", "progress"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
-          ["eo", 40, "Orale simulation #2", "", "", "speaking.t3"],
+          ["gra", 15, "Mixed review", "", "", "grammar.mixed"],
           ["bil", 30, "Resolved, or just improved?", "Check the error log against the original error list: which items are genuinely resolved?", "", "progress.errors"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
       ],
     },
     5: {
-      note: "Diagnostic-driven: adjust each day to what the previous mock showed. Keep the other skills warm with one lighter session each per week. Final week: light review only; confirm booking and ID.",
+      note: "Diagnostic-driven: adjust each day to what the previous mock showed. Keep the card reviews and the easy listening and reading going until the exam. Final week: light review only; confirm booking and ID.",
       days: [
         [
-          ["co", 35, "Full timed CO mock", "39 questions, 35 minutes.", "", "comp.co"],
+          ["voc", 10, "Review only", "", "", "vocab.review"],
+          ["co", 35, "Full timed CO mock", "39 questions, 35 minutes.", "", "comp.co.exam"],
           ["bil", 30, "Same-day review", "Review every wrong or weak answer.", "", "progress.scores"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
-          ["ce", 60, "Full timed CE mock", "39 questions, 60 minutes.", "", "comp.ce.exam"],
+          ["voc", 10, "Review only", "", "", "vocab.review"],
+          ["ce", 60, "Full timed CE mock", "39 questions, 60 minutes, nothing blank.", "", "comp.ce.exam"],
           ["bil", 30, "Same-day review", "", "", "progress.scores"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
+          ["voc", 10, "Review only", "", "", "vocab.review"],
           ["ee", 60, "Full timed Écrite mock", "Three tasks, 60 minutes.", "", "writing.t1"],
           ["bil", 30, "Same-day review", "", "", "progress.scores"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
-          ["eo", 12, "Full timed Orale mock", "Three tasks, 12 minutes.", "", "speaking.t1"],
-          ["bil", 30, "Same-day review", "", "", "progress.scores"],
+          ["voc", 10, "Review only", "", "", "vocab.review"],
+          ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
+          ["ce", 25, "Timed reading set", "", "", "comp.ce"],
+          ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
           ["bil", 60, "Weakest skill", "Most of the remaining time goes to your lowest skill against NCLC 7. IRCC never averages.", "", "progress.scores"],
+          ["gra", 15, "Mixed review", "", "", "grammar.mixed"],
           ["voc", 10, "Review only", "", "", "vocab.review"],
+          ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["bil", 167, "Dress rehearsal (optional)", "All four skills back to back at the real length (~2 h 47), at the time of day you've booked.", "", "progress.scores"],
@@ -590,79 +622,6 @@ window.TCF = (function () {
     },
   };
 
-  /* Speaking (Document 4, section 6) */
-  const SPEAKING = {
-    t1: {
-      name: "Tâche 1", kind: "Entretien dirigé", time: 120, prep: 0,
-      tests: "Ease and fluency talking about yourself: background, family, work or studies, interests.",
-      structure: ["Greeting", "Name and background", "Living situation and family", "Work or studies", "Interests", "Natural closing"],
-      phrases: ["Je m'appelle…", "Je viens de…", "Actuellement, je…", "Ce qui me passionne, c'est…", "Dans mes loisirs, j'aime…", "J'ai déménagé à Vancouver il y a environ deux ans."],
-      rubric: [
-        ["connect", "Varied connectors instead of chaining et"],
-        ["relative", "At least one relative clause (le domaine dans lequel je travaille…)"],
-        ["past", "At least one past-tense detail"],
-        ["length", "Spoke for a full minute or more, no long pauses"],
-        ["french", "No English, no freezing"],
-      ],
-      mistake: "A flat list of facts with no connective tissue, or stopping under a minute: it reads as under-prepared, not efficient.",
-    },
-    t2: {
-      name: "Tâche 2", kind: "Exercice en interaction", time: 210, prep: 120,
-      tests: "Asking relevant, well-formed questions to get information. The examiner plays a role (landlord, organizer…).",
-      structure: ["Broad situational questions first", "Then specifics", "Then logistics", "Build toward a decision"],
-      checklist: ["Prix", "Lieu", "Horaires", "Conditions", "Durée", "Inscription / paiement"],
-      phrases: ["Pourriez-vous me dire… ?", "J'aimerais savoir si…", "Est-ce que vous pourriez préciser… ?", "Et en ce qui concerne… ?", "Qu'est-ce qui est compris dans le prix ?"],
-      scenarios: [
-        "Vous cherchez un appartement à louer. L'examinateur est le propriétaire. Posez-lui des questions pour obtenir des informations (loyer, charges, quartier, date d'entrée…).",
-        "Vous voulez vous inscrire à un cours de cuisine. L'examinateur est l'organisateur du cours.",
-        "Vous voulez faire du bénévolat dans une association. L'examinateur est le responsable des bénévoles.",
-        "Vous voulez vous inscrire dans une salle de sport. L'examinateur est l'employé de l'accueil.",
-        "Vous voulez acheter un vélo d'occasion vu sur une petite annonce. L'examinateur est le vendeur.",
-        "Vous préparez un voyage organisé en Gaspésie. L'examinateur est l'agent de voyages.",
-      ],
-      mistake: "Carrying inversion into what should be an embedded question, and running out of questions too early. Aim for 5–6 solid ones.",
-    },
-    t3: {
-      name: "Tâche 3", kind: "Point de vue sans préparation", time: 270, prep: 0,
-      tests: "Spontaneous, continuous, convincing speech defending a position on a social question, with zero preparation. Where most B1 candidates plateau.",
-      steps: [
-        { label: "Restate the question in your own words", until: 15, hint: "Buys thinking time without looking like stalling." },
-        { label: "State your position clearly", until: 30, hint: "À mon avis… / Je suis convaincu(e) que…" },
-        { label: "Reason 1 + a concrete example", until: 100, hint: "parce que… Par exemple…" },
-        { label: "Concession, then pivot back", until: 150, hint: "Certes… mais / Bien que…: the clearest B1 → B2 signal." },
-        { label: "Reason 2 + example", until: 225, hint: "De plus… / D'autre part…" },
-        { label: "Nuanced close", until: 270, hint: "Tout bien considéré… / En définitive…" },
-      ],
-      phrases: [
-        ["Opinion", "à mon avis · il me semble que · je suis convaincu(e) que · on pourrait penser que… mais en réalité"],
-        ["Comparing", "d'un côté… de l'autre · certains diront que… tandis que d'autres…"],
-        ["Persuading", "Peut-on vraiment ignorer… ? · a shared value · a plausible concrete example"],
-        ["Follow-ups", "C'est une bonne question… then restate briefly and answer, never repeat verbatim"],
-        ["Missing word", "Le mot m'échappe, mais c'est quand… · a near-synonym · describe what it does"],
-      ],
-      prompts: [
-        ["Préférez-vous vivre en ville ou à la campagne ?", "City or countryside?"],
-        ["Le sport doit-il être obligatoire à l'école ?", "Should sport be mandatory in school?"],
-        ["Les réseaux sociaux nuisent-ils plus qu'ils n'aident ?", "Do social media do more harm than good?"],
-        ["Faut-il limiter le temps d'écran des enfants ?", "Should children's screen time be limited?"],
-        ["Le télétravail va-t-il définitivement remplacer le bureau ?", "Will remote work permanently replace the office?"],
-        ["La technologie nous rend-elle plus isolés ou plus connectés ?", "Does technology make us more isolated or more connected?"],
-        ["Faut-il réguler davantage l'intelligence artificielle ?", "Should AI be regulated more?"],
-        ["L'immigration est-elle une richesse ou un défi pour un pays ?", "Is immigration an asset or a challenge? Argue it from both sides, deliberately."],
-      ],
-      rubric: [
-        ["restate", "Restated the question"],
-        ["position", "Clear position"],
-        ["reason1", "Reason 1 with a concrete example"],
-        ["concede", "Concession + pivot"],
-        ["reason2", "Reason 2 with an example"],
-        ["close", "Nuanced close, not a flat restatement"],
-        ["full", "Spoke 3+ minutes without padding or repetition"],
-      ],
-      mistake: "A one-sided argument (no concession reads as B1, however good the grammar), running out of content before 4:30, or sounding rehearsed. Memorize the shape, never a script.",
-    },
-  };
-
   /* Comprehension samples, so the page works before any set is generated. */
   const COMP = {
     resources: [
@@ -693,25 +652,29 @@ window.TCF = (function () {
 
   const AUTOFAIL = ["Word count not respected", "Illegible", "Off-topic", "A task skipped"];
 
-  /* Phase exit criteria (Document 1). auto = rule the app can check itself. */
+  /* Phase exit criteria (Document 1). auto = rule the app can check itself. A drill rule counts the day's first
+     round of the set only, on two days at least a week apart (coldMet in app.js), and comp counts your first try
+     at each set. Speaking is practised off the site, so its checks are ticked by hand. */
   const CRITERIA = {
     1: [
       { id: "p1-pron", text: "Zero pronominal-verb auxiliary errors across 2 consecutive writing submissions", auto: "writingZero:pronominaux" },
       { id: "p1-imp", text: "9/10+ on a dedicated imperative + pronoun drill", auto: "drill:imperatif:main:0.9" },
       { id: "p1-subj", text: "Subjonctif présent correctly formed (regular + top irregulars) in isolation", auto: "drill:subjonctif:formation:0.9" },
-      { id: "p1-base", text: "Baseline on file: one Orale Tâche 1 recording, one CO sample, one CE sample", auto: "baseline" },
+      { id: "p1-base", text: "Baseline on file: one CO sample and one CE sample", auto: "baseline" },
     ],
     2: [
       { id: "p2-seq", text: "Séquence des temps drill at 8/10+ (up from 6/10)", auto: "drill:sequence:main:0.8" },
       { id: "p2-t3", text: "A Tâche 3 draft that compares both documents before the opinion, within 120–180 words, in one sitting", auto: "t3ok" },
-      { id: "p2-coce", text: "CO and CE diagnostics at 70%+ on B1 material", auto: "comp:B1:0.7" },
-      { id: "p2-eo", text: "A fluent, hesitation-light Orale Tâche 1 recording (~1 min)" },
+      { id: "p2-coce", text: "CO and CE at 70%+ on B1 material, on your first try at each set", auto: "comp:B1:0.7" },
+      { id: "p2-pace", text: "A B1 reading set at exam pace (4 questions in 6 minutes) with 3/4 or better", auto: "pace:ce:B1:0.75" },
+      { id: "p2-eo", text: "A fluent, hesitation-light 2-minute Orale Tâche 1: your introduction plus answers to follow-up questions" },
     ],
     3: [
       { id: "p3-mood", text: "12/15+ on the mixed subjonctif / indicatif / conditionnel drill", auto: "drill:subjonctif:contraste:0.8" },
       { id: "p3-mock", text: "A full Écrite mock rated B2 on 2 of 3 tasks" },
-      { id: "p3-t3", text: "An Orale Tâche 3 recording sustaining 3+ minutes of on-topic argued speech", auto: "eoT3" },
-      { id: "p3-coce", text: "CO and CE timed sets averaging 70%+ at B2", auto: "comp:B2:0.7" },
+      { id: "p3-t3", text: "An Orale Tâche 3 sustaining 3+ minutes of on-topic argued speech" },
+      { id: "p3-coce", text: "CO and CE sets averaging 70%+ at B2, on your first try, with CE on the clock", auto: "comp:B2:0.7:timed" },
+      { id: "p3-cex", text: "A CE practice exam with all 39 questions answered inside 60 minutes", auto: "examFull:ce" },
     ],
     4: [
       { id: "p4-ee", text: "3 consecutive full Écrite mocks with correct word counts on all 3 tasks and the Tâche 3 comparison present" },
@@ -789,6 +752,15 @@ window.TCF = (function () {
     ["Si !", "Yes! (answering a negative question)"], ["Je connais Montréal.", "I know Montréal (a place)."], ["Je sais nager.", "I know how to swim."],
     ["C'est facile à comprendre.", "It's easy to understand."], ["Il est important de lire le contrat.", "It's important to read the contract."],
     ["amener quelqu'un / apporter quelque chose", "to bring someone / to bring something"],
+    // From your own corrected writing (Oct 2026).
+    ["J'ai participé au festival.", "I took part in the festival. (participer à + noun)"],
+    ["Je viens te voir demain.", "I'm coming to see you tomorrow. (venir + infinitive, no à)"],
+    ["plus de billets", "more tickets (plus de + noun, never plus des)"],
+    ["chercher sur Internet", "to look it up online (sur Internet, no article)"],
+    ["la semaine dernière · le mois dernier", "last week · last month (dernier after the noun)"],
+    ["actuellement / en fait", "currently / actually (actuellement never means actually)"],
+    ["Après avoir fini, il est parti.", "After finishing, he left. (same subject: après + past infinitive)"],
+    ["Après qu'il est parti, on a continué.", "After he left, we carried on. (après que + indicative)"],
   ] });
   PHASES[1].vocab.push("pieges");
   PHASES[2].vocab.splice(4, 0, "logement");
@@ -819,24 +791,6 @@ window.TCF = (function () {
       { who: "Chambre de commerce régionale", text: "Dans de nombreux secteurs, comme la santé ou la construction, les entreprises n'arrivent plus à recruter. Les travailleurs immigrés apportent des compétences dont notre économie a besoin et contribuent au dynamisme des régions. Sans eux, beaucoup de services ne pourraient tout simplement pas fonctionner." },
       { who: "Nadia, sociologue", text: "Accueillir plus de travailleurs ne suffit pas si l'on ne leur offre pas de logement, de cours de langue et une vraie reconnaissance de leurs diplômes. Il faudrait aussi mieux former et mieux payer les travailleurs locaux. L'immigration est une partie de la solution, pas une solution miracle." },
     ] },
-  );
-
-  /* More speaking prompts */
-  SPEAKING.t2.scenarios.push(
-    "Vous voulez inscrire votre enfant à un camp de jour cet été. L'examinateur est le responsable du camp.",
-    "Vous voulez louer une voiture pour un week-end. L'examinateur est l'employé de l'agence de location.",
-    "Vous voulez suivre des cours de français du soir. L'examinateur est le conseiller pédagogique de l'école.",
-    "Vous avez vu une offre d'emploi à temps partiel dans un café. L'examinateur est le gérant.",
-  );
-  SPEAKING.t3.prompts.push(
-    ["La semaine de quatre jours devrait-elle devenir la norme ?", "Should the four-day week become the norm?"],
-    ["Faut-il interdire les voitures dans les centres-villes ?", "Should cars be banned from city centres?"],
-    ["Les études universitaires devraient-elles être gratuites ?", "Should university be free?"],
-    ["Vaut-il mieux vivre dans le même pays toute sa vie ?", "Is it better to live in the same country all your life?"],
-    ["Faut-il interdire les réseaux sociaux aux moins de 16 ans ?", "Should social media be banned for under-16s?"],
-    ["Le tourisme de masse fait-il plus de mal que de bien ?", "Does mass tourism do more harm than good?"],
-    ["Faut-il apprendre plusieurs langues dès l'école primaire ?", "Should children learn several languages from primary school?"],
-    ["Consommer local, est-ce vraiment meilleur pour l'environnement ?", "Is buying local really better for the environment?"],
   );
 
   /* The built-in reading sets are in comp-ce.js. */
@@ -897,6 +851,33 @@ window.TCF = (function () {
       blocks: [["A1", 4, 3], ["A2", 6, 9], ["B1", 9, 15], ["B2", 10, 21], ["C1", 6, 26], ["C2", 4, 33]],
       note: "An estimate from the points per level that TCF prep sites use. France Éducation International scores the real test with item response theory and doesn't publish its method.",
     },
+    /* A listening item at each level. The kinds of item follow the official samples in the Manuel du candidat
+       (FEI, version D, 2022, pp. 48–51): a picture with four spoken statements, a spoken question with four
+       spoken replies, then a document (a dialogue, then radio pieces and talks) followed by the spoken question,
+       with four written options. Each recording plays once and the question comes after it. The levels, the
+       short reading pause before each recording, the short answer window after it and the clip lengths follow
+       guides to the computer-based TCF Canada, which agree with one another. `secs` is the recording, the
+       spoken question included, and `words` its spoken words; check_co.js holds the built-in exam to them. */
+    coLevels: {
+      A1: { items: "1–4", secs: [10, 20], words: [18, 34], docs: "a picture of an everyday scene, with four short spoken statements (A to D), one of which describes it", asks: "which statement matches the picture" },
+      A2: { items: "5–10", secs: [10, 25], words: [20, 60], docs: "a spoken question with four spoken replies (A to D), then short everyday documents: a voicemail, a public announcement, a short exchange", asks: "the reply that fits the question, or a detail, what someone wants or has to do" },
+      B1: { items: "11–19", secs: [20, 35], words: [50, 85], docs: "a conversation, a phone call, a news brief or practical information on the radio", asks: "the purpose, a reason, a decision, or what someone thinks or will do" },
+      B2: { items: "20–29", secs: [28, 50], words: [80, 135], docs: "radio: an interview, a report, a testimony, a discussion on a concrete subject", asks: "the speaker's position, intention or attitude, the main idea, or what is implied" },
+      C1: { items: "30–35", secs: [40, 65], words: [115, 185], docs: "a talk, a debate or a radio column on an abstract subject, with nuance", asks: "implicit meaning, the structure of the argument, or a nuanced position" },
+      C2: { items: "36–39", secs: [45, 70], words: [130, 200], docs: "dense speech at natural speed: an expert discussion, a reading, an ironic column", asks: "implicit meaning, irony, an attitude or the effect of a remark" },
+    },
+    /* The CO practice exam: 39 items in 35 minutes, in the same level blocks and points as the CE one. Items 1–4
+       are pictures and 5–7 questions with spoken replies; the rest are documents. Before each recording there's a
+       pause to read (seconds, by level; questions with spoken replies have nothing to read), and after it a window
+       to answer, then the next item starts by itself. */
+    coExam: {
+      minutes: 35,
+      blocks: [["A1", 4, 3], ["A2", 6, 9], ["B1", 9, 15], ["B2", 10, 21], ["C1", 6, 26], ["C2", 4, 33]],
+      kinds: [["pic", 4], ["reply", 3], ["doc", 32]],
+      read: { A1: 8, A2: 8, B1: 8, B2: 8, C1: 10, C2: 10, reply: 3 },
+      answer: { A1: 7, A2: 7, B1: 7, B2: 7, C1: 10, C2: 10 },
+      note: "An estimate from the points per level that TCF prep sites use. France Éducation International scores the real test with item response theory and doesn't publish its method.",
+    },
   };
   EXAM[0].note = "Multiple choice, four options, one correct. Each recording is heard once, and questions get harder as you go (A1 → C2). Some items use Canadian accents or contexts.";
   EXAM[1].note = "Multiple choice, four options, from notices, ads and letters up to opinion articles and long, complex texts, in rising difficulty.";
@@ -932,18 +913,6 @@ window.TCF = (function () {
   };
   WRITING.t3.prompts.forEach((p) => { [T3_MORE, T3_MORE2].forEach((m) => { const add = m[p.q]; if (add) p.docs.forEach((d, i) => { d.text += " " + add[i]; }); }); });
 
-  /* Speaking: the official task shapes and examples from the manual. */
-  SPEAKING.t1.tests = "An entretien dirigé: the examiner, whom you don't know, asks you questions about yourself for 2 minutes. No preparation.";
-  SPEAKING.t1.questions = [
-    "Pouvez-vous vous présenter ?", "D'où venez-vous et depuis quand vivez-vous ici ?", "Pourquoi avez-vous choisi le Canada ?",
-    "Parlez-moi de votre travail ou de vos études.", "Comment se passe une journée typique pour vous ?", "Que faites-vous pendant votre temps libre ?",
-    "Qu'est-ce qui vous plaît dans votre ville ?", "Quels sont vos projets pour les prochaines années ?",
-  ];
-  SPEAKING.t2.tests = "An exercice en interaction: 2 minutes to prepare (short notes allowed), then 3 min 30 asking the examiner questions to get information. The prompt sets both roles.";
-  SPEAKING.t2.scenarios.unshift("Vous partez en voyage pendant deux semaines et vous cherchez quelqu'un pour garder votre chat. L'examinateur a publié une annonce pour garder des animaux. Posez-lui des questions (expérience, tarifs, disponibilités, conditions…).");
-  SPEAKING.t3.tests = "An expression d'un point de vue: 4 min 30, no preparation, answering a question the examiner chooses. Spontaneous, continuous and convincing.";
-  SPEAKING.t3.prompts.unshift(["Si vous aviez une activité humanitaire, laquelle choisiriez-vous ? Expliquez pourquoi.", "The official example from the TCF Canada manual."]);
-
   /* Comprehension: the official practice partners. */
   COMP.resources = [
     { name: "TV5MONDE · S'entraîner au TCF", url: "https://apprendre.tv5monde.com/fr/tcf", what: "The official preparation partner: 560 questions in listening, language structure and reading, written by the test's own designers and validated by France Éducation International. Real audio and video.", skills: ["co", "ce"] },
@@ -953,6 +922,24 @@ window.TCF = (function () {
     { name: "Radio-Canada OHdio", url: "https://ici.radio-canada.ca/ohdio", what: "Canadian French at natural speed. The TCF Canada includes some Canadian accents.", skills: ["co"] },
     { name: "RFI Français facile", url: "https://francaisfacile.rfi.fr/fr/", what: "Journal en français facile: ten minutes of news read slowly, with transcripts.", skills: ["co", "ce"] },
   ];
+
+  /* Easy French for every day: the plan's last block, outside study time (#comp.free.co and #comp.free.ce).
+     Material you can follow without pausing, with about 95% of the words known for listening and 98% for
+     reading, is what builds speed and vocabulary, so these start easy. */
+  COMP.free = {
+    co: [
+      { name: "RFI · Journal en français facile", url: "https://francaisfacile.rfi.fr/fr/podcasts/journal-en-fran%C3%A7ais-facile/", what: "Ten minutes of world news a day, read slowly, with the transcript." },
+      { name: "InnerFrench", url: "https://innerfrench.com/podcast/", what: "A podcast in clear French for intermediate learners: psychology, history, culture. Start with the early episodes; the transcripts are on the site." },
+      { name: "TV5MONDE Apprendre", url: "https://apprendre.tv5monde.com/fr", what: "Short videos sorted by level, up to B2." },
+      { name: "Radio-Canada OHdio", url: "https://ici.radio-canada.ca/ohdio", what: "Canadian radio and podcasts at natural speed. Harder, so pick topics you know well; a few times a week, for the accent." },
+    ],
+    ce: [
+      { name: "RFI · Journal en français facile", url: "https://francaisfacile.rfi.fr/fr/podcasts/journal-en-fran%C3%A7ais-facile/", what: "Read the transcript of today's news, then listen to it." },
+      { name: "Lectures CLE en français facile", url: "https://www.cle-international.com/", what: "Graded readers from A1 to B2: novels and classics rewritten for learners, as e-books too. Start at B1." },
+      { name: "Vikidia", url: "https://fr.vikidia.org/", what: "A French encyclopedia written simply: easy articles on whatever you're curious about." },
+      { name: "ICI Radio-Canada Info", url: "https://ici.radio-canada.ca/info", what: "Canadian news at natural level: B2 reading, best on stories you already know." },
+    ],
+  };
 
   /* L'expression du jour (brand kit): a new saying every morning on a scrap of notebook paper, on Aujourd'hui.
      [French, English: the literal meaning, then what it means]. A few are from Québec, and say so. */
@@ -1001,5 +988,5 @@ window.TCF = (function () {
     ["Avoir de la misère à comprendre.", "Québec. Literally “to have misery understanding”: to have a hard time understanding."],
   ];
 
-  return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, SPEAKING, COMP, NCLC, EXAM, AUTOFAIL, CRITERIA, TCF_CANADA, EXPRESSIONS };
+  return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, COMP, NCLC, EXAM, AUTOFAIL, CRITERIA, TCF_CANADA, EXPRESSIONS };
 })();

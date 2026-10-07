@@ -40,10 +40,16 @@
     - **Rewards,** all worked out from progress already saved, with no new data:
       - The streak leaf: Pousse 1–6 days, Doré 7–13, Orangé 14–29, Rouge érable 30+. It shows in the sidebar and on Régularité.
       - The "Très bien !" stamp lands on a day's header once all its blocks are ticked. It lands with a thunk only right after the last tick (`ui.thunk`).
-      - Eight stamps in Progrès: first full day, 7 and 30 days in a row (longest streak ever), a drill round with no misses, 100 cards in the SRS, the Phase 1 criteria, a CE practice exam, and NCLC 7 in any skill of a logged score.
+      - Eight stamps in Progrès: first full day, 7 and 30 days in a row (longest streak ever), a drill round with no misses, 100 cards in the SRS, the Phase 1 criteria, a practice exam (CE or CO), and NCLC 7 in any skill of a logged score.
     - **Boarding pass:** the phases as one flight from B1 to NCLC 7. The week places the plane, and the gate is today's first open block. The small version is at the foot of the sidebar; the full one is at the top of Progrès.
     - **L'expression du jour:** a French saying on a taped notebook scrap on Aujourd'hui, changing daily, from `EXPRESSIONS` in `data.js`. Some are from Québec, and say so.
   - `data.js`: curriculum content plus the `TCF_CANADA` spec.
+    - `PLAN` holds the weekly templates shown on Aujourd'hui. On 2026-10-06 they were rebuilt from a review of the research (spacing, retrieval, Nation's four strands, extensive input, fluency) against the learner's first two weeks; the reasoning and sources are in `01-assessment-and-roadmap.md` ("Review, 6 October 2026").
+      - Each grammar topic gets one slot a week, at most two rounds a sitting, with Your mistakes twice a week, Find the mistakes once and the mixed review on Saturdays. Reading sets are at exam pace, and listening sets are played once before the transcript.
+      - Every day ends with 20 minutes of easy listening or reading outside study time (`comp.free.co` or `comp.free.ce`), which the user chose on 2026-10-06. It counts toward the day like any block.
+      - Speaking isn't in the plan: the user asked on 2026-10-06 for the Oral page to be removed and practises speaking off the site. The roadmap's speaking advice (Documents 3 and 4) stays general.
+    - `CRITERIA`: a `drill:` rule and a topic's mastery count only the day's first round of the set, and need the target on two days at least 7 days apart (3 for the imperative; `coldMet` in `app.js`), since a round right after another mostly shows short-term memory (decided 2026-10-06). `comp:` counts the first try at each set (`:timed` makes CE count only sets done on the clock); `pace:` wants one set at exam pace (`CE_PACE` seconds a question) with the target score; `examFull:` a practice exam with every question answered before time ran out. Speaking checks are ticked by hand.
+    - `COMP.free`: the sources on the easy-French page (`#comp.free.co`, `#comp.free.ce`), which also explains how to do it and has "Done for today" to tick the block.
   - `drills.js`: every grammar drill set, loaded right after `data.js`, which keeps the topics themselves.
     - Each set's sentences are grouped by the rule they test (the set's `points`), and each item ends with its point.
     - Every set holds at least three rounds of sentences (3 × `take`), and every point at least 4, so a learner who needs more rounds than planned doesn't get the same sentences again. Repetition made rounds boring, and later scores reflected memory rather than the rule.
@@ -59,7 +65,7 @@
     - Their Anki review progress was copied into the `srs` collection under ids `anki--<slug of the French side>`. Changing a card's French side in `anki.js` resets its progress. Editing it on the site doesn't (see `cards` below).
     - Keep one copy of each word across all decks.
   - `app.js`: the app logic.
-    - One timer serves every page (writing, speaking, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
+    - One timer serves every page (writing, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
     - Each page has its own address after `#` (`#comp.co`, `#grammar.hunt`). On claude.ai the page runs in a frame that reloads without it, so the current page is also kept in the tab's sessionStorage (`tcf-reussir-page`) and reopened after a refresh. A new tab starts on Aujourd'hui.
     - A refresh keeps whatever you were doing, on claude.ai and locally. What's on screen (`ui`, the clock and the recording's position) is also kept in the tab's sessionStorage (`tcf-reussir-tab`) and put back before anything is drawn. That covers the drill question you're on with what you'd typed, Find the mistakes, a vocabulary session, the Compréhension set with its level and topic, the practice exam and its clock, a recording (paused where it was) and where the page was scrolled.
       - It's saved as you go, but only once your progress has loaded, so it never holds the empty page from before.
@@ -67,7 +73,9 @@
       - Bump `TAB_V` in `app.js` when the shape of `ui` changes, so an older copy is dropped rather than misread.
     - Switching level or topic in Compréhension and back brings back the set you had there, as you left it: with your answers so far, or checked, with its results.
     - Grammaire has three ways to practise across topics, above the topic list: the mixed review, Your mistakes and Find the mistakes.
-    - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item. Speaking isn't included, because its transcripts come from dictation.
+    - The **mixed review** takes every topic of the current and earlier phases that has been drilled (the four Phase 1 topics before any), most-missed in the last two weeks first, then the ones practised longest ago, and deals its 15 questions among them in turn, from each topic's sets at the phase's levels.
+    - A card missed 4 or more times says so in a review and suggests rewriting it with your own example, or splitting it.
+    - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item.
       - The cue is what the learner wrote. The question is the sentence with a gap where the correction goes, taken from Claude's corrected text when the correction is found there. Otherwise it's the learner's sentence with the draft's other corrections applied.
       - The same mistake made again counts once, and every correction given for it is accepted. "(e)" forms are expanded.
       - Left out: punctuation-only changes, corrections longer than 14 words, and mistakes the learner hides. Hidden ones are kept in `settings.main.mineHidden`, by their normalised wording.
@@ -76,14 +84,55 @@
     - **Find the mistakes** (`#grammar.hunt`) gives a text from `proofread.js`: the first not done at the level (B1 in Phases 1–2, B2 after, switchable), or else the one done longest ago.
       - The learner taps the words that look wrong, then types a correction for each mistake found. A mistake is caught when it's both found and corrected.
       - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). A text in progress isn't an unfinished attempt, since it takes a few minutes, but a refresh keeps it.
+    - **Save to cards:** selecting a word or phrase (up to 12 words) anywhere on a page, outside text boxes, shows a "Save to cards" button under it. The user asked for this on 2026-10-05, to keep words met in a reading text for review.
+      - The button opens a panel (outside `#view`, kept in `ui.grab` across a refresh). It's filled in with the words, the sentence they're in as the example, and where they were (the page, then the document's title). Speaker names in transcripts (`.who`) are left out.
+      - The meaning can be typed, or filled in by Claude: the dictionary form, the meaning in that sentence and a short note. It can also be left for later.
+      - The deck is **Mon carnet** by default (a deck of its own with no built-in cards, defined in `app.js`), or Mes cartes Anki, or any theme. The last one chosen is kept in `settings.main.grabTheme`.
+      - A card with a meaning joins the reviews from tomorrow, without going through New cards. One without a meaning waits under **À chercher** at the top of Vocabulaire, out of the reviews, until it gets one there; Claude can fill them all in. If its French then matches another card word for word, its sentence goes to that card instead.
+      - Words already on a card (the same French, give or take an article, brackets or one half of "a / b") show that card instead. Its sentence can be added to the card's examples, which also starts a card not reviewed yet, or a new card can be made anyway.
+      - Saved words are marked like a highlighter pen wherever they come up again (the CSS Custom Highlight API, which leaves the page unchanged), except on Vocabulaire. On the back of a card, they're in bold in its examples.
     - Each writing task has "Copy for another AI", for when Claude can't correct the draft. It copies one prompt: the TCF Canada writing rules, criteria and score bands, the task and its subject (with the Tâche 3 documents), the word counts, the learner's recurring errors, the draft, and what to send back. If the browser blocks the clipboard, the prompt is shown selected, to copy by hand.
   - `comp-ce.js`: built-in reading (CE) sets, one B1 and one B2 for every topic. Switching topic never needs Claude.
     - As on the real test, a set is four separate documents with one question each (`questions[i].doc`), not one text with four questions. Claude's sets use the same shape; ones saved before the change still show their single text.
     - They're pitched like the real test's items, as `TCF_CANADA.ceLevels` in `data.js` describes for each level: B1 (questions 11–19) is everyday texts of 70–150 words, asking what a document is for or what we learn from it as a whole; B2 (20–29) is articles and opinion pieces of 140–260 words, asking the writer's position, intention or what's implied. The calibration comes from France Éducation International's sample items and the Manuel du candidat.
     - The right answer rewords the document; the wrong options reuse its words. Never ask which option is NOT true.
     - Set ids end in `-s1` (`ce-<topic>-<level>-s1`). The sets before them had other ids, so their old attempts can't be shown against new questions; unfinished attempts at sets that no longer exist are cleared at load.
-  - `exam-ce.js`: the built-in CE practice exam (Examen blanc). It has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). Its score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
-    - Its B1 and B2 items follow `ceLevels` like the practice sets. Its id became `ce-exam-1-v2` when they were rewritten.
+  - `exam-ce.js`: the built-in CE practice exams, Examen blanc 1 and 2. Each has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). The score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
+    - Their B1 and B2 items follow `ceLevels` like the practice sets, and the other levels keep to the lengths `ceLevels` gives too. No document repeats a topic from the other exam or the practice sets.
+    - Exam 1's id became `ce-exam-1-v2` when its B1 and B2 items were rewritten. Exam 2 is `ce-exam-2`.
+    - Every item is original writing. Never copy or lightly reword items from TCF prep sites or past papers; the user asked for that once (formation-tcfcanada.com's série 2), and Examen blanc 2 was written from scratch instead.
+  - `exam-co.js`: the built-in CO practice exam, Examen blanc 1 (`co-exam-1`). The user asked for it on 2026-10-05, matching the real TCF Canada as closely as possible and checked against outside sources.
+    - **The real test's format,** confirmed then:
+      - **From the official Manuel du candidat** (FEI, version D, 2022: pp. 18 and 32–33, sample items pp. 48–51, answer key p. 56): 39 questions in 35 minutes, 4 options with one right answer, rising difficulty. Each recording plays once, and the question is asked after it. On computer, the questions and answers are on the same screen.
+      - **The four kinds of item in its samples:**
+        1. a picture with 4 spoken statements;
+        2. a spoken question with 4 spoken replies;
+        3. a dialogue, then the spoken question, with 4 written options;
+        4. a radio piece or talk, then the spoken question, with 4 written options.
+      - **From guides to the computer-based TCF Canada** (hitcf, languagenext, savoirx, open-exam-prep, global-exam): the same level blocks and points as CE; a short pause to read before each recording and a short window to answer after it; then the next item starts by itself; no going back; clips from about 10 s to about 90 s; mostly European French, with some Québec and African French at the higher levels.
+      - **Where the sources disagree:** some guides say the question text shows before the recording, and one says the first items show 4 pictures for 1 sentence. The exam follows the manual on both.
+      - FEI's own sample page is behind an anti-bot check, so it wasn't read.
+    - **The items** follow `TCF_CANADA.coLevels` and `coExam` in `data.js`:
+      - 1–4 (A1) are pictures: an inline SVG drawing (`pic`, with a description in `alt`) and 4 spoken statements.
+      - 5–7 (A2) are a spoken question with 4 spoken replies.
+      - 8–39 are documents: a `situation` (shown only in the review), the lines, then the narrator Q reading `q`, with written options listed right first.
+      - Spoken options keep the order they're read in, each after its letter, and every letter is right at least once across items 1–7.
+    - **The exam runs by itself, item by item:**
+      1. a pause to read: 8 s, 10 s at C1–C2, and 3 s for spoken replies;
+      2. the recording once;
+      3. a window to answer: 7 s, 10 s at C1–C2.
+      - The written options show from the start, and the question appears once it has been read.
+      - Answers can be picked at any time. Valider (or Enter) works once the recording has ended and moves on. A time-out keeps whatever is selected. There's no going back.
+      - In all it runs about 32½ minutes, inside a 35-minute clock, and it's handed in after item 39 or at 0:00.
+    - **Pause:** Pause (or Space) stops the clock, the countdown and the recording together. Leaving the page or the tab pauses it too. A refresh brings it back paused, since the recording can't play again by itself, and Resume carries on.
+    - **Audio:** one shared `Audio` element plays the whole exam. It's started with a silent clip inside the Start or Resume click, so later items can play by themselves on iOS. A file that won't load falls back to the browser's voice.
+    - **The drawings:** line art in the page's ink (`currentColor`) with one red-pen detail, on Seyès paper. They're hidden from screen readers during the exam, since a description would give the answer away.
+    - **Voices:** mostly Paris (Vivienne for women and the narrator, Rémy for men). Items 26, 29, 33 and 38 have Québec voices: Microsoft's Sylvie and Jean, and `fr-ca-*` Gemini voices for later.
+    - **One exam engine** serves both skills (`XSPEC` in `app.js`):
+      - CE exams keep their free navigation and Hand in. Records without a skill are CE.
+      - Only one exam runs at a time. Each skill has its own unfinished record, history branch, Évolution group and `mocks` column.
+      - There's no "New exam from Claude" for CO, since it would have no recordings.
+    - The exam page lists each built-in exam on its own row, with the ones not done yet as the primary choice.
   - `comp-co.js`: all 31 built-in listening (CO) sets, one B1 and one B2 for every topic. Each plays `audio/<id>.mp4`.
     - The player has one main button (Play, Pause, Resume, then Replay once the recording ends), 5 seconds back and forward, Stop, which goes back to the start, and a position bar. Skipping and the bar need a recording, so they're off for the browser voice.
     - The controls sit in their own strip between the document and the questions, and it stays on screen (below the phone's top bar, `--rail-h`) while you scroll down to answer.
@@ -105,7 +154,11 @@
   - `npm run import -- file.json` merges an export (`{coll: {id: doc}}`) into the database. A claude.ai export can be made with ArtifactData.
   - `app.js` picks its store at boot: the claude.ai `db` when `window.claude` exists, then this server, then the browser's localStorage. On first run with an empty database, it copies over whatever that browser had in localStorage.
   - The local site and the claude.ai page keep separate progress. Claude features (corrections, extra sets, "Suggest 3") only work on claude.ai.
-- `tools/make_audio.py` (+ `tools/export_co.js`): records the listening sets. `tools/recordings.json` notes which voices made each file, from which version of the script.
+- `tools/make_audio.py` (+ `tools/export_co.js`): records the listening sets, and the CO exam's items into `site/audio/co-exam-1/NN.mp4`. `tools/recordings.json` notes which voices made each file, from which version of the script.
+  - The exam's items (ids `co-exam-1-NN`, from `export_co.js --exam`) are recorded with Microsoft voices only for now, by the default run. Each level has its own pace: about 130 words a minute at A1–A2, the sets' rates at B1–B2, about 185 at C1–C2. The narrator reads every question at the same pace. There's a pause after each spoken option and before the question.
+    - Each recording must last what its level allows in `coLevels.secs`.
+    - `--gemini`, `--use-gemini` and `--status` leave the exam out, so the routine's count of 31 is unchanged.
+    - Moving the exam to Gemini (about 4 nights) is for later, once the sets are done. The narrator would then be recorded on its own and joined on, since Gemini reads at most 2 speakers in one request, and the routine's `SKILL.md` would need its count of 31 raised.
   - `python3 tools/make_audio.py` records new or changed sets with Microsoft voices (edge-tts) and deletes audio that no set uses. `--force` re-records every set; set ids re-record just those. A recording under 1:45 or over 4 minutes fails.
   - `--gemini` records Gemini takes, one request per set, into `~/Library/Application Support/tcf-reussir/gemini/`. It checks each take by transcribing it with `gemini-3.8-flash` and stops at the free tier's limit of 10 requests a day. `--status` shows progress. `--use-gemini` copies the ready takes onto the site; the routine runs it every night.
     - `tools/recordings.json` is the record of which sets are converted (`engine: "gemini"` with the current script's hash). `--gemini` never re-records those, and `--force` leaves them alone unless they're named, so no request is spent twice. Check `--status` before recording anything.
@@ -117,11 +170,19 @@
     - A take is saved (as `<id>-<hash>.unchecked.wav` in the Gemini folder) before it's transcribed. If the transcription fails, the next run checks that saved take first instead of spending another recording request. `--status` shows it as "recorded, not checked yet".
   - The daily scheduled task `co-gemini-audio` runs `--gemini` at 00:30 Pacific, just after Google's daily reset. It runs `~/.claude/scheduled-tasks/co-gemini-audio/run.sh`, a single command so its permission can be saved. The script works in a throwaway worktree of `origin/main`: it records, runs `--use-gemini` and `check_co.js`, then commits the new recordings and **pushes them straight to main**, as the user chose on 2026-09-27. Changes to the recorder reach the routine only once they're merged. When all 31 sets are converted, the routine reminds the user once and turns itself off. The routine doesn't republish the live site; its recordings go live with the next publish.
   - Gemini reads its key from `~/.config/gemini/api_key`, which the user saves; never type or print the key. Microsoft needs `python3 -m pip install --user edge-tts`. Both need node and macOS `afconvert`.
-  - After editing `comp-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`.
+  - After editing `comp-co.js` or `exam-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`. A change to a written option doesn't need a new recording; a change to anything spoken does.
 - `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 1:45 to 4 minutes and that no audio file is left over. A set not yet on Gemini that is under its word target is listed for rewriting but doesn't fail the check, so a small change in the learned pace never blocks the nightly push.
-- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks and the mixed review name sets that exist. Run it after editing `drills.js` or `proofread.js`.
+  - It also checks the CO exam:
+    - 39 items, with the level blocks and kinds of `coExam`;
+    - pictures with a drawing, and spoken options read in order with every letter right at least once;
+    - a narrator's question at the end of each document;
+    - the spoken words and recording lengths of `coLevels`, and the casts;
+    - the option-length limits, and `check_ce.js`'s word-matching rule for B1–B2;
+    - a total of 30–34 minutes with the pauses;
+    - no left-over files in the exam folder.
+- `tools/check_drills.js`: checks the grammar drills: structure (one ___ per question, accepted answers, options, explanations), elision around the gap (j'___ needs an answer starting with a vowel, je ___ can't have one), at least three rounds per set and 4 sentences per point, no sentence twice in a topic, and that the plan's grammar blocks name topics and sets that exist and every topic's criterion set exists (the mixed review falls back to it). Run it after editing `drills.js` or `proofread.js`.
   - It also checks the Find the mistakes texts: each mistake marked once, as whole words, with corrections that differ from it; 4 mistakes for B1 and 5 for B2; 60–120 words for B1 and 100–180 for B2; and no missed elision in the corrected text or outside the planted mistakes.
-- `tools/check_ce.js`: checks the CE sets and the practice exam.
+- `tools/check_ce.js`: checks the CE sets and the practice exams.
   - Structure: unique ids, a B1 and a B2 set for every topic, four documents per set with one question each, at least three kinds of document, 4 options per question, and the exam's level blocks.
   - Lengths: B1 and B2 documents keep to the word counts in `TCF_CANADA.ceLevels`.
   - Option lengths: the right answer must not stand out as the longest or shortest option.
@@ -130,33 +191,34 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-1/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
+  - `speaking` holds the attempts saved before the Oral page was removed (2026-10-06). The site no longer reads it, but it stays in `COLLS` so nothing is lost; an unfinished speaking attempt is dropped at load.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
     - A built-in or Anki card saved there replaces the one in `data.js`/`anki.js`. "Restore the original" deletes that copy.
     - Fields: `fr`, `en`, `ex` (examples, one per line, shown when the card flips), `frNote` and `enNote` (notes shown with that side), plus `theme` and `edited`.
+    - Cards saved from a page also keep `seen` (the words as selected, which get marked on the pages), `src` (where they were found, shown on the back) and `ts`. One with an empty `en` is waiting for a meaning.
+    - Your own cards can be deleted from the deck list on Vocabulaire, which drops their `srs` progress too. Built-in and Anki cards can't.
   - Each `comp` attempt records `setId`, `answers`, `secs` and `timed`, which the Compréhension history tree reads. The tree is newest first at every level: topics and sets by their latest attempt (or answer, while in progress), then the attempts.
     - Both histories list only sets finished or started (an `inprogress` record, including Claude sets never finished), and practice exams likewise. Attempts at built-in sets that have since been replaced go under "Earlier sets", without their text.
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
-  - A finished CE practice exam is saved with `kind: "exam"`. It also adds a `mocks` entry, labelled as a site estimate.
+  - A finished practice exam is saved with `kind: "exam"` and its `skill`. It also adds a `mocks` entry in its skill's column, labelled as a site estimate.
 - History keeps only two kinds of record, shown in Progrès → Historique:
   - **Unfinished attempts** live in `inprogress`, one record per activity:
     - `drill--<topic>--<set>` (`drill--mine--errors` for Your mistakes) and `drill--mixed`
     - `prod--<topic>`
     - `ce--<setId>` and `co--<setId>`
-    - `exam--ce`
+    - `exam--ce` and `exam--co` (a CO exam is kept from its start, with its phase and how far into the recording it was)
     - `writing--t1…t3`
-    - `speaking--t1…t3`
 
     A record is written at the first real answer or keystroke (typing is saved 1.5 s after it stops). It's deleted when the attempt is submitted or discarded. Nothing is saved when something is only opened or generated.
   - **Finished attempts** keep what's needed to review them:
     - Drill rounds keep every question with the answer given (`items`). A "retry the misses" round adds `retry: {score, total, items}` to its round instead of a record of its own; its questions count as asked.
     - Production checks keep `text` and `fb`.
-    - Speaking attempts keep the Tâche 2 conversation (`chat`).
   - **Claude's follow-up homework** (from writing corrections and "Suggest 3") is saved only when the learner presses Add.
 - Progrès → Évolution is the progress report. It's built from the finished attempts and saves nothing of its own; every attempt stays a separate record.
-  - Groups: each writing task (across prompts), each listening or reading level, the CE practice exams, and each drill set. Speaking isn't included: its feedback has a level but no score.
+  - Groups: each writing task (across prompts), each listening or reading level, each skill's practice exams, and each drill set. Speaking isn't practised on the site.
   - Each group lists every attempt newest first, linked so it can be opened again, and groups come in the order of their latest attempt. The chain of scores in a group's summary reads oldest → latest. It compares the first scored attempt with the latest (▲/▼), and tags a retry of the same writing prompt or comprehension set.
 - Every history list on the site is newest first, oldest at the bottom.
   - Writing tasks also compare mistakes per 100 words in each category, from the first corrected attempt to the latest: fixed, fewer, repeating, more or new.

@@ -77,6 +77,8 @@
   }
 
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
+  // "speaking" holds the attempts saved before the Oral page was removed. The site no longer reads it, but it
+  // stays in the list so a save to this browser's storage keeps them.
   const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress"];
   const S = {};
   COLLS.forEach((c) => { S[c] = new Map(); });
@@ -191,7 +193,7 @@
 
   /* =============== unfinished attempts =============== */
   // One `inprogress` record per unfinished activity: a drill round, a comprehension set, the practice exam,
-  // a writing draft, a speaking attempt. It's written at the first real answer or keystroke, never when
+  // a writing draft. It's written at the first real answer or keystroke, never when
   // something is only opened or generated, and it's deleted when the attempt is submitted or discarded.
   const ipPending = new Map();
   const ipLast = new Map();
@@ -223,7 +225,7 @@
     examKeep();
     tabSave();
   }
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") ipFlush(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") { if (examRunning() && skillOf(ui.cx) === "co") coxPause(); ipFlush(); } });
   window.addEventListener("pagehide", ipFlush);
 
   /* =============== settings & derived state =============== */
@@ -247,6 +249,10 @@
   }
   const phaseInfo = () => T.PHASES[settings().phase - 1];
 
+  // Mon carnet: the words and phrases you save from any page (select them, then "Save to cards"). It has no
+  // built-in cards. It's your own deck, like Mes cartes Anki, so it's starred in every phase.
+  T.VOCAB.unshift({ id: "carnet", label: "Mon carnet", en: "What you saved from the site: select a word or phrase on any page", own: true, cards: [] });
+  T.PHASES.forEach((p) => p.vocab.unshift("carnet"));
   const TOPIC = Object.fromEntries(T.TOPICS.map((t) => [t.id, t]));
   const THEME = Object.fromEntries(T.VOCAB.map((t) => [t.id, t]));
   const CAT = T.CATEGORIES;
@@ -256,7 +262,6 @@
   const TC = T.TCF_CANADA;
   const EXAM_BRIEF = "EXAM: " + TC.brief + " Score bands: " + TC.bands;
   const EE_RUBRIC = "TCF CANADA WRITING RULES: " + TC.ee.rules + " Correctors mark with standardized grids; the published criteria are: " + TC.ee.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
-  const EO_RUBRIC = "TCF CANADA SPEAKING RULES: " + TC.eo.rules + " Criteria: " + TC.eo.criteria.map(([n, d]) => `${n} (${d})`).join("; ") + ".";
   // For generated reading questions: on the real test the right answer doesn't stand out by its length.
   const OPTIONS_RULE = "Make the four options parallel: similar length, the same grammatical form and the same amount of detail. The correct option must not be the longest or the most precise one, and which option is longest should vary from question to question. Distractors must be plausible and reuse words from the text in misleading ways, as on the real test.";
   // A reading item at one level, as on the real test: the document, its length, what the question asks and how the options work.
@@ -289,18 +294,6 @@
       viewing: null,
       copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
     },
-    sp: {
-      task: "t1",
-      t2: dayIndex, t3: dayIndex,
-      rubric: { t1: {}, t2: {}, t3: {} },
-      notes: { t1: "", t2: "", t3: "" },
-      trans: { t1: "", t2: "", t3: "" },
-      fb: { t1: null, t2: null, t3: null },
-      chat: null,
-      chatIn: "",
-      covered: {},
-      viewing: null,
-    },
     hist: { filter: "all", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
@@ -311,6 +304,7 @@
     form: {},
     confirm: "",
     thunk: null, // a day whose stamp should land with a thunk on the next Today render
+    grab: null, // the "Save to your cards" panel, while it's open
   };
 
   /* =============== Claude (sample capability) =============== */
@@ -384,7 +378,7 @@
   function paintTimer() {
     const r = timerRemaining();
     // The practice exam is handed in at 0:00, as on the real test.
-    if (timer.running && r <= 0 && timer.home === "comp.ce.exam" && ui.cx && !ui.cx.done) { examSubmit("time"); return; }
+    if (timer.running && r <= 0 && ui.cx && !ui.cx.done && timer.home === XSPEC[skillOf(ui.cx)].home) { examSubmit("time"); return; }
     const cap = timerCap(), capMin = Math.round(cap / 60);
     if (timer.running && r <= -cap) {
       timerPause();
@@ -396,16 +390,6 @@
     }
     document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
     document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timerBtnLabel(); });
-    const steps = document.querySelectorAll(".steps li[data-until]");
-    if (steps.length && timer.home === "speaking.t3") {
-      const el = timer.total - r;
-      const on = timerStarted();
-      steps.forEach((li) => {
-        const f = +li.dataset.from, u = +li.dataset.until;
-        li.classList.toggle("active", on && el >= f && el < u);
-        li.classList.toggle("past", on && el >= u);
-      });
-    }
   }
   function timerUI(home, label, presets) {
     const mine = timer.home === home;
@@ -494,7 +478,7 @@
   // Everything here is worked out from progress already saved: the kit adds no data of its own.
   const ico = (name, cls) => `<svg class="ico${cls ? " " + cls : ""}" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   const leafSvg = (cls) => `<svg class="${cls || ""}" viewBox="0 0 24 26" aria-hidden="true"><use href="#leaf" width="24" height="26"/></svg>`;
-  const SK_ICON = { voc: "vocab", gra: "grammar", co: "listen", ce: "read", ee: "writing", eo: "speaking", bil: "bilan" };
+  const SK_ICON = { voc: "vocab", gra: "grammar", co: "listen", ce: "read", ee: "writing", bil: "bilan" };
   // Numbers in words, the way Rémy says them (digits from 100).
   const FR_UNITS = "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize dix-sept dix-huit dix-neuf".split(" ");
   const FR_TENS = { 2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante", 6: "soixante" };
@@ -560,7 +544,7 @@
     let last = "";
     const see = (d) => { if (d && d < date && d > last) last = d; };
     for (const d of S.days.keys()) { const st = dayStats(d); if (st && st.n) see(d); }
-    ["drills", "comp", "writing", "speaking"].forEach((c) => list(c).forEach((x) => see(x.date)));
+    ["drills", "comp", "writing"].forEach((c) => list(c).forEach((x) => see(x.date)));
     return last;
   }
   // What Rémy says on Aujourd'hui: first visit of the day, halfway, plan finished, or back after a break.
@@ -588,7 +572,7 @@
     { name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", ink: "--amber", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: () => S.srs.size >= 100 },
     { name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
     { name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
-    { name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first CE practice exam", todo: "To earn: first CE practice exam", earned: () => list("comp").some((c) => c.kind === "exam") },
+    { name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: () => list("comp").some((c) => c.kind === "exam") },
     { name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => list("mocks").some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
   ];
   function stampSVG(st, on) {
@@ -650,10 +634,6 @@
     for (const w of list("writing")) {
       const W = T.WRITING[w.task];
       arr(w.fb && w.fb.errors).forEach((e) => out.push(Object.assign({}, e, { date: w.date, ts: w.ts || 0, src: (W ? W.name : "Écrit") + " écrit" })));
-    }
-    for (const sp of list("speaking")) {
-      const P = T.SPEAKING[sp.task];
-      arr(sp.fb && sp.fb.errors).forEach((e) => out.push(Object.assign({}, e, { date: sp.date, ts: sp.ts || 0, src: (P ? P.name : "Oral") + " oral" })));
     }
     for (const e of list("errors")) out.push(Object.assign({}, e, { src: "Logged by you", manual: true }));
     return out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -761,8 +741,7 @@
   // the draft's other corrections applied, so the words around it are right; the correction is the answer.
   // A mistake made again counts once, with every correction given for it accepted. Left out: changes of
   // punctuation only (answers are checked without punctuation), rewrites longer than MINE_WORDS words, which
-  // don't make a fair typed answer, and the mistakes you hide. Speaking isn't included: its transcripts come
-  // from dictation, which garbles words.
+  // don't make a fair typed answer, and the mistakes you hide.
   const MINE_WORDS = 14;
   // "arrivé(e)" → arrivé, arrivée (at most two such brackets).
   function variants(s) {
@@ -861,7 +840,27 @@
     return list("drills").filter((d) => d.topic === topic && (!set || d.set === set) && d.src !== "retry").sort((a, b) => (a.ts || 0) - (b.ts || 0));
   }
   function bestPct(topic, set) { const xs = drillsFor(topic, set).filter((d) => d.total); return xs.length ? Math.max(...xs.map((d) => d.score / d.total)) : 0; }
-  function perfectDays(topic, set, p) { return new Set(drillsFor(topic, set).filter((d) => d.total && d.score / d.total >= p - 1e-9).map((d) => d.date)).size; }
+  // Mastery is judged on what you still know a week later. A round right after another mostly shows what's
+  // fresh in memory, so only the first round of the set each day counts, and it has to reach the target on
+  // `need` days, the first and last at least a week apart.
+  function coldMet(topic, set, p, need) {
+    const firsts = new Map();
+    drillsFor(topic, set).forEach((d) => { if (d.total && !firsts.has(d.date)) firsts.set(d.date, d); });
+    const days = [...firsts.values()].filter((d) => d.score / d.total >= p - 1e-9).map((d) => d.date).sort();
+    const n = days.length;
+    return { ok: n >= need && daysBetween(days[0], days[n - 1]) >= 7, n, need, p, tried: firsts.size };
+  }
+  function coldNote(m) {
+    if (!m.tried) return "No attempts yet";
+    if (m.ok) return `Done: the day's first round at ${pct(m.p)} on ${m.need} days, a week apart`;
+    if (m.n >= m.need) return `${m.n} days at ${pct(m.p)}, but less than a week apart: try again next week`;
+    return `${m.n} of ${m.need} days so far: the day's first round at ${pct(m.p)}, a week apart`;
+  }
+  // The first try at each comprehension set, oldest first. A set logged from elsewhere counts on its own.
+  function firstTries(xs) {
+    const seen = new Set();
+    return xs.slice().sort((p, q) => (p.ts || 0) - (q.ts || 0)).filter((c2) => { const k = c2.setId || c2.id; if (seen.has(k)) return false; seen.add(k); return true; });
+  }
   function writingZero(cat) {
     const ws = list("writing").filter((w) => w.fb && Array.isArray(w.fb.errors)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 2);
     if (ws.length < 2) return { ok: false, note: `${ws.length}/2 corrected writing submissions so far` };
@@ -873,14 +872,8 @@
     const c = tp.criterion;
     const parts = [];
     if (c.set) {
-      const n = drillsFor(tp.id, c.set).length;
-      if (c.days) {
-        const k = perfectDays(tp.id, c.set, c.pct);
-        parts.push({ ok: k >= c.days, note: `${k}/${c.days} separate days at ${pct(c.pct)}` });
-      } else {
-        const b = bestPct(tp.id, c.set);
-        parts.push({ ok: n > 0 && b >= c.pct - 1e-9, note: n ? `Best ${pct(b)} (target ${pct(c.pct)})` : "No attempts yet" });
-      }
+      const m = coldMet(tp.id, c.set, c.pct, c.days || 2);
+      parts.push({ ok: m.ok, note: coldNote(m) });
     }
     if (c.writing) parts.push(writingZero(c.writing));
     if (c.prod) parts.push({ ok: prodMet(tp.id), note: prodMet(tp.id) ? "Production task passed" : "Production task not passed yet" });
@@ -898,17 +891,31 @@
     const o = opts || {};
     let items, title, set;
     if (topicId === "mixed") {
+      // Every topic of this phase and the earlier ones that you've drilled (Phase 1's four until you have), so
+      // what you learned weeks ago keeps coming back. The topics missed most in the last two weeks come first,
+      // then the ones practised longest ago, and the 15 questions are dealt among them in turn.
       // Difficulty follows the phase: B1 in Phase 1, B1 + B1+ in Phase 2, B1+ and B2 from Phase 3.
       const phase = settings().phase;
       const allowed = phase <= 1 ? ["B1"] : phase === 2 ? ["B1", "B1+"] : ["B1+", "B2"];
-      const pick = [["pronominaux", "pc", 4], ["imperatif", "main", 4], ["interrogative", "main", 4], ["subjonctif", "formation", 3]];
       const log = drillLog();
+      const since = Date.now() - 14 * 864e5;
+      const missed = new Map();
+      for (const d of list("drills")) {
+        if (d.set === "prod" || (d.ts || 0) < since) continue;
+        arr(d.items).concat(d.retry ? arr(d.retry.items) : []).forEach((it) => { if (!it.ok) { const k = it.topic || d.topic; missed.set(k, (missed.get(k) || 0) + 1); } });
+      }
+      const lastTs = (id) => { const ds = drillsFor(id); return ds.length ? ds[ds.length - 1].ts || 0 : 0; };
+      let tps = T.TOPICS.filter((tp) => tp.phase <= phase && drillsFor(tp.id).some((d) => d.set !== "prod"));
+      if (!tps.length) tps = ["pronominaux", "imperatif", "interrogative", "subjonctif"].map((id) => TOPIC[id]);
+      tps.sort((p, q) => (missed.get(q.id) || 0) - (missed.get(p.id) || 0) || lastTs(p.id) - lastTs(q.id));
+      const share = new Map();
+      for (let k = 0; k < 15; k++) { const id = tps[k % tps.length].id; share.set(id, (share.get(id) || 0) + 1); }
       items = [];
-      pick.forEach(([tid, sid, n]) => {
-        const sets = TOPIC[tid].sets;
-        let pool = sets.filter((x) => allowed.includes(x.level));
-        if (!pool.length) pool = [sets.find((x) => x.id === sid)];
-        items.push(...pickRound(pool.flatMap((st) => setItems(tid, st)), n, log));
+      tps.forEach((tp) => {
+        if (!share.get(tp.id)) return;
+        let pool = tp.sets.filter((x) => allowed.includes(x.level));
+        if (!pool.length) pool = [tp.sets.find((x) => x.id === tp.criterion.set) || tp.sets[0]];
+        items.push(...pickRound(pool.flatMap((st) => setItems(tp.id, st)), share.get(tp.id), log));
       });
       items = shuffle(items);
       title = "Mixed review · " + allowed.join(" and ");
@@ -1120,6 +1127,8 @@
     return m;
   }
   const themeCards = (th, cards) => [...(cards || allCards()).values()].filter((c) => c.theme === th);
+  // A card you haven't started yet. One saved without a meaning waits under À chercher instead.
+  const isNew = (c) => !S.srs.has(c.id) && !!str(c.en).trim();
   function dueIds(cards) {
     const t = todayStr();
     const m = cards || allCards();
@@ -1151,7 +1160,7 @@
       if (!ids.length) { toast("Nothing is due today."); return; }
     } else {
       const th = ui.vTheme || defaultTheme();
-      ids = themeCards(th, cards).filter((c) => !S.srs.has(c.id)).slice(0, ui.vCount).map((c) => c.id);
+      ids = themeCards(th, cards).filter(isNew).slice(0, ui.vCount).map((c) => c.id);
       if (!ids.length) { toast("No new cards left in this theme. Build more with Claude, or pick another theme."); return; }
     }
     ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false, edit: false };
@@ -1179,7 +1188,7 @@
     const s = settings();
     const cards = allCards();
     const order = T.PHASES[s.phase - 1].vocab.concat(T.VOCAB.map((t) => t.id));
-    return order.find((th) => THEME[th] && themeCards(th, cards).some((c) => !S.srs.has(c.id))) || order[0] || T.VOCAB[0].id;
+    return order.find((th) => THEME[th] && themeCards(th, cards).some(isNew)) || order[0] || T.VOCAB[0].id;
   }
   async function vocabBuild(theme) {
     const th = THEME[theme];
@@ -1197,6 +1206,307 @@
       n++;
     }
     toast(n ? `Added ${n} cards to ${th.label}.` : "No new cards came back. Try again.");
+  }
+  // Deleting one of your own cards also drops its review progress. Built-in and Anki cards can't be deleted.
+  function cardDelete(id) {
+    if (DECK.has(id) || !S.cards.has(id)) return;
+    remove("cards", id);
+    if (S.srs.has(id)) remove("srs", id);
+    ui.confirm = "";
+    toast("Card deleted.");
+  }
+
+  /* =============== saving words from any page =============== */
+  // Select a word or phrase on any page (a reading document, a transcript, a correction…) and a "Save to
+  // cards" button appears under it. The card keeps the sentence it came from as its example, the words as you
+  // saw them (seen) and where they were (src). It goes to Mon carnet, Mes cartes Anki or any theme. With a
+  // meaning it joins your reviews from tomorrow; without one it waits under "À chercher" on Vocabulaire.
+  const GRAB_WORDS = 12; // the longest selection the button offers to save
+  const grabBtn = document.getElementById("grab-btn");
+  const grabEl = document.getElementById("grab");
+  const GRAB_PAGES = { today: "Aujourd'hui", grammar: "Grammaire", vocab: "Vocabulaire", writing: "Écrit", comp: "Compréhension", progress: "Progrès" };
+  let grabSel = null; // what the button would save, read from the selection when the button appeared
+  let grabT = 0, grabHold = 0, grabHtml = "";
+  // The words selected, without the spaces, quotes and punctuation around them.
+  const grabClean = (s) => str(s).replace(/\s+/g, " ").replace(/^[\s.,;:!?…«»“”"'’()[\]–—-]+|[\s.,;:!?…«»“”"'’()[\]–—-]+$/g, "");
+  // The text of part of a page without the speaker names, and with a space where one block ends and the next begins.
+  function textOf(frag) {
+    frag.querySelectorAll(".who").forEach((x) => x.remove());
+    frag.querySelectorAll("p, li, div, br, td, th, h1, h2, h3, h4, dd, dt").forEach((x) => x.after(" "));
+    return frag.textContent;
+  }
+  // The sentence a selection sits in, within its paragraph. A very long one is cut to the words around it.
+  function grabSentence(r) {
+    const start = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement;
+    const block = start && start.closest("p, li, td, th, dd, dt, blockquote, figcaption, h1, h2, h3, h4, label, summary");
+    if (!block || !viewEl.contains(block) || !block.contains(r.endContainer)) return "";
+    const pre = document.createRange();
+    pre.setStart(block, 0);
+    pre.setEnd(r.startContainer, r.startOffset);
+    const text = textOf(block.cloneNode(true));
+    const a = textOf(pre.cloneContents()).length, b = a + textOf(r.cloneContents()).length;
+    // A sentence ends at . ! ? or … (and any closing quote) before a space, or at a line break.
+    let s = 0, e = text.length;
+    const re = /[.!?…]+(?:\s?[»”"’)\]])*(?=\s|$)|\n/g;
+    for (let m; (m = re.exec(text));) {
+      const x = m.index + m[0].length;
+      if (x <= a) s = x;
+      else if (x >= b) { e = x; break; }
+    }
+    let before = text.slice(s, a), after = text.slice(b, e);
+    if (countWords(text.slice(s, e)) > 40) {
+      const wb = before.trim().split(/\s+/), wa = after.trim().split(/\s+/);
+      if (wb.length > 15) before = "… " + wb.slice(-15).join(" ") + (/\s$/.test(before) ? " " : "");
+      if (wa.length > 15) after = (/^\s/.test(after) ? " " : "") + wa.slice(0, 15).join(" ") + " …";
+    }
+    return (before + text.slice(a, b) + after).replace(/\s+/g, " ").trim();
+  }
+  // Where a selection was made: the page, then the title of the document it's in.
+  function grabSource(host) {
+    const v = route.view;
+    let page = GRAB_PAGES[v] || "";
+    if (v === "comp") {
+      const set = ui.c.set[ui.c.skill];
+      if (route.args[1] === "exam") page = (ui.cx ? ui.cx.exam.title : "Examen blanc") + (ui.c.skill === "co" ? " · Compréhension orale" : "");
+      else page = (ui.c.skill === "co" ? "Compréhension orale" : "Compréhension écrite") + (set && set.title && !set.questions.some((q) => q.doc) ? " · " + grabClean(set.title) : "");
+    } else if (v === "grammar" && TOPIC[route.args[0]]) page += " · " + TOPIC[route.args[0]].title;
+    const sheet = host.closest(".sheet, .doc");
+    const h = sheet && sheet.querySelector("h3");
+    const doc = h ? grabClean(h.textContent) : "";
+    return doc && !page.includes(doc) ? `${page} · ${doc}` : page;
+  }
+  // Shows the button under a selection of a few words on the page, and hides it otherwise.
+  function grabCheck() {
+    clearTimeout(grabT);
+    grabT = 0;
+    if (!grabBtn || Date.now() - grabHold < 1000) return; // no button in an older page shell, or it's being pressed
+    const sel = window.getSelection ? window.getSelection() : null;
+    const r = sel && sel.rangeCount && !sel.isCollapsed ? sel.getRangeAt(0) : null;
+    const node = r && r.commonAncestorContainer;
+    const host = node && (node.nodeType === 1 ? node : node.parentElement);
+    const ok = host && viewEl.contains(host) && !host.closest("input, textarea, select, button, [contenteditable], .who");
+    const text = ok ? grabClean(textOf(r.cloneContents())) : "";
+    if (!text || !/\p{L}/u.test(text) || countWords(text) > GRAB_WORDS) { grabBtn.hidden = true; grabSel = null; return; }
+    grabSel = { text, ex: grabSentence(r), src: grabSource(host) };
+    const rects = r.getClientRects();
+    const box = rects.length ? rects[rects.length - 1] : r.getBoundingClientRect();
+    grabBtn.hidden = false;
+    const left = Math.max(8, Math.min(box.left, document.documentElement.clientWidth - grabBtn.offsetWidth - 8));
+    grabBtn.style.left = Math.round(left + window.scrollX) + "px";
+    grabBtn.style.top = Math.round(box.bottom + window.scrollY + 10) + "px";
+  }
+  // The same French as a card's, give or take an article, the notes in brackets, or the other half of "amener / emmener".
+  const cardKeys = (fr) => str(fr).replace(/\([^)]*\)/g, " ").split(/\s\/\s|;/).map((p) => norm(p).replace(/^(?:(?:les|le|la|une|un) |l')/, "")).filter(Boolean);
+  function grabFind(fr) {
+    const want = new Set(cardKeys(fr));
+    if (!want.size) return null;
+    for (const c of allCards().values()) if (cardKeys(c.fr).concat(cardKeys(c.seen)).some((k) => want.has(k))) return c;
+    return null;
+  }
+  function grabOpen() {
+    const g = grabSel;
+    grabHold = 0;
+    if (grabBtn) grabBtn.hidden = true;
+    if (!g) return;
+    const dup = grabFind(g.text), th = settings().grabTheme;
+    ui.grab = { fr: g.text, seen: g.text, en: "", note: "", ex: norm(g.ex) === norm(g.text) ? "" : g.ex, src: g.src, theme: THEME[th] ? th : "carnet", dup: dup ? dup.id : "", force: false };
+    paintGrab(true);
+    // Straight to the meaning with a mouse; on a phone the keyboard waits until you tap a field.
+    if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) { const el = document.getElementById(dup ? "grab-add" : "grab-en"); if (el) el.focus({ preventScroll: true }); }
+  }
+  function grabClose() {
+    ui.grab = null;
+    paintGrab(true);
+  }
+  const exLines = (ex) => str(ex).split("\n").map((l) => l.trim()).filter(Boolean);
+  function grabHTML() {
+    const g = ui.grab;
+    const dup = g.dup && !g.force ? allCards().get(g.dup) : null;
+    const head = `<div class="row between"><p class="h3 with-ico">${ico("vocab")}Save to your cards</p><button class="x" data-act="grab-close" title="Close" aria-label="Close">×</button></div>`;
+    if (dup) {
+      const has = !g.ex || exLines(dup.ex).some((l) => norm(l) === norm(g.ex));
+      return `${head}
+        <p class="small">It's already in <b>${esc(themeLabel(dup.theme))}</b>:</p>
+        <div class="grab-dup"><p class="fr">${typo(dup.fr)}</p><p class="small">${dup.en ? esc(dup.en) : `<span class="muted">No meaning yet</span>`}</p></div>
+        ${g.ex ? `<p class="small muted">${has ? "This sentence is already one of its examples." : "You can add the sentence you found it in to that card's examples."}</p>` : ""}
+        <div class="row">${has ? "" : `<button class="btn primary" id="grab-add" data-act="grab-add-ex">Add the sentence to it</button>`}<button class="btn" data-act="grab-force">Make a new card anyway</button><button class="btn ghost" data-act="grab-close">Cancel</button></div>`;
+    }
+    const label = (k, more) => `<span>${k}${more ? ` <span class="muted" style="font-weight:400">· ${more}</span>` : ""}</span>`;
+    return `${head}
+      <label class="field">${label("French")}<input type="text" id="grab-fr" data-input="grab" data-k="fr" value="${esc(g.fr)}" lang="fr" autocomplete="off" spellcheck="false"></label>
+      <label class="field">${label("English", "or leave it for later")}<input type="text" id="grab-en" data-input="grab" data-k="en" value="${esc(g.en)}" autocomplete="off"></label>
+      ${claudeOn() ? `<div class="row">${claudeBtn("grab", "grab-claude", "Fill in with Claude", "", "btn sm")}<span class="small muted">the meaning in this sentence</span></div>` : ""}
+      <label class="field">${label("Note", "optional, shown with the English")}<input type="text" id="grab-note" data-input="grab" data-k="note" value="${esc(g.note)}" autocomplete="off"></label>
+      <label class="field">${label("Example", "the sentence it came from")}<textarea id="grab-ex" data-input="grab" data-k="ex" rows="3" lang="fr" spellcheck="false">${esc(g.ex)}</textarea></label>
+      <label class="field">${label("Deck")}<select id="grab-th" data-change="grab-theme">${T.VOCAB.map((th) => `<option value="${th.id}" ${th.id === g.theme ? "selected" : ""}>${esc(th.label)}</option>`).join("")}</select></label>
+      ${g.src ? `<p class="small muted">From ${esc(g.src)}</p>` : ""}
+      <div class="row"><button class="btn primary" data-act="grab-save">Save <span class="kbd">↵</span></button><button class="btn ghost" data-act="grab-close">Cancel <span class="kbd">Esc</span></button></div>`;
+  }
+  // The panel sits outside the page, so drawing the page leaves it alone. It isn't redrawn while you type in it;
+  // when it is, the field you're in keeps its focus and caret.
+  function paintGrab(force) {
+    if (!grabEl) return;
+    if (!ui.grab) { if (!grabEl.hidden || grabHtml) { grabEl.hidden = true; grabEl.innerHTML = grabHtml = ""; } return; }
+    const ae = document.activeElement;
+    const inside = !!ae && grabEl.contains(ae);
+    if (!force && inside && isTyping(ae)) return;
+    const html = grabHTML();
+    if (html === grabHtml && !grabEl.hidden) return;
+    const fid = inside ? ae.id : "";
+    const sel = fid && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd] : null;
+    grabEl.innerHTML = grabHtml = html;
+    grabEl.hidden = false;
+    const el = fid && document.getElementById(fid);
+    if (el) { try { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) el.setSelectionRange(sel[0], sel[1]); } catch (_) {} }
+  }
+  // What Claude is told when it fills in a card: the French side in the decks' style, and the meaning in that sentence.
+  const GRAB_BRIEF = `You're making French flashcards for a B1 learner preparing the TCF Canada (aiming for B2). The learner selected each word or phrase on a practice page, in the sentence given.
+- "fr": the French side in dictionary form. A verb in the infinitive, with its usual preposition and "(+ inf.)", "(+ subj.)", "qqch" or "qqn" when useful. An adjective in the masculine singular, adding the feminine when it's irregular. A noun with its article, adding "(nm)" or "(nf)" after an elided "l'". Keep a fixed expression whole. Keep the learner's words when they're already in this form.
+- "en": a short English meaning, the one used in that sentence, at most 8 words.
+- "note": at most 12 words in English, only when useful: the register (familiar, formal), Québec usage, a false friend, or a grammar point. Don't repeat the French. Otherwise "".`;
+  async function grabClaude() {
+    const g = ui.grab;
+    if (!g || !str(g.fr).trim()) return;
+    const out = await ask("grab", `${GRAB_BRIEF}\n\nSelected: «${str(g.fr).trim()}»\nSentence: «${str(g.ex).trim() || str(g.fr).trim()}»\nReply with only JSON: {"fr": "...", "en": "...", "note": "..."}`);
+    if (!out || ui.grab !== g) return;
+    if (str(out.fr).trim()) g.fr = str(out.fr).trim();
+    if (str(out.en).trim()) g.en = str(out.en).trim();
+    g.note = str(out.note).trim();
+    const dup = grabFind(g.fr);
+    if (dup && !g.force) g.dup = dup.id;
+    paintGrab(true);
+    tabSoon();
+  }
+  function grabSave() {
+    const g = ui.grab;
+    if (!g) return;
+    const fr = str(g.fr).replace(/\s+/g, " ").trim(), en = str(g.en).trim(), note = str(g.note).trim(), ex = str(g.ex).trim();
+    if (!fr) { toast("The French side needs some text."); return; }
+    const dup = g.force ? null : grabFind(fr);
+    if (dup) { g.dup = dup.id; paintGrab(true); return; }
+    const theme = THEME[g.theme] ? g.theme : "carnet";
+    const id = "c-" + uid();
+    const doc = { fr, en, theme, created: todayStr(), ts: Date.now(), by: "you", seen: g.seen };
+    if (ex && norm(ex) !== norm(fr)) doc.ex = ex;
+    if (note) doc.enNote = note;
+    if (g.src) doc.src = g.src;
+    put("cards", id, doc);
+    if (en) srsLearn(id, false);
+    if (settings().grabTheme !== theme) saveSettings({ grabTheme: theme });
+    grabClose();
+    toast(en ? `Saved to ${THEME[theme].label}. It comes up in your reviews from tomorrow.` : `Saved to ${THEME[theme].label}. Give it a meaning under À chercher on Vocabulaire.`);
+  }
+  // The words were already on a card: the sentence joins its examples, and a card you weren't reviewing yet joins your reviews.
+  function grabAddEx() {
+    const g = ui.grab;
+    const c = g && allCards().get(g.dup);
+    if (!c) return;
+    const exs = exLines(c.ex);
+    if (g.ex && !exs.some((l) => norm(l) === norm(g.ex))) exs.push(str(g.ex).trim());
+    const doc = Object.assign({}, c, { ex: exs.join("\n"), edited: todayStr() });
+    delete doc.id;
+    if (!doc.seen) doc.seen = g.seen;
+    put("cards", c.id, doc);
+    const joins = !!str(c.en).trim() && !S.srs.has(c.id);
+    if (joins) srsLearn(c.id, false);
+    grabClose();
+    toast(`Added to « ${c.fr} » in ${themeLabel(c.theme)}.${joins ? " It comes up in your reviews from tomorrow." : ""}`);
+  }
+
+  // Words you saved from a page are marked wherever they come up, with the CSS Custom Highlight API, which leaves
+  // the page itself unchanged. Browsers without it just don't mark them. Not on Vocabulaire, where the cards are.
+  let markKey = "", markRe = null;
+  const markPat = (s) => reEsc(s).replace(/['’]/g, "['’]").replace(/ /g, "\\s+");
+  function paintMarks() {
+    const H = window.CSS && CSS.highlights;
+    if (!H || typeof Highlight !== "function") return;
+    const forms = route.view === "vocab" ? [] : [...new Set(list("cards").map((c) => grabClean(c.seen)).filter((s) => s.length > 1))].sort((a, b) => b.length - a.length);
+    if (!forms.length) { H.delete("saved"); return; }
+    const key = forms.join("|");
+    if (key !== markKey) { markKey = key; markRe = new RegExp(`(?<![\\p{L}\\p{N}])(?:${forms.map(markPat).join("|")})(?![\\p{L}\\p{N}])`, "giu"); }
+    const ranges = [];
+    const walk = document.createTreeWalker(viewEl, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement && n.parentElement.closest("button, select, textarea, input, script, style, .who") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+    for (let n; (n = walk.nextNode()) && ranges.length < 500;) {
+      markRe.lastIndex = 0;
+      for (let m; (m = markRe.exec(n.data));) { const r = new Range(); r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length); ranges.push(r); }
+    }
+    H.set("saved", new Highlight(...ranges));
+  }
+  // A card's examples, with the words you saved in bold.
+  function exHTML(c) {
+    const re = grabClean(c.seen).length > 1 ? new RegExp(`(?<![\\p{L}\\p{N}])${markPat(grabClean(c.seen))}(?![\\p{L}\\p{N}])`, "giu") : null;
+    return exLines(c.ex).map((l) => {
+      if (!re) return typo(l);
+      let out = "", at = 0;
+      for (const m of l.matchAll(re)) { out += typo(l.slice(at, m.index)) + `<b>${typo(m[0])}</b>`; at = m.index + m[0].length; }
+      return out + typo(l.slice(at));
+    }).join("<br>");
+  }
+
+  // Cards saved without a meaning wait on Vocabulaire, out of your reviews, until they have one. Newest first.
+  const waitingCards = () => list("cards").filter((c) => c.fr && !str(c.en).trim()).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  const waitVal = (id, k) => str(ui.form[`wt-${k}-${id}`]);
+  function waitPanel() {
+    const ws = waitingCards();
+    if (!ws.length) return "";
+    const filled = ws.filter((c) => waitVal(c.id, "en").trim()).length;
+    const rows = ws.map((c) => {
+      const f = (k, label, extra) => `<label class="field">${label}<input type="text" id="wt-${k}-${c.id}" data-input="form" data-k="wt-${k}-${c.id}" value="${esc(ui.form[`wt-${k}-${c.id}`] != null ? ui.form[`wt-${k}-${c.id}`] : k === "fr" ? c.fr : "")}" autocomplete="off" ${extra || ""}></label>`;
+      return `<li class="stack tight">
+        <div class="wait-fields">${f("fr", "French", `lang="fr" spellcheck="false"`)}${f("en", "English")}${f("note", `<span>Note <span class="muted" style="font-weight:400">· optional</span></span>`)}</div>
+        ${c.ex ? `<p class="fr small">${exHTML(c)}</p>` : ""}
+        <div class="row between"><span class="small muted">${esc(themeLabel(c.theme))}${c.src ? ` · from ${esc(c.src)}` : ""}</span><span class="row"><button class="btn sm" data-act="wt-save" data-id="${esc(c.id)}">Save</button>${confirmBtn("wt-del-" + c.id, "Delete this card", "wt-del", `data-id="${esc(c.id)}"`)}</span></div>
+      </li>`;
+    }).join("");
+    return `<section class="panel stack">
+      <div class="row between"><p class="h3">À chercher · ${ws.length} saved without a meaning</p><span class="row">${claudeBtn("wt-fill", "wt-fill", "Fill them in with Claude", "", "btn sm")}${filled ? `<button class="btn sm primary" data-act="wt-save-all">Save the ${filled} with a meaning</button>` : ""}</span></div>
+      <p class="small muted">They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p>
+      <ul class="wait-list">${rows}</ul>
+    </section>`;
+  }
+  async function waitFill() {
+    const ws = waitingCards().filter((c) => !waitVal(c.id, "en").trim()).slice(0, 25);
+    if (!ws.length) { toast("They all have a meaning already. Check them, then save."); return; }
+    const items = ws.map((c, i) => ({ i, selected: grabClean(c.seen) || c.fr, sentence: str(c.ex).split("\n")[0] || c.fr }));
+    const out = await ask("wt-fill", `${GRAB_BRIEF}\n\nThe items:\n${JSON.stringify(items)}\nReply with only JSON: {"cards": [{"i": the item's i, "fr": "...", "en": "...", "note": "..."}]}`);
+    if (!out) return;
+    let n = 0;
+    for (const r of arr(out.cards)) {
+      const c = r && ws[Number(r.i)];
+      if (!c || !str(r.en).trim()) continue;
+      if (str(r.fr).trim()) ui.form[`wt-fr-${c.id}`] = str(r.fr).trim();
+      ui.form[`wt-en-${c.id}`] = str(r.en).trim();
+      ui.form[`wt-note-${c.id}`] = str(r.note).trim();
+      n++;
+    }
+    toast(n ? `Claude filled in ${n}. Check each one, then save it.` : "No meanings came back. Try again.");
+    render(true);
+  }
+  // Saving a meaning puts the card in your reviews. If its French is now word for word the same as another
+  // card's, the sentence goes to that card instead, so each word keeps one card.
+  function waitSave(id) {
+    const c = S.cards.get(id);
+    if (!c) return false;
+    const fr = waitVal(id, "fr").trim() || c.fr, en = waitVal(id, "en").trim(), note = waitVal(id, "note").trim();
+    if (!en) return false;
+    ["fr", "en", "note"].forEach((k) => { delete ui.form[`wt-${k}-${id}`]; });
+    const same = [...allCards().values()].find((x) => x.id !== id && x.en && norm(x.fr) === norm(fr));
+    if (same) {
+      const exs = exLines(same.ex);
+      exLines(c.ex).forEach((l) => { if (!exs.some((x) => norm(x) === norm(l))) exs.push(l); });
+      const doc = Object.assign({}, same, { ex: exs.join("\n"), edited: todayStr() });
+      delete doc.id;
+      if (!doc.seen) doc.seen = c.seen;
+      put("cards", same.id, doc);
+      if (!S.srs.has(same.id)) srsLearn(same.id, false);
+      remove("cards", id);
+      return "merged";
+    }
+    const doc = Object.assign({}, c, { fr, en });
+    if (note) doc.enNote = note; else delete doc.enNote;
+    put("cards", id, doc);
+    if (!S.srs.has(id)) srsLearn(id, false);
+    return true;
   }
 
   /* =============== writing =============== */
@@ -1406,119 +1716,6 @@
       g.docs = [{ who: str(d[0].who), text: str(d[0].text) }, { who: str(d[1].who), text: str(d[1].text) }];
     }
     ui.w.gen[task] = g;
-    render(true);
-  }
-
-  /* =============== speaking =============== */
-  function spPrompt(task) {
-    const P = T.SPEAKING[task];
-    if (task === "t2") return P.scenarios[ui.sp.t2 % P.scenarios.length];
-    if (task === "t3") return P.prompts[ui.sp.t3 % P.prompts.length][0];
-    return "Présentez-vous.";
-  }
-  function spSave(task) {
-    const P = T.SPEAKING[task];
-    const rub = ui.sp.rubric[task] || {};
-    const doc = { task, date: todayStr(), ts: Date.now(), prompt: spPrompt(task), rubric: Object.assign({}, rub), score: P.rubric ? P.rubric.filter((r) => rub[r[0]]).length : null, of: P.rubric ? P.rubric.length : null, notes: ui.sp.notes[task] || "", transcript: ui.sp.trans[task] || "", fb: ui.sp.fb[task] || null };
-    if (task === "t2" && ui.sp.chat) {
-      const turns = spTurns();
-      doc.transcript = turns.filter((t) => t.role === "user").map((t) => t.content).join("\n");
-      doc.chat = turns;
-    }
-    put("speaking", uid(), doc);
-    autoTick("speaking." + task);
-    spClear(task);
-    toast("Attempt saved.");
-    render(true);
-  }
-  // The role-play without the hidden instructions Claude plays from.
-  const spTurns = () => (ui.sp.chat ? ui.sp.chat.turns.filter((t) => !t.rules).map((t) => ({ role: t.role, content: t.content })) : []);
-  function spClear(task) {
-    ipDrop("speaking--" + task);
-    ui.sp.rubric[task] = {};
-    ui.sp.notes[task] = "";
-    ui.sp.trans[task] = "";
-    ui.sp.fb[task] = null;
-    if (task === "t2") { ui.sp.chat = null; ui.sp.covered = {}; }
-  }
-  // A speaking attempt is kept from its first tick, note, transcript or question to the examiner.
-  function spKeep(task, delay) {
-    const P = T.SPEAKING[task];
-    const rubric = ui.sp.rubric[task] || {}, notes = ui.sp.notes[task] || "", trans = ui.sp.trans[task] || "", fb = ui.sp.fb[task] || null;
-    const chat = task === "t2" ? spTurns() : [];
-    const covered = task === "t2" ? ui.sp.covered : {};
-    const any = Object.values(rubric).some(Boolean) || notes.trim() || trans.trim() || fb || chat.some((t) => t.role === "user") || Object.values(covered).some(Boolean);
-    if (!any) { ipDrop("speaking--" + task); return; }
-    ipSave("speaking--" + task, { kind: "speaking", title: P.name + " oral", route: "speaking." + task, task, idx: task === "t1" ? 0 : ui.sp[task], prompt: spPrompt(task), rubric, notes, trans, fb, chat, covered }, delay);
-  }
-  function spRestore(task) {
-    const ip = ipGet("speaking--" + task);
-    if (!ip) return false;
-    if (task !== "t1" && Number.isFinite(ip.idx)) ui.sp[task] = ip.idx;
-    ui.sp.rubric[task] = Object.assign({}, ip.rubric);
-    ui.sp.notes[task] = str(ip.notes);
-    ui.sp.trans[task] = str(ip.trans);
-    ui.sp.fb[task] = ip.fb || null;
-    if (task === "t2") {
-      ui.sp.covered = Object.assign({}, ip.covered);
-      ui.sp.chat = arr(ip.chat).length ? { turns: [{ role: "user", content: chatRules(), rules: true }].concat(arr(ip.chat).map((t) => ({ role: t.role, content: str(t.content) }))) } : null;
-    }
-    return true;
-  }
-  async function spFeedback(task) {
-    const P = T.SPEAKING[task];
-    const text = str(ui.sp.trans[task]).trim();
-    if (text.length < 20) { toast("Paste or type what you said first."); return; }
-    const structure = (P.steps ? P.steps.map((s) => s.label) : P.structure).join(" → ");
-    const crit = TC.eo.criteria.filter(([n]) => task === "t2" || n !== "Interaction").map(([n]) => n);
-    const prompt = `You are a certified TCF Canada Expression orale examiner (France Éducation International). Grade strictly the way the TCF Canada does, using the rules and criteria below; don't use DELF, TEF or TCF tout public grading. The learner practised ${P.name} (${P.kind}) and pasted a transcript of what they said. It may come from phone dictation, so ignore punctuation and capitalization, and don't judge pronunciation, which a transcript can't show.\n\n${EO_RUBRIC}\n\nPrompt: ${spPrompt(task)}\nExpected structure: ${structure}\n${PROFILE}\nTranscript:\n"""\n${text}\n"""\nReply with only JSON: {"level": "A1 | A2 | B1 | B2 | C1 | C2", "summary": "2–3 sentences in English", "criteria": [{"name": "one of: ${crit.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in English"}] (one entry per criterion, in that order), "structure": [{"step": "step name", "done": true or false, "comment": "short"}], "errors": [{"wrong": "...", "right": "...", "category": "one of: ${Object.keys(CAT).join(", ")}", "why": "short English explanation"}], "next_time": ["2–3 concrete things to do differently"]}`;
-    const out = await ask("sp-fb-" + task, prompt);
-    if (!out) return;
-    ui.sp.fb[task] = { level: str(out.level), summary: str(out.summary), criteria: cleanCriteria(out.criteria), structure: arr(out.structure).filter((s) => s && s.step).map((s) => ({ step: str(s.step), done: !!s.done, comment: str(s.comment) })), errors: cleanErrors(out.errors), next: arr(out.next_time).map(str).filter(Boolean) };
-    spKeep(task, 0);
-    render(true);
-  }
-  function chatRules() {
-    return `You are the examiner in the TCF Canada Expression orale (France Éducation International), Tâche 2, exercice en interaction: after 2 minutes of preparation the candidate has 3 min 30 to obtain information from you by asking questions, in an everyday situation where the prompt sets both roles. You play this role: ${spPrompt("t2")} The candidate asks you questions to get information. Stay in role for the whole conversation. Answer in natural spoken French, 1–3 sentences, inventing consistent, realistic details (prices in dollars, Canadian places). Don't correct the candidate or comment on their French during the role-play. If they write in English, answer in French anyway. Begin now with one short greeting in role, and nothing else.`;
-  }
-  async function chatCall() {
-    const c = ui.sp.chat;
-    const turns = c.turns.map((t) => ({ role: t.role, content: t.content }));
-    const text = await ask("chat", turns, { json: false, tier: "quick", cache: false });
-    if (text == null || ui.sp.chat !== c) return;
-    c.turns.push({ role: "assistant", content: text });
-    spKeep("t2", 0);
-    render(true);
-    scrollChat();
-  }
-  function chatStart() {
-    ui.sp.chat = { turns: [{ role: "user", content: chatRules(), rules: true }] };
-    ui.sp.fb.t2 = null;
-    chatCall();
-  }
-  function chatSend() {
-    const c = ui.sp.chat;
-    const el = document.getElementById("chat-in");
-    const v = str(el ? el.value : ui.sp.chatIn).trim();
-    if (!c || !v || busy.chat) return;
-    c.turns.push({ role: "user", content: v });
-    if (c.turns.length > 40) c.turns.splice(1, 2);
-    ui.sp.chatIn = "";
-    spKeep("t2", 0);
-    chatCall();
-  }
-  function scrollChat() { const el = document.getElementById("chat-log"); if (el) el.scrollTop = el.scrollHeight; }
-  async function chatEnd() {
-    const c = ui.sp.chat;
-    const qs = c ? c.turns.filter((t) => t.role === "user" && !t.rules).map((t) => t.content) : [];
-    if (!qs.length) { toast("Ask at least one question first."); return; }
-    const crit = TC.eo.criteria.map(([n]) => n);
-    const prompt = `You are a certified TCF Canada Expression orale examiner (France Éducation International). Evaluate the candidate's questions from a TCF Canada Tâche 2 (exercice en interaction) role-play, strictly by TCF Canada standards.\n\n${EO_RUBRIC}\n\nScenario: ${spPrompt("t2")}\nCandidate's messages, in order:\n${qs.map((q, i) => `${i + 1}. ${q}`).join("\n")}\n\n${PROFILE}\nCheck the number of questions (aim for 5–6 or more), variety (open vs yes/no), register (vouvoiement), correct question formation (especially embedded questions: no inversion, conjugated verb; and correct inversion in direct questions), and coverage of price, place, schedule and conditions. The exchange was typed, so don't judge pronunciation or fluency.\nReply with only JSON: {"count": number, "coverage": {"prix": true or false, "lieu": true or false, "horaires": true or false, "conditions": true or false}, "summary": "2–3 sentences in English", "criteria": [{"name": "one of: ${crit.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in English"}] (one entry per criterion except Aisance, in that order), "errors": [{"wrong": "...", "right": "...", "category": "interrogative, or another id from: ${Object.keys(CAT).join(", ")}", "why": "short English explanation"}], "better_questions": ["3 stronger B2-level questions they could have asked"]}`;
-    const out = await ask("chat-end", prompt);
-    if (!out) return;
-    const cov = out.coverage || {};
-    ui.sp.fb.t2 = { level: "", summary: str(out.summary), criteria: cleanCriteria(out.criteria), count: Number(out.count) || qs.length, coverage: { prix: !!cov.prix, lieu: !!cov.lieu, horaires: !!cov.horaires, conditions: !!cov.conditions }, errors: cleanErrors(out.errors), next: arr(out.better_questions).map(str).filter(Boolean), better: true };
-    spKeep("t2", 0);
     render(true);
   }
 
@@ -1970,7 +2167,7 @@
   const mins = (secs) => (secs > 0 && secs < 7200 ? `${Math.max(1, Math.round(secs / 60))} min` : "");
   const cefrOf = (v) => ["A1", "A2", "B1", "B2", "C1", "C2"][Math.max(0, Math.min(5, Math.floor((v - 100) / 100)))];
   const scorePill = (a) => `<span class="pill ${a.total && a.score / a.total >= 0.7 ? "ok" : ""}">${a.score}/${a.total}</span>`;
-  const nclcTag = (v) => { const n = nclcOf("ce", v); return `<span class="tag7 ${n >= 7 ? "ok" : "no"}">NCLC ${nclcLabel(n)}</span>`; };
+  const nclcTag = (v, skill) => { const n = nclcOf(skill || "ce", v); return `<span class="tag7 ${n >= 7 ? "ok" : "no"}">NCLC ${nclcLabel(n)}</span>`; };
   const levelCounts = (b) => (b ? Object.entries(b).map(([l, v]) => `${l} ${v[0]}/${v[1]}`).join(" · ") : "");
   // A branch of the tree. Its open state lives in ui.c.open, because render() replaces the whole view.
   const branch = (id, summary, body) => `<details class="h-node" data-node="${esc(id)}" ${ui.c.open[id] ? "open" : ""}><summary>${summary}</summary><div class="h-kids">${body}</div></details>`;
@@ -2020,10 +2217,11 @@
     return { html: branch(`${skill}:t:${t.id}`, `<span class="h-name">${esc(t.label)}</span>${lv}<span class="h-meta">${n ? `${n} attempt${n > 1 ? "s" : ""}` : "in progress"}</span>`, shown.map((s) => setBranch(skill, s, stats.get(s.id))).join("")), last: setLast(skill, shown[0], stats) };
   }
   // Practice exams done or in progress: the built-in ones and Claude's.
-  function examsBranch(attempts) {
+  function examsBranch(attempts, skill) {
+    const X = XSPEC[skill];
     const done = attempts.filter((a) => a.kind === "exam");
-    const builtIn = T.COMP.ceExams || [];
-    const paused = ipGet("exam--ce");
+    const builtIn = X.bank();
+    const paused = ipGet(X.ip);
     const lastOf = (id) => Math.max((done.find((a) => a.setId === id) || {}).ts || 0, paused && paused.examId === id ? paused.updated || 0 : 0);
     const ids = [...new Set(done.map((a) => a.setId).concat(paused ? [paused.examId] : []))].sort((a, b) => lastOf(b) - lastOf(a));
     if (!ids.length) return null;
@@ -2034,13 +2232,13 @@
       const src = ex ? "" : /claude/.test(str((as[0] || paused).src)) ? `<span class="pill info">from Claude</span>` : `<span class="pill">earlier version</span>`;
       const head = `<span class="lv">A1–C2</span><span class="h-name">${esc(title)}</span>${src}`;
       const going = paused && paused.examId === id ? `<span class="pill warn">In progress · ${esc(ipProgress(paused))}</span>` : "";
-      if (!as.length) return `<div class="h-row">${head}${going}<span class="h-meta"></span><button class="btn sm primary" data-act="ip-resume" data-id="exam--ce">Resume</button></div>`;
+      if (!as.length) return `<div class="h-row">${head}${going}<span class="h-meta"></span><button class="btn sm primary" data-act="ip-resume" data-id="${X.ip}">Resume</button></div>`;
       const best = as.reduce((b, a) => ((a.est || 0) > (b.est || 0) ? a : b));
-      const body = as.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}${mins(a.secs) ? " · " + mins(a.secs) : ""}${a.timeUp ? " · time ran out" : ""}</span><span class="small muted">${levelCounts(a.byLevel)}</span>${ex || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("");
-      return branch(`ce:x:${id}`, `${head}${going}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
+      const body = as.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}<span class="small muted">${a.score}/${a.total}${mins(a.secs) ? " · " + mins(a.secs) : ""}${a.timeUp ? " · time ran out" : ""}</span><span class="small muted">${levelCounts(a.byLevel)}</span>${ex || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("");
+      return branch(`${skill}:x:${id}`, `${head}${going}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
     }).join("");
     const last = done[0];
-    return { html: branch("ce:g:exams", `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}` : "in progress"}</span>`, rows), last: lastOf(ids[0]) };
+    return { html: branch(`${skill}:g:exams`, `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}` : "in progress"}</span>`, rows), last: lastOf(ids[0]) };
   }
   // Everything done in one skill, as a tree: topic → set → attempt, with practice exams, Claude sets with no
   // topic, built-in sets since replaced and scores logged from elsewhere alongside. Only sets you've finished
@@ -2072,7 +2270,7 @@
     const done = builtins.filter((s) => stats.has(s.id)).length;
     const practice = attempts.filter((a) => a.src !== "logged" && a.kind !== "exam").length;
     const groups = COMP_TOPICS.map((t) => topicBranch(skill, t, builtins.filter((s) => arr(s.themes).includes(t.id)).concat(claudeSets.filter((c) => c.theme === t.id)), stats)).filter(Boolean);
-    const exams = skill === "ce" ? examsBranch(attempts) : null;
+    const exams = examsBranch(attempts, skill);
     if (exams) groups.push(exams);
     // A group of sets: listed newest first, and placed by its newest.
     const setGroup = (id, name, meta, sets) => { const xs = sets.slice().sort(byLast(skill, stats)); groups.push({ html: branch(id, `<span class="h-name">${name}</span><span class="h-meta">${meta}</span>`, xs.map((s) => setBranch(skill, s, stats.get(s.id))).join("")), last: setLast(skill, xs[0], stats) }); };
@@ -2089,12 +2287,25 @@
     </section>`;
   }
 
-  /* =============== CE practice exam (Examen blanc) =============== */
-  // 39 items in 60 minutes, one document each, in the level blocks of TCF_CANADA.ceExam. The estimate adds
-  // the points of the items answered correctly; the official scale starts at 100.
+  /* =============== practice exams (Examens blancs) =============== */
+  // CE: 39 items in 60 minutes, one document each, in the level blocks of TCF_CANADA.ceExam. CO: 39 items in
+  // 35 minutes that run by themselves, each recording heard once (TCF_CANADA.coExam, and the CO exam below).
+  // The estimate adds the points of the items answered correctly; the official scale starts at 100. One exam
+  // is taken at a time (ui.cx, with its skill), and each skill keeps its own unfinished record.
   const goTo = (hash) => { if (location.hash === hash) render(true); else location.hash = hash; };
-  function examScore(exam, ans) {
-    const pts = Object.fromEntries(TC.ceExam.blocks.map(([l, , p]) => [l, p]));
+  const XSPEC = {
+    ce: { spec: TC.ceExam, bank: () => T.COMP.ceExams || [], home: "comp.ce.exam", label: "Examen blanc CE", ip: "exam--ce" },
+    co: { spec: TC.coExam, bank: () => T.COMP.coExams || [], home: "comp.co.exam", label: "Examen blanc CO", ip: "exam--co" },
+  };
+  // Exams and records from before the CO exam have no skill: they're reading exams.
+  const skillOf = (x) => (x && x.skill === "co" ? "co" : "ce");
+  const examRunning = () => !!(ui.cx && !ui.cx.done);
+  // Options read aloud keep the order they're heard in; written ones are shuffled.
+  const examOrder = (it) => (it.kind === "pic" || it.kind === "reply" ? [0, 1, 2, 3] : shuffle(it.options.map((_, j) => j)));
+  // Claude's exams exist only in this page's memory, so their attempts and records keep a copy.
+  const examSnap = (ex) => ({ id: ex.id, title: ex.title, src: "claude", items: ex.items.map((it) => { const o = Object.assign({}, it); delete o.order; return o; }) });
+  function examScore(exam, ans, skill) {
+    const pts = Object.fromEntries(XSPEC[skill].spec.blocks.map(([l, , p]) => [l, p]));
     const byLevel = {};
     let correct = 0, raw = 0;
     exam.items.forEach((it, i) => {
@@ -2104,81 +2315,289 @@
     });
     return { correct, total: exam.items.length, byLevel, est: Math.min(699, Math.max(100, raw)) };
   }
-  function examStart(exam) {
-    if (ui.cx && !ui.cx.done) { goTo("#comp.ce.exam"); return; }
+  function examStart(exam, skill) {
+    skill = skill || "ce";
+    if (examRunning()) { goTo("#" + XSPEC[skillOf(ui.cx)].home); return; }
+    const X = XSPEC[skill];
     const ex = clone(exam);
     ex.src = ex.src || "built-in";
-    ex.items.forEach((it) => { it.order = shuffle(it.options.map((_, j) => j)); });
-    ui.cx = { exam: ex, i: 0, ans: {}, done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
+    ex.items.forEach((it) => { it.order = examOrder(it); });
+    ui.cx = { skill, exam: ex, i: 0, ans: {}, done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
     if (exam === ui.cxReady) ui.cxReady = null;
-    timerSet(TC.ceExam.minutes * 60, "Examen blanc CE", "comp.ce.exam");
+    timerSet(X.spec.minutes * 60, X.label, X.home);
     timerStart();
-    goTo("#comp.ce.exam");
+    if (skill === "co") { stopAudio(); ui.cx.play = coxFresh(ex.items[0]); coxUnlock(); examKeep(); }
+    goTo("#" + X.home);
     window.scrollTo(0, 0);
+    if (skill === "co") coxRun();
   }
   function examSubmit(reason) {
     const cx = ui.cx;
     if (!cx || cx.done) return;
-    const secs = timer.home === "comp.ce.exam" ? Math.round(timer.total - timerRemaining()) : Math.round((Date.now() - cx.t0) / 1000);
+    const skill = skillOf(cx), X = XSPEC[skill];
+    const secs = timer.home === X.home ? Math.round(timer.total - timerRemaining()) : Math.round((Date.now() - cx.t0) / 1000);
     timerSet(0, "", ""); // stops the exam clock and hides it from the sidebar
-    const r = examScore(cx.exam, cx.ans);
+    if (skill === "co") coxStop();
+    const r = examScore(cx.exam, cx.ans, skill);
     const id = uid();
     Object.assign(cx, { done: true, confirm: false, quit: false, attemptId: id, result: Object.assign(r, { secs, timeUp: reason === "time", date: todayStr() }) });
     const doc = {
-      skill: "ce", kind: "exam", level: "A1–C2", title: cx.exam.title, theme: "", date: todayStr(), ts: Date.now(),
+      skill, kind: "exam", level: "A1–C2", title: cx.exam.title, theme: "", date: todayStr(), ts: Date.now(),
       score: r.correct, total: r.total, src: cx.exam.src === "claude" ? "exam-claude" : "exam", gaps: {},
       setId: cx.exam.id, answers: cx.exam.items.map((_, i) => (cx.ans[i] == null ? null : cx.ans[i])),
       secs, timed: true, timeUp: reason === "time", est: r.est, byLevel: r.byLevel,
     };
-    // Claude's exams exist only in this page's memory, so the attempt keeps a copy for review.
-    if (cx.exam.src === "claude") doc.snap = { id: cx.exam.id, title: cx.exam.title, src: "claude", items: cx.exam.items.map((it) => { const o = Object.assign({}, it); delete o.order; return o; }) };
+    if (cx.exam.src === "claude") doc.snap = examSnap(cx.exam);
     put("comp", id, doc);
     // Every practice exam goes into the score log that the Phase 4–5 criteria read, labelled as an estimate.
-    put("mocks", uid(), { date: todayStr(), ts: Date.now(), label: `${cx.exam.title} · CE (site estimate)`, ce: r.est, compId: id });
-    ipDrop("exam--ce");
-    ui.c.open["ce:g:exams"] = true;
-    ui.c.open["ce:x:" + cx.exam.id] = true;
-    autoTick("comp.ce.exam");
-    toast(reason === "time" ? "Time's up: your exam was handed in, and its estimated score added to Progress." : "Handed in. The estimated score is also in Progress → Scores and NCLC.");
+    put("mocks", uid(), { date: todayStr(), ts: Date.now(), label: `${cx.exam.title} · ${skill.toUpperCase()} (site estimate)`, [skill]: r.est, compId: id });
+    ipDrop(X.ip);
+    ui.c.open[`${skill}:g:exams`] = true;
+    ui.c.open[`${skill}:x:${cx.exam.id}`] = true;
+    autoTick(X.home);
+    toast(reason === "time" ? "Time's up: your exam was handed in, and its estimated score added to Progress."
+      : reason === "end" ? "That was the last question. The estimated score is also in Progress → Scores and NCLC."
+      : "Handed in. The estimated score is also in Progress → Scores and NCLC.");
     render(true);
     window.scrollTo(0, 0);
   }
-  // The exam is kept from its first answer, with the time left on its clock. Claude's exams keep a copy.
+  // A reading exam is kept from its first answer, with the time left on its clock. A listening exam runs by
+  // itself, so it's kept from its start, with its phase and how far into the recording it was.
   function examKeep() {
     const cx = ui.cx;
-    if (!cx || cx.done || !Object.keys(cx.ans).length) return;
-    const left = timer.home === "comp.ce.exam" ? Math.max(0, Math.round(timerRemaining())) : null;
-    const doc = { kind: "exam", title: cx.exam.title, route: "comp.ce.exam", examId: cx.exam.id, src: cx.exam.src, total: cx.exam.items.length, ans: cx.ans, i: cx.i, left };
-    if (cx.exam.src === "claude") doc.snap = { id: cx.exam.id, title: cx.exam.title, src: "claude", items: cx.exam.items.map((it) => { const o = Object.assign({}, it); delete o.order; return o; }) };
-    ipSave("exam--ce", doc);
+    if (!cx || cx.done) return;
+    const skill = skillOf(cx), X = XSPEC[skill];
+    if (skill === "ce" && !Object.keys(cx.ans).length) return;
+    const left = timer.home === X.home ? Math.max(0, Math.round(timerRemaining())) : null;
+    const doc = { kind: "exam", skill, title: cx.exam.title, route: X.home, examId: cx.exam.id, src: cx.exam.src, total: cx.exam.items.length, ans: cx.ans, i: cx.i, left };
+    if (skill === "co" && cx.play) Object.assign(doc, { phase: cx.play.phase, phaseLeft: Math.round(cx.play.left * 10) / 10, pos: Math.round(coxPos() * 10) / 10 });
+    if (cx.exam.src === "claude") doc.snap = examSnap(cx.exam);
+    ipSave(X.ip, doc);
   }
-  // Pick the exam up again; the clock carries on from the time that was left.
+  // Pick the exam up again; the clock carries on from the time that was left, and a listening exam from its phase.
   function examResume(ip) {
-    if (ui.cx && !ui.cx.done) { goTo("#comp.ce.exam"); return; }
-    const base = (T.COMP.ceExams || []).find((e) => e.id === ip.examId) || ip.snap;
+    if (examRunning()) { goTo("#" + XSPEC[skillOf(ui.cx)].home); return; }
+    const skill = skillOf(ip), X = XSPEC[skill];
+    const base = X.bank().find((e) => e.id === ip.examId) || ip.snap;
     if (!base) { toast("This exam's text wasn't saved, so it can't be picked up again."); return; }
     const ex = clone(base);
     ex.src = ex.src || ip.src || "built-in";
-    ex.items.forEach((it) => { it.order = shuffle(it.options.map((_, j) => j)); });
-    ui.cx = { exam: ex, i: Math.max(0, Math.min(Number(ip.i) || 0, ex.items.length - 1)), ans: Object.assign({}, ip.ans), done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
-    const full = TC.ceExam.minutes * 60;
-    timerSet(full, "Examen blanc CE", "comp.ce.exam");
+    ex.items.forEach((it) => { it.order = examOrder(it); });
+    ui.cx = { skill, exam: ex, i: Math.max(0, Math.min(Number(ip.i) || 0, ex.items.length - 1)), ans: Object.assign({}, ip.ans), done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
+    const full = X.spec.minutes * 60;
+    timerSet(full, X.label, X.home);
     if (ip.left != null) timer.left = Math.min(full, Math.max(0, Number(ip.left)));
     timerStart();
-    goTo("#comp.ce.exam");
+    if (skill === "co") {
+      stopAudio();
+      const p = coxFresh(ex.items[ui.cx.i]);
+      if (["read", "listen", "answer"].includes(ip.phase)) Object.assign(p, { phase: ip.phase, left: Number(ip.phaseLeft) > 0 ? Number(ip.phaseLeft) : p.left, pos: Number(ip.pos) || 0 });
+      ui.cx.play = p;
+      coxUnlock();
+    }
+    goTo("#" + X.home);
     window.scrollTo(0, 0);
+    if (skill === "co") coxRun();
   }
   function examReview(attemptId) {
-    if (ui.cx && !ui.cx.done) { toast("Finish or quit the exam in progress first."); return; }
-    const a = compAttempts("ce").find((x) => x.id === attemptId);
-    const exam = a && ((T.COMP.ceExams || []).find((e) => e.id === a.setId) || a.snap);
+    if (examRunning()) { toast("Finish or quit the exam in progress first."); return; }
+    const a = list("comp").find((x) => x.id === attemptId && x.kind === "exam");
+    const skill = skillOf(a), X = XSPEC[skill];
+    const exam = a && (X.bank().find((e) => e.id === a.setId) || a.snap);
     if (!exam) { toast("This exam's text wasn't saved, so it can't be reviewed."); return; }
     const ex = clone(exam);
     ex.items.forEach((it) => { it.order = it.options.map((_, j) => j); });
     const ans = {};
     arr(a.answers).forEach((k, i) => { if (k != null) ans[i] = k; });
-    ui.cx = { exam: ex, i: 0, ans, done: true, confirm: false, quit: false, attemptId: a.id, result: { correct: a.score, total: a.total, est: a.est, byLevel: a.byLevel, secs: a.secs, timeUp: a.timeUp, date: a.date, review: true } };
-    goTo("#comp.ce.exam");
+    ui.cx = { skill, exam: ex, i: 0, ans, done: true, confirm: false, quit: false, attemptId: a.id, result: { correct: a.score, total: a.total, est: a.est, byLevel: a.byLevel, secs: a.secs, timeUp: a.timeUp, date: a.date, review: true } };
+    goTo("#" + X.home);
+  }
+
+  /* ---------- the CO exam, item by item ---------- */
+  // As on the real test, each item runs by itself: a pause to read (the picture or the written options), the
+  // recording once (a document's ends with its question, read by the narrator), then a short window to answer.
+  // Valider, or the end of the window, moves on, and there's no going back. Pause stops the clock, the countdown
+  // and the recording together; leaving the page or the tab pauses too, and a refresh brings the exam back paused.
+  const SILENT = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+  let coxAudio = null, coxSrc = "", coxTick = 0, coxToken = 0;
+  const coxReadSecs = (it) => (it.kind === "reply" ? TC.coExam.read.reply : TC.coExam.read[it.level]);
+  const coxFresh = (it) => ({ phase: "read", left: coxReadSecs(it), pos: 0, paused: false });
+  const coxPos = () => { const p = ui.cx && ui.cx.play; if (!p || p.phase !== "listen") return 0; return coxAudio && coxSrc && !p.paused ? coxAudio.currentTime || 0 : p.pos || 0; };
+  // One Audio element plays the whole exam. Playing it once inside the click that starts or resumes the exam
+  // lets the later items play by themselves, which Safari on iPhone would otherwise block.
+  function coxUnlock() {
+    if (!coxAudio) coxAudio = new Audio();
+    if (coxSrc) return;
+    try { coxAudio.src = SILENT; const pr = coxAudio.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (_) {}
+  }
+  function coxStop() {
+    clearInterval(coxTick);
+    coxTick = 0;
+    coxToken++;
+    if (coxAudio) { try { coxAudio.pause(); } catch (_) {} }
+    try { if (synth) synth.cancel(); } catch (_) {}
+  }
+  // Starts, or carries on, the current item's phase.
+  function coxRun() {
+    clearInterval(coxTick);
+    coxTick = 0;
+    const cx = ui.cx;
+    if (!cx || cx.done || cx.skill !== "co" || !cx.play || cx.play.paused) return;
+    const p = cx.play;
+    if (p.phase === "listen") { coxListen(); return; }
+    let last = Date.now();
+    coxTick = setInterval(() => {
+      const now = Date.now();
+      p.left -= (now - last) / 1000;
+      last = now;
+      if (p.left > 0) { paintCox(); return; }
+      clearInterval(coxTick);
+      coxTick = 0;
+      if (p.phase === "read") { p.phase = "listen"; p.pos = 0; render(true); coxListen(); } else coxNext();
+    }, 200);
+    paintCox();
+  }
+  function coxListen() {
+    const cx = ui.cx, p = cx.play, it = cx.exam.items[cx.i];
+    const token = ++coxToken;
+    if (!coxAudio) coxAudio = new Audio();
+    const a = coxAudio;
+    a.onended = () => { if (token === coxToken) coxHeard(); };
+    a.ontimeupdate = () => { if (token === coxToken) paintCox(); };
+    // A recording that can't load is read by the browser's French voice instead.
+    a.onerror = () => { if (token !== coxToken || !coxSrc) return; coxSrc = ""; coxSpeak(it, token); };
+    const at = p.pos || 0;
+    if (coxSrc !== it.audio) {
+      coxSrc = it.audio;
+      a.onloadedmetadata = at ? () => { if (token === coxToken) { try { a.currentTime = at; } catch (_) {} } } : null;
+      a.src = it.audio;
+    } else if (at) { try { a.currentTime = at; } catch (_) {} }
+    const pr = a.play();
+    if (pr && pr.catch) pr.catch((e) => {
+      if (token !== coxToken || (e && e.name === "AbortError")) return;
+      // Not allowed to play by itself (after a refresh, say): the exam waits for Resume.
+      if (e && e.name === "NotAllowedError") { coxPause(); return; }
+      a.onerror();
+    });
+  }
+  function coxSpeak(it, token) {
+    if (!synth) { coxHeard(); return; }
+    const v = bestVoice();
+    let k = 0;
+    const next = () => {
+      if (token !== coxToken) return;
+      if (k >= it.lines.length) { coxHeard(); return; }
+      const u = new SpeechSynthesisUtterance(ttsText(it.lines[k++].text));
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "fr-FR";
+      let done = false;
+      const go = () => { if (done) return; done = true; setTimeout(next, 600); };
+      u.onend = go;
+      u.onerror = go;
+      synth.speak(u);
+    };
+    next();
+  }
+  // The recording has ended: a few seconds to answer.
+  function coxHeard() {
+    const cx = ui.cx;
+    if (!cx || cx.done || cx.skill !== "co") return;
+    cx.play = { phase: "answer", left: TC.coExam.answer[cx.exam.items[cx.i].level], pos: 0, paused: false };
+    examKeep();
+    render(true);
+    coxRun();
+  }
+  // On to the next item, or hand in after the last one.
+  function coxNext() {
+    const cx = ui.cx;
+    if (!cx || cx.done || cx.skill !== "co") return;
+    coxStop();
+    if (cx.i >= cx.exam.items.length - 1) { examSubmit("end"); return; }
+    cx.i++;
+    cx.play = coxFresh(cx.exam.items[cx.i]);
+    examKeep();
+    render(true);
+    window.scrollTo(0, 0);
+    coxRun();
+  }
+  function coxPause(quiet) {
+    const cx = ui.cx;
+    if (!cx || cx.done || cx.skill !== "co" || !cx.play || cx.play.paused) return;
+    cx.play.pos = coxPos();
+    cx.play.paused = true;
+    coxStop();
+    timerPause();
+    examKeep();
+    if (!quiet) render(true);
+  }
+  function coxResume() {
+    const cx = ui.cx;
+    if (!cx || cx.done || cx.skill !== "co" || !cx.play || !cx.play.paused) return;
+    cx.play.paused = false;
+    coxUnlock();
+    timerStart();
+    render(true);
+    coxRun();
+  }
+  // The countdown and the recording's progress change in place, without redrawing the page.
+  function paintCox() {
+    const cx = ui.cx;
+    if (!cx || cx.done || cx.skill !== "co" || !cx.play) return;
+    const left = Math.max(0, Math.ceil(cx.play.left)) + " s";
+    document.querySelectorAll("[data-cox-left]").forEach((el) => { el.textContent = left; });
+    const a = coxAudio, dur = a && coxSrc && isFinite(a.duration) ? a.duration : 0;
+    const w = dur ? Math.min(100, ((a.currentTime || 0) / dur) * 100) : 0;
+    document.querySelectorAll("[data-cox-bar]").forEach((el) => { el.style.width = w + "%"; });
+  }
+  // A drawing from exam-co.js, in the page's ink. During the exam it's hidden from screen readers, since a
+  // description would give the answer away; the review describes it.
+  const sceneSvg = (art, label) => `<svg class="scene" viewBox="0 0 320 200" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" ${label ? `role="img" aria-label="${esc(label)}"` : `aria-hidden="true"`}>${art}</svg>`;
+  const COX_CONSIGNE = {
+    pic: "Écoutez les quatre propositions. Choisissez celle qui correspond à l'image.",
+    reply: "Écoutez la question et les quatre réponses. Choisissez la réponse qui convient.",
+    doc: "Écoutez le document et la question. Choisissez la bonne réponse.",
+  };
+  function coxView(cx, back) {
+    const it = cx.exam.items[cx.i], n = cx.exam.items.length, p = cx.play || coxFresh(it);
+    const paused = !!p.paused;
+    const clock = `<div class="timer"><span class="clock" data-timer>${fmtClock(timerRemaining())}</span><button class="btn sm" data-act="${paused ? "cox-resume" : "cox-pause"}">${paused ? "Resume" : "Pause"}</button></div>`;
+    const strip = `<div class="qnav cox-strip" aria-label="Progress: question ${cx.i + 1} of ${n}">${cx.exam.items.map((x, j) => `<span class="${cx.ans[j] != null ? "done" : ""}" ${j === cx.i ? `aria-current="true"` : ""}>${j + 1}</span>`).join("")}</div>`;
+    const phase = p.phase === "read" ? `<span class="pill">Lecture</span><span class="small muted">The recording starts in <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`
+      : p.phase === "listen" ? `<span class="pill info">Écoute</span><div class="bar cox-bar" aria-hidden="true"><i data-cox-bar style="width:0%"></i></div>`
+      : `<span class="pill warn">Réponse</span><span class="small muted">Time left to answer: <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`;
+    const pick = (k, label) => `<label class="opt${it.kind === "doc" ? "" : " letter"}"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${label}</span></label>`;
+    const body = it.kind === "doc"
+      ? `${p.phase === "answer" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}<div class="opts">${it.order.map((k) => pick(k, typo(it.options[k]))).join("")}</div>`
+      : `<div class="letters" role="group" aria-label="Your answer">${it.order.map((k) => pick(k, "ABCD"[k])).join("")}</div>`;
+    return `${back}
+      <div class="row between"><p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p>${clock}</div>
+      ${strip}
+      ${paused ? `<div class="notice">Paused, with the clock. Resume to carry on${p.phase === "listen" ? " from where the recording stopped" : ""}.</div>` : ""}
+      <section class="panel stack cox">
+        <div class="row cox-phase">${phase}</div>
+        <p class="small muted">${COX_CONSIGNE[it.kind]}</p>
+        ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, "")}</figure>` : ""}
+        ${body}
+        <div class="row"><button class="btn primary" data-act="cox-ok" ${p.phase === "answer" && !paused ? "" : "disabled"}>Valider <span class="kbd">↵</span></button><span class="small muted">Choose at any time${it.kind === "doc" ? "" : " (A–D on the keyboard)"}. Valider confirms once the recording has ended, and it's final.</span></div>
+      </section>
+      <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
+  }
+  // One item in the results: the drawing or the situation, the transcript, the options with the right one and
+  // yours, why, and the recording to play again.
+  function coxReviewItem(it, j, a) {
+    const ok = a === it.answer;
+    const lettered = it.kind !== "doc";
+    const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => `<div class="opt ${k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${lettered ? `<b>${"ABCD"[k]}.</b> ` : ""}${typo(it.options[k])}</span></div>`).join("");
+    const said = it.lines.filter((l) => l.speaker !== "Q");
+    const multi = new Set(said.map((l) => l.speaker)).size > 1;
+    const title = it.kind === "pic" ? "Image" : it.kind === "reply" ? "Question et réponses" : esc(it.type || "Document");
+    return `<details class="fold"><summary>${j + 1} · ${esc(it.level)} · <span class="${ok ? "ok-t" : "miss"}">${ok ? "✓" : a == null ? "blank" : "✗"}</span> · ${title}</summary><div class="stack tight" style="margin-top:10px">
+      ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, it.alt)}</figure><p class="small muted fr">${typo(it.alt)}</p>` : ""}
+      ${it.kind === "doc" ? `<p class="small muted fr" style="font-style:italic">${typo(it.situation)}</p><div class="transcript">${said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div>` : ""}
+      ${it.kind !== "pic" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
+      <div class="opts">${opts}</div>
+      ${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}
+      ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
+    </div></details>`;
   }
   // Claude writes a fresh exam in six batches, one per level, each checked before it's kept.
   function examPrompt(lvl, n) {
@@ -2186,6 +2605,7 @@
   }
   async function examGenerate() {
     if (ui.cxGen || (ui.cx && !ui.cx.done)) return;
+    ui.cx = null; // results asked for a new exam close, so its progress and "ready" notice show
     ui.cxGen = { step: 0, total: TC.ceExam.blocks.length, lvl: "", items: [] };
     render(true);
     for (const [lvl, n] of TC.ceExam.blocks) {
@@ -2205,26 +2625,33 @@
     ui.cxGen = null;
     render(true);
   }
-  // A slim panel on the CE practice page that leads to the exam.
-  function examCta() {
-    const last = compAttempts("ce").find((a) => a.kind === "exam");
-    const running = ui.cx && !ui.cx.done;
-    const paused = !running && ipGet("exam--ce");
-    return `<section class="panel flat row between"><div class="stack tight"><p class="h3 with-ico">${ico("exam")}Examen blanc</p><p class="small muted">The full reading test: 39 questions in 60 minutes, from A1 to C2, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf("ce", last.est))}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="exam--ce">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#comp.ce.exam">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
+  // A slim panel on each practice page that leads to its exam.
+  function examCta(skill) {
+    const X = XSPEC[skill];
+    // An older copy of data.js or of the page (from the browser's cache) has no listening exam yet.
+    if (!X.spec || !X.bank().length) return "";
+    const last = compAttempts(skill).find((a) => a.kind === "exam");
+    const running = examRunning() && skillOf(ui.cx) === skill;
+    const paused = !running && ipGet(X.ip);
+    const what = skill === "co" ? "The full listening test: 39 questions in about 35 minutes, from A1 to C2, each recording heard once" : "The full reading test: 39 questions in 60 minutes, from A1 to C2";
+    return `<section class="panel flat row between"><div class="stack tight"><p class="h3 with-ico">${ico("exam")}Examen blanc</p><p class="small muted">${what}, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="${X.ip}">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#${X.home}">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
   }
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
-  function examView() {
-    const spec = TC.ceExam, cx = ui.cx;
-    const back = `<div><a class="btn ghost sm" href="#comp.ce">← Practice sets</a></div>`;
-    if (ui.cxGen) {
+  function examView(skill) {
+    const X = XSPEC[skill], spec = X.spec;
+    const cx = ui.cx && skillOf(ui.cx) === skill ? ui.cx : null;
+    const back = `<div><a class="btn ghost sm" href="#comp.${skill}">← ${skill === "co" ? "Listening" : "Practice"} sets</a></div>`;
+    if (!spec || !X.bank().length) return `${back}<div class="notice">This exam needs the latest version of the page. Reload it to load the exam.</div>`;
+    if (skill === "ce" && ui.cxGen) {
       const g = ui.cxGen;
       return `${back}<section class="panel stack"><p class="h3 thinking">Claude is writing your exam: the ${esc(g.lvl)} questions (${g.step} of ${g.total})</p><p class="small muted">Six batches, from A1 to C2. It usually takes one to three minutes, and you can practise on another page meanwhile.</p><div><button class="btn sm" data-act="x-gen-stop">Stop</button></div></section>`;
     }
+    if (cx && !cx.done && skill === "co") return coxView(cx, back);
     if (cx && !cx.done) {
       const it = cx.exam.items[cx.i], n = cx.exam.items.length;
       const answered = Object.keys(cx.ans).length, blanks = n - answered;
-      const mine = timer.home === "comp.ce.exam";
-      const clock = `<div class="timer"><span class="clock" ${mine ? "data-timer" : ""}>${mine ? fmtClock(timerRemaining()) : "—"}</span>${mine ? `<button class="btn sm" data-act="timer-toggle" data-home="comp.ce.exam" data-sec="${spec.minutes * 60}" data-label="Examen blanc CE" data-timer-btn>${timer.running ? "Pause" : "Resume"}</button>` : ""}</div>`;
+      const mine = timer.home === X.home;
+      const clock = `<div class="timer"><span class="clock" ${mine ? "data-timer" : ""}>${mine ? fmtClock(timerRemaining()) : "—"}</span>${mine ? `<button class="btn sm" data-act="timer-toggle" data-home="${X.home}" data-sec="${spec.minutes * 60}" data-label="${X.label}" data-timer-btn>${timer.running ? "Pause" : "Resume"}</button>` : ""}</div>`;
       const nav = `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((x, j) => `<button data-act="x-go" data-i="${j}" class="${cx.ans[j] != null ? "done" : ""}" aria-current="${j === cx.i}" aria-label="Question ${j + 1}${cx.ans[j] != null ? ", answered" : ""}">${j + 1}</button>`).join("")}</nav>`;
       return `${back}
         <div class="row between"><p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p>${clock}</div>
@@ -2239,35 +2666,58 @@
       const r = cx.result;
       const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
       const review = cx.exam.items.map((it, j) => {
-        const a = cx.ans[j], ok = a === it.answer;
+        const a = cx.ans[j];
+        if (skill === "co") return coxReviewItem(it, j, a);
+        const ok = a === it.answer;
         const opts = it.order.map((k) => `<div class="opt ${k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${typo(it.options[k])}</span></div>`).join("");
         return `<details class="fold"><summary>${j + 1} · ${esc(it.level)} · <span class="${ok ? "ok-t" : "miss"}">${ok ? "✓" : a == null ? "blank" : "✗"}</span> · ${typo(it.title || it.type)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
       }).join("");
+      // What to do next, right from the results: the built-in exams not done yet, a retake, a new one from Claude, or the list.
+      const doneIds = new Set(compAttempts(skill).filter((a) => a.kind === "exam").map((a) => a.setId));
+      const fresh = X.bank().filter((e) => e.id !== cx.exam.id && !doneIds.has(e.id));
+      const next = fresh.map((e) => `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>`).join("")
+        + `<button class="btn" data-act="x-retake">Retake ${esc(cx.exam.title)}</button>${skill === "ce" ? claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn") : ""}`
+        + `<button class="btn ghost" data-act="x-close">All exams</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a>`;
       return `${back}
         <section class="panel stack">
-          <p class="eyebrow">${esc(cx.exam.title)} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
-          <div class="row"><span class="scorebig">≈ ${r.est}</span>${nclcTag(r.est)}<span class="pill">${cefrOf(r.est)}</span></div>
-          <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in reading is 453–498.</p>
+          <p class="eyebrow">${esc(cx.exam.title)} · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
+          <div class="row"><span class="scorebig">≈ ${r.est}</span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span></div>
+          <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in ${skill === "co" ? "listening is 458–502" : "reading is 453–498"}.</p>
           <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
           <p class="small muted">${esc(spec.note)}${r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
-          <div class="row"><button class="btn" data-act="x-close">Done</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a></div>
+          <div class="row">${next}</div>
+          <p class="small muted">A retake asks questions you've already seen, so its score reads high.</p>
         </section>
-        <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see the document, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
+        <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
     }
-    const exams = compAttempts("ce").filter((a) => a.kind === "exam");
-    const starts = (T.COMP.ceExams || []).map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}`; }).join("");
-    const paused = ipGet("exam--ce");
+    const exams = compAttempts(skill).filter((a) => a.kind === "exam");
+    // One row per built-in exam, so each note sits by its own exam. The ones not done yet are the primary choice.
+    const starts = X.bank().map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<div class="row"><button class="btn ${prev ? "" : "primary"}" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}</div>`; }).join("");
+    const paused = ipGet(X.ip);
+    // The other skill's exam is still going: one exam at a time.
+    const other = examRunning() && skillOf(ui.cx) !== skill;
+    const rules = skill === "co"
+      ? `<p>39 questions in about 35 minutes, getting harder from A1 to C2, as on the TCF Canada. Each recording plays once, and the exam moves on by itself.</p>
+        <ul class="small" style="margin:0;padding-left:20px">
+          <li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li>
+          <li>Questions 1–4: look at the picture and listen to four statements, then choose the one that matches it. Questions 5–7: listen to a question and four replies, then choose the right reply. From question 8: read the four options, listen to the document and its question, then choose.</li>
+          <li>Use headphones if you can. If you're interrupted, Pause stops everything; the real test doesn't stop.</li>
+          <li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li>
+        </ul>
+        <p class="small muted">Unlike the real test, the pictures are drawings, and the recordings use Microsoft's voices for now: mostly from France, with a few from Québec, as on the real test.</p>`
+      : `<p>39 questions in 60 minutes, one document each, getting harder from A1 to C2, as on the TCF Canada.</p>
+        <ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>`;
     return `${back}
       <section class="panel stack">
-        <p class="h3">Examen blanc · Compréhension écrite</p>
-        <p>39 questions in 60 minutes, one document each, getting harder from A1 to C2, as on the TCF Canada.</p>
-        <ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>
+        <p class="h3">Examen blanc · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"}</p>
+        ${rules}
         <p class="small muted">${esc(spec.note)}</p>
-        ${paused ? `<div class="notice"><b>You have an unfinished exam:</b> ${esc(paused.title)}, ${esc(ipProgress(paused))}. Pick it up where you stopped, or discard it to start another.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="exam--ce">Resume</button>${discardBtn("exam--ce")}</div></div>`
-          : `<div class="row">${starts}${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>`}
-        ${ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
+        ${other ? `<div class="notice">Your ${skillOf(ui.cx) === "co" ? "listening" : "reading"} exam is still going. Finish it or quit it before starting this one.<div class="row" style="margin-top:8px"><a class="btn sm primary" href="#${XSPEC[skillOf(ui.cx)].home}">Back to that exam</a></div></div>`
+          : paused ? `<div class="notice"><b>You have an unfinished exam:</b> ${esc(paused.title)}, ${esc(ipProgress(paused))}. Pick it up where you stopped, or discard it to start another.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${X.ip}">Resume</button>${discardBtn(X.ip)}</div></div>`
+          : `<div class="stack tight">${starts}${skill === "ce" ? `<div class="row">${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>` : ""}</div>`}
+        ${skill === "ce" && ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
       </section>
-      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est)}<span class="small muted">${a.score}/${a.total}</span>${(T.COMP.ceExams || []).some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
+      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
   /* =============== criteria & scores =============== */
@@ -2276,30 +2726,41 @@
     const [kind, a, b, x] = c.auto.split(":");
     if (kind === "writingZero") return writingZero(a);
     if (kind === "drill") {
-      const n = drillsFor(a, b).length, best = bestPct(a, b);
-      return { ok: n > 0 && best >= Number(x) - 1e-9, note: n ? `Best so far ${pct(best)}` : "No attempts yet" };
+      const m = coldMet(a, b, Number(x), 2);
+      return { ok: m.ok, note: coldNote(m) };
     }
     if (kind === "baseline") {
-      const eo = list("speaking").some((s) => s.task === "t1");
       const co = list("comp").some((c2) => c2.skill === "co");
       const ce = list("comp").some((c2) => c2.skill === "ce");
-      return { ok: eo && co && ce, note: `Tâche 1 ${eo ? "✓" : "—"} · CO ${co ? "✓" : "—"} · CE ${ce ? "✓" : "—"}` };
+      return { ok: co && ce, note: `CO ${co ? "✓" : "—"} · CE ${ce ? "✓" : "—"}` };
     }
     if (kind === "t3ok") {
       const ok = list("writing").some((w) => w.task === "t3" && w.fb && w.fb.tache3 && w.fb.tache3.compared_both && w.fb.tache3.opinion_after_comparison && w.words >= 120 && w.words <= 180);
       return { ok, note: ok ? "Done" : "Needs a corrected Tâche 3 that passes both structure checks and the word count" };
     }
+    // comp:<level>:<share>[:timed]: your first try at each of the last 3 sets at that level, in CO and in CE
+    // (with "timed", CE only counts sets done on the clock). A retake mostly shows what you remember of the set.
     if (kind === "comp") {
-      const th = Number(b);
+      const th = Number(b), clock = x === "timed";
       const res = ["co", "ce"].map((sk) => {
-        const xs = list("comp").filter((c2) => c2.skill === sk && c2.level === a && c2.total).sort((p, q) => (q.ts || 0) - (p.ts || 0)).slice(0, 3);
+        const xs = firstTries(list("comp").filter((c2) => c2.skill === sk && c2.level === a && c2.total && c2.kind !== "exam" && (!clock || sk !== "ce" || c2.timed))).slice(-3);
         return [sk, xs.length ? xs.reduce((s2, c2) => s2 + c2.score / c2.total, 0) / xs.length : null];
       });
-      return { ok: res.every(([, v]) => v != null && v >= th), note: res.map(([sk, v]) => `${sk.toUpperCase()} ${v == null ? "—" : pct(v)}`).join(" · ") + ` (last 3 sets at ${a})` };
+      return { ok: res.every(([, v]) => v != null && v >= th), note: res.map(([sk, v]) => `${sk.toUpperCase()} ${v == null ? "—" : pct(v)}`).join(" · ") + ` (first tries, last 3 sets at ${a}${clock ? ", CE on the clock" : ""})` };
     }
-    if (kind === "eoT3") {
-      const ok = list("speaking").some((s2) => s2.task === "t3" && s2.rubric && s2.rubric.full);
-      return { ok, note: ok ? "Logged" : "Tick “Spoke 3+ minutes” on a saved Tâche 3 attempt" };
+    // pace:<skill>:<level>:<share>: one set at that level answered at exam pace (CE_PACE seconds a question) with that share right.
+    if (kind === "pace") {
+      const per = CE_PACE[b] || 90, th = Number(x);
+      const xs = list("comp").filter((c2) => c2.skill === a && c2.level === b && c2.total && c2.kind !== "exam" && c2.secs > 0);
+      const ok = xs.some((c2) => c2.secs <= per * c2.total && c2.score / c2.total >= th - 1e-9);
+      const quick = xs.slice().sort((p, q) => p.secs / p.total - q.secs / q.total)[0];
+      return { ok, note: ok ? "Done" : quick ? `Your quickest set: ${Math.round(quick.secs / quick.total)} s a question (exam pace: ${per} s)` : "No attempts yet" };
+    }
+    // examFull:<skill>: a practice exam with every question answered before the time ran out.
+    if (kind === "examFull") {
+      const exams = list("comp").filter((c2) => c2.kind === "exam" && c2.skill === a);
+      const ok = exams.some((c2) => !c2.timeUp && arr(c2.answers).length && arr(c2.answers).every((v) => v != null));
+      return { ok, note: ok ? "Done" : exams.length ? "Not yet: answer every question, guessing the last ones if time runs short" : "No practice exam yet" };
     }
     if (kind === "mocks") {
       const ms = list("mocks").sort((p, q) => str(p.date).localeCompare(str(q.date)));
@@ -2350,8 +2811,8 @@
   // empty page from before. Unfinished attempts stay the record: one changed since this copy was saved (on
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
-  const TAB_KEY = "tcf-reussir-tab", TAB_V = 1;
-  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "sp", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied"];
+  const TAB_KEY = "tcf-reussir-tab", TAB_V = 2;
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -2368,6 +2829,7 @@
       u.c = Object.assign({}, ui.c);
       ["player", "inflight", "queued", "failed"].forEach((k) => delete u.c[k]);
       u.w = Object.assign({}, ui.w, { copyOut: null });
+      if (examRunning() && skillOf(ui.cx) === "co" && ui.cx.play) ui.cx.play.pos = coxPos();
       const set = ui.c.set.co;
       const audio = audioEl && set && set.audio ? { id: set.id, t: audioEl.currentTime || 0, ended: ui.c.player === "ended" } : null;
       const tm = timer.total ? { total: timer.total, left: timer.left, base: timer.base, t0: timer.t0, running: timer.running, label: timer.label, home: timer.home, alerted: timer.alerted } : null;
@@ -2397,6 +2859,8 @@
         if (timer.running) { clearInterval(timer.iv); timer.iv = setInterval(paintTimer, 250); }
       }
       if (s.audio) coRemount(s.audio);
+      // A listening exam can't play again by itself after a refresh, so it comes back paused, clock included.
+      if (examRunning() && skillOf(ui.cx) === "co" && ui.cx.play) { ui.cx.play.paused = true; if (timer.home === XSPEC.co.home) timerPause(); }
       tabAt = Number(s.at) || 0;
       tabY = Number.isFinite(s.y) ? s.y : null;
       tabCheck = true;
@@ -2459,6 +2923,9 @@
     paintNav();
     paintFoot();
     paintTimer();
+    paintGrab();
+    paintMarks();
+    grabCheck();
     tabSoon();
   }
   function paintNav() {
@@ -2608,7 +3075,7 @@
     const s = settings(), P = T.PHASES[s.phase - 1];
     const counts = errorCounts(21).slice(0, 5).map(([c, v]) => `${CAT[c]}: ${v.n}`).join("; ") || "nothing logged yet";
     const open = list("homework").filter((h) => !h.done).map((h) => h.text);
-    const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "speaking.t1", "speaking.t2", "speaking.t3", "comp.co", "comp.ce", "comp.ce.exam"]);
+    const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "comp.co", "comp.ce", "comp.ce.exam", "comp.co.exam"]);
     const prompt = `You set daily homework for a TCF Canada learner.\n${PROFILE}\nCurrent phase: ${s.phase}, ${P.name}: ${P.goal}\nMost frequent error categories over the last 3 weeks: ${counts}.\nOpen homework already assigned: ${open.join(" | ") || "none"}.\nSuggest 3 short, concrete homework tasks for tomorrow (5–15 minutes each), each aimed at one weakness, and say where to do it in the app, using one of: ${routes.join(", ")}.\nReply with only JSON: {"homework": [{"text": "task in English, with French examples if useful", "go": "one of the routes"}]}`;
     const out = await ask("hw-suggest", prompt);
     if (!out) return;
@@ -2955,6 +3422,7 @@
     h.verdicts = pr.mistakes.map(([, a], k) => (h.found[k] ? checkAnswer({ a }, str(h.fixes[k])) : "missed"));
     const items = pr.mistakes.map(([wrong, a, , why], k) => ({ kind: "type", src: `« ${wrong} »`, q: prSentence(pr, k), a, why: (h.found[k] ? "" : "Not spotted. ") + why, given: h.found[k] ? str(h.fixes[k]) : "", ok: h.verdicts[k] === "ok" }));
     put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", items });
+    autoTick("grammar.hunt");
     render(true);
   }
   function grammarHunt() {
@@ -3026,8 +3494,8 @@
     const theme = ui.vTheme && THEME[ui.vTheme] ? ui.vTheme : (args[0] === "new" && THEME[args[1]] ? args[1] : defaultTheme());
     const phaseThemes = T.PHASES[s.phase - 1].vocab;
     const opts = T.VOCAB.slice().sort((a, b) => (phaseThemes.includes(b.id) ? 1 : 0) - (phaseThemes.includes(a.id) ? 1 : 0))
-      .map((th) => { const left = themeCards(th.id, cards).filter((c) => !S.srs.has(c.id)).length; return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${phaseThemes.includes(th.id) ? "★ " : ""}${esc(th.label)} · ${left} new</option>`; }).join("");
-    const left = themeCards(theme, cards).filter((c) => !S.srs.has(c.id)).length;
+      .map((th) => { const left = themeCards(th.id, cards).filter(isNew).length; return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${phaseThemes.includes(th.id) ? "★ " : ""}${esc(th.label)} · ${left} new</option>`; }).join("");
+    const left = themeCards(theme, cards).filter(isNew).length;
     const rows = T.VOCAB.map((th) => {
       const cs = themeCards(th.id, cards);
       const lr = cs.filter((c) => S.srs.has(c.id)).length;
@@ -3036,10 +3504,11 @@
         <td><b class="fr">${esc(th.label)}</b><br><span class="small muted">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
         <td class="n">${lr} / ${cs.length}</td><td class="n">${ms}</td>
         <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
-      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}</span><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : "new"}</span></li>`; }).join("")}</ul></details></td></tr>`;
+      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="row"><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning"}</span>${DECK.has(c.id) ? "" : confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</span></li>`; }).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire<small>Spaced repetition: a new card comes back after 1, 2, 4, 7, then 14 days. Anything you miss joins a priority pile reviewed daily until you get it right twice.</small></h1></header>
+      <header class="stack tight"><h1 class="title">Vocabulaire<small>Spaced repetition: a new card comes back after 1, 2, 4, 7, then 14 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</small></h1></header>
+      ${waitPanel()}
       <div class="grid2">
         <section class="panel stack">
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
@@ -3090,7 +3559,7 @@
       <section class="panel flash">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
         ${v.edit ? vocabEditForm(id) : `${front}
-        ${v.shown ? back + (c.ex ? `<p class="ex">${c.ex.split("\n").map((l) => typo(l)).join("<br>")}</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
+        ${v.shown ? back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
         <div class="row">${buttons}</div>`}
       </section>
     </div>`;
@@ -3279,130 +3748,37 @@
     </section>`;
   }
 
-  /* =============== view: speaking =============== */
-  VIEWS.speaking = {
-    render(args) {
-      if (args[0] && T.SPEAKING[args[0]]) ui.sp.task = args[0];
-      const task = ui.sp.task, P = T.SPEAKING[task];
-      const tabs = `<nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#speaking.${k}" role="tab" aria-selected="${k === task}">${T.SPEAKING[k].name}<small>${esc(T.SPEAKING[k].kind)}</small></a>`).join("")}</nav>`;
-      const body = task === "t1" ? speakT1(P) : task === "t2" ? speakT2(P) : speakT3(P);
-      const hist = list("speaking").filter((x) => x.task === task).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 12);
-      return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Expression orale<small>This page can't use your microphone. Record yourself with your phone's voice memos while the timer runs, then listen back once.${claudeOn() ? " Paste a transcript (phone dictation works) if you want Claude's feedback." : ""}</small></h1></header>
-        ${tabs}
-        <p class="small muted">${esc(P.tests)}</p>
-        ${body}
-        <section class="sec"><h2 class="h2">Attempts</h2>${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Prompt</th><th>Self-score</th><th>Notes</th><th></th></tr></thead><tbody>${hist.map((h) => `<tr><td class="n">${shortDate(h.date)}</td><td class="small fr">${typo(h.prompt || "")}</td><td class="n">${h.of ? `${h.score}/${h.of}` : "—"}</td><td class="small">${esc(h.notes || "")}${h.fb && h.fb.level ? ` <span class="pill">${esc(h.fb.level)}</span>` : ""}</td><td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn ghost sm" data-act="sp-open" data-id="${esc(h.id)}">${ui.sp.viewing === h.id ? "Close" : "Open"}</button>${confirmBtn("sp-del-" + h.id, "Delete this attempt", "sp-del", `data-id="${esc(h.id)}"`)}</span></td></tr>${ui.sp.viewing === h.id ? `<tr><td colspan="5">${spReview(h)}</td></tr>` : ""}`).join("")}</tbody></table></div>` : `<p class="small muted">Saved attempts collect here, so you can compare this week's recording notes with last week's.</p>`}</section>
-      </div>`;
-    },
-    after() { scrollChat(); },
-  };
-  function rubricBlock(task, P) {
-    const r = ui.sp.rubric[task] || {};
-    return `<section class="stack tight"><p class="h3">Self-review</p>
-      ${P.rubric ? P.rubric.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="sp-rubric" data-k="${k}" ${r[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("") : ""}
-      <label class="field">2–3 concrete fixes for next time<textarea id="sp-notes" data-input="sp-notes" rows="3" placeholder="e.g. vary connectors: d'ailleurs, en plus; add one past-tense detail">${esc(ui.sp.notes[task])}</textarea></label>
-    </section>`;
-  }
-  function transcriptBlock(task) {
-    const fb = ui.sp.fb[task];
-    return `<section class="stack tight"><p class="h3">Transcript <span class="small muted">· optional</span></p>
-      <textarea id="sp-trans" data-input="sp-trans" rows="5" lang="fr" spellcheck="false" placeholder="Paste what you said, from your phone's dictation or typed from the recording.">${esc(ui.sp.trans[task])}</textarea>
-      <div class="row">${claudeBtn("sp-fb-" + task, "sp-fb", "Get feedback from Claude", `data-task="${task}"`, "btn")}</div>
-      ${fb ? spFbHTML(fb) : ""}
-    </section>`;
-  }
-  function spFbHTML(fb, saved) {
-    return `<div class="panel flat stack">
-      ${fb.level ? `<div class="fb-head"><span class="level">${esc(fb.level)}</span><p>${esc(fb.summary)}</p></div>` : `<p>${esc(fb.summary)}</p>`}
-      ${criteriaTable(fb.criteria, "TCF Canada speaking criteria. Pronunciation can't be judged from a transcript.")}
-      ${fb.coverage ? `<div class="flags">${fb.count ? `<span class="pill">${fb.count} questions</span>` : ""}${Object.entries(fb.coverage).map(([k, v]) => `<span class="pill ${v ? "ok" : "bad"}">${v ? "✓" : "✗"} ${esc(k)}</span>`).join("")}</div>` : ""}
-      ${fb.structure && fb.structure.length ? `<ul class="hw">${fb.structure.map((st) => `<li style="grid-template-columns:auto minmax(0,1fr)"><b style="color:var(${st.done ? "--green" : "--red"})">${st.done ? "✓" : "✗"}</b><span>${esc(st.step)}${st.comment ? `<small>${esc(st.comment)}</small>` : ""}</span></li>`).join("")}</ul>` : ""}
-      <div class="stack tight"><p class="h3">Corrections</p>${errList(fb.errors, true)}</div>
-      ${fb.next && fb.next.length ? `<div class="stack tight"><p class="h3">${fb.better ? "Stronger questions" : "Next time"}</p><ul class="small" style="margin:0;padding-left:20px">${fb.next.map((x) => `<li class="${fb.better ? "fr" : ""}">${typo(x)}</li>`).join("")}</ul></div>` : ""}
-      ${saved ? "" : `<p class="small muted">Save the attempt to add these corrections to your error log.</p>`}
+  /* =============== view: comprehension =============== */
+  // Easy French every day (#comp.free.co, #comp.free.ce): the plan's last block, done outside study time.
+  // The page says how to do it, lists the sources (T.COMP.free) and ticks today's block.
+  function freeView(skill) {
+    const co = skill === "co";
+    const src = arr((T.COMP.free || {})[skill]);
+    const tabs = `<nav class="tabs" role="tablist"><a href="#comp.free.co" role="tab" aria-selected="${co}">${ico("listen")}Écoute libre<small>easy listening</small></a><a href="#comp.free.ce" role="tab" aria-selected="${!co}">${ico("read")}Lecture libre<small>easy reading</small></a></nav>`;
+    const tips = [
+      co ? "Pick something you can follow without pausing: you know nearly every word. If you're lost every few sentences, go easier, not harder." : "Pick something you can read without stopping: you know nearly every word. If every line has a new one, go easier, not harder.",
+      co ? "Don't rewind for every word. Follow the story, and let the rest wash over you." : "Don't look words up as you go. Read on, and guess from the context.",
+      "Choose what you'd enjoy in English too. Twenty minutes you look forward to beat an hour you put off.",
+      co ? "A few times a week, pick a Canadian source: the TCF Canada uses some Canadian accents." : "A word that keeps coming back is worth a card: add it in Vocabulaire, two or three a session at most.",
+    ];
+    return `<div class="wrap">
+      <header class="stack tight"><h1 class="title">${co ? "Écoute libre" : "Lecture libre"}<small>Easy French every day, outside your study time: on your commute, while you cook, before bed. It's the input half of the plan, and it's how vocabulary and speed grow.</small></h1></header>
+      ${tabs}
+      <div class="grid2">
+        <section class="panel stack" style="align-content:start"><p class="h3">How to do it</p><ul class="small" style="margin:0;padding-left:20px">${tips.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>
+        <section class="panel stack" style="align-content:start"><p class="h3">Where to find it</p><ul class="links">${src.map((r) => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)} ↗</a><span class="small muted">${esc(r.what)}</span></li>`).join("")}</ul></section>
+      </div>
+      <div class="row"><button class="btn primary" data-act="free-done" data-skill="${skill}">Done for today</button><span class="small muted">Ticks today's easy listening or reading block.</span></div>
     </div>`;
   }
-  function speakT1(P) {
-    return `<div class="grid2">
-      <section class="panel stack">
-        <div class="row between"><p class="h3 with-ico">${ico("timer")}Timer</p><span class="small muted">2 min on exam day, no preparation</span></div>
-        ${timerUI("speaking.t1", "Tâche 1 oral", [[120, "2:00 exam"], [60, "1:00"]])}
-        <p class="h3">Structure</p>
-        <ol class="steps">${P.structure.map((x) => `<li style="grid-template-columns:minmax(0,1fr)"><b>${esc(x)}</b></li>`).join("")}</ol>
-      </section>
-      <section class="panel stack">
-        <p class="h3">The examiner may ask</p>
-        <ul class="phrases">${arr(P.questions).map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
-        <p class="h3">Useful phrases</p>
-        <ul class="phrases">${P.phrases.map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
-        <p class="small"><b>Plateau mistake:</b> ${esc(P.mistake)}</p>
-      </section>
-    </div>
-    <section class="panel stack">${rubricBlock("t1", P)}${transcriptBlock("t1")}<div class="row"><button class="btn primary" data-act="sp-save" data-task="t1">Save this attempt</button></div></section>`;
-  }
-  function speakT2(P) {
-    const sc = spPrompt("t2");
-    const c = ui.sp.chat;
-    const cov = ui.sp.covered;
-    const chat = c ? `<div class="chat" id="chat-log">${c.turns.filter((t) => !t.rules).map((t) => `<div class="msg ${t.role === "user" ? "me" : "them"}"><small>${t.role === "user" ? "Vous" : "Examinateur"}</small>${typo(t.content)}</div>`).join("")}${busy.chat ? `<div class="msg them"><small>Examinateur</small><span class="thinking">…</span></div>` : ""}</div>
-      <div class="row"><input type="text" id="chat-in" data-input="chat-in" value="${esc(ui.sp.chatIn)}" lang="fr" spellcheck="false" autocomplete="off" placeholder="Posez votre question…" style="flex:1"><button class="btn primary" data-act="chat-send" ${busy.chat ? "disabled" : ""}>Send</button></div>
-      ${accentBar()}
-      <div class="row">${claudeBtn("chat-end", "chat-end", "End and get feedback", "", "btn")}<button class="btn ghost sm" data-act="chat-reset">Start over</button></div>`
-      : claudeOn()
-        ? `<p class="small muted">Claude plays the examiner in role. Type your questions in French. Aim for 5–6 well-formed ones, broad first, then specifics, then logistics.</p><div>${claudeBtn("chat", "chat-start", "Start the role-play", "", "btn primary")}</div>`
-        : `<p class="small muted">Say your questions out loud to an imaginary examiner. Aim for 5–6 well-formed ones: broad first, then specifics, then logistics. Tap each topic above as you cover it.</p>`;
-    return `<section class="panel prompt-card">
-        <div class="row between"><span class="eyebrow">Scénario</span><button class="btn sm" data-act="sp-next" data-task="t2">Another scenario</button>${ui.confirm === "sp-switch-t2" ? `<span class="row"><span class="small">This attempt would be discarded.</span><button class="btn sm danger" data-act="sp-next" data-task="t2">Discard and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button></span>` : ""}</div>
-        <p class="fr">${typo(sc)}</p>
-        <div class="chips">${P.checklist.map((k) => `<button class="chip" data-act="chip" data-k="${esc(k)}" aria-pressed="${!!cov[k]}">${esc(k)}</button>`).join("")}</div>
-        <p class="small muted">Tap each topic as you cover it: your mental checklist for any scenario.</p>
-      </section>
-      <div class="grid2">
-        <section class="panel stack">
-          <div class="row between"><p class="h3 with-ico">${ico("timer")}Timer</p><span class="small muted">2 min prep, then 3 min 30</span></div>
-          ${timerUI("speaking.t2", "Tâche 2 oral", [[120, "2:00 prep"], [210, "3:30 talk"]])}
-          <p class="h3">Useful phrases</p>
-          <ul class="phrases">${P.phrases.map((x) => `<li>${typo(x)}</li>`).join("")}</ul>
-          <p class="small"><b>Watch:</b> ${esc(P.mistake)}</p>
-        </section>
-        <section class="panel stack"><p class="h3">${c || claudeOn() ? "Role-play with Claude" : "Your questions"}</p>${chat}${ui.sp.fb.t2 ? spFbHTML(ui.sp.fb.t2) : ""}</section>
-      </div>
-      <section class="panel stack">${rubricBlock("t2", P)}<div class="row"><button class="btn primary" data-act="sp-save" data-task="t2">Save this attempt</button></div></section>`;
-  }
-  function speakT3(P) {
-    const pr = P.prompts[ui.sp.t3 % P.prompts.length];
-    let from = 0;
-    const steps = P.steps.map((st) => { const li = `<li data-from="${from}" data-until="${st.until}"><span class="t">${fmtClock(from)}</span><b>${esc(st.label)}</b><small>${typo(st.hint)}</small></li>`; from = st.until; return li; }).join("");
-    return `<section class="panel prompt-card">
-        <div class="row between"><span class="eyebrow">Sujet · no preparation</span><button class="btn sm" data-act="sp-next" data-task="t3">Another prompt</button>${ui.confirm === "sp-switch-t3" ? `<span class="row"><span class="small">This attempt would be discarded.</span><button class="btn sm danger" data-act="sp-next" data-task="t3">Discard and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep it</button></span>` : ""}</div>
-        <p class="fr" style="font-size:22px">${typo(pr[0])}</p>
-        <p class="small muted">${esc(pr[1])}</p>
-      </section>
-      <div class="grid2">
-        <section class="panel stack">
-          <div class="row between"><p class="h3">Guided timer</p><span class="small muted">4 min 30</span></div>
-          ${timerUI("speaking.t3", "Tâche 3 oral", [[270, "4:30 exam"]])}
-          <ol class="steps">${steps}</ol>
-          <p class="small muted">The highlighted step moves with the clock, so you can hear whether your shape holds for the full 4:30.</p>
-        </section>
-        <section class="panel stack">
-          <p class="h3">Phrases</p>
-          <ul class="phrases">${P.phrases.map(([k, v]) => `<li><b>${esc(k)}</b>${typo(v)}</li>`).join("")}</ul>
-          <p class="small"><b>Plateau mistakes:</b> ${esc(P.mistake)}</p>
-        </section>
-      </div>
-      <section class="panel stack">${rubricBlock("t3", P)}${transcriptBlock("t3")}<div class="row"><button class="btn primary" data-act="sp-save" data-task="t3">Save this attempt</button></div></section>`;
-  }
-
-  /* =============== view: comprehension =============== */
   VIEWS.comp = {
     render(args) {
+      if (args[0] === "free") return freeView(args[1] === "ce" ? "ce" : "co");
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
-      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page.</small></h1></header>`;
+      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</small></h1></header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
-      if (skill === "ce" && args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView()}</div></div>`;
+      if (args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView(skill)}</div></div>`;
       ensureCompSet(skill);
       const lvl = compLevel();
       const key = compKey(skill);
@@ -3450,7 +3826,7 @@
         </article>
         ${canPlay ? `<div class="player-dock">${playerHTML()}</div>` : ""}
         ${canPlay ? `<div><button class="btn ghost sm" id="c-script" data-act="c-script" aria-expanded="${!!ui.c.script}">${ui.c.script ? "Hide" : "Show"} the transcript</button></div>` : ""}
-        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b>${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
+        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
       const rv = ui.c.review[skill];
@@ -3473,7 +3849,7 @@
       return `<div class="wrap">
         ${head}
         ${tabs}
-        ${skill === "ce" ? examCta() : ""}
+        ${examCta(skill)}
         ${controls}
         <div class="stack">${reviewNote}${fallback}${timerRow}${material}${qs}</div>
         <div class="grid2">
@@ -3494,9 +3870,9 @@
   /* =============== view: progress =============== */
   /* =============== history =============== */
   // Only two kinds of entry: unfinished attempts (the inprogress records) and finished ones (drill rounds,
-  // production checks, reading and listening sets, practice exams, writing tasks, speaking attempts).
-  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit", speaking: "Oral" };
-  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"], ["speaking", "Oral"]];
+  // production checks, reading and listening sets, practice exams, writing tasks).
+  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit" };
+  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"]];
   const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind);
   const clip = (s, n) => { const t = str(s).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
   function whenOf(ts) {
@@ -3510,17 +3886,6 @@
     if (ip.kind === "comp") return `${Object.keys(ip.answers || {}).length} of ${ip.total || "?"} answered${ip.plays ? ` · played ${ip.plays}×` : ""}`;
     if (ip.kind === "exam") return `${Object.keys(ip.ans || {}).length} of ${ip.total} answered${ip.left != null ? ` · ${Math.ceil(ip.left / 60)} min left` : ""}`;
     if (ip.kind === "writing" || ip.kind === "prod") return `${countWords(str(ip.text))} words`;
-    if (ip.kind === "speaking") {
-      const bits = [];
-      const n = Object.values(ip.rubric || {}).filter(Boolean).length;
-      if (n) bits.push(`${n} ticked`);
-      if (str(ip.notes).trim()) bits.push("notes");
-      if (str(ip.trans).trim()) bits.push("transcript");
-      const q = arr(ip.chat).filter((t) => t.role === "user").length;
-      if (q) bits.push(`${q} question${q > 1 ? "s" : ""} asked`);
-      if (ip.fb) bits.push("feedback");
-      return bits.join(" · ") || "started";
-    }
     return "";
   }
   function ipResume(id) {
@@ -3530,8 +3895,7 @@
     if (ip.kind === "prod") { ui.prod[ip.topic] = { text: str(ip.text) }; goTo("#" + ip.route); return; }
     if (ip.kind === "comp") { if (compLoad(ip.skill, ip.setId, ip)) { goTo("#comp." + ip.skill); window.scrollTo(0, 0); } return; }
     if (ip.kind === "exam") { examResume(ip); return; }
-    if (ip.kind === "writing") { writingRestore(ip.task); ui.w.task = ip.task; goTo("#writing." + ip.task); return; }
-    if (ip.kind === "speaking") { spRestore(ip.task); ui.sp.task = ip.task; goTo("#speaking." + ip.task); }
+    if (ip.kind === "writing") { writingRestore(ip.task); ui.w.task = ip.task; goTo("#writing." + ip.task); }
   }
   function ipDiscard(id) {
     const ip = ipGet(id);
@@ -3541,21 +3905,22 @@
       if (ip.kind === "drill" && ui.drill && !ui.drill.done && drillIpId(ui.drill) === id) ui.drill = null;
       if (ip.kind === "prod") ui.prod[ip.topic] = { text: "" };
       if (ip.kind === "comp") { const set = ui.c.set[ip.skill]; if (set && set.id === ip.setId && !ui.c.submitted[ip.skill]) compReset(ip.skill); }
-      if (ip.kind === "exam" && ui.cx && !ui.cx.done) { ui.cx = null; timerSet(0, "", ""); }
+      if (ip.kind === "exam" && examRunning() && skillOf(ui.cx) === skillOf(ip)) { if (skillOf(ip) === "co") coxStop(); ui.cx = null; timerSet(0, "", ""); }
       if (ip.kind === "writing") { ui.w.text[ip.task] = ""; ui.w.checks[ip.task] = {}; }
-      if (ip.kind === "speaking") spClear(ip.task);
     }
     toast("Discarded.");
     render(true);
   }
-  // Once saved progress has loaded, writing drafts and speaking attempts fill their pages back in, and
+  // Once saved progress has loaded, writing drafts fill their pages back in, and
   // drafts from the old browser-only store move into the saved ones.
   function hydrate() {
     hydrated = true;
     // An unfinished built-in set or exam whose content has since been replaced can't be picked up again.
     for (const ip of list("inprogress")) {
       if (ip.kind === "comp" && ip.src !== "claude" && !samplesFor(ip.skill).some((s) => s.id === ip.setId)) ipDrop(ip.id);
-      if (ip.kind === "exam" && !ip.snap && !(T.COMP.ceExams || []).some((e) => e.id === ip.examId)) ipDrop(ip.id);
+      if (ip.kind === "exam" && !ip.snap && !XSPEC[skillOf(ip)].bank().some((e) => e.id === ip.examId)) ipDrop(ip.id);
+      // The Oral page was removed (2026-10-06): an unfinished speaking attempt has nowhere to go back to.
+      if (ip.kind === "speaking") ipDrop(ip.id);
     }
     // After a refresh, this tab's copy of what was on screen is kept, unless the attempt's record has changed
     // since (on another device, say). A record that didn't get saved before the refresh is saved again.
@@ -3564,7 +3929,6 @@
       const legacy = lsGet("tcf-draft-" + t, "");
       if (!tabAt || newer("writing--" + t)) { if (!writingRestore(t) && legacy.trim()) { ui.w.text[t] = legacy; writingKeep(t, 0); } }
       if (legacy) lsSet("tcf-draft-" + t, "");
-      if (!tabAt || newer("speaking--" + t)) spRestore(t);
     });
     if (!tabAt) return;
     try {
@@ -3577,7 +3941,8 @@
       });
       if (ui.cx && !ui.cx.done) {
         // An exam carried on elsewhere is picked up from there, with its own clock.
-        if (newer("exam--ce")) { ui.cx = null; if (timer.home === "comp.ce.exam") timerSet(0, "", ""); } else examKeep();
+        const X = XSPEC[skillOf(ui.cx)];
+        if (newer(X.ip)) { if (skillOf(ui.cx) === "co") coxStop(); ui.cx = null; if (timer.home === X.home) timerSet(0, "", ""); } else examKeep();
       }
     } catch (e) { console.warn(e); }
   }
@@ -3596,7 +3961,6 @@
       out.push({ kind: exam ? "exam" : "comp", id: c.id, ts: c.ts || 0, date: c.date, title: `${c.skill === "co" ? "CO" : "CE"} · ${exam ? c.title : `${c.title || ""}${c.level ? " · " + c.level : ""}`}`, result: exam ? `≈${c.est} · ${c.score}/${c.total}` : `${c.score}/${c.total}${c.src === "logged" ? " · logged" : ""}`, doc: c });
     }
     for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : "not corrected", doc: w }); }
-    for (const s of list("speaking")) { const P = T.SPEAKING[s.task]; out.push({ kind: "speaking", id: s.id, ts: s.ts || 0, date: s.date, title: `${P ? P.name : "Oral"} · ${clip(s.prompt, 80)}`, result: [s.of ? `self ${s.score}/${s.of}` : "", s.fb && s.fb.level ? s.fb.level : ""].filter(Boolean).join(" · ") || "saved", doc: s }); }
     return out.sort((a, b) => b.ts - a.ts);
   }
   function drillReview(d) {
@@ -3625,23 +3989,10 @@
       ${fb ? `<div class="verdict ${fb.pass ? "ok" : "bad"}"><p><b>${fb.pass ? "Criterion met." : "Not yet."}</b> ${esc(fb.comment)}</p></div>${errList(fb.errors)}${fb.improved ? `<div class="stack tight"><p class="eyebrow">Improved version</p><p class="fr" style="white-space:pre-line">${typo(fb.improved)}</p></div>` : ""}` : ""}
     </div>`;
   }
-  function spReview(s) {
-    const P = T.SPEAKING[s.task];
-    const ticks = P && P.rubric ? `<ul class="hw">${P.rubric.map(([k, l]) => `<li style="grid-template-columns:auto minmax(0,1fr)"><b style="color:var(${s.rubric && s.rubric[k] ? "--green" : "--ink-3"})">${s.rubric && s.rubric[k] ? "✓" : "○"}</b><span>${esc(l)}</span></li>`).join("")}</ul>` : "";
-    const chat = arr(s.chat);
-    return `<div class="stack tight">
-      <p class="fr small">${typo(s.prompt || "")}</p>
-      ${ticks}
-      ${s.notes ? `<p class="small"><b>Fixes for next time:</b> ${esc(s.notes)}</p>` : ""}
-      ${chat.length ? `<div class="stack tight"><p class="h3">The conversation</p>${chat.map((t) => `<p class="small"><b>${t.role === "user" ? "You" : "Examiner"}:</b> <span class="fr">${typo(t.content)}</span></p>`).join("")}</div>` : s.transcript ? `<div class="stack tight"><p class="h3">Transcript</p><p class="fr" style="white-space:pre-line">${typo(s.transcript)}</p></div>` : ""}
-      ${s.fb ? spFbHTML(s.fb, true) : ""}
-    </div>`;
-  }
   function reviewOf(x) {
     if (x.kind === "drill") return drillReview(x.doc);
     if (x.kind === "prod") return prodReview(x.doc);
     if (x.kind === "writing") return writingFb(x.id, x.doc, "h-close");
-    if (x.kind === "speaking") return spReview(x.doc);
     return "";
   }
   function historyOpenBtn(x) {
@@ -3650,7 +4001,7 @@
       if (c.src === "logged" || !(samplesFor(c.skill).some((s) => s.id === c.setId) || c.snap)) return "";
       return `<button class="btn ghost sm" data-act="h-comp" data-skill="${esc(c.skill)}" data-id="${esc(x.id)}">Open</button>`;
     }
-    if (x.kind === "exam") return (T.COMP.ceExams || []).some((e) => e.id === x.doc.setId) || x.doc.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(x.id)}">Open</button>` : "";
+    if (x.kind === "exam") return XSPEC[skillOf(x.doc)].bank().some((e) => e.id === x.doc.setId) || x.doc.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(x.id)}">Open</button>` : "";
     return `<button class="btn ghost sm" data-act="h-open" data-id="${esc(x.id)}">${ui.hist.open === x.id ? "Close" : "Open"}</button>`;
   }
   function historyView(head, tabs) {
@@ -3670,7 +4021,7 @@
         ${ips.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Section</th><th>Attempt</th><th>Last change</th><th></th></tr></thead><tbody>${ipRows}</tbody></table></div>` : `<p class="small muted">Nothing unfinished.</p>`}
       </section>
       <section class="sec"><div class="sec-head"><h2 class="h2">Finished</h2><span class="small muted">${all.length} attempt${all.length === 1 ? "" : "s"}, newest first. Open one to see the questions, your answers and the results.</span></div>
-        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, writing tasks and speaking attempts collect here.</p>`}
+        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.</p>`}
       </section>
     </div>`;
   }
@@ -3751,7 +4102,7 @@
       return repGroup("rep:ee:" + task, head, rows, (f, l) => [l.v - f.v, ""], " /20", `<div class="stack tight" style="padding-top:8px">${extra}</div>`);
     }).filter(Boolean).sort((a, b) => b.ts - a.ts);
   }
-  // Compréhension: one group per skill and level, across sets, plus the CE practice exams.
+  // Compréhension: one group per skill and level, across sets, plus each skill's practice exams.
   function repComp() {
     const out = [];
     for (const skill of ["co", "ce"]) {
@@ -3780,11 +4131,11 @@
       if (exams.length) {
         const rows = exams.map((a) => ({
           id: a.id, date: a.date, ts: a.ts, v: a.est, show: "≈" + a.est,
-          pill: `<span class="pill">≈${a.est}</span>${nclcTag(a.est)}`,
+          pill: `<span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}`,
           meta: `<span class="small muted">${a.score}/${a.total} · ${typo(a.title || "")}</span>`,
-          btn: (T.COMP.ceExams || []).some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Open</button>` : "",
+          btn: XSPEC[skill].bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Open</button>` : "",
         }));
-        out.push(repGroup("rep:ce:exam", `<span class="sk ce">CE</span><span class="lv">A1–C2</span><span class="h-name">Examens blancs</span>`, rows, (f, l) => [l.v - f.v, ""]));
+        out.push(repGroup(`rep:${skill}:exam`, `<span class="sk ${skill}">${skill.toUpperCase()}</span><span class="lv">A1–C2</span><span class="h-name">Examens blancs</span>`, rows, (f, l) => [l.v - f.v, ""]));
       }
     }
     return out.sort((a, b) => b.ts - a.ts);
@@ -3857,7 +4208,6 @@
         [list("drills").filter((d) => d.set !== "prod").length, "drill rounds"],
         [[...S.srs.keys()].length, "cards learned"],
         [list("writing").length, "writing tasks"],
-        [list("speaking").length, "speaking attempts"],
         [list("comp").length, "CO / CE sets"],
       ];
       return `<div class="wrap">
@@ -3871,6 +4221,7 @@
           <p class="small">${esc(P.goal)}</p>
           <div class="row"><div class="seg" role="group" aria-label="Phase">${T.PHASES.map((ph) => `<button data-act="p-phase" data-n="${ph.n}" aria-pressed="${ph.n === s.phase}">${ph.n}</button>`).join("")}</div>
             <label class="field" style="grid-auto-flow:column;align-items:center;gap:8px">Week 1 started<input type="date" id="p-start" data-change="start-date" value="${esc(s.startDate)}"></label></div>
+          <p class="small muted">A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.</p>
           <ul class="criteria">${critHTML}</ul>
           ${allMet && s.phase < 5 ? `<div class="notice"><b>Every Phase ${s.phase} criterion is met.</b> Move to Phase ${s.phase + 1} when you're ready. <button class="btn sm primary" data-act="p-phase" data-n="${s.phase + 1}">Start Phase ${s.phase + 1}</button></div>` : ""}
         </section>
@@ -3878,7 +4229,7 @@
         ${stampShelf()}
 
         <section class="sec" id="sec-errors">
-          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing and speaking, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
+          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
           ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<p class="empty">No errors logged yet. Correct a writing task with Claude, or add one below.</p>`}
           ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p><p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>
             ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
@@ -4069,6 +4420,27 @@
     "v-count": (el) => { ui.vCount = Number(el.dataset.n); render(true); },
     "v-dir": (el) => { ui.vDir = el.dataset.dir; lsSet("tcf-vdir", ui.vDir); render(true); },
     "v-build": (el) => vocabBuild(el.dataset.theme),
+    "card-del": (el) => cardDelete(el.dataset.id),
+    "grab-open": () => grabOpen(),
+    "grab-close": () => grabClose(),
+    "grab-save": () => grabSave(),
+    "grab-claude": () => grabClaude(),
+    "grab-add-ex": () => grabAddEx(),
+    "grab-force": () => { if (!ui.grab) return; ui.grab.force = true; paintGrab(true); const el = document.getElementById("grab-en"); if (el) el.focus({ preventScroll: true }); },
+    "wt-fill": () => waitFill(),
+    "wt-save": (el) => {
+      const r = waitSave(el.dataset.id);
+      if (!r) { toast("Add the English first."); return; }
+      toast(r === "merged" ? "That card was already there, so the sentence went to it." : "Saved. It comes up in your reviews from tomorrow.");
+      render(true);
+    },
+    "wt-save-all": () => {
+      const rs = waitingCards().filter((c) => waitVal(c.id, "en").trim()).map((c) => waitSave(c.id));
+      const merged = rs.filter((r) => r === "merged").length;
+      toast(`Saved ${rs.length}. They come up in your reviews from tomorrow.${merged ? ` ${merged} ${merged > 1 ? "were" : "was"} already a card, so the sentence went to it.` : ""}`);
+      render(true);
+    },
+    "wt-del": (el) => cardDelete(el.dataset.id),
     "v-add": () => {
       const fr = str(ui.form["card-fr"]).trim(), en = str(ui.form["card-en"]).trim();
       if (!fr || !en) { toast("Fill in both the French and the English."); return; }
@@ -4100,24 +4472,13 @@
     "timer-toggle": (el) => { timerAct(el, "toggle"); if (el.dataset.home === "comp.ce.exam") examKeep(); },
     "timer-reset": (el) => timerAct(el, "reset"),
     "timer-preset": (el) => timerAct(el, "preset"),
-    // A new prompt ends the attempt in progress, so ask first when there is one.
-    "sp-next": (el) => {
-      const t = el.dataset.task;
-      if (ipGet("speaking--" + t) && ui.confirm !== "sp-switch-" + t) { ui.confirm = "sp-switch-" + t; render(true); return; }
-      ui.confirm = "";
-      spClear(t);
-      ui.sp[t]++;
+    "free-done": (el) => {
+      const t = todayStr(), n = () => (dayStats(t) || {}).n || 0, before = n(), sk = el.dataset.skill;
+      autoTick(`comp.free.${sk}`);
+      if (n() === before) autoTick(`comp.free.${sk === "co" ? "ce" : "co"}`);
+      if (n() === before) toast("Nothing to tick: today's plan has no open easy listening or reading block.");
       render(true);
     },
-    "sp-save": (el) => spSave(el.dataset.task),
-    "sp-fb": (el) => spFeedback(el.dataset.task),
-    "sp-del": (el) => { ui.confirm = ""; if (ui.sp.viewing === el.dataset.id) ui.sp.viewing = null; remove("speaking", el.dataset.id); },
-    "sp-open": (el) => { ui.sp.viewing = ui.sp.viewing === el.dataset.id ? null : el.dataset.id; render(true); },
-    chip: (el) => { const k = el.dataset.k; ui.sp.covered[k] = !ui.sp.covered[k]; spKeep("t2", 0); render(true); },
-    "chat-start": chatStart,
-    "chat-send": chatSend,
-    "chat-end": chatEnd,
-    "chat-reset": () => { const c = busy.chat; if (c) c.abort(); ui.sp.chat = null; ui.sp.fb.t2 = null; spKeep("t2", 0); render(true); },
     "c-level": (el) => { ui.c.level = el.dataset.l; render(true); },
     "c-next": (el) => {
       const sk = el.dataset.skill, key = compKey(sk), cur = ui.c.set[sk];
@@ -4152,7 +4513,7 @@
     "c-open": (el) => { if (compLoad(el.dataset.skill, el.dataset.set)) { render(true); window.scrollTo({ top: 0, behavior: "smooth" }); } },
     "c-review": (el) => { compReview(el.dataset.skill, el.dataset.id); render(true); window.scrollTo({ top: 0, behavior: "smooth" }); },
     "c-hist-jump": () => { const h = document.getElementById("c-hist"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); },
-    "x-start": (el) => { const e = (T.COMP.ceExams || []).find((x) => x.id === el.dataset.id); if (e) examStart(e); },
+    "x-start": (el) => { for (const sk of ["ce", "co"]) { const e = XSPEC[sk].bank().find((x) => x.id === el.dataset.id); if (e) { examStart(e, sk); return; } } },
     "x-start-ready": () => { if (ui.cxReady) examStart(ui.cxReady); },
     "x-gen": examGenerate,
     "x-gen-stop": () => { const c = busy["cx-gen"]; ui.cxGen = null; if (c) c.abort(); render(true); },
@@ -4168,9 +4529,14 @@
     "x-submit": () => examSubmit("done"),
     "x-keep": () => { if (ui.cx) { ui.cx.confirm = false; ui.cx.quit = false; render(true); } },
     "x-quit": () => { if (ui.cx) { ui.cx.quit = true; render(true); } },
-    "x-quit-yes": () => { ui.cx = null; ipDrop("exam--ce"); timerSet(0, "", ""); render(true); },
+    "x-quit-yes": () => { const sk = skillOf(ui.cx); if (sk === "co") coxStop(); ui.cx = null; ipDrop(XSPEC[sk].ip); timerSet(0, "", ""); render(true); },
     "x-review": (el) => examReview(el.dataset.id),
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
+    // The same exam again, from its results: a built-in one from the bank, one of Claude's from the copy on screen.
+    "x-retake": () => { const cx = ui.cx; if (!cx) return; const sk = skillOf(cx); examStart(XSPEC[sk].bank().find((e) => e.id === cx.exam.id) || cx.exam, sk); },
+    "cox-ok": () => { const cx = ui.cx; if (cx && !cx.done && cx.skill === "co" && cx.play && cx.play.phase === "answer" && !cx.play.paused) coxNext(); },
+    "cox-pause": () => coxPause(),
+    "cox-resume": () => coxResume(),
     "p-phase": (el) => { saveSettings({ phase: Number(el.dataset.n) }); toast(`Phase ${el.dataset.n}: ${T.PHASES[Number(el.dataset.n) - 1].name}.`); },
     "m-add": () => {
       const f = ui.form;
@@ -4205,11 +4571,11 @@
     },
     "hw-done": (el) => { const cur = S.homework.get(el.dataset.id); if (cur) put("homework", el.dataset.id, Object.assign(clone(cur), { done: el.checked, doneOn: el.checked ? todayStr() : null })); },
     "w-check": (el) => { ui.w.checks[ui.w.task][el.dataset.k] = el.checked; if (str(ui.w.text[ui.w.task]).trim()) writingKeep(ui.w.task, 0); },
-    "sp-rubric": (el) => { const t = ui.sp.task; ui.sp.rubric[t] = ui.sp.rubric[t] || {}; ui.sp.rubric[t][el.dataset.k] = el.checked; spKeep(t, 0); },
     crit: (el) => { const s = settings(); s.criteria[el.dataset.id] = el.checked; saveSettings({ criteria: s.criteria }); },
     "start-date": (el) => { if (/^\d{4}-\d{2}-\d{2}$/.test(el.value)) saveSettings({ startDate: el.value }); },
     fix: (el) => { const s = settings(); s.fixes[el.dataset.k] = el.value.trim(); saveSettings({ fixes: s.fixes }); },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
+    "grab-theme": (el) => { if (ui.grab) ui.grab.theme = el.value; },
     "v-theme": (el) => { ui.vTheme = el.value; render(true); },
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
     "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); compKeep(ui.c.skill); },
@@ -4222,6 +4588,8 @@
       if (b) { b.classList.add("done"); b.setAttribute("aria-label", `Question ${cx.i + 1}, answered`); }
       const c = document.getElementById("x-count");
       if (c) c.textContent = `${Object.keys(cx.ans).length} of ${cx.exam.items.length} answered`;
+      const cell = document.querySelectorAll(".cox-strip span")[cx.i];
+      if (cell) cell.classList.add("done");
       examKeep();
     },
   };
@@ -4231,10 +4599,8 @@
     "pr-fix": (el) => { if (ui.hunt) ui.hunt.fixes[el.dataset.k] = el.value; },
     "w-text": onWText,
     prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); prodKeep(t); },
-    "sp-notes": (el) => { ui.sp.notes[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
-    "sp-trans": (el) => { ui.sp.trans[ui.sp.task] = el.value; spKeep(ui.sp.task, 1500); },
-    "chat-in": (el) => { ui.sp.chatIn = el.value; },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
+    grab: (el) => { if (ui.grab) ui.grab[el.dataset.k] = el.value; },
   };
 
   document.addEventListener("click", (e) => {
@@ -4246,7 +4612,11 @@
     fn(el, e);
     tabSoon();
   });
-  document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent']")) e.preventDefault(); });
+  document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent'], #grab-btn")) e.preventDefault(); });
+  // The button follows the selection once it settles, so it doesn't flicker while you drag across the words.
+  document.addEventListener("selectionchange", () => { clearTimeout(grabT); grabT = setTimeout(grabCheck, 250); });
+  if (grabBtn) grabBtn.addEventListener("pointerdown", () => { grabHold = Date.now(); });
+  window.addEventListener("resize", () => { if (grabBtn && !grabBtn.hidden) grabCheck(); });
   // Keep the history tree's open branches across re-renders. "toggle" doesn't bubble, so listen while it's captured.
   document.addEventListener("toggle", (e) => { const d = e.target; if (d && d.dataset && d.dataset.node) ui.c.open[d.dataset.node] = d.open; }, true);
   document.addEventListener("change", (e) => {
@@ -4278,6 +4648,12 @@
   });
   document.addEventListener("keydown", (e) => {
     const t = e.target;
+    if (ui.grab && t && t.closest && t.closest("#grab")) {
+      if (e.key === "Escape") { e.preventDefault(); grabClose(); }
+      else if (e.key === "Enter" && !e.isComposing && (e.metaKey || e.ctrlKey || t.tagName === "INPUT") && (ui.grab.force || !ui.grab.dup)) { e.preventDefault(); grabSave(); }
+      return;
+    }
+    if (ui.grab && e.key === "Escape" && !(route.view === "vocab" && ui.vocab && ui.vocab.edit)) { e.preventDefault(); grabClose(); return; }
     if (t && t.id === "drill-in" && e.key === "Enter") { e.preventDefault(); if (ui.drill && ui.drill.checked) drillNext(); else drillCheck(); return; }
     if (t && t.id === "hw-new" && e.key === "Enter") { e.preventDefault(); addHomework(); return; }
     if (t && t.dataset && t.dataset.input === "pr-fix" && e.key === "Enter") {
@@ -4286,11 +4662,27 @@
       if (next) next.focus(); else huntFinish();
       return;
     }
-    if (t && t.id === "chat-in" && e.key === "Enter") { e.preventDefault(); chatSend(); return; }
     if (route.view === "vocab" && ui.vocab && ui.vocab.edit) {
       if (e.key === "Escape") { e.preventDefault(); vocabEditClose(); }
       else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); vocabEditSave(); }
       return;
+    }
+    if (route.view === "comp" && route.args[1] === "exam" && examRunning() && skillOf(ui.cx) === "co" && !isTyping(t) && !(t && t.closest && t.closest("#grab")) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      const cx = ui.cx, it = cx.exam.items[cx.i], p = cx.play || {};
+      const k = "abcd".indexOf(e.key.toLowerCase()) >= 0 ? "abcd".indexOf(e.key.toLowerCase()) : "1234".indexOf(e.key);
+      if (k >= 0 && !p.paused) {
+        e.preventDefault();
+        const opt = it.order[k];
+        cx.ans[cx.i] = opt;
+        const el = document.querySelector(`input[name="x${cx.i}"][data-k="${opt}"]`);
+        if (el) el.checked = true;
+        const b = document.querySelectorAll(".cox-strip span")[cx.i];
+        if (b) b.classList.add("done");
+        examKeep();
+        return;
+      }
+      if (e.key === "Enter" && p.phase === "answer" && !p.paused) { e.preventDefault(); coxNext(); return; }
+      if (e.key === " " && !(t && t.closest && t.closest("button, a, label"))) { e.preventDefault(); if (p.paused) coxResume(); else coxPause(); return; }
     }
     if (t && t.closest && t.closest("input, textarea, select, button, a, [contenteditable]")) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -4311,6 +4703,7 @@
   });
   window.addEventListener("hashchange", () => {
     const r = parseRoute(location.hash);
+    if (examRunning() && skillOf(ui.cx) === "co" && !(r.view === "comp" && r.args[0] === "co" && r.args[1] === "exam")) coxPause(true);
     const same = r.view === route.view && r.args.join(".") === route.args.join(".");
     route = r;
     rememberPage();
