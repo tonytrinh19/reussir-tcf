@@ -579,7 +579,7 @@
     const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
       : `<use class="st-leaf" href="#leaf" x="35.5" y="33" width="29" height="31.5"/><text class="st-n" x="50" y="${st.num.length > 1 ? 54.5 : 55}" text-anchor="middle"${st.num.length > 1 ? ' style="font-size:11px"' : ""}>${st.num}</text>`;
     const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(st.reps))}</textPath></text>${center}`;
-    return `<svg class="stamp ${on ? "on" : "off"}" viewBox="0 0 100 100" role="img" aria-label="${esc(st.name)}, ${on ? "earned" : "still to earn"}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
+    return `<svg class="stamp ${on ? "on" : "off"}"${on ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${esc(st.name)}, ${on ? "earned" : "still to earn"}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
   }
   function stampShelf() {
     const x = { best: longestStreak() };
@@ -604,7 +604,7 @@
       const n = i + 1, past = n < s.phase, cur = n === s.phase, cx = X(k);
       return `<circle cx="${cx}" cy="20" r="4.2" style="fill:var(${past ? "--accent" : "--surface"});stroke:var(${past || cur ? "--accent" : "--rule-2"})" stroke-width="2"/>${mini ? "" : `<text x="${cx}" y="37" text-anchor="middle" style="font:${cur ? 700 : 500} 10px var(--f-ui);fill:var(${cur ? "--ink" : "--ink-3"})">${n}</text>`}`;
     }).join("");
-    return `<svg class="flight" viewBox="0 0 300 ${mini ? 30 : 40}" role="img" aria-label="Week ${w} of ${total}: Phase ${s.phase} of ${T.PHASES.length}"><path d="M${x} 20H284" style="stroke:var(--rule-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 6"/><path d="M10 20H${x}" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"/>${dots}<use href="#leaf" x="285" y="11.5" width="15" height="16.3" style="fill:var(--leaf-4)"/><g transform="translate(${+(x - 10).toFixed(2)} 10) rotate(45 10 10)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-plane" style="fill:var(--surface)"/></svg></g></svg>`;
+    return `<svg class="flight" viewBox="0 0 300 ${mini ? 30 : 40}" role="img" aria-label="Week ${w} of ${total}: Phase ${s.phase} of ${T.PHASES.length}"><path d="M${x} 20H284" style="stroke:var(--rule-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 6"/><path d="M10 20H${x}" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"${mini ? "" : ` data-m="draw" data-k="route-${w}"`}/>${dots}<use href="#leaf" x="285" y="11.5" width="15" height="16.3" style="fill:var(--leaf-4)"/><g${mini ? "" : ` data-m="fly" data-k="plane-${w}" data-dx="${+(x - 10).toFixed(2)}"`}><g transform="translate(${+(x - 10).toFixed(2)} 10) rotate(45 10 10)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-plane" style="fill:var(--surface)"/></svg></g></g></svg>`;
   }
   const BARCODE = `<svg class="barcode" viewBox="0 0 118 46" preserveAspectRatio="none" aria-hidden="true">${[[0, 1], [2, 2], [5, 3], [10, 4], [16, 1], [18, 2], [21, 3], [27, 4], [34, 1], [37, 2], [41, 3], [47, 4], [54, 1], [57, 2], [61, 3], [65, 4], [70, 1], [74, 2], [79, 3], [83, 4], [88, 1], [92, 2], [97, 3], [102, 4], [108, 1], [110, 2], [113, 3]].map(([x, w]) => `<rect x="${x}" y="0" width="${w}" height="46"/>`).join("")}</svg>`;
   function passHTML() {
@@ -3378,7 +3378,7 @@
       ? `<p><b>${ms.length - fixed} of your ${ms.length} mistakes</b> to practise${count("new") ? `, ${count("new")} of them new` : ""}${fixed ? ` · ${fixed} fixed` : ""}.</p>
         <div class="row">${startBtns}</div>
         ${fold("how-mine", "Comment ça marche · How it works", `<p class="small muted">A round starts with new mistakes (the ones you made most often first), then the ones you haven't fixed. A mistake is fixed once you get it right twice in a row; fixed ones come back when the others run out.</p>`)}`
-      : `<p class="empty">Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.</p>`;
+      : `<div class="empty">${greet("bonjour", "Rien pour l'instant.", "Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.", "sm")}</div>`;
     const focus = active && !ui.drill.done;
     return `<div class="wrap${focus ? " focus" : ""}">
       <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
@@ -3562,7 +3562,7 @@
       <div class="grid2">
         <section class="panel stack">
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
-          <p class="small muted">${due.length ? "Recall each card cold before you flip it. No peeking." : "Nothing due right now. Come back tomorrow."}</p>
+          ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
           <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button></div>
           <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
         </section>
@@ -4227,16 +4227,16 @@
     return `<div class="wrap">
       ${head}
       ${tabs}
-      <p class="lede">How your scores have moved in each writing task, listening and reading level, and drill set: every attempt, newest first, and the change from your first to your latest. Open any attempt to see it again.</p>
+      ${fold("intro-report", "Ce que montre Évolution · What this shows", `<p class="small muted">How your scores have moved in each writing task, listening and reading level, and drill set: every attempt, newest first, and the change from your first to your latest. Open any attempt to see it again.</p>`)}
       ${trends.length ? `<div class="stats">${tally.map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div><p class="small muted">Out of the ${trends.length} group${trends.length === 1 ? "" : "s"} you've done more than once, comparing your first and latest score.</p>` : ""}
       ${parts.length ? parts.map(([h, note, gs]) => `<section class="sec"><div class="sec-head"><h2 class="h2">${h}</h2><span class="small muted">${note}</span></div><div class="tree">${gs.map((g) => g.html).join("")}</div></section>`).join("")
-        : `<p class="empty">Finish a writing task, a listening or reading set, or a drill round, and your progress shows here.</p>`}
+        : `<div class="empty">${greet("bonjour", "Ta progression s'affichera ici.", "Finish a writing task, a listening or reading set, or a drill round, and your progress shows here.", "sm")}</div>`}
     </div>`;
   }
 
   VIEWS.progress = {
     render(args) {
-      const head = `<header class="stack tight"><h1 class="title">Progrès<small>Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</small></h1></header>`;
+      const head = `<header class="stack tight"><h1 class="title">Progrès</h1>${fold("intro-progress", "Comment ça marche · How it works", `<p class="small muted">Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</p>`)}</header>`;
       const tab = args[0] === "history" || args[0] === "report" ? args[0] : "";
       const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a></nav>`;
       if (tab === "history") return historyView(head, tabs);
@@ -4275,7 +4275,7 @@
           <p class="small">${esc(P.goal)}</p>
           <div class="row"><div class="seg" role="group" aria-label="Phase">${T.PHASES.map((ph) => `<button data-act="p-phase" data-n="${ph.n}" aria-pressed="${ph.n === s.phase}">${ph.n}</button>`).join("")}</div>
             <label class="field" style="grid-auto-flow:column;align-items:center;gap:8px">Week 1 started<input type="date" id="p-start" data-change="start-date" value="${esc(s.startDate)}"></label></div>
-          <p class="small muted">A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.</p>
+          ${fold("crit-how", "Comment ça compte · How the criteria count", `<p class="small muted">A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.</p>`)}
           <ul class="criteria">${critHTML}</ul>
           ${allMet && s.phase < 5 ? `<div class="notice"><b>Every Phase ${s.phase} criterion is met.</b> Move to Phase ${s.phase + 1} when you're ready. <button class="btn sm primary" data-act="p-phase" data-n="${s.phase + 1}">Start Phase ${s.phase + 1}</button></div>` : ""}
         </section>
@@ -4284,11 +4284,11 @@
 
         <section class="sec" id="sec-errors">
           <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
-          ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<p class="empty">No errors logged yet. Correct a writing task with Claude, or add one below.</p>`}
-          ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p><p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>
+          ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<div class="empty">${greet("correction", "Pas encore de fautes relevées.", "No errors logged yet. Correct a writing task with Claude, or add one below.", "sm")}</div>`}
+          ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p>${fold("top3-how", "Comment faire · How to use it", `<p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>`)}
             ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
           ${recent.length ? `<div class="stack tight"><p class="h3">Recent</p><ul class="errs">${recent.map((e) => `<li><div class="fix"><span class="pen-wrong">${esc(e.wrong)}</span><span class="pen-right">${esc(e.right)}</span><span class="pill">${esc(CAT[catOf(e.category)])}</span><span class="small muted">${esc(e.src)} · ${shortDate(e.date)}</span>${e.manual ? confirmBtn("e-del-" + e.id, "Delete this error", "e-del", `data-id="${esc(e.id)}"`) : ""}</div>${e.why ? `<p class="why">${esc(e.why)}</p>` : ""}</li>`).join("")}</ul></div>` : ""}
-          <div class="panel stack"><p class="h3">Log an error yourself</p>
+          <div class="panel stack">${fold("log-error", "Ajouter une erreur · Log an error yourself", `<div class="stack">
             <div class="grid2">
               <label class="field">What you wrote<input type="text" id="e-wrong" data-input="form" data-k="e-wrong" value="${formVal("e-wrong")}" lang="fr" placeholder="je achèterai"></label>
               <label class="field">Correct form<input type="text" id="e-right" data-input="form" data-k="e-right" value="${formVal("e-right")}" lang="fr" placeholder="j'achèterai"></label>
@@ -4296,14 +4296,14 @@
               <label class="field">Note (optional)<input type="text" id="e-why" data-input="form" data-k="e-why" value="${formVal("e-why")}"></label>
             </div>
             <div class="row"><button class="btn" data-act="e-add">Add to the log</button></div>
-          </div>
+          </div>`)}</div>
         </section>
 
         <section class="sec" id="sec-scores">
           <div class="sec-head"><h2 class="h2 with-ico">${ico("target")}Scores and NCLC</h2><span class="small muted">IRCC scores each skill on its own and never averages. Your weakest skill is your real result for that skill.</span></div>
           ${weakest ? `<div class="notice ${weakest[2] >= 7 ? "" : "warn"}"><b>Weakest right now: ${esc(weakest[1])}</b>, NCLC ${nclcLabel(weakest[2])}. ${weakest[2] >= 7 ? "Every logged skill is at NCLC 7 or above." : "Spend most of your spare time here, not on your strongest skill."}</div>` : ""}
-          <div class="table-wrap"><table class="nclc"><thead><tr><th>NCLC</th><th>CEFR</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th></tr></thead><tbody>${T.NCLC.map((r) => `<tr class="${r.n === 7 ? "target" : ""}"><td>${r.nclc}${r.n === 7 ? " · your target" : ""}</td><td>${r.cefr}</td><td>${r.coR}</td><td>${r.ceR}</td><td>${r.eR}</td><td>${r.eR}</td></tr>`).join("")}</tbody></table></div>
-          <div class="panel stack"><p class="h3">Log a mock or real test</p>
+          ${fold("nclc-table", "Le barème NCLC · The NCLC table", `<div class="table-wrap"><table class="nclc"><thead><tr><th>NCLC</th><th>CEFR</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th></tr></thead><tbody>${T.NCLC.map((r) => `<tr class="${r.n === 7 ? "target" : ""}"><td>${r.nclc}${r.n === 7 ? " · your target" : ""}</td><td>${r.cefr}</td><td>${r.coR}</td><td>${r.ceR}</td><td>${r.eR}</td><td>${r.eR}</td></tr>`).join("")}</tbody></table></div>`)}
+          <div class="panel stack">${fold("log-mock", "Ajouter un score · Log a mock or real test", `<div class="stack">
             <div class="grid2">
               <label class="field">Date<input type="date" id="m-date" data-input="form" data-k="m-date" value="${esc(ui.form["m-date"] || todayStr())}"></label>
               <label class="field">What was it<input type="text" id="m-label" data-input="form" data-k="m-label" value="${formVal("m-label")}" placeholder="Full mock, official sample…"></label>
@@ -4314,16 +4314,16 @@
             </div>
             <p class="small muted">Leave a skill blank if you didn't sit it.</p>
             <div class="row"><button class="btn" data-act="m-add">Save scores</button></div>
-          </div>
+          </div>`)}</div>
           ${mocks.length ? `<div class="table-wrap"><table class="nclc"><thead><tr><th>Date</th><th>Test</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th><th></th></tr></thead><tbody>${mocks.map((m) => `<tr><td>${shortDate(m.date)}</td><td>${esc(m.label || "")}</td>${["co", "ce", "ee", "eo"].map((k) => { const n = nclcOf(k, m[k]); return `<td>${m[k] == null || m[k] === "" ? "—" : `${m[k]} <span class="tag7 ${n >= 7 ? "ok" : "no"}">${nclcLabel(n)}</span>`}</td>`; }).join("")}<td>${confirmBtn("m-del-" + m.id, "Delete this entry", "m-del", `data-id="${esc(m.id)}"`)}</td></tr>`).join("")}</tbody></table></div>` : ""}
         </section>
 
         <section class="sec"><h2 class="h2">Activity</h2>
-          <div class="stats">${stats.map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("")}</div>
+          <div class="stats">${stats.map(([n, l]) => `<div class="stat"><b data-tween="stat-${esc(l)}" data-tw="count" data-to="${n}">${n}</b><span>${l}</span></div>`).join("")}</div>
           <div class="row" style="align-items:flex-start;gap:20px"><div class="stack tight"><p class="small muted">Last 12 weeks · ${streak()}-day streak</p>${heatmap(12)}</div></div>
         </section>
 
-        <section class="sec"><h2 class="h2">The exam, cold</h2>
+        <section class="sec"><h2 class="h2">The exam, cold</h2>${fold("exam-cold", "Voir le détail · Show the details", `<div class="stack">
           <div class="exam">${T.EXAM.map((e) => `<div><span class="sk ${e.code.toLowerCase()}">${e.code}</span><b>${esc(e.name)}</b><span class="small">${esc(e.fmt)}</span><span class="small muted">${esc(e.note)}</span></div>`).join("")}</div>
           <p class="small">A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: ${T.AUTOFAIL.map(esc).join(" · ")}. About 2 h 47 in total.</p>
           <div class="grid2">
@@ -4332,7 +4332,7 @@
           </div>
           <p class="small muted">Source: ${esc(TC.source)}. Everything on this site, including Claude's corrections and scores, follows these TCF Canada rules. Scores out of 20: B1 6–9, B2 10–13, C1 14–15, C1–C2 16–20.</p>
           <p class="small muted">From your roadmap notes: for sessions from September 1, 2026, re-marking requests for Expression écrite and orale aren't being accepted for about a year. Treat every mock as the one real attempt.</p>
-        </section>
+        </div>`)}</section>
 
         <p class="small muted">${backend.kind === "db" ? "Everything here is saved to this page on claude.ai, so it follows you to any device where you open it." : backend.kind === "server" ? "Everything here is saved in the local database (data/tcf.sqlite), separately from the claude.ai page. Claude's corrections and extra sets work only on claude.ai." : backend.kind === "local" ? "Everything here is saved in this browser only. Open the page on claude.ai to keep it with your account." : ""}</p>
       </div>`;

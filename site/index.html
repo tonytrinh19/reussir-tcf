@@ -416,6 +416,8 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .notice { padding: 13px 16px; border-radius: 14px; background: var(--sunk); color: var(--ink-2); font-size: 14px; }
 .notice.warn { background: var(--amber-soft); color: var(--ink); }
 .empty { padding: 22px; border: 1.5px dashed var(--rule-2); border-radius: var(--r-card); color: var(--ink-3); text-align: center; }
+/* Rémy waits in an empty box, centred, with his line read left to right. */
+.empty .greet { justify-content: center; text-align: left; color: var(--ink); }
 
 .bar { height: 8px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
 .bar > i { display: block; height: 100%; background: var(--green); border-radius: inherit; }
@@ -817,6 +819,8 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 700; }
 @media (max-width: 700px) { .wait-fields { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- motion (motion.js) ---------- */
+/* For a moment after switching light and dark, colours fade instead of snapping (motion.js adds the class). */
+:root.theme-fade, :root.theme-fade * { transition: background-color .35s ease, color .35s ease, border-color .35s ease, fill .35s ease, stroke .35s ease !important; }
 /* The maple leaves that fly off a stamp or a perfect score. */
 .m-burst { position: fixed; z-index: 40; width: 0; height: 0; pointer-events: none; }
 .m-burst svg { position: absolute; left: -10px; top: -11px; width: 20px; height: 22px; overflow: visible; }
