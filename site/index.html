@@ -158,6 +158,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 main { min-width: 0; padding-block: 32px 88px; padding-inline: 44px; }
 /* One column that never grows past the page, so a wide row (a tab tray, a table) scrolls inside it instead. */
 .wrap { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+/* A task in progress (a drill round, a text to proofread, an exam) gets a narrower page with nothing beside it. */
+.wrap.focus { max-width: 760px; gap: 22px; }
 
 @media (max-width: 880px) {
   .app { grid-template-columns: minmax(0, 1fr); }
@@ -240,6 +242,8 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .pill.bad { background: var(--red-soft); color: var(--red); }
 .pill.warn { background: var(--amber-soft); color: var(--amber); }
 .pill.info { background: var(--accent-soft); color: var(--accent); }
+/* A rule or topic name in a pill (a drill's review, the mixed review's topic) can be long: it wraps instead of widening the page. */
+.misses .pill, .drill-q .pill { white-space: normal; border-radius: 10px; }
 
 .sk { --c: var(--sk-bil); display: inline-flex; align-items: center; gap: 5px; font: 800 10.5px/1 var(--f-ui); letter-spacing: .07em; padding: 4px 8px 4px 6px; border-radius: 8px; color: var(--c); background: color-mix(in srgb, var(--c) 13%, transparent); white-space: nowrap; }
 .sk .ico { width: 14px; height: 14px; stroke-width: 2; --pen: currentColor; }
@@ -528,9 +532,29 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .heat i.now { outline: 1.5px solid var(--red); outline-offset: 1px; }
 
 /* ---------- grammar ---------- */
-.topics { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-.topics li a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 13px 8px; border-bottom: 1px solid var(--rule); text-decoration: none; color: var(--ink); transition: background-color var(--dur-fast); }
+/* The three ways to practise across topics, as tiles. */
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
+.tile-card { position: relative; display: grid; align-content: start; gap: 6px; padding: 18px 40px 16px 18px; border: 1px solid var(--rule); border-radius: var(--r-card); background: var(--surface); box-shadow: var(--shadow-sm); color: var(--ink); text-decoration: none; transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast), border-color var(--dur-fast); -webkit-tap-highlight-color: transparent; }
+.tile-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--rule-2); }
+.tile-card:active { transform: translateY(1px); box-shadow: var(--shadow-sm); }
+.tile-card.primary { border-color: color-mix(in srgb, var(--accent) 38%, var(--rule)); }
+.tile-card b { font-size: 16px; font-weight: 800; }
+.tile-ico { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 4px; border-radius: 13px; background: var(--sunk); color: var(--ink); }
+.tile-ico .ico { width: 22px; height: 22px; --pen: var(--red); }
+.tile-go { position: absolute; top: 18px; right: 18px; font-weight: 800; color: var(--ink-3); transition: transform var(--dur) var(--ease), color var(--dur-fast); }
+.tile-card:hover .tile-go { transform: translateX(3px); color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .tile-card:hover, .tile-card:active { transform: none !important; } }
+/* The topics, as one card of rows. */
+.topics { list-style: none; margin: 0; padding: 0; border: 1px solid var(--rule); border-radius: var(--r-card); background: var(--surface); box-shadow: var(--shadow-sm); overflow: hidden; }
+.topics li + li a { border-top: 1px solid var(--rule); }
+.topics li a { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto 12px; gap: 4px 14px; align-items: center; padding: 13px 16px; text-decoration: none; color: var(--ink); transition: background-color var(--dur-fast); }
+.topics li a::after { content: "›"; font-weight: 800; font-size: 18px; line-height: 1; color: var(--ink-3); transition: transform var(--dur) var(--ease), color var(--dur-fast); }
 .topics li a:hover { background: var(--hover); }
+.topics li a:hover::after { transform: translateX(3px); color: var(--accent); }
+@media (max-width: 560px) { .topics li a { grid-template-columns: 26px minmax(0, 1fr) 12px; } .topics .meta { grid-column: 2; grid-row: 2; justify-content: flex-start; } }
+/* A topic's notes: the rule, your mistakes and examples, each a fold. */
+.notes { display: grid; gap: 6px; }
 .topics .n { font: 800 15px/1 var(--f-ui); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .topics .t b { font-weight: 700; }
 .topics .t small { display: block; color: var(--ink-3); font-size: 13px; }
@@ -545,6 +569,7 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .examples div p:first-child { font: 400 17px/1.4 var(--f-text); }
 .examples div p + p { font-size: 13.5px; color: var(--ink-3); }
 .drill { display: grid; gap: 16px; }
+.drill-q { display: grid; gap: 16px; }
 .drill-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
 .drill .src { font: italic 400 16px/1.45 var(--f-text); color: var(--ink-2); }
 .drill .q { font: 400 21px/1.7 var(--f-text); }
@@ -600,6 +625,7 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .flash .note { font: 400 15px/1.5 var(--f-ui); color: var(--ink-2); max-width: 52ch; margin: 0 auto; }
 .flash .note.fr { font: 400 16px/1.5 var(--f-text); }
 .flash .row { justify-content: center; }
+.flash-back { display: grid; gap: 14px; }
 .deck { width: 100%; border-collapse: collapse; font-size: 14px; }
 .deck th, .deck td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--rule); vertical-align: middle; }
 .deck th { font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); font-weight: 800; }

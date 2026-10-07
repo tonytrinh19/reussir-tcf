@@ -2560,7 +2560,7 @@
     const it = cx.exam.items[cx.i], n = cx.exam.items.length, p = cx.play || coxFresh(it);
     const paused = !!p.paused;
     const clock = `<div class="timer"><span class="clock" data-timer>${fmtClock(timerRemaining())}</span><button class="btn sm" data-act="${paused ? "cox-resume" : "cox-pause"}">${paused ? "Resume" : "Pause"}</button></div>`;
-    const strip = `<div class="qnav cox-strip" aria-label="Progress: question ${cx.i + 1} of ${n}">${cx.exam.items.map((x, j) => `<span class="${cx.ans[j] != null ? "done" : ""}" ${j === cx.i ? `aria-current="true"` : ""}>${j + 1}</span>`).join("")}</div>`;
+    const strip = `<div class="qnav cox-strip" aria-label="Progress: question ${cx.i + 1} of ${n}">${cx.exam.items.map((x, j) => `<span class="${cx.ans[j] != null ? "done" : ""}"${cx.ans[j] != null ? ` data-m="pop" data-k="xs-${esc(cx.exam.id)}-${j}"` : ""} ${j === cx.i ? `aria-current="true"` : ""}>${j + 1}</span>`).join("")}</div>`;
     const phase = p.phase === "read" ? `<span class="pill">Lecture</span><span class="small muted">The recording starts in <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`
       : p.phase === "listen" ? `<span class="pill info">Écoute</span><div class="bar cox-bar" aria-hidden="true"><i data-cox-bar style="width:0%"></i></div>`
       : `<span class="pill warn">Réponse</span><span class="small muted">Time left to answer: <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`;
@@ -2572,7 +2572,7 @@
       <div class="row between"><p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p>${clock}</div>
       ${strip}
       ${paused ? `<div class="notice">Paused, with the clock. Resume to carry on${p.phase === "listen" ? " from where the recording stopped" : ""}.</div>` : ""}
-      <section class="panel stack cox">
+      <section class="panel stack cox" data-m="slide" data-k="cox-${esc(cx.exam.id)}-${cx.i}">
         <div class="row cox-phase">${phase}</div>
         <p class="small muted">${COX_CONSIGNE[it.kind]}</p>
         ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, "")}</figure>` : ""}
@@ -2652,12 +2652,12 @@
       const answered = Object.keys(cx.ans).length, blanks = n - answered;
       const mine = timer.home === X.home;
       const clock = `<div class="timer"><span class="clock" ${mine ? "data-timer" : ""}>${mine ? fmtClock(timerRemaining()) : "—"}</span>${mine ? `<button class="btn sm" data-act="timer-toggle" data-home="${X.home}" data-sec="${spec.minutes * 60}" data-label="${X.label}" data-timer-btn>${timer.running ? "Pause" : "Resume"}</button>` : ""}</div>`;
-      const nav = `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((x, j) => `<button data-act="x-go" data-i="${j}" class="${cx.ans[j] != null ? "done" : ""}" aria-current="${j === cx.i}" aria-label="Question ${j + 1}${cx.ans[j] != null ? ", answered" : ""}">${j + 1}</button>`).join("")}</nav>`;
+      const nav = `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((x, j) => `<button data-act="x-go" data-i="${j}" class="${cx.ans[j] != null ? "done" : ""}"${cx.ans[j] != null ? ` data-m="pop" data-k="xn-${esc(cx.exam.id)}-${j}"` : ""} aria-current="${j === cx.i}" aria-label="Question ${j + 1}${cx.ans[j] != null ? ", answered" : ""}">${j + 1}</button>`).join("")}</nav>`;
       return `${back}
         <div class="row between"><p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p>${clock}</div>
         ${nav}
-        <article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p>${it.title ? `<h3>${typo(it.title)}</h3>` : ""}<p class="fr">${typo(it.text)}</p></article>
-        <div class="stack tight"><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${it.order.map((k) => `<label class="opt"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${typo(it.options[k])}</span></label>`).join("")}</div></div>
+        <div class="stack" data-m="slide" data-k="xq-${esc(cx.exam.id)}-${cx.i}"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p>${it.title ? `<h3>${typo(it.title)}</h3>` : ""}<p class="fr">${typo(it.text)}</p></article>
+        <div class="stack tight"><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${it.order.map((k) => `<label class="opt"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${typo(it.options[k])}</span></label>`).join("")}</div></div></div>
         <div class="row between"><div class="row"><button class="btn" data-act="x-prev" ${cx.i === 0 ? "disabled" : ""}>← Previous</button><button class="btn" data-act="x-next" ${cx.i === n - 1 ? "disabled" : ""}>Next →</button></div><span class="small muted" id="x-count">${answered} of ${n} answered</span><button class="btn primary" data-act="x-finish">Hand in</button></div>
         ${cx.confirm ? `<div class="notice warn">${blanks} question${blanks > 1 ? "s are" : " is"} still blank and will count as wrong.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-submit">Hand in anyway</button><button class="btn sm" data-act="x-keep">Keep going</button></div></div>` : ""}
         <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
@@ -2679,9 +2679,9 @@
         + `<button class="btn" data-act="x-retake">Retake ${esc(cx.exam.title)}</button>${skill === "ce" ? claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn") : ""}`
         + `<button class="btn ghost" data-act="x-close">All exams</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a>`;
       return `${back}
-        <section class="panel stack">
+        <section class="panel stack" data-m="pop" data-k="xr-${esc(cx.exam.id)}-${esc(r.date)}">
           <p class="eyebrow">${esc(cx.exam.title)} · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
-          <div class="row"><span class="scorebig">≈ ${r.est}</span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span></div>
+          <div class="row"><span class="scorebig"${!r.review && (nclcOf(skill, r.est) || 0) >= 7 ? ` data-m="burst" data-k="x7-${esc(cx.exam.id)}-${esc(r.date)}-${r.est}"` : ""}>≈ <span data-tween="xest-${esc(cx.exam.id)}-${esc(r.date)}" data-tw="count" data-to="${r.est}">${r.est}</span></span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span></div>
           <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in ${skill === "co" ? "listening is 458–502" : "reading is 453–498"}.</p>
           <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
           <p class="small muted">${esc(spec.note)}${r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
@@ -2698,15 +2698,15 @@
     const other = examRunning() && skillOf(ui.cx) !== skill;
     const rules = skill === "co"
       ? `<p>39 questions in about 35 minutes, getting harder from A1 to C2, as on the TCF Canada. Each recording plays once, and the exam moves on by itself.</p>
-        <ul class="small" style="margin:0;padding-left:20px">
+        ${fold("x-rules-co", "Comment ça se passe · How it works", `<div class="stack tight"><ul class="small" style="margin:0;padding-left:20px">
           <li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li>
           <li>Questions 1–4: look at the picture and listen to four statements, then choose the one that matches it. Questions 5–7: listen to a question and four replies, then choose the right reply. From question 8: read the four options, listen to the document and its question, then choose.</li>
           <li>Use headphones if you can. If you're interrupted, Pause stops everything; the real test doesn't stop.</li>
           <li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li>
         </ul>
-        <p class="small muted">Unlike the real test, the pictures are drawings, and the recordings use Microsoft's voices for now: mostly from France, with a few from Québec, as on the real test.</p>`
+        <p class="small muted">Unlike the real test, the pictures are drawings, and the recordings use Microsoft's voices for now: mostly from France, with a few from Québec, as on the real test.</p></div>`)}`
       : `<p>39 questions in 60 minutes, one document each, getting harder from A1 to C2, as on the TCF Canada.</p>
-        <ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>`;
+        ${fold("x-rules-ce", "Comment ça se passe · How it works", `<ul class="small" style="margin:0;padding-left:20px"><li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li></ul>`)}`;
     return `${back}
       <section class="panel stack">
         <p class="h3">Examen blanc · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"}</p>
@@ -2888,6 +2888,10 @@
   const FOLD = {};
   const foldOpen = (key, dflt) => (key in FOLD ? FOLD[key] : !!dflt);
   const foldAttr = (key, dflt) => `data-fold="${esc(key)}"${foldOpen(key, dflt) ? " open" : ""}`;
+  // A fold of extra text: the page's explanation, a checklist, the rules. `body` is its HTML.
+  const fold = (key, label, body, dflt) => `<details class="fold-x" ${foldAttr(key, dflt)}><summary>${label}</summary>${body}</details>`;
+  // A short, stable key for motion.js (data-k) from any text: the same round or set gives the same key.
+  const hk = (s) => { let h = 0; for (const ch of String(s)) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
   let pendingRender = false, raf = 0, pointerDown = false;
   function scheduleRender() {
     if (raf) return;
@@ -3144,7 +3148,7 @@
   function grammarIndex() {
     const s = settings();
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Grammaire<small>Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</small></h1></header>
+      <header class="stack tight"><h1 class="title">Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
       ${practiceRows()}
       <ol class="topics">${T.TOPICS.map((tp) => {
         const m = topicMastery(tp);
@@ -3155,9 +3159,7 @@
           <span class="meta">${tp.phase === s.phase ? `<span class="pill info">Phase ${tp.phase}</span>` : ""}${last ? `<span class="small muted num">${last.score}/${last.total}</span>` : ""}${statusPill(m)}</span>
         </a></li>`;
       }).join("")}</ol>
-      <section class="sec"><h2 class="h2">Low priority: don't spend production time here</h2>
-        <ul class="hw">${T.LOW_PRIORITY.map(([a, b]) => `<li style="grid-template-columns:minmax(0,1fr)"><span><b>${esc(a)}</b> · <span class="muted">${esc(b)}</span></span></li>`).join("")}</ul>
-      </section>
+      ${fold("low-priority", "Low priority: don't spend production time here", `<ul class="hw">${T.LOW_PRIORITY.map(([a, b]) => `<li style="grid-template-columns:minmax(0,1fr)"><span><b>${esc(a)}</b> · <span class="muted">${esc(b)}</span></span></li>`).join("")}</ul>`)}
     </div>`;
   }
   function drillBox(topicId) {
@@ -3165,15 +3167,19 @@
     if (!d || d.topic !== topicId) return "";
     return d.done ? drillDone(d) : drillCard(d);
   }
+  // The same round keeps the same key across redraws and a refresh, so its animations play once (motion.js).
+  const roundKey = (d) => hk([d.topic, d.set, d.src, d.items.length, (d.items[0] || {}).q].join("|"));
   function drillCard(d) {
-    const it = d.items[d.i], n = d.items.length;
+    const it = d.items[d.i], n = d.items.length, rk = roundKey(d), at = `${rk}-${d.i}`;
+    // A right answer pops; a wrong one gives a small shake before the red-pen correction.
+    const mark = (ok) => (d.checked ? (ok ? ` data-m="pop" data-k="ok-${at}"` : ` data-m="shake" data-k="no-${at}"`) : "");
     let q, extra = "";
     if (it.kind === "type") {
       const parts = typo(it.q).split("___");
       const cls = d.checked ? (d.verdict === "ok" ? "ok" : "bad") : "";
       const full = parts.length === 2 && !parts[0].trim() && !parts[1].trim();
       const w = Math.max(8, Math.min(34, Math.max(...it.a.map((a) => a.length)) + 3));
-      const input = `<input id="drill-in" class="blank ${cls} ${full ? "blank-full" : ""}" type="text" data-input="drill" value="${esc(d.given)}" size="${w}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" lang="fr" ${d.checked ? "readonly" : ""} aria-label="Your answer">`;
+      const input = `<input id="drill-in" class="blank ${cls} ${full ? "blank-full" : ""}" type="text" data-input="drill" value="${esc(d.given)}" size="${w}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" lang="fr" ${d.checked ? "readonly" : ""} aria-label="Your answer"${mark(d.verdict === "ok")}>`;
       q = parts.length === 2 ? parts[0] + input + parts[1] : typo(it.q) + " " + input;
       if (!d.checked) extra = accentBar();
     } else {
@@ -3181,7 +3187,7 @@
       extra = `<div class="choices">${it.order.map((k, pos) => {
         const opt = it.options[k];
         const st = d.checked ? (k === 0 ? "ok" : d.given === opt ? "bad" : "") : "";
-        return `<button data-act="drill-pick" data-k="${k}" class="${st}" ${d.checked ? "disabled" : ""}><span class="kbd">${pos + 1}</span><span>${typo(opt)}</span></button>`;
+        return `<button data-act="drill-pick" data-k="${k}" class="${st}" ${d.checked ? "disabled" : ""}${st ? mark(st === "ok") : ""}><span class="kbd">${pos + 1}</span><span>${typo(opt)}</span></button>`;
       }).join("")}</div>`;
     }
     let foot;
@@ -3190,21 +3196,23 @@
       const verdict = d.verdict === "ok"
         ? `<p class="pen-ok">Très bien !</p>`
         : `<p>${d.verdict === "accent" ? "<b>Almost: check your accents.</b> " : ""}${it.kind === "type" ? `<span class="pen-wrong">${esc(d.given)}</span> ` : ""}<span class="pen-right">${esc(it.a[0])}</span></p>`;
-      foot = `<div class="verdict ${d.verdict === "ok" ? "ok" : "bad"}">${verdict}${it.why ? `<p class="why">${typo(it.why)}</p>` : ""}${alts}</div>
+      foot = `<div class="verdict ${d.verdict === "ok" ? "ok" : "bad"}" data-m="pop" data-k="v-${at}">${verdict}${it.why ? `<p class="why">${typo(it.why)}</p>` : ""}${alts}</div>
         <div class="row"><button class="btn primary" data-act="drill-next">${d.i + 1 >= n ? "See results" : "Next"} <span class="kbd">Enter</span></button></div>`;
     } else {
       foot = it.kind === "type"
         ? `<div class="row"><button class="btn primary" data-act="drill-check">Check <span class="kbd">Enter</span></button><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`
         : `<div class="row"><span class="small muted">Pick an answer, or press 1–${it.options.length}.</span><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`;
     }
-    const done = d.results.filter((r) => r && r.ok).length;
+    const done = d.results.filter((r) => r && r.ok).length, w = (d.i / n) * 100;
     return `<section class="panel drill" id="drill-area">
       <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? (d.items.some((x) => x.fresh) ? " · your misses, in new sentences" : " · retrying misses") : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
-      <div class="bar"><i style="width:${(d.i / n) * 100}%"></i></div>
-      ${drillAsk(d, it)}
-      ${it.src ? `<p class="src">${typo(it.src)}</p>` : ""}
-      <p class="q">${q}</p>
-      ${extra}
+      <div class="bar"><i style="width:${w}%" data-tween="bar-${rk}" data-tw="width" data-to="${w}"></i></div>
+      <div class="drill-q" data-m="slide" data-k="q-${at}">
+        ${drillAsk(d, it)}
+        ${it.src ? `<p class="src">${typo(it.src)}</p>` : ""}
+        <p class="q">${q}</p>
+        ${extra}
+      </div>
       ${foot}
     </section>`;
   }
@@ -3230,9 +3238,10 @@
       const rows = Object.entries(by).sort((a, b) => a[1].ok / a[1].n - b[1].ok / b[1].n);
       breakdown = `<div class="stack tight"><p class="h3">By topic</p>${rows.map(([t2, b]) => `<div class="row between"><span>${esc(TOPIC[t2].title)}</span><span class="num">${b.ok}/${b.n}</span></div>`).join("")}<p class="small muted">Weakest: <b>${esc(TOPIC[rows[0][0]].title)}</b>. Make it next week's extra focus.</p></div>`;
     }
-    return `<section class="panel drill" id="drill-area">
-      <div class="row between"><span class="eyebrow">${esc(d.title)} · results</span>${target != null && d.src !== "retry" ? `<span class="pill ${met ? "ok" : "warn"}">${met ? "Target met" : `Target ${pct(target)}`}</span>` : ""}</div>
-      <div class="row"><span class="scorebig">${score}/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
+    const rk = roundKey(d);
+    return `<section class="panel drill" id="drill-area" data-m="pop" data-k="done-${rk}">
+      <div class="row between"><span class="eyebrow">${esc(d.title)} · results</span>${target != null && d.src !== "retry" ? `<span class="pill ${met ? "ok" : "warn"}"${met ? ` data-m="pop" data-k="met-${rk}"` : ""}>${met ? "Target met" : `Target ${pct(target)}`}</span>` : ""}</div>
+      <div class="row"><span class="scorebig"><span data-tween="score-${rk}" data-tw="count" data-to="${score}">${score}</span>/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
       ${breakdown}
       ${misses.length ? `<div class="stack tight"><p class="h3">Review</p><ul class="misses">${misses.map(({ it, k, r }) => `<li>
           ${it.point ? `<p><span class="pill">${esc(it.point)}</span></p>` : ""}
@@ -3242,7 +3251,7 @@
           <p><span class="pen-wrong">${esc(r.given)}</span> <span class="pen-right">${esc(it.a[0])}</span></p>
           ${it.why ? `<p class="small muted">${typo(it.why)}</p>` : ""}
           ${r.claude ? `<p class="small ${r.claude.correct ? "" : "muted"}"><b>${r.claude.correct ? "Claude: your answer works too. Counted as correct." : "Claude: not quite."}</b> ${esc(r.claude.explanation)}</p>` : it.kind === "type" && !r.ok ? `<div>${claudeBtn("dispute-" + k, "drill-dispute", "Is my answer also correct?", `data-k="${k}"`, "btn ghost sm")}</div>` : ""}
-        </li>`).join("")}</ul></div>` : `<p class="pen-ok">Sans faute !</p>`}
+        </li>`).join("")}</ul></div>` : `<p class="pen-ok" data-m="burst" data-k="perfect-${rk}">Sans faute !</p>`}
       <div class="row">
         ${misses.some((x) => !x.r.ok) ? `<button class="btn primary" data-act="drill-retry" title="Each sentence you missed comes back as a new sentence on the same rule, when the set has one">Retry the misses</button>` : ""}
         ${d.topic !== "mixed" ? `<button class="btn" data-act="drill-start" data-topic="${d.topic}" data-set="${d.set}">New round</button>` : `<button class="btn" data-act="drill-start" data-topic="mixed" data-set="main">New round</button>`}
@@ -3278,9 +3287,12 @@
       </div>`;
     }).join("");
     const pr = tp.prod ? prodPanel(tp) : "";
+    const head = `<div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
+      <header class="stack tight"><p class="eyebrow">Topic ${tp.n} · Phase ${tp.phase} focus${tp.phase === s.phase ? " · this phase" : ""}</p><h1 class="title">${esc(tp.title)}<small>${esc(tp.en)}</small></h1></header>`;
+    // During a round: the question, with the notes a tap away. History and mastery come back with the results.
+    if (active && !ui.drill.done) return `<div class="wrap focus">${head}${drillBox(tp.id)}${fold("notes-" + tp.id, "Notes · L'essentiel, tes erreurs, des exemples", `<div class="notes">${topicNotes(tp)}</div>`)}</div>`;
     return `<div class="wrap">
-      <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Topic ${tp.n} · Phase ${tp.phase} focus${tp.phase === s.phase ? " · this phase" : ""}</p><h1 class="title">${esc(tp.title)}<small>${esc(tp.en)}</small></h1></header>
+      ${head}
       <div class="grid-side">
         <div class="stack">
           ${active ? drillBox(tp.id) : `<section class="panel stack tight" id="drill-area"><p class="h3">Drill</p><p class="small muted">${esc(tp.exercise)}</p>${sets}</section>`}
@@ -3289,12 +3301,16 @@
         </div>
         <aside class="side">
           <section class="panel stack tight"><p class="h3">Mastery</p><p class="small">${esc(tp.criterion.text)}</p>${m.parts.map((p2) => `<p class="small"><b style="color:var(${p2.ok ? "--green" : "--ink-3"})">${p2.ok ? "✓" : "○"}</b> ${esc(p2.note)}</p>`).join("")}</section>
-          <section class="panel stack tight"><p class="h3">Why it matters</p><p class="small">${typo(tp.why)}</p>${tp.know ? `<p class="small muted"><b>Already know:</b> ${typo(tp.know)}</p>` : ""}<p class="small"><b>Master:</b> ${typo(tp.master)}</p></section>
-          ${tp.mistakes.length ? `<section class="panel stack tight"><p class="h3">Your mistakes</p><ul class="mistakes">${tp.mistakes.map(([w, r]) => `<li><span class="pen-wrong">${typo(w)}</span><span class="pen-right">${typo(r)}</span></li>`).join("")}</ul></section>` : ""}
-          <section class="panel stack tight"><p class="h3">Examples</p><div class="examples">${tp.examples.map(([f, e]) => `<div><p>${typo(f)}</p><p>${esc(e)}</p></div>`).join("")}</div></section>
+          <section class="panel stack tight notes"><p class="h3">Notes</p>${topicNotes(tp)}</section>
         </aside>
       </div>
     </div>`;
+  }
+  // A topic's notes, each a fold: what to master and why, your own mistakes on it, and examples.
+  function topicNotes(tp) {
+    return `${fold("why-" + tp.id, "L'essentiel · Why it matters", `<div class="stack tight"><p class="small">${typo(tp.why)}</p>${tp.know ? `<p class="small muted"><b>Already know:</b> ${typo(tp.know)}</p>` : ""}<p class="small"><b>Master:</b> ${typo(tp.master)}</p></div>`)}
+      ${tp.mistakes.length ? fold("mist-" + tp.id, "Tes erreurs · Your mistakes", `<ul class="mistakes">${tp.mistakes.map(([w, r]) => `<li><span class="pen-wrong">${typo(w)}</span><span class="pen-right">${typo(r)}</span></li>`).join("")}</ul>`) : ""}
+      ${fold("ex-" + tp.id, "Exemples · Examples", `<div class="examples">${tp.examples.map(([f, e]) => `<div><p>${typo(f)}</p><p>${esc(e)}</p></div>`).join("")}</div>`)}`;
   }
   // A topic's last five finished rounds; the full list, with every question, is in Progrès → Historique.
   function recentRounds(topicId) {
@@ -3327,23 +3343,24 @@
     const startBtns = ip
       ? `<button class="btn primary" data-act="ip-resume" data-id="drill--mixed">Resume · ${arr(ip.results).filter(Boolean).length}/${arr(ip.items).length}</button><button class="btn" data-act="drill-start" data-topic="mixed" data-set="main" data-fresh="1">Start over</button>`
       : `<button class="btn primary" data-act="drill-start" data-topic="mixed" data-set="main">Start mixed review</button>`;
-    return `<div class="wrap">
+    const focus = active && !ui.drill.done;
+    return `<div class="wrap${focus ? " focus" : ""}">
       <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Friday review</p><h1 class="title">Mixed review<small>15 items across pronominal verbs, imperative + pronoun, embedded questions and subjonctif. The difficulty follows your phase: B1 in Phase 1, up to B1+ in Phase 2, B1+ and B2 from Phase 3. The results tell you which topic is still weakest.</small></h1></header>
-      ${active ? drillBox("mixed") : `<section class="panel stack tight" id="drill-area"><p class="small muted">A fresh random mix every round.</p><div class="row">${startBtns}</div></section>`}
-      <section class="stack tight"><p class="h3">History</p>${recentRounds("mixed")}</section>
+      <header class="stack tight"><p class="eyebrow">Révision mixte</p><h1 class="title">Mixed review<small>15 items from the topics you've drilled, up to this phase</small></h1>${focus ? "" : fold("intro-mixed", "Comment ça marche · How it works", `<p class="small muted">It takes every topic of this phase and the earlier ones that you've drilled (Phase 1's four until you have), so what you learned weeks ago keeps coming back. The topics you missed most in the last two weeks come first, then the ones practised longest ago. The difficulty follows your phase: B1 in Phase 1, up to B1+ in Phase 2, B1+ and B2 from Phase 3. The results tell you which topic is still weakest.</p>`)}</header>
+      ${active ? drillBox("mixed") : `<section class="panel stack tight" id="drill-area"><p class="small muted">A fresh mix every round.</p><div class="row">${startBtns}</div></section>`}
+      ${focus ? "" : `<section class="stack tight"><p class="h3">History</p>${recentRounds("mixed")}</section>`}
     </div>`;
   }
 
-  // The ways to practise across topics, above the topic list.
+  // The ways to practise across topics, as three tiles above the topic list.
   function practiceRows() {
     const ms = mineStatus(), todo = ms.filter((m) => m.state !== "fixed").length;
-    const row = (href, title, note, primary) => `<div class="set-row"><span class="stack tight" style="gap:2px"><b>${title}</b><span class="small muted">${note}</span></span><a class="btn ${primary ? "primary " : ""}sm" href="${href}">Open</a></div>`;
-    return `<section class="panel stack tight">
-      ${row("#grammar.mixed", "Mixed review · 15 items", "Pronominal verbs, imperative, embedded questions and subjonctif together.", true)}
-      ${row("#grammar.mine", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, from Claude's corrections and your error log.` : "The mistakes from Claude's corrections and your error log, as a drill.")}
-      ${row("#grammar.hunt", "Find the mistakes", "Proofread a short text: tap the mistakes, then correct them.")}
-    </section>`;
+    const tile = (href, icon, title, note, primary) => `<a class="tile-card${primary ? " primary" : ""}" href="${href}"><span class="tile-ico">${ico(icon)}</span><b>${title}</b><span class="small muted">${note}</span><span class="tile-go" aria-hidden="true">→</span></a>`;
+    return `<div class="tiles">
+      ${tile("#grammar.mixed", "grammar", "Mixed review", "15 items from the topics you've drilled, the most missed first.", true)}
+      ${tile("#grammar.mine", "errors", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, from Claude's corrections and your error log.` : "The mistakes from Claude's corrections and your error log, as a drill.")}
+      ${tile("#grammar.hunt", "bilan", "Find the mistakes", "Proofread a short text: tap the mistakes, then correct them.")}
+    </div>`;
   }
   function grammarMine() {
     const active = ui.drill && ui.drill.topic === "mine";
@@ -3359,16 +3376,17 @@
     const rows = ms.slice().sort((a, b) => order.indexOf(a.state) - order.indexOf(b.state) || b.n - a.n || b.ts - a.ts).map((m) => `<li><div class="fix"><span class="pen-wrong">${esc(m.wrong)}</span><span class="pen-right">${esc(m.a[0])}</span><span class="pill ${STATE[m.state][1]}">${STATE[m.state][0]}</span>${m.n > 1 ? `<span class="pill warn">made ${m.n}×</span>` : ""}<span class="pill">${esc(CAT[m.cat])}</span><button class="btn ghost sm" data-act="mine-hide" data-k="${esc(m.key)}" title="Not a real mistake? Leave it out of this drill">Hide</button></div>${m.why ? `<p class="why">${esc(m.why)}</p>` : ""}</li>`).join("");
     const intro = ms.length
       ? `<p><b>${ms.length - fixed} of your ${ms.length} mistakes</b> to practise${count("new") ? `, ${count("new")} of them new` : ""}${fixed ? ` · ${fixed} fixed` : ""}.</p>
-        <p class="small muted">A round starts with new mistakes (the ones you made most often first), then the ones you haven't fixed. A mistake is fixed once you get it right twice in a row; fixed ones come back when the others run out.</p>
-        <div class="row">${startBtns}</div>`
+        <div class="row">${startBtns}</div>
+        ${fold("how-mine", "Comment ça marche · How it works", `<p class="small muted">A round starts with new mistakes (the ones you made most often first), then the ones you haven't fixed. A mistake is fixed once you get it right twice in a row; fixed ones come back when the others run out.</p>`)}`
       : `<p class="empty">Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.</p>`;
-    return `<div class="wrap">
+    const focus = active && !ui.drill.done;
+    return `<div class="wrap${focus ? " focus" : ""}">
       <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Mes erreurs</p><h1 class="title">Your mistakes<small>Every mistake from Claude's corrections of your writing and production checks, and from your error log. You see what you wrote, in your own sentence, and type it corrected.</small></h1></header>
+      <header class="stack tight"><p class="eyebrow">Mes erreurs</p><h1 class="title">Your mistakes<small>What you wrote, in your own sentence: type it corrected</small></h1>${focus ? "" : fold("intro-mine", "Where they come from", `<p class="small muted">Every mistake from Claude's corrections of your writing and production checks, and from your error log.</p>`)}</header>
       ${active ? drillBox("mine") : `<section class="panel stack tight" id="drill-area">${intro}</section>`}
-      ${ms.length ? `<details class="fold"><summary>All your mistakes · ${ms.length}</summary><ul class="errs" style="margin-top:10px">${rows}</ul></details>` : ""}
+      ${focus ? "" : `${ms.length ? `<details class="fold"><summary>All your mistakes · ${ms.length}</summary><ul class="errs" style="margin-top:10px">${rows}</ul></details>` : ""}
       ${hidden ? `<p class="small muted">${hidden} hidden from this drill. <button class="btn ghost sm" data-act="mine-unhide">Show them again</button></p>` : ""}
-      <section class="stack tight"><p class="h3">History</p>${recentRounds("mine")}</section>
+      <section class="stack tight"><p class="h3">History</p>${recentRounds("mine")}</section>`}
     </div>`;
   }
 
@@ -3401,7 +3419,7 @@
         return;
       }
       if (!/[\p{L}\p{N}]/u.test(t.w)) { html += esc(t.w); return; }
-      if (!h.found) { html += `<span class="pr-w${picks.has(i) ? " sel" : ""}" data-act="pr-tok" data-i="${i}">${esc(t.w)}</span>`; return; }
+      if (!h.found) { html += `<span class="pr-w${picks.has(i) ? " sel" : ""}"${picks.has(i) ? ` data-m="pop" data-k="sel-${pr.id}-${i}"` : ""} data-act="pr-tok" data-i="${i}">${esc(t.w)}</span>`; return; }
       const num = t.k >= 0 && !numbered.has(t.k) ? (numbered.add(t.k), `<sup class="pr-n">${t.k + 1}</sup>`) : "";
       html += `${num}<span class="pr-w ${cls(t.k, i)}">${esc(t.w)}</span>`;
     });
@@ -3461,11 +3479,12 @@
     const done = new Set(list("drills").filter((d) => d.topic === "hunt").map((d) => d.text));
     const pool = PR.filter((p) => p.level === lvl), left = pool.filter((p) => !done.has(p.id)).length;
     const levels = `<div class="seg" role="group" aria-label="Level">${[["B1", "B1 · messages"], ["B2", "B2 · letters and articles"]].map(([l, label]) => `<button data-act="pr-level" data-l="${l}" aria-pressed="${lvl === l}">${label}</button>`).join("")}</div>`;
-    return `<div class="wrap">
+    const focus = !!pr && !h.verdicts;
+    return `<div class="wrap${focus ? " focus" : ""}">
       <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Relecture</p><h1 class="title">Find the mistakes<small>A short text like the ones the TCF asks you to write, with a few mistakes of the kinds you make. Tap the words that look wrong, then correct them: the proofreading pass to do on every draft before you hand it in.</small></h1></header>
+      <header class="stack tight"><p class="eyebrow">Relecture</p><h1 class="title">Find the mistakes<small>Tap the words that look wrong, then correct them</small></h1>${focus ? "" : fold("intro-hunt", "Comment ça marche · How it works", `<p class="small muted">A short text like the ones the TCF asks you to write, with a few mistakes of the kinds you make. It's the proofreading pass to do on every draft before you hand it in.</p>`)}</header>
       ${pr ? huntBox(pr, h) : `<section class="panel stack tight" id="drill-area"><div class="row">${levels}<span class="small muted">${left ? `${left} of ${pool.length} texts not done yet` : `All ${pool.length} done: the one done longest ago comes back`}</span></div><div class="row"><button class="btn primary" data-act="pr-start">Start a text</button></div></section>`}
-      <section class="stack tight"><p class="h3">History</p>${recentRounds("hunt")}</section>
+      ${focus ? "" : `<section class="stack tight"><p class="h3">History</p>${recentRounds("hunt")}</section>`}
     </div>`;
   }
   function huntBox(pr, h) {
@@ -3492,7 +3511,7 @@
     const caught = h.verdicts.filter((v) => v === "ok").length;
     const LABEL = { ok: ["Caught", "ok"], accent: ["Check the accents", "bad"], bad: ["Not quite", "bad"], missed: ["Not spotted", "bad"] };
     return `<section class="panel drill" id="drill-area">${head}
-      <div class="row"><span class="scorebig">${caught}/${n}</span><span class="muted">caught: found and corrected · found ${fk.length} of ${n}${extra ? ` · ${extra}` : ""}</span></div>
+      <div class="row"><span class="scorebig"><span data-tween="hunt-${pr.id}" data-tw="count" data-to="${caught}">${caught}</span>/${n}</span><span class="muted">caught: found and corrected · found ${fk.length} of ${n}${extra ? ` · ${extra}` : ""}</span></div>
       ${prText(pr, h)}
       <ul class="misses">${pr.mistakes.map(([wrong, a, cat, why], k) => `<li>
         <p class="row" style="gap:6px"><span class="pr-n">${k + 1}</span><span class="pill ${LABEL[h.verdicts[k]][1]}">${LABEL[h.verdicts[k]][0]}</span><span class="pill">${esc(CAT[catOf(cat)])}</span></p>
@@ -3501,7 +3520,7 @@
         ${a.length > 1 ? `<p class="small muted">Also accepted: ${a.slice(1).map(esc).join(" · ")}</p>` : ""}
         <p class="small muted">${typo(why)}</p>
       </li>`).join("")}</ul>
-      ${caught === n && !h.extra ? `<p class="pen-ok">Sans faute !</p>` : ""}
+      ${caught === n && !h.extra ? `<p class="pen-ok" data-m="burst" data-k="hunt-${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}">Sans faute !</p>` : ""}
       <details class="fold"><summary>The corrected text</summary>${prCorrected(pr)}</details>
       <div class="row"><button class="btn primary" data-act="pr-start">Next text</button><button class="btn ghost" data-act="pr-close">Close</button></div>
     </section>`;
@@ -3538,7 +3557,7 @@
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="row"><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning"}</span>${DECK.has(c.id) ? "" : confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</span></li>`; }).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire<small>Spaced repetition: a new card comes back after 1, 2, 4, 7, then 14 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</small></h1></header>
+      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition: a new card comes back after 1, 2, 4, 7, 14, then 30 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       ${waitPanel()}
       <div class="grid2">
         <section class="panel stack">
@@ -3557,9 +3576,9 @@
       </div>
       <div class="row"><span class="small muted">Card direction</span><div class="seg" role="group" aria-label="Card direction"><button data-act="v-dir" data-dir="en-fr" aria-pressed="${ui.vDir === "en-fr"}">English → French</button><button data-act="v-dir" data-dir="fr-en" aria-pressed="${ui.vDir === "fr-en"}">French → English</button></div><span class="small muted">English → French trains the words you'll need to produce.</span></div>
       <section class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
-        <div class="table-wrap"><table class="deck"><thead><tr><th>Theme</th><th>Learned</th><th>Mastered</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+        ${fold("deck", `Voir les ${T.VOCAB.length} thèmes · Show the deck`, `<div class="table-wrap"><table class="deck"><thead><tr><th>Theme</th><th>Learned</th><th>Mastered</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`)}
       </section>
-      <section class="panel stack"><p class="h3">Add your own card</p>
+      <section class="panel stack">${fold("add-card", "Ajouter une carte · Add your own card", `<div class="stack">
         <div class="grid2">
           <label class="field">French<input type="text" id="card-fr" data-input="form" data-k="card-fr" value="${formVal("card-fr")}" lang="fr" placeholder="s'engager à faire qqch"></label>
           <label class="field">English<input type="text" id="card-en" data-input="form" data-k="card-en" value="${formVal("card-en")}" placeholder="to commit to doing something"></label>
@@ -3567,7 +3586,7 @@
           <label class="field">Theme<select id="card-th" data-change="form" data-k="card-th">${T.VOCAB.map((th) => `<option value="${th.id}" ${(ui.form["card-th"] || theme) === th.id ? "selected" : ""}>${esc(th.label)}</option>`).join("")}</select></label>
         </div>
         <div class="row"><button class="btn" data-act="v-add">Add card</button></div>
-      </section>
+      </div>`)}</section>
     </div>`;
   }
   function vocabCard() {
@@ -3586,11 +3605,11 @@
     else buttons = `<button class="btn" data-act="v-grade" data-ok="0">Missed <span class="kbd">1</span></button><button class="btn primary" data-act="v-grade" data-ok="1">Got it <span class="kbd">2</span></button>`;
     return `<div class="wrap">
       <div class="row between"><span class="eyebrow">${v.mode === "new" ? "Learning new cards" : "Review"} · ${v.i + 1} / ${v.queue.length}</span><span class="row"><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
-      <div class="bar"><i style="width:${(v.i / v.queue.length) * 100}%"></i></div>
-      <section class="panel flash">
+      <div class="bar"><i style="width:${(v.i / v.queue.length) * 100}%" data-tween="vbar-${v.mode}" data-tw="width" data-to="${(v.i / v.queue.length) * 100}"></i></div>
+      <section class="panel flash" data-m="slide" data-k="vc-${esc(id)}-${v.i}">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
         ${v.edit ? vocabEditForm(id) : `${front}
-        ${v.shown ? back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") : `<p class="muted small">Say it out loud before you flip.</p>`}
+        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : `<p class="muted small">Say it out loud before you flip.</p>`}
         <div class="row">${buttons}</div>`}
       </section>
     </div>`;
@@ -3665,9 +3684,14 @@
   function vocabDone() {
     const v = ui.vocab;
     const due = dueIds().length;
-    return `<div class="wrap"><section class="panel stack">
+    const sk = hk(v.queue.join("|")), perfect = v.mode !== "new" && v.ok > 0 && !v.miss;
+    const rm = v.mode === "new" ? ["bonjour", "Nouvelles cartes en poche ! Elles reviennent demain.", "New cards in the bag! They come back tomorrow."]
+      : perfect ? ["bravo", "Séance parfaite ! Bravo.", "A perfect session! Well done."]
+      : ["bonjour", "Bien joué ! Les ratées reviennent demain.", "Nice work! The ones you missed come back tomorrow."];
+    return `<div class="wrap"><section class="panel stack" data-m="pop" data-k="vdone-${sk}">
       <p class="eyebrow">Session complete</p>
-      <p class="scorebig">${v.mode === "new" ? v.queue.length + " new" : v.ok + " / " + (v.ok + v.miss)}</p>
+      <p class="scorebig"${perfect ? ` data-m="burst" data-k="vperfect-${sk}"` : ""}>${v.mode === "new" ? `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.queue.length}">${v.queue.length}</span> new` : `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.ok}">${v.ok}</span> / ${v.ok + v.miss}`}</p>
+      ${greet(rm[0], rm[1], rm[2], "sm")}
       <p class="lede">${v.mode === "new" ? "These come back tomorrow for their first review." : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile for daily review.` : "Clean session."}${due ? ` ${due} card${due > 1 ? "s are" : " is"} still due.` : ""}</p>
       <div class="row"><button class="btn primary" data-act="v-close">Back to the deck</button>${due ? `<button class="btn" data-act="v-start" data-mode="review">Review the rest</button>` : ""}</div>
     </section></div>`;
@@ -3694,7 +3718,7 @@
       const viewing = ui.w.viewing && S.writing.get(ui.w.viewing);
       const hist = list("writing").sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 25);
       return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Expression écrite<small>TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</small></h1></header>
+        <header class="stack tight"><h1 class="title">Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
         <nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === task}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}</nav>
         <section class="panel prompt-card">
           <div class="row between"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] && !ui.w.gen[task].kept ? " · from Claude" : ""}</span>
@@ -3719,11 +3743,10 @@
           ${task === "t3" ? `<div class="paras" id="w-paras"></div>` : ""}
         </section>
         ${accentBar()}
-        <section class="stack tight">
-          <p class="h3">Before you submit</p>
+        ${fold("w-checks-" + task, "Avant de rendre · Before you submit", `<div class="stack tight">
           <label class="check"><input type="checkbox" id="chk-words" disabled><span>Word count inside ${W.min}–${W.max}. Outside the range, a task can be marked “A1 non atteint” however good the French.</span></label>
           ${checks.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="w-check" data-k="${k}" ${ch[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}
-        </section>
+        </div>`)}
         <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Finish without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
         ${ui.w.copyOut && ui.w.copyOut.task === task ? `<section class="panel stack tight"><p class="h3">Copy this into another AI</p><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p><textarea id="w-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.w.copyOut.text)}</textarea><div class="row"><button class="btn sm ghost" data-act="w-copy-close">Close</button></div></section>` : ""}
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
@@ -3757,9 +3780,9 @@
     if (!fb) return `<section class="panel fb" id="w-fb">${head}<div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">Not corrected</span></div><p class="corrected seyes">${esc(doc.text)}</p></section>`;
     const flag = (ok, yes, no) => `<span class="pill ${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(ok ? yes : no)}</span>`;
     const t3 = fb.tache3;
-    return `<section class="panel fb" id="w-fb">
+    return `<section class="panel fb" id="w-fb" data-m="rise" data-k="wfb-${esc(id)}">
       ${head}
-      <div class="fb-head"><span class="level">${fb.score20 != null ? `${fb.score20}<small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : fb.nclc ? `About NCLC ${esc(fb.nclc)} · ` : ""}Claude's estimate on the TCF Canada scale, not an official score.</span><p>${esc(fb.summary)}</p></div></div>
+      <div class="fb-head"><span class="level">${fb.score20 != null ? `<span data-tween="w20-${esc(id)}" data-tw="count" data-to="${fb.score20}">${fb.score20}</span><small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : fb.nclc ? `About NCLC ${esc(fb.nclc)} · ` : ""}Claude's estimate on the TCF Canada scale, not an official score.</span><p>${esc(fb.summary)}</p></div></div>
       ${greet("correction", ...remyMarks(fb.errors), "sm")}
       <div class="flags">
         ${flag(inRange, `${doc.words} words, inside ${W.min}–${W.max}`, `${doc.words} words, outside ${W.min}–${W.max}`)}
@@ -3793,7 +3816,7 @@
       co ? "A few times a week, pick a Canadian source: the TCF Canada uses some Canadian accents." : "A word that keeps coming back is worth a card: add it in Vocabulaire, two or three a session at most.",
     ];
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">${co ? "Écoute libre" : "Lecture libre"}<small>Easy French every day, outside your study time: on your commute, while you cook, before bed. It's the input half of the plan, and it's how vocabulary and speed grow.</small></h1></header>
+      <header class="stack tight"><h1 class="title">${co ? "Écoute libre" : "Lecture libre"}<small>Easy French every day, outside your study time</small></h1>${fold("intro-free", "Pourquoi · Why", `<p class="small muted">On your commute, while you cook, before bed. It's the input half of the plan, and it's how vocabulary and speed grow.</p>`)}</header>
       ${tabs}
       <div class="grid2">
         <section class="panel stack" style="align-content:start"><p class="h3">How to do it</p><ul class="small" style="margin:0;padding-left:20px">${tips.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>
@@ -3807,9 +3830,9 @@
       if (args[0] === "free") return freeView(args[1] === "ce" ? "ce" : "co");
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
-      const head = `<header class="stack tight"><h1 class="title">Compréhension<small>TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</small></h1></header>`;
+      const head = `<header class="stack tight"><h1 class="title">Compréhension</h1>${fold("intro-comp", "Comment ça marche · How it works", `<p class="small muted">TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</p>`)}</header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
-      if (args[1] === "exam") return `<div class="wrap">${head}${tabs}<div class="stack">${examView(skill)}</div></div>`;
+      if (args[1] === "exam") { const running = !!ui.cx && skillOf(ui.cx) === skill && !ui.cx.done; return `<div class="wrap${running ? " focus" : ""}">${running ? "" : head + tabs}<div class="stack">${examView(skill)}</div></div>`; }
       ensureCompSet(skill);
       const lvl = compLevel();
       const key = compKey(skill);
@@ -3867,7 +3890,7 @@
       const docOf = (q, i) => (q.doc ? `<article class="sheet"><p class="eyebrow">Document ${i + 1}${q.doc.type ? ` · ${esc(q.doc.type)}` : ""}</p>${q.doc.title ? `<h3>${typo(q.doc.title)}</h3>` : ""}<p class="fr">${typo(q.doc.text)}</p></article>` : "");
       const qs = set ? `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
-        return `<li>${docOf(q, i)}<p class="fr q">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
+        return `<li${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
           const st = submitted ? (k === q.answer ? "ok" : ans[i] === k ? "bad" : "") : "";
           return `<label class="opt ${st}"><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
         }).join("")}</div>
@@ -3875,15 +3898,15 @@
         ${miss ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `<span class="scorebig">${score}/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : ""}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
+        <div class="row">${submitted ? `<span class="scorebig"${score === set.questions.length ? ` data-m="burst" data-k="cperf-${esc(set.id)}-${esc(ui.c.saved[skill] || "")}"` : ""}><span data-tween="cs-${esc(set.id)}" data-tw="count" data-to="${score}">${score}</span>/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : ""}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       return `<div class="wrap">
         ${head}
         ${tabs}
-        ${examCta(skill)}
+        ${set && !submitted && Object.keys(ans || {}).length ? "" : examCta(skill)}
         ${controls}
         <div class="stack">${reviewNote}${fallback}${timerRow}${material}${qs}</div>
-        <div class="grid2">
+        ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
             <p class="small muted">${skill === "co" ? "Real voices at exam speed. Past papers aren't published, so the closest thing is practice written by the test's own designers at France Éducation International and its partners." : "Practice questions written by the test's designers and France Éducation International."} Log your scores here to keep them with the rest.</p>
             <ul class="links">${res.map((r) => `<li><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.name)} ↗</a><span class="small muted">${esc(r.what)}</span></li>`).join("")}</ul></section>
@@ -3892,7 +3915,7 @@
             <label class="field">Source<input type="text" id="cl-src" data-input="form" data-k="cl-src" value="${formVal("cl-src")}" placeholder="TV5MONDE TCF training, set 3"></label>
             <div class="row"><button class="btn" data-act="c-log" data-skill="${skill}">Log ${skill.toUpperCase()} score at ${esc(lvl)}</button></div>
           </section>
-        </div>
+        </div>`)}
         ${historyTree(skill)}
       </div>`;
     },
