@@ -29,17 +29,24 @@
 ## Files
 - `01`–`04-*.md`: the roadmap (assessment and phases, grammar progression, weekly study system, vocabulary/speaking/writing).
 - `site/`: the practice website.
-  - `index.html`: page shell and CSS. White by default; dark mode is a manual toggle that adds the `dark` class to `<html>`. No purple palette.
+  - `index.html`: page shell and CSS. Cream paper by default; dark mode (warm charcoal) is a manual toggle that adds the `dark` class to `<html>`, and ignores the system and claude.ai themes. No purple palette.
+    - The look is the **warm notebook**, which the user chose on 2026-10-07 for a revamp of the interface only. Its tokens at the top of the CSS are the source for colours, type, corners, shadows and motion timings:
+      - **Colours:** blue ink (`--accent`) for actions, links and progress; the red pen (`--red`) only for corrections and mistakes; the autumn-leaf colours (`--leaf-1`…`4`) for rewards. Every text colour passes 4.5:1 on its background in both modes.
+      - **Type:** Nunito (rounded, 400–800) for the interface, with extra-bold titles; Source Serif 4 for French sentences, documents and corrections; Playwrite FR for handwriting (the date, the expression of the day, the red pen).
+      - **Shapes:** 12 px corners on controls (`--r`), 18 px on cards (`--r-card`), 24 px on the big ones (`--r-lg`), round chips; soft warm shadows; buttons sit on a lip (`--lip-h`) that presses down when clicked.
+    - **Fold the extras** (also chosen on 2026-10-07): the task comes first, and instructions, rules and notes fold behind a tap (`details` with `data-fold`). Nothing is deleted. Which folds you opened or closed is kept for the visit only (`FOLD` in `app.js`, noted on the click), never saved; a fold you haven't touched shows its default.
+    - The navigation shows the French names only, with the English in a tooltip. Tabs drop their English subtitles on phones.
     - Its hidden sprite holds the brand kit's shapes (below): the maple leaf `#leaf`, the icons `#i-…`, the é tile's clip, the stamp ring `#ring34` and the ink texture `#ink`. `icon.svg` (favicon) and `icon-180.png` (home screen) are the é tile.
-  - The look comes from the **Réussir le TCF Brand Kit** (https://claude.ai/artifact/7EmNeRS2SyqVjGBxTdLwwh, made in a design chat). Follow it for any visual change: a school notebook, blue ink, the teacher's red pen, and a maple leaf for Canada.
+  - The shapes come from the **Réussir le TCF Brand Kit** (https://claude.ai/artifact/7EmNeRS2SyqVjGBxTdLwwh, made in a design chat): a school notebook, blue ink, the teacher's red pen, and a maple leaf for Canada. Keep its logo, icons, Rémy, stamps and boarding pass for any visual change. Since the revamp the site is ahead of the kit on colours, type and corners; the kit's canvas hasn't been updated.
     - **Logo:** the é tile (Seyès paper, a cursive é whose accent is a maple leaf) with the wordmark, in the sidebar and phone top bar.
     - **Icons:** 24 px grid, 1.75 stroke, in the text colour with one red-pen detail (`.pen`, `--pen`). In the navigation the red only shows on the current page. Skill chips, side cards, Progrès sections and the Compréhension tabs carry them too.
     - **Rémy, le petit chef:** a Paris rat in a toque, in five moods (`remy()` in `app.js`), always speaking French with the English underneath.
       - On Aujourd'hui (today only), by day: first visit, halfway ("Encore N minutes"), plan finished (cheering, with the streak in words), back after a break (4+ days since anything was done), Sunday rest.
+      - He blinks, twitches an ear and swishes his tail every few seconds, and hops when he cheers (CSS in `index.html`; his eyes, ears and tail are groups in `REMY_BODY` and `REMY_EYES`).
       - With headphones above a listening set before it's checked, and with glasses and a red pen over a writing correction (the count of mistakes and the main category).
     - **Rewards,** all worked out from progress already saved, with no new data:
       - The streak leaf: Pousse 1–6 days, Doré 7–13, Orangé 14–29, Rouge érable 30+. It shows in the sidebar and on Régularité.
-      - The "Très bien !" stamp lands on a day's header once all its blocks are ticked. It lands with a thunk only right after the last tick (`ui.thunk`).
+      - The "Très bien !" stamp lands on a day's header once all its blocks are ticked, in place of the day's ring. It lands with a thunk only right after the last tick (`ui.thunk`), and maple leaves burst from it (`TCFMotion.burst`).
       - Eight stamps in Progrès: first full day, 7 and 30 days in a row (longest streak ever), a drill round with no misses, 100 cards in the SRS, the Phase 1 criteria, a practice exam (CE or CO), and NCLC 7 in any skill of a logged score.
     - **Boarding pass:** the phases as one flight from B1 to NCLC 7. The week places the plane, and the gate is today's first open block. The small version is at the foot of the sidebar; the full one is at the top of Progrès.
     - **L'expression du jour:** a French saying on a taped notebook scrap on Aujourd'hui, changing daily, from `EXPRESSIONS` in `data.js`. Some are from Québec, and say so.
@@ -64,7 +71,15 @@
     - Cards that duplicated it were removed from the built-in themes.
     - Their Anki review progress was copied into the `srs` collection under ids `anki--<slug of the French side>`. Changing a card's French side in `anki.js` resets its progress. Editing it on the site doesn't (see `cards` below).
     - Keep one copy of each word across all decks.
+  - `motion.js`: the animations, loaded before `app.js`. The site works the same without it, and it never writes data, calls the app or stores anything.
+    - `app.js` redraws a whole page as HTML on every change, so an animation written in CSS would replay on every redraw. Instead `render()` announces each redraw (the `tcf:render` event, with the page and whether your progress has loaded) and `motion.js` animates only what's new:
+      - the page's entrance, when you open another page or once your progress has loaded (nothing moves before that);
+      - an element marked `data-m` (`rise`, `pop`, `slide`, `shake`, `tick` or `burst`) whose key `data-k` wasn't on screen in the previous redraw, so it animates once when it appears and never again on a save. Give it a key that changes exactly when it should animate. A burst plays once per key per visit;
+      - bars, rings and numbers marked `data-tween` (with `data-tw` `width`, `ring` or `count`, and `data-to`), from the value they showed before, or from 0 on a page's entrance.
+    - It also glides the navigation highlight (`.nav-pill`), slides the toast in and out, opens folds gently when you open them, and gives Rémy's idle cycles one clock (`--clock`), so a redraw doesn't restart them.
+    - Hover and press effects are plain CSS. With reduced motion asked for in the system, nothing moves.
   - `app.js`: the app logic.
+    - Aujourd'hui: the notebook header has the date, the day's ring (blocks ticked, minutes to go) and Rémy. The next block to do is open with its details and a big Start; the others open with a tap; done ones shrink to a ticked line. À surveiller sits in the Régularité card.
     - One timer serves every page (writing, reading, the exam). After 0:00 it counts overtime for up to half the time that was set (1 to 10 minutes), then stops, even if the tab was in the background. The exam is handed in at 0:00 instead.
     - Each page has its own address after `#` (`#comp.co`, `#grammar.hunt`). On claude.ai the page runs in a frame that reloads without it, so the current page is also kept in the tab's sessionStorage (`tcf-reussir-page`) and reopened after a refresh. A new tab starts on Aujourd'hui.
     - A refresh keeps whatever you were doing, on claude.ai and locally. What's on screen (`ui`, the clock and the recording's position) is also kept in the tab's sessionStorage (`tcf-reussir-tab`) and put back before anything is drawn. That covers the drill question you're on with what you'd typed, Find the mistakes, a vocabulary session, the Compréhension set with its level and topic, the practice exam and its clock, a recording (paused where it was) and where the page was scrolled.
@@ -191,7 +206,7 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-1/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-1/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress.
   - `speaking` holds the attempts saved before the Oral page was removed (2026-10-06). The site no longer reads it, but it stays in `COLLS` so nothing is lost; an unfinished speaking attempt is dropped at load.

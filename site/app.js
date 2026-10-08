@@ -511,8 +511,8 @@
   }
 
   // Rémy, le petit chef: a little Paris rat in a chef's toque, with a maple leaf pinned on for Canada. Five moods.
-  const REMY_BODY = `<path class="r-tail" d="M82 124C100 132 114 120 108 106C104 96 110 88 117 90"/><ellipse class="r-fur" cx="60" cy="113" rx="26" ry="24"/><ellipse class="r-belly" cx="60" cy="117" rx="16" ry="15.5"/><ellipse class="r-feet" cx="48" cy="136" rx="8" ry="4"/><ellipse class="r-feet" cx="72" cy="136" rx="8" ry="4"/><path class="r-scarf" d="M43 88.5Q60 94 77 88.5L62.5 105Q60 108 57.5 105z"/><circle class="r-fur" cx="27" cy="38" r="15"/><circle class="r-earin" cx="27" cy="38" r="9.5"/><circle class="r-fur" cx="93" cy="38" r="15"/><circle class="r-earin" cx="93" cy="38" r="9.5"/><path class="r-fur" d="M60 34C79 34 91 47 90 62C89 77 76 89 60 91C44 89 31 77 30 62C29 47 41 34 60 34z"/><ellipse class="r-belly" cx="60" cy="77" rx="15" ry="11"/><ellipse class="r-blush" cx="39.5" cy="70.5" rx="5" ry="3"/><ellipse class="r-blush" cx="80.5" cy="70.5" rx="5" ry="3"/>`;
-  const REMY_EYES = `<ellipse class="r-eye" cx="48" cy="58.5" rx="5" ry="6"/><ellipse class="r-eye" cx="72" cy="58.5" rx="5" ry="6"/><circle class="r-glint" cx="49.9" cy="56.2" r="1.9"/><circle class="r-glint" cx="73.9" cy="56.2" r="1.9"/>`;
+  const REMY_BODY = `<path class="r-tail" d="M82 124C100 132 114 120 108 106C104 96 110 88 117 90"/><ellipse class="r-fur" cx="60" cy="113" rx="26" ry="24"/><ellipse class="r-belly" cx="60" cy="117" rx="16" ry="15.5"/><ellipse class="r-feet" cx="48" cy="136" rx="8" ry="4"/><ellipse class="r-feet" cx="72" cy="136" rx="8" ry="4"/><path class="r-scarf" d="M43 88.5Q60 94 77 88.5L62.5 105Q60 108 57.5 105z"/><g class="r-ear r-ear-l"><circle class="r-fur" cx="27" cy="38" r="15"/><circle class="r-earin" cx="27" cy="38" r="9.5"/></g><g class="r-ear r-ear-r"><circle class="r-fur" cx="93" cy="38" r="15"/><circle class="r-earin" cx="93" cy="38" r="9.5"/></g><path class="r-fur" d="M60 34C79 34 91 47 90 62C89 77 76 89 60 91C44 89 31 77 30 62C29 47 41 34 60 34z"/><ellipse class="r-belly" cx="60" cy="77" rx="15" ry="11"/><ellipse class="r-blush" cx="39.5" cy="70.5" rx="5" ry="3"/><ellipse class="r-blush" cx="80.5" cy="70.5" rx="5" ry="3"/>`;
+  const REMY_EYES = `<g class="r-eyes"><ellipse class="r-eye" cx="48" cy="58.5" rx="5" ry="6"/><ellipse class="r-eye" cx="72" cy="58.5" rx="5" ry="6"/><circle class="r-glint" cx="49.9" cy="56.2" r="1.9"/><circle class="r-glint" cx="73.9" cy="56.2" r="1.9"/></g>`;
   const REMY_SMILE = `<rect class="r-tooth" x="57.3" y="78.6" width="2.6" height="4.4" rx=".8"/><rect class="r-tooth" x="60.1" y="78.6" width="2.6" height="4.4" rx=".8"/><path class="r-line" d="M60 75.2v3M54.5 78q2.8 2.6 5.5.2q2.7 2.4 5.5-.2"/>`;
   const REMY_NOSE = `<ellipse class="r-nose" cx="60" cy="71.5" rx="5.2" ry="3.8"/><ellipse class="r-noseshine" cx="58.3" cy="70.4" rx="1.8" ry="1"/><path class="r-whisk" d="M45.5 74.5 31 70.5M45 77.5 30 77.5M45.5 80.5 31 84.5M74.5 74.5 89 70.5M75 77.5 90 77.5M74.5 80.5 89 84.5"/>`;
   const REMY_TOQUE = `<path class="r-toque" d="M42 36V27.5C36 26 33.5 21 35.5 16.5C37.5 12 43 10.5 47 12.5C48.5 6.5 54 3 60 3C66 3 71.5 6.5 73 12.5C77 10.5 82.5 12 84.5 16.5C86.5 21 84 26 78 27.5V36z"/><path class="r-toqueline" d="M42 30H78M49.5 26.5V30M60 25.5V30M70.5 26.5V30"/><use class="r-pin" href="#leaf" x="66" y="30.8" width="6.4" height="6.9"/>`;
@@ -524,7 +524,7 @@
       face: `<path class="r-line r-thick" d="M42.5 60Q48 53.5 53.5 60M66.5 60Q72 53.5 77.5 60"/><path class="r-mouth" d="M53.8 78.2Q60 90 66.2 78.2Q60 81 53.8 78.2z"/><rect class="r-tooth" x="57.4" y="78.9" width="2.5" height="3.6" rx=".7"/><rect class="r-tooth" x="60.1" y="78.9" width="2.5" height="3.6" rx=".7"/><path class="r-line" d="M60 75.2v3.2"/>`,
       extra: `<ellipse class="r-dark" cx="29" cy="93" rx="6" ry="10.5" transform="rotate(-38 29 93)"/><ellipse class="r-dark" cx="91" cy="93" rx="6" ry="10.5" transform="rotate(38 91 93)"/><use class="k-c1" href="#leaf" x="2" y="6" width="12" height="13" transform="rotate(-28 8 12.5)"/><use class="k-c2" href="#leaf" x="102" y="4" width="12" height="13" transform="rotate(22 108 10.5)"/><use class="k-c3" href="#leaf" x="1" y="62" width="10" height="11" transform="rotate(35 6 67.5)"/><use class="k-c4" href="#leaf" x="109" y="62" width="10" height="11" transform="rotate(-18 114 67.5)"/>` },
     ecoute: { label: "Rémy the rat, listening with headphones",
-      face: `<ellipse class="r-eye" cx="49.6" cy="58" rx="5" ry="6"/><ellipse class="r-eye" cx="73.6" cy="58" rx="5" ry="6"/><circle class="r-glint" cx="51.5" cy="55.6" r="1.9"/><circle class="r-glint" cx="75.5" cy="55.6" r="1.9"/>${REMY_SMILE}`,
+      face: `<g class="r-eyes"><ellipse class="r-eye" cx="49.6" cy="58" rx="5" ry="6"/><ellipse class="r-eye" cx="73.6" cy="58" rx="5" ry="6"/><circle class="r-glint" cx="51.5" cy="55.6" r="1.9"/><circle class="r-glint" cx="75.5" cy="55.6" r="1.9"/></g>${REMY_SMILE}`,
       top: `<path class="k-hp" d="M31 52C27 14 93 14 89 52"/>`,
       extra: `${REMY_ARM_L}<ellipse class="r-dark" cx="82.5" cy="112" rx="6" ry="10" transform="rotate(-18 82.5 112)"/><rect class="k-hpc" x="23" y="45" width="11" height="20" rx="5"/><rect class="k-hpc" x="86" y="45" width="11" height="20" rx="5"/>` },
     correction: { label: "Rémy the rat, with glasses and a red pen", face: REMY_EYES + REMY_SMILE,
@@ -534,11 +534,11 @@
       extra: `<path class="k-steam" d="M55 104q-2.2-2.6 0-5.2M65 104q-2.2-2.6 0-5.2"/><rect class="k-mug" x="48" y="107" width="24" height="20" rx="4.2"/><path class="k-mugh" d="M72 111.5h3a4.6 4.6 0 0 1 0 9.2h-3"/><use class="k-mugleaf" href="#leaf" x="54.6" y="111" width="10.8" height="11.7"/><ellipse class="r-dark" cx="47" cy="118" rx="5.6" ry="8" transform="rotate(28 47 118)"/><ellipse class="r-dark" cx="73.5" cy="120" rx="5.6" ry="7.5" transform="rotate(-28 73.5 120)"/>` },
   };
   function remy(mood) {
-    const m = REMY[mood] || REMY.bonjour;
-    return `<svg class="mascot" viewBox="0 0 120 140" role="img" aria-label="${m.label}">${REMY_BODY}${m.face}${REMY_NOSE}${m.top || ""}${REMY_TOQUE}${m.extra}</svg>`;
+    const k = REMY[mood] ? mood : "bonjour", m = REMY[k];
+    return `<svg class="mascot m-${k}" viewBox="0 0 120 140" role="img" aria-label="${m.label}">${REMY_BODY}${m.face}${REMY_NOSE}${m.top || ""}${REMY_TOQUE}${m.extra}</svg>`;
   }
   // Rémy and his line: always in French, with the English underneath.
-  const greet = (mood, fr, en, cls) => `<div class="greet${cls ? " " + cls : ""}">${remy(mood)}<p class="bubble"><span lang="fr">${typo(fr)}</span><small>${esc(en)}</small></p></div>`;
+  const greet = (mood, fr, en, cls) => `<div class="greet${cls ? " " + cls : ""}">${remy(mood)}<p class="bubble" data-m="pop" data-k="${esc(mood + "|" + fr)}"><span lang="fr">${typo(fr)}</span><small>${esc(en)}</small></p></div>`;
   // The last day before `date` with anything done: a ticked block or a finished attempt.
   function lastActive(date) {
     let last = "";
@@ -2883,6 +2883,11 @@
     try { sessionStorage.removeItem(TAB_KEY); } catch (_) {}
   }
   const routeView = () => route.view;
+  // The folds you've opened or closed (a block's details, "Comment ça marche"…), for this visit only. One you
+  // haven't touched shows its default: open for the block that's next, closed otherwise.
+  const FOLD = {};
+  const foldOpen = (key, dflt) => (key in FOLD ? FOLD[key] : !!dflt);
+  const foldAttr = (key, dflt) => `data-fold="${esc(key)}"${foldOpen(key, dflt) ? " open" : ""}`;
   let pendingRender = false, raf = 0, pointerDown = false;
   function scheduleRender() {
     if (raf) return;
@@ -2927,6 +2932,8 @@
     paintMarks();
     grabCheck();
     tabSoon();
+    // motion.js animates what's new on the page after each redraw. It only listens; nothing here depends on it.
+    document.dispatchEvent(new CustomEvent("tcf:render", { detail: { page: [route.view].concat(route.args).join("."), ready: hydrated } }));
   }
   function paintNav() {
     document.querySelectorAll("[data-nav]").forEach((a) => { if (a.dataset.nav === route.view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
@@ -2936,7 +2943,10 @@
     const store = backend.kind === "db" ? `<span class="status-dot on"></span>Progress saved on claude.ai` : backend.kind === "server" ? `<span class="status-dot on"></span>Progress saved on this computer` : backend.kind === "local" ? `<span class="status-dot warn"></span>Progress saved in this browser only` : `<span class="status-dot"></span>Loading your progress…`;
     const cl = sample ? `<span class="status-dot on"></span>Claude ready` : claudeState === "pending" ? `<span class="status-dot"></span>Connecting to Claude…` : claudeState === "off" ? `<span class="status-dot"></span>Claude off (reload to allow)` : "";
     const tm = timer.total && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}">${ico("timer")}<span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
-    footEl.innerHTML = `${miniPass()}${tm}${streakPill(streak())}<div>${store}</div>${cl ? `<div>${cl}</div>` : ""}<button type="button" class="theme-btn" data-act="theme" data-theme-btn></button>`;
+    // Where your progress is saved, on one line; that and whether Claude is ready open with a tap.
+    const saved = backend.kind === "db" ? "Saved on claude.ai" : backend.kind === "server" ? "Saved on this computer" : backend.kind === "local" ? "Saved in this browser only" : "Loading your progress…";
+    const dot = backend.kind === "local" ? "warn" : backend.kind === "loading" ? "" : "on";
+    footEl.innerHTML = `${miniPass()}${tm}${streakPill(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}</div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button>`;
     paintTheme();
   }
   function confirmBtn(key, label, act, attrs) {
@@ -2973,7 +2983,7 @@
       const plan = planFor(s.phase, sel);
       const doc = S.days.get(sel);
       const done = (doc && doc.done) || {};
-      let body, rm = null;
+      let body, rm = null, ring = "";
       if (!plan) {
         body = `<div class="panel stack"><h2 class="h2">Repos</h2><p class="lede">Sunday is a rest day in every phase. If you want something light, review your due cards or reread this week's corrections, but it isn't on the plan.</p><div class="row"><a class="btn" href="#vocab">Due cards</a><a class="btn" href="#progress.errors">This week's errors</a></div></div>`;
       } else {
@@ -2981,36 +2991,28 @@
         const doneN = plan.filter((b, i) => done[blockKey(s.phase, i)]).length;
         const doneMin = plan.reduce((a, b, i) => a + (done[blockKey(s.phase, i)] ? b[1] : 0), 0);
         const pnote = T.PLAN[s.phase].note;
+        const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i)]);
         if (sel === t) rm = remyToday(plan, doneN, mins - doneMin);
+        ring = dayRing(sel, doneN, plan.length, doneMin, mins);
         body = `<div class="stack">
-          <div class="progress-line"><span class="num"><b>${doneN}</b> of ${plan.length} blocks · ${doneMin} of ${mins} min</span><div class="bar"><i style="width:${(doneN / plan.length) * 100}%"></i></div></div>
-          <ol class="blocks">${plan.map((b, i) => {
-            const key = blockKey(s.phase, i), isDone = !!done[key];
-            return `<li class="block ${isDone ? "done" : ""}">
-              <span class="tick"><input type="checkbox" data-change="tick" data-date="${sel}" data-key="${key}" ${isDone ? "checked" : ""} aria-label="Mark “${esc(b[2])}” done"></span>
-              <div>
-                <div class="block-top">${skChip(b[0])}<h3>${esc(b[2])}</h3><span class="min">${b[1]} min</span></div>
-                ${b[3] ? `<p class="detail">${typo(b[3])}</p>` : ""}
-                ${b[4] ? `<p class="check"><span>Check</span>${typo(b[4])}</p>` : ""}
-              </div>
-              <a class="btn sm" href="#${b[5]}">Start</a>
-            </li>`;
-          }).join("")}</ol>
-          ${pnote ? `<p class="small muted">${esc(pnote)}</p>` : ""}
+          <ol class="blocks">${plan.map((b, i) => todayBlock(b, i, sel, s.phase, done, i === next)).join("")}</ol>
+          ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p></details>` : ""}
         </div>`;
       }
       if (!plan && sel === t) rm = remyToday(null);
+      const side = dayComplete(sel) ? tbStamp(sel) : ring;
       return `<div class="wrap">
         <header class="cahier-head seyes">
-          <p class="date-hand">${frDate(sel)}</p>
-          <div class="meta"><b>Phase ${s.phase} · ${esc(P.name)}</b><span>Semaine ${weekNo()}</span><span>${esc(P.weeks)}</span>${sel !== t ? `<button class="btn ghost sm" data-act="day" data-date="${t}">Back to today</button>` : ""}</div>
-          ${dayComplete(sel) ? tbStamp(sel) : ""}
-          ${rm ? greet(rm[0], rm[1], rm[2]) : ""}
+          <div class="head-main">
+            <p class="date-hand">${frDate(sel)}</p>
+            <div class="meta"><b>Phase ${s.phase} · ${esc(P.name)}</b><span>Semaine ${weekNo()}</span><span>${esc(P.weeks)}</span>${sel !== t ? `<button class="btn ghost sm" data-act="day" data-date="${t}">Back to today</button>` : ""}</div>
+          </div>
+          ${side || rm ? `<div class="head-side">${side}${rm ? greet(rm[0], rm[1], rm[2]) : ""}</div>` : ""}
         </header>
         <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
-          <aside class="side">${continueCard()}${expressionCard()}${homeworkCard()}${watchCard()}${streakCard()}</aside>
+          <aside class="side">${continueCard()}${expressionCard()}${homeworkCard()}${streakCard()}</aside>
         </div>
       </div>`;
     },
@@ -3021,8 +3023,34 @@
       ui.thunk = null;
       if (typeof el.animate !== "function" || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
       el.animate([{ transform: "rotate(-11deg) scale(1.4)", opacity: 0.3 }, { transform: "rotate(-11deg) scale(.95)", opacity: 1, offset: 0.55 }, { transform: "rotate(-11deg) scale(1)", opacity: 1 }], { duration: 500, easing: "cubic-bezier(.2, .8, .3, 1.25)" });
+      // …and a handful of maple leaves fly off it as it lands (motion.js; without it, nothing happens).
+      if (window.TCFMotion) setTimeout(() => window.TCFMotion.burst(el), 240);
     },
   };
+  // One block of the day's plan. The next one to do is open, with its details and a big Start; the others show
+  // their title and open with a tap; done ones shrink to a ticked line.
+  function todayBlock(b, i, sel, phase, done, isNext) {
+    const key = blockKey(phase, i), isDone = !!done[key], fk = `blk-${sel}-${key}`;
+    const more = b[3] || b[4], open = more && foldOpen(fk, isNext);
+    const top = `${skChip(b[0])}<h3>${esc(b[2])}</h3><span class="min">${b[1]} min${more ? `<span class="chev" aria-hidden="true"></span>` : ""}</span>`;
+    const main = more
+      ? `<details class="block-main" ${foldAttr(fk, isNext)}><summary class="block-top">${top}</summary>
+          <div class="block-more"${open ? ` data-m="rise" data-k="${fk}"` : ""}>${b[3] ? `<p class="detail">${typo(b[3])}</p>` : ""}${b[4] ? `<p class="check"><span>Check</span>${typo(b[4])}</p>` : ""}</div></details>`
+      : `<div class="block-main"><div class="block-top">${top}</div></div>`;
+    return `<li class="block${isDone ? " done" : ""}${isNext ? " next" : ""}" data-m="rise" data-k="b-${sel}-${key}">
+      <label class="tick"><input type="checkbox" data-change="tick" data-date="${sel}" data-key="${key}" ${isDone ? "checked" : ""} aria-label="Mark “${esc(b[2])}” done"><svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"${isDone ? ` data-m="tick" data-k="t-${sel}-${key}"` : ""}><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg></label>
+      ${main}
+      <a class="btn ${isNext ? "primary" : isDone ? "ghost sm" : "sm"}" href="#${b[5]}">Start</a>
+    </li>`;
+  }
+  // The day's ring in the notebook header: the blocks ticked out of the plan, and the minutes still to go.
+  function dayRing(sel, n, total, doneMin, mins) {
+    const p = total ? Math.round((n / total) * 100) : 0, C = 113.1;
+    return `<div class="day-ring" role="img" aria-label="${n} of ${total} blocks done, ${doneMin} of ${mins} minutes">
+      <span class="ring"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="rg-track" cx="22" cy="22" r="18"/><circle class="rg-fill${p ? "" : " empty"}" cx="22" cy="22" r="18" stroke-dasharray="${C}" stroke-dashoffset="${(C * (1 - p / 100)).toFixed(1)}" data-tween="ring-${sel}" data-tw="ring" data-to="${p}" data-c="${C}"/></svg><span class="rg-n"><span><b>${n}</b><small>/${total}</small></span></span></span>
+      <small>${mins - doneMin > 0 ? `${mins - doneMin} min to go` : "All done"}</small>
+    </div>`;
+  }
   function homeworkCard() {
     const t = todayStr();
     const hw = list("homework").filter((h) => !h.done || (h.doneOn && h.doneOn >= addDays(t, -2)))
@@ -3042,13 +3070,14 @@
       ${suggestions || `<div>${claudeBtn("hw-suggest", "hw-suggest", "Suggest 3 from my error log", "", "btn ghost sm")}</div>`}
     </section>`;
   }
-  function watchCard() {
+  // À surveiller: your three most frequent error categories, in the Régularité card.
+  function watchList() {
     const t3 = top3();
-    if (!t3.length) return `<section class="panel stack tight"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2><p class="small muted">Your most frequent error categories show up here once corrections start coming in. From your history so far: pronominal verbs, imperative + pronoun, elision.</p></section>`;
-    return `<section class="panel stack tight"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2><ul class="hw">${t3.map(([c, v]) => {
+    if (!t3.length) return `<p class="small muted">Your most frequent error categories show up here once corrections start coming in. From your history so far: pronominal verbs, imperative + pronoun, elision.</p>`;
+    return `<ul class="hw">${t3.map(([c, v]) => {
       const tp = TOPIC[c];
       return `<li style="grid-template-columns:minmax(0,1fr) auto"><span><b>${esc(CAT[c])}</b> <span class="muted">×${v.n}</span><small><span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</small></span>${tp ? `<a class="btn ghost sm" href="#grammar.${c}">Drill</a>` : ""}</li>`;
-    }).join("")}</ul></section>`;
+    }).join("")}</ul>`;
   }
   function heatmap(weeks) {
     const t = todayStr();
@@ -3069,7 +3098,9 @@
   function streakCard() {
     const n = streak(), t = tierOf(n);
     const next = t === 4 ? "Rouge érable from day 30: the leaf stays red. " : t ? `${TIERS[t].name} until day ${TIERS[t].to}, then ${TIERS[t + 1].name.toLowerCase()}. ` : "";
-    return `<section class="panel stack tight"><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${heatmap(8)}<p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></section>`;
+    return `<section class="panel stack tight"><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${heatmap(8)}
+      <details class="fold-x" ${foldAttr("streak-how")}><summary>Comment ça marche · How it works</summary><p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></details>
+      <hr class="rule"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2>${watchList()}</section>`;
   }
   async function suggestHomework() {
     const s = settings(), P = T.PHASES[s.phase - 1];
@@ -4619,6 +4650,9 @@
   window.addEventListener("resize", () => { if (grabBtn && !grabBtn.hidden) grabCheck(); });
   // Keep the history tree's open branches across re-renders. "toggle" doesn't bubble, so listen while it's captured.
   document.addEventListener("toggle", (e) => { const d = e.target; if (d && d.dataset && d.dataset.node) ui.c.open[d.dataset.node] = d.open; }, true);
+  // A fold remembers only what you did with it, so it's noted on the click (before it opens or closes), not on
+  // "toggle", which also fires for folds a redraw draws open.
+  document.addEventListener("click", (e) => { const s = e.target.closest && e.target.closest("summary"), d = s && s.parentElement; if (d && d.dataset && d.dataset.fold) FOLD[d.dataset.fold] = !d.open; }, true);
   document.addEventListener("change", (e) => {
     const el = e.target;
     const fn = el.dataset && CHANGES[el.dataset.change];
