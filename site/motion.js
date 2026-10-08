@@ -3,15 +3,19 @@
    This file runs after each redraw (the "tcf:render" event) and animates only what's new:
    - the page's entrance, when you open another page;
    - elements marked data-m (rise, pop, slide, shake, tick, burst) whose key (data-k) wasn't on screen in the
-     previous redraw, so a question animates when it appears and not again on every save. Press, fly and draw
-     (the stamps, the boarding pass's plane and route) belong to a page's entrance and also play as it opens;
+     previous redraw, so a question animates when it appears and not again on every save. Press, fly, draw, deal
+     and chart (the stamps, the boarding pass's plane and route, the overview's tiles and its charts) belong to a
+     page's entrance and also play as it opens; below the fold they wait, still, until you scroll to them;
    - bars, rings and numbers marked data-tween, from the value they had before (data-tw: width, ring or count).
-   It also glides the navigation highlight, slides the toast in and out, opens folds gently and throws the maple
-   leaves (TCFMotion.burst). It only reads the page and adds animations: it never writes data, calls the app or
-   stores anything, and the site works the same without it. With reduced motion asked for, nothing moves. */
+   It also glides the navigation highlight, slides the toast in and out, opens folds gently, throws the maple
+   leaves (TCFMotion.burst), lights up and tilts the overview's cards under a mouse, and runs the overview's section
+   bar (a tap scrolls to the section; the pill follows the one you're reading). It only reads the page, moves it
+   and scrolls it: it never writes data, calls the app or stores anything, and the site works the same without it.
+   With reduced motion asked for, nothing moves. */
 (() => {
   "use strict";
   const mq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  const fine = window.matchMedia ? window.matchMedia("(hover: hover) and (pointer: fine)") : null;
   const still = () => !!(mq && mq.matches) || typeof Element.prototype.animate !== "function";
   const EASE = "cubic-bezier(.2, .8, .2, 1)";
   const POP = "cubic-bezier(.34, 1.56, .64, 1)";
@@ -24,21 +28,48 @@
     shake: (el) => el.animate([{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(5px)" }, { transform: "translateX(-3px)" }, { transform: "translateX(2px)" }, { transform: "none" }], { duration: 380, easing: "ease-out" }),
     // A tick: the circle pops and the check mark draws itself.
     tick: (el) => {
-      const box = el.previousElementSibling;
-      if (box) box.animate([{ transform: "scale(.75)" }, { transform: "scale(1.15)", offset: 0.55 }, { transform: "none" }], { duration: 360, easing: EASE });
+      const box = el.previousElementSibling, out = [];
+      if (box) out.push(box.animate([{ transform: "scale(.75)" }, { transform: "scale(1.15)", offset: 0.55 }, { transform: "none" }], { duration: 360, easing: EASE }));
       const p = el.querySelector("path");
-      if (p) p.animate([{ strokeDashoffset: 18 }, { strokeDashoffset: 0 }], { duration: 300, delay: 90, easing: EASE, fill: "backwards" });
+      if (p) out.push(p.animate([{ strokeDashoffset: 18 }, { strokeDashoffset: 0 }], { duration: 300, delay: 90, easing: EASE, fill: "backwards" }));
+      return out;
     },
     burst: (el) => burst(el),
     // A stamp pressed onto the page, one after another (the scale property keeps its tilt).
     press: (el, i) => el.animate([{ scale: "1.35", opacity: 0 }, { scale: ".94", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 160 + Math.min(i, 10) * 70, easing: EASE, fill: "backwards" }),
     // The boarding pass's plane flies along its route to this week (data-dx: how far it has come).
-    fly: (el) => { const dx = Number(el.getAttribute("data-dx")) || 0; if (dx > 0) el.animate([{ translate: `${-dx}px 0` }, { translate: "0 0" }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }); },
+    fly: (el) => { const dx = Number(el.getAttribute("data-dx")) || 0; return dx > 0 ? el.animate([{ translate: `${-dx}px 0` }, { translate: "0 0" }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }) : null; },
     // A line that draws itself: the part of the route already flown.
-    draw: (el) => { const L = el.getTotalLength ? el.getTotalLength() : 0; if (L) el.animate([{ strokeDasharray: `${L}`, strokeDashoffset: L }, { strokeDasharray: `${L}`, strokeDashoffset: 0 }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }); },
+    draw: (el) => { const L = el.getTotalLength ? el.getTotalLength() : 0; return L ? el.animate([{ strokeDasharray: `${L}`, strokeDashoffset: L }, { strokeDasharray: `${L}`, strokeDashoffset: 0 }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }) : null; },
+    // A tile dealt onto the table, one after another (the overview's headline numbers).
+    deal: (el, i) => el.animate([{ opacity: 0, transform: "translateY(16px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: 60 + Math.min(i, 8) * 70, easing: POP, fill: "backwards" }),
+    chart: (el) => chartIn(el),
   };
   // These are part of a page's entrance, so they also play when the page opens.
-  const ENTRANCE = new Set(["press", "fly", "draw"]);
+  const ENTRANCE = new Set(["press", "fly", "draw", "deal", "chart"]);
+  // These wait until they're on screen: there's no point drawing a chart nobody sees.
+  const LATER = ENTRANCE;
+
+  // A chart draws itself (charts.js): columns grow from the baseline, bars from the left, lines wipe in with their
+  // dots popping as the line reaches them, rings sweep round, a day strip and the heatmap fill in square by square,
+  // and a score slides along its scale.
+  function chartIn(el) {
+    const out = [];
+    const add = (node, frames, o) => out.push(node.animate(frames, Object.assign({ easing: EASE, fill: "backwards" }, o)));
+    const cols = el.querySelectorAll(".c-col");
+    cols.forEach((c, i) => add(c, [{ scale: "1 0" }, { scale: "1 1" }], { duration: 560, delay: 60 + i * Math.min(40, 520 / cols.length) }));
+    el.querySelectorAll(".c-ht > i").forEach((b, i) => add(b, [{ scale: "0 1" }, { scale: "1 1" }], { duration: 640, delay: 80 + Math.min(i, 12) * 55 }));
+    el.querySelectorAll(".c-bar").forEach((b) => add(b, [{ clipPath: "inset(0 100% 0 0 round 999px)" }, { clipPath: "inset(0 0 0 0 round 999px)" }], { duration: 820, delay: 80 }));
+    el.querySelectorAll(".c-svg, .c-spark").forEach((s) => add(s, [{ clipPath: "inset(-20% 100% -20% -2%)" }, { clipPath: "inset(-20% -4% -20% -2%)" }], { duration: 900, delay: 120, easing: "cubic-bezier(.45, 0, .2, 1)" }));
+    el.querySelectorAll(".c-dot").forEach((d) => { const x = (parseFloat(d.style.left) || 0) / 100; add(d, [{ scale: "0", opacity: 0 }, { scale: "1.35", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 140 + x * 780, easing: POP }); });
+    el.querySelectorAll(".c-end, .c-ref, .c-band").forEach((n) => add(n, [{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: 640 }));
+    el.querySelectorAll(".c-rfill").forEach((r, i) => { const C = Number(r.getAttribute("data-c")) || 0, p = Number(r.getAttribute("data-p")) || 0; if (C && p) add(r, [{ strokeDashoffset: C }, { strokeDashoffset: C * (1 - p) }], { duration: 900, delay: 100 + Math.min(i, 16) * 45 }); });
+    const cells = el.querySelectorAll(".c-cells > i, .heat > i");
+    cells.forEach((c, i) => add(c, [{ opacity: 0, scale: ".3" }, { opacity: 1, scale: "1" }], { duration: 320, delay: 40 + i * Math.min(12, 700 / cells.length), easing: POP }));
+    el.querySelectorAll(".c-mark").forEach((m) => add(m, [{ left: "0%", opacity: 0 }, { opacity: 1, offset: 0.12 }, { left: m.style.left, opacity: 1 }], { duration: 1000, delay: 220 }));
+    el.querySelectorAll(".c-ghost").forEach((g, i) => add(g, [{ opacity: 0, scale: ".4" }, { opacity: 1, scale: "1" }], { duration: 300, delay: 320 + i * 70 }));
+    return out;
+  }
 
   /* ---------- after each redraw ---------- */
   let seen = new Set(); // the data-m keys on screen after the previous redraw
@@ -56,20 +87,28 @@
     lastReady = !!d.ready;
     safe(() => setClock(view));
     safe(() => placePill(entering));
-    const now = new Set(), fresh = [];
+    safe(() => spy(true));
+    if (tilted && !tilted.isConnected) tilted = null;
+    const now = new Set(), fresh = [], again = [];
     view.querySelectorAll("[data-m][data-k]").forEach((el) => {
       const k = el.getAttribute("data-m") + "|" + el.getAttribute("data-k");
       now.add(k);
       if (!seen.has(k)) fresh.push(el);
+      else if (waitKeys.has(k)) again.push(el);
     });
     seen = now;
     // Until your progress has loaded the page is drawn with defaults, so it waits there, still, and comes in once.
     if (!d.ready) return;
     if (still()) { safe(() => tween(view, true, false)); return; }
     if (entering) {
+      safe(forget);
       safe(() => enter(view));
       safe(() => playFresh(fresh.filter((el) => ENTRANCE.has(el.getAttribute("data-m"))), true));
-    } else safe(() => playFresh(fresh));
+    } else {
+      // Something still waiting to be seen when the page redrew waits on in its new copy.
+      safe(() => { prune(now); playFresh(again, true); });
+      safe(() => playFresh(fresh));
+    }
     safe(() => tween(view, false, entering));
   }
 
@@ -90,7 +129,7 @@
 
   function playFresh(fresh, inside) {
     const set = new Set(fresh);
-    let n = 0;
+    const n = {}; // each kind counts its own, so a row of stamps or tiles comes in one after another
     fresh.forEach((el) => {
       const kind = el.getAttribute("data-m");
       const fn = KINDS[kind];
@@ -104,8 +143,52 @@
       }
       // Inside something that's already coming in, one movement is enough (an entrance's own parts excepted).
       if (!inside) for (let p = el.parentElement; p && p.id !== "view"; p = p.parentElement) if (set.has(p) && p.getAttribute("data-m") !== "burst") return;
-      safe(() => fn(el, n++));
+      const i = n[kind] || 0;
+      n[kind] = i + 1;
+      if (LATER.has(kind)) safe(() => later(el, kind, i));
+      else safe(() => fn(el, i));
     });
+  }
+
+  /* ---------- waiting until it's seen ---------- */
+  // An entrance below the fold is set up paused at its start and plays when it scrolls into view.
+  const waiting = new Map(); // element → what starts it
+  let waitKeys = new Set(); // the data-m keys of what's waiting, so a redraw can carry them over
+  let io = null;
+  function inView(el) {
+    const r = el.getBoundingClientRect();
+    return (r.width || r.height) && r.bottom > 0 && r.top < (window.innerHeight || document.documentElement.clientHeight);
+  }
+  function whenSeen(el, start, key) {
+    if (inView(el) || typeof IntersectionObserver !== "function") { start(); return; }
+    if (!io) io = new IntersectionObserver((entries) => entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      const w = waiting.get(en.target);
+      io.unobserve(en.target);
+      waiting.delete(en.target);
+      if (w) { waitKeys.delete(w.key); safe(w.start); }
+    }), { rootMargin: "0px 0px -10% 0px" });
+    waiting.set(el, { start, key });
+    if (key) waitKeys.add(key);
+    io.observe(el);
+  }
+  function later(el, kind, i) {
+    const key = kind + "|" + el.getAttribute("data-k");
+    waitKeys.delete(key);
+    const anims = [].concat(KINDS[kind](el, i) || []).filter(Boolean);
+    if (!anims.length || inView(el)) return;
+    anims.forEach((a) => a.pause());
+    whenSeen(el, () => anims.forEach((a) => a.play()), key);
+  }
+  // A new page starts with nothing waiting; a redraw lets go of the copies it replaced.
+  function forget() {
+    if (io) waiting.forEach((w, el) => io.unobserve(el));
+    waiting.clear();
+    waitKeys = new Set();
+  }
+  function prune(keys) {
+    waiting.forEach((w, el) => { if (!el.isConnected) { if (io) io.unobserve(el); waiting.delete(el); } });
+    waitKeys.forEach((k) => { if (!keys.has(k)) waitKeys.delete(k); });
   }
 
   function tween(view, instant, entering) {
@@ -121,13 +204,20 @@
         el.animate([{ strokeDashoffset: c * (1 - from / 100) }, { strokeDashoffset: c * (1 - to / 100) }], { duration: 700, easing: EASE });
       } else if (kind === "width") {
         el.animate([{ width: from + "%" }, { width: to + "%" }], { duration: 500, easing: EASE });
-      } else if (kind === "count") countUp(el, from, to);
+      } else if (kind === "count") {
+        const text = el.textContent;
+        // A number below the fold counts up when you get to it.
+        if (entering && !inView(el) && typeof IntersectionObserver === "function") {
+          el.textContent = String(from);
+          whenSeen(el, () => countUp(el, from, to, text));
+        } else countUp(el, from, to, text);
+      }
     });
   }
 
   // A score counts up to its value; the text the page drew comes back exactly at the end.
-  function countUp(el, from, to) {
-    const text = el.textContent, t0 = performance.now(), dur = Math.min(900, 300 + Math.abs(to - from) * 40);
+  function countUp(el, from, to, text) {
+    const t0 = performance.now(), dur = Math.min(900, 300 + Math.abs(to - from) * 40);
     const step = (t) => {
       if (!el.isConnected) return;
       const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
@@ -166,6 +256,80 @@
       if (l < nav.scrollLeft + 8 || r > nav.scrollLeft + nav.clientWidth - 8) nav.scrollTo({ left: Math.max(0, l - 24), behavior: jump ? "auto" : "smooth" });
     }
   }
+
+  /* ---------- the overview's section bar ---------- */
+  // A tap scrolls to the section (at once with reduced motion). As you scroll, the bar marks the section you're
+  // reading, and its pill glides there.
+  document.addEventListener("click", (e) => {
+    const b = e.target && e.target.closest ? e.target.closest("[data-goto]") : null;
+    const sec = b && document.getElementById(b.getAttribute("data-goto"));
+    if (sec) sec.scrollIntoView({ behavior: still() ? "auto" : "smooth", block: "start" });
+  });
+  let navPill = null, spyRaf = 0;
+  function spy(instant) {
+    const nav = document.querySelector(".dash-nav");
+    if (!nav) return;
+    const btns = [...nav.querySelectorAll("[data-goto]")];
+    if (!btns.length) return;
+    const line = nav.getBoundingClientRect().bottom + 28;
+    let cur = btns[0];
+    btns.forEach((b) => { const s = document.getElementById(b.getAttribute("data-goto")); if (s && s.getBoundingClientRect().top <= line) cur = b; });
+    const doc = document.documentElement;
+    if (window.scrollY > 0 && window.innerHeight + window.scrollY >= doc.scrollHeight - 4) cur = btns[btns.length - 1];
+    btns.forEach((b) => { if (b === cur) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+    if (!navPill || !nav.contains(navPill)) {
+      navPill = document.createElement("span");
+      navPill.className = "dash-pill";
+      navPill.setAttribute("aria-hidden", "true");
+      nav.prepend(navPill);
+      instant = true;
+    }
+    const jump = instant || still();
+    if (jump) navPill.style.transition = "none";
+    navPill.style.width = cur.offsetWidth + "px";
+    navPill.style.height = cur.offsetHeight + "px";
+    navPill.style.transform = `translate(${cur.offsetLeft}px, ${cur.offsetTop}px)`;
+    if (jump) { void navPill.offsetWidth; navPill.style.transition = ""; }
+    if (nav.scrollWidth > nav.clientWidth + 1) {
+      const l = cur.offsetLeft, r = l + cur.offsetWidth;
+      if (l < nav.scrollLeft + 8 || r > nav.scrollLeft + nav.clientWidth - 8) nav.scrollTo({ left: Math.max(0, l - 24), behavior: jump ? "auto" : "smooth" });
+    }
+  }
+  window.addEventListener("scroll", () => { if (!spyRaf) spyRaf = requestAnimationFrame(() => { spyRaf = 0; safe(() => spy(false)); }); }, { passive: true });
+
+  /* ---------- the overview's cards under a mouse ---------- */
+  // A soft light follows the pointer across a card (--sx, --sy), and a tile tilts toward it.
+  let lastMove = null, moveRaf = 0, tilted = null;
+  function untilt() {
+    if (!tilted) return;
+    tilted.style.rotate = "";
+    tilted.classList.remove("m-tilting");
+    tilted = null;
+  }
+  function track(e) {
+    const t = e.target && e.target.closest ? e.target : null;
+    const on = t && !still() && !!(fine && fine.matches);
+    const spot = on ? t.closest("[data-spot], .kpi") : null;
+    const tilt = on ? t.closest("[data-tilt]") : null;
+    if (spot) {
+      const r = spot.getBoundingClientRect();
+      spot.style.setProperty("--sx", Math.round(e.clientX - r.left) + "px");
+      spot.style.setProperty("--sy", Math.round(e.clientY - r.top) + "px");
+    }
+    if (tilted && tilted !== tilt) untilt();
+    if (!tilt) return;
+    const r = tilt.getBoundingClientRect(), px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+    const deg = Math.min(1, Math.hypot(px, py) * 2) * (tilt.classList.contains("kpi") ? 5 : 7);
+    tilted = tilt;
+    tilt.classList.add("m-tilting");
+    tilt.style.rotate = deg > 0.2 ? `${(-py).toFixed(3)} ${px.toFixed(3)} 0 ${deg.toFixed(2)}deg` : "";
+  }
+  document.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse") return;
+    lastMove = e;
+    if (!moveRaf) moveRaf = requestAnimationFrame(() => { moveRaf = 0; safe(() => track(lastMove)); });
+  }, { passive: true });
+  document.addEventListener("pointerout", (e) => { if (!e.relatedTarget) safe(untilt); }, { passive: true });
 
   /* ---------- the toast ---------- */
   function watchToast() {
@@ -265,8 +429,8 @@
 
   window.TCFMotion = Object.freeze({ burst: (el, opts) => safe(() => burst(el, opts)) });
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
-  window.addEventListener("resize", () => safe(() => placePill(true)));
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => placePill(true)));
+  window.addEventListener("resize", () => safe(() => { placePill(true); spy(true); }));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => { placePill(true); spy(true); }));
   safe(watchToast);
   safe(watchGrab);
 })();

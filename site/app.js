@@ -4234,6 +4234,349 @@
     </div>`;
   }
 
+  /* =============== the dashboard (Progrès → Vue d'ensemble) =============== */
+  // The overview as a logbook: the headline numbers, where each skill stands against NCLC 7, study time, grammar,
+  // mistakes, cards, listening and reading, and writing. Like Évolution, it's worked out from progress already
+  // saved and adds no data of its own. The charts come from charts.js, each with its numbers in a fold under it.
+  const CH = window.TCFCharts;
+  // The skills in the charts' order (bottom to top in a stack), checked for colour-blind readers in both modes.
+  const SK_ORDER = ["co", "voc", "ee", "ce", "gra", "bil"];
+  const skColor = (k) => `var(--c-${k})`;
+  const hm = (m) => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? " " + pad(m % 60) : ""}`; };
+  const dayLabel = (d) => `${DAYS_SHORT[dow(d)]} ${shortDate(d)}`;
+  const taskName = (w) => (T.WRITING[w.task] || {}).name || "Écrit";
+  const numbers = (key, head, rows) => (rows.length ? fold("num-" + key, "Les chiffres · The numbers", CH.table(head, rows)) : "");
+  // The minutes of each skill in a day's ticked blocks, from the plan the day was ticked against.
+  function dayMinutes(date) {
+    const doc = S.days.get(date);
+    if (!doc || !doc.done) return {};
+    const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {};
+    if (plan) plan.forEach((b, i) => { if (doc.done[blockKey(phase, i)]) by[b[0]] = (by[b[0]] || 0) + b[1]; });
+    return by;
+  }
+  const minTotal = (by) => Object.values(by).reduce((a, b) => a + b, 0);
+  // The day's first round of each drill set (as the criteria count it): the topics' sets and the mixed review.
+  function firstRoundsSince(from) {
+    const seen = new Set();
+    return list("drills").filter((d) => d.total && d.set !== "prod" && d.src !== "retry" && d.topic !== "mine" && d.topic !== "hunt" && str(d.date) >= from)
+      .sort((a, b) => (a.ts || 0) - (b.ts || 0)).filter((d) => { const k = `${d.topic}|${d.set}|${d.date}`; if (seen.has(k)) return false; seen.add(k); return true; });
+  }
+  const accuracy = (rounds) => { const n = rounds.reduce((a, d) => a + d.total, 0); return n ? rounds.reduce((a, d) => a + d.score, 0) / n : null; };
+  // Every day with anything done: a ticked block, a finished attempt, an error logged or a card reviewed.
+  function activeDays() {
+    const set = new Set();
+    for (const [d, doc] of S.days) if (doc && doc.done && Object.keys(doc.done).length) set.add(d);
+    ["drills", "comp", "writing", "errors"].forEach((c) => list(c).forEach((x) => x.date && set.add(x.date)));
+    for (const st of S.srs.values()) if (st && st.last) set.add(st.last);
+    return set;
+  }
+  // A score's place along the NCLC scale, from NCLC 4 (0) to 10+ (1), each band the same width.
+  const NCLC_UP = T.NCLC.slice().sort((a, b) => a.n - b.n);
+  function nclcPos(k, v) {
+    const top = k === "co" || k === "ce" ? 700 : 21;
+    for (let i = NCLC_UP.length - 1; i >= 0; i--) {
+      const lo = NCLC_UP[i][k], hi = i + 1 < NCLC_UP.length ? NCLC_UP[i + 1][k] : top;
+      if (v >= lo) return (i + Math.min(0.96, (v - lo) / (hi - lo))) / NCLC_UP.length;
+    }
+    return 0.01;
+  }
+  const scoreText = (k, v) => (k === "co" || k === "ce" ? String(Math.round(v)) : `${CH.fr(v, 1)}/20`);
+
+  function dashData() {
+    const t = todayStr(), mon = mondayOf(t), s = settings();
+    const start = /^\d{4}-\d{2}-\d{2}$/.test(str(s.startDate)) && s.startDate <= t ? s.startDate : addDays(t, -27);
+    const D = { t, mon, start };
+    // The days charted: since you started, at least two weeks and at most four.
+    let from = start < addDays(t, -27) ? addDays(t, -27) : start;
+    if (from > addDays(t, -13)) from = addDays(t, -13);
+    D.days = [];
+    for (let d = from; d <= t; d = addDays(d, 1)) D.days.push(d);
+    D.span = from === start ? "Since you started" : from > start ? "Last 4 weeks" : "Last 2 weeks";
+    D.mins = D.days.map(dayMinutes);
+    D.bySkill = {};
+    D.mins.forEach((by) => Object.entries(by).forEach(([k, m]) => { D.bySkill[k] = (D.bySkill[k] || 0) + m; }));
+    D.total = minTotal(D.bySkill);
+    // This week against last week up to the same day, and each week since you started (eight at most).
+    const span = (a, b) => { let m = 0; for (let d = a; d <= b; d = addDays(d, 1)) m += minTotal(dayMinutes(d)); return m; };
+    D.week = span(mon, t);
+    D.lastWeek = start <= addDays(t, -7) ? span(addDays(mon, -7), addDays(t, -7)) : null;
+    D.planned = [0, 1, 2, 3, 4, 5].reduce((a, k) => a + arr(planFor(s.phase, addDays(mon, k))).reduce((x, b) => x + b[1], 0), 0);
+    let w0 = mondayOf(start);
+    if (w0 < addDays(mon, -49)) w0 = addDays(mon, -49);
+    D.weekStarts = [];
+    for (let w = w0; w <= mon; w = addDays(w, 7)) D.weekStarts.push(w);
+    const weekEnd = (w) => (addDays(w, 6) < t ? addDays(w, 6) : t);
+    D.weeks = D.weekStarts.map((w) => span(w, weekEnd(w)));
+    // Regularity: what was done each day, against its plan (Sundays are rest days).
+    const act = activeDays();
+    D.strip = D.days.map((d) => { const st = dayStats(d); return { d, level: dayComplete(d) ? 3 : st && st.n ? 2 : act.has(d) ? 1 : 0, rest: dow(d) === 6, today: d === t }; });
+    const counted = D.strip.filter((x) => !x.rest && x.d >= start && (x.d < t || x.level));
+    D.active = counted.filter((x) => x.level).length;
+    D.studyDays = counted.length;
+    D.streak = streak();
+    D.best = longestStreak();
+    D.activeAll = [...act].filter((d) => d <= t).length;
+    // Grammar: the day's first rounds, the last two weeks against the two before.
+    const recent = firstRoundsSince(addDays(t, -13)), before = firstRoundsSince(addDays(t, -27)).filter((d) => d.date < addDays(t, -13));
+    D.acc = accuracy(recent);
+    D.accPrev = recent.length >= 3 && before.length >= 3 ? accuracy(before) : null;
+    D.accWeeks = D.weekStarts.map((w) => accuracy(firstRoundsSince(w).filter((d) => d.date <= weekEnd(w))));
+    // Cards.
+    D.cards = allCards();
+    D.srs = [...S.srs.entries()].filter(([id, st]) => D.cards.has(id) && st);
+    D.learned = D.srs.length;
+    D.learnedWeek = D.srs.filter(([, st]) => str(st.learned) >= mon).length;
+    D.mastered = D.srs.filter(([, st]) => !st.pri && (st.stage || 0) >= 5).length;
+    D.due = dueIds(D.cards).length;
+    D.learnedWeeks = D.weekStarts.map((w) => D.srs.filter(([, st]) => !st.learned || st.learned <= weekEnd(w)).length);
+    // Writing: Claude's corrections, oldest first, with mistakes per 100 words.
+    D.writes = list("writing").filter((w) => w.fb).sort((a, b) => (a.ts || 0) - (b.ts || 0)).map((w) => {
+      const n = arr(w.fb.errors).length, sc = w.fb.score20;
+      return { w, n, rate: w.words ? (n / w.words) * 100 : null, score: sc != null && sc !== "" && !isNaN(sc) ? Number(sc) : null };
+    });
+    D.rates = D.writes.filter((x) => x.rate != null);
+    D.scores = D.writes.filter((x) => x.score != null);
+    return D;
+  }
+
+  // The bar of section links under the tabs: it follows your scroll (motion.js).
+  const DASH_SECTIONS = [["sec-kpis", "En bref"], ["sec-scores", "NCLC 7"], ["sec-phase", "Phase"], ["sec-time", "Activité"], ["sec-grammar", "Grammaire"], ["sec-errors", "Fautes"], ["sec-vocab", "Vocabulaire"], ["sec-comp", "Compréhension"], ["sec-writing", "Écrit"], ["sec-stamps", "Tampons"]];
+  const dashNav = () => `<nav class="dash-nav" aria-label="Sections of the overview">${DASH_SECTIONS.map(([id, l]) => `<button type="button" data-goto="${id}">${l}</button>`).join("")}</nav>`;
+  const dashHead = (icon, title, note) => `<div class="sec-head"><h2 class="h2 with-ico">${icon}${title}</h2>${note ? `<span class="small muted">${note}</span>` : ""}</div>`;
+  const delta = (v, good, text) => (v == null ? "" : `<p class="k-delta ${v === 0 ? "flat" : good ? "good" : "bad"}"><span aria-hidden="true">${v > 0 ? "▲" : v < 0 ? "▼" : "■"}</span>${text}</p>`);
+  const card = (span, title, note, body, cls) => `<article class="dash-card span-${span}${cls ? " " + cls : ""}" data-spot><div class="dash-ch"><h3 class="h3">${title}</h3>${note ? `<span class="small muted">${note}</span>` : ""}</div>${body}</article>`;
+  const hint = (t) => `<p class="small muted dash-hint">${t}</p>`;
+
+  // The headline numbers, one tile each with its trend.
+  function dashKpis(D) {
+    const nR = D.rates.length, rN = D.rates[nR - 1], k = Math.min(3, Math.floor(nR / 2));
+    const avgRate = (xs) => xs.reduce((a, x) => a + x.rate, 0) / xs.length;
+    const rateNow = nR ? avgRate(D.rates.slice(-3)) : null;
+    const dRate = k ? +(avgRate(D.rates.slice(-k)) - avgRate(D.rates.slice(0, k))).toFixed(1) : null;
+    const dw = D.lastWeek == null ? null : D.week - D.lastWeek;
+    const accPts = D.acc != null && D.accPrev != null ? Math.round((D.acc - D.accPrev) * 100) : null;
+    const n = (k, v, unit) => `<span data-tween="kpi-${k}" data-tw="count" data-to="${v}">${v}</span>${unit ? `<small>${unit}</small>` : ""}`;
+    const tile = (k, icon, fr, en, value, sub, extra, viz) => `<article class="kpi k-${k}" data-tilt data-m="deal" data-k="kpi-${k}">
+        <p class="k-label"><span class="k-ico">${ico(icon)}</span><span>${fr}<small>${en}</small></span></p>
+        <p class="k-value">${value}</p><p class="k-sub">${sub}</p>${extra || ""}<div class="k-viz" data-m="chart" data-k="kv-${k}">${viz || ""}</div></article>`;
+    const dayTip = (x) => `${dayLabel(x.d)}${x.today ? " · today" : ""}\n${x.rest ? (x.level ? "Rest day, and you practised anyway" : "Rest day") : ["Nothing done", "Practice outside the plan", "Part of the plan", "The whole plan"][x.level]}`;
+    return `<div class="kpis">
+      ${tile("time", "timer", "Temps d'étude", "this week", `≈ ${hm(D.week)}`, `Of about ${hm(D.planned)} planned, counted from the blocks you tick`, delta(dw, dw >= 0, `${dw >= 0 ? "+" : "−"}${hm(Math.abs(dw || 0))} on last week, same days`), CH.spark(D.weeks, { w: 150, h: 34, min: 0, color: "var(--accent)" }))}
+      ${tile("days", "today", "Jours actifs", D.span.toLowerCase(), `${n("days", D.active)}${D.studyDays ? `<small>/${D.studyDays}</small>` : ""}`, D.streak ? `Streak of ${D.streak} day${D.streak > 1 ? "s" : ""} · best ${D.best}` : `No streak right now · best ${D.best}`, "", CH.strip(D.strip.map((x) => ({ level: x.level, rest: x.rest, today: x.today, tip: dayTip(x) })), { label: `${D.active} of ${D.studyDays} study days with something done` }))}
+      ${tile("acc", "grammar", "Précision", "grammar, first rounds", D.acc == null ? "—" : n("acc", Math.round(D.acc * 100), " %"), "The day's first round of each set, last 14 days", accPts == null ? "" : delta(accPts, accPts >= 0, `${accPts >= 0 ? "+" : "−"}${Math.abs(accPts)} pts on the 14 days before`), CH.spark(D.accWeeks.map((a) => (a == null ? null : a * 100)), { w: 150, h: 34, min: 0, max: 100, color: "var(--c-gra)" }))}
+      ${tile("cards", "vocab", "Cartes", "learned", n("cards", D.learned), `${D.mastered} mastered · ${D.due} due today`, D.learnedWeek ? delta(D.learnedWeek, true, `+${D.learnedWeek} this week`) : "", CH.spark(D.learnedWeeks, { w: 150, h: 34, color: "var(--c-voc)" }))}
+      ${tile("rate", "errors", "Fautes", "per 100 words", rN ? CH.fr(rateNow, 1) : "—", rN ? `Your last ${Math.min(3, nR) > 1 ? Math.min(3, nR) + " corrected texts, on average" : "corrected text"} (latest ${shortDate(rN.w.date)})` : "Once Claude corrects a text", dRate == null ? "" : delta(dRate, dRate <= 0, `${dRate <= 0 ? "−" : "+"}${CH.fr(Math.abs(dRate), 1)} on your first ${k > 1 ? k + " texts" : "text"}`), CH.spark(D.rates.map((x) => x.rate), { w: 150, h: 34, min: 0, color: "var(--red)" }))}
+    </div>`;
+  }
+
+  // Where each skill stands against NCLC 7: the latest estimate, the ones before it, and how far there is to go.
+  function dashReady(D) {
+    const all = [];
+    const rows = [["co", "Compréhension orale"], ["ce", "Compréhension écrite"], ["ee", "Expression écrite"], ["eo", "Expression orale"]].map(([k, name]) => {
+      // Practice exams, and scores you logged (a practice exam's own copy in the log isn't counted twice).
+      let hist = compAttempts(k).filter((a) => a.kind === "exam" && a.est).map((a) => ({ v: Number(a.est), date: a.date, ts: a.ts || 0, src: "Examen blanc (site estimate)" }))
+        .concat(list("mocks").filter((m) => m[k] != null && m[k] !== "" && !isNaN(m[k]) && !m.compId).map((m) => ({ v: Number(m[k]), date: m.date, ts: m.ts || 0, src: m.label || "Logged score" })));
+      const fromClaude = k === "ee" ? D.scores.map((x) => ({ v: x.score, date: x.w.date, ts: x.w.ts || 0, src: `${taskName(x.w)}, Claude's estimate`, claude: true })) : [];
+      hist = hist.concat(fromClaude).sort((a, b) => str(a.date).localeCompare(str(b.date)) || a.ts - b.ts);
+      hist.forEach((h) => all.push({ d: str(h.date), ts: h.ts, row: [name, shortDate(h.date), h.src, scoreText(k, h.v), `NCLC ${nclcLabel(nclcOf(k, h.v))}`] }));
+      // Writing: the average of Claude's last three scores, unless a score you logged is newer.
+      const logged = hist.filter((h) => !h.claude), lastLogged = logged[logged.length - 1];
+      const last3 = fromClaude.slice(-3);
+      let est = null, note = "", ghosts = hist;
+      if (last3.length && !(lastLogged && str(lastLogged.date) >= str(last3[last3.length - 1].date))) {
+        est = last3.reduce((a, x) => a + x.v, 0) / last3.length;
+        note = `Average of Claude's last ${last3.length} score${last3.length > 1 ? "s" : ""}`;
+      } else if (hist.length) {
+        const h = hist[hist.length - 1];
+        est = h.v;
+        note = `${h.src} · ${shortDate(h.date)}`;
+        ghosts = hist.slice(0, -1);
+      }
+      const nc = est == null ? null : nclcOf(k, est), ok = nc != null && nc >= 7;
+      const valTxt = est == null ? "" : `≈ ${scoreText(k, est)}`;
+      const gap = nc == null ? "" : ok ? `<span class="r-gap ok">✓ NCLC 7 reached</span>` : `<span class="r-gap">${nc === 0 ? "Below NCLC 4" : `${7 - nc} band${7 - nc > 1 ? "s" : ""} to go`}</span>`;
+      const empty = k === "eo" ? "Speaking is practised off the site: log a mock's score below." : k === "co" ? "No score yet: the CO practice exam gives a first estimate." : k === "ce" ? "No score yet: the CE practice exam gives a first estimate." : "No score yet: correct a writing task with Claude.";
+      return `<div class="r-row">
+        <span class="r-skill">${skChip(k)}<b>${name}</b></span>
+        ${CH.bullet({ key: "ready-" + k, bands: NCLC_UP.map((r) => ({ label: r.nclc, target: r.n === 7 })), pos: est == null ? null : nclcPos(k, est), ok, tip: est == null ? "" : `${valTxt} · NCLC ${nclcLabel(nc)}\n${note}`, ghosts: ghosts.slice(-6).map((h) => ({ pos: nclcPos(k, h.v), tip: `${scoreText(k, h.v)} · NCLC ${nclcLabel(nclcOf(k, h.v))}\n${h.src} · ${shortDate(h.date)}` })), label: `${name}: ${est == null ? "no score yet" : `${valTxt}, NCLC ${nclcLabel(nc)}`}` })}
+        <span class="r-val">${est == null ? `<small>${empty}</small>` : `<b>${valTxt} · NCLC ${nclcLabel(nc)}</b><small>${esc(note)}</small>`}</span>
+        ${gap}
+      </div>`;
+    }).join("");
+    return `<article class="dash-card ready" data-spot>${rows}<p class="small muted r-key"><span class="r-key-t"></span>NCLC 7, your target<span class="r-key-d"></span>latest estimate<span class="r-key-g"></span>earlier scores</p>
+      ${numbers("ready", ["Skill", "Date", "From", "Score", "Level"], all.sort((x, y) => y.d.localeCompare(x.d) || y.ts - x.ts).map((x) => x.row))}</article>`;
+  }
+
+  // Study time: minutes a day by skill, how they split between skills, and everything since you started.
+  function dashTime(D, stats) {
+    const series = SK_ORDER.map((k) => ({ id: k, label: T.SKILLS[k].label, color: skColor(k) }));
+    const top = Math.max(60, ...D.mins.map(minTotal));
+    const step = top > 180 ? 60 : 30;
+    const ticks = [];
+    for (let v = step; v <= Math.ceil(top / step) * step; v += step) ticks.push(v);
+    const afterMonday = D.t !== D.days[0] && dow(D.t) === 1;
+    const cols = CH.cols({
+      key: "time-cols", h: 190, ticks, max: Math.ceil(top / step) * step, series, label: `Minutes of study a day: ${hm(D.total)} in all`,
+      x: D.days.map((d, i) => {
+        const by = D.mins[i], tot = minTotal(by);
+        const label = d === D.t ? "auj." : dow(d) === 0 && !(afterMonday && addDays(d, 1) === D.t) ? shortDate(d) : "";
+        return { label, today: d === D.t, rest: dow(d) === 6, tip: `${dayLabel(d)} · ${tot ? hm(tot) : dow(d) === 6 ? "rest day" : "nothing ticked"}${SK_ORDER.filter((k) => by[k]).map((k) => `\n${T.SKILLS[k].label} · ${by[k]} min`).join("")}` };
+      }),
+      data: D.mins.map((by) => SK_ORDER.map((k) => by[k] || 0)),
+    });
+    const studied = D.mins.filter((by) => minTotal(by) > 0).length;
+    const split = CH.stack(SK_ORDER.filter((k) => D.bySkill[k]).map((k) => ({ label: T.SKILLS[k].label, value: D.bySkill[k], color: skColor(k), text: hm(D.bySkill[k]) })), { key: "time-split", unit: "min", label: "How the study time splits between skills" });
+    return `<div class="dash-grid">
+      ${card(8, "Minutes par jour · minutes a day", `${D.span} · ${hm(D.total)} in all, from the blocks you ticked`, cols + numbers("time", ["Day", "Total"].concat(SK_ORDER.map((k) => T.SKILLS[k].label)), D.days.map((d, i) => [dayLabel(d), hm(minTotal(D.mins[i]))].concat(SK_ORDER.map((k) => (D.mins[i][k] ? `${D.mins[i][k]} min` : "")))).filter((r) => r[1] !== "0 min").reverse()))}
+      ${card(4, "Répartition · the split", D.span, `${D.total ? split : hint("Tick blocks on Aujourd'hui and the split shows here.")}
+        <dl class="facts"><div><dt>A study day, on average</dt><dd>${studied ? hm(D.total / studied) : "—"}</dd></div><div><dt>Days with anything done</dt><dd>${D.activeAll}</dd></div><div><dt>Longest streak</dt><dd>${D.best} day${D.best === 1 ? "" : "s"}</dd></div></dl>`)}
+      ${card(12, "Depuis le début · since you started", `Last 12 weeks · ${D.streak}-day streak`, `<div class="since"><div class="stats">${stats.map(([v, l]) => `<div class="stat"><b data-tween="stat-${esc(l)}" data-tw="count" data-to="${v}">${v}</b><span>${l}</span></div>`).join("")}</div><div class="since-heat" data-m="chart" data-k="heat">${heatmap(12)}</div></div>`)}
+    </div>`;
+  }
+
+  // Grammar: each topic's latest first round against its target, and the rules you miss most.
+  function dashGrammar() {
+    const s = settings();
+    const rows = T.TOPICS.map((tp) => {
+      const c = tp.criterion, m = topicMastery(tp), firsts = new Map();
+      if (c.set) drillsFor(tp.id, c.set).forEach((d) => { if (d.total && !firsts.has(d.date)) firsts.set(d.date, d.score / d.total); });
+      const vals = [...firsts.values()];
+      return { tp, m, vals, last: vals.length ? vals[vals.length - 1] : null };
+    });
+    // What you're working on first, then what's mastered, then the topics still ahead.
+    const rank = (r) => (r.m.ok ? 1 : r.m.started || r.tp.phase === s.phase ? 0 : 2);
+    rows.sort((a, b) => rank(a) - rank(b) || a.tp.phase - b.tp.phase);
+    const tiles = rows.map(({ tp, m, vals, last }) => {
+      const p = tp.criterion.pct || null, hit = last != null && p != null && last >= p - 1e-9;
+      const color = m.ok || hit ? "var(--green)" : "var(--accent)";
+      const status = m.ok ? "Maîtrisé · mastered" : m.started ? `En cours · Phase ${tp.phase}` : `Phase ${tp.phase} · not started`;
+      return `<a class="t-tile ${m.ok ? "ok" : m.started ? "on" : "off"}" href="#grammar.${tp.id}" data-tilt>
+        ${CH.ring(last, { size: 46, stroke: 5, color, target: p, text: last == null ? "—" : String(Math.round(last * 100)), tip: last == null ? `${tp.title}\nNot started` : `${tp.title}\nLatest first round ${Math.round(last * 100)} %${p ? ` · target ${Math.round(p * 100)} %` : ""}` })}
+        <span class="t-txt"><b>${esc(tp.title)}</b><small>${status}</small></span>
+        ${vals.length > 1 ? CH.spark(vals.slice(-8), { w: 54, h: 22, min: 0, max: 1, color }) : ""}
+      </a>`;
+    }).join("");
+    // The rules behind the sentences missed in the last 30 days, found from the built-in sets.
+    const since = Date.now() - 30 * 864e5, rules = new Map();
+    for (const d of list("drills")) {
+      if (d.set === "prod" || (d.ts || 0) < since) continue;
+      arr(d.items).concat(d.retry ? arr(d.retry.items) : []).forEach((it) => {
+        const topic = it.topic || d.topic;
+        if (topic === "mine" || topic === "hunt") return;
+        const b = bankItem(topic, it), point = (b && b.point) || it.point;
+        if (!point) return;
+        const tid = b ? b.topic : topic, k = tid + "|" + point, e = rules.get(k) || { topic: tid, point, n: 0, miss: 0 };
+        e.n++;
+        if (!it.ok) e.miss++;
+        rules.set(k, e);
+      });
+    }
+    const weak = [...rules.values()].filter((e) => e.n >= 3 && e.miss).sort((a, b) => b.miss / b.n - a.miss / a.n || b.miss - a.miss).slice(0, 6);
+    const tname = (id) => (TOPIC[id] || {}).title || "";
+    const done = rows.filter((r) => r.m.ok).length;
+    return `<div class="dash-grid">
+      ${card(8, "Les sujets · topics", `${done} of ${T.TOPICS.length} mastered · the ring is your latest first round, the tick its target`, `<div class="t-grid" data-m="chart" data-k="topics">${tiles}</div>` + numbers("topics", ["Topic", "Phase", "Latest first round", "Target", "Status"], rows.filter((r) => r.vals.length).map(({ tp, m, last }) => [tp.title, tp.phase, `${Math.round(last * 100)} %`, tp.criterion.pct ? `${Math.round(tp.criterion.pct * 100)} %` : "", m.ok ? "Mastered" : "In progress"])))}
+      ${card(4, "Points faibles · weak rules", "Missed most in the last 30 days (rules met 3 times or more)", weak.length
+        ? CH.hbars(weak.map((e) => ({ label: e.point, sub: tname(e.topic), value: e.miss / e.n, max: 1, text: `${e.miss}/${e.n}`, color: "var(--red)", href: TOPIC[e.topic] ? `#grammar.${e.topic}` : "", tip: `${e.point}\nMissed ${e.miss} of ${e.n} · ${tname(e.topic)}` })), { key: "weak-rules", label: "The rules missed most often in the last 30 days" })
+          + numbers("weak", ["Rule", "Topic", "Missed"], weak.map((e) => [e.point, tname(e.topic), `${e.miss} of ${e.n}`]))
+        : hint("Nothing missed often lately. Rules show here once you've met them three times."))}
+    </div>`;
+  }
+
+  // Mistakes: how many per 100 words in each corrected text, where your own mistakes stand, and by category.
+  function dashErrors(D, counts) {
+    const n = D.rates.length, lastR = D.rates[n - 1];
+    const ratePlot = n ? CH.plot({
+      key: "err-rate", h: 170, yMin: 0, yMax: Math.max(20, Math.ceil(Math.max(...D.rates.map((x) => x.rate)) / 5) * 5), ticks: [5, 10, 15, 20, 25, 30].filter((v) => v <= Math.max(20, Math.ceil(Math.max(...D.rates.map((x) => x.rate)) / 5) * 5)), label: "Mistakes per 100 words in each text Claude corrected",
+      series: [{ label: "Per 100 words", color: "var(--red)", line: true, area: true, points: D.rates.map((x, i) => ({ x: n > 1 ? i / (n - 1) : 0.5, y: x.rate, tip: `${CH.fr(x.rate, 1)} per 100 words\n${taskName(x.w)} · ${shortDate(x.w.date)} · ${x.n} mistakes in ${x.w.words} words` })) }],
+      end: { x: n > 1 ? 1 : 0.5, y: lastR.rate, label: CH.fr(lastR.rate, 1) },
+      xs: n > 1 ? [{ x: 0, label: shortDate(D.rates[0].w.date) }, { x: 1, label: shortDate(lastR.w.date) }] : [],
+    }) : "";
+    const ms = mineStatus(), by = (st) => ms.filter((m) => m.state === st).length;
+    const mine = CH.stack([["fixed", "Fixed", "var(--green)"], ["once", "Right once", "color-mix(in srgb, var(--green) 45%, var(--surface))"], ["new", "Not practised yet", "var(--ink-3)"], ["missed", "Missed last time", "var(--red)"]].map(([k, l, c]) => ({ label: l, value: by(k), color: c })), { key: "mine-split", label: "Where your own mistakes stand" });
+    const recent = errorCounts(21);
+    const rec = (c) => { const r = recent.find(([k]) => k === c); return r ? r[1].n : 0; };
+    return `<div class="dash-grid">
+      ${card(7, "Fautes pour 100 mots · per 100 words", "Each text Claude corrected, oldest to latest", n ? ratePlot + numbers("rate", ["Date", "Task", "Words", "Mistakes", "Per 100 words"], D.rates.map((x) => [shortDate(x.w.date), taskName(x.w), x.w.words, x.n, CH.fr(x.rate, 1)]).reverse()) : hint("Correct a writing task with Claude and it shows here."))}
+      ${card(5, "Mes erreurs · your mistakes drill", ms.length ? `${ms.length - by("fixed")} of ${ms.length} still to fix` : "", ms.length ? `${mine}<div class="row"><a class="btn sm" href="#grammar.mine">Practise them</a></div>` : hint("Your mistakes come here once Claude corrects your writing."))}
+      ${card(12, "Par catégorie · by category", "Every mistake so far, with how many in the last 3 weeks", counts.length
+        ? CH.hbars(counts.map(([c, v]) => ({ label: CAT[c], sub: rec(c) ? `${rec(c)} in the last 3 weeks` : "None in the last 3 weeks", value: v.n, text: String(v.n), color: "var(--red)", href: TOPIC[c] ? `#grammar.${c}` : "", tip: `${CAT[c]}\n${v.n} in all · ${rec(c)} in the last 3 weeks\ne.g. ${v.ex.wrong} → ${v.ex.right}` })), { key: "err-cats", label: "Mistakes by category" })
+        : `<div class="empty">${greet("correction", "Pas encore de fautes relevées.", "No errors logged yet. Correct a writing task with Claude, or add one below.", "sm")}</div>`)}
+    </div>`;
+  }
+
+  // Cards: how far along they are, what's due this week, and the ones that keep slipping.
+  function dashVocab(D) {
+    const groups = [["1–2 days", (st) => st.pri || (st.stage || 0) <= 1], ["4–7 days", (st) => !st.pri && (st.stage === 2 || st.stage === 3)], ["14 days", (st) => !st.pri && st.stage === 4], ["30 days · mastered", (st) => !st.pri && st.stage >= 5]];
+    const stages = CH.stack(groups.map(([l, f], i) => ({ label: l, value: D.srs.filter(([, st]) => f(st)).length, color: `var(--o-${i + 1})` })), { key: "voc-stages", label: "Your cards by the gap to their next review" });
+    const days = Array.from({ length: 7 }, (_, i) => addDays(D.t, i));
+    const dueOn = days.map((d, i) => D.srs.filter(([, st]) => st.due && (i ? st.due === d : st.due <= d)).length);
+    const forecast = CH.cols({ key: "voc-due", h: 120, legend: false, series: [{ id: "due", label: "Cards due", color: "var(--c-voc)" }], data: dueOn.map((v) => [v]), label: "Cards due each day this week",
+      x: days.map((d, i) => ({ label: i ? DAYS_SHORT[dow(d)] : "auj.", today: !i, tip: `${i ? dayLabel(d) : "Today"} · ${dueOn[i]} card${dueOn[i] === 1 ? "" : "s"}${i ? "" : " (with any overdue)"}` })) });
+    const hard = D.srs.filter(([, st]) => (st.lapses || 0) >= 2).sort((a, b) => b[1].lapses - a[1].lapses).slice(0, 6);
+    return `<div class="dash-grid">
+      ${card(6, "Les étapes · how far along", `${D.learned} cards, by the gap to their next review`, D.learned ? stages : hint("Learn your first cards in Vocabulaire."))}
+      ${card(6, "À revoir · due this week", `${dueOn[0]} today${dueOn[1] ? ` · ${dueOn[1]} tomorrow` : ""}`, forecast + numbers("due", ["Day", "Cards due"], days.map((d, i) => [i ? dayLabel(d) : "Today", dueOn[i]])) + `<div class="row"><a class="btn sm" href="#vocab">Review now</a></div>`)}
+      ${card(12, "Les plus difficiles · the ones that slip", "Missed the most: an example of your own helps (Edit card, or E while reviewing)", hard.length ? `<ul class="hard">${hard.map(([id, st]) => { const c = D.cards.get(id) || {}; return `<li><span class="fr" lang="fr">${typo(c.fr || id)}</span><span class="pill bad">×${st.lapses}</span><small>${esc(c.en || "")}</small></li>`; }).join("")}</ul>` : hint("No card missed twice yet."))}
+    </div>`;
+  }
+
+  // Listening and reading: each set's score, first tries filled and retries hollow, against this phase's
+  // target; reading pace against exam pace; and the practice exams.
+  function dashComp() {
+    const s = settings();
+    const target = arr(T.CRITERIA[s.phase]).map((c) => str(c.auto).split(":")).find((a) => a[0] === "comp");
+    const lvlColor = { B1: "var(--o-2)", B2: "var(--o-4)" };
+    const plotFor = (k) => {
+      const xs = compAttempts(k).filter((a) => a.kind !== "exam" && a.total && a.src !== "logged").reverse();
+      if (!xs.length) return hint(`No ${k === "co" ? "listening" : "reading"} sets yet.`);
+      const firsts = new Set(firstTries(xs).map((a) => a.id)), n = xs.length;
+      const levels = ["B1", "B2"].filter((l) => xs.some((a) => (a.level || "B1") === l));
+      return CH.plot({
+        key: "comp-" + k, h: 160, yMin: 0, yMax: 100, ticks: [25, 50, 75, 100], tick: (v) => `${v} %`, label: `${k === "co" ? "Listening" : "Reading"} set scores, oldest to latest`,
+        refs: target ? [{ y: Number(target[2]) * 100, label: `target ${Math.round(Number(target[2]) * 100)} % at ${target[1]}` }] : [],
+        series: levels.map((l) => ({ label: l, color: lvlColor[l], points: xs.map((a, i) => ({ a, i })).filter(({ a }) => (a.level || "B1") === l).map(({ a, i }) => ({ x: n > 1 ? i / (n - 1) : 0.5, y: (a.score / a.total) * 100, hollow: !firsts.has(a.id), tip: `${a.score}/${a.total} · ${l}${firsts.has(a.id) ? " · first try" : " · another try"}\n${a.title || ""} · ${shortDate(a.date)}` })) })),
+        xs: n > 1 ? [{ x: 0, label: shortDate(xs[0].date) }, { x: 1, label: shortDate(xs[n - 1].date) }] : [],
+      }) + numbers("comp-" + k, ["Date", "Set", "Level", "Score", "Try"], xs.map((a) => [shortDate(a.date), a.title || "", a.level || "", `${a.score}/${a.total}`, firsts.has(a.id) ? "first" : "again"]).reverse());
+    };
+    // Reading pace in seconds a question, from sets done in one sitting (a set left open for hours says nothing).
+    const ce = compAttempts("ce").filter((a) => a.kind !== "exam" && a.total && a.secs && a.secs / a.total <= 600).reverse(), m = ce.length;
+    const paceMax = m ? Math.max(240, Math.ceil(Math.max(...ce.map((a) => a.secs / a.total)) / 60) * 60) : 240;
+    const pace = m ? CH.plot({
+      key: "ce-pace", h: 150, yMin: 0, yMax: paceMax, ticks: [60, 120, 180, 240, 300, 360, 420, 480, 540, 600].filter((v) => v <= paceMax), tick: (v) => `${v} s`, label: "Seconds a reading question, against exam pace",
+      refs: [{ y: CE_PACE.B1, label: `exam pace · ${CE_PACE.B1} s` }],
+      series: [{ label: "Seconds a question", color: "var(--c-ce)", line: true, points: ce.map((a, i) => ({ x: m > 1 ? i / (m - 1) : 0.5, y: a.secs / a.total, tip: `${Math.round(a.secs / a.total)} s a question${a.timed ? " · on the clock" : ""}\n${a.title || ""} · ${shortDate(a.date)} · ${a.score}/${a.total}` })) }],
+      xs: m > 1 ? [{ x: 0, label: shortDate(ce[0].date) }, { x: 1, label: shortDate(ce[m - 1].date) }] : [],
+    }) + numbers("pace", ["Date", "Set", "Seconds a question", "Score"], ce.map((a) => [shortDate(a.date), a.title || "", Math.round(a.secs / a.total), `${a.score}/${a.total}`]).reverse()) : hint("Do a reading set in one sitting and your pace shows here.");
+    const exams = ["co", "ce"].flatMap((k) => compAttempts(k).filter((a) => a.kind === "exam" && a.est).map((a) => ({ k, a }))).sort((x, y) => (y.a.ts || 0) - (x.a.ts || 0));
+    return `<div class="dash-grid">
+      ${card(6, `${ico("listen")}Écoute · listening sets`, "Filled: first try · hollow: another try", plotFor("co"))}
+      ${card(6, `${ico("read")}Lecture · reading sets`, "Filled: first try · hollow: another try", plotFor("ce"))}
+      ${card(6, "Rythme · reading pace", "Under the line is exam pace or quicker", pace)}
+      ${card(6, `${ico("exam")}Examens blancs · practice exams`, "The site's estimate on the TCF scale", `${exams.length ? `<ul class="exams-l">${exams.map(({ k, a }) => `<li><span class="sk ${k}">${k.toUpperCase()}</span><b>≈ ${esc(a.est)}</b>${nclcTag(a.est, k)}<span class="small muted">${shortDate(a.date)} · ${a.score}/${a.total}</span></li>`).join("")}</ul>` : hint("No practice exam yet.")}
+        <div class="row"><a class="btn sm" href="#comp.co.exam">CO exam</a><a class="btn sm" href="#comp.ce.exam">CE exam</a></div>`)}
+    </div>`;
+  }
+
+  // Writing: Claude's score out of 20 for each corrected text, against the NCLC 7 band.
+  function dashWriting(D) {
+    const pts = D.scores, n = pts.length, lastP = pts[n - 1];
+    const plotHtml = n ? CH.plot({
+      key: "ee-scores", h: 180, yMin: 0, yMax: 20, ticks: [5, 10, 15, 20], label: "Claude's score out of 20 for each corrected text",
+      bands: [{ from: 7, to: 10, label: "NCLC 6" }, { from: 10, to: 12, label: "NCLC 7", cls: "target" }],
+      series: [{ label: "Score /20", color: "var(--c-ee)", line: true, points: pts.map((x, i) => ({ x: n > 1 ? i / (n - 1) : 0.5, y: x.score, tip: `${x.score}/20${x.w.fb.level ? " · " + x.w.fb.level : ""}\n${taskName(x.w)} · ${shortDate(x.w.date)} · ${x.w.words} words` })) }],
+      end: { x: n > 1 ? 1 : 0.5, y: lastP.score, label: `${lastP.score}/20` },
+      xs: n > 1 ? [{ x: 0, label: shortDate(pts[0].w.date) }, { x: 1, label: shortDate(lastP.w.date) }] : [],
+    }) + numbers("ee", ["Date", "Task", "Words", "Score", "Level"], pts.map((x) => [shortDate(x.w.date), taskName(x.w), x.w.words, `${x.score}/20`, x.w.fb.level || ""]).reverse()) : hint("Correct a writing task with Claude and its score shows here.");
+    const last3 = pts.slice(-3), avg = last3.length ? last3.reduce((a, x) => a + x.score, 0) / last3.length : null;
+    const ws = list("writing"), inRange = ws.filter((w) => { const W = T.WRITING[w.task]; return W && w.words >= W.min && w.words <= W.max; }).length;
+    return `<div class="dash-grid">
+      ${card(8, `${ico("writing")}Note sur 20 · score out of 20`, "Claude's estimate for each corrected text: 10/20 is NCLC 7", plotHtml)}
+      ${card(4, "En bref · at a glance", "", `<dl class="facts"><div><dt>Average of the last 3</dt><dd>${avg == null ? "—" : `${CH.fr(avg, 1)}/20`}</dd></div><div><dt>Best so far</dt><dd>${n ? `${Math.max(...pts.map((x) => x.score))}/20` : "—"}</dd></div><div><dt>Inside the word count</dt><dd>${ws.length ? `${inRange} of ${ws.length}` : "—"}</dd></div><div><dt>Texts corrected</dt><dd>${D.writes.length}</dd></div></dl>
+        <div class="row"><a class="btn sm" href="#writing">Write a task</a></div>`)}
+    </div>`;
+  }
+
   VIEWS.progress = {
     render(args) {
       const head = `<header class="stack tight"><h1 class="title">Progrès</h1>${fold("intro-progress", "Comment ça marche · How it works", `<p class="small muted">Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</p>`)}</header>`;
@@ -4250,7 +4593,6 @@
       }).join("");
       const allMet = crit.length && crit.every((c) => criterionStatus(c).ok);
       const counts = errorCounts(0);
-      const max = counts.length ? counts[0][1].n : 1;
       const t3 = top3();
       const recent = allErrors().slice(0, 12);
       const latest = latestScores();
@@ -4264,43 +4606,18 @@
         [list("writing").length, "writing tasks"],
         [list("comp").length, "CO / CE sets"],
       ];
-      return `<div class="wrap">
+      const D = dashData();
+      const met = crit.filter((c) => criterionStatus(c).ok).length;
+      return `<div class="wrap dash">
         ${head}
         ${tabs}
+        ${dashNav()}
 
-        <section class="sec" id="sec-pass"><div class="sec-head"><h2 class="h2 with-ico">${ico("plane")}Carte d'embarquement · Boarding pass</h2><span class="small muted">The five phases as one flight from B1 to NCLC 7. The plane moves each week; the gate is today's first open block.</span></div>${passHTML()}</section>
-
-        <section class="panel stack">
-          <div class="row between"><p class="h3">Phase ${s.phase} · ${esc(P.name)} <span class="muted">· ${esc(P.weeks)}</span></p><span class="small muted">Semaine ${weekNo()}</span></div>
-          <p class="small">${esc(P.goal)}</p>
-          <div class="row"><div class="seg" role="group" aria-label="Phase">${T.PHASES.map((ph) => `<button data-act="p-phase" data-n="${ph.n}" aria-pressed="${ph.n === s.phase}">${ph.n}</button>`).join("")}</div>
-            <label class="field" style="grid-auto-flow:column;align-items:center;gap:8px">Week 1 started<input type="date" id="p-start" data-change="start-date" value="${esc(s.startDate)}"></label></div>
-          ${fold("crit-how", "Comment ça compte · How the criteria count", `<p class="small muted">A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.</p>`)}
-          <ul class="criteria">${critHTML}</ul>
-          ${allMet && s.phase < 5 ? `<div class="notice"><b>Every Phase ${s.phase} criterion is met.</b> Move to Phase ${s.phase + 1} when you're ready. <button class="btn sm primary" data-act="p-phase" data-n="${s.phase + 1}">Start Phase ${s.phase + 1}</button></div>` : ""}
-        </section>
-
-        ${stampShelf()}
-
-        <section class="sec" id="sec-errors">
-          <div class="sec-head"><h2 class="h2 with-ico">${ico("bilan")}Error log</h2><span class="small muted">From Claude's corrections of your writing, plus anything you add. <a href="#grammar.mine">Practise them →</a></span></div>
-          ${counts.length ? `<div class="bars">${counts.map(([c, v]) => `<div class="b"><span>${esc(CAT[c])}</span><span class="track"><i style="width:${(v.n / max) * 100}%"></i></span><span class="c">${v.n}</span></div>`).join("")}</div>` : `<div class="empty">${greet("correction", "Pas encore de fautes relevées.", "No errors logged yet. Correct a writing task with Claude, or add one below.", "sm")}</div>`}
-          ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p>${fold("top3-how", "Comment faire · How to use it", `<p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>`)}
-            ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
-          ${recent.length ? `<div class="stack tight"><p class="h3">Recent</p><ul class="errs">${recent.map((e) => `<li><div class="fix"><span class="pen-wrong">${esc(e.wrong)}</span><span class="pen-right">${esc(e.right)}</span><span class="pill">${esc(CAT[catOf(e.category)])}</span><span class="small muted">${esc(e.src)} · ${shortDate(e.date)}</span>${e.manual ? confirmBtn("e-del-" + e.id, "Delete this error", "e-del", `data-id="${esc(e.id)}"`) : ""}</div>${e.why ? `<p class="why">${esc(e.why)}</p>` : ""}</li>`).join("")}</ul></div>` : ""}
-          <div class="panel stack">${fold("log-error", "Ajouter une erreur · Log an error yourself", `<div class="stack">
-            <div class="grid2">
-              <label class="field">What you wrote<input type="text" id="e-wrong" data-input="form" data-k="e-wrong" value="${formVal("e-wrong")}" lang="fr" placeholder="je achèterai"></label>
-              <label class="field">Correct form<input type="text" id="e-right" data-input="form" data-k="e-right" value="${formVal("e-right")}" lang="fr" placeholder="j'achèterai"></label>
-              <label class="field">Category<select id="e-cat" data-change="form" data-k="e-cat">${Object.entries(CAT).map(([k, l]) => `<option value="${k}" ${(ui.form["e-cat"] || "elision") === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
-              <label class="field">Note (optional)<input type="text" id="e-why" data-input="form" data-k="e-why" value="${formVal("e-why")}"></label>
-            </div>
-            <div class="row"><button class="btn" data-act="e-add">Add to the log</button></div>
-          </div>`)}</div>
-        </section>
+        <section class="sec" id="sec-kpis"><h2 class="sr">En bref · At a glance</h2>${dashKpis(D)}</section>
 
         <section class="sec" id="sec-scores">
-          <div class="sec-head"><h2 class="h2 with-ico">${ico("target")}Scores and NCLC</h2><span class="small muted">IRCC scores each skill on its own and never averages. Your weakest skill is your real result for that skill.</span></div>
+          ${dashHead(ico("target"), "Objectif NCLC 7 · Where each skill stands", "IRCC scores each skill on its own and never averages. Your weakest skill is your real result for that skill.")}
+          ${dashReady(D)}
           ${weakest ? `<div class="notice ${weakest[2] >= 7 ? "" : "warn"}"><b>Weakest right now: ${esc(weakest[1])}</b>, NCLC ${nclcLabel(weakest[2])}. ${weakest[2] >= 7 ? "Every logged skill is at NCLC 7 or above." : "Spend most of your spare time here, not on your strongest skill."}</div>` : ""}
           ${fold("nclc-table", "Le barème NCLC · The NCLC table", `<div class="table-wrap"><table class="nclc"><thead><tr><th>NCLC</th><th>CEFR</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th></tr></thead><tbody>${T.NCLC.map((r) => `<tr class="${r.n === 7 ? "target" : ""}"><td>${r.nclc}${r.n === 7 ? " · your target" : ""}</td><td>${r.cefr}</td><td>${r.coR}</td><td>${r.ceR}</td><td>${r.eR}</td><td>${r.eR}</td></tr>`).join("")}</tbody></table></div>`)}
           <div class="panel stack">${fold("log-mock", "Ajouter un score · Log a mock or real test", `<div class="stack">
@@ -4318,10 +4635,70 @@
           ${mocks.length ? `<div class="table-wrap"><table class="nclc"><thead><tr><th>Date</th><th>Test</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th><th></th></tr></thead><tbody>${mocks.map((m) => `<tr><td>${shortDate(m.date)}</td><td>${esc(m.label || "")}</td>${["co", "ce", "ee", "eo"].map((k) => { const n = nclcOf(k, m[k]); return `<td>${m[k] == null || m[k] === "" ? "—" : `${m[k]} <span class="tag7 ${n >= 7 ? "ok" : "no"}">${nclcLabel(n)}</span>`}</td>`; }).join("")}<td>${confirmBtn("m-del-" + m.id, "Delete this entry", "m-del", `data-id="${esc(m.id)}"`)}</td></tr>`).join("")}</tbody></table></div>` : ""}
         </section>
 
-        <section class="sec"><h2 class="h2">Activity</h2>
-          <div class="stats">${stats.map(([n, l]) => `<div class="stat"><b data-tween="stat-${esc(l)}" data-tw="count" data-to="${n}">${n}</b><span>${l}</span></div>`).join("")}</div>
-          <div class="row" style="align-items:flex-start;gap:20px"><div class="stack tight"><p class="small muted">Last 12 weeks · ${streak()}-day streak</p>${heatmap(12)}</div></div>
+        <section class="sec" id="sec-phase">
+          ${dashHead(ico("plane"), "Carte d'embarquement · Boarding pass", "The five phases as one flight from B1 to NCLC 7. The plane moves each week; the gate is today's first open block.")}
+          <div class="phase-grid">
+            <div class="phase-side">
+              <div id="sec-pass">${passHTML()}</div>
+              <article class="dash-card" data-spot>
+                <div class="dash-ch"><h3 class="h3">Phase ${s.phase} · ${esc(P.name)} <span class="muted">· ${esc(P.weeks)}</span></h3><span class="small muted">Semaine ${weekNo()}</span></div>
+                <div class="crit-top" data-m="chart" data-k="crit-${s.phase}">${CH.ring(crit.length ? met / crit.length : null, { size: 62, stroke: 6, color: allMet ? "var(--green)" : "var(--accent)", text: `${met}/${crit.length}`, tip: `${met} of ${crit.length} criteria met\nPhase ${s.phase} · ${P.name}` })}<p class="small">${esc(P.goal)}</p></div>
+                <div class="row"><div class="seg" role="group" aria-label="Phase">${T.PHASES.map((ph) => `<button data-act="p-phase" data-n="${ph.n}" aria-pressed="${ph.n === s.phase}">${ph.n}</button>`).join("")}</div>
+                  <label class="field" style="grid-auto-flow:column;align-items:center;gap:8px">Week 1 started<input type="date" id="p-start" data-change="start-date" value="${esc(s.startDate)}"></label></div>
+              </article>
+            </div>
+            <article class="dash-card crit-card" data-spot>
+              <div class="dash-ch"><h3 class="h3">Critères de sortie · exit criteria</h3><span class="small muted">${met} of ${crit.length} met</span></div>
+              ${fold("crit-how", "Comment ça compte · How the criteria count", `<p class="small muted">A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.</p>`)}
+              <ul class="criteria">${critHTML}</ul>
+              ${allMet && s.phase < 5 ? `<div class="notice"><b>Every Phase ${s.phase} criterion is met.</b> Move to Phase ${s.phase + 1} when you're ready. <button class="btn sm primary" data-act="p-phase" data-n="${s.phase + 1}">Start Phase ${s.phase + 1}</button></div>` : ""}
+            </article>
+          </div>
         </section>
+
+        <section class="sec" id="sec-time">
+          ${dashHead(ico("timer"), "Activité · Study time", "Worked out from the blocks you tick on Aujourd'hui, at the minutes the plan gives each one.")}
+          ${dashTime(D, stats)}
+        </section>
+
+        <section class="sec" id="sec-grammar">
+          ${dashHead(ico("grammar"), "Grammaire · Grammar", `Mastery counts the day's first round of a set, on days at least a week apart. <a href="#grammar">All topics →</a>`)}
+          ${dashGrammar()}
+        </section>
+
+        <section class="sec" id="sec-errors">
+          ${dashHead(ico("bilan"), "Fautes · Mistakes", `From Claude's corrections of your writing, plus anything you add. <a href="#grammar.mine">Practise them →</a>`)}
+          ${dashErrors(D, counts)}
+          ${t3.length ? `<div class="panel stack"><p class="h3">Top 3 recurring issues <span class="small muted">· last 3 weeks</span></p>${fold("top3-how", "Comment faire · How to use it", `<p class="small muted">Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.</p>`)}
+            ${t3.map(([c, v]) => `<label class="field">${esc(CAT[c])} · ×${v.n} <span class="small muted" style="font-weight:400">e.g. <span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</span><input type="text" id="fix-${c}" data-change="fix" data-k="${c}" value="${esc(s.fixes[c] || "")}" placeholder="What goes wrong, and the fix, in one sentence"></label>`).join("")}</div>` : ""}
+          ${recent.length ? `<div class="stack tight"><p class="h3">Recent</p><ul class="errs">${recent.map((e) => `<li><div class="fix"><span class="pen-wrong">${esc(e.wrong)}</span><span class="pen-right">${esc(e.right)}</span><span class="pill">${esc(CAT[catOf(e.category)])}</span><span class="small muted">${esc(e.src)} · ${shortDate(e.date)}</span>${e.manual ? confirmBtn("e-del-" + e.id, "Delete this error", "e-del", `data-id="${esc(e.id)}"`) : ""}</div>${e.why ? `<p class="why">${esc(e.why)}</p>` : ""}</li>`).join("")}</ul></div>` : ""}
+          <div class="panel stack">${fold("log-error", "Ajouter une erreur · Log an error yourself", `<div class="stack">
+            <div class="grid2">
+              <label class="field">What you wrote<input type="text" id="e-wrong" data-input="form" data-k="e-wrong" value="${formVal("e-wrong")}" lang="fr" placeholder="je achèterai"></label>
+              <label class="field">Correct form<input type="text" id="e-right" data-input="form" data-k="e-right" value="${formVal("e-right")}" lang="fr" placeholder="j'achèterai"></label>
+              <label class="field">Category<select id="e-cat" data-change="form" data-k="e-cat">${Object.entries(CAT).map(([k, l]) => `<option value="${k}" ${(ui.form["e-cat"] || "elision") === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+              <label class="field">Note (optional)<input type="text" id="e-why" data-input="form" data-k="e-why" value="${formVal("e-why")}"></label>
+            </div>
+            <div class="row"><button class="btn" data-act="e-add">Add to the log</button></div>
+          </div>`)}</div>
+        </section>
+
+        <section class="sec" id="sec-vocab">
+          ${dashHead(ico("vocab"), "Vocabulaire · Cards", "Your built-in, Anki and own cards, by where each one is in its reviews.")}
+          ${dashVocab(D)}
+        </section>
+
+        <section class="sec" id="sec-comp">
+          ${dashHead(ico("comp"), "Compréhension · Listening and reading", "Sets differ in difficulty, so read the trend over several sets.")}
+          ${dashComp()}
+        </section>
+
+        <section class="sec" id="sec-writing">
+          ${dashHead(ico("writing"), "Écrit · Writing", "Claude marks each text on the TCF Canada criteria and score bands.")}
+          ${dashWriting(D)}
+        </section>
+
+        ${stampShelf()}
 
         <section class="sec"><h2 class="h2">The exam, cold</h2>${fold("exam-cold", "Voir le détail · Show the details", `<div class="stack">
           <div class="exam">${T.EXAM.map((e) => `<div><span class="sk ${e.code.toLowerCase()}">${e.code}</span><b>${esc(e.name)}</b><span class="small">${esc(e.fmt)}</span><span class="small muted">${esc(e.note)}</span></div>`).join("")}</div>
