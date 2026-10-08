@@ -28,14 +28,16 @@
 
   // Stacked columns over a run of days. data[i] holds one value per series, bottom to top.
   // x[i]: { label (shown under the column, or ""), tip, today, rest }. ticks: the y gridlines, in data units.
+  // ghost[i], if given, is drawn as an outline behind each column: what was planned, say.
   function cols(o) {
     const n = o.x.length;
     const totals = o.data.map((vs) => vs.reduce((a, b) => a + (b || 0), 0));
-    const max = Math.max(o.max || 0, ...totals, 1);
+    const max = Math.max(o.max || 0, ...totals, ...(o.ghost || []), 1);
     const grid = (o.ticks || []).map((t) => `<span class="c-grid" style="bottom:${pc(t / max)}"><b>${fr(t, 0)}</b></span>`).join("");
     const colsHtml = o.x.map((x, i) => {
       const segs = o.series.map((s, k) => (o.data[i][k] ? `<i style="flex:${o.data[i][k]};background:${s.color}"></i>` : "")).join("");
-      return `<span class="c-colw${x.today ? " today" : ""}${x.rest ? " rest" : ""}"${tip(x.tip)}>${totals[i] ? `<span class="c-col" style="height:${pc(totals[i] / max)}">${segs}</span>` : ""}</span>`;
+      const ghost = o.ghost && o.ghost[i] ? `<span class="c-gcol" style="height:${pc(o.ghost[i] / max)}"></span>` : "";
+      return `<span class="c-colw${x.today ? " today" : ""}${x.rest ? " rest" : ""}"${tip(x.tip)}>${ghost}${totals[i] ? `<span class="c-col" style="height:${pc(totals[i] / max)}">${segs}</span>` : ""}</span>`;
     }).join("");
     const labels = o.x.map((x, i) => (x.label ? xLabel((i + 0.5) / n, x.label) : "")).join("");
     return chart(o.key, "c-cols", `<div class="c-plot${grid ? "" : " bare"}" style="height:${o.h || 180}px">${grid}<div class="c-colrow" style="--n:${n}">${colsHtml}</div></div><div class="c-xs${grid ? "" : " bare"}">${labels}</div>${o.legend === false ? "" : legend(o.series)}`, o.label);
@@ -51,12 +53,14 @@
   }
 
   // A whole split into its parts, as one bar: segs [{ label, value, color, text, tip }]. The legend under it gives
-  // every part its number and share, so nothing has to fit inside a thin part.
+  // every part its number and share, so nothing has to fit inside a thin part; o.compact puts it on one line.
   function stack(segs, o) {
     const total = segs.reduce((a, s) => a + (s.value || 0), 0) || 1;
     const share = (s) => `${fr(((s.value || 0) / total) * 100, 0)} %`;
     const bar = segs.filter((s) => s.value > 0).map((s) => `<i style="flex:${s.value};background:${s.color}"${tip(s.tip || `${s.label}\n${s.text != null ? s.text : fr(s.value, 0)}${o.unit ? " " + o.unit : ""} · ${share(s)}`)}></i>`).join("");
-    const leg = `<ul class="c-legend c-legend-v">${segs.map((s) => `<li><i style="background:${s.color}"></i><span>${esc(s.label)}</span><b>${esc(s.text != null ? s.text : fr(s.value, 0))}</b><small>${share(s)}</small></li>`).join("")}</ul>`;
+    const leg = o.compact
+      ? `<ul class="c-legend">${segs.map((s) => `<li><i style="background:${s.color}"></i>${esc(s.label)} <b>${esc(s.text != null ? s.text : fr(s.value, 0))}</b></li>`).join("")}</ul>`
+      : `<ul class="c-legend c-legend-v">${segs.map((s) => `<li><i style="background:${s.color}"></i><span>${esc(s.label)}</span><b>${esc(s.text != null ? s.text : fr(s.value, 0))}</b><small>${share(s)}</small></li>`).join("")}</ul>`;
     return chart(o.key, "c-stack", `<div class="c-bar">${bar}</div>${o.legend === false ? "" : leg}`, o.label);
   }
 

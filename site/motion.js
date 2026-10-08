@@ -7,11 +7,12 @@
      and chart (the stamps, the boarding pass's plane and route, the overview's tiles and its charts) belong to a
      page's entrance and also play as it opens; below the fold they wait, still, until you scroll to them;
    - bars, rings and numbers marked data-tween, from the value they had before (data-tw: width, ring or count).
-   It also glides the navigation highlight, slides the toast in and out, opens folds gently, throws the maple
-   leaves (TCFMotion.burst), lights up and tilts the overview's cards under a mouse, and runs the overview's section
-   bar (a tap scrolls to the section; the pill follows the one you're reading). It only reads the page, moves it
-   and scrolls it: it never writes data, calls the app or stores anything, and the site works the same without it.
-   With reduced motion asked for, nothing moves. */
+   It also slides one page out and the next in when you change page (TCFMotion.transition), glides the navigation
+   highlight, slides the toast in and out, opens folds gently, throws the maple leaves (TCFMotion.burst), lights up
+   cards and tilts tiles under a mouse, and runs the overview's section bar (a tap scrolls to the section; the pill
+   follows the one you're reading). It only reads the page, moves it and scrolls it: it never writes data, calls
+   the app or stores anything, and the site works the same without it. With reduced motion asked for, nothing
+   moves. */
 (() => {
   "use strict";
   const mq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
@@ -56,6 +57,7 @@
   function chartIn(el) {
     const out = [];
     const add = (node, frames, o) => out.push(node.animate(frames, Object.assign({ easing: EASE, fill: "backwards" }, o)));
+    el.querySelectorAll(".c-gcol").forEach((g) => add(g, [{ opacity: 0 }, { opacity: 1 }], { duration: 400 }));
     const cols = el.querySelectorAll(".c-col");
     cols.forEach((c, i) => add(c, [{ scale: "1 0" }, { scale: "1 1" }], { duration: 560, delay: 60 + i * Math.min(40, 520 / cols.length) }));
     el.querySelectorAll(".c-ht > i").forEach((b, i) => add(b, [{ scale: "0 1" }, { scale: "1 1" }], { duration: 640, delay: 80 + Math.min(i, 12) * 55 }));
@@ -102,7 +104,8 @@
     if (still()) { safe(() => tween(view, true, false)); return; }
     if (entering) {
       safe(forget);
-      safe(() => enter(view));
+      // A page that slides in as a whole (a page change) doesn't also rise section by section.
+      if (!vt) safe(() => enter(view));
       safe(() => playFresh(fresh.filter((el) => ENTRANCE.has(el.getAttribute("data-m"))), true));
     } else {
       // Something still waiting to be seen when the page redrew waits on in its new copy.
@@ -226,6 +229,30 @@
       requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
+  }
+
+  /* ---------- changing page ---------- */
+  // The old page slides out and the new one slides in (the View Transitions API): forward along the navigation to
+  // the left, back to the right, and a page within the same section rises in place ("fwd", "back", "up"). The
+  // sidebar stays still (index.html). Without the API, with reduced motion, or in a tab in the background, the new
+  // page is simply drawn.
+  let vt = null;
+  function transition(update, dir) {
+    if (still() || document.hidden || typeof document.startViewTransition !== "function") { update(); return; }
+    const root = document.documentElement;
+    let t = null;
+    try {
+      root.setAttribute("data-vt", dir || "up");
+      t = document.startViewTransition(update);
+    } catch (e) {
+      root.removeAttribute("data-vt");
+      if (!t) update();
+      return;
+    }
+    vt = t;
+    const end = () => { if (vt === t) { vt = null; root.removeAttribute("data-vt"); } };
+    t.finished.then(end, end);
+    t.ready.catch(() => {});
   }
 
   /* ---------- the navigation highlight ---------- */
@@ -427,7 +454,12 @@
     setTimeout(() => box.remove(), 2400);
   }
 
-  window.TCFMotion = Object.freeze({ burst: (el, opts) => safe(() => burst(el, opts)) });
+  window.TCFMotion = Object.freeze({ burst: (el, opts) => safe(() => burst(el, opts)), transition: (update, dir) => {
+    // The page is drawn exactly once, whatever happens to the transition.
+    let ran = false;
+    const once = () => { if (!ran) { ran = true; update(); } };
+    try { transition(once, dir); } catch (e) { console.warn("motion:", e); once(); }
+  } });
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
   window.addEventListener("resize", () => safe(() => { placePill(true); spy(true); }));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => { placePill(true); spy(true); }));
