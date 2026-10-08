@@ -3,7 +3,8 @@
    This file runs after each redraw (the "tcf:render" event) and animates only what's new:
    - the page's entrance, when you open another page;
    - elements marked data-m (rise, pop, slide, shake, tick, burst) whose key (data-k) wasn't on screen in the
-     previous redraw, so a question animates when it appears and not again on every save;
+     previous redraw, so a question animates when it appears and not again on every save. Press, fly and draw
+     (the stamps, the boarding pass's plane and route) belong to a page's entrance and also play as it opens;
    - bars, rings and numbers marked data-tween, from the value they had before (data-tw: width, ring or count).
    It also glides the navigation highlight, slides the toast in and out, opens folds gently and throws the maple
    leaves (TCFMotion.burst). It only reads the page and adds animations: it never writes data, calls the app or
@@ -29,7 +30,15 @@
       if (p) p.animate([{ strokeDashoffset: 18 }, { strokeDashoffset: 0 }], { duration: 300, delay: 90, easing: EASE, fill: "backwards" });
     },
     burst: (el) => burst(el),
+    // A stamp pressed onto the page, one after another (the scale property keeps its tilt).
+    press: (el, i) => el.animate([{ scale: "1.35", opacity: 0 }, { scale: ".94", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 160 + Math.min(i, 10) * 70, easing: EASE, fill: "backwards" }),
+    // The boarding pass's plane flies along its route to this week (data-dx: how far it has come).
+    fly: (el) => { const dx = Number(el.getAttribute("data-dx")) || 0; if (dx > 0) el.animate([{ translate: `${-dx}px 0` }, { translate: "0 0" }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }); },
+    // A line that draws itself: the part of the route already flown.
+    draw: (el) => { const L = el.getTotalLength ? el.getTotalLength() : 0; if (L) el.animate([{ strokeDasharray: `${L}`, strokeDashoffset: L }, { strokeDasharray: `${L}`, strokeDashoffset: 0 }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }); },
   };
+  // These are part of a page's entrance, so they also play when the page opens.
+  const ENTRANCE = new Set(["press", "fly", "draw"]);
 
   /* ---------- after each redraw ---------- */
   let seen = new Set(); // the data-m keys on screen after the previous redraw
@@ -57,8 +66,10 @@
     // Until your progress has loaded the page is drawn with defaults, so it waits there, still, and comes in once.
     if (!d.ready) return;
     if (still()) { safe(() => tween(view, true, false)); return; }
-    if (entering) safe(() => enter(view));
-    else safe(() => playFresh(fresh));
+    if (entering) {
+      safe(() => enter(view));
+      safe(() => playFresh(fresh.filter((el) => ENTRANCE.has(el.getAttribute("data-m"))), true));
+    } else safe(() => playFresh(fresh));
     safe(() => tween(view, false, entering));
   }
 
@@ -77,7 +88,7 @@
     parts.forEach((el, i) => KINDS.rise(el, i));
   }
 
-  function playFresh(fresh) {
+  function playFresh(fresh, inside) {
     const set = new Set(fresh);
     let n = 0;
     fresh.forEach((el) => {
@@ -91,8 +102,8 @@
         safe(() => fn(el));
         return;
       }
-      // Inside something that's already coming in, one movement is enough.
-      for (let p = el.parentElement; p && p.id !== "view"; p = p.parentElement) if (set.has(p) && p.getAttribute("data-m") !== "burst") return;
+      // Inside something that's already coming in, one movement is enough (an entrance's own parts excepted).
+      if (!inside) for (let p = el.parentElement; p && p.id !== "view"; p = p.parentElement) if (set.has(p) && p.getAttribute("data-m") !== "burst") return;
       safe(() => fn(el, n++));
     });
   }
@@ -185,6 +196,26 @@
     setTimeout(() => g.remove(), 800);
   }
 
+  /* ---------- Save to cards, and the theme ---------- */
+  // The button under a selection pops up, and the panel slides up when it opens.
+  function watchGrab() {
+    if (typeof MutationObserver !== "function") return;
+    [["grab-btn", [{ opacity: 0, transform: "translateY(6px) scale(.9)" }, { opacity: 1, transform: "none" }], 200], ["grab", [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], 260]].forEach(([id, frames, ms]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let was = el.hidden;
+      new MutationObserver(() => safe(() => { if (was && !el.hidden && !still()) el.animate(frames, { duration: ms, easing: POP }); was = el.hidden; })).observe(el, { attributes: true, attributeFilter: ["hidden"] });
+    });
+  }
+  // Switching between light and dark fades the colours over a moment instead of snapping.
+  document.addEventListener("click", (e) => {
+    if (still() || !e.target.closest || !e.target.closest('[data-act="theme"]')) return;
+    const root = document.documentElement;
+    root.classList.add("theme-fade");
+    clearTimeout(root.__mFade);
+    root.__mFade = setTimeout(() => root.classList.remove("theme-fade"), 400);
+  }, true);
+
   /* ---------- folds ---------- */
   // A fold you open shows its contents gently. Folds drawn open by a redraw stay still.
   document.addEventListener("click", (e) => {
@@ -237,4 +268,5 @@
   window.addEventListener("resize", () => safe(() => placePill(true)));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => placePill(true)));
   safe(watchToast);
+  safe(watchGrab);
 })();

@@ -44,6 +44,7 @@
     - **Rémy, le petit chef:** a Paris rat in a toque, in five moods (`remy()` in `app.js`), always speaking French with the English underneath.
       - On Aujourd'hui (today only), by day: first visit, halfway ("Encore N minutes"), plan finished (cheering, with the streak in words), back after a break (4+ days since anything was done), Sunday rest.
       - He blinks, twitches an ear and swishes his tail every few seconds, and hops when he cheers (CSS in `index.html`; his eyes, ears and tail are groups in `REMY_BODY` and `REMY_EYES`).
+      - He closes a card session (cheering after a perfect one), and waits with a line in the empty states: no cards due, no mistakes yet, an empty error log, and Évolution before any attempt.
       - With headphones above a listening set before it's checked, and with glasses and a red pen over a writing correction (the count of mistakes and the main category).
     - **Rewards,** all worked out from progress already saved, with no new data:
       - The streak leaf: Pousse 1–6 days, Doré 7–13, Orangé 14–29, Rouge érable 30+. It shows in the sidebar and on Régularité.
@@ -77,7 +78,8 @@
       - the page's entrance, when you open another page or once your progress has loaded (nothing moves before that);
       - an element marked `data-m` (`rise`, `pop`, `slide`, `shake`, `tick` or `burst`) whose key `data-k` wasn't on screen in the previous redraw, so it animates once when it appears and never again on a save. Give it a key that changes exactly when it should animate. A burst plays once per key per visit;
       - bars, rings and numbers marked `data-tween` (with `data-tw` `width`, `ring` or `count`, and `data-to`), from the value they showed before, or from 0 on a page's entrance.
-    - It also glides the navigation highlight (`.nav-pill`), slides the toast in and out, opens folds gently when you open them, and gives Rémy's idle cycles one clock (`--clock`), so a redraw doesn't restart them.
+      - `press`, `fly` and `draw` belong to a page's entrance and also play as it opens: Progrès's earned stamps press in one after another, and the boarding pass's plane flies along the part of the route already flown.
+    - It also glides the navigation highlight (`.nav-pill`), slides the toast and the Save to cards panel in, opens folds gently when you open them, fades the colours when you switch light and dark, and gives Rémy's idle cycles one clock (`--clock`), so a redraw doesn't restart them.
     - Hover and press effects are plain CSS. With reduced motion asked for in the system, nothing moves.
   - `app.js`: the app logic.
     - Aujourd'hui: the notebook header has the date, the day's ring (blocks ticked, minutes to go) and Rémy. The next block to do is open with its details and a big Start; the others open with a tap; done ones shrink to a ticked line. À surveiller sits in the Régularité card.
