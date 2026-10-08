@@ -2974,6 +2974,50 @@
   const formVal = (k) => esc(ui.form[k] || "");
 
   /* =============== view: today =============== */
+  /* =============== charts (charts.js) =============== */
+  // The chart kit, and what more than one page charts: study minutes, cards due, and cards by stage. Every chart
+  // is worked out from progress already saved.
+  const CH = window.TCFCharts;
+  // The skills in the charts' order (bottom to top in a stack), checked for colour-blind readers in both modes.
+  const SK_ORDER = ["co", "voc", "ee", "ce", "gra", "bil"];
+  const skColor = (k) => `var(--c-${k})`;
+  const hm = (m) => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? " " + pad(m % 60) : ""}`; };
+  const dayLabel = (d) => `${DAYS_SHORT[dow(d)]} ${shortDate(d)}`;
+  // The minutes of each skill in a day's ticked blocks, from the plan the day was ticked against.
+  function dayMinutes(date) {
+    const doc = S.days.get(date);
+    if (!doc || !doc.done) return {};
+    const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {};
+    if (plan) plan.forEach((b, i) => { if (doc.done[blockKey(phase, i)]) by[b[0]] = (by[b[0]] || 0) + b[1]; });
+    return by;
+  }
+  const minTotal = (by) => Object.values(by).reduce((a, b) => a + b, 0);
+  // This week day by day: the minutes ticked (filled) against the minutes planned (the outline behind).
+  function weekChart() {
+    const s = settings(), t = todayStr(), mon = mondayOf(t);
+    const days = [0, 1, 2, 3, 4, 5, 6].map((k) => addDays(mon, k));
+    const done = days.map((d) => minTotal(dayMinutes(d)));
+    const plan = days.map((d) => { const doc = S.days.get(d); return arr(planFor((doc && doc.phase) || s.phase, d)).reduce((a, b) => a + b[1], 0); });
+    const sum = (xs) => xs.reduce((a, b) => a + b, 0);
+    return { done: sum(done), plan: sum(plan), html: CH.cols({
+      key: "week-" + mon, h: 64, legend: false, ghost: plan, series: [{ id: "done", label: "Minutes ticked", color: "var(--accent)" }], data: done.map((v) => [v]),
+      label: `This week: ${hm(sum(done))} ticked of about ${hm(sum(plan))} planned`,
+      x: days.map((d, k) => ({ label: DAYS_SHORT[k].charAt(0).toUpperCase(), today: d === t, rest: k === 6, tip: `${dayLabel(d)}${d === t ? " · today" : ""}\n${k === 6 ? (done[k] ? `Rest day · ${hm(done[k])} anyway` : "Rest day") : `${hm(done[k])} of about ${hm(plan[k])} planned`}` })),
+    }) };
+  }
+  // Learned cards, as [id, state] pairs.
+  const learnedCards = (cards) => [...S.srs.entries()].filter(([id, st]) => cards.has(id) && st);
+  // The cards due on each of the next seven days, today's with any overdue.
+  function dueChart(srs, key, h) {
+    const t = todayStr(), days = Array.from({ length: 7 }, (_, i) => addDays(t, i));
+    const n = days.map((d, i) => srs.filter(([, st]) => st.due && (i ? st.due === d : st.due <= d)).length);
+    return { n, days, html: CH.cols({ key, h, legend: false, series: [{ id: "due", label: "Cards due", color: "var(--c-voc)" }], data: n.map((v) => [v]), label: "Cards due each day this week",
+      x: days.map((d, i) => ({ label: i ? DAYS_SHORT[dow(d)] : "auj.", today: !i, tip: `${i ? dayLabel(d) : "Today"} · ${n[i]} card${n[i] === 1 ? "" : "s"}${i ? "" : " (with any overdue)"}` })) }) };
+  }
+  // Cards by the gap to their next review, on the ordered blue scale.
+  const STAGES = [["1–2 days", (st) => st.pri || (st.stage || 0) <= 1], ["4–7 days", (st) => !st.pri && (st.stage === 2 || st.stage === 3)], ["14 days", (st) => !st.pri && st.stage === 4], ["30 days · mastered", (st) => !st.pri && st.stage >= 5]];
+  const stageChart = (srs, key, compact) => CH.stack(STAGES.map(([l, f], i) => ({ label: l, value: srs.filter(([, st]) => f(st)).length, color: `var(--o-${i + 1})` })), { key, compact, label: "Your cards by the gap to their next review" });
+
   VIEWS.today = {
     render() {
       const s = settings(), P = T.PHASES[s.phase - 1];
@@ -3067,7 +3111,7 @@
     // Claude's suggestions live only on the page until you add the ones you want.
     const sug = arr(ui.hwSug);
     const suggestions = sug.length ? `<div class="stack tight"><p class="small muted">Claude's suggestions. Nothing is saved unless you add it.</p><ul class="hw">${sug.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(h.text)}${h.go ? `<small><a href="#${esc(h.go)}">Open</a></small>` : ""}</span><button class="btn sm" data-act="hw-sug-add" data-i="${i}">Add</button></li>`).join("")}</ul><div><button class="btn ghost sm" data-act="hw-sug-clear">Dismiss</button></div></div>` : "";
-    return `<section class="panel stack tight">
+    return `<section class="panel stack tight" data-spot>
       <div class="row between"><h2 class="h3 with-ico">${ico("homework")}Devoirs · Homework</h2></div>
       ${items}
       <div class="row"><input type="text" id="hw-new" data-input="form" data-k="hw" value="${formVal("hw")}" placeholder="Add a task…" style="flex:1"><button class="btn sm" data-act="hw-add">Add</button></div>
@@ -3102,7 +3146,9 @@
   function streakCard() {
     const n = streak(), t = tierOf(n);
     const next = t === 4 ? "Rouge érable from day 30: the leaf stays red. " : t ? `${TIERS[t].name} until day ${TIERS[t].to}, then ${TIERS[t + 1].name.toLowerCase()}. ` : "";
-    return `<section class="panel stack tight"><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${heatmap(8)}
+    const wk = weekChart();
+    return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>
+      <div class="mini-week"><p class="small muted">Cette semaine · <b>${hm(wk.done)}</b> of about ${hm(wk.plan)}</p>${wk.html}</div>${heatmap(8)}
       <details class="fold-x" ${foldAttr("streak-how")}><summary>Comment ça marche · How it works</summary><p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></details>
       <hr class="rule"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2>${watchList()}</section>`;
   }
@@ -3150,13 +3196,16 @@
     return `<div class="wrap">
       <header class="stack tight"><h1 class="title">Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
       ${practiceRows()}
-      <ol class="topics">${T.TOPICS.map((tp) => {
+      <ol class="topics" data-m="chart" data-k="topics-list">${T.TOPICS.map((tp) => {
         const m = topicMastery(tp);
-        const last = drillsFor(tp.id).filter((d) => d.set !== "prod").slice(-1)[0];
+        const last = drillsFor(tp.id).filter((d) => d.set !== "prod" && d.total).slice(-1)[0];
+        const p = tp.criterion.pct || null, v = last ? last.score / last.total : null;
+        // The latest round as a ring, green once it reaches the target the tick marks.
+        const ring = last ? CH.ring(v, { size: 34, stroke: 4, color: m.ok || (p && v >= p - 1e-9) ? "var(--green)" : "var(--accent)", target: p, text: String(Math.round(v * 100)), tip: `Latest round ${last.score}/${last.total} · ${shortDate(last.date)}${p ? `\nTarget ${Math.round(p * 100)} % on the day's first round` : ""}` }) : "";
         return `<li><a href="#grammar.${tp.id}">
           <span class="n">${tp.n}</span>
           <span class="t"><b>${esc(tp.title)}</b><small>${esc(tp.en)}</small></span>
-          <span class="meta">${tp.phase === s.phase ? `<span class="pill info">Phase ${tp.phase}</span>` : ""}${last ? `<span class="small muted num">${last.score}/${last.total}</span>` : ""}${statusPill(m)}</span>
+          <span class="meta">${tp.phase === s.phase ? `<span class="pill info">Phase ${tp.phase}</span>` : ""}${ring}${statusPill(m)}</span>
         </a></li>`;
       }).join("")}</ol>
       ${fold("low-priority", "Low priority: don't spend production time here", `<ul class="hw">${T.LOW_PRIORITY.map(([a, b]) => `<li style="grid-template-columns:minmax(0,1fr)"><span><b>${esc(a)}</b> · <span class="muted">${esc(b)}</span></span></li>`).join("")}</ul>`)}
@@ -3355,7 +3404,7 @@
   // The ways to practise across topics, as three tiles above the topic list.
   function practiceRows() {
     const ms = mineStatus(), todo = ms.filter((m) => m.state !== "fixed").length;
-    const tile = (href, icon, title, note, primary) => `<a class="tile-card${primary ? " primary" : ""}" href="${href}"><span class="tile-ico">${ico(icon)}</span><b>${title}</b><span class="small muted">${note}</span><span class="tile-go" aria-hidden="true">→</span></a>`;
+    const tile = (href, icon, title, note, primary) => `<a class="tile-card${primary ? " primary" : ""}" href="${href}" data-spot><span class="tile-ico">${ico(icon)}</span><b>${title}</b><span class="small muted">${note}</span><span class="tile-go" aria-hidden="true">→</span></a>`;
     return `<div class="tiles">
       ${tile("#grammar.mixed", "grammar", "Mixed review", "15 items from the topics you've drilled, the most missed first.", true)}
       ${tile("#grammar.mine", "errors", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, from Claude's corrections and your error log.` : "The mistakes from Claude's corrections and your error log, as a drill.")}
@@ -3541,6 +3590,7 @@
     const due = dueIds(cards);
     const pri = due.filter((id) => S.srs.get(id).pri).length;
     const learned = [...S.srs.keys()].filter((id) => cards.has(id)).length;
+    const srs = learnedCards(cards), week = dueChart(srs, "v-due", 58);
     const theme = ui.vTheme && THEME[ui.vTheme] ? ui.vTheme : (args[0] === "new" && THEME[args[1]] ? args[1] : defaultTheme());
     const phaseThemes = T.PHASES[s.phase - 1].vocab;
     const opts = T.VOCAB.slice().sort((a, b) => (phaseThemes.includes(b.id) ? 1 : 0) - (phaseThemes.includes(a.id) ? 1 : 0))
@@ -3559,14 +3609,15 @@
     return `<div class="wrap">
       <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition: a new card comes back after 1, 2, 4, 7, 14, then 30 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       ${waitPanel()}
-      <div class="grid2">
-        <section class="panel stack">
+      <div class="grid2 v-home">
+        <section class="panel stack" data-spot>
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
           ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
           <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button></div>
+          ${srs.length ? `<div class="v-week"><p class="small muted">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></p>${week.html}</div>${stageChart(srs, "v-stages", true)}` : ""}
           <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
         </section>
-        <section class="panel stack">
+        <section class="panel stack" data-spot>
           <p class="h3">New cards</p>
           <label class="field">Theme<select id="v-theme" data-change="v-theme">${opts}</select></label>
           <div class="row"><div class="seg" role="group" aria-label="How many">${[10, 15].map((n) => `<button data-act="v-count" data-n="${n}" aria-pressed="${ui.vCount === n}">${n}</button>`).join("")}</div>
@@ -3717,6 +3768,15 @@
       const ch = ui.w.checks[task];
       const viewing = ui.w.viewing && S.writing.get(ui.w.viewing);
       const hist = list("writing").sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 25);
+      // Every corrected text's score out of 20, oldest to latest, against the NCLC 7 band.
+      const scored = list("writing").filter((w) => w.fb && w.fb.score20 != null && w.fb.score20 !== "" && !isNaN(w.fb.score20)).sort((a, b) => (a.ts || 0) - (b.ts || 0)), ns = scored.length;
+      const trend = ns > 1 ? `<div class="panel w-trend" data-spot><p class="small muted">Tes notes · your scores out of 20, every task, oldest to latest</p>${CH.plot({
+        key: "w-trend", h: 96, yMin: 0, yMax: 20, ticks: [10, 20], label: "Your writing scores out of 20, oldest to latest",
+        bands: [{ from: 10, to: 12, label: "NCLC 7", cls: "target" }],
+        series: [{ label: "Score /20", color: "var(--c-ee)", line: true, points: scored.map((w, i) => ({ x: i / (ns - 1), y: Number(w.fb.score20), tip: `${w.fb.score20}/20${w.fb.level ? " · " + w.fb.level : ""}\n${(T.WRITING[w.task] || W).name} · ${shortDate(w.date)} · ${w.words} words` })) }],
+        end: { x: 1, y: Number(scored[ns - 1].fb.score20), label: `${scored[ns - 1].fb.score20}/20` },
+        xs: [{ x: 0, label: shortDate(scored[0].date) }, { x: 1, label: shortDate(scored[ns - 1].date) }],
+      })}</div>` : "";
       return `<div class="wrap">
         <header class="stack tight"><h1 class="title">Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
         <nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === task}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}</nav>
@@ -3751,6 +3811,7 @@
         ${ui.w.copyOut && ui.w.copyOut.task === task ? `<section class="panel stack tight"><p class="h3">Copy this into another AI</p><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p><textarea id="w-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.w.copyOut.text)}</textarea><div class="row"><button class="btn sm ghost" data-act="w-copy-close">Close</button></div></section>` : ""}
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
         <section class="sec"><div class="sec-head"><h2 class="h2">History</h2><span class="small muted">${hist.length ? `${hist.length} most recent` : ""}</span></div>
+          ${trend}
           ${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Task</th><th>Words</th><th>Level</th><th></th></tr></thead><tbody>${hist.map((w) => {
             const WW = T.WRITING[w.task] || W;
             const ok = w.words >= WW.min && w.words <= WW.max;
@@ -4083,7 +4144,7 @@
   function continueCard() {
     const ips = unfinished();
     if (!ips.length) return "";
-    return `<section class="panel stack tight"><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
+    return `<section class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
   }
 
   /* =============== progress report (Progrès → Évolution) =============== */
@@ -4106,7 +4167,8 @@
     const scored = rows.filter((r) => r.v != null);
     const chain = scored.slice(-REP_CHAIN).map((r) => r.show).join(" → ");
     const last = rows[rows.length - 1];
-    const summary = `${head}${chain ? `<span class="num">${scored.length > REP_CHAIN ? "… → " : ""}${chain}${suffix || ""}</span>` : ""}${scored.length > 1 ? repBadge(change(scored[0], scored[scored.length - 1])) : ""}<span class="h-meta">${rows.length} attempt${rows.length > 1 ? "s" : ""} · last ${shortDate(last.date)}</span>`;
+    const spark = scored.length > 1 ? CH.spark(scored.slice(-REP_CHAIN).map((r) => r.v), { w: 64, h: 22, min: 0, color: "var(--accent)" }) : "";
+    const summary = `${head}${spark}${chain ? `<span class="num">${scored.length > REP_CHAIN ? "… → " : ""}${chain}${suffix || ""}</span>` : ""}${scored.length > 1 ? repBadge(change(scored[0], scored[scored.length - 1])) : ""}<span class="h-meta">${rows.length} attempt${rows.length > 1 ? "s" : ""} · last ${shortDate(last.date)}</span>`;
     const body = rows.slice().reverse().map((r) => `<div class="h-att"><span class="num">${shortDate(r.date)}</span>${r.pill}${r.meta || ""}${r.tags || ""}<span style="margin-left:auto">${r.btn || ""}</span>${r.sub ? `<span class="small muted fr" style="flex-basis:100%">${r.sub}</span>` : ""}</div>${r.review && ui.rep.open === r.id ? `<div>${r.review()}</div>` : ""}`).join("") + (extra || "");
     return { html: branch(id, summary, body), trend: scored.length > 1 ? change(scored[0], scored[scored.length - 1])[0] : null, ts: last.ts || 0 };
   }
@@ -4237,24 +4299,10 @@
   /* =============== the dashboard (Progrès → Vue d'ensemble) =============== */
   // The overview as a logbook: the headline numbers, where each skill stands against NCLC 7, study time, grammar,
   // mistakes, cards, listening and reading, and writing. Like Évolution, it's worked out from progress already
-  // saved and adds no data of its own. The charts come from charts.js, each with its numbers in a fold under it.
-  const CH = window.TCFCharts;
-  // The skills in the charts' order (bottom to top in a stack), checked for colour-blind readers in both modes.
-  const SK_ORDER = ["co", "voc", "ee", "ce", "gra", "bil"];
-  const skColor = (k) => `var(--c-${k})`;
-  const hm = (m) => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? " " + pad(m % 60) : ""}`; };
-  const dayLabel = (d) => `${DAYS_SHORT[dow(d)]} ${shortDate(d)}`;
+  // saved and adds no data of its own. The charts come from charts.js (see "charts" above), each with its numbers
+  // in a fold under it.
   const taskName = (w) => (T.WRITING[w.task] || {}).name || "Écrit";
   const numbers = (key, head, rows) => (rows.length ? fold("num-" + key, "Les chiffres · The numbers", CH.table(head, rows)) : "");
-  // The minutes of each skill in a day's ticked blocks, from the plan the day was ticked against.
-  function dayMinutes(date) {
-    const doc = S.days.get(date);
-    if (!doc || !doc.done) return {};
-    const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {};
-    if (plan) plan.forEach((b, i) => { if (doc.done[blockKey(phase, i)]) by[b[0]] = (by[b[0]] || 0) + b[1]; });
-    return by;
-  }
-  const minTotal = (by) => Object.values(by).reduce((a, b) => a + b, 0);
   // The day's first round of each drill set (as the criteria count it): the topics' sets and the mixed review.
   function firstRoundsSince(from) {
     const seen = new Set();
@@ -4323,7 +4371,7 @@
     D.accWeeks = D.weekStarts.map((w) => accuracy(firstRoundsSince(w).filter((d) => d.date <= weekEnd(w))));
     // Cards.
     D.cards = allCards();
-    D.srs = [...S.srs.entries()].filter(([id, st]) => D.cards.has(id) && st);
+    D.srs = learnedCards(D.cards);
     D.learned = D.srs.length;
     D.learnedWeek = D.srs.filter(([, st]) => str(st.learned) >= mon).length;
     D.mastered = D.srs.filter(([, st]) => !st.pri && (st.stage || 0) >= 5).length;
@@ -4507,12 +4555,8 @@
 
   // Cards: how far along they are, what's due this week, and the ones that keep slipping.
   function dashVocab(D) {
-    const groups = [["1–2 days", (st) => st.pri || (st.stage || 0) <= 1], ["4–7 days", (st) => !st.pri && (st.stage === 2 || st.stage === 3)], ["14 days", (st) => !st.pri && st.stage === 4], ["30 days · mastered", (st) => !st.pri && st.stage >= 5]];
-    const stages = CH.stack(groups.map(([l, f], i) => ({ label: l, value: D.srs.filter(([, st]) => f(st)).length, color: `var(--o-${i + 1})` })), { key: "voc-stages", label: "Your cards by the gap to their next review" });
-    const days = Array.from({ length: 7 }, (_, i) => addDays(D.t, i));
-    const dueOn = days.map((d, i) => D.srs.filter(([, st]) => st.due && (i ? st.due === d : st.due <= d)).length);
-    const forecast = CH.cols({ key: "voc-due", h: 120, legend: false, series: [{ id: "due", label: "Cards due", color: "var(--c-voc)" }], data: dueOn.map((v) => [v]), label: "Cards due each day this week",
-      x: days.map((d, i) => ({ label: i ? DAYS_SHORT[dow(d)] : "auj.", today: !i, tip: `${i ? dayLabel(d) : "Today"} · ${dueOn[i]} card${dueOn[i] === 1 ? "" : "s"}${i ? "" : " (with any overdue)"}` })) });
+    const stages = stageChart(D.srs, "voc-stages");
+    const due = dueChart(D.srs, "voc-due", 120), days = due.days, dueOn = due.n, forecast = due.html;
     const hard = D.srs.filter(([, st]) => (st.lapses || 0) >= 2).sort((a, b) => b[1].lapses - a[1].lapses).slice(0, 6);
     return `<div class="dash-grid">
       ${card(6, "Les étapes · how far along", `${D.learned} cards, by the gap to their next review`, D.learned ? stages : hint("Learn your first cards in Vocabulaire."))}
@@ -5135,16 +5179,25 @@
       else if (v.shown && (e.key === "2" || e.key === "Enter")) { e.preventDefault(); vocabGrade(true); }
     }
   });
+  // The navigation's order, for the way a new page slides in (motion.js): forward to the left, back to the right,
+  // and a page within the same section rises in place.
+  const NAV_ORDER = ["today", "grammar", "vocab", "writing", "comp", "progress"];
+  const pageDir = (a, b) => (a.view === b.view ? "up" : NAV_ORDER.indexOf(b.view) > NAV_ORDER.indexOf(a.view) ? "fwd" : "back");
   window.addEventListener("hashchange", () => {
     const r = parseRoute(location.hash);
     if (examRunning() && skillOf(ui.cx) === "co" && !(r.view === "comp" && r.args[0] === "co" && r.args[1] === "exam")) coxPause(true);
     const same = r.view === route.view && r.args.join(".") === route.args.join(".");
+    const from = route;
     route = r;
     rememberPage();
     ui.confirm = "";
     ui.applied = "";
-    render(true);
-    if (!same && !(r.view === "progress" && r.args[0])) window.scrollTo(0, 0);
+    const draw = () => {
+      render(true);
+      if (!same && !(r.view === "progress" && r.args[0])) window.scrollTo(0, 0);
+    };
+    const M = window.TCFMotion;
+    if (!same && M && M.transition) M.transition(draw, pageDir(from, r)); else draw();
   });
 
   /* =============== boot =============== */

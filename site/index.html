@@ -1048,6 +1048,40 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 }
 @keyframes dash-in { from { opacity: 0; translate: 0 26px; scale: .975; } to { opacity: 1; translate: none; scale: none; } }
 
+/* ---------- mini charts on the other pages ---------- */
+/* The planned minutes behind each day's column, as an outline. */
+.c-gcol { position: absolute; bottom: 0; left: 50%; translate: -50% 0; width: min(100%, 26px); border-radius: 6px 6px 2px 2px; background: color-mix(in srgb, var(--accent) 7%, transparent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 28%, transparent); }
+.mini-week, .v-week { display: grid; gap: 6px; }
+.v-home > .panel { align-content: start; }
+.mini-week .c-plot, .v-week .c-plot { margin-top: 2px; }
+.mini-week .c-xs span, .v-week .c-xs span { top: 3px; }
+.topics .meta .c-ring b { font-size: 10.5px; }
+.w-trend { display: grid; gap: 8px; padding: 14px 18px 12px; }
+.h-node > summary .c-spark { flex: none; }
+[data-spot] { position: relative; isolation: isolate; }
+
+/* ---------- changing page (View Transitions, started by motion.js) ---------- */
+/* The sidebar stays still while the page slides: forward along the navigation to the left, back to the right,
+   and a page within the same section rises in place. */
+:root[data-vt] .rail { view-transition-name: rail; }
+::view-transition-old(rail) { display: none; }
+::view-transition-new(rail) { animation: none; }
+::view-transition-old(root) { animation: vt-fade-out .2s cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(root) { animation: vt-fade-in .34s cubic-bezier(.2, .8, .2, 1) .04s both; }
+:root[data-vt="fwd"]::view-transition-old(root) { animation-name: vt-out-left; }
+:root[data-vt="fwd"]::view-transition-new(root) { animation-name: vt-in-right; }
+:root[data-vt="back"]::view-transition-old(root) { animation-name: vt-out-right; }
+:root[data-vt="back"]::view-transition-new(root) { animation-name: vt-in-left; }
+:root[data-vt="up"]::view-transition-new(root) { animation-name: vt-in-up; }
+@keyframes vt-out-left { to { opacity: 0; transform: translateX(-32px); } }
+@keyframes vt-in-right { from { opacity: 0; transform: translateX(44px); } }
+@keyframes vt-out-right { to { opacity: 0; transform: translateX(32px); } }
+@keyframes vt-in-left { from { opacity: 0; transform: translateX(-44px); } }
+@keyframes vt-in-up { from { opacity: 0; transform: translateY(14px); } }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+
 /* ---------- motion (motion.js) ---------- */
 /* For a moment after switching light and dark, colours fade instead of snapping (motion.js adds the class). */
 :root.theme-fade, :root.theme-fade * { transition: background-color .35s ease, color .35s ease, border-color .35s ease, fill .35s ease, stroke .35s ease !important; }
