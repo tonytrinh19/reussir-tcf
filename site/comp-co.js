@@ -8,8 +8,7 @@
 
    Each set plays audio/<id>.mp4, made by tools/make_audio.py from the set's cast: a note on the
    scene and, for every speaker, a Gemini voice (Paris French), a Microsoft voice (vivienne or remy) and
-   a delivery note. The site ignores the cast. The Montréal (fr-ca) voices left are in sets already
-   recorded with Gemini; they're kept for now and will be re-recorded with Paris voices eventually.
+   a delivery note. The site ignores the cast. All Gemini voices are Paris French (fr-fr).
    After editing, run: node tools/check_co.js and python3 tools/make_audio.py */
 (function () {
   "use strict";
@@ -54,7 +53,7 @@
       ["B", "Alors je m'inscris tout de suite ! Les groupes sont grands ? Je n'ai jamais étudié le français, à part quelques mots appris sur une application."],
       ["A", "Une quinzaine de personnes au maximum, et les enseignantes ont l'habitude des grands débutants, ne vous inquiétez pas. Les livres sont prêtés gratuitement pour toute la session. Par contre, avant de commencer, vous devez passer un test de niveau, mercredi prochain à 10 h. Ça dure environ une heure : d'abord une petite conversation avec une enseignante, puis quelques exercices écrits."],
       ["B", "D'accord. Qu'est-ce que je dois apporter ce jour-là ?"],
-      ["A", "Seulement une pièce d'identité et un crayon. Si vous êtes en retard, prévenez l'accueil par téléphone, sinon votre place pourrait être donnée à quelqu'un d'autre. Le centre est à deux minutes du métro Jean-Talon. Et si vous avez des enfants, il y a une halte-garderie gratuite pendant les cours du soir."],
+      ["A", "Seulement une pièce d'identité et un crayon. Vous recevrez aussi un petit guide pour les nouveaux arrivants, écrit en français simple, avec les adresses des services utiles dans votre quartier : la bibliothèque, la clinique et l'école. Si vous êtes en retard, prévenez l'accueil par téléphone, sinon votre place pourrait être donnée à quelqu'un d'autre. Le centre est à deux minutes du métro Jean-Talon. Et si vous avez des enfants, il y a une halte-garderie gratuite pendant les cours du soir."],
       ["B", "Ça, c'est une très bonne nouvelle, mon fils a quatre ans ! Pour mercredi à 10 h… je vais demander à mon patron si je peux commencer plus tard ce jour-là. Merci beaucoup, monsieur !"],
     ], [
       ["Pourquoi la femme vient-elle au centre ?", ["Pour s'inscrire à des cours de français", "Pour renouveler sa carte de résident", "Pour chercher un emploi", "Pour inscrire son fils à la garderie"], "« je voudrais m'inscrire aux cours de français gratuits pour les nouveaux arrivants »"],
@@ -65,7 +64,7 @@
       ["Que va-t-elle faire pour pouvoir passer le test ?", ["Demander à son patron de commencer plus tard", "Demander un autre jour à l'enseignante du test", "Venir au centre avec son fils mercredi soir", "Prendre le métro plus tôt que d'habitude"], "« je vais demander à mon patron si je peux commencer plus tard ce jour-là »"],
     ], {
       scene: "The reception desk of a community centre for newcomers in Montréal; a friendly, practical conversation.",
-      A: v("fr-ca-csagent-2", "remy", "A receptionist in his late thirties, calm, patient and reassuring."),
+      A: v("fr-fr-podcaster-12", "remy", "A receptionist in his late thirties, calm, patient and reassuring."),
       B: v("fr-fr-tutor-5", "vivienne", "A woman who arrived three weeks ago, polite and a little anxious, then relieved."),
     }),
     set("co-immigration-b2", "B2", "immigration", "Faire reconnaître ses compétences", "Un journaliste interroge une conseillère en emploi qui accompagne des immigrants qualifiés.", [
@@ -78,9 +77,9 @@
       ["A", "Au Québec, la langue reste tout de même un enjeu, non ?"],
       ["B", "Bien sûr. Beaucoup de nouveaux arrivants parlent déjà un bon français général, mais il leur manque le vocabulaire de leur métier. Des cours de français spécialisé existent, par exemple pour le secteur de la santé. Ils font souvent une énorme différence en entrevue."],
       ["A", "Vous parlez beaucoup du réseau. Concrètement, comment s'en construit-on un quand on ne connaît personne ?"],
-      ["B", "En participant à des activités professionnelles : des conférences, des rencontres organisées par les associations de métier, des « cinq à sept » où l'on discute de manière informelle. Le bénévolat aide aussi énormément. Une de mes clientes, ingénieure, a trouvé son premier emploi grâce à une personne rencontrée en aidant à organiser un festival de quartier."],
+      ["B", "En participant à des activités professionnelles : des conférences, des rencontres organisées par les associations de métier, des « cinq à sept » où l'on discute de manière informelle. Le bénévolat aide aussi énormément. Il suffit parfois d'une seule conversation pour ouvrir une porte, à condition d'oser faire le premier pas. Une de mes clientes, ingénieure, a trouvé son premier emploi grâce à une personne rencontrée en aidant à organiser un festival de quartier."],
       ["A", "Et les employeurs, ont-ils un rôle à jouer ?"],
-      ["B", "Évidemment. Ceux qui proposent des stages rémunérés ou du mentorat découvrent souvent des candidats excellents, et toute l'équipe y gagne. Avec la pénurie de main-d'œuvre, ils n'ont plus vraiment le choix. Mais il faut aussi changer les réflexes : demander « avez-vous une expérience canadienne ? », c'est souvent fermer la porte à quelqu'un avant même d'avoir écouté ce qu'il peut apporter."],
+      ["B", "Évidemment. Ceux qui proposent des stages rémunérés ou du mentorat découvrent souvent des candidats excellents, et toute l'équipe y gagne. Avec la pénurie de main-d'œuvre, ils n'ont plus vraiment le choix. Mais il faut aussi changer les réflexes : demander « avez-vous une expérience canadienne ? », c'est souvent fermer la porte à quelqu'un avant même d'avoir écouté ce qu'il peut apporter. Heureusement, de plus en plus d'entreprises changent leurs pratiques, et les résultats se voient déjà dans certains secteurs."],
     ], [
       ["Selon la conseillère, quelle est la principale difficulté des immigrants qualifiés ?", ["La reconnaissance de leur expérience", "Leur niveau de français général", "Le prix élevé des formations", "Le manque d'offres d'emploi"], "« ce n'est pas toujours la langue. C'est la reconnaissance de leur expérience. »"],
       ["Pourquoi conseille-t-elle de faire évaluer ses diplômes ?", ["C'est un document clair pour l'employeur", "Cela permet d'obtenir un meilleur salaire", "Cela dispense de l'examen de français", "C'est obligatoire pour faire du bénévolat"], "« c'est un document que l'employeur comprend tout de suite »"],
@@ -90,8 +89,8 @@
       ["Que reproche-t-elle à certains employeurs ?", ["Exiger une expérience canadienne dès le départ", "Refuser de payer les stagiaires", "Proposer trop de programmes de mentorat", "Recruter seulement par les ordres professionnels"], "« demander « avez-vous une expérience canadienne ? », c'est souvent fermer la porte avant même d'avoir écouté la personne »"],
     ], {
       scene: "A current-affairs interview on a Montréal radio station; serious but warm.",
-      A: v("fr-ca-podcaster-8", "remy", "A journalist in his forties, curious, precise and professional."),
-      B: v("fr-ca-assistant-6", "vivienne", "An experienced employment counsellor around fifty, confident, warm and convincing."),
+      A: v("fr-fr-podcaster-8", "remy", "A journalist in his forties, curious, precise and professional."),
+      B: v("fr-fr-advisor-9", "vivienne", "An experienced employment counsellor around fifty, confident, warm and convincing."),
     }),
 
     /* ---------- Travail ---------- */
@@ -104,7 +103,7 @@
       ["B", "Parfait. Qu'est-ce que je dois apporter ?"],
       ["A", "Une pièce d'identité et deux lettres de référence. Il y aura aussi un petit test de vingt minutes sur ordinateur : un tableau à remplir et un courriel à rédiger. Pour le test, vous n'avez besoin de rien, l'ordinateur est fourni."],
       ["B", "Et le salaire, est-ce qu'on en parlera pendant l'entrevue ?"],
-      ["A", "Oui, M. Bouchard vous présentera les conditions : le salaire, les vacances et les assurances collectives. Vous pourrez poser toutes vos questions à ce moment-là."],
+      ["A", "Oui, M. Bouchard vous présentera les conditions : le salaire, les vacances et les assurances collectives. Vous pourrez poser toutes vos questions à ce moment-là. N'hésitez pas à poser aussi des questions sur l'équipe et sur les tâches du poste : nous aimons les candidats curieux. Vous pourrez même visiter les bureaux et rencontrer vos futurs collègues."],
       ["B", "D'accord. Et pour venir, est-ce qu'il y a un stationnement ?"],
       ["A", "Malheureusement non, pas pour les visiteurs. Je vous conseille le métro : la station Laurier est à cinq minutes à pied. Sinon, il y a un stationnement payant derrière l'immeuble, mais il est souvent complet l'après-midi."],
       ["B", "Je prendrai le métro, alors. Pouvez-vous me rappeler l'horaire du poste ?"],
@@ -118,8 +117,8 @@
       ["Qu'est-ce qui est possible après trois mois ?", ["Travailler de la maison un jour par semaine", "Travailler seulement quatre jours par semaine", "Obtenir une augmentation de salaire", "Choisir ses horaires de travail"], "« il est possible de faire du télétravail une journée par semaine »"],
     ], {
       scene: "A phone call between the HR coordinator of a Montréal company and a job applicant; professional and friendly.",
-      A: v("fr-ca-advisor-1", "vivienne", "An HR coordinator in her early thirties, organised, friendly and efficient."),
-      B: v("fr-ca-tutor-4", "remy", "A job applicant in his twenties, polite and a little nervous."),
+      A: v("fr-fr-advisor-9", "vivienne", "An HR coordinator in her early thirties, organised, friendly and efficient."),
+      B: v("fr-fr-podcaster-2", "remy", "A job applicant in his twenties, polite and a little nervous."),
     }),
     set("co-travail-b2", "B2", "travail", "La semaine de quatre jours à l'essai", "Vous écoutez un reportage à la radio.", [
       ["N", "Depuis six mois, une cinquantaine d'entreprises testent la semaine de quatre jours, sans baisse de salaire. Les employés travaillent trente-deux heures au lieu de trente-cinq, mais ils doivent atteindre les mêmes objectifs qu'avant. Banques, agences de communication, usines : les secteurs sont très variés."],
@@ -190,9 +189,9 @@
     /* ---------- Technologie ---------- */
     set("co-technologie-b1", "B1", "technologie", "Ateliers numériques à la bibliothèque", "Vous écoutez une annonce à la bibliothèque municipale.", [
       ["N", "Vous avez du mal à utiliser votre téléphone intelligent ou votre tablette ? Cet automne, la bibliothèque municipale propose des ateliers numériques gratuits pour les personnes de 60 ans et plus. L'an dernier, plus de cent personnes y ont participé."],
-      ["N", "Les ateliers ont lieu chaque mardi après-midi, de 14 h à 16 h, pendant huit semaines. La première semaine, vous apprendrez à prendre des photos et à les envoyer à vos proches. Ensuite, un animateur vous montrera comment faire un appel vidéo avec votre famille, même si elle vit à l'autre bout du monde."],
+      ["N", "Les ateliers ont lieu chaque mardi après-midi, de 14 h à 16 h, pendant huit semaines. La première semaine, vous apprendrez à prendre des photos et à les envoyer à vos proches. Ensuite, un animateur vous montrera comment faire un appel vidéo avec votre famille, même si elle vit à l'autre bout du monde. Vous n'avez pas besoin d'avoir déjà utilisé un ordinateur : les explications sont données lentement, en mots simples, et chaque personne avance à son rythme."],
       ["N", "Une séance entière sera consacrée à la sécurité : comment reconnaître les messages frauduleux, comment créer un bon mot de passe, et pourquoi il ne faut jamais donner ses informations bancaires par courriel. Vous apprendrez aussi à utiliser les applications de transport, pour connaître l'heure du prochain autobus, et à prendre rendez-vous chez le médecin en ligne. Enfin, les dernières semaines, vous découvrirez les services en ligne de la ville et du gouvernement."],
-      ["N", "Les groupes sont petits, huit personnes au maximum, pour que chacun puisse poser ses questions. Des étudiants bénévoles aident l'animateur pendant les séances. Ils parlent aussi anglais, espagnol et arabe, ce qui peut aider les personnes qui maîtrisent encore mal le français. Apportez votre propre appareil, bien chargé. Si vous n'en avez pas, la bibliothèque peut vous prêter une tablette pendant l'atelier."],
+      ["N", "Les groupes sont petits, huit personnes au maximum, pour que chacun puisse poser ses questions. Des étudiants bénévoles aident l'animateur pendant les séances. Personne n'est jugé : ici, toutes les questions sont les bienvenues, même les plus simples. Ils parlent aussi anglais, espagnol et arabe, ce qui peut aider les personnes qui maîtrisent encore mal le français. Apportez votre propre appareil, bien chargé. Si vous n'en avez pas, la bibliothèque peut vous prêter une tablette pendant l'atelier. À la fin de chaque séance, vous recevrez une fiche résumé pour pratiquer à la maison pendant la semaine."],
       ["N", "Pour vous inscrire, il faut avoir une carte de la bibliothèque. Elle est gratuite pour les résidents de la ville : présentez simplement une preuve d'adresse au comptoir. La salle des ateliers se trouve au deuxième étage, et un ascenseur est disponible."],
       ["N", "Les inscriptions commencent le 1er septembre, au comptoir ou par téléphone. Les places partent vite, alors ne tardez pas ! Et si vous avez une question urgente, venez au café numérique, le vendredi matin : des bénévoles vous aident, sans inscription."],
     ], [
@@ -204,7 +203,7 @@
       ["Que propose le café numérique du vendredi ?", ["De l'aide sans inscription", "Des ateliers de huit semaines", "Un café gratuit aux étudiants", "Des tablettes à acheter"], "« des bénévoles vous aident, sans inscription »"],
     ], {
       scene: "An announcement recorded for a Montréal public library; welcoming and clear.",
-      N: v("fr-ca-tutor-1", "vivienne", "A librarian in her forties, natural, clear and welcoming."),
+      N: v("fr-fr-podcaster-1", "vivienne", "A librarian in her forties, natural, clear and welcoming."),
     }),
     set("co-technologie-b2", "B2", "technologie", "Le droit à la déconnexion", "Vous écoutez une chronique à la radio.", [
       ["N", "Répondre à un courriel du patron à vingt-deux heures, vérifier ses messages pendant les vacances : pour beaucoup de salariés, la frontière entre le travail et la vie privée a presque disparu. Avec le télétravail et les smartphones, le bureau nous suit désormais partout, jusque dans notre chambre. C'est pour répondre à ce problème que plusieurs pays ont adopté un droit à la déconnexion."],

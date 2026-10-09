@@ -530,23 +530,25 @@
   }
  },
  "co-immigration-b1": {
-  "date": "2026-09-28",
+  "date": "2026-10-09",
   "engine": "gemini",
-  "hash": "3cc8c059a74b",
-  "seconds": 127.4,
+  "hash": "f8201ad68cb2",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 133.2,
   "voices": {
-   "A": "fr-ca-csagent-2",
+   "A": "fr-fr-podcaster-12",
    "B": "fr-fr-tutor-5"
   }
  },
  "co-immigration-b2": {
-  "date": "2026-09-27",
+  "date": "2026-10-09",
   "engine": "gemini",
-  "hash": "004efd3c663d",
-  "seconds": 139.8,
+  "hash": "ea1f413129bc",
+  "pace": "Speak at a natural pace.",
+  "seconds": 138.6,
   "voices": {
-   "A": "fr-ca-podcaster-8",
-   "B": "fr-ca-assistant-6"
+   "A": "fr-fr-podcaster-8",
+   "B": "fr-fr-advisor-9"
   }
  },
  "co-logement-b1": {
@@ -628,12 +630,13 @@
   }
  },
  "co-technologie-b1": {
-  "date": "2026-09-28",
+  "date": "2026-10-09",
   "engine": "gemini",
-  "hash": "00effed10ec1",
-  "seconds": 135.3,
+  "hash": "e995beaf0d26",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 146.9,
   "voices": {
-   "N": "fr-ca-tutor-1"
+   "N": "fr-fr-podcaster-1"
   }
  },
  "co-technologie-b2": {
@@ -688,13 +691,14 @@
   }
  },
  "co-travail-b1": {
-  "date": "2026-09-28",
+  "date": "2026-10-09",
   "engine": "gemini",
-  "hash": "bec71a473848",
-  "seconds": 131.3,
+  "hash": "0e4eb5260656",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 135.7,
   "voices": {
-   "A": "fr-ca-advisor-1",
-   "B": "fr-ca-tutor-4"
+   "A": "fr-fr-advisor-9",
+   "B": "fr-fr-podcaster-2"
   }
  },
  "co-travail-b2": {
