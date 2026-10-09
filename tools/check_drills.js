@@ -2,8 +2,8 @@
 // to keep practising without repeating:
 //  - a set holds at least three rounds of sentences (3 × take), so a learner who needs more rounds than
 //    planned still gets new sentences;
-//  - every point (the rule a sentence tests) has at least 4 sentences, so "Retry the misses" can ask a new
-//    sentence on the rule that was missed;
+//  - every point (the rule a sentence tests) has at least 4 sentences, so a rule you keep missing can get
+//    extra sentences in later rounds that aren't the one you missed;
 //  - no sentence appears twice in a topic, because the app recognises a sentence it has asked by its wording;
 //  - the answer fits the elision around the gap (j'___ needs a vowel, je ___ can't take one).
 // It also checks that the plan's grammar blocks and every topic's criterion set exist (the mixed review falls

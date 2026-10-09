@@ -64,7 +64,8 @@
     - Each set's sentences are grouped by the rule they test (the set's `points`), and each item ends with its point.
     - Every set holds at least three rounds of sentences (3 × `take`), and every point at least 4, so a learner who needs more rounds than planned doesn't get the same sentences again. Repetition made rounds boring, and later scores reflected memory rather than the rule.
     - A round asks the sentences not had yet before any come back. A rule missed in the last two weeks gets extra sentences, up to 40% of the round: one for each such rule, then a second and third for rules with more misses among their last five answers. They're never the missed sentence itself. The rest of the round takes the rules in turn.
-    - "Retry the misses" swaps each missed sentence for another on the same rule, preferring ones never asked; a sentence comes back unchanged only when its rule has no other.
+    - "Retry today's misses" asks again, word for word, every sentence missed today on that set (every round and retry today), until each is answered right. The user asked for this on 2026-10-08: the old retry swapped each miss for another sentence on its rule, which didn't feel like retrying. It's offered on the results screen and on the set's row (and on the Mixed review and Your mistakes pages), so it can be picked up later in the day.
+      - A right answer on a retry doesn't count as knowing the rule (it's the same sentence just after its correction): the missed-rule extra sentences in the next round and Your mistakes' "fixed" ignore retry successes, while a miss on a retry counts. Mastery never counts retries.
     - The app recognises a sentence by its topic, cue and question, so rewording one makes it a new sentence. Keep each sentence once per topic.
   - `proofread.js`: the texts for Find the mistakes. There are 10 B1 messages with 4 mistakes each, and 10 B2 letters, articles and opinions with 5 each.
     - The mistakes are of the kinds the learner makes: `KNOWN_ERRORS` plus patterns from their own corrections (malgré + clause, participer à, si + conditionnel, gender agreement…).
@@ -262,7 +263,7 @@
 
     A record is written at the first real answer or keystroke (typing is saved 1.5 s after it stops). It's deleted when the attempt is submitted or discarded. Nothing is saved when something is only opened or generated.
   - **Finished attempts** keep what's needed to review them:
-    - Drill rounds keep every question with the answer given (`items`). A "retry the misses" round adds `retry: {score, total, items}` to its round instead of a record of its own; its questions count as asked.
+    - Drill rounds keep every question with the answer given (`items`). A retry adds `{score, total, date, ts, items}` to the `retries` list of today's latest round of that set instead of a record of its own; its questions count as asked. Rounds saved before keep a single `retry`, which is still read (`retriesOf`).
     - Production checks keep `text` and `fb`.
   - **Claude's follow-up homework** (from writing corrections and "Suggest 3") is saved only when the learner presses Add.
 - Progrès → Vue d'ensemble is the dashboard ("Carnet de bord", added 2026-10-08 at the user's request: more about their learning, progress and mistakes, and more animation). Like Évolution it's worked out from progress already saved and adds no data of its own. Under a sticky section bar:
