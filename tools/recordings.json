@@ -345,9 +345,9 @@
   }
  },
  "co-exam-1-26": {
-  "date": "2026-10-05",
+  "date": "2026-10-09",
   "engine": "microsoft",
-  "hash": "2b86e1de35ed",
+  "hash": "b88ee29dc459",
   "seconds": 38.6,
   "voices": {
    "A": "sylvie",
@@ -377,9 +377,9 @@
   }
  },
  "co-exam-1-29": {
-  "date": "2026-10-05",
+  "date": "2026-10-09",
   "engine": "microsoft",
-  "hash": "d788fedc2532",
+  "hash": "ba0d4cba233b",
   "seconds": 43.1,
   "voices": {
    "A": "vivienne",
@@ -419,9 +419,9 @@
   }
  },
  "co-exam-1-33": {
-  "date": "2026-10-05",
+  "date": "2026-10-09",
   "engine": "microsoft",
-  "hash": "387ed25e0ece",
+  "hash": "0d11184f5eb5",
   "seconds": 44.6,
   "voices": {
    "A": "sylvie",
@@ -470,9 +470,9 @@
   }
  },
  "co-exam-1-38": {
-  "date": "2026-10-05",
+  "date": "2026-10-09",
   "engine": "microsoft",
-  "hash": "e3d766df69ab",
+  "hash": "827d63f310f3",
   "seconds": 49.6,
   "voices": {
    "A": "jean",

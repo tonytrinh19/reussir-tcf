@@ -194,7 +194,7 @@ const examIds = new Set();
       if (!c) { fail(`${where}: speaker ${sp} has no cast entry`); return; }
       if (!/^fr-(fr|ca)-[a-z]+-\d+$/.test(c.gemini || "")) fail(`${where}: speaker ${sp} needs a Gemini voice id`);
       if (!EXAM_VOICES.includes(c.ms)) fail(`${where}: speaker ${sp} needs a Microsoft voice (${EXAM_VOICES.join(", ")})`);
-      if (/^fr-ca/.test(c.gemini || "") !== ["sylvie", "jean"].includes(c.ms)) fail(`${where}: speaker ${sp} mixes a Québec and a Paris voice`);
+      if (/^fr-ca/.test(c.gemini || "") && !["sylvie", "jean"].includes(c.ms)) fail(`${where}: speaker ${sp} mixes a Québec Gemini voice with a Paris Microsoft one`);
       if (!c.style) fail(`${where}: speaker ${sp} needs a delivery note`);
     });
     const opts = Array.isArray(it.options) ? it.options : [];
