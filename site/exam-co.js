@@ -249,7 +249,7 @@
       ], "Quel conseil donne cette entrepreneure ?",
         ["Confier à d'autres une partie des tâches.", "Commencer son entreprise à la maison.", "Apprendre la comptabilité avant de se lancer.", "Créer de nouveaux produits chaque année."],
         "« Le jour où j'ai accepté de payer quelqu'un pour la comptabilité… Ne croyez pas que vous devez tout savoir faire. » Her basement is where she started, not advice; she says the opposite of learning everything herself; and new soaps are what she has time for now.",
-        { scene: "A small-business owner from Gaspésie talking on a Québec radio programme.", A: v("fr-ca-assistant-6", "sylvie", "A Québec entrepreneur in her forties, warm and candid, with a Québec accent.") }),
+        { scene: "A small-business owner from Gaspésie talking on a Québec radio programme.", A: v("fr-fr-advisor-9", "sylvie", "A Québec entrepreneur in her forties, warm and candid.") }),
       doc("B2", "Reportage", "Vous écoutez un reportage à la radio.", [
         ["A", "À Sherbrooke, un programme met en relation des étudiants qui cherchent un logement et des personnes âgées qui vivent seules dans une grande maison. L'étudiant paie un petit loyer et, en échange, il passe quelques soirées par semaine avec son hôte."],
         ["B", "On pense souvent que l'aide matérielle est l'essentiel : faire les courses, sortir les poubelles. Mais ce que nos aînés nous disent, c'est qu'ils ne se sentent plus seuls le soir. C'est ça, le vrai changement."],
@@ -270,7 +270,7 @@
       ], "Comment l'entreprise s'est-elle adaptée ?",
         ["En proposant des activités en dehors de l'hiver.", "En commençant ses sorties dès le mois de décembre.", "En réduisant peu à peu le nombre de ses chiens.", "En augmentant le prix des sorties en traîneau."],
         "« l'été, on propose de la randonnée avec les chiens, et des visites du chenil ». December is when outings began twenty years ago, the dogs are kept fit, not fewer, and prices are never mentioned (summer simply earns less).",
-        { scene: "A radio interview with a dog-sled guide in the Laurentians; easy-going.", A: v("fr-fr-advisor-7", "vivienne", "A radio journalist, curious."), B: v("fr-ca-podcaster-8", "jean", "A dog-sled guide from Québec in his fifties, relaxed, with a Québec accent.") }),
+        { scene: "A radio interview with a dog-sled guide in the Laurentians; easy-going.", A: v("fr-fr-advisor-7", "vivienne", "A radio journalist, curious."), B: v("fr-fr-podcaster-8", "jean", "A dog-sled guide from Québec in his fifties, relaxed.") }),
 
       /* ---------- C1 (items 30–35) ---------- */
       doc("C1", "Conférence", "Vous écoutez un extrait de conférence.", [
@@ -298,7 +298,7 @@
       ], "Qu'est-ce qui préoccupe surtout la linguiste ?",
         ["Des emprunts qui passent inaperçus.", "L'arrivée de mots anglais comme « week-end ».", "Le refus d'emprunter des mots étrangers.", "La disparition du français au Québec."],
         "« Ce qui m'inquiète davantage, ce sont les calques discrets… qu'on ne remarque même plus ». She says English words like « week-end » do no harm, never talks of refusing loanwords, and answers that the threat is smaller than people think.",
-        { scene: "A linguist from Montréal talking on a Québec radio programme; clear and engaging.", A: v("fr-ca-tutor-1", "sylvie", "A Québec linguist in her fifties, clear and engaging, with a Québec accent.") }),
+        { scene: "A linguist from Montréal talking on a Québec radio programme; clear and engaging.", A: v("fr-fr-podcaster-1", "sylvie", "A Québec linguist in her fifties, clear and engaging.") }),
       doc("C1", "Chronique", "Vous écoutez une chronique économique à la radio.", [
         ["A", "Dans certains commerces, on ne peut déjà plus payer en espèces. On nous présente cette évolution comme un progrès : plus rapide, plus hygiénique, plus sûr. Et pour la plupart d'entre nous, c'est vrai. Mais une société sans argent liquide laisse des gens au bord du chemin. Pensez à la personne âgée qui n'a pas de téléphone intelligent, à celle qui gère un budget serré et qui ne sait plus combien il lui reste quand tout passe par une carte. Et il y a la question de la trace : chaque achat devient une donnée, et cette donnée, quelqu'un, quelque part, sait très bien quoi en faire. Je ne réclame pas qu'on revienne en arrière. Je demande simplement qu'on garde le choix."],
       ], "Que demande le chroniqueur ?",
@@ -332,7 +332,7 @@
       ], "Que laisse entendre l'économiste ?",
         ["Miser uniquement sur la croissance verte serait imprudent.", "La croissance verte n'est qu'une pure illusion.", "Aucun pays n'est parvenu à réduire ses émissions.", "Il faudrait produire davantage à l'étranger."],
         "« en faire notre seule stratégie, c'est parier sur une vitesse qu'aucune économie n'a jamais atteinte ». She explicitly says it isn't a decoy (« je ne dis pas que… un leurre »), that some countries did cut emissions, and moving production abroad is what hides emissions, not a solution.",
-        { scene: "A radio debate on economics and climate; dense, at a natural pace.", A: v("fr-ca-csagent-2", "jean", "A Québec radio host in his fifties, sharp and friendly, with a Québec accent."), B: v("fr-fr-advisor-9", "vivienne", "An economist in her fifties, precise, fast and nuanced.") }),
+        { scene: "A radio debate on economics and climate; dense, at a natural pace.", A: v("fr-fr-podcaster-12", "jean", "A Québec radio host in his fifties, sharp and friendly."), B: v("fr-fr-advisor-9", "vivienne", "An economist in her fifties, precise, fast and nuanced.") }),
       doc("C2", "Conférence", "Vous écoutez un extrait de conférence.", [
         ["A", "Nous passons nos journées à faire confiance à des inconnus. Nous mangeons des plats préparés par des gens que nous ne verrons jamais, nous montons dans des avions pilotés par des personnes dont nous ignorons le nom, nous suivons les conseils de médecins rencontrés une seule fois. Même acheter un pot de confiture suppose de croire, sans vérifier, qu'il contient bien ce qu'annonce l'étiquette. On décrit volontiers notre époque comme celle de la défiance généralisée ; je crois que c'est confondre deux choses. Ce qui s'effrite, ce n'est pas la confiance en tant que telle, sans laquelle aucune journée ne serait vivable : c'est la confiance que nous accordons aux institutions qui la garantissaient, le diplôme, la signature, le titre. Le défi n'est donc pas de réapprendre à faire confiance, mais de rebâtir ce qui nous permettait de le faire sans y penser."],
       ], "Quelle est la thèse de la conférencière ?",
