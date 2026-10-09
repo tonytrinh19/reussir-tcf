@@ -498,7 +498,7 @@ window.TCF = (function () {
       ["le seuil", "threshold"], ["l'accueil", "welcome, reception"], ["déposer un dossier", "to submit a file"],
       ["remplir les conditions d'admissibilité", "to meet the eligibility requirements"], ["s'intégrer à la société d'accueil", "to integrate into the host society"],
       ["prendre racine", "to put down roots"], ["tourner la page", "to turn the page, start fresh"],
-      ["s'expatrier / entamer un parcours migratoire", "B2 upgrade of: aller vivre dans un autre pays", "De nombreux candidats choisissent le TCF Canada pour prouver leur niveau de français dans le cadre de leur démarche d'immigration."],
+      ["s'expatrier / entamer un parcours migratoire", "B2 upgrade of: aller vivre dans un autre pays", "De nombreux candidats choisissent le TCF Canada pour prouver leur niveau de français dans le cadre de leur démarche d'immigration. — Many candidates choose the TCF Canada to prove their level of French as part of their immigration process."],
     ] },
     { id: "travail", label: "Travail et emploi", en: "Work & employment", full: true, cards: [
       ["le marché du travail", "the job market"], ["le recrutement", "recruitment"], ["le télétravail", "remote work"],
@@ -507,7 +507,7 @@ window.TCF = (function () {
       ["se reconvertir", "to change careers"], ["négocier son salaire", "to negotiate one's salary"],
       ["polyvalent(e)", "versatile"], ["précaire", "precarious, insecure"], ["le CDI", "permanent contract"], ["le CDD", "fixed-term contract"],
       ["le chômage", "unemployment"], ["la promotion", "promotion"], ["faire ses preuves", "to prove oneself"],
-      ["monter en compétences", "to upskill"], ["décrocher un poste", "B2 upgrade of: trouver un travail", "Le télétravail a profondément transformé le marché du travail depuis quelques années."],
+      ["monter en compétences", "to upskill"], ["décrocher un poste", "B2 upgrade of: trouver un travail", "Le télétravail a profondément transformé le marché du travail depuis quelques années. — Remote work has profoundly changed the job market in recent years."],
     ] },
     { id: "environnement", label: "Environnement", en: "Environment & climate", full: true, cards: [
       ["le réchauffement climatique", "global warming"], ["l'empreinte carbone", "carbon footprint"], ["les énergies renouvelables", "renewable energy"],
@@ -518,7 +518,7 @@ window.TCF = (function () {
       ["l'espèce menacée", "endangered species"], ["réduire son empreinte carbone", "to reduce one's carbon footprint"],
       ["adopter un mode de vie durable", "to adopt a sustainable lifestyle"], ["il est urgent d'agir", "action is urgently needed"],
       ["prendre conscience de", "to become aware of"],
-      ["cela contribue au réchauffement climatique", "B2 upgrade of: c'est mauvais pour la planète", "Le réchauffement climatique menace la biodiversité à l'échelle mondiale."],
+      ["cela contribue au réchauffement climatique", "B2 upgrade of: c'est mauvais pour la planète", "Le réchauffement climatique menace la biodiversité à l'échelle mondiale. — Global warming threatens biodiversity worldwide."],
     ] },
     { id: "technologie", label: "Technologie", en: "Technology & social media", full: true, cards: [
       ["les réseaux sociaux", "social media"], ["l'intelligence artificielle", "artificial intelligence"], ["la vie privée", "privacy"],
@@ -527,7 +527,7 @@ window.TCF = (function () {
       ["addictif / addictive", "addictive"], ["fiable / peu fiable", "reliable / unreliable"], ["l'influenceur / l'influenceuse", "influencer"],
       ["la donnée personnelle", "personal data"], ["passer trop de temps sur les écrans", "to spend too much time on screens"],
       ["protéger sa vie privée", "to protect one's privacy"], ["être accro à", "to be hooked on"], ["prendre du recul", "to step back, gain perspective"],
-      ["on observe une dépendance croissante aux écrans", "B2 upgrade of: les gens regardent trop leur téléphone", "La désinformation se propage rapidement en ligne."],
+      ["on observe une dépendance croissante aux écrans", "B2 upgrade of: les gens regardent trop leur téléphone", "La désinformation se propage rapidement en ligne. — Misinformation spreads quickly online."],
     ] },
     { id: "societe", label: "Société et vie civique", en: "Society, culture & civic life", full: true, cards: [
       ["la diversité", "diversity"], ["le vivre-ensemble", "social cohesion, living together"], ["le débat public", "public debate"],
@@ -537,7 +537,7 @@ window.TCF = (function () {
       ["prendre position sur un sujet", "to take a stand on an issue"], ["défendre ses valeurs", "to defend one's values"],
       ["favoriser le vivre-ensemble", "to foster social cohesion"], ["faire entendre sa voix", "to make one's voice heard"],
       ["avoir voix au chapitre", "to have a say"],
-      ["la diversité constitue une richesse pour la société", "B2 upgrade of: les gens sont différents et c'est bien", "La diversité culturelle enrichit le débat public."],
+      ["la diversité constitue une richesse pour la société", "B2 upgrade of: les gens sont différents et c'est bien", "La diversité culturelle enrichit le débat public. — Cultural diversity enriches public debate."],
     ] },
     { id: "education", label: "Éducation", en: "Education", cards: [["le cursus", "course of study"], ["la formation continue", "continuing education"], ["décrocher un diplôme", "to earn a degree"]] },
     { id: "sante", label: "Santé", en: "Health", cards: [["le système de santé", "the health system"], ["la prévention", "prevention"]] },
@@ -694,7 +694,7 @@ window.TCF = (function () {
       ["le décrochage scolaire", "dropping out of school"], ["l'échec scolaire / la réussite scolaire", "academic failure / success"],
       ["les frais de scolarité", "tuition fees"], ["l'égalité des chances", "equal opportunity"],
       ["faire des études supérieures", "to pursue higher education"], ["l'enseignement à distance", "distance learning"],
-      ["faire reconnaître ses diplômes", "to get one's qualifications recognized", "Beaucoup de nouveaux arrivants doivent faire reconnaître leurs diplômes avant de travailler."],
+      ["faire reconnaître ses diplômes", "to get one's qualifications recognized", "Beaucoup de nouveaux arrivants doivent faire reconnaître leurs diplômes avant de travailler. — Many newcomers have to get their qualifications recognised before they can work."],
       ["se former", "to train, to upskill"], ["l'orientation professionnelle", "career guidance"],
       ["acquérir des compétences", "B2 upgrade of: apprendre des choses"],
     ],
@@ -703,7 +703,7 @@ window.TCF = (function () {
       ["prendre rendez-vous chez le médecin", "to book a doctor's appointment"], ["l'assurance maladie", "health insurance"],
       ["la santé mentale", "mental health"], ["mener une vie saine", "to lead a healthy life"],
       ["l'épuisement professionnel", "burnout"], ["la sédentarité", "sedentary lifestyle"], ["se soigner", "to look after one's health, get treatment"],
-      ["l'accès aux soins", "access to healthcare", "L'accès aux soins reste difficile dans certaines régions éloignées."],
+      ["l'accès aux soins", "access to healthcare", "L'accès aux soins reste difficile dans certaines régions éloignées. — Access to healthcare is still difficult in some remote regions."],
       ["adopter de saines habitudes de vie", "B2 upgrade of: manger bien et faire du sport"],
     ],
     famille: [
@@ -712,7 +712,7 @@ window.TCF = (function () {
       ["élever ses enfants", "to raise one's children"], ["la natalité", "birth rate"], ["le vieillissement de la population", "population ageing"],
       ["s'occuper de ses parents âgés", "to care for one's elderly parents"], ["le fossé des générations", "the generation gap"],
       ["transmettre des valeurs", "to pass on values"],
-      ["la conciliation travail-famille", "B2 upgrade of: avoir du temps pour son travail et sa famille", "La conciliation travail-famille est une priorité pour beaucoup de jeunes parents."],
+      ["la conciliation travail-famille", "B2 upgrade of: avoir du temps pour son travail et sa famille", "La conciliation travail-famille est une priorité pour beaucoup de jeunes parents. — Work-family balance is a priority for many young parents."],
     ],
     gouvernement: [
       ["le gouvernement fédéral / provincial", "the federal / provincial government"], ["adopter une loi", "to pass a law"],
@@ -724,7 +724,7 @@ window.TCF = (function () {
     ],
     economie: [
       ["le coût de la vie", "the cost of living"], ["la hausse des prix", "rising prices"], ["le salaire minimum", "minimum wage"],
-      ["la pénurie de main-d'œuvre", "labour shortage", "La pénurie de main-d'œuvre touche surtout la santé et la construction."],
+      ["la pénurie de main-d'œuvre", "labour shortage", "La pénurie de main-d'œuvre touche surtout la santé et la construction. — The labour shortage mainly affects healthcare and construction."],
       ["le taux de chômage", "unemployment rate"], ["la mondialisation", "globalization"], ["les inégalités sociales", "social inequalities"],
       ["faire des économies", "to save money"], ["s'endetter", "to go into debt"], ["relancer l'économie", "to boost the economy"],
       ["les PME", "small and medium-sized businesses"],
@@ -735,7 +735,7 @@ window.TCF = (function () {
       ["déménager", "to move (house)"], ["la colocation", "flat-sharing"], ["le logement social", "social housing"],
       ["l'accès à la propriété", "access to home ownership"], ["la hausse des loyers", "rent increases"], ["se loger", "to find somewhere to live"],
       ["l'étalement urbain", "urban sprawl"], ["la gentrification", "gentrification"],
-      ["le marché locatif est saturé", "B2 upgrade of: c'est difficile de trouver un appartement", "Dans les grandes villes, le marché locatif est saturé et les loyers explosent."],
+      ["le marché locatif est saturé", "B2 upgrade of: c'est difficile de trouver un appartement", "Dans les grandes villes, le marché locatif est saturé et les loyers explosent. — In the big cities, the rental market is saturated and rents are soaring."],
     ],
   };
   VOCAB.forEach((th) => { (MORE_CARDS[th.id] || []).forEach((c) => th.cards.push(c)); });

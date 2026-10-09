@@ -55,6 +55,9 @@
   --fur: #9D958E; --fur-dark: #766D67; --muzzle: #EEE7E0; --ear-in: #F0AAA5; --m-ink: #2B1D15; --m-nose: #E07A87; --tail: #E6A19C; --tooth: #FFFDF6; --blush: #EE9A8F;
   --leaf-1: #4E9A57; --leaf-2: #DE9F1A; --leaf-3: #E06A22; --leaf-4: #C62F24;
   --tape: rgba(21, 101, 192, .15);
+  /* Fiches: the sticky notes' four papers, and the blue-ink highlighter. */
+  --note-1: #FFF0B3; --note-2: #FFDFE5; --note-3: #DDEBFB; --note-4: #DDF1E2;
+  --hl: rgba(21, 101, 192, .18);
   --shade: 74 52 30;
   --shadow-sm: 0 1px 2px rgb(var(--shade) / .08);
   --shadow: 0 1px 2px rgb(var(--shade) / .06), 0 8px 22px -12px rgb(var(--shade) / .24);
@@ -108,6 +111,8 @@
   --fur: #A8A099; --muzzle: #E8E1DA; --blush: #D98479;
   --leaf-1: #5FB86A; --leaf-2: #F0B43A; --leaf-3: #F47F3A; --leaf-4: #F0564A;
   --tape: rgba(125, 179, 246, .18);
+  --note-1: #4A4024; --note-2: #4A2B32; --note-3: #22344A; --note-4: #243F2D;
+  --hl: rgba(125, 179, 246, .26);
   --shade: 0 0 0;
   --shadow-sm: 0 1px 2px rgb(0 0 0 / .35);
   --shadow: 0 1px 2px rgb(0 0 0 / .35), 0 10px 26px -14px rgb(0 0 0 / .65);
@@ -632,6 +637,9 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .flash .prompt { font: 700 24px/1.3 var(--f-ui); }
 .flash .answer { font: 400 30px/1.25 var(--f-text); color: var(--accent); }
 .flash .ex { font: italic 400 16px/1.5 var(--f-text); color: var(--ink-2); max-width: 52ch; margin: 0 auto; }
+.ex-l { display: block; }
+.ex-l + .ex-l { margin-top: 10px; }
+.ex-en { display: block; margin-top: 1px; font: 400 13px/1.45 var(--f-ui); font-style: normal; color: var(--ink-3); }
 .flash .note { font: 400 15px/1.5 var(--f-ui); color: var(--ink-2); max-width: 52ch; margin: 0 auto; }
 .flash .note.fr { font: 400 16px/1.5 var(--f-text); }
 .flash .row { justify-content: center; }
@@ -646,8 +654,17 @@ details.fold > summary::-webkit-details-marker { display: none; }
 details.fold > summary::before { content: "+ "; }
 details.fold[open] > summary::before { content: "– "; }
 .cards-list { list-style: none; margin: 8px 0 0; padding: 0; columns: 2 260px; column-gap: 24px; font-size: 14px; }
-.cards-list li { break-inside: avoid; padding: 4px 0; border-bottom: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 10px; }
-.cards-list li span:first-child { font-family: var(--f-text); }
+.cards-list li { break-inside: avoid; border-bottom: 1px solid var(--rule); }
+.peek > summary { list-style: none; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 5px 2px; cursor: pointer; border-radius: 6px; transition: background-color var(--dur-fast); }
+.peek > summary::-webkit-details-marker { display: none; }
+.peek > summary:hover { background: var(--hover); }
+.peek-fr { font-family: var(--f-text); }
+.peek[open] > summary .peek-fr { font-weight: 600; }
+.peek-body { display: grid; gap: 8px; padding: 2px 2px 12px 12px; margin-left: 2px; border-left: 2px solid color-mix(in srgb, var(--red) 40%, transparent); animation: peek-in var(--dur) var(--ease); }
+.peek-en { margin: 0; font-weight: 700; font-size: 14px; }
+.ex-list { margin: 0; font: 400 15px/1.5 var(--f-text); color: var(--ink); }
+@keyframes peek-in { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .peek-body { animation: none; } }
 
 /* ---------- writing ---------- */
 .prompt-card { display: grid; gap: 10px; }
@@ -674,6 +691,8 @@ textarea.seyes:focus { outline: none; box-shadow: none; }
 .timer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .timer .clock { font: 800 22px/1 var(--f-ui); font-variant-numeric: tabular-nums; min-width: 4.2ch; }
 .timer .clock.over { color: var(--red); }
+.timer.done .clock { color: var(--green); }
+.timer.done .clock.over { color: var(--red); }
 .paras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; padding: 12px 16px 14px; border-top: 1px solid var(--rule); background: var(--surface); }
 @media (max-width: 700px) { .paras { grid-template-columns: minmax(0, 1fr); } }
 .paras .meter { min-width: 0; max-width: none; }
@@ -1031,6 +1050,196 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 .exams-l li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .exams-l li:last-child { border-bottom: 0; }
 .exams-l b { font: 800 18px/1 var(--f-ui); font-variant-numeric: tabular-nums; }
+/* ---------- Fiches: a desk of revision cards ---------- */
+/* Each kind of sheet has its colour (the band, the table headings), from the skill palette. */
+.t-grammaire { --tc: var(--c-gra); --tci: var(--sk-gra); }
+.t-ecrit { --tc: var(--c-ee); --tci: var(--sk-ee); }
+.t-oral { --tc: var(--c-co); --tci: var(--sk-co); }
+.t-vocabulaire { --tc: var(--c-voc); --tci: var(--sk-voc); }
+.t-examen { --tc: var(--c-bil); --tci: var(--sk-bil); }
+/* An order chain's slots: numbered as well as coloured, so the colour is never the only cue. The order passes the
+   colour-blindness check for neighbouring slots in both themes (blue, green, violet, pink, amber, teal). */
+.s1 { --sc: var(--c-gra); } .s2 { --sc: var(--c-ce); } .s3 { --sc: var(--c-ee); } .s4 { --sc: var(--c-bil); } .s5 { --sc: var(--c-voc); } .s6 { --sc: var(--c-co); }
+
+.fx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.fx-hand { margin: 0; font: 400 16px/1.5 var(--f-hand); color: var(--accent); }
+.fx-head .btn .ico { width: 17px; height: 17px; }
+
+/* Pense-bête: sticky notes on a dotted board. */
+.fx-board { display: grid; gap: 14px; padding: 16px 18px 22px; border-radius: var(--r-card); border: 1px solid var(--rule); background-color: var(--sunk); background-image: radial-gradient(color-mix(in srgb, var(--rule-2) 90%, transparent) 1px, transparent 1.4px); background-size: 18px 18px; }
+.fx-board .h3 { margin: 0; }
+.fx-pins { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 20px 16px; align-items: start; }
+.fx-pin { --nb: var(--note-1); position: relative; min-height: 132px; display: grid; align-content: space-between; gap: 6px; padding: 22px 14px 8px; background: var(--nb); border-radius: 3px 3px 16px 3px; box-shadow: 0 1px 1px rgb(var(--shade) / .07), 0 12px 20px -14px rgb(var(--shade) / .55); rotate: var(--tilt, 0deg); transition: rotate var(--dur) var(--ease), translate var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.fx-pin.t2 { --nb: var(--note-2); } .fx-pin.t3 { --nb: var(--note-3); } .fx-pin.t4 { --nb: var(--note-4); }
+.fx-pin:hover { rotate: 0deg; translate: 0 -3px; box-shadow: 0 2px 3px rgb(var(--shade) / .08), 0 18px 26px -16px rgb(var(--shade) / .6); }
+.fx-pin .tape, .fx-note .tape { position: absolute; top: -10px; left: calc(50% - 34px); width: 68px; height: 20px; background: var(--tape); rotate: 3deg; border-left: 1px dashed color-mix(in srgb, var(--accent) 30%, transparent); border-right: 1px dashed color-mix(in srgb, var(--accent) 30%, transparent); }
+.fx-pin p { margin: 0; font: 400 13.5px/1.85 var(--f-hand); color: var(--ink); overflow-wrap: anywhere; }
+.fx-pin-acts { display: flex; justify-content: flex-end; gap: 2px; opacity: 0; transition: opacity var(--dur-fast); }
+.fx-pin-acts .btn { padding: 4px 8px; }
+.fx-pin:hover .fx-pin-acts, .fx-pin:focus-within .fx-pin-acts { opacity: 1; }
+@media (hover: none) { .fx-pin-acts { opacity: 1; } }
+.fx-pin-new { cursor: text; background: color-mix(in srgb, var(--nb) 50%, transparent); box-shadow: none; outline: 1.5px dashed color-mix(in srgb, var(--ink-3) 45%, transparent); outline-offset: -1.5px; }
+.fx-pin-new:focus-within { background: var(--nb); outline-color: transparent; box-shadow: 0 12px 20px -14px rgb(var(--shade) / .55); }
+.fx-pin-new textarea, .fx-pin-new textarea:focus { width: 100%; min-height: 92px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; resize: none; font: 400 13.5px/1.85 var(--f-hand); color: var(--ink); }
+.fx-pin-new textarea::placeholder { color: color-mix(in srgb, var(--ink-3) 75%, transparent); }
+
+/* The filter chips (with a highlight that glides) and the search. */
+.fx-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.fx-chips { position: relative; display: flex; gap: 2px; max-width: 100%; padding: 4px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); box-shadow: var(--shadow-sm); overflow-x: auto; scrollbar-width: none; }
+.fx-chips::-webkit-scrollbar { display: none; }
+.fx-chips button { position: relative; z-index: 1; flex: none; padding: 7px 12px; border: 0; border-radius: 999px; background: none; color: var(--ink-2); font: 700 13px/1 var(--f-ui); white-space: nowrap; cursor: pointer; transition: color .25s var(--ease); }
+.fx-chips button .num { margin-left: 2px; font-weight: 600; opacity: .7; }
+.fx-chips button:hover { color: var(--ink); }
+.fx-chips button[aria-pressed="true"] { color: var(--accent-ink); }
+.fx-chip-pill { position: absolute; z-index: 0; left: 0; top: 0; border-radius: 999px; background: var(--accent); box-shadow: 0 3px 10px -3px color-mix(in srgb, var(--accent) 70%, transparent); pointer-events: none; transition: transform .38s var(--ease), width .38s var(--ease), opacity .2s; }
+.fx-search { display: flex; align-items: center; gap: 8px; flex: 1 1 240px; min-width: 0; max-width: 380px; padding: 0 14px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--surface); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
+.fx-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.fx-search .ico { flex: none; width: 16px; height: 16px; color: var(--ink-3); }
+.fx-search input[type="search"], .fx-search input[type="search"]:focus { flex: 1; min-width: 0; padding: 10px 0; border: 0; background: none; box-shadow: none; }
+
+/* The bristol cards: a coloured band, faint blue rules and a red margin, slightly askew on the desk. */
+.fx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 22px 20px; perspective: 1200px; }
+.fx-card { position: relative; isolation: isolate; display: flex; flex-direction: column; min-width: 0; min-height: 214px; overflow: hidden; border: 1px solid var(--rule); border-radius: 6px 6px 16px 6px; background: var(--surface); color: var(--ink); text-decoration: none; box-shadow: 0 1px 2px rgb(var(--shade) / .08), 0 14px 28px -18px rgb(var(--shade) / .45); rotate: var(--tilt, 0deg); transition: rotate var(--dur) var(--ease), translate var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.fx-card:hover, .fx-card:focus-visible { rotate: 0deg; translate: 0 -5px; box-shadow: var(--shadow-lg); }
+.fx-card:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; }
+.fx-card[hidden] { display: none; }
+.fx-band { display: flex; align-items: center; gap: 7px; padding: 9px 14px; background: color-mix(in srgb, var(--tc) 15%, var(--surface)); border-bottom: 2px solid color-mix(in srgb, var(--tc) 60%, transparent); color: var(--tci); font: 800 11.5px/1 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; }
+.fx-band .ico { width: 15px; height: 15px; --pen: currentColor; }
+.fx-mine { margin-left: auto; font: 400 12px/1 var(--f-hand); letter-spacing: 0; text-transform: none; color: var(--red); }
+.fx-paper { position: relative; flex: 1; display: flex; flex-direction: column; padding: 6px 16px 10px 32px; background-image: repeating-linear-gradient(to bottom, transparent 0 25px, var(--seyes-2) 25px 26px); background-position: 0 5px; line-height: 26px; }
+.fx-paper::before { content: ""; position: absolute; left: 20px; top: 0; bottom: 0; border-left: 1.5px solid var(--margin); }
+.fx-title { font: 600 17px/26px var(--f-text); text-wrap: balance; }
+.fx-paper .fx-en { font-size: 12.5px; line-height: 26px; color: var(--ink-3); }
+.fx-prev { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; font: 400 13.5px/26px var(--f-text); color: var(--ink-2); -webkit-mask-image: linear-gradient(#000 40%, transparent); mask-image: linear-gradient(#000 40%, transparent); }
+.fx-foot { display: flex; justify-content: space-between; gap: 8px; padding: 8px 14px 10px; border-top: 1px dashed var(--rule); font-size: 11.5px; color: var(--ink-3); }
+
+/* One sheet. */
+.fx-view { max-width: 940px; }
+.fx-sheet { position: relative; border: 1px solid var(--rule); border-radius: 8px 8px 24px 8px; background: var(--surface); box-shadow: var(--shadow-lg); }
+.fx-sheet::before { content: ""; position: absolute; left: 40px; top: 36px; bottom: 0; border-left: 1.5px solid var(--margin); pointer-events: none; }
+.fx-sheet > .fx-sheet-head > .fx-band { border-radius: 8px 8px 0 0; padding: 10px 18px; }
+.fx-sheet-title { padding: 18px 28px 4px 58px; }
+.fx-h1 { margin: 0; font: 600 clamp(24px, 3.4vw, 32px)/1.2 var(--f-text); text-wrap: balance; }
+.fx-sheet .fx-sheet-title .fx-en { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); }
+.fx-sheet-acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 28px 2px 58px; }
+.fx-cacher-tip { margin: 8px 28px 0 58px; color: var(--accent); }
+.fx-toc { margin: 14px 28px 0 58px; }
+.fx-body { display: grid; gap: 22px; padding: 10px 28px 26px 58px; container-type: inline-size; }
+.fx-scope { display: grid; gap: 14px; min-width: 0; }
+.fx-body p { margin: 0; }
+.fx-body > .fx-scope > p, .fx-list { font: 400 15.5px/1.6 var(--f-text); }
+.fx-h { position: relative; justify-self: start; margin: 14px 0 2px; scroll-margin-top: 96px; font: 800 19px/1.3 var(--f-ui); }
+.fx-scope:first-child > .fx-h:first-child { margin-top: 4px; }
+.fx-h .ink { position: absolute; left: -3px; right: -8px; bottom: -5px; height: 3px; border-radius: 3px; background: var(--red); opacity: .85; rotate: -.7deg; transform-origin: left center; }
+.fx-h3 { margin: 4px 0 0; font: 800 15px/1.3 var(--f-ui); color: var(--ink-2); }
+.fx-list { display: grid; gap: 6px; margin: 0; padding-left: 20px; }
+.fx-list li::marker { color: var(--red); }
+.fx-body mark.hl { padding: 0 2px; border-radius: 2px; background: linear-gradient(transparent 50%, var(--hl) 50%, var(--hl) 92%, transparent 92%); color: inherit; }
+.fx-body .pen-wrong { font-family: inherit; }
+.fx-body .pen-right { font-size: .92em; line-height: 1.5; }
+
+/* The order chain. Hovering or tapping a slot lights its words in the examples below it, in its colour. */
+.fx-chain { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 4px 0; }
+.fx-slot { flex: 1 1 96px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 10px 8px; border: 1.5px solid color-mix(in srgb, var(--sc) 70%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--sc) 11%, var(--surface)); color: var(--ink); font: inherit; cursor: pointer; transition: translate var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background-color var(--dur); }
+.fx-slot:hover, .fx-slot:focus-visible { translate: 0 -3px; box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--sc) 90%, transparent); }
+.fx-slot .num { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 2px var(--sc); font: 800 12px/1 var(--f-ui); color: var(--ink); }
+.fx-slot .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.fx-slot .chip { padding: 2px 6px; border-radius: 7px; background: color-mix(in srgb, var(--sc) 16%, var(--surface)); font: 600 16px/1.25 var(--f-text); }
+.fx-slot .lab { font: 700 11px/1.3 var(--f-ui); color: var(--ink-2); text-align: center; }
+.fx-slot.verb { flex: 0 0 auto; min-width: 84px; justify-content: center; border-color: var(--ink); background: var(--ink); color: var(--surface); font: 800 12.5px/1 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; cursor: default; }
+.fx-slot.verb:hover { translate: none; box-shadow: none; }
+.fx-arrow { align-self: center; color: var(--ink-3); font-weight: 800; }
+.fx-scope .sw { padding: 0 1px; border-radius: 4px; box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--sc) 85%, transparent); transition: background-color .2s, box-shadow .2s; }
+.fx-scope:has(.fx-slot.s1:hover) .sw.s1, .fx-scope[data-lit="1"] .sw.s1,
+.fx-scope:has(.fx-slot.s2:hover) .sw.s2, .fx-scope[data-lit="2"] .sw.s2,
+.fx-scope:has(.fx-slot.s3:hover) .sw.s3, .fx-scope[data-lit="3"] .sw.s3,
+.fx-scope:has(.fx-slot.s4:hover) .sw.s4, .fx-scope[data-lit="4"] .sw.s4,
+.fx-scope:has(.fx-slot.s5:hover) .sw.s5, .fx-scope[data-lit="5"] .sw.s5,
+.fx-scope:has(.fx-slot.s6:hover) .sw.s6, .fx-scope[data-lit="6"] .sw.s6 { background: color-mix(in srgb, var(--sc) 30%, transparent); box-shadow: inset 0 -3px 0 var(--sc); }
+.fx-scope[data-lit="1"] .fx-slot.s1, .fx-scope[data-lits~="1"] .fx-slot.s1,
+.fx-scope[data-lit="2"] .fx-slot.s2, .fx-scope[data-lits~="2"] .fx-slot.s2,
+.fx-scope[data-lit="3"] .fx-slot.s3, .fx-scope[data-lits~="3"] .fx-slot.s3,
+.fx-scope[data-lit="4"] .fx-slot.s4, .fx-scope[data-lits~="4"] .fx-slot.s4,
+.fx-scope[data-lit="5"] .fx-slot.s5, .fx-scope[data-lits~="5"] .fx-slot.s5,
+.fx-scope[data-lit="6"] .fx-slot.s6, .fx-scope[data-lits~="6"] .fx-slot.s6 { translate: 0 -3px; background: color-mix(in srgb, var(--sc) 22%, var(--surface)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sc) 35%, transparent); }
+
+/* Example lines: tap one to light up the slots its words come from. */
+.fx-exs { display: grid; gap: 2px; }
+.fx-ex { display: grid; gap: 1px; margin: 0 -10px; padding: 6px 10px; border-radius: 10px; cursor: pointer; transition: background-color var(--dur-fast); }
+.fx-ex:hover { background: var(--hover); }
+.fx-ex.on { background: var(--accent-soft); }
+.fx-ex.on .sw { background: color-mix(in srgb, var(--sc) 30%, transparent); box-shadow: inset 0 -3px 0 var(--sc); }
+.fx-ex .fr { font: 400 17px/1.45 var(--f-text); }
+.fx-ex .en { font-size: 13px; color: var(--ink-3); }
+
+.fx-tw { margin: 0; }
+.fx-table { width: 100%; overflow: hidden; border: 1px solid var(--rule); border-radius: 12px; border-collapse: separate; border-spacing: 0; background: var(--surface); font-size: 14.5px; }
+.fx-table th { padding: 9px 12px; background: color-mix(in srgb, var(--tc, var(--accent)) 12%, var(--surface)); color: var(--tci, var(--accent)); font: 800 11.5px/1.3 var(--f-ui); letter-spacing: .05em; text-align: left; text-transform: uppercase; }
+.fx-table td { padding: 9px 12px; border-top: 1px solid var(--rule); font-family: var(--f-text); vertical-align: top; transition: background-color var(--dur-fast); }
+.fx-table td:first-child { font: 700 14px/1.45 var(--f-ui); }
+.fx-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--sunk) 50%, transparent); }
+.fx-table tbody tr:hover td { background: var(--hover); }
+
+/* The memory trick, taped on; and the red-pen warning, its label circled. */
+.fx-note { --nb: var(--note-1); position: relative; justify-self: start; max-width: 600px; padding: 20px 20px 12px; border-radius: 3px 3px 16px 3px; background: var(--nb); box-shadow: 0 12px 22px -16px rgb(var(--shade) / .6); rotate: var(--tilt, -1deg); }
+.fx-note p { font: 400 14px/1.9 var(--f-hand); color: var(--ink); }
+.fx-note b { color: var(--accent); font-weight: 400; }
+.fx-warn { position: relative; display: grid; gap: 8px; padding: 14px 16px; border: 1.5px dashed color-mix(in srgb, var(--red) 70%, transparent); border-radius: 14px; background: color-mix(in srgb, var(--red-soft) 75%, transparent); }
+.fx-warn-h { position: relative; justify-self: start; margin: 0; padding: 3px 12px; color: var(--red); font: 800 12px/1.4 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; }
+.fx-warn-h svg { position: absolute; left: -6px; top: -6px; width: calc(100% + 12px); height: calc(100% + 12px); overflow: visible; pointer-events: none; }
+.fx-warn-h path { fill: none; stroke: var(--red); stroke-width: 2.2; stroke-linecap: round; }
+.fx-warn > p:last-child { font: 400 15.5px/1.6 var(--f-text); }
+.fx-sheet-foot { padding: 12px 28px 18px 58px; border-top: 1px dashed var(--rule); }
+
+/* Cacher: the answers become dotted blanks; a tap turns one over. */
+.fx-sheet.cacher :is(.chip, mark.hl, .pen-right):not(.shown), .fx-sheet.cacher td:not(:first-child):not(.shown) { color: transparent !important; text-shadow: none; cursor: pointer; border-radius: 5px; background: repeating-linear-gradient(90deg, var(--ink-3) 0 3px, transparent 3px 7px) left bottom / 100% 1.5px no-repeat, color-mix(in srgb, var(--sunk) 85%, transparent) !important; }
+.fx-sheet.cacher td:not(:first-child):not(.shown) * { color: transparent !important; background: none !important; box-shadow: none !important; }
+.fx-sheet.cacher .fx-scope .sw { box-shadow: none; }
+
+/* The tab on a grammar topic or a writing task. */
+.fx-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.fx-tab { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 10px; border: 1px solid var(--rule); border-top: 3px solid var(--tc); border-radius: 4px 4px 12px 4px; background: var(--surface); box-shadow: var(--shadow-sm); color: var(--ink-2); font-size: 13.5px; text-decoration: none; rotate: -.6deg; transition: rotate var(--dur) var(--ease), translate var(--dur) var(--ease), box-shadow var(--dur); }
+.fx-tab b { font: 600 14px/1.3 var(--f-text); color: var(--ink); }
+.fx-tab .ico { width: 16px; height: 16px; color: var(--tci); --pen: var(--red); }
+.fx-tab:hover { rotate: 0deg; translate: 0 -2px; box-shadow: var(--shadow); }
+
+/* The editor, with its live preview. */
+.fx-edit { max-width: 1260px; }
+.fx-edit-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.fx-prev-wrap { position: sticky; top: 16px; display: grid; gap: 8px; min-width: 0; }
+.fx-prev-wrap .eyebrow { margin: 0; }
+.fx-preview { box-shadow: var(--shadow); }
+.fx-etags { display: flex; flex-wrap: wrap; gap: 6px; }
+.fx-etags button { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border: 1.5px solid var(--rule-2); border-radius: 999px; background: var(--surface); color: var(--ink-2); font: 700 13px/1 var(--f-ui); cursor: pointer; transition: border-color var(--dur-fast), background-color var(--dur-fast), color var(--dur-fast); }
+.fx-etags button .ico { width: 15px; height: 15px; --pen: currentColor; }
+.fx-etags button[aria-pressed="true"] { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 14%, var(--surface)); color: var(--tci); }
+.fx-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+#fx-body { font: 400 13.5px/1.65 ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.fx-help td { padding: 4px 12px 4px 0; vertical-align: top; font-size: 13px; }
+.fx-help code { font-size: 12.5px; white-space: nowrap; }
+
+@media (max-width: 980px) {
+  .fx-edit-grid { grid-template-columns: minmax(0, 1fr); }
+  .fx-prev-wrap { position: static; }
+}
+@media (max-width: 640px) {
+  .fx-grid { grid-template-columns: minmax(0, 1fr); }
+  .fx-pins { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
+  .fx-sheet::before { left: 22px; }
+  .fx-sheet-title, .fx-sheet-acts, .fx-body, .fx-sheet-foot { padding-left: 34px; padding-right: 16px; }
+  .fx-cacher-tip, .fx-toc { margin-left: 34px; margin-right: 16px; }
+}
+/* A chain that can't fit on one line stacks, one slot per row, with the arrows pointing down. */
+@container (max-width: 620px) {
+  .fx-chain { flex-direction: column; align-items: stretch; }
+  .fx-slot { flex: none; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; }
+  .fx-slot .lab { margin-left: auto; text-align: right; }
+  .fx-slot.verb { min-height: 40px; }
+  .fx-arrow { rotate: 90deg; line-height: .7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-card, .fx-pin, .fx-slot, .fx-tab { transition: none; }
+}
 /* Under a mouse, cards light up where the pointer is, and tiles tilt toward it (motion.js sets --sx, --sy). */
 @media (hover: hover) and (pointer: fine) {
   [data-tilt] { transition: rotate .6s var(--ease), translate .35s var(--ease), box-shadow .35s var(--ease), border-color .2s; }
@@ -1106,6 +1315,7 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
     </filter>
     <symbol id="i-today" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path class="pen" d="M15.3 15.3C15.3 13.9 13.8 12.8 12 12.8S8.7 13.9 8.7 15.3 10.2 17.8 12 17.8 15.5 16.9 15.6 15.2c0-.8-.2-1.4-.6-1.9"/></symbol>
     <symbol id="i-grammar" viewBox="0 0 24 24"><path d="M3.5 6.5h17M3.5 17.5h11M3.5 12h3M18.5 12h2"/><rect class="pen" x="8.8" y="9.6" width="7.4" height="4.8" rx="1.2"/></symbol>
+    <symbol id="i-fiches" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/><path class="pen" d="M3.5 8.5h17"/><path d="M7.5 12.5h9M7.5 16h5.5"/></symbol>
     <symbol id="i-vocab" viewBox="0 0 24 24"><path d="M7.5 7.5V5A1.5 1.5 0 0 1 9 3.5h10A1.5 1.5 0 0 1 20.5 5v8a1.5 1.5 0 0 1-1.5 1.5h-.5"/><rect x="3.5" y="7.5" width="15" height="13" rx="1.5"/><path d="M7 11.5h5"/><path class="pen" d="M7 16h8"/></symbol>
     <symbol id="i-writing" viewBox="0 0 24 24"><g transform="rotate(45 12 12)"><path d="M12 21.5 7.9 13.4a1.2 1.2 0 0 1 .1-1.3L10 8.5h4l2 3.6a1.2 1.2 0 0 1 .1 1.3z"/><path d="M10 8.5V4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4"/><path d="M12 21.5v-6.4"/><circle cx="12" cy="13.6" r="1.1"/></g><path class="pen" d="M7 20.4c1.3-1 2.6-1 3.9 0s2.6 1 3.9 0 2.6-1 3.9 0"/></symbol>
     <symbol id="i-comp" viewBox="0 0 24 24"><path d="M12 11.3c-1.8-1.1-4-1.4-6.5-1.1v9.3c2.5-.3 4.7 0 6.5 1.1 1.8-1.1 4-1.4 6.5-1.1v-9.3c-2.5-.3-4.7 0-6.5 1.1zM12 11.3v9.3"/><path d="M4 11.5V10a8 8 0 0 1 16 0v1.5"/><rect class="pen" x="2.5" y="11" width="3" height="5.5" rx="1.3"/><rect class="pen" x="18.5" y="11" width="3" height="5.5" rx="1.3"/></symbol>
@@ -1134,6 +1344,7 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
       <a href="#today" data-nav="today" title="Today"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-today"/></svg>Aujourd'hui</a>
       <a href="#grammar" data-nav="grammar" title="Grammar drills"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grammar"/></svg>Grammaire</a>
       <a href="#vocab" data-nav="vocab" title="Vocabulary cards"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-vocab"/></svg>Vocabulaire</a>
+      <a href="#fiches" data-nav="fiches" title="Revision sheets and notes"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fiches"/></svg>Fiches</a>
       <a href="#writing" data-nav="writing" title="Writing (EE)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-writing"/></svg>Écrit</a>
       <a href="#comp" data-nav="comp" title="Listening and reading (CO · CE)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-comp"/></svg>Compréhension</a>
       <a href="#progress" data-nav="progress" title="Progress"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-progress"/></svg>Progrès</a>
@@ -1150,6 +1361,8 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 <script src="drills.js"></script>
 <script src="proofread.js"></script>
 <script src="anki.js"></script>
+<script src="examples.js"></script>
+<script src="fiches.js"></script>
 <script src="comp-ce.js"></script>
 <script src="exam-ce.js"></script>
 <script src="exam-co.js"></script>

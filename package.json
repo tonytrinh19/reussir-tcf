@@ -6,6 +6,6 @@
   "scripts": {
     "start": "node server/server.js",
     "import": "node server/import.js",
-    "check": "node tools/check_drills.js && node tools/check_ce.js && node tools/check_co.js"
+    "check": "node tools/check_drills.js && node tools/check_ce.js && node tools/check_co.js && node tools/check_notes.js"
   }
 }
