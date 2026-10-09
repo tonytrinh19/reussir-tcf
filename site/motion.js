@@ -10,7 +10,8 @@
    It also slides one page out and the next in when you change page (TCFMotion.transition), glides the navigation
    highlight, slides the toast in and out, opens folds gently, throws the maple leaves (TCFMotion.burst), lights up
    cards and tilts tiles under a mouse, and runs the overview's section bar (a tap scrolls to the section; the pill
-   follows the one you're reading). It only reads the page, moves it and scrolls it: it never writes data, calls
+   follows the one you're reading). On the Fiches it slides the cards into place as you filter them, peels a note
+   off the board and turns over a blank you tap in Cacher mode. It only reads the page, moves it and scrolls it: it never writes data, calls
    the app or stores anything, and the site works the same without it. With reduced motion asked for, nothing
    moves. */
 (() => {
@@ -45,9 +46,16 @@
     // A tile dealt onto the table, one after another (the overview's headline numbers).
     deal: (el, i) => el.animate([{ opacity: 0, transform: "translateY(16px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: 60 + Math.min(i, 8) * 70, easing: POP, fill: "backwards" }),
     chart: (el) => chartIn(el),
+    // The Fiches: a note taped on drops in and settles with a small bounce (translate and scale, so it keeps its tilt);
+    // a red-pen line draws itself under a heading; an order chain's slots pop in one by one, left to right; a
+    // table's rows come in one after another.
+    pin: (el, i) => el.animate([{ opacity: 0, translate: "0 -22px", scale: "1.08" }, { opacity: 1, translate: "0 3px", scale: "1", offset: 0.7 }, { opacity: 1, translate: "0 0", scale: "1" }], { duration: 560, delay: 60 + Math.min(i, 8) * 80, easing: POP, fill: "backwards" }),
+    ink: (el) => el.animate([{ scale: "0 1" }, { scale: "1 1" }], { duration: 700, delay: 140, easing: EASE, fill: "backwards" }),
+    slots: (el) => [...el.children].map((c, i) => c.animate([{ opacity: 0, scale: ".7", translate: "0 10px" }, { opacity: 1, scale: "1.06", translate: "0 0", offset: 0.6 }, { opacity: 1, scale: "1", translate: "0 0" }], { duration: 480, delay: 100 + i * 85, easing: POP, fill: "backwards" })),
+    rows: (el) => [...el.querySelectorAll("tbody tr")].map((r, i) => r.animate([{ opacity: 0, translate: "-10px 0" }, { opacity: 1, translate: "0 0" }], { duration: 340, delay: 80 + Math.min(i, 12) * 50, easing: EASE, fill: "backwards" })),
   };
   // These are part of a page's entrance, so they also play when the page opens.
-  const ENTRANCE = new Set(["press", "fly", "draw", "deal", "chart"]);
+  const ENTRANCE = new Set(["press", "fly", "draw", "deal", "chart", "pin", "ink", "slots", "rows"]);
   // These wait until they're on screen: there's no point drawing a chart nobody sees.
   const LATER = ENTRANCE;
 
@@ -454,7 +462,51 @@
     setTimeout(() => box.remove(), 2400);
   }
 
-  window.TCFMotion = Object.freeze({ burst: (el, opts) => safe(() => burst(el, opts)), transition: (update, dir) => {
+  /* ---------- the Fiches ---------- */
+  // Filtering the cards: the ones that stay slide to their new places, the ones that go fold away where they
+  // were (a copy fades out there, since the card itself is already hidden), and the ones that come back pop in.
+  function flip(els, mutate) {
+    if (still()) { mutate(); return; }
+    const before = new Map();
+    els.forEach((el) => { if (!el.hidden) before.set(el, el.getBoundingClientRect()); });
+    mutate();
+    els.forEach((el) => {
+      const a = before.get(el);
+      if (el.hidden) { if (a) ghost(el, a); return; }
+      const b = el.getBoundingClientRect();
+      if (!a) { el.animate([{ opacity: 0, scale: ".88" }, { opacity: 1, scale: "1" }], { duration: 340, easing: POP }); return; }
+      const dx = a.left - b.left, dy = a.top - b.top;
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) el.animate([{ translate: `${dx}px ${dy}px` }, { translate: "0 0" }], { duration: 440, easing: EASE });
+    });
+  }
+  function ghost(el, r) {
+    const g = el.cloneNode(true);
+    g.hidden = false;
+    g.removeAttribute("id");
+    g.setAttribute("aria-hidden", "true");
+    Object.assign(g.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", margin: "0", pointerEvents: "none", zIndex: "5", viewTransitionName: "none" });
+    document.body.appendChild(g);
+    const a = g.animate([{ opacity: 1, scale: "1" }, { opacity: 0, scale: ".82" }], { duration: 260, easing: "ease-in", fill: "forwards" });
+    a.onfinish = () => g.remove();
+    setTimeout(() => g.remove(), 700);
+  }
+  // A note peeled off the board: it lifts at a corner, then falls away. Resolves when it's gone.
+  function peel(el) {
+    return new Promise((done) => {
+      if (still() || !el || !el.animate) { done(); return; }
+      const a = el.animate([{ translate: "0 0", rotate: "0deg", opacity: 1 }, { translate: "6px -8px", rotate: "-7deg", opacity: 1, offset: 0.25 }, { translate: "34px 110px", rotate: "26deg", opacity: 0 }], { duration: 560, easing: "cubic-bezier(.5, 0, .75, .4)", fill: "forwards", composite: "add" });
+      a.onfinish = done;
+      a.oncancel = done;
+      setTimeout(done, 800);
+    });
+  }
+  // A blank in Cacher mode turned over: the answer comes into focus.
+  function reveal(el) {
+    if (still() || !el || !el.animate) return;
+    el.animate([{ opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 340, easing: EASE });
+  }
+
+  window.TCFMotion = Object.freeze({ burst: (el, opts) => safe(() => burst(el, opts)), flip: (els, mutate) => { let ran = false; try { flip(els, () => { ran = true; mutate(); }); } catch (e) { console.warn("motion:", e); if (!ran) mutate(); } }, peel: (el) => peel(el).catch(() => {}), reveal: (el) => safe(() => reveal(el)), transition: (update, dir) => {
     // The page is drawn exactly once, whatever happens to the transition.
     let ran = false;
     const once = () => { if (!ran) { ran = true; update(); } };

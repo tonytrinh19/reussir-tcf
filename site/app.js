@@ -79,7 +79,7 @@
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
   // "speaking" holds the attempts saved before the Oral page was removed. The site no longer reads it, but it
   // stays in the list so a save to this browser's storage keeps them.
-  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress"];
+  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress", "fiches"];
   const S = {};
   COLLS.forEach((c) => { S[c] = new Map(); });
   const LS_KEY = "tcf-reussir-data-v1";
@@ -302,6 +302,7 @@
     cxGen: null, // progress while Claude writes a practice exam
     cxReady: null, // a practice exam from Claude, ready to start
     form: {},
+    fx: { tag: "all", q: "", cacher: false, note: "", edit: null },
     confirm: "",
     thunk: null, // a day whose stamp should land with a thunk on the next Today render
     grab: null, // the "Save to your cards" panel, while it's open
@@ -355,7 +356,7 @@
   }
 
   /* =============== timer =============== */
-  const timer = { total: 0, left: 0, base: 0, t0: 0, running: false, label: "", home: "", iv: 0, alerted: false };
+  const timer = { total: 0, left: 0, base: 0, t0: 0, running: false, label: "", home: "", iv: 0, alerted: false, done: false };
   // After 0:00 the clock counts overtime, but only up to half the time that was set (at least 1 minute, at
   // most 10), so a clock left running in a tab you've left doesn't count on for hours. It's worked out from
   // the time it started, so it stops at the same point even if the page was in the background.
@@ -363,17 +364,34 @@
   const timerRemaining = () => (timer.running ? Math.max(-timerCap(), timer.base - (Date.now() - timer.t0) / 1000) : timer.left);
   const timerStarted = () => timer.running || (timer.total > 0 && Math.abs(timer.left - timer.total) > 0.5);
   const timerCapped = () => timer.total > 0 && timerRemaining() <= -timerCap() + 0.5;
-  const timerBtnLabel = () => (timer.running ? "Pause" : timerCapped() ? "Restart" : timerStarted() ? "Resume" : "Start");
+  const timerBtnLabel = () => (timer.running ? "Pause" : timer.done || timerCapped() ? "Restart" : timerStarted() ? "Resume" : "Start");
   function fmtClock(sec) { const neg = sec < -0.5; const s = Math.abs(Math.round(sec)); return (neg ? "+" : "") + Math.floor(s / 60) + ":" + pad(s % 60); }
-  function timerSet(sec, label, home) { timerPause(); timer.total = timer.left = sec; timer.label = label; timer.home = home; timer.alerted = false; }
+  function timerSet(sec, label, home) { timerPause(); timer.total = timer.left = sec; timer.label = label; timer.home = home; timer.alerted = false; timer.done = false; }
   function timerStart() {
     if (timer.running || !timer.total) return;
-    // A clock that stopped at the end of its overtime starts again from the full time.
-    if (timerCapped()) { timer.left = timer.total; timer.alerted = false; }
+    // A clock that stopped at the end of its overtime, or because you finished, starts again from the full time.
+    if (timer.done || timerCapped()) { timer.left = timer.total; timer.alerted = false; timer.done = false; }
     timer.base = timer.left; timer.t0 = Date.now(); timer.running = true;
     clearInterval(timer.iv); timer.iv = setInterval(paintTimer, 250);
   }
   function timerPause() { if (!timer.running) return; timer.left = timerRemaining(); timer.running = false; clearInterval(timer.iv); }
+  // Finishing a task (Finish, Correct, Copy for another AI, Check answers) stops its clock where it is: the time
+  // taken stays on the page and is what's saved with the attempt, and the sidebar's clock goes away. Returns
+  // whether it was running, so a request that fails can start it again.
+  function timerFinish(home) {
+    if (timer.home !== home || timer.done || !timerStarted()) return false;
+    const was = timer.running;
+    timerPause();
+    timer.done = true;
+    paintTimer();
+    return was;
+  }
+  function timerUnfinish(home, was) {
+    if (timer.home !== home || !timer.done) return;
+    timer.done = false;
+    if (was) timerStart();
+  }
+  const timerTaken = () => Math.max(1, Math.round((timer.total - timerRemaining()) / 60));
   function timerElapsedMin(home) { return timer.home === home && timerStarted() ? Math.max(1, Math.round((timer.total - timerRemaining()) / 60)) : null; }
   function paintTimer() {
     const r = timerRemaining();
@@ -396,8 +414,9 @@
     const cur = mine ? timer.total : presets[0][0];
     const clock = mine ? fmtClock(timerRemaining()) : fmtClock(presets[0][0]);
     const btn = mine ? timerBtnLabel() : "Start";
-    return `<div class="timer">
-      <span class="clock" ${mine ? "data-timer" : ""}>${clock}</span>
+    const done = mine && timer.done;
+    return `<div class="timer${done ? " done" : ""}">
+      <span class="clock" ${mine ? "data-timer" : ""}>${clock}</span>${done ? `<span class="pill ok timer-done" data-m="pop" data-k="tdone-${esc(home)}-${timer.total}-${Math.round(timer.left)}">Terminé · ${timerTaken()} min</span>` : ""}
       <button class="btn sm primary" data-act="timer-toggle" data-home="${home}" data-sec="${cur}" data-label="${esc(label)}" ${mine ? "data-timer-btn" : ""}>${btn}</button>
       <button class="btn sm" data-act="timer-reset" data-home="${home}" data-sec="${cur}" data-label="${esc(label)}">Reset</button>
       <div class="seg" role="group" aria-label="Timer length">${presets.map((p) => `<button data-act="timer-preset" data-home="${home}" data-sec="${p[0]}" data-label="${esc(label)}" aria-pressed="${cur === p[0]}">${esc(p[1])}</button>`).join("")}</div>
@@ -1194,7 +1213,7 @@
     const th = THEME[theme];
     if (!th) return;
     const have = themeCards(theme).map((c) => c.fr);
-    const prompt = `Create 20 French vocabulary flashcards for the TCF Canada theme "${th.label}" (${th.en}) for a B1→B2 learner.\nPrioritize collocations and verb + preposition pairs over isolated nouns. Include 2–3 connectors or linking phrases useful for arguing about this topic, 1–2 idiomatic expressions, and 2 B1→B2 "sophistication swaps" (for those, the English side reads "B2 upgrade of: <the plain B1 phrase in French>").\nDon't repeat any of: ${have.join("; ")}.\nEach card: {"fr": "French, with the article or preposition when useful", "en": "short English meaning", "ex": "one natural French example sentence, max 18 words"}.\nReply with only JSON: {"cards": [ ... ]}`;
+    const prompt = `Create 20 French vocabulary flashcards for the TCF Canada theme "${th.label}" (${th.en}) for a B1→B2 learner.\nPrioritize collocations and verb + preposition pairs over isolated nouns. Include 2–3 connectors or linking phrases useful for arguing about this topic, 1–2 idiomatic expressions, and 2 B1→B2 "sophistication swaps" (for those, the English side reads "B2 upgrade of: <the plain B1 phrase in French>").\nDon't repeat any of: ${have.join("; ")}.\nEach card: {"fr": "French, with the article or preposition when useful", "en": "short English meaning", "ex": "two natural French example sentences that show the word in real use (a TCF Canada situation: settling in Canada, work, housing, health, the environment, public life), each followed by \" — \" and its English, on two lines separated by \\n, max 20 words each"}.\nReply with only JSON: {"cards": [ ... ]}`;
     const out = await ask("build-" + theme, prompt);
     if (!out) return;
     const seen = new Set([...allCards().values()].map((c) => norm(c.fr)));
@@ -1432,15 +1451,26 @@
     }
     H.set("saved", new Highlight(...ranges));
   }
-  // A card's examples, with the words you saved in bold.
+  // A line's French and its English, from "French — English" or "French [English]". A line with neither is all French.
+  function exSplit(l) {
+    const i = l.indexOf(" — ");
+    if (i > 0) return [l.slice(0, i).trim(), l.slice(i + 3).trim()];
+    const m = l.match(/^(.*\S)\s*\[([^\]]+)\]\s*$/);
+    return m ? [m[1], m[2].trim()] : [l, ""];
+  }
+  // A card's examples, one per line with its English underneath, and the words you saved in bold.
   function exHTML(c) {
     const re = grabClean(c.seen).length > 1 ? new RegExp(`(?<![\\p{L}\\p{N}])${markPat(grabClean(c.seen))}(?![\\p{L}\\p{N}])`, "giu") : null;
-    return exLines(c.ex).map((l) => {
+    const bold = (l) => {
       if (!re) return typo(l);
       let out = "", at = 0;
       for (const m of l.matchAll(re)) { out += typo(l.slice(at, m.index)) + `<b>${typo(m[0])}</b>`; at = m.index + m[0].length; }
       return out + typo(l.slice(at));
-    }).join("<br>");
+    };
+    return exLines(c.ex).map((l) => {
+      const [fr, en] = exSplit(l);
+      return `<span class="ex-l"><span class="ex-fr" lang="fr">${bold(fr)}</span>${en ? `<span class="ex-en">${esc(en)}</span>` : ""}</span>`;
+    }).join("");
   }
 
   // Cards saved without a meaning wait on Vocabulaire, out of your reviews, until they have one. Newest first.
@@ -1506,6 +1536,52 @@
     if (note) doc.enNote = note; else delete doc.enNote;
     put("cards", id, doc);
     if (!S.srs.has(id)) srsLearn(id, false);
+    return true;
+  }
+
+  // Your own cards with fewer than 2 examples. Claude can write them; they're saved only when you press Save.
+  const thinCards = () => [...allCards().values()].filter((c) => !DECK.has(c.id) && c.fr && str(c.en).trim() && exLines(c.ex).length < 2);
+  const exDraft = (id) => ui.form["exf-" + id];
+  function exPanel() {
+    const ws = thinCards();
+    if (!ws.length) return "";
+    const ready = ws.filter((c) => exDraft(c.id) != null);
+    const rows = ready.map((c) => `<li class="stack tight">
+        <p><b class="fr">${typo(c.fr)}</b> <span class="small muted">· ${esc(c.en)}</span></p>
+        <label class="field">Examples <span class="muted" style="font-weight:400">one per line, French — English</span><textarea id="exf-${esc(c.id)}" data-input="form" data-k="exf-${esc(c.id)}" rows="3" lang="fr" spellcheck="false">${esc(exDraft(c.id))}</textarea></label>
+        <div class="row"><button class="btn sm" data-act="exf-save" data-id="${esc(c.id)}">Save</button><button class="btn ghost sm" data-act="exf-skip" data-id="${esc(c.id)}">Not now</button></div>
+      </li>`).join("");
+    return `<section class="panel stack">
+      <div class="row between"><p class="h3">Exemples · ${ws.length} of your cards ${ws.length === 1 ? "has" : "have"} fewer than 2</p><span class="row">${ready.length < ws.length ? claudeBtn("ex-fill", "ex-fill", "Write them with Claude", "", "btn sm") : ""}${ready.length > 1 ? `<button class="btn sm primary" data-act="exf-save-all">Save all ${ready.length}</button>` : ""}</span></div>
+      <p class="small muted">Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p>
+      ${rows ? `<ul class="wait-list">${rows}</ul>` : ""}
+    </section>`;
+  }
+  async function exFill() {
+    const ws = thinCards().filter((c) => exDraft(c.id) == null).slice(0, 25);
+    if (!ws.length) return;
+    const items = ws.map((c, i) => ({ i, fr: c.fr, en: c.en, has: exLines(c.ex) }));
+    const out = await ask("ex-fill", `You're writing example sentences for a B1 learner's French flashcards, for the TCF Canada (aiming for NCLC 7, about B2).\nFor each card, write 2 natural French sentences that use the word or phrase in real use, with the prepositions and collocations it actually takes, in situations the TCF Canada writes about (settling in Canada, work, housing, health, the environment, studies, public life). B1–B2, at most 20 words each. Make at least one a sentence the learner could write in a Tâche 2 or 3 or say in an oral Tâche 3. Follow each with " — " and its English. Don't repeat a sentence the card already has ("has").\nThe cards:\n${JSON.stringify(items)}\nReply with only JSON: {"cards": [{"i": the card's i, "ex": ["French — English", "French — English"]}]}`);
+    if (!out) return;
+    let n = 0;
+    for (const r of arr(out.cards)) {
+      const c = r && ws[Number(r.i)];
+      const lines = arr(r && r.ex).map((l) => str(l).replace(/\s+/g, " ").trim()).filter(Boolean);
+      if (!c || !lines.length) continue;
+      const have = exLines(c.ex);
+      lines.forEach((l) => { if (!have.some((h) => norm(exSplit(h)[0]) === norm(exSplit(l)[0]))) have.push(l); });
+      ui.form["exf-" + c.id] = have.join("\n");
+      n++;
+    }
+    toast(n ? `Claude wrote examples for ${n}. Check them, then save.` : "No examples came back. Try again.");
+    render(true);
+  }
+  function exSave(id) {
+    const c = S.cards.get(id), text = exDraft(id);
+    if (!c || text == null) return false;
+    delete ui.form["exf-" + id];
+    const ex = exLines(text).join("\n");
+    put("cards", id, Object.assign({}, c, { ex, edited: todayStr() }));
     return true;
   }
 
@@ -1608,6 +1684,8 @@
     const text = ui.w.text[task] || "";
     const words = countWords(text);
     if (words < 20) { toast("Write at least a few sentences first."); return; }
+    // The clock stops as you hand the text in, so Claude's time doesn't count as writing time.
+    const clockWas = timerFinish("writing." + task);
     const p = wPrompt(task);
     const docs = task === "t3" && p.docs ? `\nDOCUMENT 1 (${p.docs[0].who}): ${p.docs[0].text}\nDOCUMENT 2 (${p.docs[1].who}): ${p.docs[1].text}` : "";
     const ps = paragraphs(text);
@@ -1616,7 +1694,7 @@
     const critNames = TC.ee.criteria.map(([n]) => n);
     const prompt = `You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct the learner's text and grade it strictly the way the TCF Canada does, using the TCF Canada rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.\n\n${EE_RUBRIC}\n\nTASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. Learner's word count (anything between two spaces): ${words}.${parts}\nPROMPT: ${p.q}${docs}\n\n${PROFILE}\n\nLEARNER'S TEXT:\n"""\n${text}\n"""\n\nGrade this task on the TCF Canada 0–20 scale. If the word count is outside the range, the text is off-topic or the instructions are ignored, cap the score accordingly (it can be A1 non atteint). List every grammar, spelling, agreement and word-choice error, most important first (max 25). Quote "wrong" exactly as it appears in the text, just enough to locate it. Error categories (use the id): ${Object.keys(CAT).join(", ")}.\nReply with only JSON:\n{"score20": integer from 0 to 20 for this task on the TCF Canada scale, "level": "A1 | A2 | B1 | B2 | C1 | C2 (the level that score corresponds to)", "summary": "2–3 sentences in English", "criteria": [{"name": "one of: ${critNames.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in English"}] (one entry per criterion, in that order), "compliance": {"on_topic": true or false, "length_ok": true or false, "register_ok": true or false, "notes": "one sentence"}, ${t3}"errors": [{"wrong": "...", "right": "...", "category": "...", "why": "short English explanation"}], "corrected_text": "the full corrected text, keeping the learner's ideas and paragraph breaks", "upgrades": [{"from": "a B1 phrase from the text", "to": "a B2 alternative"}], "strengths": ["up to 3"], "homework": ["1–3 short, concrete follow-up tasks for tomorrow"]}`;
     const out = await ask("w-correct", prompt);
-    if (!out) return;
+    if (!out) { timerUnfinish("writing." + task, clockWas); render(true); return; }
     const fb = cleanFb(out, task);
     const id = uid();
     // Claude's follow-up tasks stay suggestions on the correction until you add them to your homework.
@@ -1675,9 +1753,12 @@
     const task = ui.w.task;
     if (!str(ui.w.text[task]).trim()) { toast("Write your text first: there's nothing to evaluate yet."); return; }
     const text = wCopyPrompt(task);
+    // Copying the draft out for marking hands it in, so its clock stops; Resume starts it again.
+    timerFinish("writing." + task);
+    const stopped = timer.home === "writing." + task && timer.done;
     if (await copyText(text)) {
       ui.w.copyOut = null;
-      toast(`Copied: the task, the TCF Canada rules and your draft (${countWords(ui.w.text[task])} words). Paste it into any AI chat.`);
+      toast(`Copied: the task, the TCF Canada rules and your draft (${countWords(ui.w.text[task])} words). Paste it into any AI chat.${stopped ? ` The clock stopped at ${timerTaken()} min.` : ""}`);
       render(true);
       return;
     }
@@ -1690,13 +1771,15 @@
     const task = ui.w.task;
     const text = ui.w.text[task] || "";
     if (countWords(text) < 5) { toast("There's nothing to hand in yet."); return; }
+    timerFinish("writing." + task);
+    const stopped = timer.home === "writing." + task && timer.done;
     const p = wPrompt(task);
     const id = uid();
     put("writing", id, { task, date: todayStr(), ts: Date.now(), prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: timerElapsedMin("writing." + task), fb: null });
     ipDrop("writing--" + task);
     ui.w.viewing = id;
     autoTick("writing." + task);
-    toast("Finished. It's in your writing history.");
+    toast(`Finished. It's in your writing history.${stopped ? ` The clock stopped at ${timerTaken()} min.` : ""}`);
     render(true);
   }
   async function writingGenPrompt() {
@@ -2092,13 +2175,15 @@
     const ans = ui.c.ans[skill];
     if (Object.keys(ans).length < set.questions.length) { toast("Answer every question first. On the real test a blank is simply wrong."); return; }
     const score = set.questions.filter((q, i) => ans[i] === q.answer).length;
+    const timed = timer.home === "comp." + skill && timerStarted();
+    timerFinish("comp." + skill);
     ui.c.submitted[skill] = true;
     const id = uid();
     ui.c.saved[skill] = id;
     const doc = {
       skill, level: set.level || compLevel(), title: set.title, theme: set.theme || "", date: todayStr(), ts: Date.now(), score, total: set.questions.length, src: set.src || "sample", gaps: {},
       setId: set.id || "", answers: set.questions.map((q, i) => (ans[i] == null ? null : ans[i])),
-      secs: Math.round((Date.now() - (ui.c.t0[skill] || Date.now())) / 1000), timed: timer.home === "comp." + skill && timerStarted(),
+      secs: Math.round((Date.now() - (ui.c.t0[skill] || Date.now())) / 1000), timed,
     };
     // Claude's sets exist only in this page's memory, so the attempt keeps a copy to reopen from the history.
     if (set.src === "claude") doc.snap = snapOf(set);
@@ -2812,7 +2897,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 2;
-  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab"];
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -2832,7 +2917,7 @@
       if (examRunning() && skillOf(ui.cx) === "co" && ui.cx.play) ui.cx.play.pos = coxPos();
       const set = ui.c.set.co;
       const audio = audioEl && set && set.audio ? { id: set.id, t: audioEl.currentTime || 0, ended: ui.c.player === "ended" } : null;
-      const tm = timer.total ? { total: timer.total, left: timer.left, base: timer.base, t0: timer.t0, running: timer.running, label: timer.label, home: timer.home, alerted: timer.alerted } : null;
+      const tm = timer.total ? { total: timer.total, left: timer.left, base: timer.base, t0: timer.t0, running: timer.running, label: timer.label, home: timer.home, alerted: timer.alerted, done: timer.done } : null;
       sessionStorage.setItem(TAB_KEY, JSON.stringify({ v: TAB_V, at: Date.now(), y: window.scrollY, ui: u, timer: tm, audio }));
     } catch (_) {
       // A copy that can't be updated would bring back an older state, so drop it.
@@ -2946,7 +3031,7 @@
     const s = settings(), P = T.PHASES[s.phase - 1];
     const store = backend.kind === "db" ? `<span class="status-dot on"></span>Progress saved on claude.ai` : backend.kind === "server" ? `<span class="status-dot on"></span>Progress saved on this computer` : backend.kind === "local" ? `<span class="status-dot warn"></span>Progress saved in this browser only` : `<span class="status-dot"></span>Loading your progress…`;
     const cl = sample ? `<span class="status-dot on"></span>Claude ready` : claudeState === "pending" ? `<span class="status-dot"></span>Connecting to Claude…` : claudeState === "off" ? `<span class="status-dot"></span>Claude off (reload to allow)` : "";
-    const tm = timer.total && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}">${ico("timer")}<span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
+    const tm = timer.total && !timer.done && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}">${ico("timer")}<span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
     // Where your progress is saved, on one line; that and whether Claude is ready open with a tap.
     const saved = backend.kind === "db" ? "Saved on claude.ai" : backend.kind === "server" ? "Saved on this computer" : backend.kind === "local" ? "Saved in this browser only" : "Loading your progress…";
     const dot = backend.kind === "local" ? "warn" : backend.kind === "loading" ? "" : "on";
@@ -3337,7 +3422,7 @@
     }).join("");
     const pr = tp.prod ? prodPanel(tp) : "";
     const head = `<div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Topic ${tp.n} · Phase ${tp.phase} focus${tp.phase === s.phase ? " · this phase" : ""}</p><h1 class="title">${esc(tp.title)}<small>${esc(tp.en)}</small></h1></header>`;
+      <header class="stack tight"><p class="eyebrow">Topic ${tp.n} · Phase ${tp.phase} focus${tp.phase === s.phase ? " · this phase" : ""}</p><h1 class="title">${esc(tp.title)}<small>${esc(tp.en)}</small></h1>${fxTabs("grammar." + tp.id)}</header>`;
     // During a round: the question, with the notes a tap away. History and mastery come back with the results.
     if (active && !ui.drill.done) return `<div class="wrap focus">${head}${drillBox(tp.id)}${fold("notes-" + tp.id, "Notes · L'essentiel, tes erreurs, des exemples", `<div class="notes">${topicNotes(tp)}</div>`)}</div>`;
     return `<div class="wrap">
@@ -3575,6 +3660,417 @@
     </section>`;
   }
 
+  /* =============== fiches =============== */
+  // Revision sheets: the starters in fiches.js and your own, with the Pense-bête notes above them. All of it is in
+  // the fiches collection: your sheets as f-…, your notes as n-… (kind "note"), an edited starter under its own id
+  // (so it replaces the original until you restore it), and a hidden starter with hidden: true.
+  const FX_TAGS = { grammaire: ["Grammaire", "grammar"], ecrit: ["Écrit", "writing"], oral: ["Oral", "listen"], vocabulaire: ["Vocabulaire", "vocab"], examen: ["Examen", "exam"] };
+  const FX_BASE = new Map((T.FICHES || []).map((f) => [f.id, f]));
+  const fxTagOf = (f) => (FX_TAGS[f.tag] ? f.tag : "grammaire");
+  // A name the View Transitions API accepts, so a card can grow into its sheet.
+  const fxVt = (id) => "fx-" + String(id).replace(/[^A-Za-z0-9_-]/g, "_");
+  // Each card and note sits slightly askew, always the same way: the angle comes from its id.
+  const fxTilt = (id, max) => ((parseInt(hk(id), 36) % 9) - 4) * ((max || 1.6) / 4);
+  function allFiches() {
+    const out = [];
+    for (const [id, f] of S.fiches) if (f && !FX_BASE.has(id) && f.kind !== "note" && str(f.title).trim()) out.push(Object.assign({ id }, f, { mine: true }));
+    out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    for (const f of FX_BASE.values()) {
+      const mine = S.fiches.get(f.id);
+      if (mine && mine.hidden) continue;
+      out.push(Object.assign({}, f, mine || {}, { id: f.id, starter: true, changed: !!mine }));
+    }
+    return out;
+  }
+  const fxGet = (id) => allFiches().find((f) => f.id === id) || null;
+  const fxHidden = () => [...FX_BASE.keys()].filter((id) => (S.fiches.get(id) || {}).hidden);
+  const fxNotes = () => list("fiches").filter((n) => n.kind === "note" && str(n.text).trim()).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  const fxFor = (route) => allFiches().filter((f) => f.for === route);
+  // Everything a sheet can link to: the grammar topics and the writing tasks.
+  const fxRoutes = () => T.TOPICS.map((tp) => [`grammar.${tp.id}`, `Grammaire · ${tp.title}`]).concat(["t1", "t2", "t3"].map((k) => [`writing.${k}`, `Écrit · ${T.WRITING[k].name}`]));
+  const fxRouteLabel = (r) => (fxRoutes().find(([k]) => k === r) || [, ""])[1];
+
+  // The sheet markup (fiches.js lists it). Everything is escaped and given French spacing first.
+  function fxInline(s) {
+    return typo(s)
+      .replace(/\{([1-6]):([^{}]+?)\}/g, '<span class="sw s$1" data-n="$1">$2</span>')
+      .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+      .replace(/~~(.+?)~~/g, '<s class="pen-wrong">$1</s>')
+      .replace(/\+\+(.+?)\+\+/g, '<span class="pen-right">$1</span>')
+      .replace(/==(.+?)==/g, '<mark class="hl">$1</mark>');
+  }
+  // An order chain: ">> me te se :: label | le la les | *verbe". A slot's colour is its place among the slots,
+  // or "#n" to keep a kind of pronoun the same colour in another chain; "*" is the verb.
+  function fxChainParse(src) {
+    let auto = 0;
+    return src.split("|").map((p) => p.trim()).filter(Boolean).map((p) => {
+      if (p.startsWith("*")) return { verb: true, text: p.slice(1).trim() || "verbe" };
+      let n = 0;
+      const m = p.match(/^#([1-6])\s+/);
+      if (m) { n = Number(m[1]); p = p.slice(m[0].length); }
+      auto++;
+      const [w, lab] = p.split("::").map((x) => x.trim());
+      const words = (w.includes(",") ? w.split(",") : w.split(/\s+/)).map((x) => x.trim()).filter(Boolean);
+      return { n: n || Math.min(auto, 6), pos: auto, words, lab: lab || "" };
+    });
+  }
+  function fxChain(src, mk) {
+    const slots = fxChainParse(src);
+    return `<div class="fx-chain"${mk("slots")}>${slots.map((s, i) => {
+      const arrow = i ? `<span class="fx-arrow" aria-hidden="true">→</span>` : "";
+      if (s.verb) return arrow + `<div class="fx-slot verb"><span>${typo(s.text)}</span></div>`;
+      return arrow + `<button type="button" class="fx-slot s${s.n}" data-act="fx-slot" data-n="${s.n}"${s.lab ? ` aria-label="${esc(`${s.pos}: ${s.words.join(" ")}, ${s.lab}`)}"` : ""}><span class="num">${s.pos}</span><span class="chips">${s.words.map((w) => `<span class="chip">${typo(w)}</span>`).join("")}</span>${s.lab ? `<span class="lab">${typo(s.lab)}</span>` : ""}</button>`;
+    }).join("")}</div>`;
+  }
+  function fxTable(rows, mk) {
+    const cells = rows.filter((r) => !/^\|[\s:|-]+\|?$/.test(r)).map((r) => r.replace(/^\|/, "").replace(/\|\s*$/, "").split("|").map((c) => c.trim()));
+    if (!cells.length) return "";
+    const [head, ...body] = cells;
+    return `<div class="table-wrap fx-tw"><table class="fx-table"${mk("rows")}><thead><tr>${head.map((h) => `<th>${fxInline(h)}</th>`).join("")}</tr></thead><tbody>${body.map((r) => `<tr>${head.map((_, j) => `<td>${fxInline(r[j] || "")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+  // The whole sheet. Each order chain starts a section of its own, so its slots light up only the words below it.
+  // o.key gives the blocks their animation keys (motion.js); a preview has none, so it doesn't flicker as you type.
+  function ficheHTML(body, o) {
+    o = o || {};
+    let k = 0;
+    const mk = (kind) => (o.key ? ` data-m="${kind}" data-k="fx-${esc(o.key)}-${k++}"` : "");
+    const scopes = [];
+    let blocks = [], acc = [], cur = "";
+    const heads = [];
+    const flush = () => {
+      if (!acc.length) { cur = ""; return; }
+      const L = acc;
+      acc = [];
+      if (cur === "p") blocks.push(`<p>${L.map(fxInline).join("<br>")}</p>`);
+      else if (cur === "li") blocks.push(`<ul class="fx-list">${L.map((l) => `<li>${fxInline(l)}</li>`).join("")}</ul>`);
+      else if (cur === "tr") blocks.push(fxTable(L, mk));
+      else if (cur === "note") blocks.push(`<aside class="fx-note" style="--tilt:${fxTilt(L[0], 1.4)}deg"${mk("pin")}><i class="tape" aria-hidden="true"></i><p>${L.map(fxInline).join("<br>")}</p></aside>`);
+      else if (cur === "warn") blocks.push(`<aside class="fx-warn"><p class="fx-warn-h"><span>Attention</span><svg viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"><path${mk("draw")} d="M14 24C12 10 104 4 112 17c6 11-34 18-62 18C22 35 6 30 8 21 10 13 30 8 48 7"/></svg></p><p>${L.map(fxInline).join("<br>")}</p></aside>`);
+      else if (cur === "ex") blocks.push(`<div class="fx-exs">${L.map((l) => { const [fr, en] = exSplit(l); return `<p class="fx-ex" data-act="fx-line"><span class="fr" lang="fr">${fxInline(fr)}</span>${en ? `<span class="en">${esc(en)}</span>` : ""}</p>`; }).join("")}</div>`);
+      cur = "";
+    };
+    const endScope = () => { flush(); if (blocks.length) scopes.push(`<section class="fx-scope">${blocks.join("")}</section>`); blocks = []; };
+    for (const raw of str(body).replace(/\r/g, "").split("\n")) {
+      const t = raw.trim();
+      let type, text = t;
+      if (!t) { flush(); continue; }
+      if (t.startsWith(">>")) {
+        // The heading just above a chain belongs with it.
+        flush();
+        const tail = [];
+        while (blocks.length && /^<h[23]/.test(blocks[blocks.length - 1])) tail.unshift(blocks.pop());
+        endScope();
+        blocks = tail;
+        blocks.push(fxChain(t.slice(2), mk));
+        continue;
+      }
+      const h = t.match(/^(#{1,2})\s+(.*)$/);
+      if (h) {
+        flush();
+        if (h[1] === "#") { const id = `fx-h-${heads.length}`; heads.push([id, h[2]]); blocks.push(`<h2 class="fx-h" id="${id}"><span>${fxInline(h[2])}</span><i class="ink" aria-hidden="true"${mk("ink")}></i></h2>`); }
+        else blocks.push(`<h3 class="fx-h3">${fxInline(h[2])}</h3>`);
+        continue;
+      }
+      if (t.startsWith("|")) type = "tr";
+      else if (/^>\s/.test(t)) { type = "note"; text = t.slice(1).trim(); }
+      else if (/^!\s/.test(t)) { type = "warn"; text = t.slice(1).trim(); }
+      else if (/^[-•]\s/.test(t)) { type = "li"; text = t.slice(1).trim(); }
+      else if (/^=\s/.test(t)) { type = "ex"; text = t.slice(1).trim(); }
+      else type = "p";
+      if (type !== cur) flush();
+      cur = type;
+      acc.push(text);
+    }
+    endScope();
+    return { html: scopes.join(""), heads };
+  }
+  // Plain text for search: the markup's signs taken out.
+  const fxPlain = (f) => bare([f.title, f.en, str(f.body).replace(/[#|>!=*~+{}]|\d:/g, " ")].join(" "));
+
+  VIEWS.fiches = {
+    render(args) {
+      const id = args[0];
+      if (id === "new") return fxEditor(null);
+      const f = id && fxGet(id);
+      if (f && args[1] === "edit") return fxEditor(f);
+      if (f) return fxSheet(f);
+      return fxHome();
+    },
+    after(args) {
+      if (!args[0]) fxFilter(false);
+      fxPill();
+      if (document.getElementById("fx-body")) fxPreview();
+    },
+  };
+
+  function fxCard(f) {
+    const tag = fxTagOf(f), [label, icon] = FX_TAGS[tag];
+    const prev = str(f.body).split("\n").map((l) => l.trim()).filter((l) => l && !/^(>>|#|\||!)/.test(l)).slice(0, 3)
+      .map((l) => typo(l.replace(/^[-=>•]\s*/, "").replace(/\{\d:([^}]*)\}/g, "$1").replace(/\*\*|~~|\+\+|==/g, "").split(" — ")[0])).join(" · ");
+    return `<a class="fx-card t-${tag}" href="#fiches.${esc(f.id)}" data-tag="${tag}" data-text="${esc(fxPlain(f))}" data-tilt data-spot data-m="deal" data-k="fxc-${esc(f.id)}" style="--tilt:${fxTilt(f.id)}deg;view-transition-name:${fxVt(f.id)}">
+      <span class="fx-band">${ico(icon)}<span>${label}</span>${f.mine ? `<span class="fx-mine">à moi</span>` : ""}</span>
+      <span class="fx-paper">
+        <b class="fx-title" style="view-transition-name:${fxVt(f.id)}-t">${typo(f.title)}</b>
+        ${f.en ? `<span class="fx-en">${esc(f.en)}</span>` : ""}
+        <span class="fx-prev">${prev}</span>
+      </span>
+      <span class="fx-foot">${f.for ? `<span>${esc(fxRouteLabel(f.for))}</span>` : "<span></span>"}<span>${f.edited ? "modifiée le " + shortDate(f.edited) : f.starter ? "fiche de départ" : ""}</span></span>
+    </a>`;
+  }
+  function fxNote(n) {
+    return `<div class="fx-pin t${(parseInt(hk(n.id), 36) % 4) + 1}" style="--tilt:${fxTilt(n.id, 2.4)}deg" data-m="pin" data-k="fxn-${esc(n.id)}" data-note="${esc(n.id)}">
+      <i class="tape" aria-hidden="true"></i>
+      <p lang="fr">${fxInline(n.text)}</p>
+      <span class="fx-pin-acts"><button type="button" class="btn ghost sm" data-act="fx-note-up" data-id="${esc(n.id)}" title="Make it a fiche">→ fiche</button><button type="button" class="btn ghost sm" data-act="fx-note-del" data-id="${esc(n.id)}" aria-label="Remove this note">×</button></span>
+    </div>`;
+  }
+  function fxHome() {
+    const fs = allFiches(), notes = fxNotes(), hidden = fxHidden();
+    const counts = {};
+    fs.forEach((f) => { const t = fxTagOf(f); counts[t] = (counts[t] || 0) + 1; });
+    const tag = ui.fx.tag;
+    const chips = [["all", "Toutes", fs.length]].concat(Object.keys(FX_TAGS).filter((t) => counts[t]).map((t) => [t, FX_TAGS[t][0], counts[t]]));
+    const own = fs.filter((f) => f.mine).length;
+    return `<div class="wrap fx-home">
+      <header class="fx-head">
+        <div class="stack tight"><h1 class="title">Fiches</h1><p class="fx-hand" lang="fr">fiches de révision</p></div>
+        <span class="row"><span class="small muted num">${fs.length} fiches${own ? ` · ${own} à toi` : ""}</span><a class="btn primary" href="#fiches.new">${ico("writing")}Nouvelle fiche</a></span>
+      </header>
+      <section class="fx-board" aria-label="Pense-bête">
+        <div class="row between"><p class="h3">Pense-bête</p><span class="small muted">One line worth remembering. ↵ to pin it.</span></div>
+        <div class="fx-pins">
+          ${notes.map(fxNote).join("")}
+          <label class="fx-pin fx-pin-new t${(notes.length % 4) + 1}"><i class="tape" aria-hidden="true"></i><textarea id="fx-note-in" data-input="fx-note" rows="3" lang="fr" spellcheck="false" placeholder="se rendre compte garde toujours son se…">${esc(ui.fx.note)}</textarea></label>
+        </div>
+      </section>
+      <div class="fx-tools">
+        <div class="fx-chips" role="group" aria-label="Filter by kind">${chips.map(([k, l, n]) => `<button type="button" data-act="fx-tag" data-tag="${k}" aria-pressed="${tag === k}">${l} <span class="num">${n}</span></button>`).join("")}</div>
+        <label class="fx-search">${ico("target")}<input type="search" id="fx-q" data-input="fx-q" value="${esc(ui.fx.q)}" placeholder="Chercher : pronoms, subjonctif, Tâche 3…" autocomplete="off" aria-label="Search the sheets"></label>
+      </div>
+      ${own ? "" : greet("correction", "Écris ta première fiche : une règle que tu oublies, un tableau à retenir.", "Write your first sheet: a rule you keep forgetting, a table to remember.", "sm")}
+      <div class="fx-grid" id="fx-grid">${fs.map(fxCard).join("")}</div>
+      <p class="small muted" id="fx-none" hidden>No sheet matches. Try another word, or write it: <a href="#fiches.new">Nouvelle fiche</a>.</p>
+      ${hidden.length ? `<p class="small muted">${hidden.length} starter sheet${hidden.length > 1 ? "s" : ""} hidden · <button type="button" class="btn ghost sm" data-act="fx-unhide">Show ${hidden.length > 1 ? "them" : "it"}</button></p>` : ""}
+    </div>`;
+  }
+  // The filter and the search hide the cards in place, so typing keeps its focus, and the cards that stay slide
+  // to their new places (motion.js) instead of jumping.
+  function fxFilter(animate) {
+    const grid = document.getElementById("fx-grid");
+    if (!grid) return;
+    const q = bare(ui.fx.q), tag = ui.fx.tag;
+    const cards = [...grid.querySelectorAll(".fx-card")];
+    const apply = () => {
+      let n = 0;
+      cards.forEach((c) => { const ok = (tag === "all" || c.dataset.tag === tag) && (!q || c.dataset.text.includes(q)); c.hidden = !ok; if (ok) n++; });
+      const none = document.getElementById("fx-none");
+      if (none) none.hidden = n > 0 || !cards.length;
+    };
+    const M = window.TCFMotion;
+    if (animate && M && M.flip) M.flip(cards, apply); else apply();
+    document.querySelectorAll(".fx-chips [data-tag]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tag === tag)));
+    fxPill();
+  }
+  // The chips' highlight glides to the one chosen.
+  function fxPill() {
+    const box = document.querySelector(".fx-chips");
+    if (!box) return;
+    let pill = box.querySelector(".fx-chip-pill");
+    const first = !pill;
+    if (!pill) { pill = document.createElement("span"); pill.className = "fx-chip-pill"; pill.setAttribute("aria-hidden", "true"); box.prepend(pill); }
+    const cur = box.querySelector('[aria-pressed="true"]');
+    if (!cur) { pill.style.opacity = "0"; return; }
+    if (first) pill.style.transition = "none";
+    pill.style.opacity = "1";
+    pill.style.width = cur.offsetWidth + "px";
+    pill.style.height = cur.offsetHeight + "px";
+    pill.style.transform = `translate(${cur.offsetLeft}px, ${cur.offsetTop}px)`;
+    if (first) { void pill.offsetWidth; pill.style.transition = ""; }
+  }
+  function fxSheet(f) {
+    const tag = fxTagOf(f), [label, icon] = FX_TAGS[tag];
+    const { html, heads } = ficheHTML(f.body, { key: f.id });
+    const topic = f.for && f.for.startsWith("grammar.") ? TOPIC[f.for.split(".")[1]] : null;
+    const practise = f.for ? `<a class="btn primary sm" href="#${esc(f.for)}">${ico(topic ? "grammar" : "writing")}S'entraîner : ${esc(topic ? topic.title : fxRouteLabel(f.for).replace(/^Écrit · /, ""))}</a>` : "";
+    const restore = f.starter && f.changed ? (ui.confirm === "fx-restore" ? `<button class="btn danger sm" data-act="fx-restore" data-id="${esc(f.id)}">Restore the original</button><button class="btn ghost sm" data-act="confirm-cancel">Keep my edits</button>` : `<button class="btn ghost sm" data-act="confirm" data-key="fx-restore">Restore the original</button>`) : "";
+    const remove = f.starter ? `<button class="btn ghost sm" data-act="fx-hide" data-id="${esc(f.id)}">Hide</button>` : confirmBtn("fx-del-" + f.id, "Delete", "fx-del", `data-id="${esc(f.id)}"`);
+    return `<div class="wrap fx-view">
+      <div class="row between"><a class="btn ghost sm" href="#fiches">← Fiches</a><span class="row">${practise}</span></div>
+      <article class="fx-sheet t-${tag}${ui.fx.cacher ? " cacher" : ""}" id="fx-sheet" style="view-transition-name:${fxVt(f.id)}">
+        <header class="fx-sheet-head">
+          <span class="fx-band">${ico(icon)}<span>${label}</span>${f.mine ? `<span class="fx-mine">à moi</span>` : ""}</span>
+          <div class="fx-sheet-title">
+            <h1 class="fx-h1" style="view-transition-name:${fxVt(f.id)}-t">${typo(f.title)}</h1>
+            ${f.en ? `<p class="fx-en">${esc(f.en)}</p>` : ""}
+          </div>
+          <div class="fx-sheet-acts">
+            <button type="button" class="btn sm${ui.fx.cacher ? " primary" : ""}" data-act="fx-cacher" aria-pressed="${!!ui.fx.cacher}" title="Hide the answers and test yourself">${ui.fx.cacher ? "Tout montrer" : "Cacher"}</button>
+            <a class="btn ghost sm" href="#fiches.${esc(f.id)}.edit">Edit</a>${restore}${remove}
+          </div>
+        </header>
+        ${ui.fx.cacher ? `<p class="fx-cacher-tip small">Cache-réponses : tap a dotted blank to check yourself.</p>` : ""}
+        ${heads.length > 1 ? `<nav class="dash-nav fx-toc" aria-label="Sections of this sheet">${heads.map(([hid, t]) => `<button type="button" data-goto="${hid}">${fxInline(t)}</button>`).join("")}</nav>` : ""}
+        <div class="fx-body">${html}</div>
+        <footer class="fx-sheet-foot small muted">${f.starter ? (f.changed ? `Fiche de départ, modifiée le ${shortDate(f.edited || todayStr())}` : "Fiche de départ") : `Ta fiche${f.edited ? ` · modifiée le ${shortDate(f.edited)}` : ""}`} · select any line, then “Save to cards” to drill it.</footer>
+      </article>
+    </div>`;
+  }
+  // A tab on a grammar topic or a writing task, for each sheet that belongs there. It grows into the sheet.
+  function fxTabs(route) {
+    const fs = fxFor(route);
+    if (!fs.length) return "";
+    return `<div class="fx-tabs">${fs.map((f) => `<a class="fx-tab t-${fxTagOf(f)}" href="#fiches.${esc(f.id)}" style="view-transition-name:${fxVt(f.id)}">${ico("vocab")}<span>Fiche : <b>${typo(f.title)}</b></span></a>`).join("")}</div>`;
+  }
+
+  /* ---------- the editor ---------- */
+  const FX_SNIPS = {
+    h: ["Titre", "\n# Titre de la section\n"],
+    li: ["Liste", "\n- premier point\n- deuxième point\n"],
+    tr: ["Tableau", "\n| Quand | Quoi | Exemple |\n|---|---|---|\n| … | … | … |\n"],
+    chain: ["Ordre", "\n>> me te se :: 1re et 2e pers. | le la les :: COD | lui leur :: COI | *verbe\n= Je {2:le} {3:lui} donne. — I give it to him.\n"],
+    note: ["Note", "\n> L'astuce pour s'en souvenir.\n"],
+    warn: ["Attention", "\n! ~~la faute~~ ++la bonne forme++\n"],
+    ex: ["Exemple", "\n= Phrase en français. — English translation.\n"],
+  };
+  function fxDraft(f) {
+    const e = ui.fx.edit;
+    const id = f ? f.id : "";
+    if (e && e.id === id) return e;
+    ui.fx.edit = f ? { id, title: str(f.title), en: str(f.en), tag: fxTagOf(f), for: str(f.for), body: str(f.body), topic: "" }
+      : { id: "", title: "", en: "", tag: "grammaire", for: "", body: "", topic: "", fromNote: "" };
+    return ui.fx.edit;
+  }
+  function fxEditor(f) {
+    const d = fxDraft(f);
+    const back = f ? `#fiches.${esc(f.id)}` : "#fiches";
+    return `<div class="wrap fx-edit">
+      <div class="row between"><a class="btn ghost sm" href="${back}" data-act="fx-cancel">← ${f ? "Back to the sheet" : "Fiches"}</a><span class="small muted">${f ? (f.starter ? "Editing a starter sheet: your copy replaces it, and you can restore the original." : "Editing your sheet") : "Nouvelle fiche"}</span></div>
+      <div class="fx-edit-grid">
+        <section class="panel stack fx-form">
+          <div class="grid2">
+            <label class="field">Titre<input type="text" id="fx-title" data-input="fx-f" data-k="title" value="${esc(d.title)}" lang="fr" placeholder="L'ordre des pronoms" autocomplete="off"></label>
+            <label class="field"><span>In English <span class="muted" style="font-weight:400">· optional</span></span><input type="text" id="fx-en" data-input="fx-f" data-k="en" value="${esc(d.en)}" placeholder="Where object pronouns go" autocomplete="off"></label>
+          </div>
+          <div class="row"><span class="small muted">Kind</span><div class="fx-etags" role="group" aria-label="Kind">${Object.keys(FX_TAGS).map((t) => `<button type="button" class="t-${t}" data-act="fx-etag" data-tag="${t}" aria-pressed="${d.tag === t}">${ico(FX_TAGS[t][1])}${FX_TAGS[t][0]}</button>`).join("")}</div></div>
+          <label class="field"><span>Linked page <span class="muted" style="font-weight:400">· optional: that page shows a tab to this sheet</span></span><select id="fx-for" data-change="fx-for"><option value="">None</option>${fxRoutes().map(([k, l]) => `<option value="${k}" ${d.for === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+          <div class="fx-bar" role="toolbar" aria-label="Insert a block">${Object.entries(FX_SNIPS).map(([k, [l]]) => `<button type="button" class="btn sm" data-act="fx-ins" data-b="${k}">${l}</button>`).join("")}</div>
+          <label class="field">La fiche<textarea id="fx-body" data-input="fx-f" data-k="body" rows="16" lang="fr" spellcheck="false" placeholder="# L'essentiel&#10;- …">${esc(d.body)}</textarea></label>
+          ${fold("fx-format", "Format · how to write a sheet", `<div class="table-wrap"><table class="fx-help"><tbody>
+            <tr><td><code># Titre</code></td><td>a section heading</td></tr>
+            <tr><td><code>- point</code></td><td>a bullet</td></tr>
+            <tr><td><code>| a | b |</code></td><td>a table: the first row is the header</td></tr>
+            <tr><td><code>&gt; …</code></td><td>a taped note, for the memory trick</td></tr>
+            <tr><td><code>! …</code></td><td>a red-pen “Attention” box</td></tr>
+            <tr><td><code>= Phrase — English</code></td><td>an example</td></tr>
+            <tr><td><code>&gt;&gt; me te :: label | le la | *verbe</code></td><td>an order chain: numbered, coloured slots; <code>*</code> is the verb, <code>#2</code> keeps slot colour 2</td></tr>
+            <tr><td><code>{2:le}</code></td><td>colours a word like slot 2 of the chain above it</td></tr>
+            <tr><td><code>**gras**  ~~faux~~  ++juste++</code></td><td>bold, a red-pen crossing-out, the red-pen correction</td></tr>
+            <tr><td><code>==caché==</code></td><td>highlighted, and hidden when you press Cacher</td></tr>
+          </tbody></table></div>`)}
+          <div class="row">${claudeOn() ? `<input type="text" id="fx-topic" data-input="fx-f" data-k="topic" value="${esc(d.topic)}" lang="fr" placeholder="Sujet : les prépositions de lieu" aria-label="What the sheet should be about" style="flex:1;min-width:180px">${claudeBtn("fx-claude", "fx-claude", "Rédiger avec Claude", "", "btn sm")}` : ""}</div>
+          <div class="row"><button class="btn primary" data-act="fx-save">Save <span class="kbd">⌘↵</span></button><a class="btn ghost" href="${back}" data-act="fx-cancel">Cancel <span class="kbd">Esc</span></a></div>
+        </section>
+        <section class="fx-prev-wrap" aria-label="Preview">
+          <p class="eyebrow">Aperçu</p>
+          <article class="fx-sheet t-${d.tag} fx-preview" id="fx-prev-sheet">
+            <header class="fx-sheet-head"><span class="fx-band">${ico(FX_TAGS[d.tag][1])}<span>${FX_TAGS[d.tag][0]}</span></span><div class="fx-sheet-title"><h1 class="fx-h1" id="fx-prev-title">${typo(d.title || "Titre de la fiche")}</h1><p class="fx-en" id="fx-prev-en">${esc(d.en)}</p></div></header>
+            <div class="fx-body" id="fx-prev"></div>
+          </article>
+        </section>
+      </div>
+    </div>`;
+  }
+  let fxPrevT = 0;
+  function fxPreview() {
+    clearTimeout(fxPrevT);
+    fxPrevT = 0;
+    const d = ui.fx.edit, box = document.getElementById("fx-prev");
+    if (!d || !box) return;
+    box.innerHTML = ficheHTML(d.body).html || `<p class="muted">Start typing, or insert a block from the bar.</p>`;
+    const t = document.getElementById("fx-prev-title"), en = document.getElementById("fx-prev-en");
+    if (t) t.innerHTML = typo(d.title || "Titre de la fiche");
+    if (en) en.textContent = d.en;
+  }
+  function fxInsert(kind) {
+    const d = ui.fx.edit, ta = document.getElementById("fx-body"), snip = FX_SNIPS[kind];
+    if (!d || !ta || !snip) return;
+    const a = ta.selectionStart != null ? ta.selectionStart : ta.value.length, b = ta.selectionEnd != null ? ta.selectionEnd : a;
+    let text = snip[1];
+    if (a === 0 || ta.value[a - 1] === "\n") text = text.replace(/^\n/, "");
+    ta.value = ta.value.slice(0, a) + text + ta.value.slice(b);
+    d.body = ta.value;
+    ta.focus();
+    ta.setSelectionRange(a + text.length, a + text.length);
+    fxPreview();
+  }
+  function fxSave() {
+    const d = ui.fx.edit;
+    if (!d) return;
+    const title = str(d.title).trim(), body = str(d.body).replace(/\s+$/, "");
+    if (!title) { toast("Give the sheet a title."); const el = document.getElementById("fx-title"); if (el) el.focus(); return; }
+    if (!body.trim()) { toast("The sheet is empty: write something first."); return; }
+    const id = d.id || "f-" + uid();
+    const was = S.fiches.get(id) || {};
+    const doc = { title, en: str(d.en).trim(), tag: FX_TAGS[d.tag] ? d.tag : "grammaire", for: str(d.for), body, created: was.created || todayStr(), edited: todayStr(), ts: Date.now() };
+    if (!doc.for) delete doc.for;
+    if (!doc.en) delete doc.en;
+    put("fiches", id, doc);
+    if (d.fromNote && S.fiches.has(d.fromNote)) remove("fiches", d.fromNote);
+    ui.fx.edit = null;
+    toast(d.id ? "Sheet saved." : "Sheet saved. It's on your desk.");
+    goTo("#fiches." + id);
+  }
+  // Whether the draft differs from the sheet it started from (or from an empty one).
+  function fxDirty() {
+    const d = ui.fx.edit;
+    if (!d) return false;
+    const f = d.id ? fxGet(d.id) : null;
+    return ["title", "en", "for", "body"].some((k) => str(d[k]).trim() !== str(f ? f[k] : k === "body" && d.fromNote ? `> ${str((S.fiches.get(d.fromNote) || {}).text)}` : "").trim()) || (f ? fxTagOf(f) : "grammaire") !== d.tag;
+  }
+  function fxCancel() {
+    const d = ui.fx.edit;
+    ui.fx.edit = null;
+    goTo(d && d.id ? "#fiches." + d.id : "#fiches");
+  }
+  async function fxClaude() {
+    const d = ui.fx.edit;
+    if (!d) return;
+    const topic = str(d.topic).trim() || str(d.title).trim();
+    if (!topic) { toast("Say what the sheet should be about first."); const el = document.getElementById("fx-topic"); if (el) el.focus(); return; }
+    const out = await ask("fx-claude", `${EXAM_BRIEF}\n\nWrite a French revision sheet (fiche de révision) on: «${topic}». The learner is B1, aiming for NCLC 7 (about B2) on the TCF Canada. Their recurring errors: ${T.KNOWN_ERRORS.join("; ")}. Mention one of these where it fits the subject.\nMake it short and easy to remember: a table or an order chain for the rule, a memory trick, one "Attention" warning with the classic mistake, and 3–5 example sentences in TCF Canada situations. French throughout; examples carry their English.\nUse exactly this markup, one block per line: "# Heading", "- bullet", "| a | b |" table rows (first row the header), "> memory trick", "! warning", "= French sentence — English", and inline **bold**, ~~wrong~~ ++right++, ==hidden answer==. For a word order, use a chain: ">> words :: label | words :: label | *verbe", then colour words in the examples below it with {n:word} (n = the slot's place).\nReply with only JSON: {"title": "short French title", "en": "short English subtitle", "tag": "grammaire" | "ecrit" | "oral" | "vocabulaire" | "examen", "body": "the sheet"}`);
+    if (!out || !str(out.body).trim()) return;
+    if (!str(d.title).trim()) d.title = str(out.title).trim();
+    if (!str(d.en).trim()) d.en = str(out.en).trim();
+    if (FX_TAGS[out.tag]) d.tag = out.tag;
+    d.body = str(out.body).replace(/\r/g, "").trim();
+    toast("Claude drafted it. Check it, then save.");
+    render(true);
+    fxPreview();
+  }
+
+  /* ---------- Pense-bête ---------- */
+  function fxNoteAdd() {
+    const text = str(ui.fx.note).replace(/\s+/g, " ").trim();
+    if (!text) return;
+    put("fiches", "n-" + uid(), { kind: "note", text, ts: Date.now(), created: todayStr() });
+    ui.fx.note = "";
+    render(true);
+    const el = document.getElementById("fx-note-in");
+    if (el) el.focus();
+  }
+  async function fxNoteDel(id) {
+    const el = document.querySelector(`[data-note="${CSS.escape(id)}"]`);
+    const M = window.TCFMotion;
+    if (el && M && M.peel) await M.peel(el);
+    remove("fiches", id);
+  }
+  function fxNoteUp(id) {
+    const n = S.fiches.get(id);
+    if (!n) return;
+    ui.fx.edit = { id: "", title: "", en: "", tag: "grammaire", for: "", body: `> ${n.text}`, topic: "", fromNote: id };
+    goTo("#fiches.new");
+  }
+
   /* =============== view: vocab =============== */
   VIEWS.vocab = {
     render(args) {
@@ -3584,6 +4080,19 @@
       return vocabHome(args);
     },
   };
+  // One card in Deck by theme: tap it to see its meaning, notes and examples without starting a review.
+  function cardPeek(c) {
+    const st = S.srs.get(c.id);
+    const state = st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning";
+    const notes = [c.frNote, c.enNote].map((n) => str(n).trim()).filter(Boolean);
+    return `<li><details class="peek" ${foldAttr("peek-" + c.id)}><summary><span class="peek-fr">${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="muted small">${state}</span></summary>
+      <div class="peek-body">
+        <p class="peek-en">${esc(c.en || "")}</p>
+        ${notes.length ? `<p class="small muted">${notes.map(esc).join("<br>")}</p>` : ""}
+        ${c.ex ? `<p class="ex-list">${exHTML(c)}</p>` : `<p class="small muted">No examples yet.</p>`}
+        ${DECK.has(c.id) ? "" : `<div class="row">${confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</div>`}
+      </div></details></li>`;
+  }
   function vocabHome(args) {
     const s = settings();
     const cards = allCards();
@@ -3604,11 +4113,12 @@
         <td><b class="fr">${esc(th.label)}</b><br><span class="small muted">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
         <td class="n">${lr} / ${cs.length}</td><td class="n">${ms}</td>
         <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
-      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map((c) => { const st = S.srs.get(c.id); return `<li><span>${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="row"><span class="muted small">${st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning"}</span>${DECK.has(c.id) ? "" : confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</span></li>`; }).join("")}</ul></details></td></tr>`;
+      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
       <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition: a new card comes back after 1, 2, 4, 7, 14, then 30 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       ${waitPanel()}
+      ${exPanel()}
       <div class="grid2 v-home">
         <section class="panel stack" data-spot>
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
@@ -3780,6 +4290,7 @@
       return `<div class="wrap">
         <header class="stack tight"><h1 class="title">Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
         <nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === task}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}</nav>
+        ${fxTabs("writing." + task)}
         <section class="panel prompt-card">
           <div class="row between"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] && !ui.w.gen[task].kept ? " · from Claude" : ""}</span>
             <span class="row"><button class="btn sm" data-act="w-next">Another prompt</button>${claudeBtn("w-gen", "w-gen", "New prompt from Claude", "", "btn sm")}</span></div>
@@ -4903,6 +5414,35 @@
     "grab-add-ex": () => grabAddEx(),
     "grab-force": () => { if (!ui.grab) return; ui.grab.force = true; paintGrab(true); const el = document.getElementById("grab-en"); if (el) el.focus({ preventScroll: true }); },
     "wt-fill": () => waitFill(),
+    "ex-fill": () => exFill(),
+    "fx-tag": (el) => { ui.fx.tag = el.dataset.tag; fxFilter(true); },
+    // A slot lights up its words in the examples below it, and an example lights up the slots its words come from.
+    // Both only mark the page, so nothing is redrawn.
+    "fx-slot": (el) => { const sc = el.closest(".fx-scope"); if (!sc) return; const n = el.dataset.n; sc.dataset.lit = sc.dataset.lit === n ? "" : n; sc.dataset.lits = ""; sc.querySelectorAll(".fx-ex.on").forEach((x) => x.classList.remove("on")); },
+    "fx-line": (el) => {
+      const sc = el.closest(".fx-scope");
+      if (!sc) return;
+      const was = el.classList.contains("on");
+      sc.querySelectorAll(".fx-ex.on").forEach((x) => x.classList.remove("on"));
+      sc.dataset.lit = "";
+      sc.dataset.lits = was ? "" : [...new Set([...el.querySelectorAll(".sw")].map((w) => w.dataset.n))].join(" ");
+      if (!was) el.classList.add("on");
+    },
+    "fx-cacher": () => { ui.fx.cacher = !ui.fx.cacher; render(true); },
+    "fx-note-del": (el) => fxNoteDel(el.dataset.id),
+    "fx-note-up": (el) => fxNoteUp(el.dataset.id),
+    "fx-etag": (el) => { if (ui.fx.edit) { ui.fx.edit.tag = el.dataset.tag; render(true); } },
+    "fx-ins": (el) => fxInsert(el.dataset.b),
+    "fx-save": () => fxSave(),
+    "fx-cancel": () => fxCancel(),
+    "fx-claude": () => fxClaude(),
+    "fx-del": (el) => { ui.confirm = ""; remove("fiches", el.dataset.id); toast("Sheet deleted."); goTo("#fiches"); },
+    "fx-restore": (el) => { ui.confirm = ""; remove("fiches", el.dataset.id); toast("Back to the original."); },
+    "fx-hide": (el) => { const id = el.dataset.id; put("fiches", id, Object.assign({}, S.fiches.get(id) || {}, { hidden: true })); toast("Hidden. You can bring it back from the foot of Fiches."); goTo("#fiches"); },
+    "fx-unhide": () => fxHidden().forEach((id) => { const d = Object.assign({}, S.fiches.get(id)); delete d.hidden; if (str(d.title).trim() || str(d.body).trim()) put("fiches", id, d); else remove("fiches", id); }),
+    "exf-save": (el) => { if (exSave(el.dataset.id)) toast("Examples saved."); },
+    "exf-skip": (el) => { delete ui.form["exf-" + el.dataset.id]; render(true); },
+    "exf-save-all": () => { const n = thinCards().filter((c) => exDraft(c.id) != null && exSave(c.id)).length; toast(`Examples saved on ${n} cards.`); },
     "wt-save": (el) => {
       const r = waitSave(el.dataset.id);
       if (!r) { toast("Add the English first."); return; }
@@ -5039,6 +5579,7 @@
   };
   const CHANGES = {
     "c-seek": () => coSeekDone(),
+    "fx-for": (el) => { if (ui.fx.edit) ui.fx.edit.for = el.value; },
     tick: (el) => {
       const d = el.dataset.date, was = dayComplete(d);
       setBlock(d, el.dataset.key, el.checked);
@@ -5073,6 +5614,9 @@
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
     "pr-fix": (el) => { if (ui.hunt) ui.hunt.fixes[el.dataset.k] = el.value; },
     "w-text": onWText,
+    "fx-q": (el) => { ui.fx.q = el.value; fxFilter(true); },
+    "fx-note": (el) => { ui.fx.note = el.value; },
+    "fx-f": (el) => { const d = ui.fx.edit; if (!d) return; d[el.dataset.k] = el.value; if (el.dataset.k !== "topic" && !fxPrevT) fxPrevT = setTimeout(fxPreview, 120); },
     prod: (el) => { const t = el.dataset.topic; ui.prod[t] = Object.assign({}, ui.prod[t] || {}, { text: el.value }); prodKeep(t); },
     form: (el) => { ui.form[el.dataset.k] = el.value; },
     grab: (el) => { if (ui.grab) ui.grab[el.dataset.k] = el.value; },
@@ -5088,6 +5632,18 @@
     tabSoon();
   });
   document.addEventListener("mousedown", (e) => { if (e.target.closest("[data-act='accent'], #grab-btn")) e.preventDefault(); });
+  // In Cacher mode the answers are dotted blanks: a tap turns one over, before the slot or line under it hears the tap.
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest) return;
+    const b = e.target.closest(".fx-sheet.cacher td:not(:first-child):not(.shown)") || e.target.closest(".fx-sheet.cacher :is(.chip, mark.hl, .pen-right):not(.shown)");
+    if (!b) return;
+    e.preventDefault();
+    e.stopPropagation();
+    b.classList.add("shown");
+    b.querySelectorAll("mark.hl, .pen-right, .chip").forEach((x) => x.classList.add("shown"));
+    const M = window.TCFMotion;
+    if (M && M.reveal) M.reveal(b);
+  }, true);
   // The button follows the selection once it settles, so it doesn't flicker while you drag across the words.
   document.addEventListener("selectionchange", () => { clearTimeout(grabT); grabT = setTimeout(grabCheck, 250); });
   if (grabBtn) grabBtn.addEventListener("pointerdown", () => { grabHold = Date.now(); });
@@ -5132,6 +5688,11 @@
       return;
     }
     if (ui.grab && e.key === "Escape" && !(route.view === "vocab" && ui.vocab && ui.vocab.edit)) { e.preventDefault(); grabClose(); return; }
+    if (t && t.id === "fx-note-in" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); fxNoteAdd(); return; }
+    if (route.view === "fiches" && ui.fx.edit && (route.args[0] === "new" || route.args[1] === "edit")) {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); fxSave(); return; }
+      if (e.key === "Escape") { e.preventDefault(); if (fxDirty()) toast("You have unsaved changes: ⌘↵ saves them, Cancel throws them away."); else fxCancel(); return; }
+    }
     if (t && t.id === "drill-in" && e.key === "Enter") { e.preventDefault(); if (ui.drill && ui.drill.checked) drillNext(); else drillCheck(); return; }
     if (t && t.id === "hw-new" && e.key === "Enter") { e.preventDefault(); addHomework(); return; }
     if (t && t.dataset && t.dataset.input === "pr-fix" && e.key === "Enter") {
@@ -5181,7 +5742,7 @@
   });
   // The navigation's order, for the way a new page slides in (motion.js): forward to the left, back to the right,
   // and a page within the same section rises in place.
-  const NAV_ORDER = ["today", "grammar", "vocab", "writing", "comp", "progress"];
+  const NAV_ORDER = ["today", "grammar", "vocab", "fiches", "writing", "comp", "progress"];
   const pageDir = (a, b) => (a.view === b.view ? "up" : NAV_ORDER.indexOf(b.view) > NAV_ORDER.indexOf(a.view) ? "fwd" : "back");
   window.addEventListener("hashchange", () => {
     const r = parseRoute(location.hash);
