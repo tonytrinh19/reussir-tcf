@@ -1,20 +1,22 @@
 {
  "co-consommation-b1": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-09",
+  "engine": "gemini",
   "hash": "34a6b88bb430",
-  "seconds": 157.0,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 147.4,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-concierge-6"
   }
  },
  "co-consommation-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-09",
+  "engine": "gemini",
   "hash": "b1643cef2a52",
-  "seconds": 150.9,
+  "pace": "Speak at a natural pace.",
+  "seconds": 139.2,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-tutor-6"
   }
  },
  "co-crime-b1": {
@@ -654,13 +656,14 @@
   }
  },
  "co-tourisme-b2": {
-  "date": "2026-10-02",
-  "engine": "microsoft",
+  "date": "2026-10-09",
+  "engine": "gemini",
   "hash": "f5d0c0bf5527",
-  "seconds": 157.9,
+  "pace": "Speak at a natural pace.",
+  "seconds": 135.5,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-fr-concierge-4",
+   "B": "fr-fr-advisor-9"
   }
  },
  "co-transports-b1": {

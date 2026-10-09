@@ -1,14 +1,14 @@
 {
  "B1": {
-  "maxWords": 638,
-  "minWords": 358,
-  "reads": 14,
-  "wpm": 160.2
+  "maxWords": 640,
+  "minWords": 359,
+  "reads": 15,
+  "wpm": 160.7
  },
  "B2": {
-  "maxWords": 747,
-  "minWords": 420,
-  "reads": 10,
-  "wpm": 187.7
+  "maxWords": 766,
+  "minWords": 430,
+  "reads": 16,
+  "wpm": 192.5
  }
 }
