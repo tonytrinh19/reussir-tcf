@@ -53,6 +53,15 @@
     ink: (el) => el.animate([{ scale: "0 1" }, { scale: "1 1" }], { duration: 700, delay: 140, easing: EASE, fill: "backwards" }),
     slots: (el) => [...el.children].map((c, i) => c.animate([{ opacity: 0, scale: ".7", translate: "0 10px" }, { opacity: 1, scale: "1.06", translate: "0 0", offset: 0.6 }, { opacity: 1, scale: "1", translate: "0 0" }], { duration: 480, delay: 100 + i * 85, easing: POP, fill: "backwards" })),
     rows: (el) => [...el.querySelectorAll("tbody tr")].map((r, i) => r.animate([{ opacity: 0, translate: "-10px 0" }, { opacity: 1, translate: "0 0" }], { duration: 340, delay: 80 + Math.min(i, 12) * 50, easing: EASE, fill: "backwards" })),
+    // The red pen (Your mistakes): what you wrote is crossed out, a stroke after another, then the correction is
+    // written in, the ink soaking into the paper.
+    pen: (el) => {
+      const dels = [...el.querySelectorAll("del")], ins = [...el.querySelectorAll("ins")], out = [];
+      dels.forEach((d, i) => out.push(d.animate([{ backgroundSize: "0% 2px" }, { backgroundSize: "100% 2px" }], { duration: 280, delay: 60 + i * 110, easing: EASE, fill: "backwards" })));
+      const t0 = 60 + dels.length * 110 + 80;
+      ins.forEach((n, i) => out.push(n.animate([{ opacity: 0, filter: "blur(3px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 380, delay: t0 + i * 90, easing: EASE, fill: "backwards" })));
+      return out;
+    },
   };
   // These are part of a page's entrance, so they also play when the page opens.
   const ENTRANCE = new Set(["press", "fly", "draw", "deal", "chart", "pin", "ink", "slots", "rows"]);

@@ -79,7 +79,7 @@
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
   // "speaking" holds the attempts saved before the Oral page was removed. The site no longer reads it, but it
   // stays in the list so a save to this browser's storage keeps them.
-  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress", "fiches"];
+  const COLLS = ["settings", "days", "drills", "srs", "cards", "writing", "errors", "homework", "speaking", "comp", "mocks", "inprogress", "fiches", "mistakes"];
   const S = {};
   COLLS.forEach((c) => { S[c] = new Map(); });
   const LS_KEY = "tcf-reussir-data-v1";
@@ -116,7 +116,10 @@
     if (backend.kind === "loading") { pendingOps.push(op); return Promise.resolve(); }
     return run(op);
   }
-  const list = (coll) => [...S[coll].entries()].map(([id, v]) => Object.assign({ id }, v));
+  // Records the site keeps but no longer reads: the rounds of the typed Your mistakes and its unfinished round,
+  // replaced on 2026-10-09 by the hunt in your own text (only its rounds have src "text").
+  const retired = (coll, id, v) => (coll === "drills" && !!v && v.topic === "mine" && v.set === "errors" && v.src !== "text") || (coll === "inprogress" && id === "drill--mine--errors");
+  const list = (coll) => [...S[coll].entries()].filter(([id, v]) => !retired(coll, id, v)).map(([id, v]) => Object.assign({ id }, v));
   function flushPending() { while (pendingOps.length) run(pendingOps.shift()); }
 
   function useLocal() {
@@ -197,7 +200,7 @@
   // something is only opened or generated, and it's deleted when the attempt is submitted or discarded.
   const ipPending = new Map();
   const ipLast = new Map();
-  const ipGet = (id) => S.inprogress.get(id) || null;
+  const ipGet = (id) => (retired("inprogress", id) ? null : S.inprogress.get(id) || null);
   function ipSave(id, doc, delay) {
     const prev = ipPending.get(id);
     if (prev) clearTimeout(prev.t);
@@ -278,6 +281,7 @@
     day: null,
     drill: null,
     hunt: null, // the Find the mistakes text being done: its id, the words tapped, then what was found and typed
+    mh: null, // a Your mistakes round: your text with your mistakes back in it, the words tapped, then each card's pick
     huntLevel: "",
     gen: {},
     prod: {},
@@ -325,7 +329,7 @@
   async function ask(key, input, opts) {
     const o = opts || {};
     if (!sample) {
-      toast(claudeState === "pending" ? "Still connecting to Claude. Try again in a moment." : "Claude features work when this page is opened on claude.ai.");
+      if (!o.quiet) toast(claudeState === "pending" ? "Still connecting to Claude. Try again in a moment." : "Claude features work when this page is opened on claude.ai.");
       return null;
     }
     if (busy[key]) return null;
@@ -339,7 +343,7 @@
       return await sample.json(input, so);
     } catch (e) {
       const code = e && e.code;
-      if (code !== "cancelled") toast(SAMPLE_COPY[code] || "Claude couldn't answer. Try again.");
+      if (code !== "cancelled" && !o.quiet) toast(SAMPLE_COPY[code] || "Claude couldn't answer. Try again.");
       if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(code)) { claudeState = "off"; sample = null; }
       return null;
     } finally {
@@ -679,8 +683,8 @@
   }
   const setItems = (tid, st) => st.items.map((r) => normItem(r, st.kind, tid, st.ask, st.id));
   // A sentence's identity across rounds: its topic, cue and question. One of your own mistakes is known by
-  // what you wrote alone, since the sentence shown around it can change.
-  const itemKey = (topic, it) => (topic === "mine" ? `mine|${norm(it.src)}` : `${topic}|${norm(it.src)}|${norm(it.q)}`);
+  // what you wrote alone (mk), since the sentence shown around it can change.
+  const itemKey = (topic, it) => (topic === "mine" ? `mine|${norm(it.mk || it.src)}` : `${topic}|${norm(it.src)}|${norm(it.q)}`);
   // Names for the drill records that aren't one topic's set.
   const DRILL_NAMES = { mixed: "Mixed review", mine: "Your mistakes", hunt: "Find the mistakes" };
   let BANK = null;
@@ -750,7 +754,8 @@
   const todayRounds = (topic, set) => list("drills").filter((d) => d.topic === topic && d.set === set && d.set !== "prod" && d.src !== "retry" && d.date === todayStr()).sort((a, b) => (a.ts || 0) - (b.ts || 0));
   // Retry the misses: every sentence missed today on this set, from every round and retry, whose latest answer
   // today is still wrong, asked exactly as it was. A built-in sentence comes back from its set, with its rule
-  // and explanation; Claude's sentences and your own mistakes from what was saved with the round.
+  // and explanation; Claude's sentences from what was saved with the round; your own mistakes as a choice in
+  // their sentence, with Claude's options (mineChoice).
   function todayMisses(topic, set) {
     const ev = [];
     for (const d of todayRounds(topic, set)) {
@@ -759,11 +764,11 @@
     }
     const last = new Map();
     ev.sort((a, b) => a[0] - b[0]).forEach(([, it, tid]) => last.set(itemKey(tid, it), { it, tid }));
-    const mine = topic === "mine" ? new Map(mineStatus().map((m) => ["mine|" + m.key, m])) : null;
+    const mine = topic === "mine" ? new Map(mineAll().map((m) => ["mine|" + m.key, m])) : null;
     const out = [];
     for (const [key, { it, tid }] of last) {
       if (it.ok) continue;
-      if (mine) { const m = mine.get(key); if (m) out.push(mineItem(m)); continue; } // a mistake you've since hidden stays out
+      if (mine) { const m = mine.get(key); if (m && m.kind !== "skip") out.push(mineChoice(m)); continue; } // a mistake you've since hidden stays out
       const b = bankItem(tid, it);
       out.push(b ? Object.assign({}, b) : { kind: it.kind || "type", topic: tid, ask: it.ask || "", src: it.src || "", q: it.q, options: it.options ? it.options.slice() : undefined, a: arr(it.a).slice(), why: it.why || "" });
     }
@@ -775,13 +780,12 @@
     return n ? `<button class="${cls || "btn"}" data-act="drill-retry" data-topic="${esc(topic)}" data-set="${esc(set)}" title="The sentences you missed today, exactly as they were">Retry today's ${n === 1 ? "miss" : `${n} misses`}</button>` : "";
   }
   /* =============== your own mistakes =============== */
-  // Every mistake from Claude's corrections of your writing and production checks, and from the error log, as a
-  // drill item. What you wrote is the cue; your sentence is the question, with a gap where the mistake was and
-  // the draft's other corrections applied, so the words around it are right; the correction is the answer.
-  // A mistake made again counts once, with every correction given for it accepted. Left out: changes of
-  // punctuation only (answers are checked without punctuation), rewrites longer than MINE_WORDS words, which
-  // don't make a fair typed answer, and the mistakes you hide.
-  const MINE_WORDS = 14;
+  // Every mistake from Claude's corrections of your writing and production checks, and from the error log. A
+  // mistake made again counts once: it's known by what you wrote (mk), with every correction given for it.
+  // Claude prepares each corrected text once (the mistakes collection, minePrep): for each correction, whether
+  // it's a real mistake, a style tip or not a point of French; the excerpt of the corrected text that holds it;
+  // that excerpt with your mistake put back; and near-misses that are each wrong. A round is then one of your
+  // texts with every mistake back in it, to find, and a choice with exactly one right answer to fix each one.
   // "arrivé(e)" → arrivé, arrivée (at most two such brackets).
   function variants(s) {
     let out = [str(s).trim()];
@@ -793,18 +797,42 @@
   const unbracket = (x) => str(x).replace(/\(([^()\s]{1,3})\)/g, "");
   const sentencesOf = (t) => str(t).split(/\n+|(?<=[.!?…])\s+/).filter((x) => x.trim());
   const overlap = (a, b) => { const A = new Set(norm(a).split(" ")); return norm(b).split(" ").filter((x) => A.has(x)).length; };
-  // The sentence a mistake was in, with a gap where the correction goes, cut to about ten words on each side.
-  // It comes from Claude's corrected text when the correction is there (exact: every word around the gap is
+  const apo = (s) => str(s).replace(/[’‘ʼ]/g, "'");
+  // Where an excerpt is in a text, as whole words (not glued to a letter, a digit, an apostrophe or a hyphen on
+  // either side): [start, end], or null. Curly and straight apostrophes match each other.
+  function spanAt(text, span) {
+    if (!span) return null;
+    const m = new RegExp(`(?<![\\p{L}\\p{N}'-])${reEsc(apo(span))}(?![\\p{L}\\p{N}'-])`, "u").exec(apo(text));
+    return m ? [m.index, m.index + span.length] : null;
+  }
+  // A sentence with a gap in it, cut to about ten words on each side of the gap.
+  function cutGap(gapped) {
+    const ws = str(gapped).trim().split(/\s+/);
+    const i = ws.findIndex((x) => x.includes("___"));
+    if (i < 0) return "___";
+    const from = Math.max(0, i - 10), to = Math.min(ws.length, i + 11);
+    return (from ? "… " : "") + ws.slice(from, to).join(" ") + (to < ws.length ? " …" : "");
+  }
+  // The sentence of a text an excerpt is in, with a gap in its place.
+  function gapIn(text, span) {
+    for (const sen of sentencesOf(text)) {
+      const at = spanAt(sen, span);
+      if (at) return cutGap(sen.slice(0, at[0]) + "___" + sen.slice(at[1]));
+    }
+    return "";
+  }
+  // Before Claude has prepared a text: the sentence a mistake was in, with a gap where the correction goes. It
+  // comes from Claude's corrected text when the correction is there (exact: every word around the gap is
   // right). Otherwise it's your sentence with the draft's other corrections applied.
   function mistakeContext(text, corrected, wrong, a, errs) {
     const re = wordRe(wrong);
     const orig = sentencesOf(text).find((x) => re.test(x)) || "";
-    let gapped = "", exact = false, best = -1;
+    let gapped = "", best = -1;
     for (const sen of sentencesOf(unbracket(corrected))) {
       for (const r of a) {
         const m = wordRe(r).exec(sen);
         const score = m ? overlap(orig, sen) : -1;
-        if (score > best) { best = score; gapped = sen.slice(0, m.index) + "___" + sen.slice(m.index + r.length); exact = true; }
+        if (score > best) { best = score; gapped = sen.slice(0, m.index) + "___" + sen.slice(m.index + r.length); }
       }
     }
     if (!gapped && orig) {
@@ -818,48 +846,67 @@
       }
       gapped = unbracket(before) + "___" + unbracket(after);
     }
-    if (!gapped) return { q: "___", exact };
-    const ws = gapped.trim().split(/\s+/);
-    const i = ws.findIndex((x) => x.includes("___"));
-    const from = Math.max(0, i - 10), to = Math.min(ws.length, i + 11);
-    return { q: (from ? "… " : "") + ws.slice(from, to).join(" ") + (to < ws.length ? " …" : ""), exact };
+    return gapped ? cutGap(gapped) : "___";
   }
+  // The texts your mistakes come from: each corrected writing task (EE) and production check.
+  function mineSources() {
+    const out = [];
+    for (const w of list("writing")) {
+      if (!w.fb || !arr(w.fb.errors).length) continue;
+      const W = T.WRITING[w.task];
+      out.push({ ref: "w-" + w.id, ee: true, ts: w.ts || 0, text: str(w.text), corrected: str(w.fb.corrected), errs: arr(w.fb.errors), sujet: str(w.prompt), title: `${W ? `${W.name} · ${W.kind}` : "Écrit"} · ${shortDate(w.date)}`, from: `your ${W ? W.name : "writing"} of ${shortDate(w.date)}` });
+    }
+    for (const d of list("drills")) {
+      if (d.set !== "prod" || !d.fb || !arr(d.fb.errors).length) continue;
+      const tp = TOPIC[d.topic];
+      out.push({ ref: "p-" + d.id, ee: false, ts: d.ts || 0, cat: d.topic, text: str(d.text), corrected: str(d.fb.improved), errs: arr(d.fb.errors), sujet: tp && tp.prod ? str(tp.prod.prompt) : "", title: `${tp ? tp.title : "Production"} · ${shortDate(d.date)}`, from: `your ${tp ? tp.title : "production"} check of ${shortDate(d.date)}` });
+    }
+    return out.sort((a, b) => b.ee - a.ee || b.ts - a.ts);
+  }
+  // What Claude prepared, by text: w-<writing id>, p-<production check id>, and "log" for the error log (by entry).
+  const PREP_V = 1;
+  const prepDoc = (ref) => { const p = S.mistakes.get(ref); return p && p.v === PREP_V ? p : null; };
+  // The preparation of correction n of a text, if it's still for that same mistake.
+  const prepFor = (src, n, e) => { const p = prepDoc(src.ref), x = p && arr(p.items).find((y) => y.n === n); return x && norm(x.mk) === norm(e.wrong) ? x : null; };
+  const prepLog = (e) => { const p = prepDoc("log"), x = p && p.items && p.items[e.id]; return x && norm(x.mk) === norm(e.wrong) ? x : null; };
+  const KIND_RANK = { error: 3, style: 2, skip: 1 };
   function myMistakes() {
     const hidden = new Set(arr(settings().mineHidden));
     const found = new Map();
-    const add = (e, src) => {
+    const add = (e, src, prep) => {
       const wrong = str(e.wrong).trim(), key = norm(wrong);
       const a = [...new Set(str(e.right).split(/\s+\/\s+/).flatMap(variants).filter((r) => r && norm(r) !== key))];
       if (!key || hidden.has(key) || !a.length) return;
-      if (countWords(wrong) > MINE_WORDS || a.some((r) => countWords(r) > MINE_WORDS)) return;
-      const ctx = src.text ? mistakeContext(src.text, src.corrected, wrong, a, src.errs) : { q: "___", exact: false };
+      const C = src.corrected ? unbracket(src.corrected) : "";
+      const fallbackQ = () => (src.text ? mistakeContext(src.text, src.corrected, wrong, a, src.errs) : "___");
+      // How it's asked: with Claude's excerpt and options; or, from a text Claude prepared without this one, as
+      // the correction or what you wrote.
+      let use = null;
+      if (prep) {
+        const span = unbracket(prep.span), placed = !!(C && span && spanAt(C, span));
+        use = { kind: prep.kind, ref: src.ref, right: span || a[0], yours: str(prep.wrong) || wrong, near: arr(prep.near), why: str(prep.why), q: prep.q || (placed ? gapIn(C, span) : "") || fallbackQ(), placed };
+      } else if (src.ref !== "log" && prepDoc(src.ref)) use = { kind: "error", ref: src.ref, right: a[0], yours: wrong, near: [], why: str(e.why), q: fallbackQ(), placed: false };
       const cur = found.get(key);
       if (!cur) {
-        found.set(key, { key, wrong, a, n: 1, ts: src.ts || 0, from: src.from, cat: catOf(e.category || src.cat), why: str(e.why), q: ctx.q, exact: ctx.exact, has: !!src.text, seenAt: src.ts || 0 });
+        found.set(key, { key, wrong, a, n: 1, ts: src.ts || 0, from: src.from, cat: catOf(e.category || src.cat), why: str(e.why), kind: use ? use.kind : "pending", use, q: use ? use.q : fallbackQ(), uses: use ? [use] : [] });
         return;
       }
       cur.n++;
       cur.ts = Math.max(cur.ts, src.ts || 0);
       a.forEach((r) => { if (!cur.a.some((x) => norm(x) === norm(r))) cur.a.push(r); });
       if (!cur.why && e.why) cur.why = str(e.why);
-      // The sentence shown: one taken from a corrected text beats one rebuilt from your draft, and a newer one an older one.
-      if (src.text && (ctx.exact > cur.exact || (ctx.exact === cur.exact && (!cur.has || (src.ts || 0) >= cur.seenAt)))) Object.assign(cur, { q: ctx.q, exact: ctx.exact, from: src.from, has: true, seenAt: src.ts || 0 });
+      if (!use) return;
+      cur.uses.push(use);
+      // The strongest verdict wins (a real mistake in one text is a mistake), and an excerpt that's in its text
+      // beats one that isn't.
+      if (!cur.use || KIND_RANK[use.kind] > KIND_RANK[cur.kind] || (use.kind === cur.kind && use.placed && !cur.use.placed)) Object.assign(cur, { use, kind: use.kind, q: use.q });
     };
-    for (const w of list("writing")) {
-      const W = T.WRITING[w.task];
-      if (w.fb) arr(w.fb.errors).forEach((e) => add(e, { ts: w.ts, text: w.text, corrected: w.fb.corrected, errs: w.fb.errors, from: `your ${W ? W.name : "writing"} of ${shortDate(w.date)}` }));
-    }
-    for (const d of list("drills")) {
-      if (d.set !== "prod" || !d.fb) continue;
-      const tp = TOPIC[d.topic];
-      arr(d.fb.errors).forEach((e) => add(e, { ts: d.ts, text: d.text, corrected: d.fb.improved, errs: d.fb.errors, cat: d.topic, from: `your ${tp ? tp.title : "production"} check of ${shortDate(d.date)}` }));
-    }
-    for (const e of list("errors")) add(e, { ts: e.ts, from: "your error log" });
+    for (const src of mineSources()) src.errs.forEach((e, n) => add(e, src, prepFor(src, n, e)));
+    for (const e of list("errors")) add(e, { ref: "log", ts: e.ts, from: "your error log" }, prepLog(e));
     return [...found.values()];
   }
-  const mineItem = (m) => ({ kind: "type", topic: "mine", set: "errors", ask: `In ${m.from}, you wrote the words above. Type them corrected.`, src: `« ${m.wrong} »`, q: m.q, a: m.a.slice(), why: m.why || `${CAT[m.cat]}.`, point: CAT[m.cat] });
-  // Where each mistake stands: new (never practised), missed last time, right once, or fixed (right the last two times).
-  function mineStatus() {
+  // Where each one stands: new (never practised), missed last time, right once, or fixed (right the last two times).
+  function mineAll() {
     const hist = new Map();
     // A right answer on a retry doesn't move a mistake toward fixed; a miss on one does count.
     drillLog().forEach((e) => { if (e.key.startsWith("mine|") && !(e.retry && e.ok)) hist.set(e.key, (hist.get(e.key) || []).concat(e)); });
@@ -868,12 +915,228 @@
       return Object.assign(m, { state: !last ? "new" : !last.ok ? "missed" : prev && prev.ok ? "fixed" : "once", seen: last ? last.ts : 0 });
     });
   }
-  // A round: new mistakes first (the ones made most often, then the newest), then the ones missed last time,
-  // then the ones right once, then fixed ones, longest ago first, so they come back to check they stay fixed.
-  function mineRound(n) {
-    const tier = { new: 0, missed: 1, once: 2, fixed: 3 };
-    const ms = mineStatus().sort((a, b) => tier[a.state] - tier[b.state] || (a.state === "new" ? b.n - a.n || b.ts - a.ts : a.seen - b.seen));
-    return shuffle(ms.slice(0, n)).map(mineItem);
+  // The mistakes to practise (real ones, and ones Claude hasn't prepared yet), and the style tips apart.
+  const mineStatus = () => mineAll().filter((m) => m.kind === "error" || m.kind === "pending");
+  const styleStatus = () => mineAll().filter((m) => m.kind === "style");
+  // New ones first (the ones made most often, then the newest), then the ones missed last time, then the ones
+  // right once, then fixed ones, longest ago first, so they come back to check they stay fixed.
+  const TIER = { new: 0, missed: 1, once: 2, fixed: 3 };
+  const byNeed = (a, b) => TIER[a.state] - TIER[b.state] || (a.state === "new" ? b.n - a.n || b.ts - a.ts : a.seen - b.seen);
+  // A mistake as a choice in its sentence (Retry today's misses, the style tips, « Hors texte » cards): the
+  // correction, what you wrote and Claude's near-misses. There's no « what you wrote » above it, since that would
+  // say which option is yours.
+  function mineOptions(m, n) {
+    const u = m.use || {}, seen = new Set();
+    return [u.right || m.a[0], u.yours || m.wrong].concat(arr(u.near)).filter((o) => { const k = norm(o); if (!o || !k || seen.has(k)) return false; seen.add(k); return true; }).slice(0, n);
+  }
+  function mineChoice(m) {
+    const style = m.kind === "style", u = m.use || {};
+    return { kind: "choice", topic: "mine", set: style ? "style" : "errors", ask: style ? "Which sounds more natural?" : "Which is correct here?", mk: m.wrong, q: m.q || "___", options: mineOptions(m, style ? 3 : 4), a: [u.right || m.a[0]], why: u.why || m.why || `${CAT[m.cat]}.`, point: style ? "Conseil de style" : CAT[m.cat] };
+  }
+  const styleRound = (n) => shuffle(styleStatus().filter((m) => m.use).sort(byNeed).slice(0, n)).map(mineChoice);
+
+  /* ----- Claude prepares each corrected text, once ----- */
+  function minePrompt(src) {
+    const log = src.ref === "log";
+    const fixes = src.errs.map((e, n) => `${n + 1}. « ${str(e.wrong)} » → « ${str(e.right)} »${e.why ? ` (${str(e.why)})` : ""}`).join("\n");
+    const texts = log ? "" : `THE LEARNER'S TEXT:\n"""\n${src.text}\n"""\n\nTHE CORRECTED TEXT:\n"""\n${src.corrected}\n"""\n\n`;
+    return `You are preparing a French learner's own mistakes for an exercise. The learner (adult, B1, aiming for B2, NCLC 7, at the TCF Canada) ${log ? "sees each mistake as a sentence with a gap and picks the right version from 4 options" : "sees their text again as the teacher corrected it, with their mistakes put back as they wrote them, taps the mistakes, then picks each correction from 4 options"}. Every question must have exactly one right answer, so be strict.\n\n${texts}THE TEACHER'S CORRECTIONS (what the learner wrote → the correction):\n${fixes}\n\nFor each correction, give:\n- "n": its number.\n- "kind": "error" if what the learner wrote is incorrect French (grammar, spelling, accents, agreement, elision, mood or tense, a wrong word, preposition or construction); "style" if it was already correct French and the correction only sounds more natural or more formal; "skip" if it isn't a point of French (a person's name, punctuation or capital letters only, a missing sentence, or no real change).\n- "span": ${log ? "the correction, written as it should be in a sentence" : `the shortest excerpt of THE CORRECTED TEXT that holds the whole correction, copied exactly, character for character, in whole words (at most 10 words). Use "" if the correction isn't in the corrected text`}.\n- "wrong": the same excerpt with only this mistake in it, the way the learner wrote it${log ? "" : `. It replaces "span" in the corrected text, so it has to fit the words around it`}.\n- "near": for "error", 3 other versions of the excerpt, each with one real mistake of the same kind as the learner's that a B1 learner might make (gender, agreement, accent, mood, preposition, word order…). Each must be wrong French, and different from "span", from "wrong" and from each other. For "style", 1 version with a real grammar or spelling mistake. For "skip", [].\n- "why": one short sentence in English giving the rule, for the learner.${log ? `\n- "sentence": a natural B1–B2 sentence on a TCF Canada theme (settling in Canada, work, housing, studies) that uses the correction, with ___ in place of exactly "span".` : ""}\nReply with only JSON: {"items": [{"n": 1, "kind": "error", "span": "...", "wrong": "...", "near": ["...", "...", "..."], "why": "..."${log ? `, "sentence": "..."` : ""}}]}`;
+  }
+  // Claude's answer, checked: the excerpt has to be in the corrected text as whole words (if it isn't, the
+  // correction itself is looked for), the options all different, and a correction that changes nothing isn't a mistake.
+  function minePrepClean(src, out) {
+    const C = src.corrected ? unbracket(src.corrected) : "";
+    const items = [];
+    for (const x of arr(out && out.items)) {
+      const n = Number(x && x.n) - 1, e = src.errs[n];
+      if (!e || items.some((y) => y.n === n)) continue;
+      let kind = ["error", "style", "skip"].includes(x.kind) ? x.kind : "error";
+      const right = str(e.right).split(/\s+\/\s+/)[0].trim();
+      let span = unbracket(str(x.span).trim());
+      if (C && span && !spanAt(C, span)) span = "";
+      if (C && !span) span = variants(right).map(unbracket).find((r) => spanAt(C, r)) || "";
+      if (!C && !span) span = unbracket(right);
+      if (countWords(span) > 16) span = "";
+      const wrong = str(x.wrong).trim() || str(e.wrong).trim();
+      if (span && norm(span) === norm(wrong)) kind = "skip";
+      const seen = new Set([norm(span), norm(wrong)]);
+      const near = arr(x.near).map((s) => str(s).trim()).filter((s) => { const k = norm(s); if (!s || !k || seen.has(k)) return false; seen.add(k); return true; }).slice(0, kind === "style" ? 1 : 3);
+      const q = !C && str(x.sentence).split("___").length === 2 ? cutGap(str(x.sentence)) : "";
+      items.push(Object.assign({ n, mk: str(e.wrong).trim(), kind, span, wrong, near, why: str(x.why).trim() || str(e.why) }, q ? { q } : {}));
+    }
+    return items;
+  }
+  // The texts Claude hasn't prepared yet (your EE drafts first, newest first), then the error-log entries that
+  // aren't in any of your texts, all together.
+  function mineBacklog() {
+    const srcs = mineSources(), out = srcs.filter((s) => !prepDoc(s.ref));
+    const p = prepDoc("log"), hidden = new Set(arr(settings().mineHidden));
+    const inText = new Set(srcs.flatMap((s) => s.errs.map((e) => norm(e.wrong))));
+    const errs = list("errors").filter((e) => { const k = norm(e.wrong); return k && str(e.right).trim() && k !== norm(e.right) && !hidden.has(k) && !inText.has(k) && !(p && p.items && p.items[e.id]); });
+    if (errs.length) out.push({ ref: "log", ee: false, errs, ids: errs.map((e) => e.id), text: "", corrected: "" });
+    return out;
+  }
+  async function minePrep(src, quiet) {
+    const out = await ask("mine-prep-" + src.ref, minePrompt(src), { quiet });
+    if (!out) return false;
+    const items = minePrepClean(src, out);
+    if (src.ref !== "log") { put("mistakes", src.ref, { ref: src.ref, v: PREP_V, ts: Date.now(), items }); return true; }
+    // An entry Claude left out is still marked as prepared, so it's asked as the correction or what you wrote.
+    const cur = prepDoc("log"), all = Object.assign({}, cur ? cur.items : {});
+    src.errs.forEach((e, n) => { all[src.ids[n]] = items.find((x) => x.n === n) || { n, mk: str(e.wrong).trim(), kind: "error", span: str(e.right).trim(), wrong: str(e.wrong).trim(), near: [], why: str(e.why) }; });
+    put("mistakes", "log", { ref: "log", v: PREP_V, ts: Date.now(), items: all });
+    return true;
+  }
+  let prepRun = null; // { done, total, ref, stop } while Claude prepares your texts one after another
+  async function minePrepAll() {
+    if (prepRun || !claudeOn()) return;
+    const todo = mineBacklog().filter((s) => !busy["mine-prep-" + s.ref]);
+    if (!todo.length) return;
+    prepRun = { done: 0, total: todo.length, ref: "", stop: false };
+    render(true);
+    for (const src of todo) {
+      if (prepRun.stop) break;
+      prepRun.ref = src.ref;
+      if (!(await minePrep(src))) break;
+      prepRun.done++;
+    }
+    const { done, total } = prepRun;
+    prepRun = null;
+    if (done) toast(done === total ? `Ready: ${done === 1 ? "your text" : `all ${done} texts`}.` : `${done} of ${total} texts are ready.`);
+    render(true);
+  }
+  function minePrepStop() {
+    if (!prepRun) return;
+    prepRun.stop = true;
+    const c = busy["mine-prep-" + prepRun.ref];
+    if (c) c.abort();
+  }
+  // Right after a correction, its mistakes are prepared in the background, without a word unless you look.
+  function minePrepSoon(ref) {
+    if (!sample || prepRun || prepDoc(ref)) return;
+    const src = mineSources().find((s) => s.ref === ref);
+    if (src) minePrep(src, true);
+  }
+
+  /* ----- a round: your text with your mistakes back in it ----- */
+  // Mistakes on overlapping words can't all be put back. A correction that rewrites a whole clause often holds
+  // smaller ones, so the choice is the one that puts the most mistakes back, and on a tie the one that brings
+  // back more of what you wrote (the longer excerpts). The same mistake twice in a text: its longest excerpt.
+  function mineFit(spots) {
+    const one = new Map();
+    spots.forEach((s) => { const c = one.get(s.m.key); if (!c || s.at[1] - s.at[0] > c.at[1] - c.at[0]) one.set(s.m.key, s); });
+    const xs = [...one.values()].sort((a, b) => a.at[1] - b.at[1]);
+    const best = [{ w: 0, set: [] }];
+    xs.forEach((s, i) => {
+      let j = i - 1;
+      while (j >= 0 && xs[j].at[1] > s.at[0]) j--;
+      const take = { w: best[j + 1].w + 1000 + (s.at[1] - s.at[0]), set: best[j + 1].set.concat(s) };
+      best.push(take.w > best[i].w ? take : best[i]);
+    });
+    return best[xs.length].set;
+  }
+  // A corrected text with every real mistake Claude found in it put back, as you wrote it (as many as fit, see
+  // mineFit). Each one needs at least two near-misses, so its choice is a real one; one without stays corrected
+  // in the text and can come as a « Hors texte » card instead.
+  const NEED = { new: 3, missed: 3, once: 1, fixed: 0 };
+  function mineTextFor(src, byKey) {
+    if (!prepDoc(src.ref) || !src.corrected) return null;
+    const C = unbracket(src.corrected).replace(/[{}]/g, "");
+    const spots = [];
+    src.errs.forEach((e, n) => {
+      const x = prepFor(src, n, e), m = byKey.get(norm(e.wrong));
+      if (!x || x.kind !== "error" || !m || m.kind !== "error") return;
+      const at = spanAt(C, unbracket(x.span).replace(/[{}]/g, ""));
+      const wrong = str(x.wrong).replace(/[{}]/g, "").trim(), near = arr(x.near).filter((s) => str(s).trim());
+      if (!at || !wrong || near.length < 2) return;
+      spots.push({ at, m, span: C.slice(at[0], at[1]), wrong, near: near.slice(0, 3), why: str(x.why) || m.why });
+    });
+    const kept = mineFit(spots);
+    if (!kept.length) return null;
+    let text = "", pos = 0;
+    kept.forEach((s, k) => { text += C.slice(pos, s.at[0]) + `{${k}}`; pos = s.at[1]; });
+    text += C.slice(pos);
+    return { id: src.ref, ref: src.ref, title: src.title, sujet: src.sujet, ee: src.ee, text, corrected: C, mistakes: kept.map((s) => [s.wrong, [s.span], s.m.cat, s.why, s.m.wrong, s.near]), need: kept.reduce((t, s) => t + NEED[s.m.state], 0) };
+  }
+  // The next text: your EE drafts first (production checks are a sentence or two, so they come when no EE draft
+  // has anything left to practise), the one with the most mistakes not fixed yet, then the one done longest ago,
+  // and never the text you've just done while there's another.
+  function mineNextText(all) {
+    const byKey = new Map((all || mineAll()).map((m) => [m.key, m]));
+    const last = new Map();
+    let lastRef = "", lastTs = -1;
+    list("drills").forEach((d) => {
+      if (d.topic !== "mine" || d.src !== "text" || !d.text) return;
+      last.set(d.text, Math.max(last.get(d.text) || 0, d.ts || 0));
+      if ((d.ts || 0) > lastTs) { lastTs = d.ts || 0; lastRef = d.text; }
+    });
+    const texts = mineSources().map((s) => mineTextFor(s, byKey)).filter(Boolean);
+    const pool = texts.length > 1 ? texts.filter((t) => t.ref !== lastRef) : texts;
+    const best = (xs) => xs.sort((a, b) => b.need - a.need || (last.get(a.ref) || 0) - (last.get(b.ref) || 0))[0];
+    return best(pool.filter((t) => t.ee && t.need)) || best(pool.filter((t) => t.need)) || best(pool.slice()) || null;
+  }
+  // Mistakes that can't be in a text (an error-log entry, or one whose correction isn't in its corrected text),
+  // asked on their own: up to 3 a round, the ones that need it most first. Without Claude, as on the local site,
+  // mistakes nobody has prepared are asked this way too, as the correction or what you wrote.
+  const inAText = (m) => m.uses.some((u) => u.kind === "error" && u.placed && u.near.length >= 2);
+  const mineLoose = (all, n, placed) => all.filter((m) => !placed.has(m.key) && (m.kind === "error" ? !inAText(m) : m.kind === "pending" && !claudeOn())).sort(byNeed).slice(0, n);
+  function mineCards(pr, loose) {
+    const cards = pr ? pr.mistakes.map(([wrong, [right], cat, why, mk, near], k) => ({ k, mk, wrong, q: prSentence(pr, k), options: [right].concat(near), why, cat })) : [];
+    loose.forEach((m) => cards.push({ k: -1, mk: m.wrong, wrong: (m.use && m.use.yours) || m.wrong, q: m.q || "___", options: mineOptions(m, 4), why: (m.use && m.use.why) || m.why, cat: m.cat }));
+    return cards.map((c) => Object.assign(c, { order: shuffle(c.options.map((_, i) => i)) }));
+  }
+  // The cards on screen: one for each mistake you found, and the « Hors texte » ones.
+  const mhShown = (h) => (h.found ? h.cards.map((_, ci) => ci).filter((ci) => h.cards[ci].k < 0 || h.found[h.cards[ci].k]) : []);
+  let mhScroll = ""; // where to bring the page after the next redraw: the cards after Check, the next card after a pick
+  function mhStart() {
+    const all = mineAll(), pr = mineNextText(all);
+    const loose = mineLoose(all.filter((m) => m.kind === "error" || m.kind === "pending"), 3, new Set(pr ? pr.mistakes.map((x) => norm(x[4])) : []));
+    if (!pr && !loose.length) { toast(mineBacklog().length ? "Your texts aren't prepared yet." : "No mistakes to practise yet."); return; }
+    if (ui.drill && ui.drill.topic === "mine") ui.drill = null;
+    ui.mh = { pr, cards: mineCards(pr, loose), picks: [], found: pr ? null : [], extra: 0, pick: {}, saved: null, done: false, at: Date.now() };
+    render(true);
+    const el = document.getElementById("drill-area");
+    if (el) el.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  function mhTap(i) {
+    const h = ui.mh;
+    if (!h || h.found) return;
+    h.picks = h.picks.includes(i) ? h.picks.filter((x) => x !== i) : h.picks.concat(i);
+    render(true);
+  }
+  function mhCheck() {
+    const h = ui.mh;
+    if (!h || !h.pr || h.found) return;
+    if (!h.picks.length) { toast("Tap the words you think are wrong first."); return; }
+    const toks = prTokens(h.pr);
+    h.found = h.pr.mistakes.map((_, k) => h.picks.some((i) => toks[i] && toks[i].k === k));
+    h.extra = h.picks.filter((i) => toks[i] && toks[i].k < 0).length;
+    if (!mhShown(h).length) { mhFinish(); h.done = true; }
+    mhScroll = "top";
+    render(true);
+  }
+  function mhPick(ci, oi) {
+    const h = ui.mh;
+    if (!h || h.done || h.pick[ci] != null || !mhShown(h).includes(ci)) return;
+    h.pick[ci] = oi;
+    // The text is saved as soon as the last card is answered, so leaving then loses nothing.
+    if (mhShown(h).every((x) => h.pick[x] != null)) mhFinish();
+    mhScroll = "next";
+    render(true);
+  }
+  // Each mistake is caught when it's both found and fixed, as in Find the mistakes. The text is a finished
+  // round of Your mistakes, with every mistake as a choice, so Retry today's misses can ask the ones missed.
+  function mhFinish() {
+    const h = ui.mh;
+    if (!h || h.saved) return;
+    const items = h.cards.map((c, ci) => {
+      const found = c.k < 0 || !!h.found[c.k], p = h.pick[ci];
+      return { kind: "choice", mk: c.mk, q: c.q, options: c.options, a: [c.options[0]], why: str(c.why), given: found && p != null ? c.options[p] : "", ok: found && p === 0, found };
+    });
+    const id = uid();
+    h.saved = id;
+    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", items });
+    autoTick("grammar.mine.errors");
   }
 
   function drillsFor(topic, set) {
@@ -961,10 +1224,14 @@
       title = "Mixed review · " + allowed.join(" and ");
       setId = "main";
     } else if (topicId === "mine") {
-      items = o.items || mineRound(10);
-      if (!items.length) { toast("No mistakes to practise yet."); return; }
-      title = "Your mistakes";
-      setId = "errors";
+      // Your mistakes are practised in your own text (mhStart); the drill engine plays their retries and the
+      // style tips, as choices.
+      const style = setId === "style";
+      items = o.items || (style ? styleRound(10) : []);
+      if (!items.length) { toast(style ? "No style tips to practise yet." : "Nothing to retry."); return; }
+      title = style ? "Your mistakes · Conseils de style" : "Your mistakes";
+      setId = style ? "style" : "errors";
+      ui.mh = null;
     } else {
       const tp = TOPIC[topicId];
       set = tp.sets.find((x) => x.id === setId) || tp.sets[0];
@@ -1055,7 +1322,8 @@
     d.saved = id;
     put("drills", id, { topic: d.topic, set: d.set, name: d.title, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, items: roundItems(d) });
     ipDrop(drillIpId(d));
-    autoTick(`grammar.${d.topic}.${d.set}`);
+    // The style tips are a few quick questions, not the day's Your mistakes block.
+    if (!(d.topic === "mine" && d.set === "style")) autoTick(`grammar.${d.topic}.${d.set}`);
     render(true);
   }
   // Every question is kept with the answer given, so the round can be reviewed from the history.
@@ -1064,6 +1332,7 @@
       const r = d.results[k] || {};
       const o = { kind: it.kind, q: it.q, a: it.a, why: it.why || "", given: str(r.given), ok: !!r.ok };
       if (it.src) o.src = it.src;
+      if (it.mk) o.mk = it.mk;
       if (it.ask) o.ask = it.ask;
       if (it.kind === "choice") o.options = it.options;
       if (it.topic && it.topic !== d.topic) o.topic = it.topic;
@@ -1155,8 +1424,10 @@
     if (!out) return;
     const fb = { pass: !!out.pass, comment: str(out.comment), errors: arr(out.errors).filter((e) => e && e.wrong).slice(0, 15).map((e) => ({ wrong: str(e.wrong), right: str(e.right), why: str(e.why) })), improved: str(out.improved) };
     ui.prod[topicId] = { text, fb };
-    put("drills", uid(), { topic: topicId, set: "prod", date: todayStr(), ts: Date.now(), score: fb.pass ? 1 : 0, total: 1, src: "claude", text, fb });
+    const pid = uid();
+    put("drills", pid, { topic: topicId, set: "prod", date: todayStr(), ts: Date.now(), score: fb.pass ? 1 : 0, total: 1, src: "claude", text, fb });
     ipDrop("prod--" + topicId);
+    minePrepSoon("p-" + pid);
     if (fb.pass) autoTick(`grammar.${topicId}`);
     render(true);
   }
@@ -1737,6 +2008,7 @@
     // Claude's follow-up tasks stay suggestions on the correction until you add them to your homework.
     put("writing", id, { task, date: todayStr(), ts: Date.now(), prompt: p.q, docs: p.docs || null, text, words, minutes: timerElapsedMin("writing." + task), fb });
     ipDrop("writing--" + task);
+    minePrepSoon("w-" + id);
     ui.w.viewing = id;
     autoTick("writing." + task);
     render(true);
@@ -2933,8 +3205,8 @@
   // empty page from before. Unfinished attempts stay the record: one changed since this copy was saved (on
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
-  const TAB_KEY = "tcf-reussir-tab", TAB_V = 2;
-  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx"];
+  const TAB_KEY = "tcf-reussir-tab", TAB_V = 3;
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -3301,6 +3573,12 @@
       const d = ui.drill;
       const el = document.getElementById("drill-in");
       if (el && d && !d.checked && document.activeElement !== el) el.focus({ preventScroll: true });
+      // Your mistakes: after Check, the text with what you found, and after each pick, the next card.
+      if (mhScroll) {
+        const go = mhScroll === "top" ? document.getElementById("drill-area") : document.querySelector(".mh-card.cur") || document.querySelector('[data-act="mh-results"]');
+        mhScroll = "";
+        if (go) go.scrollIntoView({ block: go.id === "drill-area" ? "start" : "nearest", behavior: "smooth" });
+      }
       const h = ui.hunt;
       if (h && h.found && !h.verdicts && !isTyping(document.activeElement)) {
         const fix = [...document.querySelectorAll('[data-input="pr-fix"]')].find((x) => !x.value);
@@ -3530,36 +3808,203 @@
     const tile = (href, icon, title, note, primary) => `<a class="tile-card${primary ? " primary" : ""}" href="${href}" data-spot><span class="tile-ico">${ico(icon)}</span><b>${title}</b><span class="small muted">${note}</span><span class="tile-go" aria-hidden="true">→</span></a>`;
     return `<div class="tiles">
       ${tile("#grammar.mixed", "grammar", "Mixed review", "15 items from the topics you've drilled, the most missed first.", true)}
-      ${tile("#grammar.mine", "errors", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, from Claude's corrections and your error log.` : "The mistakes from Claude's corrections and your error log, as a drill.")}
+      ${tile("#grammar.mine", "errors", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, back in your own texts: find them, then pick the fix.` : "Your own texts with your mistakes put back: find them, then pick the fix.")}
       ${tile("#grammar.hunt", "bilan", "Find the mistakes", "Proofread a short text: tap the mistakes, then correct them.")}
     </div>`;
   }
+  const MINE_STATE = { missed: ["Missed last time", "bad"], new: ["New", "info"], once: ["Right once", ""], fixed: ["Fixed", "ok"] };
   function grammarMine() {
-    const active = ui.drill && ui.drill.topic === "mine";
-    const ms = mineStatus();
-    const count = (st) => ms.filter((m) => m.state === st).length;
-    const fixed = count("fixed"), hidden = arr(settings().mineHidden).length;
-    const ip = ipGet("drill--mine--errors");
-    const startBtns = ip
-      ? `<button class="btn primary" data-act="ip-resume" data-id="drill--mine--errors">Resume · ${arr(ip.results).filter(Boolean).length}/${arr(ip.items).length}</button><button class="btn" data-act="drill-start" data-topic="mine" data-set="errors" data-fresh="1">Start over</button>`
-      : `<button class="btn primary" data-act="drill-start" data-topic="mine" data-set="errors">Practise ${Math.min(10, ms.length)}</button>`;
-    const STATE = { missed: ["Missed last time", "bad"], new: ["New", "info"], once: ["Right once", ""], fixed: ["Fixed", "ok"] };
-    const order = Object.keys(STATE);
-    const rows = ms.slice().sort((a, b) => order.indexOf(a.state) - order.indexOf(b.state) || b.n - a.n || b.ts - a.ts).map((m) => `<li><div class="fix"><span class="pen-wrong">${esc(m.wrong)}</span><span class="pen-right">${esc(m.a[0])}</span><span class="pill ${STATE[m.state][1]}">${STATE[m.state][0]}</span>${m.n > 1 ? `<span class="pill warn">made ${m.n}×</span>` : ""}<span class="pill">${esc(CAT[m.cat])}</span><button class="btn ghost sm" data-act="mine-hide" data-k="${esc(m.key)}" title="Not a real mistake? Leave it out of this drill">Hide</button></div>${m.why ? `<p class="why">${esc(m.why)}</p>` : ""}</li>`).join("");
-    const intro = ms.length
-      ? `<p><b>${ms.length - fixed} of your ${ms.length} mistakes</b> to practise${count("new") ? `, ${count("new")} of them new` : ""}${fixed ? ` · ${fixed} fixed` : ""}.</p>
-        <div class="row">${startBtns}${active ? "" : retryBtn("mine", "errors")}</div>
-        ${fold("how-mine", "Comment ça marche · How it works", `<p class="small muted">A round starts with new mistakes (the ones you made most often first), then the ones you haven't fixed. A mistake is fixed once you get it right twice in a row; fixed ones come back when the others run out.</p>`)}`
-      : `<div class="empty">${greet("bonjour", "Rien pour l'instant.", "Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.", "sm")}</div>`;
-    const focus = active && !ui.drill.done;
+    const all = mineAll();
+    const ms = all.filter((m) => m.kind === "error" || m.kind === "pending"), tips = all.filter((m) => m.kind === "style"), skips = all.filter((m) => m.kind === "skip");
+    const hidden = arr(settings().mineHidden).length;
+    const drillOn = ui.drill && ui.drill.topic === "mine", h = !drillOn && ui.mh;
+    const focus = drillOn ? !ui.drill.done : !!h && !h.done;
+    const body = drillOn ? drillBox("mine") : h ? mineBox(h, all) : mineIntro(all, ms, tips);
+    const order = Object.keys(MINE_STATE);
+    const row = (m, pill, hide) => {
+      const why = (m.use && m.use.why) || m.why;
+      return `<li><div class="fix"><span class="pen-wrong">${esc(m.wrong)}</span><span class="pen-right">${esc((m.use && m.use.right) || m.a[0])}</span>${pill}${m.n > 1 ? `<span class="pill warn">made ${m.n}×</span>` : ""}<span class="pill">${esc(CAT[m.cat])}</span>${hide ? `<button class="btn ghost sm" data-act="mine-hide" data-k="${esc(m.key)}" title="Not a real mistake? Leave it out of Your mistakes">Hide</button>` : ""}</div>${why ? `<p class="why">${esc(why)}</p>` : ""}</li>`;
+    };
+    const statePill = (m) => (m.kind === "pending" ? `<span class="pill">Not prepared yet</span>` : `<span class="pill ${MINE_STATE[m.state][1]}">${MINE_STATE[m.state][0]}</span>`);
+    const lists = [
+      ms.length ? `<details class="fold"><summary>All your mistakes · ${ms.length}</summary><ul class="errs" style="margin-top:10px">${ms.slice().sort((a, b) => order.indexOf(a.state) - order.indexOf(b.state) || b.n - a.n || b.ts - a.ts).map((m) => row(m, statePill(m), true)).join("")}</ul></details>` : "",
+      tips.length ? `<details class="fold"><summary>Conseils de style · ${tips.length} style tip${tips.length > 1 ? "s" : ""}</summary><p class="small muted" style="margin-top:8px">What you wrote was already correct French; Claude's version sounds more natural. They're practised apart (« Which sounds more natural? ») and never counted as mistakes.</p><ul class="errs" style="margin-top:10px">${tips.map((m) => row(m, `<span class="pill tip">Style</span>`, true)).join("")}</ul></details>` : "",
+      skips.length ? `<details class="fold"><summary>Pas une faute · ${skips.length} left out</summary><p class="small muted" style="margin-top:8px">Claude found these aren't points of French (a name, punctuation, a missing sentence), so they're not practised.</p><ul class="errs" style="margin-top:10px">${skips.map((m) => row(m, "", false)).join("")}</ul></details>` : "",
+    ].join("");
     return `<div class="wrap${focus ? " focus" : ""}">
       <div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Mes erreurs</p><h1 class="title">Your mistakes<small>What you wrote, in your own sentence: type it corrected</small></h1>${focus ? "" : fold("intro-mine", "Where they come from", `<p class="small muted">Every mistake from Claude's corrections of your writing and production checks, and from your error log.</p>`)}</header>
-      ${active ? drillBox("mine") : `<section class="panel stack tight" id="drill-area">${intro}</section>`}
-      ${focus ? "" : `${ms.length ? `<details class="fold"><summary>All your mistakes · ${ms.length}</summary><ul class="errs" style="margin-top:10px">${rows}</ul></details>` : ""}
-      ${hidden ? `<p class="small muted">${hidden} hidden from this drill. <button class="btn ghost sm" data-act="mine-unhide">Show them again</button></p>` : ""}
+      <header class="stack tight"><p class="eyebrow">Mes erreurs</p><h1 class="title">Your mistakes<small>Your own text with your mistakes back in it: find them, then pick the fix</small></h1>${focus ? "" : fold("intro-mine", "Where they come from", `<p class="small muted">Every mistake from Claude's corrections of your writing and production checks, and from your error log.</p>`)}</header>
+      ${body}
+      ${focus ? "" : `${lists}
+      ${hidden ? `<p class="small muted">${hidden} hidden from Your mistakes. <button class="btn ghost sm" data-act="mine-unhide">Show them again</button></p>` : ""}
       <section class="stack tight"><p class="h3">History</p>${recentRounds("mine")}</section>`}
     </div>`;
+  }
+  // Before a round: where your mistakes stand, the next text (as a scrap of your notebook), and Claude's preparation.
+  function mineIntro(all, ms, tips) {
+    if (!all.length) return `<section class="panel stack tight" id="drill-area"><div class="empty">${greet("bonjour", "Rien pour l'instant.", "Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.", "sm")}</div></section>`;
+    const count = (st) => ms.filter((m) => m.state === st).length, fixed = count("fixed");
+    const next = mineNextText(all);
+    const loose = mineLoose(ms, 3, new Set(next ? next.mistakes.map((x) => norm(x[4])) : []));
+    const byKey = new Map(all.map((m) => [m.key, m]));
+    const inNext = (st) => (next ? next.mistakes.filter((x) => (byKey.get(norm(x[4])) || {}).state === st).length : 0);
+    const n = next ? next.mistakes.length : 0;
+    const card = next ? `<button class="mh-next seyes" data-act="mh-start" data-spot data-m="rise" data-k="mhnext-${esc(next.ref)}">
+        <span class="mh-next-tape" aria-hidden="true"></span>
+        <span class="eyebrow">Prochain texte · next text</span>
+        <b class="mh-next-title">${esc(next.title)}</b>
+        ${next.sujet ? `<span class="mh-next-sujet">${typo(clip(next.sujet, 150))}</span>` : ""}
+        <span class="mh-next-chips"><span class="pill bad">${n} faute${n > 1 ? "s" : ""} to find</span>${inNext("new") ? `<span class="pill info">${inNext("new")} new</span>` : ""}${inNext("missed") ? `<span class="pill warn">${inNext("missed")} missed last time</span>` : ""}${loose.length ? `<span class="pill">+ ${loose.length} hors texte</span>` : ""}</span>
+        <span class="mh-next-go" aria-hidden="true">→</span>
+      </button>` : "";
+    const backlog = mineBacklog(), bg = backlog.some((s) => busy["mine-prep-" + s.ref]);
+    const p = prepRun ? (prepRun.done / prepRun.total) * 100 : 0;
+    const prep = !backlog.length ? "" : prepRun
+      ? `<div class="mh-prep" data-m="rise" data-k="mhprep-run"><div class="row between"><span class="small"><span class="thinking">Claude is preparing your texts</span> · <b class="num">${prepRun.done} of ${prepRun.total}</b> ready</span><button class="btn ghost sm" data-act="mine-prep-stop">Stop</button></div><div class="bar"><i style="width:${p}%" data-tween="mhprep" data-tw="width" data-to="${p}"></i></div></div>`
+      : claudeOn()
+        ? `<div class="mh-prep" data-m="rise" data-k="mhprep-${backlog.length}"><p class="small"><b>${backlog.length} ${backlog.length === 1 ? "text" : "texts"} to prepare.</b> Claude reads each corrected text once, puts your mistakes back in it and writes the options, so every question has exactly one right answer.${bg ? " <span class=\"thinking\">Your latest correction is being prepared</span>" : ""}</p><div class="row"><button class="btn sm" data-act="mine-prep">Prepare ${backlog.length === 1 ? "it" : `all ${backlog.length}`} with Claude</button></div></div>`
+        : `<p class="small muted">${backlog.length} ${backlog.length === 1 ? "text is" : "texts are"} waiting for Claude, which prepares them when this page is opened on claude.ai. Until then their mistakes are asked as a choice between the correction and what you wrote.</p>`;
+    const tipsReady = tips.filter((m) => m.use).length, styleIp = ipGet("drill--mine--style");
+    const style = !tipsReady ? "" : styleIp
+      ? `<button class="btn" data-act="ip-resume" data-id="drill--mine--style">Resume the style tips · ${arr(styleIp.results).filter(Boolean).length}/${arr(styleIp.items).length}</button>`
+      : `<button class="btn" data-act="drill-start" data-topic="mine" data-set="style" title="Where what you wrote was already correct: which sounds more natural?">Conseils de style · ${Math.min(10, tipsReady)}</button>`;
+    const start = next ? `<button class="btn primary" data-act="mh-start">Start this text</button>` : loose.length ? `<button class="btn primary" data-act="mh-start">Practise ${loose.length}</button>` : "";
+    const counts = ms.length ? `<p><b>${ms.length - fixed} of your ${ms.length} mistakes</b> to practise${count("new") ? `, ${count("new")} of them new` : ""}${fixed ? ` · ${fixed} fixed` : ""}${tips.length ? ` · ${tips.length} style tip${tips.length > 1 ? "s" : ""}` : ""}.</p>` : `<p>${tips.length} style tip${tips.length > 1 ? "s" : ""} to practise.</p>`;
+    return `<section class="panel stack tight mh-intro" id="drill-area">
+      ${counts}
+      ${card}
+      ${prep}
+      <div class="row">${start}${retryBtn("mine", "errors")}${style}${retryBtn("mine", "style")}</div>
+      ${fold("how-mine", "Comment ça marche · How it works", `<p class="small muted">A round is one of your corrected texts with every mistake Claude found in it put back, exactly as you wrote it; the rest is the corrected version. Tap the words that look wrong and check, then pick the right version of each mistake you found, from four. A mistake is caught when it's found and fixed, and fixed once you've caught it twice in a row. Your EE drafts come first, the one with the most mistakes not fixed yet. Mistakes that aren't in a text (from your error log) come as « Hors texte » cards, and style tips, where what you wrote was already correct, are practised apart.</p>`)}
+    </section>`;
+  }
+  // A round: the text to proofread, then a card for each mistake found, then the results.
+  function mineBox(h, all) {
+    const pr = h.pr, key = hk((pr ? pr.ref : "loose") + "|" + h.at), n = pr ? pr.mistakes.length : 0;
+    const head = `<div class="drill-head"><span class="eyebrow">Mes erreurs · ${pr ? esc(pr.title) : "Hors texte"}</span>${pr ? `<span class="small muted num">${n} faute${n > 1 ? "s" : ""}</span>` : ""}</div>${pr && pr.sujet ? `<p class="mh-sujet"><b>Sujet :</b> ${typo(clip(pr.sujet, 220))}</p>` : ""}`;
+    if (pr && !h.found) {
+      return `<section class="panel drill mh" id="drill-area">${head}
+        <p class="small muted">Your text is back with all ${n} of your mistakes in it, as you wrote them; everything else is corrected. Tap each word that looks wrong (tap it again to unmark it), then check.</p>
+        ${mhText(pr, h, key)}
+        <div class="row"><button class="btn primary" data-act="mh-check">Check · ${h.picks.length} marked</button><button class="btn ghost sm" data-act="mh-close">Close</button></div>
+      </section>`;
+    }
+    const shown = mhShown(h), found = pr ? h.found.filter(Boolean).length : 0;
+    const extra = h.extra ? `${h.extra} word${h.extra > 1 ? "s" : ""} marked that ${h.extra > 1 ? "were" : "was"} fine` : "";
+    if (!h.done) {
+      const picked = shown.filter((ci) => h.pick[ci] != null).length, w = shown.length ? (picked / shown.length) * 100 : 100;
+      const cur = shown.find((ci) => h.pick[ci] == null);
+      const said = pr ? `<p>You found <b>${found} of ${n}</b>${extra ? `, and ${extra}` : ""}.${found ? " Now pick the right version of each one." : ""}${found < n ? " The ones you missed are underlined in red; their corrections come with the results." : ""}</p>` : `<p>Mistakes that aren't in one of your texts. Pick the right version of each.</p>`;
+      return `<section class="panel drill mh" id="drill-area">${head}
+        ${said}
+        ${pr ? mhText(pr, h, key) : ""}
+        ${shown.length ? `<div class="mh-progress"><span class="small muted num">Corrigées ${picked} / ${shown.length}</span><div class="bar"><i style="width:${w}%" data-tween="mhbar-${key}" data-tw="width" data-to="${w}"></i></div></div>
+        <ol class="mh-cards" id="mh-cards">${shown.map((ci) => mhCard(h, ci, key, ci === cur)).join("")}</ol>` : ""}
+        <div class="row">${cur == null ? `<button class="btn primary" data-act="mh-results">See results <span class="kbd">Enter</span></button>` : `<span class="small muted">Pick an option, or press 1–${h.cards[cur].order.length}.</span>`}<button class="btn ghost sm" data-act="mh-close" title="${cur == null ? "Your text is saved" : "This text isn't kept until every card is answered"}">Close</button></div>
+      </section>`;
+    }
+    const rows = h.cards.map((c, ci) => ({ c, found: c.k < 0 || !!h.found[c.k], p: h.pick[ci] })).map((x) => Object.assign(x, { ok: x.found && x.p === 0 }));
+    const caught = rows.filter((x) => x.ok).length, misses = rows.filter((x) => !x.ok), perfect = !misses.length && !h.extra;
+    const next = !!mineNextText(all);
+    return `<section class="panel drill mh" id="drill-area" data-m="pop" data-k="mhdone-${key}">${head}
+      <div class="row mh-score"><span class="scorebig"><span data-tween="mhs-${key}" data-tw="count" data-to="${caught}">${caught}</span>/${rows.length}</span><span class="muted">caught: found and fixed${pr ? ` · found ${found} of ${n}` : ""}${extra ? ` · ${extra}` : ""}</span></div>
+      ${pr ? mhText(pr, h, key) : ""}
+      ${misses.length ? `<div class="stack tight"><p class="h3">À revoir · to look at again</p><ul class="misses">${misses.map(({ c, found: f }, i) => `<li data-m="rise" data-k="mhmiss-${key}-${i}">
+          <p class="row" style="gap:6px">${c.k >= 0 ? `<span class="pr-n bad">${c.k + 1}</span>` : `<span class="pill">Hors texte</span>`}<span class="pill bad">${f ? "Wrong fix" : "Not spotted"}</span><span class="pill">${esc(CAT[catOf(c.cat)])}</span></p>
+          <p class="pd" data-m="pen" data-k="mhrd-${key}-${i}">${penDiff(c.wrong, c.options[0])}</p>
+          ${c.why ? `<p class="small muted">${typo(c.why)}</p>` : ""}
+        </li>`).join("")}</ul></div>` : ""}
+      ${perfect ? `<p class="pen-ok mh-perfect" data-m="burst" data-k="mhperfect-${key}">Sans faute !</p>` : ""}
+      ${pr ? `<details class="fold"><summary>The corrected text</summary><div class="pr-text" lang="fr"><p>${typo(pr.corrected).replace(/\n+/g, "</p><p>")}</p></div></details>` : ""}
+      <div class="row">${retryBtn("mine", "errors", "btn primary")}${next ? `<button class="btn" data-act="mh-start">Next text</button>` : ""}<button class="btn ghost" data-act="mh-close">Close</button></div>
+    </section>`;
+  }
+  // Your text in a round: words to tap while you look for the mistakes; then the ones found in blue ink and the
+  // ones missed underlined in red, each numbered; and, as you fix each one (and for all of them once the round is
+  // over), your words struck out in red pen with the correction written in.
+  function mhText(pr, h, key) {
+    const toks = prTokens(pr), picks = new Set(h.picks), ciOf = new Map();
+    h.cards.forEach((c, ci) => { if (c.k >= 0) ciOf.set(c.k, ci); });
+    const state = (k) => (!h.found[k] ? "missed" : h.pick[ciOf.get(k)] == null ? "open" : h.pick[ciOf.get(k)] === 0 ? "ok" : "bad");
+    const rewritten = (k) => { const s = state(k); return s === "ok" || s === "bad" || (h.done && s === "missed"); };
+    const cls = (k) => (state(k) === "open" ? "mh-found" : "pr-missed");
+    const drawn = new Set();
+    let html = "";
+    toks.forEach((t, i) => {
+      const prev = toks[i - 1] || {}, next = toks[i + 1] || {};
+      if (t.sp) {
+        if (/\n/.test(t.sp)) html += "</p><p>";
+        else if (h.found && prev.k >= 0 && prev.k === next.k) html += rewritten(prev.k) ? "" : `<span class="pr-w ${cls(prev.k)}"> </span>`;
+        else html += /^[?!:;»]/.test(next.w || "") || /«$/.test(prev.w || "") ? NB : " ";
+        return;
+      }
+      const word = /[\p{L}\p{N}]/u.test(t.w);
+      if (!h.found) {
+        html += word ? `<span class="pr-w${picks.has(i) ? " sel" : ""}"${picks.has(i) ? ` data-m="pop" data-k="mhsel-${key}-${i}"` : ""} data-act="mh-tok" data-i="${i}">${esc(t.w)}</span>` : esc(t.w);
+        return;
+      }
+      if (t.k < 0) { html += word && picks.has(i) ? `<span class="pr-w pr-false">${esc(t.w)}</span>` : esc(t.w); return; }
+      const k = t.k, s = state(k), first = !drawn.has(k);
+      drawn.add(k);
+      const badge = first ? `<sup class="pr-n${s === "ok" ? " ok" : s === "open" ? "" : " bad"}">${k + 1}</sup>` : "";
+      if (rewritten(k)) {
+        if (first) html += `${badge}<span class="mh-fixed ${s}" data-m="pen" data-k="mhfix-${key}-${k}"><del>${esc(pr.mistakes[k][0])}</del><ins>${typo(pr.mistakes[k][1][0])}</ins></span>`;
+        return;
+      }
+      html += `${badge}<span class="pr-w ${cls(k)}">${esc(t.w)}</span>`;
+    });
+    return `<div class="pr-text mh-text seyes" lang="fr"><p>${html}</p></div>`;
+  }
+  // One mistake's card: the words in the text (or, off the text, its sentence) and four versions to pick from.
+  // Once picked: the right one pops, a wrong one shakes, and the red pen shows exactly what changed.
+  function mhCard(h, ci, key, cur) {
+    const c = h.cards[ci], p = h.pick[ci], done = p != null;
+    const head = c.k >= 0
+      ? `<span class="pr-n">${c.k + 1}</span><span class="mh-was">« ${typo(c.wrong)} »</span>`
+      : `<span class="pill">Hors texte</span>${c.q && c.q !== "___" ? `<span class="mh-q">${typo(c.q).replace("___", "<b>_____</b>")}</span>` : ""}`;
+    const opts = c.order.map((oi, pos) => {
+      const st = done ? (oi === 0 ? "ok" : oi === p ? "bad" : "dim") : "";
+      const anim = !done ? "" : oi === p ? (oi === 0 ? ` data-m="pop" data-k="mhok-${key}-${ci}"` : ` data-m="shake" data-k="mhno-${key}-${ci}"`) : oi === 0 ? ` data-m="pop" data-k="mhright-${key}-${ci}"` : "";
+      return `<button data-act="mh-pick" data-c="${ci}" data-o="${oi}"${st ? ` class="${st}"` : ""}${done ? " disabled" : ""}${anim}><span class="kbd">${pos + 1}</span><span>${typo(c.options[oi])}</span></button>`;
+    }).join("");
+    const after = done ? `<div class="mh-after">${p === 0 ? `<p class="pen-ok" data-m="pop" data-k="mhtb-${key}-${ci}">Très bien !</p>` : ""}<p class="pd" data-m="pen" data-k="mhd-${key}-${ci}">${penDiff(c.wrong, c.options[0])}</p>${c.why ? `<p class="why">${typo(c.why)}</p>` : ""}</div>` : "";
+    return `<li class="mh-card${done ? (p === 0 ? " ok" : " bad") : cur ? " cur" : ""}" data-m="rise" data-k="mhc-${key}-${ci}"><div class="mh-card-head">${head}</div><div class="choices">${opts}</div>${after}</li>`;
+  }
+  // What changed between what you wrote and the correction, in red pen: the words taken out struck through and
+  // the words put in written in; a word changed by a letter or two shows just those letters.
+  function lcsOps(A, B) {
+    const n = A.length, m = B.length, L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    const ops = [];
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (A[i] === B[j]) { ops.push(["=", A[i]]); i++; j++; }
+      else if (L[i + 1][j] >= L[i][j + 1]) ops.push(["-", A[i++]]);
+      else ops.push(["+", B[j++]]);
+    }
+    while (i < n) ops.push(["-", A[i++]]);
+    while (j < m) ops.push(["+", B[j++]]);
+    return ops;
+  }
+  function letterDiff(x, y) {
+    let html = "", mode = "=", buf = "";
+    const flush = () => { if (buf) html += mode === "=" ? esc(buf) : `<${mode === "-" ? "del" : "ins"}>${esc(buf)}</${mode === "-" ? "del" : "ins"}>`; buf = ""; };
+    for (const [m, ch] of lcsOps([...x], [...y])) { if (m !== mode) { flush(); mode = m; } buf += ch; }
+    flush();
+    return html;
+  }
+  function penDiff(a, b) {
+    const A = str(a).trim().split(/\s+/).filter(Boolean), B = str(b).trim().split(/\s+/).filter(Boolean);
+    const ops = lcsOps(A, B), out = [];
+    for (let i = 0; i < ops.length;) {
+      if (ops[i][0] === "=") { out.push(typo(ops[i][1])); i++; continue; }
+      const del = [], ins = [];
+      while (i < ops.length && ops[i][0] !== "=") { (ops[i][0] === "-" ? del : ins).push(ops[i][1]); i++; }
+      const same = del.length === 1 && ins.length === 1 ? lcsOps([...del[0]], [...ins[0]]).filter((o) => o[0] === "=").length : 0;
+      if (same && same >= Math.max(del[0].length, ins[0].length) / 2) out.push(letterDiff(del[0], ins[0]));
+      else out.push([del.length ? `<del>${typo(del.join(" "))}</del>` : "", ins.length ? `<ins>${typo(ins.join(" "))}</ins>` : ""].filter(Boolean).join(" "));
+    }
+    return out.join(" ");
   }
 
   /* =============== find the mistakes =============== */
@@ -4631,6 +5076,7 @@
     const items = arr(d.items);
     const qs = items.length ? items : arr(d.misses).map((m) => ({ q: m.q, src: m.src, a: [m.a], given: m.given, ok: false }));
     const li = (it) => `<li>
+        ${it.found === false ? `<p><span class="pill bad">Not spotted in the text</span></p>` : ""}
         ${it.ask ? `<p class="small muted">${esc(it.ask)}</p>` : ""}
         ${it.src ? `<p class="small muted fr">${typo(it.src)}</p>` : ""}
         <p class="fr">${typo(it.q).replace("___", "<b>___</b>")}</p>
@@ -4813,7 +5259,7 @@
     }
     return [...groups.entries()].map(([k, ds]) => {
       const tp = TOPIC[ds[0].topic], st = tp && tp.sets.find((x) => x.id === ds[0].set);
-      const name = DRILL_NAMES[ds[0].topic] || `${tp ? tp.title : ds[0].topic} · ${st ? st.title : ds[0].name || ds[0].set}`;
+      const name = ds[0].topic === "mine" && ds[0].set === "style" ? "Your mistakes · Conseils de style" : DRILL_NAMES[ds[0].topic] || `${tp ? tp.title : ds[0].topic} · ${st ? st.title : ds[0].name || ds[0].set}`;
       const rows = ds.map((d) => ({
         id: d.id, date: d.date, ts: d.ts, v: d.total ? d.score / d.total : null, show: `${d.score}/${d.total}`, score: d.score, total: d.total,
         pill: scorePill(d),
@@ -5412,6 +5858,14 @@
     },
     "drill-close": () => { ui.drill = null; render(true); },
     "drill-retry": drillRetry,
+    "mh-start": mhStart,
+    "mh-tok": (el) => mhTap(Number(el.dataset.i)),
+    "mh-check": mhCheck,
+    "mh-pick": (el) => mhPick(Number(el.dataset.c), Number(el.dataset.o)),
+    "mh-results": () => { if (ui.mh && ui.mh.saved) { ui.mh.done = true; render(true); const el = document.getElementById("drill-area"); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); } },
+    "mh-close": () => { ui.mh = null; render(true); },
+    "mine-prep": () => minePrepAll(),
+    "mine-prep-stop": minePrepStop,
     "mine-hide": (el) => { saveSettings({ mineHidden: [...new Set(arr(settings().mineHidden).concat(el.dataset.k))] }); toast("Hidden: it won't come up in Your mistakes again."); },
     "mine-unhide": () => { saveSettings({ mineHidden: [] }); toast("Your hidden mistakes are back."); },
     "pr-start": huntStart,
@@ -5761,6 +6215,11 @@
     }
     if (t && t.closest && t.closest("input, textarea, select, button, a, [contenteditable]")) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (route.view === "grammar" && route.args[0] === "mine" && ui.mh && ui.mh.found && !ui.mh.done && !(ui.drill && ui.drill.topic === "mine")) {
+      const h = ui.mh, cur = mhShown(h).find((ci) => h.pick[ci] == null);
+      if (cur != null && /^[1-9]$/.test(e.key)) { const pos = Number(e.key) - 1, c = h.cards[cur]; if (pos < c.order.length) { e.preventDefault(); mhPick(cur, c.order[pos]); } return; }
+      if (cur == null && e.key === "Enter" && h.saved) { e.preventDefault(); ACTS["mh-results"](); return; }
+    }
     if (route.view === "grammar" && ui.drill && !ui.drill.done) {
       const it = ui.drill.items[ui.drill.i];
       if (e.key === "Enter" && ui.drill.checked) { e.preventDefault(); drillNext(); }
