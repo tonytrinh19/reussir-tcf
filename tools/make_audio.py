@@ -105,7 +105,8 @@ PACE_EXAM = {"A1": "Speak slowly and clearly, as for a learner of French at leve
 # For the spoken options of a picture or reply item, and the narrator's questions (recorded apart).
 OPTION_NOTE = " Read each option on its own, then stay silent for about a second."
 NARRATOR_NOTE = " Read the question once, steadily. Then stay completely silent for four seconds before the next one."
-NARRATOR_CHUNK = 16        # questions per narrator request
+RESPLIT_SECONDS = (1.5, 1.0, 0.7)  # shorter silences tried on a saved narrator take that didn't split
+NARRATOR_CHUNK = 6         # questions per narrator request (16 at once never came back cleanly separated)
 QUESTION_GAP = 1.6         # the pause between an item's document and its question (GAP_QUESTION)
 SPLIT_DB, SPLIT_SECONDS, CLIP_PAD = -50.0, 2.0, 0.15  # silence that separates narrator questions, and the margin kept
 # One stuck request used to hold the whole batch past the routine's limit, with nothing printed.
@@ -602,7 +603,7 @@ def load_clip(s):
         return w.readframes(w.getnframes())
 
 
-def split_clips(pcm, n):
+def split_clips(pcm, n, gap=SPLIT_SECONDS):
     """The n spoken clips of a narrator take, cut at the silent stretches between them; None when the
     take doesn't hold exactly n."""
     a, frame = array.array("h", pcm), int(SR * 0.02)
@@ -611,13 +612,13 @@ def split_clips(pcm, n):
         db = 20 * math.log10(max(1e-9, math.sqrt(sum(x * x for x in a[i:i + frame]) / frame) / 32768))
         loud.append(db > SPLIT_DB)
     clips, start, quiet = [], None, 0
-    for k, on in enumerate(loud + [False] * int(SPLIT_SECONDS / 0.02 + 1)):
+    for k, on in enumerate(loud + [False] * int(gap / 0.02 + 1)):
         if on:
             start = k if start is None else start
             quiet = 0
         elif start is not None:
             quiet += 1
-            if quiet * 0.02 >= SPLIT_SECONDS:
+            if quiet * 0.02 >= gap:
                 end = k - quiet + 1
                 lo, hi = max(0, start * frame - int(SR * CLIP_PAD)), min(len(a), end * frame + int(SR * CLIP_PAD))
                 clips.append(a[lo:hi].tobytes())
@@ -641,9 +642,64 @@ def narrator_chunks(todo):
     return out
 
 
+def keep_rejected(pcm, name):
+    """A take that wasn't kept is saved here to listen to, not thrown away; only the newest 40 stay."""
+    d = os.path.join(CACHE, "rejected")
+    os.makedirs(d, exist_ok=True)
+    path = os.path.join(d, "%s-%s.wav" % (name, time.strftime("%Y%m%d-%H%M%S")))
+    write_wav(pcm, path)
+    old = sorted(os.listdir(d))
+    for f in old[:-40]:
+        os.remove(os.path.join(d, f))
+    print("    saved to %s" % path, flush=True)
+
+
+def gap_report(pcm):
+    """The silent stretches of 0.5 s or more in a take, in seconds, so a failed split can be understood."""
+    a, frame = array.array("h", pcm), int(SR * 0.02)
+    gaps, run = [], 0
+    for i in range(0, len(a) - frame + 1, frame):
+        db = 20 * math.log10(max(1e-9, math.sqrt(sum(x * x for x in a[i:i + frame]) / frame) / 32768))
+        if db > SPLIT_DB:
+            if run * 0.02 >= 0.5:
+                gaps.append(round(run * 0.02, 1))
+            run = 0
+        else:
+            run += 1
+    return gaps
+
+
+def failed_path(cid):
+    return os.path.join(CACHE, "narrator-%s.failed.wav" % cid)
+
+
 def run_narrator(chunk, st, key):
     voice, style, qs = chunk
     cid = hashlib.sha1("|".join(k for k, _ in qs).encode()).hexdigest()[:12]
+    # A take that failed to split on an earlier run is looked at again first, with shorter silences allowed
+    # between the questions: it costs no recording request.
+    if os.path.exists(failed_path(cid)):
+        with wave.open(failed_path(cid)) as w:
+            pcm = w.readframes(w.getnframes())
+        for gap in RESPLIT_SECONDS:
+            clips = split_clips(pcm, len(qs), gap)
+            if clips:
+                break
+        if clips:
+            print("narrator               checking the take saved earlier (split at %.1f s of silence)… (%s)" % (gap, time.strftime("%H:%M:%S")), flush=True)
+            err, missed, extra = compare(words(" ".join(t for _, t in qs)), words(transcript(pcm, key)))
+            problem = "%d words skipped in a row" % missed if missed >= MAX_GAP else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else ""
+            if not problem:
+                for (k, _), clip in zip(qs, clips):
+                    write_wav(clip, clip_path(k))
+                os.remove(failed_path(cid))
+                print("narrator               %d questions  ready (%2.0f%% word errors, %s, from the saved take)" % (len(qs), err * 100, voice), flush=True)
+                return
+            print("narrator               the saved take isn't usable either (%s)" % problem, flush=True)
+        else:
+            print("narrator               the saved take can't be split into %d questions at any silence length" % len(qs), flush=True)
+        keep_rejected(pcm, "narrator-" + cid)
+        os.remove(failed_path(cid))
     fails = st["narrator_fails"].get(cid, 0)
     if fails >= 2:
         print("narrator (%d questions)  failed twice, needs a look" % len(qs), flush=True)
@@ -663,6 +719,11 @@ def run_narrator(chunk, st, key):
     if problem:
         st["narrator_fails"][cid] = fails + 1
         print("narrator               NOT KEPT (%s)" % problem, flush=True)
+        if pcm:
+            # Saved, so the next run can look at it again without a new request (and so it can be listened to).
+            write_wav(pcm, failed_path(cid))
+            print("    take %.0f s, silent stretches of 0.5 s or more (s): %s" % (len(pcm) / 2 / SR, gap_report(pcm)), flush=True)
+            print("    saved to %s" % failed_path(cid), flush=True)
         return
     for (k, _), clip in zip(qs, clips):
         write_wav(clip, clip_path(k))
@@ -692,6 +753,37 @@ def unchecked_path(s, h=None):
     """A take that came back but couldn't be checked yet (e.g. the transcription got 503s): the raw
     speech, kept so the next run checks it without spending another recording request."""
     return os.path.join(CACHE, "%s-%s.unchecked.wav" % (s["id"], h or content_hash(s)))
+
+
+def rejected_path(s, h=None):
+    return os.path.join(CACHE, "%s-%s.rejected.wav" % (s["id"], h or content_hash(s)))
+
+
+def recheck_rejected(st, s, key, exam):
+    """The take saved when this item last failed: checked again, now, against the current limits (a length
+    that was too long may be allowed now, and a transcription can have misread). Returns it when it now
+    passes, and otherwise puts it with the other rejected takes and returns None."""
+    r = st["rejected"].get(s["id"])
+    path = rejected_path(s)
+    if not r or r.get("hash") != content_hash(s) or not os.path.exists(path):
+        return None
+    with wave.open(path) as w:
+        pcm = w.readframes(w.getnframes())
+    sec = (len(compose(s, pcm)) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
+    problem = length_problem(sec, s)
+    if not problem:
+        err, missed, extra = compare(doc_words(s) if exam else script_words(s), words(transcript(pcm, key)))
+        problem = ("%d words skipped in a row" % missed if missed >= MAX_GAP
+                   else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else "")
+    st["rejected"].pop(s["id"], None)
+    if problem:
+        print("%-22s %s  the take rejected on %s still fails (%s)" % (s["id"], clock(sec), r.get("date"), problem), flush=True)
+        keep_rejected(pcm, s["id"])
+        os.remove(path)
+        return None
+    print("%-22s %s  the take rejected on %s passes now" % (s["id"], clock(sec), r.get("date")), flush=True)
+    os.remove(path)
+    return pcm
 
 
 def load_unchecked(st, s):
@@ -745,6 +837,7 @@ def load_status():
     st.setdefault("takes", {})
     st.setdefault("fails", {})
     st.setdefault("unchecked", {})
+    st.setdefault("rejected", {})
     st.setdefault("narrator_fails", {})
     return st
 
@@ -758,10 +851,10 @@ def run_gemini(sets, items, only=None):
     # Forget takes and failures for scripts that have changed, and delete their files.
     current = {(s["id"], content_hash(s)) for s in everything}
     for f in os.listdir(CACHE):
-        m = re.match(r"(.+)-([0-9a-f]{12})\.(?:mp4|unchecked\.wav)$", f)
+        m = re.match(r"(.+)-([0-9a-f]{12})\.(?:mp4|unchecked\.wav|rejected\.wav)$", f)
         if m and (m.group(1), m.group(2)) not in current:
             os.remove(os.path.join(CACHE, f))
-    for bucket in ("takes", "fails", "unchecked"):
+    for bucket in ("takes", "fails", "unchecked", "rejected"):
         st[bucket] = {k: v for k, v in st[bucket].items() if (k, v.get("hash")) in current}
     # A failure under an older pace instruction doesn't count against the set.
     pace = {s["id"]: pace_of(s) for s in everything}
@@ -788,10 +881,15 @@ def run_gemini(sets, items, only=None):
     print("Gemini: %d set%s or exam item%s to record" % (len(todo), "" if len(todo) == 1 else "s", "" if len(todo) == 1 else "s"), flush=True)
     DEADLINE[0] = time.monotonic() + BATCH_MINUTES * 60
     try:
-        # The narrator's questions first (one request per sixteen), unless every item waiting has its clip.
+        # The narrator's questions first (one request per six), unless every item waiting has its clip.
         for chunk in narrator_chunks([s for s in todo if s["id"] not in st["unchecked"] or not have_clip(s)]):
             run_narrator(chunk, st, key)
             save_json(status_file, st)
+        # Documents wait until every narrator question is recorded, so no request is spent on them meanwhile.
+        left = narrator_chunks(todo)
+        if left:
+            print("Narrator questions first: %d batch%s still to record, no documents today" % (len(left), "" if len(left) == 1 else "es"), flush=True)
+            todo = []
         for s in todo:
             if out_of_time():
                 raise Busy("out of time: the batch ran %d minutes" % BATCH_MINUTES)
@@ -810,6 +908,8 @@ def run_gemini(sets, items, only=None):
             if speech is not None:
                 print("%-22s %s  checking the take recorded on %s… (%s)" % (s["id"], s["level"], st["unchecked"][s["id"]]["date"], time.strftime("%H:%M:%S")), flush=True)
             else:
+                speech = recheck_rejected(st, s, key, exam)
+            if speech is None:
                 print("%-22s %s  recording… (%s)" % (s["id"], s["level"], time.strftime("%H:%M:%S")), flush=True)
                 speech = gemini_speak(s, key)
             whole = compose(s, speech)
@@ -831,11 +931,19 @@ def run_gemini(sets, items, only=None):
                 st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "wer": None if err is None else round(err, 3), "problem": problem,
                                         "seconds": round(sec, 1), "pace": pace_of(s), "date": today()}
                 print("%-22s %s  %s  NOT KEPT (%s)" % (s["id"], clock(sec), checked, problem), flush=True)
+                # Saved, to be checked again on the next run without a new recording (an earlier one goes to rejected/).
+                if os.path.exists(rejected_path(s, h)):
+                    with wave.open(rejected_path(s, h)) as w:
+                        keep_rejected(w.readframes(w.getnframes()), s["id"])
+                write_wav(speech, rejected_path(s, h))
+                st["rejected"][s["id"]] = {"hash": h, "problem": problem, "date": today()}
             else:
                 encode(silence(LEAD_IN) + whole + silence(TAIL), take_path(s, h))
                 voices = {sp: s["cast"][sp]["gemini"] for sp in speakers(s)}
                 st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "wer": round(err, 3), "voices": voices, "pace": pace_of(s), "date": today()}
                 st["fails"].pop(s["id"], None)
+                if st["rejected"].pop(s["id"], None) and os.path.exists(rejected_path(s, h)):
+                    os.remove(rejected_path(s, h))
                 print("%-22s %s  %2.0f%% word errors  ready (%s)" % (s["id"], clock(sec), err * 100, ", ".join(voices.values())), flush=True)
             if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s, h)):
                 os.remove(unchecked_path(s, h))
