@@ -91,6 +91,7 @@
       - the page's entrance, when you open another page or once your progress has loaded (nothing moves before that);
       - an element marked `data-m` (`rise`, `pop`, `slide`, `shake`, `tick` or `burst`) whose key `data-k` wasn't on screen in the previous redraw, so it animates once when it appears and never again on a save. Give it a key that changes exactly when it should animate. A burst plays once per key per visit;
       - bars, rings and numbers marked `data-tween` (with `data-tw` `width`, `ring` or `count`, and `data-to`), from the value they showed before, or from 0 on a page's entrance.
+      - `pen` (Your mistakes): your words crossed out in red, a stroke after another, then the correction written in, when a card is answered.
       - `press`, `fly`, `draw`, `deal`, `chart`, and on the Fiches `pin` (a note taped on), `ink` (a heading's red underline), `slots` (a chain's slots one by one) and `rows` (a table's rows), belong to a page's entrance and also play as it opens: Progrès's earned stamps press in one after another, the boarding pass's plane flies along the part of the route already flown, the overview's headline tiles are dealt in, and its charts draw themselves (columns grow, lines wipe in, dots pop, rings sweep, the heatmap fills in).
       - Below the fold these wait, paused at their start, until they scroll into view, and a number marked `count` counts up when you get to it. A redraw before then carries the wait over to the new copy.
     - It also glides the navigation highlight (`.nav-pill`), slides the toast and the Save to cards panel in, opens folds gently when you open them, fades the colours when you switch light and dark, and gives Rémy's idle cycles one clock (`--clock`), so a redraw doesn't restart them.
@@ -114,7 +115,7 @@
       - `#fiches.<id>` is a sheet, with Cacher, Edit, and Hide (a starter) or Delete (yours). `#fiches.new` and `#fiches.<id>.edit` are the editor: a toolbar that inserts each block, a live preview, ⌘↵ to save and Esc to cancel, and "Rédiger avec Claude" on claude.ai. The draft is kept on refresh (`ui.fx`).
       - Any line can go to your cards with the usual "Save to cards".
     - Each page has its own address after `#` (`#comp.co`, `#grammar.hunt`). On claude.ai the page runs in a frame that reloads without it, so the current page is also kept in the tab's sessionStorage (`tcf-reussir-page`) and reopened after a refresh. A new tab starts on Aujourd'hui.
-    - A refresh keeps whatever you were doing, on claude.ai and locally. What's on screen (`ui`, the clock and the recording's position) is also kept in the tab's sessionStorage (`tcf-reussir-tab`) and put back before anything is drawn. That covers the drill question you're on with what you'd typed, Find the mistakes, a vocabulary session, the Compréhension set with its level and topic, the practice exam and its clock, a recording (paused where it was) and where the page was scrolled.
+    - A refresh keeps whatever you were doing, on claude.ai and locally. What's on screen (`ui`, the clock and the recording's position) is also kept in the tab's sessionStorage (`tcf-reussir-tab`) and put back before anything is drawn. That covers the drill question you're on with what you'd typed, Find the mistakes, a Your mistakes text (`ui.mh`) with its picks, a vocabulary session, the Compréhension set with its level and topic, the practice exam and its clock, a recording (paused where it was) and where the page was scrolled.
       - It's saved as you go, but only once your progress has loaded, so it never holds the empty page from before.
       - Unfinished attempts stay the record: one changed since the copy was saved (on another device, say) wins over it. A copy that can't be drawn is dropped.
       - Bump `TAB_V` in `app.js` when the shape of `ui` changes, so an older copy is dropped rather than misread.
@@ -122,12 +123,38 @@
     - Grammaire has three ways to practise across topics, above the topic list: the mixed review, Your mistakes and Find the mistakes.
     - The **mixed review** takes every topic of the current and earlier phases that has been drilled (the four Phase 1 topics before any), most-missed in the last two weeks first, then the ones practised longest ago, and deals its 15 questions among them in turn, from each topic's sets at the phase's levels.
     - A card missed 4 or more times says so in a review and suggests rewriting it with your own example, or splitting it.
-    - **Your mistakes** (`#grammar.mine`) turns every mistake from Claude's corrections of writing and production checks, and from the error log, into a typed drill item.
-      - The cue is what the learner wrote. The question is the sentence with a gap where the correction goes, taken from Claude's corrected text when the correction is found there. Otherwise it's the learner's sentence with the draft's other corrections applied.
-      - The same mistake made again counts once, and every correction given for it is accepted. "(e)" forms are expanded.
-      - Left out: punctuation-only changes, corrections longer than 14 words, and mistakes the learner hides. Hidden ones are kept in `settings.main.mineHidden`, by their normalised wording.
-      - Rounds of 10 go: new mistakes (the most often made first), then the ones missed last time, then the ones right once, then fixed ones. A mistake is fixed after two right answers in a row.
-      - Rounds are saved in `drills` with topic `mine`, set `errors`. A mistake is recognised by its wording alone.
+    - **Your mistakes** (`#grammar.mine`): your own texts with your mistakes put back in them. Find them, then pick the fix. The user asked on 2026-10-09 for every question to have one definite answer, which the old typed exercise didn't (Claude's correction had to be typed word for word), and chose this mix of a paragraph hunt and multiple choice.
+      - **Where they come from:** every mistake from Claude's corrections of writing and production checks, and from the error log.
+        - The same mistake made again counts once. It's recognised by its wording alone (`mk`, what the learner wrote).
+        - Left out: corrections that change nothing or only punctuation, and mistakes the learner hides (kept in `settings.main.mineHidden`, by their normalised wording).
+      - **Claude prepares each corrected text once,** in one request (`minePrep`), right after a correction or production check, in the background. The page offers « Prepare with Claude » for any text not prepared yet, one after another, with Stop.
+        - For each correction Claude gives:
+          - `kind`: `error`; `style` (what was written was already correct French); or `skip` (not a point of French: a name, punctuation, a missing sentence).
+          - `span`: the shortest exact excerpt of the corrected text that holds the correction.
+          - `wrong`: that excerpt with the mistake put back.
+          - `near`: 3 near-misses, each wrong French (1 for a style tip).
+          - `why`: the rule in one line.
+        - `minePrepClean` checks the answer. The excerpt must be in the corrected text as whole words, or else the correction itself is looked for, and the options must all be different.
+        - It's saved in the `mistakes` collection.
+        - A mistake none of whose texts is prepared is « Not prepared yet » and waits. Without Claude (the local site), it's asked as a « Hors texte » card with two options: the correction or what was written.
+      - **A round is one text:** a corrected draft with every `error` it holds put back as the learner wrote it, with no cap. Style tips stay in their corrected form.
+        - Where mistakes overlap, `mineFit` keeps the set that puts the most back. A sentence-wide rewrite gives way to the smaller mistakes inside it, and on a tie the longer excerpts win.
+        - A mistake needs at least 2 near-misses to be put back.
+        - Which text: EE drafts before production checks; then the one with the most mistakes not fixed yet (new and missed count most); then the one done longest ago. Never the text just done while there's another.
+        - Up to 3 mistakes that can't be in a text come after it as « Hors texte » cards: error-log entries (Claude writes them a sentence with a gap), or corrections not in the corrected text.
+      - **The hunt:** tap the words that look wrong, then Check. Found mistakes turn blue ink, missed ones get a red underline, each numbered, and fine words tapped are crossed out.
+      - **The fix:** one card per mistake found, with the correction and its 3 near-misses. The learner's own version isn't an option, since they've just marked it. « Hors texte » cards show their sentence and include the learner's version.
+        - A pick is judged at once. The right one pops and the text rewrites itself: your words struck through in red pen, the correction written in (`penDiff` and the `pen` motion).
+        - A wrong pick shakes, and the right option lights up.
+        - Keys 1–4 pick.
+        - The text is saved when the last card is answered.
+      - **Scoring:** a mistake is caught when it's found and fixed, as in Find the mistakes. It's fixed after it's caught twice in a row.
+        - Rounds are saved in `drills` with topic `mine`, set `errors`, `src: "text"`, `text` (the draft's ref) and `found`/`extra`. Every item is a choice with `mk` and `found`.
+        - Retry today's misses asks the missed ones again as choices in their sentence: the correction, your version and 2 near-misses (`mineChoice`).
+      - **Style tips** (`kind: "style"`) are practised apart: « Conseils de style », up to 10 questions of « Which sounds more natural? » (the drill engine, set `style`).
+        - They're kept out of the mistake counts (the tile, the dashboard) and never fixed.
+        - Their round doesn't tick the day's Your mistakes block.
+      - **The typed exercise it replaced:** its rounds (`drills`, topic `mine`, set `errors`, without `src: "text"`) and its unfinished round (`inprogress` `drill--mine--errors`) stay in the database untouched, but the site no longer reads them (`retired` in `list()` and `ipGet()`). The user asked for its progress to go.
     - **Find the mistakes** (`#grammar.hunt`) gives a text from `proofread.js`: the first not done at the level (B1 in Phases 1–2, B2 after, switchable), or else the one done longest ago.
       - The learner taps the words that look wrong, then types a correction for each mistake found. A mistake is caught when it's both found and corrected.
       - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). A text in progress isn't an unfinished attempt, since it takes a few minutes, but a refresh keeps it.
@@ -248,7 +275,11 @@
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
 - Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-1/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
-- Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress, fiches.
+- Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress, fiches, mistakes.
+  - `mistakes` holds Claude's preparation of each corrected text for Your mistakes:
+    - `w-<writing id>` and `p-<production check id>`: `{ ref, v, ts, items: [{ n, mk, kind, span, wrong, near, why }] }`, with `n` the correction's place in the text's `fb.errors`;
+    - `log` for the error log, its `items` keyed by entry id, each with a `q` sentence.
+    - A new `PREP_V` in `app.js` asks for every text again.
   - `fiches` holds your sheets (`f-…`: `title`, `en`, `tag`, `for`, `body`, `created`, `edited`, `ts`) and your Pense-bête notes (`n-…`, `kind: "note"`, `text`). An edited starter is saved under its own id and replaces it until "Restore the original"; a hidden starter keeps `hidden: true` (with any edits). Sheets are content, like cards, not attempts, so they're not in the history.
   - `speaking` holds the attempts saved before the Oral page was removed (2026-10-06). The site no longer reads it, but it stays in `COLLS` so nothing is lost; an unfinished speaking attempt is dropped at load.
   - `cards` holds the learner's own cards and Claude's (ids `c-…`). It also holds cards edited from the review page (Edit card, or the E key). Those are saved under the card's own id, so its `srs` progress stays.
@@ -262,7 +293,7 @@
   - A finished practice exam is saved with `kind: "exam"` and its `skill`. It also adds a `mocks` entry in its skill's column, labelled as a site estimate.
 - History keeps only two kinds of record, shown in Progrès → Historique:
   - **Unfinished attempts** live in `inprogress`, one record per activity:
-    - `drill--<topic>--<set>` (`drill--mine--errors` for Your mistakes) and `drill--mixed`
+    - `drill--<topic>--<set>` (`drill--mine--style` for the style tips; a Your mistakes text, like Find the mistakes, is kept only in the tab) and `drill--mixed`
     - `prod--<topic>`
     - `ce--<setId>` and `co--<setId>`
     - `exam--ce` and `exam--co` (a CO exam is kept from its start, with its phase and how far into the recording it was)
