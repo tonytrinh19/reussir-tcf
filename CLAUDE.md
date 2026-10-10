@@ -275,6 +275,7 @@
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
 - Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-1/*.mp4` as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
+  - Delete a branch once its pull request is merged (the user asked on 2026-10-10). Cloud sessions can't delete branches on GitHub, so the repo's "Automatically delete head branches" setting does it, or the user deletes them.
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress, fiches, mistakes.
   - `mistakes` holds Claude's preparation of each corrected text for Your mistakes:
     - `w-<writing id>` and `p-<production check id>`: `{ ref, v, ts, items: [{ n, mk, kind, span, wrong, near, why }] }`, with `n` the correction's place in the text's `fb.errors`;
