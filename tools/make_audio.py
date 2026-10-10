@@ -105,6 +105,7 @@ PACE_EXAM = {"A1": "Speak slowly and clearly, as for a learner of French at leve
 # For the spoken options of a picture or reply item, and the narrator's questions (recorded apart).
 OPTION_NOTE = " Read each option on its own, then stay silent for about a second."
 NARRATOR_NOTE = " Read the question once, steadily. Then stay completely silent for four seconds before the next one."
+RESPLIT_SECONDS = (1.5, 1.0, 0.7)  # shorter silences tried on a saved narrator take that didn't split
 NARRATOR_CHUNK = 6         # questions per narrator request (16 at once never came back cleanly separated)
 QUESTION_GAP = 1.6         # the pause between an item's document and its question (GAP_QUESTION)
 SPLIT_DB, SPLIT_SECONDS, CLIP_PAD = -50.0, 2.0, 0.15  # silence that separates narrator questions, and the margin kept
@@ -602,7 +603,7 @@ def load_clip(s):
         return w.readframes(w.getnframes())
 
 
-def split_clips(pcm, n):
+def split_clips(pcm, n, gap=SPLIT_SECONDS):
     """The n spoken clips of a narrator take, cut at the silent stretches between them; None when the
     take doesn't hold exactly n."""
     a, frame = array.array("h", pcm), int(SR * 0.02)
@@ -611,13 +612,13 @@ def split_clips(pcm, n):
         db = 20 * math.log10(max(1e-9, math.sqrt(sum(x * x for x in a[i:i + frame]) / frame) / 32768))
         loud.append(db > SPLIT_DB)
     clips, start, quiet = [], None, 0
-    for k, on in enumerate(loud + [False] * int(SPLIT_SECONDS / 0.02 + 1)):
+    for k, on in enumerate(loud + [False] * int(gap / 0.02 + 1)):
         if on:
             start = k if start is None else start
             quiet = 0
         elif start is not None:
             quiet += 1
-            if quiet * 0.02 >= SPLIT_SECONDS:
+            if quiet * 0.02 >= gap:
                 end = k - quiet + 1
                 lo, hi = max(0, start * frame - int(SR * CLIP_PAD)), min(len(a), end * frame + int(SR * CLIP_PAD))
                 clips.append(a[lo:hi].tobytes())
@@ -668,9 +669,37 @@ def gap_report(pcm):
     return gaps
 
 
+def failed_path(cid):
+    return os.path.join(CACHE, "narrator-%s.failed.wav" % cid)
+
+
 def run_narrator(chunk, st, key):
     voice, style, qs = chunk
     cid = hashlib.sha1("|".join(k for k, _ in qs).encode()).hexdigest()[:12]
+    # A take that failed to split on an earlier run is looked at again first, with shorter silences allowed
+    # between the questions: it costs no recording request.
+    if os.path.exists(failed_path(cid)):
+        with wave.open(failed_path(cid)) as w:
+            pcm = w.readframes(w.getnframes())
+        for gap in RESPLIT_SECONDS:
+            clips = split_clips(pcm, len(qs), gap)
+            if clips:
+                break
+        if clips:
+            print("narrator               checking the take saved earlier (split at %.1f s of silence)… (%s)" % (gap, time.strftime("%H:%M:%S")), flush=True)
+            err, missed, extra = compare(words(" ".join(t for _, t in qs)), words(transcript(pcm, key)))
+            problem = "%d words skipped in a row" % missed if missed >= MAX_GAP else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else ""
+            if not problem:
+                for (k, _), clip in zip(qs, clips):
+                    write_wav(clip, clip_path(k))
+                os.remove(failed_path(cid))
+                print("narrator               %d questions  ready (%2.0f%% word errors, %s, from the saved take)" % (len(qs), err * 100, voice), flush=True)
+                return
+            print("narrator               the saved take isn't usable either (%s)" % problem, flush=True)
+        else:
+            print("narrator               the saved take can't be split into %d questions at any silence length" % len(qs), flush=True)
+        keep_rejected(pcm, "narrator-" + cid)
+        os.remove(failed_path(cid))
     fails = st["narrator_fails"].get(cid, 0)
     if fails >= 2:
         print("narrator (%d questions)  failed twice, needs a look" % len(qs), flush=True)
@@ -691,8 +720,10 @@ def run_narrator(chunk, st, key):
         st["narrator_fails"][cid] = fails + 1
         print("narrator               NOT KEPT (%s)" % problem, flush=True)
         if pcm:
+            # Saved, so the next run can look at it again without a new request (and so it can be listened to).
+            write_wav(pcm, failed_path(cid))
             print("    take %.0f s, silent stretches of 0.5 s or more (s): %s" % (len(pcm) / 2 / SR, gap_report(pcm)), flush=True)
-            keep_rejected(pcm, "narrator-" + cid)
+            print("    saved to %s" % failed_path(cid), flush=True)
         return
     for (k, _), clip in zip(qs, clips):
         write_wav(clip, clip_path(k))
