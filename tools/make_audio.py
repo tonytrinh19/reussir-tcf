@@ -755,6 +755,37 @@ def unchecked_path(s, h=None):
     return os.path.join(CACHE, "%s-%s.unchecked.wav" % (s["id"], h or content_hash(s)))
 
 
+def rejected_path(s, h=None):
+    return os.path.join(CACHE, "%s-%s.rejected.wav" % (s["id"], h or content_hash(s)))
+
+
+def recheck_rejected(st, s, key, exam):
+    """The take saved when this item last failed: checked again, now, against the current limits (a length
+    that was too long may be allowed now, and a transcription can have misread). Returns it when it now
+    passes, and otherwise puts it with the other rejected takes and returns None."""
+    r = st["rejected"].get(s["id"])
+    path = rejected_path(s)
+    if not r or r.get("hash") != content_hash(s) or not os.path.exists(path):
+        return None
+    with wave.open(path) as w:
+        pcm = w.readframes(w.getnframes())
+    sec = (len(compose(s, pcm)) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
+    problem = length_problem(sec, s)
+    if not problem:
+        err, missed, extra = compare(doc_words(s) if exam else script_words(s), words(transcript(pcm, key)))
+        problem = ("%d words skipped in a row" % missed if missed >= MAX_GAP
+                   else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else "")
+    st["rejected"].pop(s["id"], None)
+    if problem:
+        print("%-22s %s  the take rejected on %s still fails (%s)" % (s["id"], clock(sec), r.get("date"), problem), flush=True)
+        keep_rejected(pcm, s["id"])
+        os.remove(path)
+        return None
+    print("%-22s %s  the take rejected on %s passes now" % (s["id"], clock(sec), r.get("date")), flush=True)
+    os.remove(path)
+    return pcm
+
+
 def load_unchecked(st, s):
     u = st["unchecked"].get(s["id"])
     if not u or u.get("hash") != content_hash(s) or not os.path.exists(unchecked_path(s)):
@@ -806,6 +837,7 @@ def load_status():
     st.setdefault("takes", {})
     st.setdefault("fails", {})
     st.setdefault("unchecked", {})
+    st.setdefault("rejected", {})
     st.setdefault("narrator_fails", {})
     return st
 
@@ -819,10 +851,10 @@ def run_gemini(sets, items, only=None):
     # Forget takes and failures for scripts that have changed, and delete their files.
     current = {(s["id"], content_hash(s)) for s in everything}
     for f in os.listdir(CACHE):
-        m = re.match(r"(.+)-([0-9a-f]{12})\.(?:mp4|unchecked\.wav)$", f)
+        m = re.match(r"(.+)-([0-9a-f]{12})\.(?:mp4|unchecked\.wav|rejected\.wav)$", f)
         if m and (m.group(1), m.group(2)) not in current:
             os.remove(os.path.join(CACHE, f))
-    for bucket in ("takes", "fails", "unchecked"):
+    for bucket in ("takes", "fails", "unchecked", "rejected"):
         st[bucket] = {k: v for k, v in st[bucket].items() if (k, v.get("hash")) in current}
     # A failure under an older pace instruction doesn't count against the set.
     pace = {s["id"]: pace_of(s) for s in everything}
@@ -876,6 +908,8 @@ def run_gemini(sets, items, only=None):
             if speech is not None:
                 print("%-22s %s  checking the take recorded on %s… (%s)" % (s["id"], s["level"], st["unchecked"][s["id"]]["date"], time.strftime("%H:%M:%S")), flush=True)
             else:
+                speech = recheck_rejected(st, s, key, exam)
+            if speech is None:
                 print("%-22s %s  recording… (%s)" % (s["id"], s["level"], time.strftime("%H:%M:%S")), flush=True)
                 speech = gemini_speak(s, key)
             whole = compose(s, speech)
@@ -897,12 +931,19 @@ def run_gemini(sets, items, only=None):
                 st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "wer": None if err is None else round(err, 3), "problem": problem,
                                         "seconds": round(sec, 1), "pace": pace_of(s), "date": today()}
                 print("%-22s %s  %s  NOT KEPT (%s)" % (s["id"], clock(sec), checked, problem), flush=True)
-                keep_rejected(speech, s["id"])
+                # Saved, to be checked again on the next run without a new recording (an earlier one goes to rejected/).
+                if os.path.exists(rejected_path(s, h)):
+                    with wave.open(rejected_path(s, h)) as w:
+                        keep_rejected(w.readframes(w.getnframes()), s["id"])
+                write_wav(speech, rejected_path(s, h))
+                st["rejected"][s["id"]] = {"hash": h, "problem": problem, "date": today()}
             else:
                 encode(silence(LEAD_IN) + whole + silence(TAIL), take_path(s, h))
                 voices = {sp: s["cast"][sp]["gemini"] for sp in speakers(s)}
                 st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "wer": round(err, 3), "voices": voices, "pace": pace_of(s), "date": today()}
                 st["fails"].pop(s["id"], None)
+                if st["rejected"].pop(s["id"], None) and os.path.exists(rejected_path(s, h)):
+                    os.remove(rejected_path(s, h))
                 print("%-22s %s  %2.0f%% word errors  ready (%s)" % (s["id"], clock(sec), err * 100, ", ".join(voices.values())), flush=True)
             if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s, h)):
                 os.remove(unchecked_path(s, h))
