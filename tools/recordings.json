@@ -88,21 +88,23 @@
   }
  },
  "co-exam-1-01": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-10",
+  "engine": "gemini",
   "hash": "12ddbe433f3c",
-  "seconds": 16.0,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 19.8,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-1"
   }
  },
  "co-exam-1-02": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-10",
+  "engine": "gemini",
   "hash": "e780ca7f5802",
-  "seconds": 16.8,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 16.0,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-tutor-6"
   }
  },
  "co-exam-1-03": {
@@ -115,42 +117,46 @@
   }
  },
  "co-exam-1-04": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-10",
+  "engine": "gemini",
   "hash": "f1ee297605f3",
-  "seconds": 18.0,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 16.5,
   "voices": {
-   "N": "remy"
+   "N": "fr-fr-podcaster-2"
   }
  },
  "co-exam-1-05": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-10",
+  "engine": "gemini",
   "hash": "e178cbd7177c",
-  "seconds": 20.8,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 21.1,
   "voices": {
-   "A": "remy",
-   "B": "vivienne"
+   "A": "fr-fr-advisor-2",
+   "B": "fr-fr-csagent-3"
   }
  },
  "co-exam-1-06": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-10",
+  "engine": "gemini",
   "hash": "cc3fefa9495e",
-  "seconds": 21.5,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 17.5,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-podcaster-5",
+   "B": "fr-fr-podcaster-8"
   }
  },
  "co-exam-1-07": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-10",
+  "engine": "gemini",
   "hash": "62322a3daff0",
-  "seconds": 23.8,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 20.7,
   "voices": {
-   "A": "vivienne",
-   "B": "remy"
+   "A": "fr-fr-advisor-12",
+   "B": "fr-fr-concierge-4"
   }
  },
  "co-exam-1-08": {
