@@ -641,6 +641,33 @@ def narrator_chunks(todo):
     return out
 
 
+def keep_rejected(pcm, name):
+    """A take that wasn't kept is saved here to listen to, not thrown away; only the newest 40 stay."""
+    d = os.path.join(CACHE, "rejected")
+    os.makedirs(d, exist_ok=True)
+    path = os.path.join(d, "%s-%s.wav" % (name, time.strftime("%Y%m%d-%H%M%S")))
+    write_wav(pcm, path)
+    old = sorted(os.listdir(d))
+    for f in old[:-40]:
+        os.remove(os.path.join(d, f))
+    print("    saved to %s" % path, flush=True)
+
+
+def gap_report(pcm):
+    """The silent stretches of 0.5 s or more in a take, in seconds, so a failed split can be understood."""
+    a, frame = array.array("h", pcm), int(SR * 0.02)
+    gaps, run = [], 0
+    for i in range(0, len(a) - frame + 1, frame):
+        db = 20 * math.log10(max(1e-9, math.sqrt(sum(x * x for x in a[i:i + frame]) / frame) / 32768))
+        if db > SPLIT_DB:
+            if run * 0.02 >= 0.5:
+                gaps.append(round(run * 0.02, 1))
+            run = 0
+        else:
+            run += 1
+    return gaps
+
+
 def run_narrator(chunk, st, key):
     voice, style, qs = chunk
     cid = hashlib.sha1("|".join(k for k, _ in qs).encode()).hexdigest()[:12]
@@ -663,6 +690,9 @@ def run_narrator(chunk, st, key):
     if problem:
         st["narrator_fails"][cid] = fails + 1
         print("narrator               NOT KEPT (%s)" % problem, flush=True)
+        if pcm:
+            print("    take %.0f s, silent stretches of 0.5 s or more (s): %s" % (len(pcm) / 2 / SR, gap_report(pcm)), flush=True)
+            keep_rejected(pcm, "narrator-" + cid)
         return
     for (k, _), clip in zip(qs, clips):
         write_wav(clip, clip_path(k))
@@ -836,6 +866,7 @@ def run_gemini(sets, items, only=None):
                 st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "wer": None if err is None else round(err, 3), "problem": problem,
                                         "seconds": round(sec, 1), "pace": pace_of(s), "date": today()}
                 print("%-22s %s  %s  NOT KEPT (%s)" % (s["id"], clock(sec), checked, problem), flush=True)
+                keep_rejected(speech, s["id"])
             else:
                 encode(silence(LEAD_IN) + whole + silence(TAIL), take_path(s, h))
                 voices = {sp: s["cast"][sp]["gemini"] for sp in speakers(s)}
