@@ -105,7 +105,7 @@ PACE_EXAM = {"A1": "Speak slowly and clearly, as for a learner of French at leve
 # For the spoken options of a picture or reply item, and the narrator's questions (recorded apart).
 OPTION_NOTE = " Read each option on its own, then stay silent for about a second."
 NARRATOR_NOTE = " Read the question once, steadily. Then stay completely silent for four seconds before the next one."
-NARRATOR_CHUNK = 16        # questions per narrator request
+NARRATOR_CHUNK = 6         # questions per narrator request (16 at once never came back cleanly separated)
 QUESTION_GAP = 1.6         # the pause between an item's document and its question (GAP_QUESTION)
 SPLIT_DB, SPLIT_SECONDS, CLIP_PAD = -50.0, 2.0, 0.15  # silence that separates narrator questions, and the margin kept
 # One stuck request used to hold the whole batch past the routine's limit, with nothing printed.
@@ -788,10 +788,15 @@ def run_gemini(sets, items, only=None):
     print("Gemini: %d set%s or exam item%s to record" % (len(todo), "" if len(todo) == 1 else "s", "" if len(todo) == 1 else "s"), flush=True)
     DEADLINE[0] = time.monotonic() + BATCH_MINUTES * 60
     try:
-        # The narrator's questions first (one request per sixteen), unless every item waiting has its clip.
+        # The narrator's questions first (one request per six), unless every item waiting has its clip.
         for chunk in narrator_chunks([s for s in todo if s["id"] not in st["unchecked"] or not have_clip(s)]):
             run_narrator(chunk, st, key)
             save_json(status_file, st)
+        # Documents wait until every narrator question is recorded, so no request is spent on them meanwhile.
+        left = narrator_chunks(todo)
+        if left:
+            print("Narrator questions first: %d batch%s still to record, no documents today" % (len(left), "" if len(left) == 1 else "es"), flush=True)
+            todo = []
         for s in todo:
             if out_of_time():
                 raise Busy("out of time: the batch ran %d minutes" % BATCH_MINUTES)
