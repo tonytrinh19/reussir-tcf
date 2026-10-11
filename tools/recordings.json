@@ -160,13 +160,14 @@
   }
  },
  "co-exam-1-08": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-11",
+  "engine": "gemini",
   "hash": "c5cfd021c48d",
-  "seconds": 20.5,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 20.2,
   "voices": {
-   "A": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-tutor-7",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-09": {
@@ -180,14 +181,15 @@
   }
  },
  "co-exam-1-10": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-11",
+  "engine": "gemini",
   "hash": "dd457003b015",
-  "seconds": 23.8,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 19.8,
   "voices": {
-   "A": "vivienne",
-   "B": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-11": {
