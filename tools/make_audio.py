@@ -34,6 +34,7 @@ import array
 import asyncio
 import base64
 import datetime
+import difflib
 import hashlib
 import http.client
 import io
@@ -101,8 +102,15 @@ GAP_OPTION, GAP_QUESTION = 0.9, 1.6
 
 GEMINI_API = "https://generativelanguage.googleapis.com/v1beta"
 GEMINI_TTS = "gemini-3.8-flash-tts"
-GEMINI_CHECK = "gemini-3.8-flash"  # transcribes each take to catch skipped or repeated words
-MAX_WER, MAX_GAP = 0.08, 5  # a take fails over 8% word errors, or with 5+ words skipped or added in a row
+# A take is kept on its length alone. Each one used to be transcribed by gemini-3.8-flash to catch skipped
+# or added words, but that never caught one, and its 503s held whole nights back (dropped 2026-10-13).
+# Instead --audit transcribes every Gemini recording on the site once, when everything is converted.
+GEMINI_CHECK = "gemini-3.8-flash"
+# The audit's verdicts: re-record over 8% word errors or 5+ words skipped or added in a row; listen to one
+# over 3%, or where a number differs (a wrong time or price changes an answer).
+REDO_WER, REDO_RUN, LISTEN_WER = 0.08, 5, 0.03
+AUDIT_FILE = os.path.join(CACHE, "audit.json")       # transcripts so far, by file, so a rerun carries on
+AUDIT_REPORT = os.path.join(CACHE, "audit-report.md")
 # Gemini reads fast: "unhurried" still gave B1 about 180 words a minute (1:50), so B1 asks for a slow pace.
 PACE = {"B1": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
         "B2": "Speak at a natural pace."}
@@ -298,8 +306,7 @@ def spell(n):
 
 
 def words(s):
-    """Lower-case words without accents or punctuation, numbers spelled out, for counting and for
-    comparing a transcript with its script whichever way each writes the numbers."""
+    """Lower-case words without accents or punctuation, numbers spelled out, for counting spoken words."""
     s = re.sub(r"\d+", lambda m: " " + spell(int(m.group())) + " " if len(m.group()) <= 6 else m.group(), s)
     s = unicodedata.normalize("NFD", s.lower().replace("’", "'"))
     s = "".join(c for c in s if unicodedata.category(c) != "Mn")
@@ -567,42 +574,6 @@ def gemini_speak(s, key):
     return b"".join(pcm)
 
 
-def transcript(pcm, key):
-    """Gemini's word-for-word transcript of a take (sent as 16 kHz WAV to keep the request small)."""
-    with tempfile.TemporaryDirectory() as tmp:
-        src, low = os.path.join(tmp, "in.wav"), os.path.join(tmp, "low.wav")
-        write_wav(pcm, src)
-        subprocess.run(["afconvert", "-f", "WAVE", "-d", "LEI16@16000", "-c", "1", src, low], check=True, capture_output=True)
-        with open(low, "rb") as f:
-            audio = base64.b64encode(f.read()).decode()
-    body = {"contents": [{"parts": [
-        {"inline_data": {"mime_type": "audio/wav", "data": audio}},
-        {"text": "Transcris cet enregistrement en français, mot pour mot, sans rien corriger. Écris les nombres en toutes lettres, comme ils sont prononcés. Réponds uniquement avec la transcription."},
-    ]}]}
-    r = gemini("/models/%s:generateContent" % GEMINI_CHECK, body, key, "transcription")
-    return "".join(p.get("text", "") for c in r.get("candidates", [])[:1] for p in c.get("content", {}).get("parts", []))
-
-
-def compare(ref, hyp):
-    """How far a transcript is from its script: the word error rate, and the longest run of script
-    words left out and of extra words put in (a skipped or repeated phrase)."""
-    n, m = len(ref), len(hyp)
-    d = [list(range(m + 1))] + [[i] + [0] * m for i in range(1, n + 1)]
-    for i in range(1, n + 1):
-        for j in range(1, m + 1):
-            d[i][j] = min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (ref[i - 1] != hyp[j - 1]))
-    i, j, run, most = n, m, {"miss": 0, "extra": 0}, {"miss": 0, "extra": 0}
-    while i or j:
-        if i and j and d[i][j] == d[i - 1][j - 1] + (ref[i - 1] != hyp[j - 1]):
-            i, j, run = i - 1, j - 1, {"miss": 0, "extra": 0}
-            continue
-        kind = "miss" if i and d[i][j] == d[i - 1][j] + 1 else "extra"
-        i, j = (i - 1, j) if kind == "miss" else (i, j - 1)
-        run[kind], run["miss" if kind == "extra" else "extra"] = run[kind] + 1, 0
-        most[kind] = max(most[kind], run[kind])
-    return d[n][m] / max(1, n), most["miss"], most["extra"]
-
-
 # ---- the exam narrator: every missing question of a voice in one request, split at its silences
 
 def clip_key(s):
@@ -706,18 +677,12 @@ def run_narrator(chunk, st, key):
             if clips:
                 break
         if clips:
-            print("narrator               checking the take saved earlier (split at %.1f s of silence)… (%s)" % (gap, time.strftime("%H:%M:%S")), flush=True)
-            err, missed, extra = compare(words(" ".join(t for _, t in qs)), words(transcript(pcm, key)))
-            problem = "%d words skipped in a row" % missed if missed >= MAX_GAP else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else ""
-            if not problem:
-                for (k, _), clip in zip(qs, clips):
-                    write_wav(clip, clip_path(k))
-                os.remove(failed_path(cid))
-                print("narrator               %d questions  ready (%2.0f%% word errors, %s, from the saved take)" % (len(qs), err * 100, voice), flush=True)
-                return
-            print("narrator               the saved take isn't usable either (%s)" % problem, flush=True)
-        else:
-            print("narrator               the saved take can't be split into %d questions at any silence length" % len(qs), flush=True)
+            for (k, _), clip in zip(qs, clips):
+                write_wav(clip, clip_path(k))
+            os.remove(failed_path(cid))
+            print("narrator               %d questions  ready (%s, from the take saved earlier, split at %.1f s of silence)" % (len(qs), voice, gap), flush=True)
+            return
+        print("narrator               the saved take can't be split into %d questions at any silence length" % len(qs), flush=True)
         keep_rejected(pcm, "narrator-" + cid)
         os.remove(failed_path(cid))
     fails = st["narrator_fails"].get(cid, 0)
@@ -733,9 +698,6 @@ def run_narrator(chunk, st, key):
                    for c in step.get("content", []) if c.get("type") == "audio" and c.get("data"))
     clips = split_clips(pcm, len(qs)) if pcm else None
     problem = "" if clips else ("no audio" if not pcm else "the questions weren't separated by silences (expected %d clips)" % len(qs))
-    if clips:
-        err, missed, extra = compare(words(" ".join(t for _, t in qs)), words(transcript(pcm, key)))
-        problem = "%d words skipped in a row" % missed if missed >= MAX_GAP else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else ""
     if problem:
         st["narrator_fails"][cid] = fails + 1
         print("narrator               NOT KEPT (%s)" % problem, flush=True)
@@ -747,7 +709,7 @@ def run_narrator(chunk, st, key):
         return
     for (k, _), clip in zip(qs, clips):
         write_wav(clip, clip_path(k))
-    print("narrator               %d questions  ready (%2.0f%% word errors, %s)" % (len(qs), err * 100, voice), flush=True)
+    print("narrator               %d questions  ready (%s)" % (len(qs), voice), flush=True)
 
 
 def compose(s, speech):
@@ -769,20 +731,14 @@ def on_site_gemini(manifest, s):
     return m.get("engine") == "gemini" and m.get("hash") == content_hash(s)
 
 
-def unchecked_path(s, h=None):
-    """A take that came back but couldn't be checked yet (e.g. the transcription got 503s): the raw
-    speech, kept so the next run checks it without spending another recording request."""
-    return os.path.join(CACHE, "%s-%s.unchecked.wav" % (s["id"], h or content_hash(s)))
-
-
 def rejected_path(s, h=None):
     return os.path.join(CACHE, "%s-%s.rejected.wav" % (s["id"], h or content_hash(s)))
 
 
-def recheck_rejected(st, s, key, exam):
+def recheck_rejected(st, s):
     """The take saved when this item last failed: checked again, now, against the current limits (a length
-    that was too long may be allowed now, and a transcription can have misread). Returns it when it now
-    passes, and otherwise puts it with the other rejected takes and returns None."""
+    that was too long may be allowed now, and a take turned down for its wording is kept now). Returns it
+    when it passes, and otherwise puts it with the other rejected takes and returns None."""
     r = st["rejected"].get(s["id"])
     path = rejected_path(s)
     if not r or r.get("hash") != content_hash(s) or not os.path.exists(path):
@@ -791,10 +747,6 @@ def recheck_rejected(st, s, key, exam):
         pcm = w.readframes(w.getnframes())
     sec = (len(compose(s, pcm)) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
     problem = length_problem(sec, s)
-    if not problem:
-        err, missed, extra = compare(doc_words(s) if exam else script_words(s), words(transcript(pcm, key)))
-        problem = ("%d words skipped in a row" % missed if missed >= MAX_GAP
-                   else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else "")
     st["rejected"].pop(s["id"], None)
     if problem:
         print("%-22s %s  the take rejected on %s still fails (%s)" % (s["id"], clock(sec), r.get("date"), problem), flush=True)
@@ -806,14 +758,6 @@ def recheck_rejected(st, s, key, exam):
     return pcm
 
 
-def load_unchecked(st, s):
-    u = st["unchecked"].get(s["id"])
-    if not u or u.get("hash") != content_hash(s) or not os.path.exists(unchecked_path(s)):
-        return None
-    with wave.open(unchecked_path(s)) as w:
-        return w.readframes(w.getnframes())
-
-
 def take_ready(status, s):
     t = status["takes"].get(s["id"])
     return bool(t) and t.get("hash") == content_hash(s) and os.path.exists(take_path(s))
@@ -821,11 +765,11 @@ def take_ready(status, s):
 
 def gemini_wpm(st, sets, manifest):
     """Gemini's median words a minute at each level, from every read of a current script with the
-    current pace instruction: the recordings on the site and the takes kept, failed or not checked yet.
+    current pace instruction: the recordings on the site and the takes kept or failed.
     Takes that skipped or added words are left out, since their length doesn't match the script."""
     by_id, rates = {s["id"]: s for s in sets}, {}
     reads = [(k, v) for k, v in manifest.items() if v.get("engine") == "gemini"]
-    reads += [(k, v) for b in ("takes", "fails", "unchecked") for k, v in st[b].items()
+    reads += [(k, v) for b in ("takes", "fails") for k, v in st[b].items()
               if b != "fails" or not re.search(r"skipped|added", v.get("problem", ""))]
     for k, v in reads:
         s = by_id.get(k)
@@ -863,7 +807,7 @@ def exam_wpm(st, items, manifest):
     of a current script with the current pace instruction, like gemini_wpm for the sets."""
     by_id, rates = {s["id"]: s for s in items}, {}
     reads = [(k, v) for k, v in manifest.items() if v.get("engine") == "gemini"]
-    reads += [(k, v) for b in ("takes", "fails", "unchecked") for k, v in st[b].items()
+    reads += [(k, v) for b in ("takes", "fails") for k, v in st[b].items()
               if b != "fails" or not re.search(r"skipped|added", v.get("problem", ""))]
     for k, v in reads:
         s = by_id.get(k)
@@ -923,7 +867,6 @@ def load_status():
     st = load_json(os.path.join(CACHE, "status.json"), {})
     st.setdefault("takes", {})
     st.setdefault("fails", {})
-    st.setdefault("unchecked", {})
     st.setdefault("rejected", {})
     st.setdefault("narrator_fails", {})
     return st
@@ -941,7 +884,7 @@ def run_gemini(sets, items, only=None):
         m = re.match(r"(.+)-([0-9a-f]{12})\.(?:mp4|unchecked\.wav|rejected\.wav)$", f)
         if m and (m.group(1), m.group(2)) not in current:
             os.remove(os.path.join(CACHE, f))
-    for bucket in ("takes", "fails", "unchecked", "rejected"):
+    for bucket in ("takes", "fails", "rejected"):
         st[bucket] = {k: v for k, v in st[bucket].items() if (k, v.get("hash")) in current}
     # A failure under an older pace instruction doesn't count against the set.
     pace = {s["id"]: pace_of(s) for s in everything}
@@ -951,6 +894,8 @@ def run_gemini(sets, items, only=None):
     by_id = {s["id"]: s for s in everything}
     st["fails"] = {k: v for k, v in st["fails"].items()
                    if not (v.get("problem") in ("too long", "too short") and v.get("seconds") and not length_problem(v["seconds"], by_id[k]))}
+    # A failure for its wording doesn't count either, since takes are no longer checked against their script.
+    st["fails"] = {k: v for k, v in st["fails"].items() if v.get("problem") in ("too long", "too short")}
     manifest = load_json(MANIFEST, {})
     done = [s for s in everything if on_site_gemini(manifest, s)]
     todo = [s for s in everything if s not in done and not take_ready(st, s) and st["fails"].get(s["id"], {}).get("count", 0) < 2
@@ -958,16 +903,14 @@ def run_gemini(sets, items, only=None):
     for s in done:  # converted: the cached copies are no longer needed
         if st["takes"].pop(s["id"], None) and os.path.exists(take_path(s)):
             os.remove(take_path(s))
-        if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s)):
-            os.remove(unchecked_path(s))
     # Narrator clips are kept only for the questions of items still to do.
     wanted = {clip_key(s) for s in everything if "exam" in s and question_of(s) and s not in done}
     for f in os.listdir(CACHE):
         m = re.match(r"q-([0-9a-f]{12})\.wav$", f)
         if m and m.group(1) not in wanted:
             os.remove(os.path.join(CACHE, f))
-    # Takes already recorded but not checked go first: they cost no recording request.
-    todo.sort(key=lambda s: s["id"] not in st["unchecked"])
+    # Takes saved when they last failed go first: they cost no recording request if they pass now.
+    todo.sort(key=lambda s: s["id"] not in st["rejected"])
     if done:
         print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s or exam item%s to record" % (len(todo), "" if len(todo) == 1 else "s", "" if len(todo) == 1 else "s"), flush=True)
@@ -975,7 +918,7 @@ def run_gemini(sets, items, only=None):
     DEADLINE[0] = time.monotonic() + BATCH_MINUTES * 60
     try:
         # The narrator's questions first (one request per six), unless every item waiting has its clip.
-        for chunk in narrator_chunks([s for s in todo if s["id"] not in st["unchecked"] or not have_clip(s)]):
+        for chunk in narrator_chunks(todo):
             run_narrator(chunk, st, key)
             save_json(status_file, st)
         # Documents wait until every narrator question is recorded, so no request is spent on them meanwhile.
@@ -997,34 +940,19 @@ def run_gemini(sets, items, only=None):
                     s["id"], s["level"], expected[0], expected[1], "at least" if expected[0] == "too short" else "at most", expected[2]), flush=True)
                 continue
             h = content_hash(s)
-            speech = load_unchecked(st, s)
-            if speech is not None:
-                print("%-22s %s  checking the take recorded on %s… (%s)" % (s["id"], s["level"], st["unchecked"][s["id"]]["date"], time.strftime("%H:%M:%S")), flush=True)
-            else:
-                speech = recheck_rejected(st, s, key, exam)
+            speech = recheck_rejected(st, s)
             if speech is None:
                 expect = "  expect about %s, %s allows %s–%s" % (clock(expected_seconds(s, wpm[s["level"]][0])), s["level"], clock(s["secs"][0]), clock(s["secs"][1])) if exam else ""
                 print("%-22s %s  recording…%s (%s)" % (s["id"], s["level"], expect, time.strftime("%H:%M:%S")), flush=True)
                 speech = gemini_speak(s, key)
             whole = compose(s, speech)
             sec = (len(whole) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
-            if not length_problem(sec, s) and s["id"] not in st["unchecked"]:
-                # Saved before the check, so a transcription outage doesn't throw the recording away.
-                write_wav(speech, unchecked_path(s, h))
-                st["unchecked"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "pace": pace_of(s), "date": today()}
-                save_json(status_file, st)
-            # A take outside its length can't be kept, so it isn't worth a transcription request.
             problem = length_problem(sec, s)
-            ref = doc_words(s) if exam else script_words(s)
-            err, missed, extra = (None, 0, 0) if problem else compare(ref, words(transcript(speech, key)))
-            problem = problem or ("%d words skipped in a row" % missed if missed >= MAX_GAP
-                       else "%d words added in a row" % extra if extra >= MAX_GAP else "misread" if err > MAX_WER else "")
-            checked = "not checked     " if err is None else "%2.0f%% word errors" % (err * 100)
             if problem:
                 f = st["fails"].get(s["id"], {"count": 0})
-                st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "wer": None if err is None else round(err, 3), "problem": problem,
+                st["fails"][s["id"]] = {"hash": h, "count": f["count"] + 1, "problem": problem,
                                         "seconds": round(sec, 1), "pace": pace_of(s), "date": today()}
-                print("%-22s %s  %s  NOT KEPT (%s)" % (s["id"], clock(sec), checked, problem), flush=True)
+                print("%-22s %s  NOT KEPT (%s)" % (s["id"], clock(sec), problem), flush=True)
                 # Saved, to be checked again on the next run without a new recording (an earlier one goes to rejected/).
                 if os.path.exists(rejected_path(s, h)):
                     with wave.open(rejected_path(s, h)) as w:
@@ -1034,14 +962,12 @@ def run_gemini(sets, items, only=None):
             else:
                 encode(silence(LEAD_IN) + whole + silence(TAIL), take_path(s, h))
                 voices = {sp: s["cast"][sp]["gemini"] for sp in speakers(s)}
-                st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "wer": round(err, 3), "voices": voices, "pace": pace_of(s), "date": today()}
+                st["takes"][s["id"]] = {"hash": h, "seconds": round(sec, 1), "voices": voices, "pace": pace_of(s), "date": today()}
                 st["fails"].pop(s["id"], None)
                 if st["rejected"].pop(s["id"], None) and os.path.exists(rejected_path(s, h)):
                     os.remove(rejected_path(s, h))
                 note = length_note(sec, s)
-                print("%-22s %s  %2.0f%% word errors  ready (%s)%s" % (s["id"], clock(sec), err * 100, ", ".join(voices.values()), ("  NOTE: " + note) if note else ""), flush=True)
-            if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s, h)):
-                os.remove(unchecked_path(s, h))
+                print("%-22s %s  ready (%s)%s" % (s["id"], clock(sec), ", ".join(voices.values()), ("  NOTE: " + note) if note else ""), flush=True)
             save_json(status_file, st)
     except DailyLimit:
         print("Stopped at Gemini's daily limit (10 requests on the free tier). The next run continues.", flush=True)
@@ -1054,8 +980,6 @@ def run_gemini(sets, items, only=None):
     if items:
         have = sum(on_site_gemini(manifest, s) or take_ready(st, s) for s in items)
         print("Exam: %d of %d items ready" % (have, len(items)))
-    if st["unchecked"]:
-        print("Recorded, not checked yet (kept for the next run): " + ", ".join(sorted(st["unchecked"])))
     if stuck:
         print("Failed twice, needs a look: " + ", ".join(sorted(stuck)))
     long = long_items(st, items, manifest)
@@ -1095,6 +1019,119 @@ def use_gemini(sets, ids):  # sets here are sets and exam items
     print("Put %d Gemini recording%s on the site" % (used, "" if used == 1 else "s"))
 
 
+# ---- the audit: every Gemini recording on the site transcribed once and compared with its script
+
+def transcript_file(path, key):
+    """Gemini's word-for-word transcript of a recording on the site (sent as 16 kHz WAV to keep it small)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        low = os.path.join(tmp, "low.wav")
+        subprocess.run(["afconvert", "-f", "WAVE", "-d", "LEI16@16000", "-c", "1", path, low], check=True, capture_output=True)
+        with open(low, "rb") as f:
+            audio = base64.b64encode(f.read()).decode()
+    body = {"contents": [{"parts": [
+        {"inline_data": {"mime_type": "audio/wav", "data": audio}},
+        {"text": "Transcris cet enregistrement en français, mot pour mot, sans rien corriger. Écris les nombres en toutes lettres, comme ils sont prononcés. Réponds uniquement avec la transcription."},
+    ]}]}
+    r = gemini("/models/%s:generateContent" % GEMINI_CHECK, body, key, "transcription")
+    return "".join(p.get("text", "") for c in r.get("candidates", [])[:1] for p in c.get("content", {}).get("parts", []))
+
+
+NUMBER_WORDS = set(words(" ".join(spell(n) for n in range(0, 101)) + " cent mille million milliard"))
+
+
+def differences(ref, hyp):
+    """The word error rate, the longest run of script words left out and of extra words, and each place the
+    transcript differs from the script, with a few words around it."""
+    sm, errors, most, out = difflib.SequenceMatcher(None, ref, hyp, autojunk=False), 0, {"miss": 0, "extra": 0}, []
+    for op, i1, i2, j1, j2 in sm.get_opcodes():
+        if op == "equal":
+            continue
+        errors += max(i2 - i1, j2 - j1)
+        if op == "delete" or (op == "replace" and i2 - i1 > j2 - j1):
+            most["miss"] = max(most["miss"], i2 - i1 - (j2 - j1))
+        if op == "insert" or (op == "replace" and j2 - j1 > i2 - i1):
+            most["extra"] = max(most["extra"], j2 - j1 - (i2 - i1))
+        out.append({"kind": {"delete": "skipped", "insert": "added", "replace": "heard instead"}[op],
+                    "said": " ".join(ref[i1:i2]), "heard": " ".join(hyp[j1:j2]),
+                    "before": " ".join(ref[max(0, i1 - 4):i1]), "after": " ".join(ref[i2:i2 + 4]),
+                    "number": bool(NUMBER_WORDS & set(ref[i1:i2] + hyp[j1:j2]))})
+    return errors / max(1, len(ref)), most["miss"], most["extra"], out
+
+
+def verdict(wer, miss, extra, diffs):
+    if wer > REDO_WER or miss >= REDO_RUN or extra >= REDO_RUN:
+        return "re-record"
+    if wer > LISTEN_WER or any(d["number"] for d in diffs):
+        return "listen"
+    return "fine"
+
+
+def audit(sets, items):
+    """Transcribes every Gemini recording on the site not transcribed yet (by its file's hash, so a re-recorded
+    file is transcribed again), then writes the report. A 503 or the daily limit only pauses it."""
+    manifest, done = load_json(MANIFEST, {}), load_json(AUDIT_FILE, {})
+    todo = [s for s in sets + items if on_site_gemini(manifest, s) and os.path.exists(out_path(s))]
+    left = [s for s in todo if (done.get(s["id"]) or {}).get("file") != file_hash(out_path(s))]
+    total = len(sets) + len(items)
+    print("Audit: %d Gemini recordings on the site (of %d), %d to transcribe" % (len(todo), total, len(left)), flush=True)
+    key = api_key() if left else None
+    try:
+        for s in left:
+            text = transcript_file(out_path(s), key)
+            done[s["id"]] = {"file": file_hash(out_path(s)), "text": text, "date": today()}
+            save_json(AUDIT_FILE, done)
+            print("%-22s transcribed" % s["id"], flush=True)
+    except DailyLimit:
+        print("Audit paused at Gemini's daily limit. Run --audit again to carry on.", flush=True)
+    except Busy as e:
+        print("Audit paused: Gemini stayed unavailable (%s). Run --audit again to carry on." % e, flush=True)
+    rows = []
+    for s in todo:
+        d = done.get(s["id"])
+        if not d or d.get("file") != file_hash(out_path(s)):
+            continue
+        wer, miss, extra, diffs = differences(script_words(s), words(d["text"]))
+        rows.append({"s": s, "wer": wer, "miss": miss, "extra": extra, "diffs": diffs, "verdict": verdict(wer, miss, extra, diffs)})
+    write_report(rows, len(todo), total)
+    complete = len(rows) == len(todo) == total
+    print("Audit: %d of %d transcribed%s. Report: %s" % (len(rows), len(todo), " · AUDIT COMPLETE" if complete else "", AUDIT_REPORT))
+    for v in ("re-record", "listen"):
+        ids = [r["s"]["id"] for r in rows if r["verdict"] == v]
+        print("%s: %s" % ("Re-record" if v == "re-record" else "Worth a listen", ", ".join(ids) or "none"))
+
+
+def file_hash(path):
+    with open(path, "rb") as f:
+        return hashlib.sha1(f.read()).hexdigest()[:12]
+
+
+def write_report(rows, on_site, total):
+    """The audit as Markdown: the totals, then each file to re-record or listen to with what differs."""
+    ref = sum(len(script_words(r["s"])) for r in rows)
+    errs = sum(r["wer"] * len(script_words(r["s"])) for r in rows)
+    rows = sorted(rows, key=lambda r: (["re-record", "listen", "fine"].index(r["verdict"]), -r["wer"]))
+    out = ["# Gemini recordings: transcript check", "",
+           "%s · %d of %d recordings transcribed (%d on the site with Gemini)." % (today(), len(rows), total, on_site), "",
+           "Overall: %.1f%% word errors over %d words. %d to re-record, %d worth a listen, %d fine." % (
+               100 * errs / max(1, ref), ref, sum(r["verdict"] == "re-record" for r in rows),
+               sum(r["verdict"] == "listen" for r in rows), sum(r["verdict"] == "fine" for r in rows)), "",
+           "Re-record: over %d%% word errors, or %d+ words skipped or added in a row. Worth a listen: over %d%%, or a number "
+           "differs. The transcript can be wrong too, so listen before re-recording." % (REDO_WER * 100, REDO_RUN, LISTEN_WER * 100), "",
+           "| File | Level | Words | Word errors | Longest skip / addition | Verdict |", "|---|---|---|---|---|---|"]
+    for r in rows:
+        out.append("| %s | %s | %d | %.1f%% | %d / %d | %s |" % (r["s"]["id"], r["s"]["level"], len(script_words(r["s"])), 100 * r["wer"], r["miss"], r["extra"], r["verdict"]))
+    for r in rows:
+        if r["verdict"] == "fine":
+            continue
+        out += ["", "## %s (%s, %s)" % (r["s"]["id"], r["verdict"], r["s"]["file"] if "file" in r["s"] else "audio/%s.mp4" % r["s"]["id"]), ""]
+        for d in r["diffs"]:
+            said = "~~%s~~" % d["said"] if d["said"] else ""
+            heard = "**%s**" % d["heard"] if d["heard"] else ""
+            out.append("- %s: …%s %s %s %s…%s" % (d["kind"], d["before"], said, heard, d["after"], " (a number)" if d["number"] else ""))
+    with open(AUDIT_REPORT, "w") as f:
+        f.write("\n".join(out) + "\n")
+
+
 def status(sets, items):
     st, manifest = load_status(), load_json(MANIFEST, {})
     targets, counts, wpm = word_targets(st, sets, manifest), {}, exam_wpm(st, items, manifest)
@@ -1109,9 +1146,7 @@ def status(sets, items):
         t = st["takes"].get(s["id"])
         fails = st["fails"].get(s["id"], {}).get("count", 0)
         expected = None if exam else expected_problem(targets, s)
-        u = st["unchecked"].get(s["id"])
         gem = ("on the site" if on_site_gemini(manifest, s) else "ready %s" % clock(t["seconds"]) if take_ready(st, s)
-               else "recorded %s, not checked yet" % clock(u["seconds"]) if u and u.get("hash") == content_hash(s)
                else "failed %d×" % fails if fails else "script %s (%d words, target %d)" % expected if expected
                else "to do (narrator question not recorded)" if exam and not have_clip(s) else "to do")
         if exam and gem.startswith(("to do", "failed")):
@@ -1139,7 +1174,7 @@ def main():
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
     sets = load_sets()
     items = load_exam()
-    known = {"--force", "--gemini", "--use-gemini", "--status", "--word-counts"}
+    known = {"--force", "--gemini", "--use-gemini", "--status", "--word-counts", "--audit"}
     if flags - known:  # a mistyped flag (--help included) used to start a Microsoft recording
         sys.exit("Unknown option: %s. Options: %s" % (", ".join(sorted(flags - known)), ", ".join(sorted(known))))
     unknown = [a for a in args if a not in {s["id"] for s in sets + items}]
@@ -1147,6 +1182,8 @@ def main():
         sys.exit("Unknown set id: " + ", ".join(unknown))
     if "--word-counts" in flags:  # for tools/check_co.js, so both count the spoken words the same way
         print(json.dumps({s["id"]: len(script_words(s)) for s in sets + items}))
+    elif "--audit" in flags:
+        audit(sets, items)
     elif "--status" in flags:
         status(sets, items)
     elif "--gemini" in flags:
