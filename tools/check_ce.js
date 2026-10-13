@@ -170,6 +170,26 @@ exams.forEach((ex) => {
   matchReport(`${ex.title} B1–B2`, mid);
 });
 
+/* ---------- no document twice ---------- */
+// A title used twice across the practice sets and the exams usually means the same document came back.
+const seenTitles = new Map();
+const titleOf = (t) => norm(t).replace(/[^a-z0-9]+/g, " ").trim();
+sets.forEach((s) => (s.questions || []).forEach((q, j) => { const t = q.doc && q.doc.title; if (t) seenTitles.set(titleOf(t), (seenTitles.get(titleOf(t)) || []).concat(`${s.id} doc ${j + 1}`)); }));
+exams.forEach((ex) => (ex.items || []).forEach((it, i) => { if (it.title) seenTitles.set(titleOf(it.title), (seenTitles.get(titleOf(it.title)) || []).concat(`${ex.id} item ${i + 1}`)); }));
+[...seenTitles.values()].filter((w) => w.length > 1).forEach((w) => fail(`the same document title appears in ${w.join(" and ")}`));
+
+/* ---------- the kinds of question in the newer exams ---------- */
+// Exams written to the October 2026 research (v: 2) ask, as prep guides describe the real test, at least two
+// vocabulary-in-context questions at B2–C1 (« Dans le texte, l'expression « … » signifie… ») and at least two
+// about a document's purpose at A2–B1 (« Quel est le but de ce … ? »).
+exams.filter((ex) => ex.v >= 2).forEach((ex) => {
+  const its = ex.items || [];
+  const vocab = its.filter((it) => (it.level === "B2" || it.level === "C1") && /signifi|veut dire|sens/i.test(it.q)).length;
+  const goal = its.filter((it) => (it.level === "A2" || it.level === "B1") && /\b(but|objectif)\b/i.test(it.q)).length;
+  if (vocab < 2) fail(`${ex.id}: ${vocab} vocabulary-in-context question${vocab === 1 ? "" : "s"} at B2–C1, needs at least 2`);
+  if (goal < 2) fail(`${ex.id}: ${goal} question${goal === 1 ? "" : "s"} about a document's purpose at A2–B1, needs at least 2`);
+});
+
 if (errors.length) {
   console.log(`\n${errors.length} problem${errors.length > 1 ? "s" : ""}:`);
   errors.forEach((e) => console.log("  - " + e));

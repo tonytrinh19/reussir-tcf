@@ -105,6 +105,7 @@
     - A chart given a `key` draws itself once as it appears (`data-m="chart"` in `motion.js`).
     - In `app.js`, the "charts" section above the pages holds what more than one page charts: `dayMinutes` (a day's ticked minutes by skill), `weekChart`, `dueChart` and `stageChart`. Besides the overview, small charts sit on Aujourd'hui (Régularité: this week's minutes ticked against the plan's), Grammaire (each topic's latest round as a ring with its target), Vocabulaire (the review panel: cards due this week and cards by stage), Écrit (the scores out of 20 above the history) and Évolution (a sparkline beside each group's chain of scores).
   - `app.js`: the app logic.
+    - **Saved progress is read-only on claude.ai** (the `db` capability hands back frozen documents), so never change an object or array that came from `S` or `list()`: copy it first (`clone`, `.slice()`, `Object.assign({}, …)`). Locally nothing is frozen, so a mistake only shows on claude.ai (on 2026-10-12, a `push` onto a round's `items` broke Aujourd'hui with « Attempted to assign to readonly property »). To test locally, deep-freeze what `tryServer` loads.
     - Aujourd'hui: the notebook header has the date, the day's ring (blocks ticked, minutes to go) and Rémy. The next block to do is open with its details and a big Start; the others open with a tap; done ones shrink to a ticked line. « Ce qui te freine » (below) sits in the side column; the Régularité card no longer has À surveiller.
     - **The coach** (the "coach" section of `app.js`): the user asked on 2026-10-11 for Start to present the right exercise of the day and for the plan to adapt to their progress, speed and what holds them back. They chose: each block keeps its skill, but its level, set, topic and clock follow progress, and a block whose exercise is mastered goes to the biggest blocker in that same skill.
       - **Only today's blocks are coached** (`coach(b, i, date)`); other days show the plan's text. Each gets two short lines (what to do, then what moves you on), chips, its minutes and, when the plan was changed, a red-pen « adapté » tag with the reason.
@@ -183,9 +184,15 @@
     - They're pitched like the real test's items, as `TCF_CANADA.ceLevels` in `data.js` describes for each level: B1 (questions 11–19) is everyday texts of 70–150 words, asking what a document is for or what we learn from it as a whole; B2 (20–29) is articles and opinion pieces of 140–260 words, asking the writer's position, intention or what's implied. The calibration comes from France Éducation International's sample items and the Manuel du candidat.
     - The right answer rewords the document; the wrong options reuse its words. Never ask which option is NOT true.
     - Set ids end in `-s1` (`ce-<topic>-<level>-s1`). The sets before them had other ids, so their old attempts can't be shown against new questions; unfinished attempts at sets that no longer exist are cleared at load.
-  - `exam-ce.js`: the built-in CE practice exams, Examen blanc 1 and 2. Each has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). The score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
+  - `exam-ce.js`: the built-in CE practice exams, Examens blancs 1 to 5. Each has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). The score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
     - Their B1 and B2 items follow `ceLevels` like the practice sets, and the other levels keep to the lengths `ceLevels` gives too. No document repeats a topic from the other exam or the practice sets.
-    - Exam 1's id became `ce-exam-1-v2` when its B1 and B2 items were rewritten. Exam 2 is `ce-exam-2`.
+    - Exam 1's id became `ce-exam-1-v2` when its B1 and B2 items were rewritten. Exam 2 is `ce-exam-2`; exams 3–5 are `ce-exam-3`, `-4` and `-5`.
+    - **Exams 3–5** (`v: 2`) were written on 2026-10-12, when the user asked for more reading exams matched by research to the real test. They follow the research noted on `TCF_CANADA.ceLevels`:
+      - the *Manuel du candidat*, version J (September 2024): 39 questions in 60 minutes, rising difficulty, only right answers counted and weighted by difficulty, and its list of documents from short messages to long factual or literary texts (FEI's own page is behind a bot check; the manual was read from a test centre's copy);
+      - prep guides (languagenext, tcfca, testdelangue-canada and others), used as a guide only: they add vocabulary-in-context and purpose questions, describe the traps, and put the core themes (housing, work, health, education, settling in, daily life) at about 70%, with AI and jobs, affordable housing, mental health, climate and diversity as rising themes.
+      - Settings mix Canada with France, Belgium, Switzerland and francophone Africa, since FEI's samples are set in France and Exam 2 was almost all Canadian.
+      - Each has at least two vocabulary-in-context questions at B2–C1 and two purpose questions at A2–B1 (`check_ce.js` holds `v: 2` exams to that), and no document title repeats one from another exam or the practice sets.
+    - The coach presents the next built-in exam not done yet on a CE exam block.
     - Every item is original writing. Never copy or lightly reword items from TCF prep sites or past papers; the user asked for that once (formation-tcfcanada.com's série 2), and Examen blanc 2 was written from scratch instead.
   - `exam-co.js`: the built-in CO practice exam, Examen blanc 1 (`co-exam-1`). The user asked for it on 2026-10-05, matching the real TCF Canada as closely as possible and checked against outside sources.
     - **The real test's format,** confirmed then:
@@ -283,6 +290,8 @@
   - Lengths: B1 and B2 documents keep to the word counts in `TCF_CANADA.ceLevels`.
   - Option lengths: the right answer must not stand out as the longest or shortest option.
   - Word matching: the right answer can't be the option that shares the most words with the document more than 30% of the time, or the fewest more than 40%, and on average it mustn't share more than the wrong options. Otherwise the answer could be found by matching words instead of understanding.
+  - No document title appears twice across the practice sets and the exams.
+  - Exams marked `v: 2` have at least two vocabulary-in-context questions at B2–C1 and two questions on a document's purpose at A2–B1.
   - Run `node tools/check_ce.js` after editing `comp-ce.js` or `exam-ce.js`.
 
 ## Publishing
