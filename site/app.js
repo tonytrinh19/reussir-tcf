@@ -584,7 +584,8 @@
     list("errors").forEach((e) => { if ((e.date || "") >= since) { const c = catOf(e.category); logN.set(c, (logN.get(c) || 0) + 1); } });
     list("drills").forEach((d) => {
       if (d.set === "prod") return;
-      const its = (d.ts || 0) >= from ? arr(d.items) : [];
+      // A copy: on claude.ai saved progress is read-only, and the round's own list mustn't change anyway.
+      const its = (d.ts || 0) >= from ? arr(d.items).slice() : [];
       retriesOf(d).forEach((r) => { if ((r.ts || 0) >= from) its.push(...arr(r.items)); });
       its.forEach((it) => { const k = it.topic || d.topic; if (!it.ok && TOPIC[k]) miss.set(k, (miss.get(k) || 0) + 1); });
     });
