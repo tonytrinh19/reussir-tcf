@@ -193,55 +193,60 @@
   }
  },
  "co-exam-1-11": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-12",
+  "engine": "gemini",
   "hash": "4ec21a5a3ffa",
-  "seconds": 34.5,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 24.3,
   "voices": {
-   "A": "vivienne",
-   "B": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-tutor-4",
+   "B": "fr-fr-advisor-4",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-12": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-12",
+  "engine": "gemini",
   "hash": "a7e8952c79cc",
-  "seconds": 32.2,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 33.5,
   "voices": {
-   "A": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-13": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-12",
+  "engine": "gemini",
   "hash": "376754a5ddb2",
-  "seconds": 31.6,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 27.3,
   "voices": {
-   "A": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-14": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-12",
+  "engine": "gemini",
   "hash": "af7b00f3a294",
-  "seconds": 32.2,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 25.7,
   "voices": {
-   "A": "vivienne",
-   "B": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-training-4",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-15": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-12",
+  "engine": "gemini",
   "hash": "f92086d15594",
-  "seconds": 29.3,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 33.5,
   "voices": {
-   "A": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-5",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-16": {
