@@ -108,12 +108,13 @@
   }
  },
  "co-exam-1-03": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-13",
+  "engine": "gemini",
   "hash": "519eb488d39f",
-  "seconds": 16.3,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 22.3,
   "voices": {
-   "N": "vivienne"
+   "N": "fr-fr-podcaster-9"
   }
  },
  "co-exam-1-04": {
@@ -171,13 +172,14 @@
   }
  },
  "co-exam-1-09": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-13",
+  "engine": "gemini",
   "hash": "340e752637b9",
-  "seconds": 23.8,
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 26.6,
   "voices": {
-   "A": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-10": {
