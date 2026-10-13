@@ -183,9 +183,15 @@
     - They're pitched like the real test's items, as `TCF_CANADA.ceLevels` in `data.js` describes for each level: B1 (questions 11–19) is everyday texts of 70–150 words, asking what a document is for or what we learn from it as a whole; B2 (20–29) is articles and opinion pieces of 140–260 words, asking the writer's position, intention or what's implied. The calibration comes from France Éducation International's sample items and the Manuel du candidat.
     - The right answer rewords the document; the wrong options reuse its words. Never ask which option is NOT true.
     - Set ids end in `-s1` (`ce-<topic>-<level>-s1`). The sets before them had other ids, so their old attempts can't be shown against new questions; unfinished attempts at sets that no longer exist are cleared at load.
-  - `exam-ce.js`: the built-in CE practice exams, Examen blanc 1 and 2. Each has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). The score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
+  - `exam-ce.js`: the built-in CE practice exams, Examens blancs 1 to 5. Each has 39 items, one document each, in the level blocks of `TCF_CANADA.ceExam` (A1 ×4 up to C2 ×4). The score is an estimate from the points per level that prep sites use, because FEI doesn't publish its own scoring.
     - Their B1 and B2 items follow `ceLevels` like the practice sets, and the other levels keep to the lengths `ceLevels` gives too. No document repeats a topic from the other exam or the practice sets.
-    - Exam 1's id became `ce-exam-1-v2` when its B1 and B2 items were rewritten. Exam 2 is `ce-exam-2`.
+    - Exam 1's id became `ce-exam-1-v2` when its B1 and B2 items were rewritten. Exam 2 is `ce-exam-2`; exams 3–5 are `ce-exam-3`, `-4` and `-5`.
+    - **Exams 3–5** (`v: 2`) were written on 2026-10-12, when the user asked for more reading exams matched by research to the real test. They follow the research noted on `TCF_CANADA.ceLevels`:
+      - the *Manuel du candidat*, version J (September 2024): 39 questions in 60 minutes, rising difficulty, only right answers counted and weighted by difficulty, and its list of documents from short messages to long factual or literary texts (FEI's own page is behind a bot check; the manual was read from a test centre's copy);
+      - prep guides (languagenext, tcfca, testdelangue-canada and others), used as a guide only: they add vocabulary-in-context and purpose questions, describe the traps, and put the core themes (housing, work, health, education, settling in, daily life) at about 70%, with AI and jobs, affordable housing, mental health, climate and diversity as rising themes.
+      - Settings mix Canada with France, Belgium, Switzerland and francophone Africa, since FEI's samples are set in France and Exam 2 was almost all Canadian.
+      - Each has at least two vocabulary-in-context questions at B2–C1 and two purpose questions at A2–B1 (`check_ce.js` holds `v: 2` exams to that), and no document title repeats one from another exam or the practice sets.
+    - The coach presents the next built-in exam not done yet on a CE exam block.
     - Every item is original writing. Never copy or lightly reword items from TCF prep sites or past papers; the user asked for that once (formation-tcfcanada.com's série 2), and Examen blanc 2 was written from scratch instead.
   - `exam-co.js`: the built-in CO practice exam, Examen blanc 1 (`co-exam-1`). The user asked for it on 2026-10-05, matching the real TCF Canada as closely as possible and checked against outside sources.
     - **The real test's format,** confirmed then:
@@ -283,6 +289,8 @@
   - Lengths: B1 and B2 documents keep to the word counts in `TCF_CANADA.ceLevels`.
   - Option lengths: the right answer must not stand out as the longest or shortest option.
   - Word matching: the right answer can't be the option that shares the most words with the document more than 30% of the time, or the fewest more than 40%, and on average it mustn't share more than the wrong options. Otherwise the answer could be found by matching words instead of understanding.
+  - No document title appears twice across the practice sets and the exams.
+  - Exams marked `v: 2` have at least two vocabulary-in-context questions at B2–C1 and two questions on a document's purpose at A2–B1.
   - Run `node tools/check_ce.js` after editing `comp-ce.js` or `exam-ce.js`.
 
 ## Publishing
