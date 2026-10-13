@@ -408,7 +408,8 @@
   // The button under a selection pops up, and the panel slides up when it opens.
   function watchGrab() {
     if (typeof MutationObserver !== "function") return;
-    [["grab-btn", [{ opacity: 0, transform: "translateY(6px) scale(.9)" }, { opacity: 1, transform: "none" }], 200], ["grab", [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], 260]].forEach(([id, frames, ms]) => {
+    // The next bar (what's next in today's plan) rises from the bottom; it keeps its own centring transform.
+    [["grab-btn", [{ opacity: 0, transform: "translateY(6px) scale(.9)" }, { opacity: 1, transform: "none" }], 200], ["grab", [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], 260], ["nextup", [{ opacity: 0, translate: "0 22px", scale: ".97" }, { opacity: 1, translate: "0 -3px", scale: "1", offset: 0.7 }, { opacity: 1, translate: "0 0", scale: "1" }], 420]].forEach(([id, frames, ms]) => {
       const el = document.getElementById(id);
       if (!el) return;
       let was = el.hidden;

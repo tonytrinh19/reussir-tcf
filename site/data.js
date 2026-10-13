@@ -83,28 +83,28 @@ window.TCF = (function () {
         [
           ["voc", 10, "Cards + 10–15 new: work & employment", "Due cards first, then the new ones. Theme cards English → French, so you practise producing the words.", "Recall each card before you flip it.", "vocab.new.travail"],
           ["gra", 20, "Séquence des temps", "One round, then Retry the misses. Imparfait, passé composé or plus-que-parfait? Watch for implied anteriority.", "8/10+ on the day's first round is the Phase 2 target (baseline 6/10).", "grammar.sequence"],
-          ["co", 25, "Listening set: once through, then dig in", "Play it once without pausing and answer, like the exam. Then replay it with the transcript and find where each miss was said.", "For each miss: vocabulary gap or comprehension gap?", "comp.co"],
+          ["co", 25, "Listening set: once through, then dig in", "One set at your level, once without pausing, like the exam. Then replay each miss with the transcript. 5/6 or better adds a second set.", "For each miss: vocabulary gap or comprehension gap?", "comp.co"],
           ["ee", 30, "Tâche 1 on the clock", "A fresh prompt, 15 minutes. Then 3 minutes of proofreading: accents, agreement, elision, verb + preposition.", "Inside 60–120 words?", "writing.t1"],
           ["co", 20, "Easy listening", "Outside your study time: commute or chores. French you can follow without pausing, and no dictionary.", "You understood nearly everything.", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "Spaced-repetition review. No new cards today.", "Recall each card cold.", "vocab.review"],
           ["gra", 20, "Si-clauses, types 1 & 2", "One round, then Retry the misses.", "", "grammar.si"],
-          ["ce", 25, "Reading set at exam pace", "Start the timer at exam pace: 6 minutes for 4 B1 questions. Answer every question, guessing if you must, then go back over each miss untimed.", "Done in time, nothing blank? For each miss: vocabulary gap or comprehension gap?", "comp.ce"],
+          ["ce", 25, "Reading set at exam pace", "One set at your level on the clock (6:00 for 4 B1 questions at exam pace; more while you build up to it). Answer every question, then go over each miss without the clock. 3/4 inside the clock adds a second set.", "Done in time, nothing blank? For each miss: vocabulary gap or comprehension gap?", "comp.ce"],
           ["gra", 10, "Your mistakes", "One round of the mistakes from your own corrected writing.", "", "grammar.mine"],
           ["ce", 20, "Easy reading", "Outside your study time: a graded reader or an easy article. Read on without stopping for every word.", "You understood nearly everything.", "comp.free.ce"],
         ],
         [
           ["voc", 10, "Cards + 10–15 new: education & health", "", "", "vocab.new.education"],
           ["gra", 20, "Relative pronouns", "One round, then Retry the misses: qui, que, où, dont, lequel.", "", "grammar.relatifs"],
-          ["co", 25, "Listening set #2: once through, then dig in", "Once without pausing, answer, then replay it with the transcript.", "", "comp.co"],
+          ["co", 25, "Listening set #2: once through, then dig in", "Once without pausing, answer, then replay each miss with the transcript. 5/6 or better adds a second set.", "", "comp.co"],
           ["ee", 30, "Tâche 2 on the clock", "120–150 words in 20 minutes, then the 3-minute proofreading pass.", "Inside 120–150 words?", "writing.t2"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
           ["gra", 20, "Object pronouns + y / en", "One round, then Retry the misses.", "", "grammar.pronoms"],
-          ["ce", 25, "Reading set #2 at exam pace", "Exam pace, nothing blank. Move up to B2 sets once your B1 sets are at 3/4 or better.", "", "comp.ce"],
+          ["ce", 25, "Reading set #2 at exam pace", "One set on the clock, nothing blank, then your misses without it. 3/4 inside the clock adds a second set.", "", "comp.ce"],
           ["gra", 10, "Find the mistakes", "One text: tap what looks wrong, then correct it. It's the eye you need to proofread your own writing.", "", "grammar.hunt"],
           ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
@@ -117,8 +117,8 @@ window.TCF = (function () {
         ],
         [
           ["gra", 15, "Mixed review", "Questions from every topic you've practised so far, Phase 1 included.", "Which topic is still weakest? Give it next week's extra round.", "grammar.mixed"],
-          ["co", 20, "Timed CO set", "Back to back with the CE set. Listen once only.", "", "comp.co"],
-          ["ce", 20, "Timed CE set", "Exam pace, nothing blank.", "", "comp.ce"],
+          ["co", 20, "Timed CO set", "Back to back with the CE set: listen once only, answer, then replay your misses with the transcript.", "", "comp.co"],
+          ["ce", 20, "Timed CE set", "One set on the clock, nothing blank, then your misses without it.", "", "comp.ce"],
           ["ee", 25, "Rewrite from memory", "Reread the correction of your best piece this week, close it, and write it again from memory. Then compare.", "Are the corrected forms in your rewrite?", "writing"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
@@ -130,28 +130,28 @@ window.TCF = (function () {
         [
           ["voc", 10, "Cards + 10–15 new: environment & climate", "", "", "vocab.new.environnement"],
           ["gra", 20, "Subjonctif vs conditionnel", "Contrastive drill after afin que / avant que: your named gap.", "12/15+ on the day's first round is the Phase 3 target.", "grammar.subjonctif.contraste"],
-          ["co", 25, "B2 listening set: once through, then dig in", "Once without pausing, answer, then replay it with the transcript.", "", "comp.co"],
+          ["co", 25, "B2 listening set: once through, then dig in", "Once without pausing, answer, then replay each miss with the transcript. 5/6 or better adds a second set.", "", "comp.co"],
           ["ee", 30, "Tâche 1 on the clock", "15 minutes, then the proofreading pass.", "", "writing.t1"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
           ["gra", 20, "Concession: yes, but", "State a position, concede with bien que / alors que, pivot back.", "", "grammar.concession"],
-          ["ce", 25, "Timed B2 reading set", "Exam pace: about 7 minutes for 4 B2 questions. Nothing blank.", "", "comp.ce"],
+          ["ce", 25, "Timed B2 reading set", "One set on the clock (7:00 for 4 B2 questions at exam pace), nothing blank, then your misses without it. 3/4 inside the clock adds a second set.", "", "comp.ce"],
           ["gra", 10, "Your mistakes", "", "", "grammar.mine"],
           ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
           ["voc", 10, "Cards + 10–15 new: technology & social media", "", "", "vocab.new.technologie"],
           ["gra", 20, "Reported speech", "Direct → reported, checking tense and time expressions.", "", "grammar.discours"],
-          ["co", 25, "B2 listening set #2", "Once without pausing, then with the transcript.", "", "comp.co"],
+          ["co", 25, "B2 listening set #2", "Once without pausing, then your misses with the transcript.", "", "comp.co"],
           ["ee", 30, "Tâche 2 on the clock", "20 minutes, then the proofreading pass.", "", "writing.t2"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
           ["gra", 20, "Conditionnel + passive voice", "", "", "grammar.conditionnel"],
-          ["ce", 25, "Timed B2 reading set #2", "", "", "comp.ce"],
+          ["ce", 25, "Timed B2 reading set #2", "One set on the clock, then your misses without it.", "", "comp.ce"],
           ["gra", 10, "Find the mistakes", "A B2 text.", "", "grammar.hunt"],
           ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
@@ -183,7 +183,7 @@ window.TCF = (function () {
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
           ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
-          ["ce", 25, "Timed reading set", "B2, or C1 once B2 is steady.", "", "comp.ce"],
+          ["ce", 25, "Timed reading set", "One B2 set on the clock, then your misses without it.", "", "comp.ce"],
           ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
@@ -202,7 +202,7 @@ window.TCF = (function () {
         [
           ["voc", 10, "Cards + 10–15 new: politics & civic life", "", "", "vocab.new.gouvernement"],
           ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
-          ["ce", 25, "Timed reading set", "", "", "comp.ce"],
+          ["ce", 25, "Timed reading set", "One set on the clock, then your misses without it.", "", "comp.ce"],
           ["bil", 10, "Plan next week", "", "", "progress"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
@@ -237,7 +237,7 @@ window.TCF = (function () {
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
           ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
-          ["ce", 25, "Timed reading set", "", "", "comp.ce"],
+          ["ce", 25, "Timed reading set", "One set on the clock, then your misses without it.", "", "comp.ce"],
           ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
         [
