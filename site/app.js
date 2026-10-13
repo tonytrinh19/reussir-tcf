@@ -301,7 +301,7 @@
     hist: { filter: "all", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
-    c: { skill: "ce", level: "", theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
+    c: { skill: "ce", lv: { ce: "", co: "" }, theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
     cx: null, // the CE practice exam being taken or reviewed
     cxGen: null, // progress while Claude writes a practice exam
     cxReady: null, // a practice exam from Claude, ready to start
@@ -310,6 +310,7 @@
     confirm: "",
     thunk: null, // a day whose stamp should land with a thunk on the next Today render
     grab: null, // the "Save to your cards" panel, while it's open
+    nextUp: null, // the next bar: the block just ticked (or whose first part was just done), so it can say what's next
   };
 
   /* =============== Claude (sample capability) =============== */
@@ -413,10 +414,11 @@
     document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
     document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timerBtnLabel(); });
   }
-  function timerUI(home, label, presets) {
+  function timerUI(home, label, presets, def) {
     const mine = timer.home === home;
-    const cur = mine ? timer.total : presets[0][0];
-    const clock = mine ? fmtClock(timerRemaining()) : fmtClock(presets[0][0]);
+    const first = def || presets[0][0];
+    const cur = mine ? timer.total : first;
+    const clock = mine ? fmtClock(timerRemaining()) : fmtClock(first);
     const btn = mine ? timerBtnLabel() : "Start";
     const done = mine && timer.done;
     return `<div class="timer${done ? " done" : ""}">
@@ -455,33 +457,34 @@
     doc.phase = doc.phase || settings().phase;
     const plan = planFor(doc.phase, date);
     if (plan) doc.total = plan.length;
+    // A block ticked by hand today keeps the coach's minutes for it, as one the app ticks keeps what was done.
+    doc.min = Object.assign({}, doc.min);
+    if (!val) delete doc.min[key];
+    else if (plan && date === todayStr() && doc.min[key] == null && doc.phase === settings().phase) { const i = plan.findIndex((b, k) => blockKey(doc.phase, k) === key); if (i >= 0) doc.min[key] = coach(plan[i], i, date).min; }
     put("days", date, doc);
   }
-  function autoTick(token) {
-    const s = settings();
-    const t = todayStr();
-    const plan = planFor(s.phase, t);
-    if (!plan) return;
-    const cur = S.days.get(t);
+  // Start on a block of today's plan (or in the next bar): what it opened is kept on the day, so the block knows its
+  // parts, then the exercise is presented, set up, with no clock running. A block with nothing to do (no cards due)
+  // is simply ticked.
+  function startBlock(i) {
+    const s = settings(), t = todayStr(), plan = planFor(s.phase, t), b = plan && plan[i];
+    if (!b) return;
+    const st = coach(b, i, t), key = st.key, cur = S.days.get(t);
+    ui.nextUp = null;
+    if (cur && cur.done && cur.done[key]) { goTo("#" + st.go); return; }
+    if (st.empty) { setBlock(t, key, true); if (dayComplete(t)) ui.thunk = t; toast(`Nothing to do there today, so it's ticked: ${b[2]}.`); render(true); return; }
     const doc = cur ? clone(cur) : { phase: s.phase, done: {} };
-    doc.done = doc.done || {};
-    const head = token.split(".")[0];
-    for (let i = 0; i < plan.length; i++) {
-      const go = plan[i][5];
-      const key = blockKey(s.phase, i);
-      if (doc.done[key]) continue;
-      const loose = head === "vocab" && go.split(".")[0] === "vocab";
-      if (loose || token === go || token.startsWith(go + ".")) {
-        doc.done[key] = true;
-        doc.phase = s.phase;
-        doc.total = plan.length;
-        put("days", t, doc);
-        if (dayComplete(t)) ui.thunk = t;
-        toast(`Ticked off in today's plan: ${plan[i][2]}.`);
-        return;
-      }
-    }
+    doc.went = Object.assign({}, doc.went);
+    const w = doc.went[key] || {}, part = st.parts.find((x) => !x.done);
+    doc.went[key] = Object.assign({ at: Date.now() }, w, { go: st.go }, part && part.clock && !w.clock ? { clock: part.clock } : {});
+    doc.phase = doc.phase || s.phase;
+    put("days", t, doc);
+    st.launch();
   }
+  // Finishing an exercise ticks off the block of today's plan it was for, once its last part is done (a block can
+  // have two), with the minutes of what was done (info.min, when the exercise measured them). The next bar then
+  // says what's next. See tickPart in the coach.
+  function autoTick(token, info) { tickPart(token, info); }
   // A day counts toward the streak only when every block in its plan is ticked.
   function dayComplete(date) { const st = dayStats(date); return !!(st && st.total && st.n >= st.total); }
   function streak() {
@@ -494,6 +497,453 @@
       d = addDays(d, -1);
     }
     return n;
+  }
+
+  /* =============== the coach =============== */
+  // Each block of today's plan becomes the exercise you need now, worked out from your progress only. Start
+  // presents it set up (the level, the set, the topic, the clock's length) and starts no clock. A block's minutes
+  // are its exercise's own: each part at your measured pace, plus a couple of minutes between parts. What Start
+  // opened, and the parts done since, are kept on the day (days.went), so a block ticks once its last part is done;
+  // the minutes of what was done are kept with the tick (days.min) for the study-time charts.
+  const PACE_STEPS = [[1.5, "relaxed pace"], [1.25, "practice pace"], [1, "exam pace"]];
+  const LADDER_UP = { co: 0.7, ce: 0.75, hunt: 0.75 }; // your last 3 first tries at B1 average this: B2 next
+  const LADDER_DOWN = 0.5; // your last 3 at B2 average under this: back to B1
+  const BACKLOG = 60; // this many cards due: today's cards are review only
+  const SWITCH_MIN = 2; // between the two parts of a block: a change of task, a short break
+  const CO_WPM = { B1: 160, B2: 185 }; // how fast the recordings speak (Gemini's pace at each level)
+  const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+  const median = (xs) => { const s = xs.filter((x) => x > 0).sort((a, b) => a - b), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : null; };
+  const rmin = (x) => Math.max(1, Math.round(x));
+  // Time spent on an activity, counted between your answers with each gap capped, so a round left open over
+  // lunch doesn't count the lunch.
+  function activeTick(o, cap) { const now = Date.now(); o.secs = (o.secs || 0) + Math.min(cap || 180, Math.max(0, (now - (o.lastT || now)) / 1000)); o.lastT = now; }
+
+  // A level from first tries, oldest first, judged on the latest ones: B2 once your last 3 at B1 average `up`, and
+  // B1 again when they slip under it. Your last 3 at B2 averaging under 50% bring you back to B1 too, until 3 B1
+  // ones newer than them clear the bar again. From Phase 3 it's B2 unless your B2 sets say otherwise.
+  function ladder(xs, up, fromB2) {
+    const at = (l) => xs.filter((x) => x.level === l), b1 = at("B1").slice(-3), b2 = at("B2").slice(-3);
+    const a1 = b1.length === 3 ? avg(b1.map((x) => x.r)) : null, a2 = b2.length === 3 ? avg(b2.map((x) => x.r)) : null;
+    // B2 sets that went badly count until 3 B1 sets after them have cleared the bar.
+    const b2Bad = a2 != null && a2 < LADDER_DOWN && !(b1.length === 3 && b1[0].i > b2[2].i);
+    const level = b2Bad ? "B1" : fromB2 || (a1 != null && a1 >= up - 1e-9) ? "B2" : "B1";
+    // The day you moved up: the B1 set that brought the average over the bar.
+    let upDate = "";
+    if (level === "B2" && !fromB2 && b1.length === 3) {
+      const before = at("B1").slice(-4, -1);
+      if (before.length < 3 || avg(before.map((x) => x.r)) < up - 1e-9) upDate = b1[2].date;
+    }
+    const w = level === "B1" ? b1 : b2;
+    return { level, have: w.length ? avg(w.map((x) => x.r)) : null, n: w.length, up, upDate, a1, a2 };
+  }
+  function compLadder(skill) {
+    const xs = firstTries(list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.total && (c.level === "B1" || c.level === "B2")));
+    return ladder(xs.map((c, i) => ({ i, level: c.level, r: c.score / c.total, date: c.date })), LADDER_UP[skill], settings().phase >= 3);
+  }
+  function huntLadder() {
+    const seen = new Set();
+    const xs = list("drills").filter((d) => d.topic === "hunt" && d.total).sort((a, b) => (a.ts || 0) - (b.ts || 0)).filter((d) => !seen.has(d.text) && seen.add(d.text));
+    return ladder(xs.map((d, i) => ({ i, level: d.level, r: d.score / d.total, date: d.date })), LADDER_UP.hunt, settings().phase >= 3);
+  }
+  // The reading clock: relaxed, practice or exam pace (150%, 125% and 100% of exam pace). It starts at exam pace
+  // (or wherever `start` says) and moves after each timed first try at that level: a step faster for 3/4 or better
+  // inside the clock, a step slower for one more than 15% over it or under 2/4. A time that can't be right (a set
+  // left open for hours) is skipped.
+  function cePace(level, start) {
+    const per = CE_PACE[level] || 90;
+    let k = start == null ? 2 : start, last = null;
+    for (const c of firstTries(list("comp").filter((x) => x.skill === "ce" && x.kind !== "exam" && x.total))) {
+      if (c.level !== level || !c.timed || !(c.secs > 0) || c.secs > 3 * per * c.total) continue;
+      const clock = PACE_STEPS[k][0] * per * c.total, r = c.score / c.total;
+      if (c.secs <= clock + 5 && r >= 0.75 - 1e-9) k = Math.min(2, k + 1);
+      else if (c.secs > clock * 1.15 || r < 0.5) k = Math.max(0, k - 1);
+      last = c;
+    }
+    return { k, label: PACE_STEPS[k][1], clock: Math.round(PACE_STEPS[k][0] * per * CE_SET_SIZE), last };
+  }
+  const paceClock = (level, k) => Math.round(PACE_STEPS[k][0] * (CE_PACE[level] || 90) * CE_SET_SIZE);
+  // Error categories in your last n corrected texts, with an example of each.
+  function recentCats(n) {
+    const ws = list("writing").filter((w) => w.fb && Array.isArray(w.fb.errors)).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, n);
+    const counts = new Map(), ex = new Map();
+    ws.forEach((w) => w.fb.errors.forEach((e) => { const c = catOf(e.category); counts.set(c, (counts.get(c) || 0) + 1); if (!ex.has(c)) ex.set(c, e); }));
+    return { n: ws.length, counts, ex, top: [...counts.entries()].sort((a, b) => b[1] - a[1]) };
+  }
+  // A topic is done once its mastery criterion is met and its B2 set is too.
+  function topicDone(tp) {
+    if (!topicMastery(tp).ok) return false;
+    const b2 = tp.sets.find((x) => x.level === "B2");
+    return !b2 || coldMet(tp.id, b2.id, tp.criterion.pct, tp.criterion.days || 2).ok;
+  }
+  // How much each grammar topic up to your phase needs you: 2 points for each error in its category in your last
+  // 3 corrected texts, 1 for each error-log entry in the last 21 days, 1 for each miss on its sentences in the
+  // last 14 days. Most needed first.
+  function gramNeed() {
+    const phase = settings().phase, rc = recentCats(3), since = addDays(todayStr(), -21), from = Date.now() - 14 * 864e5;
+    const logN = new Map(), miss = new Map();
+    list("errors").forEach((e) => { if ((e.date || "") >= since) { const c = catOf(e.category); logN.set(c, (logN.get(c) || 0) + 1); } });
+    list("drills").forEach((d) => {
+      if (d.set === "prod") return;
+      const its = (d.ts || 0) >= from ? arr(d.items) : [];
+      retriesOf(d).forEach((r) => { if ((r.ts || 0) >= from) its.push(...arr(r.items)); });
+      its.forEach((it) => { const k = it.topic || d.topic; if (!it.ok && TOPIC[k]) miss.set(k, (miss.get(k) || 0) + 1); });
+    });
+    return T.TOPICS.filter((tp) => tp.phase <= phase).map((tp) => {
+      const w = rc.counts.get(tp.id) || 0, l = logN.get(tp.id) || 0, m = miss.get(tp.id) || 0;
+      return { tp, need: 2 * w + l + m, w, l, m, ex: rc.ex.get(tp.id) };
+    }).sort((a, b) => b.need - a.need);
+  }
+  // The topics this phase's week already gives a slot to.
+  const weekTopics = (phase) => new Set(arr((T.PLAN[phase] || {}).days).flat().map((b) => b[5]).filter((g) => /^grammar\.[a-z]/.test(g)).map((g) => g.split(".")[1]).filter((id) => TOPIC[id]));
+  // Your own pace: seconds a drill question (your last 5 rounds that kept their time), seconds a review card and
+  // a new card (your last 5 sessions), and minutes for each writing task (your last 3 on the clock).
+  function myPace() {
+    const rounds = list("drills").filter((d) => d.secs > 0 && d.total && d.set !== "prod" && d.topic !== "hunt" && d.topic !== "mine").sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 5);
+    const p = settings().pace || {};
+    // Kept within believable bounds, so one rushed round or a session left open doesn't skew the plan.
+    const within = (x, lo, hi, d) => (x ? Math.min(hi, Math.max(lo, x)) : d);
+    return { q: within(median(rounds.map((d) => d.secs / d.total)), 15, 120, 30), rev: within(median(arr(p.rev)), 3, 40, 8), nw: within(median(arr(p.nw)), 8, 90, 25) };
+  }
+  const writeMin = (task) => median(list("writing").filter((w) => w.task === task && w.minutes > 0).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 3).map((w) => w.minutes));
+  const coWords = (set) => arr(set && set.lines).reduce((n, l) => n + countWords(l.text), 0);
+  // The clock is set for a task without starting it, unless another task's clock is already going.
+  function presetClock(sec, label, home) {
+    const going = timer.total && !timer.done && (timer.running || timerStarted());
+    if (going && timer.home !== home) { toast(`Your ${timer.label} clock is still going, so this one wasn't set.`); return; }
+    if (going) return;
+    timerSet(sec, label, home);
+  }
+  const wentOf = (date, key) => { const d = S.days.get(date); return (d && d.went && d.went[key]) || null; };
+  const didOf = (w) => (w && w.did) || {};
+  const partHit = (p, token) => (p.exact ? token === p.tok : token === p.tok || token.startsWith(p.tok + "."));
+  const chip = (t, cls) => ({ t, cls: cls || "" });
+
+  // Listening and reading: one set at your level (reading's clock at your pace), your misses gone over, and a pass
+  // adds a stretch set: one pace step faster, or at exam pace already, the next level at relaxed pace.
+  function compStep(skill, b, key, date) {
+    const w = wentOf(date, key), lad = compLadder(skill), P = phaseInfo();
+    const done = list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.date === date && (c.ts || 0) >= ((w && w.at) || 0)).sort((a, b2) => (a.ts || 0) - (b2.ts || 0));
+    const first = firstTries(list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.total));
+    const accAt = (lvl) => { const xs = first.filter((c) => c.level === lvl).slice(-3); return xs.length ? avg(xs.map((c) => c.score / c.total)) : 0.7; };
+    const passOf = (c, clock) => c.score / c.total >= (skill === "ce" ? 0.75 : 5 / 6) - 1e-9 && (skill !== "ce" || !c.timed || !(c.clock || clock) || c.secs <= (c.clock || clock) + 5);
+    const pPass = (lvl) => { const xs = first.filter((c) => c.level === lvl).slice(-3); return xs.length ? xs.filter((c) => passOf(c)).length / xs.length : 0; };
+    const nextSet = (lvl) => { const all = samplesFor(skill), i = findSample(skill, lvl, "", -1); return i >= 0 ? all[i] : null; };
+    const n = skill === "ce" ? CE_SET_SIZE : 6;
+    // A set's minutes: reading, its clock and about 2 min a miss; listening, the recording, a minute to answer, and
+    // with any misses the recording again with the transcript and about a minute on each miss.
+    const setMin = (lvl, clock, att) => {
+      const misses = att ? att.total - att.score : n * (1 - accAt(lvl));
+      if (skill === "ce") return (att && att.timed && att.secs > 0 && att.secs <= 3 * (CE_PACE[lvl] || 90) * att.total ? att.secs : clock || paceClock(lvl, 0)) / 60 + 2 * misses;
+      const set = (att && samplesFor("co").find((s) => s.id === att.setId)) || nextSet(lvl);
+      const rec = set ? coWords(set) / (CO_WPM[lvl] || 160) : 3;
+      return rec + 1 + (misses > 0.5 ? rec + misses : 0);
+    };
+    const lvl = done[0] ? done[0].level : lad.level;
+    const pace = skill === "ce" ? cePace(lvl) : null;
+    // Phase 1's reading sets are untimed diagnostics.
+    const untimed = skill === "ce" && settings().phase === 1;
+    const clock1 = skill === "ce" && !untimed ? (done[0] && done[0].clock) || (w && w.clock) || pace.clock : 0;
+    // The stretch: a step faster at the same level, or the next level at relaxed pace once at exam pace (another
+    // B2 set at B2). Listening has no clock, so its stretch is a B2 set.
+    const stretchOf = (lvl0, k0) => {
+      if (skill === "co") return { level: "B2", clock: 0 };
+      if (k0 < 2) return { level: lvl0, clock: paceClock(lvl0, k0 + 1), k: k0 + 1 };
+      if (lvl0 === "B1") { const p2 = cePace("B2", 0); return { level: "B2", clock: p2.clock, k: p2.k }; }
+      return { level: "B2", clock: paceClock("B2", 2), k: 2 };
+    };
+    const k1 = skill === "ce" ? PACE_STEPS.findIndex((s) => Math.round(s[0] * (CE_PACE[lvl] || 90) * CE_SET_SIZE) === clock1) : -1;
+    const st = stretchOf(lvl, k1 < 0 ? (pace ? pace.k : 2) : k1);
+    const passed = done[0] ? passOf(done[0], clock1) : false;
+    const parts = [{ kind: "set", tok: "comp." + skill, exact: true, done: !!done[0], level: lvl, clock: clock1, min: setMin(lvl, clock1, done[0]) }];
+    if (passed && !untimed) parts.push({ kind: "stretch", tok: "comp." + skill, exact: true, done: !!done[1], level: st.level, clock: st.clock, min: setMin(st.level, st.clock, done[1]) });
+    const expect = done[0] || untimed ? 0 : pPass(lvl) * (SWITCH_MIN + setMin(st.level, st.clock));
+    const min = parts.reduce((a, p) => a + p.min, 0) + (parts.length > 1 ? SWITCH_MIN : 0) + expect;
+    const cl = (c) => `${fmtClock(c)} clock`;
+    const kName = (c, l) => { const k = PACE_STEPS.findIndex((s) => Math.round(s[0] * (CE_PACE[l] || 90) * CE_SET_SIZE) === c); return k >= 0 ? PACE_STEPS[k][1] : ""; };
+    const passTxt = skill === "ce" ? "3/4 in time" : "5/6+";
+    const stTxt = skill === "ce" ? (st.level !== lvl ? `a ${st.level} set at ${fmtClock(st.clock)}` : `a second set at ${fmtClock(st.clock)}`) : `a ${st.level === lvl ? "second " : ""}B2 set`;
+    let line1, line2, chips = [];
+    const cur = parts.find((p) => !p.done);
+    if (!done[0]) {
+      line1 = untimed ? `${lvl} set, untimed, then your misses.` : skill === "ce" ? `${lvl} set · ${cl(clock1)} (${kName(clock1, lvl)}), then your misses.` : `${lvl} set: once through, then your misses with the transcript.`;
+      line2 = untimed ? "A baseline: no clock yet." : `${passTxt} → ${stTxt}.`;
+      chips = skill === "ce" && !untimed ? [chip(lvl, "lvl"), chip(fmtClock(clock1) + " · " + kName(clock1, lvl))] : [chip(lvl, "lvl")];
+    } else if (cur) {
+      line1 = skill === "ce" ? `Part 2 · ${cur.level} set · ${cl(cur.clock)} (${kName(cur.clock, cur.level)}).` : `Part 2 · ${cur.level} set: once through, then your misses.`;
+      line2 = `Part 1: ${done[0].score}/${done[0].total}${skill === "ce" && done[0].timed ? ` in ${fmtClock(done[0].secs)}` : ""}. Well done.`;
+      chips = [chip(cur.level, "lvl")].concat(skill === "ce" ? [chip(fmtClock(cur.clock) + " · " + kName(cur.clock, cur.level))] : []);
+    } else {
+      line1 = `Done: ${done.slice(0, parts.length).map((c) => `${c.score}/${c.total}`).join(" then ")}.`;
+      line2 = passed || !done[0] ? "" : `${passTxt} adds a stretch set next time.`;
+    }
+    const meter = lad.level === "B1" ? { label: `B2 at ${pct(lad.up)}`, have: lad.have, need: lad.up } : { label: "B2 · stay above 50%", have: lad.have, need: LADDER_DOWN };
+    let adapted = "";
+    if (lad.level !== P.level) adapted = lad.level === "B2" ? `Your last 3 B1 ${skill === "co" ? "listening" : "reading"} sets averaged ${pct(lad.a1)}: B2 from now on.` : `Your last 3 B2 sets averaged ${pct(lad.a2)}: B1 until 3 B1 sets average ${pct(lad.up)}.`;
+    if (skill === "ce" && !adapted && !untimed && pace.k < 2) adapted = pace.last ? `Last set: ${pace.last.score}/${pace.last.total} in ${fmtClock(pace.last.secs)}, so a little more time: accuracy first, then speed.` : "";
+    const launch = () => {
+      const p = cur || parts[parts.length - 1];
+      ui.c.skill = skill;
+      ui.c.lv[skill] = p.level;
+      ui.c.theme = "";
+      if (skill === "ce" && !untimed) presetClock(p.clock || paceClock(p.level, 2), "Lecture CE", "comp.ce");
+      // A set already checked gives way to the next one.
+      const key2 = compKey(skill), last = ui.c.shown[key2], cs = ui.c.set[skill];
+      if (last && last.saved) delete ui.c.shown[key2];
+      if (cs && cs.key === key2 && ui.c.submitted[skill]) ACTS["c-next"]({ dataset: { skill } });
+      goTo("#comp." + skill);
+    };
+    return { go: "comp." + skill, line1, line2, chips, meter, adapted, stamp: lad.upDate === date && lad.level === "B2" ? "B2 débloqué" : "", parts, min, launch };
+  }
+  // A practice exam: the next built-in one not done yet. Start opens the exam page; the exam's own clock starts
+  // only when you start it there.
+  function examStep(skill, merged, key, date) {
+    const X = XSPEC[skill], doneIds = new Set(list("comp").filter((c) => c.kind === "exam" && skillOf(c) === skill && c.date < date).map((c) => c.setId));
+    const w = wentOf(date, key), handed = list("comp").some((c) => c.kind === "exam" && skillOf(c) === skill && c.date === date && (c.ts || 0) >= ((w && w.at) || 0)) || !!didOf(w).exam;
+    const ex = X.bank().find((e) => !doneIds.has(e.id));
+    const mins = X.spec.minutes || (skill === "co" ? 35 : 60);
+    const line1 = ex ? `${ex.title} · ${skill === "co" ? "each recording once" : "39 questions"}, ${mins} min, nothing blank.` : skill === "ce" && claudeOn() ? "Every built-in exam done: Claude writes you a new one." : `Every built-in exam done: a retake reads high.`;
+    return { go: X.home, title: merged ? `Examen blanc ${skill.toUpperCase()}` : null, line1: handed ? "Handed in: go over the questions you missed." : line1, line2: "Then go over the questions you missed.", chips: [chip(ex ? ex.title : "Examen blanc")], parts: [{ kind: "exam", tok: X.home, exact: true, done: handed, min: mins + 10 }], min: mins + 10, launch: () => goTo("#" + X.home) };
+  }
+  // A grammar topic block: the set that counts toward mastery, then its B2 set; once both are mastered, the slot
+  // goes to your biggest grammar blocker not already in this week's plan.
+  function grammarStep(b, key, date) {
+    const parts0 = b[5].split("."), phase = settings().phase, pace = myPace();
+    let tp = TOPIC[parts0[1]], setId = parts0[2] || "", adapted = "", title = null;
+    const needs = gramNeed();
+    if (!tp || topicDone(tp)) {
+      const wk = weekTopics(phase), was = tp;
+      const pick = needs.find((x) => x.need > 0 && (!wk.has(x.tp.id) || !was) && !topicDone(x.tp)) || needs.find((x) => !wk.has(x.tp.id) && !topicMastery(x.tp).ok && x.tp.phase === phase);
+      if (pick) {
+        const why = [pick.w ? `${CAT[pick.tp.id] || pick.tp.title} ×${pick.w} in your last texts` : "", pick.m ? `${pick.m} misses in drills` : ""].filter(Boolean).join(", ");
+        adapted = was ? `${was.title} is mastered, so the slot goes to ${pick.tp.title}${why ? ` (${why})` : ""}.` : `Your biggest blocker: ${pick.tp.title}${why ? ` (${why})` : ""}.`;
+        tp = pick.tp; setId = ""; title = tp.title;
+      } else if (!tp) { tp = (needs[0] || {}).tp || T.TOPICS[0]; title = tp.title; }
+    }
+    const m = topicMastery(tp), b2 = tp.sets.find((x) => x.level === "B2");
+    if (!setId || !tp.sets.some((x) => x.id === setId)) setId = m.ok && b2 ? b2.id : tp.criterion.set;
+    const set = tp.sets.find((x) => x.id === setId) || tp.sets[0];
+    const n = Math.min(set.take, set.items.length);
+    const w = wentOf(date, key), did = didOf(w);
+    const firsts = drillsFor(tp.id, set.id).filter((d) => d.total), last = firsts[firsts.length - 1];
+    const acc = last ? last.score / last.total : 0.7;
+    const est = (n + n * (1 - acc)) * pace.q / 60;
+    const cm = coldMet(tp.id, set.id, tp.criterion.pct, tp.criterion.days || 2);
+    const ipId = `drill--${tp.id}--${set.id}`;
+    const roundDone = typeof did.round === "number" ? did.round : did.round ? est : 0;
+    const today = drillsFor(tp.id).filter((d) => d.date === date && (d.ts || 0) >= ((w && w.at) || 0)).pop();
+    return {
+      go: "grammar." + tp.id, title, adapted,
+      line1: today && did.round ? `Done: ${today.score}/${today.total}${retriesOf(today).length ? `, then retried ${retryScores(today)}` : ""}.` : `${set.level === "B2" ? "B2 set · " : ""}${n} questions, then retry your misses.`,
+      line2: cm.ok ? (m.ok && !b2 ? "Mastered: a round keeps it fresh." : "This set is mastered: a round keeps it fresh.") : `Mastered at ${pct(cm.p)} on ${cm.need} days a week apart (${Math.min(cm.n, cm.need)}/${cm.need}).`,
+      chips: [chip(set.level, "lvl"), chip(`${n} questions`)],
+      meter: null,
+      parts: [{ kind: "round", tok: "grammar." + tp.id, done: !!did.round, min: roundDone || est }],
+      min: roundDone || est,
+      launch: () => {
+        if (ipGet(ipId) && !(ui.drill && ui.drill.topic === tp.id && !ui.drill.done)) { ipResume(ipId); return; }
+        if (!(ui.drill && ui.drill.topic === tp.id && ui.drill.set === set.id && !ui.drill.done)) startDrill(tp.id, set.id);
+        goTo("#grammar." + tp.id);
+      },
+    };
+  }
+  function mixedStep(key, date) {
+    const pace = myPace(), did = didOf(wentOf(date, key));
+    const est = (15 + 15 * 0.3) * pace.q / 60;
+    return {
+      go: "grammar.mixed", line1: did.round ? "Done." : "15 questions from every topic so far, most missed first.", line2: "Then retry your misses.",
+      chips: [chip("15 questions")], parts: [{ kind: "round", tok: "grammar.mixed", done: !!did.round, min: typeof did.round === "number" ? did.round : est }], min: typeof did.round === "number" ? did.round : est,
+      launch: () => {
+        if (ipGet("drill--mixed") && !(ui.drill && ui.drill.topic === "mixed" && !ui.drill.done)) { ipResume("drill--mixed"); return; }
+        if (!(ui.drill && ui.drill.topic === "mixed" && !ui.drill.done)) startDrill("mixed", "main");
+        goTo("#grammar.mixed");
+      },
+    };
+  }
+  // Find the mistakes at your level: B2 texts once your last 3 B1 texts average 75% caught.
+  function huntStep(key, date, adapted) {
+    const lad = huntLadder(), lvl = lad.level, pr = huntNext(lvl), did = didOf(wentOf(date, key));
+    const est = pr ? countWords(pr.text.replace(/\{\d+\}/g, " x ")) / 120 + pr.mistakes.length * 0.75 : 6;
+    const min = typeof did.text === "number" ? did.text : est;
+    return {
+      go: "grammar.hunt", title: adapted ? "Find the mistakes" : null, adapted: adapted || (lvl !== (settings().phase <= 2 ? "B1" : "B2") ? `Your last 3 B1 texts averaged ${pct(lad.up)}+: B2 texts now.` : ""),
+      line1: did.text ? "Done." : `${lvl} text · ${pr ? pr.mistakes.length : 4} mistakes to find, then correct.`,
+      line2: lvl === "B1" ? `B2 texts at ${pct(lad.up)} caught${lad.have != null ? ` · now ${pct(lad.have)}` : ""}.` : "",
+      chips: [chip(lvl, "lvl")], meter: lvl === "B1" ? { label: `B2 at ${pct(lad.up)}`, have: lad.have, need: lad.up } : null,
+      parts: [{ kind: "text", tok: "grammar.hunt", exact: true, done: !!did.text, min }], min,
+      launch: () => { ui.huntLevel = lvl; if (!(ui.hunt && !ui.hunt.verdicts)) huntStart(); goTo("#grammar.hunt"); },
+    };
+  }
+  // Your mistakes: the next of your texts, or the « Hors texte » cards. With nothing left to practise, the block
+  // becomes Find the mistakes.
+  function mineStep(key, date) {
+    const all = mineAll(), pr = mineNextText(all), did = didOf(wentOf(date, key));
+    const loose = mineLoose(all.filter((m) => m.kind === "error" || m.kind === "pending"), 3, new Set(pr ? pr.mistakes.map((x) => norm(x[4])) : []));
+    if (!did.text && !pr && !loose.length) {
+      if (mineBacklog().length && claudeOn()) return { go: "grammar.mine", line1: `${mineBacklog().length} of your texts to prepare first.`, line2: "Prepare them with Claude on the page.", chips: [], parts: [{ kind: "text", tok: "grammar.mine", min: 2 }], min: 2, launch: () => goTo("#grammar.mine") };
+      return huntStep(key, date, "No mistakes of yours left to practise, so it's Find the mistakes today.");
+    }
+    const errs = all.filter((m) => m.kind === "error"), fixed = errs.filter((m) => m.state === "fixed").length;
+    const nCards = (pr ? pr.mistakes.length : 0) + loose.length;
+    const est = (pr ? countWords(pr.text.replace(/\{\d+\}/g, " x ")) / 120 : 0) + nCards * 0.5;
+    const min = typeof did.text === "number" ? did.text : est;
+    return {
+      go: "grammar.mine", line1: did.text ? "Done." : pr ? `Your text « ${clip(pr.title, 52)} » · ${pr.mistakes.length} mistakes to find, then fix.` : `${loose.length} of your mistakes, one card each.`,
+      line2: `Fixed once caught twice in a row · ${fixed} of ${errs.length} so far.`,
+      chips: [chip(`${nCards} mistakes`)], parts: [{ kind: "text", tok: "grammar.mine", done: !!did.text, min }], min,
+      launch: () => { if (!(ui.mh && !ui.mh.done)) mhStart(); goTo("#grammar.mine"); },
+    };
+  }
+  // Cards: the due ones first, then new ones, from (first that applies, while it has new cards) a topic whose
+  // reading or listening misses you tagged as vocabulary gaps lately, Pièges once a week while word choice or
+  // micro-errors lead your mistakes, the planned theme, or the phase's next theme. 60+ due: review only.
+  function vocabStep(b, key, date) {
+    const cards = allCards(), due = dueIds(cards).length, pace = myPace(), w = wentOf(date, key), did = didOf(w);
+    const planned = b[5].split(".")[2] || "";
+    const hasNew = (th) => THEME[th] && themeCards(th, cards).some(isNew);
+    let theme = "", why = "";
+    if (planned) {
+      const since = addDays(date, -14), gapTh = new Map();
+      list("comp").forEach((c) => { if ((c.date || "") >= since && c.theme) Object.values(c.gaps || {}).forEach((g) => { if (g === "vocab") gapTh.set(c.theme, (gapTh.get(c.theme) || 0) + 1); }); });
+      const gap = [...gapTh.entries()].sort((a, b2) => b2[1] - a[1]).find(([th]) => hasNew(th));
+      const top2 = recentCats(3).top.slice(0, 2).map(([c]) => c);
+      const mon = mondayOf(date);
+      const piegesWeek = [...S.srs.entries()].some(([id, st]) => st && st.learned >= mon && id.startsWith("pieges--"));
+      if (gap) { theme = gap[0]; why = `You tagged ${gap[1]} ${THEME[theme].label} miss${gap[1] > 1 ? "es" : ""} as vocabulary gaps.`; }
+      else if ((top2.includes("lexique") || top2.includes("micro")) && hasNew("pieges") && !piegesWeek) { theme = "pieges"; why = `Pièges this week: ${top2.includes("lexique") ? "word choice" : "micro-errors"} lead your last texts' mistakes.`; }
+      else if (hasNew(planned)) theme = planned;
+      else { theme = defaultTheme(); if (theme !== planned) why = `${(THEME[planned] || {}).label || planned} has no new cards left, so ${THEME[theme].label}.`; }
+    }
+    const backlog = due >= BACKLOG;
+    const newOn = !!planned && !backlog && hasNew(theme);
+    const nNew = newOn ? Math.min(ui.vCount, themeCards(theme, cards).filter(isNew).length) : 0;
+    const parts = [];
+    if (due > 0 || did.review) parts.push({ kind: "review", tok: planned ? "vocab.review" : "vocab", exact: !!planned, done: !!did.review, min: typeof did.review === "number" ? did.review : Math.min(due, 100) * 1.1 * pace.rev / 60 });
+    if (newOn || did.new) parts.push({ kind: "new", tok: "vocab.new", exact: true, done: !!did.new, min: typeof did.new === "number" ? did.new : nNew * pace.nw / 60 });
+    const min = parts.reduce((a, p) => a + p.min, 0) + (parts.length > 1 ? SWITCH_MIN : 0);
+    const cur = parts.find((p) => !p.done);
+    const lbl = THEME[theme] ? THEME[theme].label : "";
+    const line1 = !parts.length ? "Nothing due today: tick it off." : !cur ? "Done." : cur.kind === "new" ? `${nNew} new · ${lbl}.` : newOn ? `${due} due, then ${nNew} new · ${lbl}.` : `${due} due card${due === 1 ? "" : "s"}${planned && !backlog ? " · no new ones left to learn" : ""}.`;
+    const adapted = backlog && planned ? `${due} cards due: new cards wait until fewer than ${BACKLOG} are due.` : why;
+    return {
+      go: "vocab", title: backlog && planned ? "Cards: review only today" : newOn && theme !== planned ? `Cards + ${nNew} new: ${lbl}` : null, adapted, line1, line2: "Recall each card before you flip it.",
+      chips: [due ? chip(`${due} due`) : null, nNew ? chip(`${nNew} new`) : null].filter(Boolean), parts, min: parts.length ? min : 1, empty: !parts.length,
+      launch: () => {
+        if (ui.vocab && !ui.vocab.finished) { goTo("#vocab"); return; }
+        const p = cur || parts[0];
+        if (p && p.kind === "new") { ui.vTheme = theme; vocabStart("new"); } else if (p) vocabStart("review");
+        goTo("#vocab");
+      },
+    };
+  }
+  // A writing task: a prompt you haven't written yet (or your draft), with the task's exam clock set, not started.
+  function writingStep(b, key, date) {
+    const task = b[5].split(".")[1], did = didOf(wentOf(date, key));
+    if (!T.WRITING[task]) {
+      // Rewrite from memory: this week's best-scored correction (or the latest one).
+      const mon = mondayOf(date), ws = list("writing").filter((x) => x.fb).sort((a, b2) => (b2.ts || 0) - (a.ts || 0));
+      const best = ws.filter((x) => x.date >= mon).sort((a, b2) => (Number(b2.fb.score20) || 0) - (Number(a.fb.score20) || 0))[0] || ws[0];
+      const WW = best && T.WRITING[best.task];
+      return { go: "writing", line1: best ? `Your ${WW ? WW.name : "text"} of ${shortDate(best.date)}: reread the correction, close it, write it again.` : "No corrected text yet this week.", line2: "Then compare: are the corrected forms in it?", chips: [], parts: [{ kind: "write", tok: "writing", done: !!did.write, min: b[1] }], min: b[1],
+        launch: () => { if (best) { ui.w.task = best.task; ui.w.viewing = best.id; goTo("#writing." + best.task); } else goTo("#writing"); } };
+    }
+    const W = T.WRITING[task], own = writeMin(task);
+    const est = (own || W.exam + 3) + 5;
+    const lastC = list("writing").filter((x) => x.task === task && x.fb).sort((a, b2) => (b2.ts || 0) - (a.ts || 0))[0];
+    let line2 = "";
+    if (lastC) {
+      const wc = lastC.words, out = wc < W.min || wc > W.max, slow = lastC.minutes > W.exam;
+      const top = errorCountsOf(lastC.fb.errors)[0];
+      line2 = out ? `Last time: ${wc} words (${W.min}–${W.max}).` : slow ? `Last time: ${lastC.minutes} min for a ${W.exam}-minute task.` : top ? `Last time: ${CAT[top[0]].toLowerCase()} ×${top[1]}.` : `Last time: ${wc} words, in range.`;
+    }
+    const min = typeof did.write === "number" ? did.write + 5 : est;
+    return {
+      go: "writing." + task, line1: did.write ? "Done: read your correction." : `${W.name} · ${W.exam}:00 clock, then 3 min proofreading.`, line2,
+      chips: [chip(`${W.min}–${W.max} words`)], parts: [{ kind: "write", tok: "writing." + task, exact: true, done: !!did.write, min }], min,
+      launch: () => {
+        ui.w.task = task;
+        const draft = str(ui.w.text[task]).trim() || ipGet("writing--" + task);
+        if (!draft) {
+          // The first prompt you haven't written yet, or the one written longest ago.
+          const lastAt = new Map();
+          list("writing").filter((x) => x.task === task).forEach((x) => lastAt.set(x.prompt, Math.max(lastAt.get(x.prompt) || 0, x.ts || 0)));
+          const ps = W.prompts.map((p, i) => ({ i, q: typeof p === "string" ? p : p.q }));
+          const pick = ps.find((p) => !lastAt.has(p.q)) || ps.sort((a, b2) => lastAt.get(a.q) - lastAt.get(b2.q))[0];
+          if (pick) { ui.w.gen[task] = null; ui.w.idx[task] = pick.i; }
+        } else if (!str(ui.w.text[task]).trim()) writingRestore(task);
+        ui.w.viewing = null;
+        presetClock(W.exam * 60, W.name + " écrit", "writing." + task);
+        goTo("#writing." + task);
+      },
+    };
+  }
+
+  // What a block of the day's plan is today. Only today's blocks are coached; other days show the plan.
+  function coach(b, i, date) {
+    const key = blockKey(settings().phase, i), go = b[5];
+    const plain = (tok) => ({ go, line1: b[3] || "", line2: "", chips: [], parts: tok ? [{ kind: "free", tok, exact: true, done: !!didOf(wentOf(date, key)).free, min: b[1] }] : [], min: b[1], launch: () => goTo("#" + go) });
+    let st;
+    // Saturdays in Phase 2: until the CO Examen blanc is done, it replaces the two timed sets.
+    const coExamDay = settings().phase === 2 && dow(date) === 5 && !list("comp").some((c) => c.kind === "exam" && skillOf(c) === "co" && c.date < date) && (T.COMP.coExams || []).length;
+    if (coExamDay && (go === "comp.co" || go === "comp.ce")) {
+      const ex = examStep("co", true, key, date);
+      st = go === "comp.co" ? ex : { go: XSPEC.co.home, title: "Replaced by the Examen blanc", line1: "The CO Examen blanc stands in for both timed sets today.", line2: "", chips: [], parts: [{ kind: "exam", tok: XSPEC.co.home, exact: true, done: ex.parts[0].done, min: 0 }], min: 0, launch: () => goTo("#" + XSPEC.co.home) };
+      st.merge = true;
+      st.adapted = "As the phase note says: the CO Examen blanc once, instead of Saturday's timed sets.";
+    } else if (go === "comp.co" || go === "comp.ce") st = compStep(go.split(".")[1], b, key, date);
+    else if (go === "comp.co.exam" || go === "comp.ce.exam") st = examStep(go.split(".")[1], false, key, date);
+    else if (go.startsWith("comp.free.")) st = plain(go);
+    else if (go === "grammar.mixed") st = mixedStep(key, date);
+    else if (go === "grammar.mine") st = mineStep(key, date);
+    else if (go === "grammar.hunt") st = huntStep(key, date);
+    else if (go === "grammar" || go.startsWith("grammar.")) st = grammarStep(b, key, date);
+    else if (go.startsWith("vocab")) st = vocabStep(b, key, date);
+    else if (go.startsWith("writing")) st = writingStep(b, key, date);
+    else st = plain("");
+    st.min = st.min > 0 ? rmin(st.min) : 0;
+    st.key = key;
+    st.adapted = st.adapted || "";
+    return st;
+  }
+  // The block a token finishes a part of, among today's unticked blocks: the first whose next part it matches,
+  // or, failing that, the first whose route it matches as before.
+  function tickPart(token, info) {
+    const s = settings(), t = todayStr(), plan = planFor(s.phase, t);
+    if (!plan) return;
+    const cur = S.days.get(t);
+    const doc = cur ? clone(cur) : { phase: s.phase, done: {} };
+    doc.done = doc.done || {};
+    doc.went = doc.went || {};
+    doc.min = doc.min || {};
+    doc.phase = s.phase;
+    doc.total = plan.length;
+    let hit = -1, merge = false;
+    for (let i = 0; i < plan.length; i++) {
+      const key = blockKey(s.phase, i);
+      if (doc.done[key]) continue;
+      const st = coach(plan[i], i, t);
+      // A part the token finishes: the first not done yet, or one already counted as done from what was saved
+      // just now (a reading or listening set is done as soon as its attempt is saved).
+      const hits = st.parts.filter((x) => partHit(x, token));
+      const p = hits.find((x) => !x.done) || hits[0] || (!st.parts.length && (token === plan[i][5] || token.startsWith(plan[i][5] + ".")) ? {} : null);
+      if (!p) continue;
+      const w = Object.assign({ go: st.go, at: 0 }, doc.went[key] || {});
+      if (p.kind && p.kind !== "set" && p.kind !== "stretch") w.did = Object.assign({}, w.did, { [p.kind]: info && info.min > 0 ? Math.round(info.min * 10) / 10 : true });
+      doc.went[key] = w;
+      put("days", t, doc);
+      const after = coach(plan[i], i, t);
+      if (after.parts.every((x) => x.done)) {
+        doc.done[key] = true;
+        doc.min[key] = after.min;
+        put("days", t, doc);
+        merge = !!st.merge;
+        hit = i;
+        // The CO Examen blanc that stands in for Saturday's timed sets ticks them both.
+        if (merge) for (let j = i + 1; j < plan.length; j++) { const kj = blockKey(s.phase, j); if (!doc.done[kj] && coach(plan[j], j, t).merge) { doc.done[kj] = true; doc.min[kj] = 0; put("days", t, doc); } }
+        if (dayComplete(t)) ui.thunk = t;
+        ui.nextUp = { date: t, from: key };
+      } else ui.nextUp = { date: t, from: key, part: true };
+      return;
+    }
   }
 
   /* =============== brand kit (the "Réussir le TCF Brand Kit" design) =============== */
@@ -579,6 +1029,8 @@
       return n > 1 ? ["bravo", `Journée validée ! ${cap(frNum(n))} jours d'affilée.`, `Day done! ${cap(enNum(n))} days in a row.`]
         : ["bravo", "Journée validée ! Premier jour de la série.", "Day done! Day one of a streak."];
     }
+    const ups = ["co", "ce"].filter((sk) => { const l = compLadder(sk); return l.level === "B2" && l.upDate === t; });
+    if (ups.length) return ["bravo", `Tu passes au B2 en ${ups.map((sk) => (sk === "co" ? "écoute" : "lecture")).join(" et en ")} !`, `You're moving up to B2 in ${ups.map((sk) => (sk === "co" ? "listening" : "reading")).join(" and ")}!`];
     if (doneN > 0) return ["bonjour", `Bonjour ! Encore ${left} minutes aujourd'hui.`, `Hello! ${left} minutes to go today.`];
     const last = lastActive(t);
     if (last && daysBetween(last, t) >= 4) return ["cafe", "Un petit café, et on s'y remet ?", "A quick coffee, and back to it?"];
@@ -635,7 +1087,7 @@
     const t = todayStr(), plan = planFor(s.phase, t), done = (S.days.get(t) || {}).done || {};
     const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k)]) : -1;
     const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${clip(plan[open][2], 26)}`;
-    const mins = plan ? `${plan.reduce((a, b) => a + b[1], 0)} min` : "Repos";
+    const mins = plan ? `${planMins(t, s.phase)} min` : "Repos";
     return `<div class="pass"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
       <div class="route"><div class="city"><small>Départ · From</small><b>B1</b><span>Where you started</span></div>${flightSVG(false)}<div class="city r"><small>Arrivée · To</small><b>NCLC&#160;7</b><span>All four skills</span></div></div>
       <dl class="fields"><div><dt>Phase</dt><dd>${s.phase} · ${esc(P.name)}</dd></div><div><dt>Semaine · Week</dt><dd>${weekNo()} sur ${total}</dd></div><div><dt>Porte · Gate</dt><dd>${esc(gate)}</dd></div><div><dt>Aujourd'hui · Today</dt><dd>${mins}</dd></div></dl></div>
@@ -1093,7 +1545,7 @@
     const loose = mineLoose(all.filter((m) => m.kind === "error" || m.kind === "pending"), 3, new Set(pr ? pr.mistakes.map((x) => norm(x[4])) : []));
     if (!pr && !loose.length) { toast(mineBacklog().length ? "Your texts aren't prepared yet." : "No mistakes to practise yet."); return; }
     if (ui.drill && ui.drill.topic === "mine") ui.drill = null;
-    ui.mh = { pr, cards: mineCards(pr, loose), picks: [], found: pr ? null : [], extra: 0, pick: {}, saved: null, done: false, at: Date.now() };
+    ui.mh = { pr, cards: mineCards(pr, loose), picks: [], found: pr ? null : [], extra: 0, pick: {}, saved: null, done: false, at: Date.now(), secs: 0, lastT: Date.now() };
     render(true);
     const el = document.getElementById("drill-area");
     if (el) el.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -1102,6 +1554,7 @@
     const h = ui.mh;
     if (!h || h.found) return;
     h.picks = h.picks.includes(i) ? h.picks.filter((x) => x !== i) : h.picks.concat(i);
+    activeTick(h);
     render(true);
   }
   function mhCheck() {
@@ -1109,6 +1562,7 @@
     if (!h || !h.pr || h.found) return;
     if (!h.picks.length) { toast("Tap the words you think are wrong first."); return; }
     const toks = prTokens(h.pr);
+    activeTick(h);
     h.found = h.pr.mistakes.map((_, k) => h.picks.some((i) => toks[i] && toks[i].k === k));
     h.extra = h.picks.filter((i) => toks[i] && toks[i].k < 0).length;
     if (!mhShown(h).length) { mhFinish(); h.done = true; }
@@ -1119,6 +1573,7 @@
     const h = ui.mh;
     if (!h || h.done || h.pick[ci] != null || !mhShown(h).includes(ci)) return;
     h.pick[ci] = oi;
+    activeTick(h);
     // The text is saved as soon as the last card is answered, so leaving then loses nothing.
     if (mhShown(h).every((x) => h.pick[x] != null)) mhFinish();
     mhScroll = "next";
@@ -1135,8 +1590,9 @@
     });
     const id = uid();
     h.saved = id;
-    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", items });
-    autoTick("grammar.mine.errors");
+    activeTick(h);
+    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", secs: Math.round(h.secs || 0), items });
+    autoTick("grammar.mine.errors", { min: (h.secs || 0) / 60 });
   }
 
   function drillsFor(topic, set) {
@@ -1242,7 +1698,7 @@
       else items = pickRound(setItems(tp.id, set), set.take, drillLog());
     }
     items = items.map((it) => Object.assign({}, it, it.kind === "choice" ? { order: shuffle(it.options.map((_, k) => k)) } : {}));
-    ui.drill = { topic: topicId, set: setId, title, items, i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: o.src || (o.gen ? "claude" : "bank"), saved: null, parent: o.parent || null };
+    ui.drill = { topic: topicId, set: setId, title, items, i: 0, results: [], given: "", checked: false, verdict: null, done: false, src: o.src || (o.gen ? "claude" : "bank"), saved: null, parent: o.parent || null, secs: 0, lastT: Date.now() };
     render(true);
     const el = document.getElementById("drill-area");
     if (el) el.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -1254,14 +1710,14 @@
     const d = ui.drill;
     if (!d || d.done || d.src === "retry" || !d.results.some(Boolean)) return;
     const tp = TOPIC[d.topic];
-    ipSave(drillIpId(d), { kind: "drill", title: tp ? `${tp.title} · ${d.title}` : d.title, route: "grammar." + d.topic, topic: d.topic, set: d.set, name: d.title, src: d.src, items: d.items, results: d.results, i: d.i });
+    ipSave(drillIpId(d), { kind: "drill", title: tp ? `${tp.title} · ${d.title}` : d.title, route: "grammar." + d.topic, topic: d.topic, set: d.set, name: d.title, src: d.src, items: d.items, results: d.results, i: d.i, secs: Math.round(d.secs || 0) });
   }
   function drillResume(ip) {
     const items = arr(ip.items);
     const results = arr(ip.results).map((r) => r || undefined);
     const i = Math.max(0, Math.min(Number(ip.i) || 0, items.length - 1));
     const r = results[i];
-    ui.drill = { topic: ip.topic, set: ip.set, title: ip.name || ip.title, items, i, results, given: r ? r.given : "", checked: !!r, verdict: r ? r.verdict : null, done: false, src: ip.src || "bank", saved: null, parent: null };
+    ui.drill = { topic: ip.topic, set: ip.set, title: ip.name || ip.title, items, i, results, given: r ? r.given : "", checked: !!r, verdict: r ? r.verdict : null, done: false, src: ip.src || "bank", saved: null, parent: null, secs: Number(ip.secs) || 0, lastT: Date.now() };
   }
   function drillCheck() {
     const d = ui.drill;
@@ -1273,6 +1729,7 @@
     d.given = given;
     d.verdict = checkAnswer(it, given);
     d.checked = true;
+    activeTick(d);
     d.results[d.i] = { given, ok: d.verdict === "ok", verdict: d.verdict };
     drillKeep();
     render(true);
@@ -1284,6 +1741,7 @@
     d.given = it.options[k];
     d.verdict = k === 0 ? "ok" : "bad";
     d.checked = true;
+    activeTick(d);
     d.results[d.i] = { given: d.given, ok: k === 0, verdict: d.verdict };
     drillKeep();
     render(true);
@@ -1309,7 +1767,7 @@
       const cur = d.parent && S.drills.get(d.parent);
       if (cur) {
         const doc = clone(cur), rs = retriesOf(doc).slice();
-        rs.push({ score, total: d.items.length, date: todayStr(), ts: Date.now(), items: roundItems(d) });
+        rs.push({ score, total: d.items.length, date: todayStr(), ts: Date.now(), secs: Math.round(d.secs || 0), items: roundItems(d) });
         doc.retries = rs;
         delete doc.retry;
         d.retryIdx = rs.length - 1;
@@ -1320,10 +1778,10 @@
     }
     const id = uid();
     d.saved = id;
-    put("drills", id, { topic: d.topic, set: d.set, name: d.title, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, items: roundItems(d) });
+    put("drills", id, { topic: d.topic, set: d.set, name: d.title, date: todayStr(), ts: Date.now(), score, total: d.items.length, src: d.src, secs: Math.round(d.secs || 0), items: roundItems(d) });
     ipDrop(drillIpId(d));
     // The style tips are a few quick questions, not the day's Your mistakes block.
-    if (!(d.topic === "mine" && d.set === "style")) autoTick(`grammar.${d.topic}.${d.set}`);
+    if (!(d.topic === "mine" && d.set === "style")) autoTick(`grammar.${d.topic}.${d.set}`, { min: (d.secs || 0) / 60 });
     render(true);
   }
   // Every question is kept with the answer given, so the round can be reviewed from the history.
@@ -1490,7 +1948,7 @@
       ids = themeCards(th, cards).filter(isNew).slice(0, ui.vCount).map((c) => c.id);
       if (!ids.length) { toast("No new cards left in this theme. Build more with Claude, or pick another theme."); return; }
     }
-    ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false, edit: false };
+    ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false, edit: false, secs: 0, lastT: Date.now() };
     render(true);
     window.scrollTo(0, 0);
   }
@@ -1498,18 +1956,27 @@
     const v = ui.vocab;
     v.i++;
     v.shown = v.mode === "new";
-    if (v.i >= v.queue.length) { v.finished = true; autoTick(v.mode === "review" ? "vocab.review" : "vocab.new"); }
+    if (v.i >= v.queue.length) { v.finished = true; vocabPace(v); autoTick(v.mode === "review" ? "vocab.review" : "vocab.new", { min: (v.secs || 0) / 60 }); }
     render(true);
   }
   function vocabGrade(ok) {
     const v = ui.vocab;
     if (!v || v.finished) return;
     const id = v.queue[v.i];
+    activeTick(v, 90);
     if (v.mode === "new") { srsLearn(id, !ok); v.ok++; vocabAdvance(); return; }
     if (!v.shown) return;
     srsGrade(id, ok);
     if (ok) v.ok++; else { v.miss++; if (!v.requeued[id]) { v.requeued[id] = true; v.queue.push(id); } }
     vocabAdvance();
+  }
+  // Your seconds a card, kept for the last 5 sessions of each kind, so the plan's minutes follow your own pace.
+  function vocabPace(v) {
+    const n = v.mode === "new" ? v.queue.length : v.ok + v.miss;
+    if (!n || !(v.secs > 0)) return;
+    const k = v.mode === "new" ? "nw" : "rev", p = Object.assign({}, settings().pace || {});
+    p[k] = arr(p[k]).concat(Math.round((v.secs / n) * 10) / 10).slice(-5);
+    saveSettings({ pace: p });
   }
   function defaultTheme() {
     const s = settings();
@@ -1685,6 +2152,34 @@
     grabEl.hidden = false;
     const el = fid && document.getElementById(fid);
     if (el) { try { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) el.setSelectionRange(sel[0], sel[1]); } catch (_) {} }
+  }
+  // The next bar: once a block is ticked (or its first part done), it says what's next, wherever you are, with a
+  // Start that presents it as Aujourd'hui does. It sits outside the page, like the Save to cards panel.
+  const nextEl = document.getElementById("nextup");
+  let nextHtml = "";
+  function nextUpHTML() {
+    const nu = ui.nextUp, t = todayStr(), s = settings(), plan = planFor(s.phase, t);
+    if (!nu || nu.date !== t || !plan) return "";
+    const done = (S.days.get(t) || {}).done || {};
+    const fromI = plan.findIndex((b, k) => blockKey(s.phase, k) === nu.from);
+    // A block with a part still to do comes first; otherwise the next block not ticked.
+    const i = fromI >= 0 && !done[nu.from] ? fromI : plan.findIndex((b, k) => !done[blockKey(s.phase, k)]);
+    const was = fromI >= 0 ? `<span class="nu-was"><svg class="nu-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg>${i === fromI ? "Part 1 · " : ""}${esc(plan[fromI][2])}</span>` : "";
+    const x = `<button class="btn ghost sm nu-x" data-act="nextup-close" aria-label="Dismiss">×</button>`;
+    if (i < 0) return `<div class="nu-in nu-day">${was}<span class="nu-next"><b class="nu-hand">Journée terminée&#160;!</b></span><a class="btn sm primary" href="#today">See the stamp</a>${x}</div>`;
+    const st = coach(plan[i], i, t), left = i === fromI ? rmin(st.parts.filter((p) => !p.done).reduce((a, p) => a + p.min, 0)) : st.min;
+    return `<div class="nu-in">${was}<span class="nu-next"><small>${i === fromI ? "Part 2" : "Next"}</small><b>${esc(st.title || plan[i][2])}</b><span class="nu-min">${left}&#8201;min</span></span><button class="btn sm primary" data-act="plan-start" data-i="${i}">Start</button>${x}</div>`;
+  }
+  function paintNextUp() {
+    if (!nextEl) return;
+    if (route.view === "today" && ui.nextUp) ui.nextUp = null;
+    const html = nextUpHTML();
+    if (html === nextHtml) return;
+    nextHtml = html;
+    nextEl.innerHTML = html;
+    nextEl.hidden = !html;
+    const day = html && nextEl.querySelector(".nu-hand");
+    if (day && window.TCFMotion) setTimeout(() => window.TCFMotion.burst(day), 200);
   }
   // What Claude is told when it fills in a card: the French side in the decks' style, and the meaning in that sentence.
   const GRAB_BRIEF = `You're making French flashcards for a B1 learner preparing the TCF Canada (aiming for B2). The learner selected each word or phrase on a practice page, in the sentence given.
@@ -2010,7 +2505,7 @@
     ipDrop("writing--" + task);
     minePrepSoon("w-" + id);
     ui.w.viewing = id;
-    autoTick("writing." + task);
+    autoTick("writing." + task, { min: timerElapsedMin("writing." + task) || 0 });
     render(true);
     const fe = document.getElementById("w-fb");
     if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -2087,7 +2582,7 @@
     put("writing", id, { task, date: todayStr(), ts: Date.now(), prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: timerElapsedMin("writing." + task), fb: null });
     ipDrop("writing--" + task);
     ui.w.viewing = id;
-    autoTick("writing." + task);
+    autoTick("writing." + task, { min: timerElapsedMin("writing." + task) || 0 });
     toast(`Finished. It's in your writing history.${stopped ? ` The clock stopped at ${timerTaken()} min.` : ""}`);
     render(true);
   }
@@ -2305,8 +2800,9 @@
   const samplesFor = (skill) => (skill === "ce" ? T.COMP.ceSets : T.COMP.coSets);
   // Topics for comprehension sets: the vocabulary themes, minus the two that are language lists rather than topics.
   const COMP_TOPICS = T.VOCAB.filter((t2) => t2.id !== "connecteurs" && t2.id !== "pieges" && !t2.own);
-  function compLevel() { return ui.c.level || phaseInfo().level; }
-  const compKey = (skill) => `${skill}|${compLevel()}|${ui.c.theme || ""}`;
+  // The level a skill's sets are at: the one you picked on the page, or else where your progress puts you (the coach's ladder).
+  function compLevel(skill) { const sk = skill || ui.c.skill; return (ui.c.lv && ui.c.lv[sk]) || compLadder(sk).level; }
+  const compKey = (skill) => `${skill}|${compLevel(skill)}|${ui.c.theme || ""}`;
   const themeLabel = (id) => (THEME[id] ? THEME[id].label : "");
   function prepSet(set) { set.questions.forEach((q) => { q.order = shuffle(q.options.map((_, j) => j)); }); return set; }
   function sampleSet(skill, i, key) {
@@ -2380,7 +2876,7 @@
     if (busy["c-gen-" + skill] || ui.c.inflight[key]) return;
     compReset(skill);
     if (compBack(skill, key)) return;
-    const lvl = compLevel(), th = ui.c.theme;
+    const lvl = compLevel(skill), th = ui.c.theme;
     // A set you started at this level and topic comes back first, with your answers.
     const ip = compUnfinished(skill, lvl, th);
     if (ip && compLoad(skill, ip.setId, ip)) { ui.c.set[skill].early = !loaded; return; }
@@ -2426,7 +2922,7 @@
     const answers = ui.c.ans[skill] || {};
     const plays = skill === "co" ? ui.c.plays : 0;
     if (!Object.keys(answers).length && !plays) return;
-    const doc = { kind: "comp", title: set.title, route: "comp." + skill, skill, setId: set.id, level: set.level || compLevel(), theme: set.theme || "", themes: arr(set.themes), src: set.src || "sample", total: set.questions.length, answers, plays };
+    const doc = { kind: "comp", title: set.title, route: "comp." + skill, skill, setId: set.id, level: set.level || compLevel(skill), theme: set.theme || "", themes: arr(set.themes), src: set.src || "sample", total: set.questions.length, answers, plays };
     if (set.src === "claude") doc.snap = snapOf(set);
     ipSave(compIpId(skill, set.id), doc);
   }
@@ -2447,7 +2943,7 @@
     if (busy["c-gen-" + skill]) return;
     const key = compKey(skill);
     if (ui.c.inflight[key]) return;
-    const lvl = compLevel();
+    const lvl = compLevel(skill);
     const themeId = ui.c.theme;
     const th = THEME[themeId];
     const theme = th ? `${th.label} (${th.en})` : "any everyday or social topic typical of the TCF Canada (work, housing, services, health, environment, technology, culture, settling in Canada)";
@@ -2484,16 +2980,20 @@
     const ans = ui.c.ans[skill];
     if (Object.keys(ans).length < set.questions.length) { toast("Answer every question first. On the real test a blank is simply wrong."); return; }
     const score = set.questions.filter((q, i) => ans[i] === q.answer).length;
-    const timed = timer.home === "comp." + skill && timerStarted();
+    // A clock already finished on an earlier set doesn't time this one.
+    const timed = timer.home === "comp." + skill && timerStarted() && !timer.done;
     timerFinish("comp." + skill);
     ui.c.submitted[skill] = true;
     const id = uid();
     ui.c.saved[skill] = id;
     const doc = {
-      skill, level: set.level || compLevel(), title: set.title, theme: set.theme || "", date: todayStr(), ts: Date.now(), score, total: set.questions.length, src: set.src || "sample", gaps: {},
+      skill, level: set.level || compLevel(skill), title: set.title, theme: set.theme || "", date: todayStr(), ts: Date.now(), score, total: set.questions.length, src: set.src || "sample", gaps: {},
       setId: set.id || "", answers: set.questions.map((q, i) => (ans[i] == null ? null : ans[i])),
-      secs: Math.round((Date.now() - (ui.c.t0[skill] || Date.now())) / 1000), timed,
+      secs: timed ? Math.round(timer.total - timerRemaining()) : Math.round((Date.now() - (ui.c.t0[skill] || Date.now())) / 1000), timed,
     };
+    // On the clock, the time saved is the clock's (pauses left out), with the clock's length, so the pace ladder
+    // can tell whether the set was done inside it.
+    if (timed) doc.clock = timer.total;
     // Claude's sets exist only in this page's memory, so the attempt keeps a copy to reopen from the history.
     if (set.src === "claude") doc.snap = snapOf(set);
     put("comp", id, doc);
@@ -2527,7 +3027,7 @@
     const base = i >= 0 ? all[i] : snap;
     if (!base) { toast("This set's text wasn't saved, so it can't be opened again."); return false; }
     ui.c.skill = skill;
-    ui.c.level = base.level || ui.c.level;
+    ui.c.lv[skill] = base.level || ui.c.lv[skill];
     ui.c.theme = arr(base.themes).includes(ui.c.theme) ? ui.c.theme : base.theme || arr(base.themes)[0] || "";
     const key = compKey(skill);
     compReset(skill);
@@ -3205,8 +3705,8 @@
   // empty page from before. Unfinished attempts stay the record: one changed since this copy was saved (on
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
-  const TAB_KEY = "tcf-reussir-tab", TAB_V = 3;
-  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx"];
+  const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
+  const TAB_UI = ["day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -3327,6 +3827,7 @@
     paintFoot();
     paintTimer();
     paintGrab();
+    paintNextUp();
     paintMarks();
     grabCheck();
     tabSoon();
@@ -3377,12 +3878,21 @@
   const skColor = (k) => `var(--c-${k})`;
   const hm = (m) => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? " " + pad(m % 60) : ""}`; };
   const dayLabel = (d) => `${DAYS_SHORT[dow(d)]} ${shortDate(d)}`;
-  // The minutes of each skill in a day's ticked blocks, from the plan the day was ticked against.
+  // Each block's minutes: what was saved with its tick (the minutes of what was done), else today's coach
+  // estimate (the exercise's own), else the plan's.
+  function blockMins(date, plan, phase, steps) {
+    const saved = (S.days.get(date) || {}).min || {};
+    const st = steps || (date === todayStr() && phase === settings().phase ? plan.map((b, i) => coach(b, i, date)) : null);
+    return plan.map((b, i) => { const k = blockKey(phase, i); return saved[k] != null ? saved[k] : st ? st[i].min : b[1]; });
+  }
+  const planMins = (date, phase) => { const plan = planFor(phase, date); return plan ? blockMins(date, plan, phase).reduce((a, x) => a + x, 0) : 0; };
+  // The minutes of each skill in a day's ticked blocks: what was saved with each tick, or for days ticked before
+  // that, the minutes of the plan the day was ticked against.
   function dayMinutes(date) {
     const doc = S.days.get(date);
     if (!doc || !doc.done) return {};
-    const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {};
-    if (plan) plan.forEach((b, i) => { if (doc.done[blockKey(phase, i)]) by[b[0]] = (by[b[0]] || 0) + b[1]; });
+    const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {}, saved = doc.min || {};
+    if (plan) plan.forEach((b, i) => { const k = blockKey(phase, i); if (doc.done[k]) by[b[0]] = (by[b[0]] || 0) + (saved[k] != null ? saved[k] : b[1]); });
     return by;
   }
   const minTotal = (by) => Object.values(by).reduce((a, b) => a + b, 0);
@@ -3391,7 +3901,7 @@
     const s = settings(), t = todayStr(), mon = mondayOf(t);
     const days = [0, 1, 2, 3, 4, 5, 6].map((k) => addDays(mon, k));
     const done = days.map((d) => minTotal(dayMinutes(d)));
-    const plan = days.map((d) => { const doc = S.days.get(d); return arr(planFor((doc && doc.phase) || s.phase, d)).reduce((a, b) => a + b[1], 0); });
+    const plan = days.map((d) => { const doc = S.days.get(d); return planMins(d, (doc && doc.phase) || s.phase); });
     const sum = (xs) => xs.reduce((a, b) => a + b, 0);
     return { done: sum(done), plan: sum(plan), html: CH.cols({
       key: "week-" + mon, h: 64, legend: false, ghost: plan, series: [{ id: "done", label: "Minutes ticked", color: "var(--accent)" }], data: done.map((v) => [v]),
@@ -3429,15 +3939,18 @@
       if (!plan) {
         body = `<div class="panel stack"><h2 class="h2">Repos</h2><p class="lede">Sunday is a rest day in every phase. If you want something light, review your due cards or reread this week's corrections, but it isn't on the plan.</p><div class="row"><a class="btn" href="#vocab">Due cards</a><a class="btn" href="#progress.errors">This week's errors</a></div></div>`;
       } else {
-        const mins = plan.reduce((a, b) => a + b[1], 0);
+        // Today's minutes are the coach's (each exercise's own); other days, the plan's, or what was saved with each tick.
+        const steps = sel === t ? plan.map((b, i) => coach(b, i, t)) : null;
+        const bm = blockMins(sel, plan, s.phase, steps);
+        const mins = bm.reduce((a, x) => a + x, 0);
         const doneN = plan.filter((b, i) => done[blockKey(s.phase, i)]).length;
-        const doneMin = plan.reduce((a, b, i) => a + (done[blockKey(s.phase, i)] ? b[1] : 0), 0);
+        const doneMin = bm.reduce((a, x, i) => a + (done[blockKey(s.phase, i)] ? x : 0), 0);
         const pnote = T.PLAN[s.phase].note;
         const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i)]);
         if (sel === t) rm = remyToday(plan, doneN, mins - doneMin);
         ring = dayRing(sel, doneN, plan.length, doneMin, mins);
         body = `<div class="stack">
-          <ol class="blocks">${plan.map((b, i) => todayBlock(b, i, sel, s.phase, done, i === next)).join("")}</ol>
+          <ol class="blocks">${plan.map((b, i) => todayBlock(b, i, sel, s.phase, done, i === next, steps && steps[i])).join("")}</ol>
           ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p></details>` : ""}
         </div>`;
       }
@@ -3454,7 +3967,7 @@
         <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
-          <aside class="side">${continueCard()}${expressionCard()}${homeworkCard()}${streakCard()}</aside>
+          <aside class="side">${continueCard()}${sel === t ? blockersCard() : ""}${expressionCard()}${homeworkCard()}${streakCard()}</aside>
         </div>
       </div>`;
     },
@@ -3470,17 +3983,36 @@
     },
   };
   // One block of the day's plan. The next one to do is open, with its details and a big Start; the others show
-  // their title and open with a tap; done ones shrink to a ticked line.
-  function todayBlock(b, i, sel, phase, done, isNext) {
+  // their title and open with a tap; done ones shrink to a ticked line. Today's blocks are the coach's: what Start
+  // presents, in two short lines, its own minutes and, when the plan was changed for you, why.
+  function todayBlock(b, i, sel, phase, done, isNext, st) {
     const key = blockKey(phase, i), isDone = !!done[key], fk = `blk-${sel}-${key}`;
+    const tick = `<label class="tick"><input type="checkbox" data-change="tick" data-date="${sel}" data-key="${key}" ${isDone ? "checked" : ""} aria-label="Mark “${esc((st && st.title) || b[2])}” done"><svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"${isDone ? ` data-m="tick" data-k="t-${sel}-${key}"` : ""}><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg></label>`;
+    const cls = `block${isDone ? " done" : ""}${isNext ? " next" : ""}`;
+    if (st) {
+      // The chips, the minutes and the tag are keyed by what they say, so each pops in when the plan changes it.
+      const min = isDone && ((S.days.get(sel) || {}).min || {})[key] != null ? S.days.get(sel).min[key] : st.min;
+      const sig = hk([st.line1, st.chips.map((c) => c.t).join("|"), st.adapted].join("~"));
+      const tag = st.adapted ? `<span class="adapt" title="${esc(st.adapted)}">adapté<i class="adapt-ink" data-m="ink" data-k="ad-${sel}-${key}-${sig}"></i></span>` : "";
+      const m = st.meter && st.meter.have != null ? `<span class="cmeter" title="${esc(st.meter.label)}"><span class="cm-bar"><i data-tween="cm-${key}" data-tw="width" data-to="${Math.min(100, Math.round((st.meter.have / st.meter.need) * 100))}" style="width:${Math.min(100, Math.round((st.meter.have / st.meter.need) * 100))}%"></i></span><small>${esc(st.meter.label)} · now ${pct(st.meter.have)}</small></span>` : st.meter ? `<span class="cmeter"><small>${esc(st.meter.label)}</small></span>` : "";
+      const chips = st.chips.length || m ? `<div class="cchips">${st.chips.map((c, k) => `<span class="cchip ${c.cls}" data-m="pop" data-k="cc-${key}-${sig}-${k}">${esc(c.t)}</span>`).join("")}${m}</div>` : "";
+      const stamp = st.stamp ? `<span class="lvl-up" data-m="press" data-k="lvlup-${sel}-${key}"><span data-m="burst" data-k="lvlb-${sel}-${key}">${esc(st.stamp)}</span></span>` : "";
+      const open = foldOpen(fk, isNext);
+      const top = `${skChip(b[0])}<h3>${esc(st.title || b[2])}${tag}</h3>${stamp}<span class="min"><span><span data-tween="bm-${sel}-${key}" data-tw="count" data-to="${min}">${min}</span>&#8201;min</span><span class="chev" aria-hidden="true"></span></span><p class="coach-l1">${typo(st.line1)}</p>`;
+      const more = `<div class="block-more"${open ? ` data-m="rise" data-k="${fk}"` : ""}>${st.line2 ? `<p class="coach-l2">${typo(st.line2)}</p>` : ""}${chips}${st.adapted ? `<p class="adapt-why">${typo(st.adapted)}</p>` : ""}</div>`;
+      return `<li class="${cls}" data-m="rise" data-k="b-${sel}-${key}">${tick}
+        <details class="block-main" ${foldAttr(fk, isNext)}><summary class="block-top">${top}</summary>${more}</details>
+        <button class="btn ${isNext ? "primary" : isDone ? "ghost sm" : "sm"}" data-act="plan-start" data-i="${i}">${isDone ? "Open" : "Start"}</button>
+      </li>`;
+    }
     const more = b[3] || b[4], open = more && foldOpen(fk, isNext);
     const top = `${skChip(b[0])}<h3>${esc(b[2])}</h3><span class="min">${b[1]} min${more ? `<span class="chev" aria-hidden="true"></span>` : ""}</span>`;
     const main = more
       ? `<details class="block-main" ${foldAttr(fk, isNext)}><summary class="block-top">${top}</summary>
           <div class="block-more"${open ? ` data-m="rise" data-k="${fk}"` : ""}>${b[3] ? `<p class="detail">${typo(b[3])}</p>` : ""}${b[4] ? `<p class="check"><span>Check</span>${typo(b[4])}</p>` : ""}</div></details>`
       : `<div class="block-main"><div class="block-top">${top}</div></div>`;
-    return `<li class="block${isDone ? " done" : ""}${isNext ? " next" : ""}" data-m="rise" data-k="b-${sel}-${key}">
-      <label class="tick"><input type="checkbox" data-change="tick" data-date="${sel}" data-key="${key}" ${isDone ? "checked" : ""} aria-label="Mark “${esc(b[2])}” done"><svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"${isDone ? ` data-m="tick" data-k="t-${sel}-${key}"` : ""}><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg></label>
+    return `<li class="${cls}" data-m="rise" data-k="b-${sel}-${key}">
+      ${tick}
       ${main}
       <a class="btn ${isNext ? "primary" : isDone ? "ghost sm" : "sm"}" href="#${b[5]}">Start</a>
     </li>`;
@@ -3512,15 +4044,6 @@
       ${suggestions || `<div>${claudeBtn("hw-suggest", "hw-suggest", "Suggest 3 from my error log", "", "btn ghost sm")}</div>`}
     </section>`;
   }
-  // À surveiller: your three most frequent error categories, in the Régularité card.
-  function watchList() {
-    const t3 = top3();
-    if (!t3.length) return `<p class="small muted">Your most frequent error categories show up here once corrections start coming in. From your history so far: pronominal verbs, imperative + pronoun, elision.</p>`;
-    return `<ul class="hw">${t3.map(([c, v]) => {
-      const tp = TOPIC[c];
-      return `<li style="grid-template-columns:minmax(0,1fr) auto"><span><b>${esc(CAT[c])}</b> <span class="muted">×${v.n}</span><small><span class="pen-wrong">${esc(v.ex.wrong)}</span> → ${esc(v.ex.right)}</small></span>${tp ? `<a class="btn ghost sm" href="#grammar.${c}">Drill</a>` : ""}</li>`;
-    }).join("")}</ul>`;
-  }
   function heatmap(weeks) {
     const t = todayStr();
     const start = addDays(mondayOf(t), -(weeks - 1) * 7);
@@ -3543,8 +4066,48 @@
     const wk = weekChart();
     return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>
       <div class="mini-week"><p class="small muted">Cette semaine · <b>${hm(wk.done)}</b> of about ${hm(wk.plan)}</p>${wk.html}</div>${heatmap(8)}
-      <details class="fold-x" ${foldAttr("streak-how")}><summary>Comment ça marche · How it works</summary><p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></details>
-      <hr class="rule"><h2 class="h3 with-ico">${ico("errors")}À surveiller · Watch for today</h2>${watchList()}</section>`;
+      <details class="fold-x" ${foldAttr("streak-how")}><summary>Comment ça marche · How it works</summary><p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></details></section>`;
+  }
+  // Ce qui te freine: what's holding you back, worked out from your progress, each with its evidence, how far
+  // you are from the bar, and where the plan deals with it. Most serious first, four at most.
+  function blockers() {
+    const s = settings(), rc = recentCats(3), out = [];
+    const week = arr((T.PLAN[s.phase] || {}).days);
+    const dayOf = (tid) => week.findIndex((d) => d.some((b) => b[5] === "grammar." + tid || b[5].startsWith("grammar." + tid + ".")));
+    const mixedDay = week.findIndex((d) => d.some((b) => b[5] === "grammar.mixed"));
+    const EN_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const ex = (e) => (e && e.wrong ? `<span class="pen-wrong">${esc(e.wrong)}</span> → ${esc(e.right)}` : "");
+    gramNeed().filter((x) => x.w >= 2 || x.need >= 4).slice(0, 2).forEach((x) => {
+      const d = dayOf(x.tp.id), cm = coldMet(x.tp.id, x.tp.criterion.set, x.tp.criterion.pct, x.tp.criterion.days || 2);
+      out.push({ sev: x.need, ico: "grammar", label: x.tp.title, ev: [x.w ? `×${x.w} in your last ${rc.n} texts` : "", x.l ? `×${x.l} logged` : "", x.m ? `${x.m} drill misses` : ""].filter(Boolean).join(" · "), ex: ex(x.ex),
+        fix: d >= 0 ? `${EN_DAYS[d]}'s grammar slot` : mixedDay >= 0 ? `${EN_DAYS[mixedDay]}'s mixed review, most-missed first` : "the mixed review, most-missed first", go: "grammar." + x.tp.id, have: cm.n / cm.need, label2: `mastered ${Math.min(cm.n, cm.need)}/${cm.need} days` });
+    });
+    const lex = (rc.counts.get("lexique") || 0), mic = (rc.counts.get("micro") || 0);
+    if (lex + mic >= 2) out.push({ sev: 2 * (lex + mic), ico: "vocab", label: lex >= mic ? "Word choice" : "Micro-errors", ev: `×${Math.max(lex, mic)} in your last ${rc.n} texts${lex && mic ? `, and ${lex >= mic ? "micro-errors" : "word choice"} ×${Math.min(lex, mic)}` : ""}`, ex: ex(rc.ex.get(lex >= mic ? "lexique" : "micro")), fix: "Pièges cards this week, and Your mistakes", go: "grammar.mine" });
+    const acc = (rc.counts.get("accord") || 0) + (rc.counts.get("elision") || 0);
+    if (acc >= 2) out.push({ sev: 2 * acc, ico: "errors", label: "Agreement & elision", ev: `×${acc} in your last ${rc.n} texts`, ex: ex(rc.ex.get("accord") || rc.ex.get("elision")), fix: "Find the mistakes, and the 3-minute proofreading pass", go: "grammar.hunt" });
+    const lastW = list("writing").filter((w) => w.fb).sort((a, b) => (b.ts || 0) - (a.ts || 0))[0], LW = lastW && T.WRITING[lastW.task];
+    if (LW && (lastW.words < LW.min || lastW.words > LW.max || (lastW.task === "t3" && lastW.fb.tache3 && !lastW.fb.tache3.compared_both))) out.push({ sev: 5, ico: "writing", label: "Task structure", ev: lastW.words < LW.min || lastW.words > LW.max ? `last ${LW.name}: ${lastW.words} words (${LW.min}–${LW.max})` : "last Tâche 3 didn't compare both documents", fix: "the writing blocks' second line", go: "writing." + lastW.task });
+    for (const sk of ["ce", "co"]) {
+      const lad = compLadder(sk), name = sk === "ce" ? "Reading" : "Listening";
+      if (lad.have != null && lad.n >= 2 && lad.have < 0.6) out.push({ sev: 10 * (0.75 - lad.have), ico: sk === "ce" ? "read" : "listen", label: `${name} at ${lad.level}`, ev: `your last ${lad.n} sets: ${pct(lad.have)}`, fix: sk === "ce" ? "more time on the clock, and each miss gone over" : "each miss replayed with the transcript", go: "comp." + sk, have: lad.have / lad.up, label2: `${pct(lad.up)} for B2` });
+    }
+    const pace = cePace(compLadder("ce").level);
+    if (pace.k < 2 && pace.last) out.push({ sev: 3 + (2 - pace.k), ico: "timer", label: "Reading speed", ev: `last set: ${pace.last.score}/${pace.last.total} in ${fmtClock(pace.last.secs)}`, fix: `the clock at ${fmtClock(pace.clock)} (${pace.label}) until 3/4 inside it`, go: "comp.ce", have: (pace.k + 1) / 3, label2: "toward exam pace" });
+    const due = dueIds().length;
+    if (due >= BACKLOG) out.push({ sev: 4, ico: "vocab", label: "Cards piling up", ev: `${due} due`, fix: "review only until fewer than " + BACKLOG + " are due", go: "vocab" });
+    const since = addDays(todayStr(), -14), untagged = list("comp").filter((c) => c.kind !== "exam" && (c.date || "") >= since && c.total > c.score && !Object.keys(c.gaps || {}).length).length;
+    return { rows: out.sort((a, b) => b.sev - a.sev).slice(0, 4), untagged };
+  }
+  function blockersCard() {
+    const { rows, untagged } = blockers();
+    const body = rows.length ? `<ul class="blk-list">${rows.map((r, k) => `<li data-m="rise" data-k="blk-${hk(r.label + r.ev)}">
+        <span class="blk-ico">${ico(r.ico)}</span>
+        <span class="blk-main"><b>${esc(r.label)}</b><small>${esc(r.ev)}</small>${r.ex ? `<small class="blk-ex">${r.ex}</small>` : ""}
+          ${r.have != null ? `<span class="cm-bar" title="${esc(r.label2 || "")}"><i data-tween="blk-${k}-${hk(r.label)}" data-tw="width" data-to="${Math.round(Math.min(1, r.have) * 100)}" style="width:${Math.round(Math.min(1, r.have) * 100)}%"></i></span>` : ""}
+          <a class="blk-fix" href="#${esc(r.go)}">→ ${esc(r.fix)}</a></span></li>`).join("")}</ul>`
+      : `<p class="small muted">Nothing stands out right now. Your corrections, drills and sets will show here what's holding you back.</p>`;
+    return `<section class="panel stack tight" data-spot><h2 class="h3 with-ico">${ico("target")}Ce qui te freine<small class="muted"> · What's holding you back</small></h2>${body}${untagged ? `<p class="small muted">Tag your reading and listening misses (vocabulary or comprehension gap) so the plan can pick the words you need: ${untagged} set${untagged > 1 ? "s" : ""} untagged lately.</p>` : ""}</section>`;
   }
   async function suggestHomework() {
     const s = settings(), P = T.PHASES[s.phase - 1];
@@ -4048,7 +4611,7 @@
     const full = pr.text.replace(/\{(\d+)\}/g, (_, j) => (Number(j) === k ? "\u0000" : pr.mistakes[Number(j)][1][0]));
     return (full.split(/\n+|(?<=[.!?…])\s+/).find((x) => x.includes("\u0000")) || "\u0000").replace("\u0000", "___").trim();
   }
-  const huntLevel = () => ui.huntLevel || (settings().phase <= 2 ? "B1" : "B2");
+  const huntLevel = () => ui.huntLevel || huntLadder().level;
   // The next text at a level: the first not done yet, or else the one done longest ago.
   function huntNext(level) {
     const last = new Map();
@@ -4059,7 +4622,7 @@
   function huntStart() {
     const pr = huntNext(huntLevel());
     if (!pr) return;
-    ui.hunt = { id: pr.id, picks: [], found: null, extra: 0, fixes: {}, verdicts: null };
+    ui.hunt = { id: pr.id, picks: [], found: null, extra: 0, fixes: {}, verdicts: null, secs: 0, lastT: Date.now() };
     render(true);
     const el = document.getElementById("drill-area");
     if (el) el.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -4068,6 +4631,7 @@
     const h = ui.hunt;
     if (!h || h.found) return;
     h.picks = h.picks.includes(i) ? h.picks.filter((x) => x !== i) : h.picks.concat(i);
+    activeTick(h);
     render(true);
   }
   function huntCheck() {
@@ -4086,9 +4650,10 @@
     document.querySelectorAll('[data-input="pr-fix"]').forEach((el) => { h.fixes[el.dataset.k] = el.value; });
     if (h.found.some((f, k) => f && !str(h.fixes[k]).trim())) { toast("Type a correction for each mistake you found."); return; }
     h.verdicts = pr.mistakes.map(([, a], k) => (h.found[k] ? checkAnswer({ a }, str(h.fixes[k])) : "missed"));
+    activeTick(h, 300);
     const items = pr.mistakes.map(([wrong, a, , why], k) => ({ kind: "type", src: `« ${wrong} »`, q: prSentence(pr, k), a, why: (h.found[k] ? "" : "Not spotted. ") + why, given: h.found[k] ? str(h.fixes[k]) : "", ok: h.verdicts[k] === "ok" }));
-    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", items });
-    autoTick("grammar.hunt");
+    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", secs: Math.round(h.secs || 0), items });
+    autoTick("grammar.hunt", { min: (h.secs || 0) / 60 });
     render(true);
   }
   function grammarHunt() {
@@ -4940,8 +5505,11 @@
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
       const rv = ui.c.review[skill];
       const reviewNote = rv && set ? `<p class="notice small">You're looking at your attempt from ${shortDate(rv.date)} (${rv.score}/${rv.total}). “Try this set again” starts a new one.</p>` : "";
-      const pace = set ? (CE_PACE[set.level] || 90) * set.questions.length : 0;
-      const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Time yourself: at exam pace, ${set.questions.length} ${esc(set.level || lvl)} questions take about ${Math.round(pace / 60)} minutes.</span>${timerUI("comp.ce", "Lecture CE", [[pace, `${fmtClock(pace)} · exam pace`], [1200, "20:00"], [1800, "30:00"]])}</div>` : "";
+      // The clock's lengths are the pace steps for the set's level, with yours (the coach's) picked unless you choose another.
+      const sl = (set && set.level) || lvl, per = CE_PACE[sl] || 90, nq = set ? set.questions.length : CE_SET_SIZE;
+      const steps = PACE_STEPS.slice().reverse().map(([m, name]) => [Math.round(m * per * nq), `${fmtClock(Math.round(m * per * nq))} · ${name}`]);
+      const mineP = cePace(sl), myClock = Math.round(PACE_STEPS[mineP.k][0] * per * nq);
+      const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Your clock: ${fmtClock(myClock)}, ${mineP.label}. Exam pace for ${nq} ${esc(sl)} questions is ${fmtClock(per * nq)}.</span>${timerUI("comp.ce", "Lecture CE", steps.concat([[1200, "20:00"]]), myClock)}</div>` : "";
       const docOf = (q, i) => (q.doc ? `<article class="sheet"><p class="eyebrow">Document ${i + 1}${q.doc.type ? ` · ${esc(q.doc.type)}` : ""}</p>${q.doc.title ? `<h3>${typo(q.doc.title)}</h3>` : ""}<p class="fr">${typo(q.doc.text)}</p></article>` : "");
       const qs = set ? `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
@@ -5341,7 +5909,7 @@
     const span = (a, b) => { let m = 0; for (let d = a; d <= b; d = addDays(d, 1)) m += minTotal(dayMinutes(d)); return m; };
     D.week = span(mon, t);
     D.lastWeek = start <= addDays(t, -7) ? span(addDays(mon, -7), addDays(t, -7)) : null;
-    D.planned = [0, 1, 2, 3, 4, 5].reduce((a, k) => a + arr(planFor(s.phase, addDays(mon, k))).reduce((x, b) => x + b[1], 0), 0);
+    D.planned = [0, 1, 2, 3, 4, 5].reduce((a, k) => a + planMins(addDays(mon, k), s.phase), 0);
     let w0 = mondayOf(start);
     if (w0 < addDays(mon, -49)) w0 = addDays(mon, -49);
     D.weekStarts = [];
@@ -5824,6 +6392,8 @@
       render(true);
     },
     "ip-resume": (el) => ipResume(el.dataset.id),
+    "plan-start": (el) => startBlock(Number(el.dataset.i)),
+    "nextup-close": () => { ui.nextUp = null; render(true); },
     "ip-discard": (el) => ipDiscard(el.dataset.id),
     "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; render(true); },
     "h-more": () => { ui.hist.limit += 30; render(true); },
@@ -5984,12 +6554,12 @@
       if (n() === before) toast("Nothing to tick: today's plan has no open easy listening or reading block.");
       render(true);
     },
-    "c-level": (el) => { ui.c.level = el.dataset.l; render(true); },
+    "c-level": (el) => { ui.c.lv[ui.c.skill] = el.dataset.l; render(true); },
     "c-next": (el) => {
       const sk = el.dataset.skill, key = compKey(sk), cur = ui.c.set[sk];
       const after = cur && cur.src === "sample" ? cur.sampleIdx : -1;
-      let i = findSample(sk, compLevel(), ui.c.theme, after);
-      if (i < 0) i = findSample(sk, compLevel(), "", after);
+      let i = findSample(sk, compLevel(sk), ui.c.theme, after);
+      if (i < 0) i = findSample(sk, compLevel(sk), "", after);
       if (i < 0) i = after + 1;
       compReset(sk);
       ui.c.set[sk] = sampleSet(sk, i, key);
@@ -6010,7 +6580,7 @@
     "c-log": (el) => {
       const sc = Number(ui.form["cl-score"]), tot = Number(ui.form["cl-total"]);
       if (!(tot > 0) || !(sc >= 0) || sc > tot) { toast("Enter a score and a total, with the score no higher than the total."); return; }
-      put("comp", uid(), { skill: el.dataset.skill, level: compLevel(), title: str(ui.form["cl-src"]).trim() || "Outside practice", date: todayStr(), ts: Date.now(), score: sc, total: tot, src: "logged", gaps: {} });
+      put("comp", uid(), { skill: el.dataset.skill, level: compLevel(el.dataset.skill), title: str(ui.form["cl-src"]).trim() || "Outside practice", date: todayStr(), ts: Date.now(), score: sc, total: tot, src: "logged", gaps: {} });
       ui.form["cl-score"] = ui.form["cl-total"] = ui.form["cl-src"] = "";
       toast("Score logged.");
       render(true);
