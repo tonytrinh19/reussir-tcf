@@ -702,7 +702,7 @@
     const w = wentOf(date, key), handed = list("comp").some((c) => c.kind === "exam" && skillOf(c) === skill && c.date === date && (c.ts || 0) >= ((w && w.at) || 0)) || !!didOf(w).exam;
     const ex = X.bank().find((e) => !doneIds.has(e.id));
     const mins = X.spec.minutes || (skill === "co" ? 35 : 60);
-    const line1 = ex ? `${ex.title} · ${skill === "co" ? "each recording once" : "39 questions"}, ${mins} min, nothing blank.` : skill === "ce" && claudeOn() ? "Every built-in exam done: Claude writes you a new one." : `Every built-in exam done: a retake reads high.`;
+    const line1 = ex ? `${ex.title} · ${skill === "co" ? "each recording once" : "39 questions"}, ${mins} min, nothing blank.` : skill === "ce" && claudeOn() ? "Every built-in exam done: Claude writes you a new one." : `Every built-in exam done: a retake is practice, and its score won't count.`;
     return { go: X.home, title: merged ? `Examen blanc ${skill.toUpperCase()}` : null, line1: handed ? "Handed in: go over the questions you missed." : line1, line2: "Then go over the questions you missed.", chips: [chip(ex ? ex.title : "Examen blanc")], parts: [{ kind: "exam", tok: X.home, exact: true, done: handed, min: mins + 10 }], min: mins + 10, launch: () => goTo("#" + X.home) };
   }
   // A grammar topic block: the set that counts toward mastery, then its B2 set; once both are mastered, the slot
@@ -1049,7 +1049,7 @@
     { name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
     { name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
     { name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: () => list("comp").some((c) => c.kind === "exam") },
-    { name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => list("mocks").some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+    { name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
   ];
   function stampSVG(st, on) {
     const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
@@ -3128,12 +3128,12 @@
       const head = `<span class="lv">A1–C2</span><span class="h-name">${esc(title)}</span>${src}`;
       const going = paused && paused.examId === id ? `<span class="pill warn">In progress · ${esc(ipProgress(paused))}</span>` : "";
       if (!as.length) return `<div class="h-row">${head}${going}<span class="h-meta"></span><button class="btn sm primary" data-act="ip-resume" data-id="${X.ip}">Resume</button></div>`;
-      const best = as.reduce((b, a) => ((a.est || 0) > (b.est || 0) ? a : b));
-      const body = as.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}<span class="small muted">${a.score}/${a.total}${mins(a.secs) ? " · " + mins(a.secs) : ""}${a.timeUp ? " · time ran out" : ""}</span><span class="small muted">${levelCounts(a.byLevel)}</span>${ex || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("");
-      return branch(`${skill}:x:${id}`, `${head}${going}<span class="h-meta">${as.length} attempt${as.length > 1 ? "s" : ""} · best ≈${best.est} · last ${shortDate(as[0].date)}</span>`, body);
+      const R = retakeIds(), first = as.find((a) => !R.has(a.id)) || as[as.length - 1];
+      const body = as.map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${R.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}${mins(a.secs) ? " · " + mins(a.secs) : ""}${a.timeUp ? " · time ran out" : ""}</span><span class="small muted">${levelCounts(a.byLevel)}</span>${ex || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("");
+      return branch(`${skill}:x:${id}`, `${head}${going}<span class="h-meta">${as.length > 1 ? `${as.length} attempts · ≈${first.est} on the first try` : `1 attempt · ≈${first.est}`} · last ${shortDate(as[0].date)}</span>`, body);
     }).join("");
     const last = done[0];
-    return { html: branch(`${skill}:g:exams`, `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}` : "in progress"}</span>`, rows), last: lastOf(ids[0]) };
+    return { html: branch(`${skill}:g:exams`, `<span class="h-name">Examens blancs</span><span class="h-meta">${last ? `${done.length} exam${done.length > 1 ? "s" : ""} · last ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}${retakeIds().has(last.id) ? " (a retake)" : ""}` : "in progress"}</span>`, rows), last: lastOf(ids[0]) };
   }
   // Everything done in one skill, as a tree: topic → set → attempt, with practice exams, Claude sets with no
   // topic, built-in sets since replaced and scores logged from elsewhere alongside. Only sets you've finished
@@ -3529,7 +3529,7 @@
     const running = examRunning() && skillOf(ui.cx) === skill;
     const paused = !running && ipGet(X.ip);
     const what = skill === "co" ? "The full listening test: 39 questions in about 35 minutes, from A1 to C2, each recording heard once" : "The full reading test: 39 questions in 60 minutes, from A1 to C2";
-    return `<section class="panel flat row between"><div class="stack tight"><p class="h3 with-ico">${ico("exam")}Examen blanc</p><p class="small muted">${what}, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="${X.ip}">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#${X.home}">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
+    return `<section class="panel flat row between"><div class="stack tight"><p class="h3 with-ico">${ico("exam")}Examen blanc</p><p class="small muted">${what}, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}${retakeIds().has(last.id) ? " (a retake, not counted)" : ""}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="${X.ip}">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#${X.home}">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
   }
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
   function examView(skill) {
@@ -3558,7 +3558,7 @@
         <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
     }
     if (cx && cx.done) {
-      const r = cx.result;
+      const r = cx.result, retake = retakeIds().has(cx.attemptId);
       const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
       const review = cx.exam.items.map((it, j) => {
         const a = cx.ans[j];
@@ -3576,18 +3576,18 @@
       return `${back}
         <section class="panel stack" data-m="pop" data-k="xr-${esc(cx.exam.id)}-${esc(r.date)}">
           <p class="eyebrow">${esc(cx.exam.title)} · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
-          <div class="row"><span class="scorebig"${!r.review && (nclcOf(skill, r.est) || 0) >= 7 ? ` data-m="burst" data-k="x7-${esc(cx.exam.id)}-${esc(r.date)}-${r.est}"` : ""}>≈ <span data-tween="xest-${esc(cx.exam.id)}-${esc(r.date)}" data-tw="count" data-to="${r.est}">${r.est}</span></span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span></div>
+          <div class="row"><span class="scorebig"${!r.review && !retake && (nclcOf(skill, r.est) || 0) >= 7 ? ` data-m="burst" data-k="x7-${esc(cx.exam.id)}-${esc(r.date)}-${r.est}"` : ""}>≈ <span data-tween="xest-${esc(cx.exam.id)}-${esc(r.date)}" data-tw="count" data-to="${r.est}">${r.est}</span></span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span>${retake ? `<span class="pill info">retake · not counted</span>` : ""}</div>
           <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in ${skill === "co" ? "listening is 458–502" : "reading is 453–498"}.</p>
           <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
-          <p class="small muted">${esc(spec.note)}${r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
+          <p class="small muted">${esc(spec.note)}${retake ? " You'd taken this exam before, so you'll have remembered some answers: this score is kept as a retake and doesn't count toward your NCLC estimate." : r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
           <div class="row">${next}</div>
-          <p class="small muted">A retake asks questions you've already seen, so its score reads high.</p>
+          ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
         <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
     }
-    const exams = compAttempts(skill).filter((a) => a.kind === "exam");
+    const exams = compAttempts(skill).filter((a) => a.kind === "exam"), retakes = retakeIds();
     // One row per built-in exam, so each note sits by its own exam. The ones not done yet are the primary choice.
-    const starts = X.bank().map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<div class="row"><button class="btn ${prev ? "" : "primary"}" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date)}, so a new score would read high.</span>` : ""}</div>`; }).join("");
+    const starts = X.bank().map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<div class="row"><button class="btn ${prev ? "" : "primary"}" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date).replace(/\.$/, "")}. A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</span>` : ""}</div>`; }).join("");
     const paused = ipGet(X.ip);
     // The other skill's exam is still going: one exam at a time.
     const other = examRunning() && skillOf(ui.cx) !== skill;
@@ -3612,7 +3612,7 @@
           : `<div class="stack tight">${starts}${skill === "ce" ? `<div class="row">${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>` : ""}</div>`}
         ${skill === "ce" && ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
       </section>
-      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
+      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
   /* =============== criteria & scores =============== */
@@ -3658,7 +3658,7 @@
       return { ok, note: ok ? "Done" : exams.length ? "Not yet: answer every question, guessing the last ones if time runs short" : "No practice exam yet" };
     }
     if (kind === "mocks") {
-      const ms = list("mocks").sort((p, q) => str(p.date).localeCompare(str(q.date)));
+      const ms = scoredMocks().sort((p, q) => str(p.date).localeCompare(str(q.date)));
       if (a === "coce2") {
         const co = ms.filter((m) => m.co >= 458).length, ce = ms.filter((m) => m.ce >= 453).length;
         return { ok: co >= 2 && ce >= 2, note: `CO ${Math.min(co, 2)}/2 · CE ${Math.min(ce, 2)}/2` };
@@ -3677,8 +3677,17 @@
     return 0;
   }
   const nclcLabel = (n) => (n == null ? "—" : n >= 10 ? "10+" : n === 0 ? "<4" : String(n));
+  // A practice exam taken again asks questions you've already seen, so its score reads high. It's kept and shown
+  // as a retake, but no estimate, stamp or phase criterion counts it, nor its copy in the score log.
+  function retakeIds() {
+    const seen = new Set(), out = new Set();
+    list("comp").filter((c) => c.kind === "exam" && c.setId).sort((a, b) => str(a.date).localeCompare(str(b.date)) || (a.ts || 0) - (b.ts || 0))
+      .forEach((c) => { const k = skillOf(c) + ":" + c.setId; if (seen.has(k)) out.add(c.id); else seen.add(k); });
+    return out;
+  }
+  const scoredMocks = () => { const R = retakeIds(); return list("mocks").filter((m) => !(m.compId && R.has(m.compId))); };
   function latestScores() {
-    const ms = list("mocks").sort((p, q) => str(q.date).localeCompare(str(p.date)) || (q.ts || 0) - (p.ts || 0));
+    const ms = scoredMocks().sort((p, q) => str(q.date).localeCompare(str(p.date)) || (q.ts || 0) - (p.ts || 0));
     const out = {};
     for (const k of ["co", "ce", "ee", "eo"]) { const m = ms.find((x) => x[k] != null && x[k] !== ""); if (m) out[k] = { v: m[k], date: m.date }; }
     return out;
@@ -5805,12 +5814,14 @@
         const head = `<span class="sk ${skill}">${skill.toUpperCase()}</span>${lvl ? `<span class="lv">${esc(lvl)}</span>` : ""}<span class="h-name">${skill === "co" ? "Listening sets" : "Reading sets"}</span>`;
         out.push(repGroup(`rep:${skill}:${lvl || "other"}`, head, rows, repFracChange));
       }
-      const exams = as.filter((a) => a.kind === "exam");
+      const exams = as.filter((a) => a.kind === "exam"), retakes = retakeIds();
       if (exams.length) {
         const rows = exams.map((a) => ({
-          id: a.id, date: a.date, ts: a.ts, v: a.est, show: "≈" + a.est,
+          // A retake stays out of the chain of scores and the change, which compare first tries.
+          id: a.id, date: a.date, ts: a.ts, v: retakes.has(a.id) ? null : a.est, show: "≈" + a.est,
           pill: `<span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}`,
           meta: `<span class="small muted">${a.score}/${a.total} · ${typo(a.title || "")}</span>`,
+          tags: retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : "",
           btn: XSPEC[skill].bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Open</button>` : "",
         }));
         out.push(repGroup(`rep:${skill}:exam`, `<span class="sk ${skill}">${skill.toUpperCase()}</span><span class="lv">A1–C2</span><span class="h-name">Examens blancs</span>`, rows, (f, l) => [l.v - f.v, ""]));
@@ -5981,14 +5992,16 @@
 
   // Where each skill stands against NCLC 7: the latest estimate, the ones before it, and how far there is to go.
   function dashReady(D) {
-    const all = [];
+    const all = [], R = retakeIds();
     const rows = [["co", "Compréhension orale"], ["ce", "Compréhension écrite"], ["ee", "Expression écrite"], ["eo", "Expression orale"]].map(([k, name]) => {
       // Practice exams, and scores you logged (a practice exam's own copy in the log isn't counted twice).
-      let hist = compAttempts(k).filter((a) => a.kind === "exam" && a.est).map((a) => ({ v: Number(a.est), date: a.date, ts: a.ts || 0, src: "Examen blanc (site estimate)" }))
+      let hist = compAttempts(k).filter((a) => a.kind === "exam" && a.est && !R.has(a.id)).map((a) => ({ v: Number(a.est), date: a.date, ts: a.ts || 0, src: "Examen blanc (site estimate)" }))
         .concat(list("mocks").filter((m) => m[k] != null && m[k] !== "" && !isNaN(m[k]) && !m.compId).map((m) => ({ v: Number(m[k]), date: m.date, ts: m.ts || 0, src: m.label || "Logged score" })));
       const fromClaude = k === "ee" ? D.scores.map((x) => ({ v: x.score, date: x.w.date, ts: x.w.ts || 0, src: `${taskName(x.w)}, Claude's estimate`, claude: true })) : [];
       hist = hist.concat(fromClaude).sort((a, b) => str(a.date).localeCompare(str(b.date)) || a.ts - b.ts);
       hist.forEach((h) => all.push({ d: str(h.date), ts: h.ts, row: [name, shortDate(h.date), h.src, scoreText(k, h.v), `NCLC ${nclcLabel(nclcOf(k, h.v))}`] }));
+      // Retakes are listed in the numbers, but kept off the chart and out of the estimate.
+      compAttempts(k).filter((a) => a.kind === "exam" && a.est && R.has(a.id)).forEach((a) => all.push({ d: str(a.date), ts: a.ts || 0, row: [name, shortDate(a.date), "Examen blanc, a retake (not counted)", scoreText(k, a.est), `NCLC ${nclcLabel(nclcOf(k, a.est))}`] }));
       // Writing: the average of Claude's last three scores, unless a score you logged is newer.
       const logged = hist.filter((h) => !h.claude), lastLogged = logged[logged.length - 1];
       const last3 = fromClaude.slice(-3);
@@ -6154,12 +6167,12 @@
       series: [{ label: "Seconds a question", color: "var(--c-ce)", line: true, points: ce.map((a, i) => ({ x: m > 1 ? i / (m - 1) : 0.5, y: a.secs / a.total, tip: `${Math.round(a.secs / a.total)} s a question${a.timed ? " · on the clock" : ""}\n${a.title || ""} · ${shortDate(a.date)} · ${a.score}/${a.total}` })) }],
       xs: m > 1 ? [{ x: 0, label: shortDate(ce[0].date) }, { x: 1, label: shortDate(ce[m - 1].date) }] : [],
     }) + numbers("pace", ["Date", "Set", "Seconds a question", "Score"], ce.map((a) => [shortDate(a.date), a.title || "", Math.round(a.secs / a.total), `${a.score}/${a.total}`]).reverse()) : hint("Do a reading set in one sitting and your pace shows here.");
-    const exams = ["co", "ce"].flatMap((k) => compAttempts(k).filter((a) => a.kind === "exam" && a.est).map((a) => ({ k, a }))).sort((x, y) => (y.a.ts || 0) - (x.a.ts || 0));
+    const exams = ["co", "ce"].flatMap((k) => compAttempts(k).filter((a) => a.kind === "exam" && a.est).map((a) => ({ k, a }))).sort((x, y) => (y.a.ts || 0) - (x.a.ts || 0)), retakes = retakeIds();
     return `<div class="dash-grid">
       ${card(6, `${ico("listen")}Écoute · listening sets`, "Filled: first try · hollow: another try", plotFor("co"))}
       ${card(6, `${ico("read")}Lecture · reading sets`, "Filled: first try · hollow: another try", plotFor("ce"))}
       ${card(6, "Rythme · reading pace", "Under the line is exam pace or quicker", pace)}
-      ${card(6, `${ico("exam")}Examens blancs · practice exams`, "The site's estimate on the TCF scale", `${exams.length ? `<ul class="exams-l">${exams.map(({ k, a }) => `<li><span class="sk ${k}">${k.toUpperCase()}</span><b>≈ ${esc(a.est)}</b>${nclcTag(a.est, k)}<span class="small muted">${shortDate(a.date)} · ${a.score}/${a.total}</span></li>`).join("")}</ul>` : hint("No practice exam yet.")}
+      ${card(6, `${ico("exam")}Examens blancs · practice exams`, "The site's estimate on the TCF scale", `${exams.length ? `<ul class="exams-l">${exams.map(({ k, a }) => `<li><span class="sk ${k}">${k.toUpperCase()}</span><b>≈ ${esc(a.est)}</b>${nclcTag(a.est, k)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${shortDate(a.date)} · ${a.score}/${a.total}</span></li>`).join("")}</ul>` : hint("No practice exam yet.")}
         <div class="row"><a class="btn sm" href="#comp.co.exam">CO exam</a><a class="btn sm" href="#comp.ce.exam">CE exam</a></div>`)}
     </div>`;
   }
@@ -6205,7 +6218,7 @@
       const skills = [["co", "CO · Listening"], ["ce", "CE · Reading"], ["ee", "EE · Writing"], ["eo", "EO · Speaking"]];
       const withN = skills.filter(([k]) => latest[k]).map(([k, l]) => [k, l, nclcOf(k, latest[k].v)]);
       const weakest = withN.length ? withN.slice().sort((a, b) => a[2] - b[2])[0] : null;
-      const mocks = list("mocks").sort((a, b) => str(b.date).localeCompare(str(a.date)) || (b.ts || 0) - (a.ts || 0));
+      const mocks = list("mocks").sort((a, b) => str(b.date).localeCompare(str(a.date)) || (b.ts || 0) - (a.ts || 0)), retakes = retakeIds();
       const stats = [
         [list("drills").filter((d) => d.set !== "prod").length, "drill rounds"],
         [[...S.srs.keys()].length, "cards learned"],
@@ -6238,7 +6251,7 @@
             <p class="small muted">Leave a skill blank if you didn't sit it.</p>
             <div class="row"><button class="btn" data-act="m-add">Save scores</button></div>
           </div>`)}</div>
-          ${mocks.length ? `<div class="table-wrap"><table class="nclc"><thead><tr><th>Date</th><th>Test</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th><th></th></tr></thead><tbody>${mocks.map((m) => `<tr><td>${shortDate(m.date)}</td><td>${esc(m.label || "")}</td>${["co", "ce", "ee", "eo"].map((k) => { const n = nclcOf(k, m[k]); return `<td>${m[k] == null || m[k] === "" ? "—" : `${m[k]} <span class="tag7 ${n >= 7 ? "ok" : "no"}">${nclcLabel(n)}</span>`}</td>`; }).join("")}<td>${confirmBtn("m-del-" + m.id, "Delete this entry", "m-del", `data-id="${esc(m.id)}"`)}</td></tr>`).join("")}</tbody></table></div>` : ""}
+          ${mocks.length ? `<div class="table-wrap"><table class="nclc"><thead><tr><th>Date</th><th>Test</th><th>CO</th><th>CE</th><th>EE</th><th>EO</th><th></th></tr></thead><tbody>${mocks.map((m) => `<tr><td>${shortDate(m.date)}</td><td>${esc(m.label || "")}${m.compId && retakes.has(m.compId) ? ` <span class="pill info">retake · not counted</span>` : ""}</td>${["co", "ce", "ee", "eo"].map((k) => { const n = nclcOf(k, m[k]); return `<td>${m[k] == null || m[k] === "" ? "—" : `${m[k]} <span class="tag7 ${n >= 7 ? "ok" : "no"}">${nclcLabel(n)}</span>`}</td>`; }).join("")}<td>${confirmBtn("m-del-" + m.id, "Delete this entry", "m-del", `data-id="${esc(m.id)}"`)}</td></tr>`).join("")}</tbody></table></div>` : ""}
         </section>
 
         <section class="sec" id="sec-phase">

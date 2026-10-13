@@ -315,6 +315,7 @@
     - Both histories list only sets finished or started (an `inprogress` record, including Claude sets never finished), and practice exams likewise. Attempts at built-in sets that have since been replaced go under "Earlier sets", without their text.
   - Claude's sets and exams also keep `snap`, a copy of the content, so they can be reopened.
   - A finished practice exam is saved with `kind: "exam"` and its `skill`. It also adds a `mocks` entry in its skill's column, labelled as a site estimate.
+    - Taking the same exam again is a **retake** (`retakeIds()` in `app.js`, worked out from the attempts, so nothing extra is saved). The user asked on 2026-10-13 for retakes to stay out of the NCLC estimate, since remembered answers make the score read high. A retake and its `mocks` entry are kept and shown with a « retake · not counted » tag, but the dashboard's estimate, the weakest-skill notice, the NCLC 7 stamp, the phase criteria and Évolution's chain of scores leave them out. The exam page says so beside each exam already done.
 - History keeps only two kinds of record, shown in Progrès → Historique:
   - **Unfinished attempts** live in `inprogress`, one record per activity:
     - `drill--<topic>--<set>` (`drill--mine--style` for the style tips; a Your mistakes text, like Find the mistakes, is kept only in the tab) and `drill--mixed`
