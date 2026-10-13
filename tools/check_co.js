@@ -26,10 +26,14 @@ const T = window.TCF;
 const LIMITS = { longestMin: 0.15, longest: 0.3, shortestMin: 0.15, shortest: 0.35, ratioMin: 0.9, ratioMax: 1.1, maxRatio: 1.4 };
 const QUESTIONS = 6;
 const targetsFile = path.join(root, "tools", "word-targets.json");
-const TARGETS = JSON.parse(fs.readFileSync(targetsFile, "utf8"));
+// The sets' targets by level, and under "exam" the exam's word ranges (shown, not checked: coLevels.words is).
+const { exam: EXAM_TARGETS = {}, ...TARGETS } = JSON.parse(fs.readFileSync(targetsFile, "utf8"));
 // Spoken words (numbers spelled out, l'homme as two), counted by the recorder that learned the targets.
 const spoken = JSON.parse(require("child_process").execFileSync("python3", ["-B", path.join(root, "tools", "make_audio.py"), "--word-counts"], { encoding: "utf8" }));
 const MIN_SECONDS = 105, MAX_SECONDS = 240; // a recording outside 1:45–4:00 means something went wrong
+// Same as LENGTH_TOLERANCE in tools/make_audio.py: an exam item's recording may run over its level's length,
+// fails only when more than this under the minimum, and is listed to rewrite when more than this over the maximum.
+const LENGTH_TOLERANCE = 0.15;
 const MS_VOICES = ["vivienne", "remy"];
 const errors = [];
 const fail = (msg) => errors.push(msg);
@@ -169,6 +173,7 @@ function matchReport(label, items) {
 const CX = T.TCF_CANADA.coExam, CL = T.TCF_CANADA.coLevels;
 const EXAM_VOICES = ["vivienne", "remy", "sylvie", "jean"];
 const examIds = new Set();
+const longItems = [];
 (T.COMP.coExams || []).forEach((ex) => {
   const items = ex.items || [];
   const levels = CX.blocks.flatMap(([l, n]) => Array(n).fill(l));
@@ -228,7 +233,8 @@ const examIds = new Set();
     else if (!m) { fail(`${id}: missing from tools/recordings.json (run python3 tools/make_audio.py)`); missing = true; }
     else {
       if (m.hash !== hashOf(it)) fail(`${id}: the recording is older than the script (run python3 tools/make_audio.py)`);
-      if (lv && !(m.seconds >= lv.secs[0] && m.seconds <= lv.secs[1])) fail(`${id}: the recording lasts ${m.seconds} s; ${it.level} takes ${lv.secs[0]}–${lv.secs[1]} s`);
+      if (lv && m.seconds < lv.secs[0] * (1 - LENGTH_TOLERANCE)) fail(`${id}: the recording lasts ${m.seconds} s; ${it.level} takes ${lv.secs[0]}–${lv.secs[1]} s, and at least ${+(lv.secs[0] * (1 - LENGTH_TOLERANCE)).toFixed(1)} s is kept`);
+      else if (lv && m.seconds > lv.secs[1] * (1 + LENGTH_TOLERANCE)) longItems.push(`${id} (${m.engine}, ${m.seconds} s, ${pct(m.seconds / lv.secs[1] - 1)} over the ${lv.secs[1]} s ${it.level} allows)`);
       total += m.seconds;
     }
     total += (it.kind === "reply" ? CX.read.reply : CX.read[it.level]) + CX.answer[it.level];
@@ -247,6 +253,9 @@ console.log(`Recordings: ${secs.length} · ${Object.entries(engines).map(([e, n]
 
 console.log(`Script targets for about 2:15: ${Object.entries(TARGETS).map(([l, t]) => `${l} ${t.minWords}+ words (${Math.round(t.wpm)} a minute, ${t.reads} reads)`).join(" · ")}`);
 if (short.length) console.log(`\nToo short for Gemini, rewrite before it records them (${short.length}):\n  - ${short.join("\n  - ")}`);
+const KIND_NAMES = { pic: "picture", reply: "reply", doc: "document" };
+if (Object.keys(EXAM_TARGETS).length) console.log(`Exam words for each level's length at Gemini's pace: ${Object.entries(EXAM_TARGETS).map(([l, t]) => `${l} ${Object.entries(t.words).map(([k, [a, b]]) => `${KIND_NAMES[k] || k} ${a}–${b}`).join(", ")}`).join(" · ")}`);
+if (longItems.length) console.log(`\nMore than ${pct(LENGTH_TOLERANCE)} over their level's length, kept but worth shortening (${longItems.length}):\n  - ${longItems.join("\n  - ")}`);
 
 if (errors.length) {
   console.log(`\n${errors.length} problem${errors.length > 1 ? "s" : ""}:`);

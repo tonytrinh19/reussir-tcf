@@ -70,6 +70,15 @@ GAP_SAME, GAP_TURN, LEAD_IN, TAIL = 0.45, 0.8, 0.4, 0.6
 TARGET_SECONDS = 135
 DEFAULT_WPM = {"B1": 160, "B2": 185}  # Gemini's median on 2026-10-02, from 9 takes at each level
 MIN_SECONDS, MAX_SECONDS = 105, 240
+# An exam item is judged by the length its level allows (TCF_CANADA.coLevels secs, the question included), with
+# room for Gemini's pace: a take is kept however long it runs, and turned down only when it is more than
+# LENGTH_TOLERANCE under the level's minimum. One more than LENGTH_TOLERANCE over the maximum is kept with a
+# note, so its script can be shortened later (the run's summary, --status and check_co.js list them).
+LENGTH_TOLERANCE = 0.15
+# Gemini's words a minute in the exam, by level, until a level has reads of its own (the narrator's question
+# included): A1 and A2 measured on 2026-10-11 from 4 and 6 takes, B1 and B2 the sets' pace, C1 and C2 a guess.
+DEFAULT_WPM_EXAM = {"A1": 130, "A2": 145, "B1": 160, "B2": 185, "C1": 190, "C2": 200}
+OPTION_PAUSE = 1.0  # Gemini's silence after each spoken option of a picture or reply item (OPTION_NOTE)
 TARGET_DB, PEAK_DB = -21.0, -1.0  # every recording equally loud, with no clipping
 BITRATE = 64000
 
@@ -362,8 +371,9 @@ async def ms_record(s, sem):
             sec = encode(b"".join(parts), out_path(s))
     wpm = len(script_words(s)) / max(1, sec - pauses) * 60
     voices = {sp: s["cast"][sp]["ms"] for sp in speakers(s)}
-    problem = length_problem(sec, s)
-    print("%-22s %s %s  %3.0f words/min  %s%s" % (s["id"], s["level"], clock(sec), wpm, "+".join(dict.fromkeys(voices.values())), ("  " + problem.upper()) if problem else ""), flush=True)
+    problem, note = length_problem(sec, s), length_note(sec, s)
+    print("%-22s %s %s  %3.0f words/min  %s%s%s" % (s["id"], s["level"], clock(sec), wpm, "+".join(dict.fromkeys(voices.values())),
+          ("  " + problem.upper()) if problem else "", ("  NOTE: " + note) if note else ""), flush=True)
     return {"engine": "microsoft", "voices": voices, "hash": content_hash(s), "seconds": round(sec, 1), "date": today()}
 
 
@@ -391,12 +401,22 @@ def run_microsoft(sets, items, force, ids):
     save_json(MANIFEST, manifest)
     bad = ["%s (%s)" % (s["id"], length_problem(manifest[s["id"]]["seconds"], s)) for s in todo if length_problem(manifest[s["id"]]["seconds"], s)]
     if bad:
-        sys.exit("Recordings must last 1:45 to 4 minutes (exam items: what their level allows); change the script: " + ", ".join(bad))
+        sys.exit("Recordings must last 1:45 to 4 minutes (exam items: at least %d%% of their level's minimum); change the script: %s" % (round((1 - LENGTH_TOLERANCE) * 100), ", ".join(bad)))
 
 
 def length_problem(sec, s=None):
-    lo, hi = s["secs"] if s and "secs" in s else (MIN_SECONDS, MAX_SECONDS)
-    return "too short" if sec < lo else "too long" if sec > hi else ""
+    if s and "secs" in s:  # an exam item: only too short, with LENGTH_TOLERANCE of room
+        return "too short" if sec < s["secs"][0] * (1 - LENGTH_TOLERANCE) else ""
+    return "too short" if sec < MIN_SECONDS else "too long" if sec > MAX_SECONDS else ""
+
+
+def length_note(sec, s):
+    """An exam item's recording more than LENGTH_TOLERANCE over its level's maximum: kept, but its script is
+    worth shortening later. Empty when it's fine (and for sets)."""
+    hi = s["secs"][1] if "secs" in s else None
+    if not hi or sec <= hi * (1 + LENGTH_TOLERANCE):
+        return ""
+    return "%d%% over the %d s %s allows, rewrite later" % (round((sec / hi - 1) * 100), hi, s["level"])
 
 
 def prune(sets, items, manifest):
@@ -821,8 +841,75 @@ def word_targets(st, sets, manifest):
     for lv, (wpm, n) in gemini_wpm(st, sets, manifest).items():
         speech = lambda sec: (sec - LEAD_IN - TAIL) * wpm / 60
         out[lv] = {"wpm": round(wpm, 1), "minWords": math.ceil(speech(TARGET_SECONDS)), "maxWords": math.floor(speech(MAX_SECONDS)), "reads": n}
-    if load_json(TARGETS, {}) != out:
-        save_json(TARGETS, out)
+    saved = load_json(TARGETS, {})
+    if dict(saved, exam=None) != dict(out, exam=None):  # the exam's ranges are kept by exam_targets
+        save_json(TARGETS, dict(out, **({"exam": saved["exam"]} if "exam" in saved else {})))
+    return out
+
+
+def fixed_seconds(s):
+    """The part of an exam item's recording that isn't words: the lead-in and tail, the pause before the
+    narrator's question, and the silence after each spoken option of a picture or reply item."""
+    return LEAD_IN + TAIL + (QUESTION_GAP if question_of(s) else 0) + (4 * OPTION_PAUSE if s["kind"] in ("pic", "reply") else 0)
+
+
+def expected_seconds(s, wpm):
+    """How long an exam item's recording should last at Gemini's pace for its level."""
+    return fixed_seconds(s) + len(script_words(s)) / wpm * 60
+
+
+def exam_wpm(st, items, manifest):
+    """Gemini's median words a minute at each exam level (the narrator's question included), from every read
+    of a current script with the current pace instruction, like gemini_wpm for the sets."""
+    by_id, rates = {s["id"]: s for s in items}, {}
+    reads = [(k, v) for k, v in manifest.items() if v.get("engine") == "gemini"]
+    reads += [(k, v) for b in ("takes", "fails", "unchecked") for k, v in st[b].items()
+              if b != "fails" or not re.search(r"skipped|added", v.get("problem", ""))]
+    for k, v in reads:
+        s = by_id.get(k)
+        if s and v.get("hash") == content_hash(s) and v.get("pace") == pace_of(s) and v.get("seconds"):
+            rates.setdefault(s["level"], {})[k] = len(script_words(s)) / (v["seconds"] - fixed_seconds(s)) * 60
+    return {lv: (statistics.median(rates[lv].values()) if rates.get(lv) else DEFAULT_WPM_EXAM[lv], len(rates.get(lv, {})))
+            for lv in DEFAULT_WPM_EXAM}
+
+
+def exam_targets(st, items, manifest):
+    """For each exam level: Gemini's pace and, for each kind of item at that level, about how many spoken words
+    fill the length the level allows. Saved under "exam" in tools/word-targets.json when they change."""
+    wpm, out = exam_wpm(st, items, manifest), {}
+    for s in items:
+        lv, (rate, n) = s["level"], wpm[s["level"]]
+        t = out.setdefault(lv, {"wpm": round(rate, 1), "reads": n, "secs": s["secs"], "words": {}})
+        if s["kind"] not in t["words"]:
+            words_in = lambda sec: (sec - fixed_seconds(s)) * rate / 60
+            t["words"][s["kind"]] = [max(1, math.ceil(words_in(s["secs"][0]))), math.floor(words_in(s["secs"][1]))]
+    saved = load_json(TARGETS, {})
+    if items and saved.get("exam") != out:
+        save_json(TARGETS, dict(saved, exam=out))
+    return out
+
+
+KIND_NAMES = {"pic": "picture", "reply": "reply", "doc": "document"}
+
+
+def exam_range_lines(targets):
+    return ["  %s %2d–%2d s: %s (Gemini reads %.0f a minute, %s)" % (
+        lv, t["secs"][0], t["secs"][1], ", ".join("%s %d–%d words" % (KIND_NAMES[k], a, b) for k, (a, b) in t["words"].items()),
+        t["wpm"], "from %d read%s" % (t["reads"], "" if t["reads"] == 1 else "s") if t["reads"] else "estimated")
+        for lv, t in targets.items()]
+
+
+
+def long_items(st, items, manifest):
+    """Exam items whose recording (on the site, or ready to go on it) is more than LENGTH_TOLERANCE over its
+    level's maximum, with the note to show."""
+    out = []
+    for s in items:
+        m = manifest.get(s["id"]) or {}
+        t = st["takes"].get(s["id"]) if take_ready(st, s) else None
+        sec = (t or m).get("seconds") if t or m.get("hash") == content_hash(s) else None
+        if sec and length_note(sec, s):
+            out.append("%s (%s, %s)" % (s["id"], clock(sec), length_note(sec, s)))
     return out
 
 
@@ -859,6 +946,11 @@ def run_gemini(sets, items, only=None):
     # A failure under an older pace instruction doesn't count against the set.
     pace = {s["id"]: pace_of(s) for s in everything}
     st["fails"] = {k: v for k, v in st["fails"].items() if v.get("pace") == pace[k]}
+    # Nor does a failure for its length alone when that length passes now (the exam's limits were relaxed on
+    # 2026-10-11): its saved take is checked again (recheck_rejected) without a new request.
+    by_id = {s["id"]: s for s in everything}
+    st["fails"] = {k: v for k, v in st["fails"].items()
+                   if not (v.get("problem") in ("too long", "too short") and v.get("seconds") and not length_problem(v["seconds"], by_id[k]))}
     manifest = load_json(MANIFEST, {})
     done = [s for s in everything if on_site_gemini(manifest, s)]
     todo = [s for s in everything if s not in done and not take_ready(st, s) and st["fails"].get(s["id"], {}).get("count", 0) < 2
@@ -879,6 +971,7 @@ def run_gemini(sets, items, only=None):
     if done:
         print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s or exam item%s to record" % (len(todo), "" if len(todo) == 1 else "s", "" if len(todo) == 1 else "s"), flush=True)
+    wpm = exam_wpm(st, items, manifest)
     DEADLINE[0] = time.monotonic() + BATCH_MINUTES * 60
     try:
         # The narrator's questions first (one request per six), unless every item waiting has its clip.
@@ -910,7 +1003,8 @@ def run_gemini(sets, items, only=None):
             else:
                 speech = recheck_rejected(st, s, key, exam)
             if speech is None:
-                print("%-22s %s  recording… (%s)" % (s["id"], s["level"], time.strftime("%H:%M:%S")), flush=True)
+                expect = "  expect about %s, %s allows %s–%s" % (clock(expected_seconds(s, wpm[s["level"]][0])), s["level"], clock(s["secs"][0]), clock(s["secs"][1])) if exam else ""
+                print("%-22s %s  recording…%s (%s)" % (s["id"], s["level"], expect, time.strftime("%H:%M:%S")), flush=True)
                 speech = gemini_speak(s, key)
             whole = compose(s, speech)
             sec = (len(whole) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
@@ -944,7 +1038,8 @@ def run_gemini(sets, items, only=None):
                 st["fails"].pop(s["id"], None)
                 if st["rejected"].pop(s["id"], None) and os.path.exists(rejected_path(s, h)):
                     os.remove(rejected_path(s, h))
-                print("%-22s %s  %2.0f%% word errors  ready (%s)" % (s["id"], clock(sec), err * 100, ", ".join(voices.values())), flush=True)
+                note = length_note(sec, s)
+                print("%-22s %s  %2.0f%% word errors  ready (%s)%s" % (s["id"], clock(sec), err * 100, ", ".join(voices.values()), ("  NOTE: " + note) if note else ""), flush=True)
             if st["unchecked"].pop(s["id"], None) and os.path.exists(unchecked_path(s, h)):
                 os.remove(unchecked_path(s, h))
             save_json(status_file, st)
@@ -963,6 +1058,9 @@ def run_gemini(sets, items, only=None):
         print("Recorded, not checked yet (kept for the next run): " + ", ".join(sorted(st["unchecked"])))
     if stuck:
         print("Failed twice, needs a look: " + ", ".join(sorted(stuck)))
+    long = long_items(st, items, manifest)
+    if long:
+        print("Kept, but more than %d%% over their level's length, rewrite later: %s" % (round(LENGTH_TOLERANCE * 100), ", ".join(long)))
     if len(done) + ready == len(everything):
         print("ALL READY" + ("" if st.get("announced") else " (new)"))
         st["announced"] = True
@@ -970,6 +1068,7 @@ def run_gemini(sets, items, only=None):
         st["announced"] = False
     save_json(status_file, st)
     word_targets(st, sets, manifest)
+    exam_targets(st, items, manifest)
 
 
 def use_gemini(sets, ids):  # sets here are sets and exam items
@@ -992,12 +1091,13 @@ def use_gemini(sets, ids):  # sets here are sets and exam items
         used += 1
     save_json(MANIFEST, manifest)
     word_targets(st, [s for s in sets if "exam" not in s], manifest)
+    exam_targets(st, [s for s in sets if "exam" in s], manifest)
     print("Put %d Gemini recording%s on the site" % (used, "" if used == 1 else "s"))
 
 
 def status(sets, items):
     st, manifest = load_status(), load_json(MANIFEST, {})
-    targets, counts = word_targets(st, sets, manifest), {}
+    targets, counts, wpm = word_targets(st, sets, manifest), {}, exam_wpm(st, items, manifest)
     for s in sets + items:
         exam = "exam" in s
         m = manifest.get(s["id"])
@@ -1014,6 +1114,8 @@ def status(sets, items):
                else "recorded %s, not checked yet" % clock(u["seconds"]) if u and u.get("hash") == content_hash(s)
                else "failed %d×" % fails if fails else "script %s (%d words, target %d)" % expected if expected
                else "to do (narrator question not recorded)" if exam and not have_clip(s) else "to do")
+        if exam and gem.startswith(("to do", "failed")):
+            gem += ", expect about %s (%s allows %s–%s)" % (clock(expected_seconds(s, wpm[s["level"]][0])), s["level"], clock(s["secs"][0]), clock(s["secs"][1]))
         print("%-22s %s %4d words  site: %-52s gemini: %s" % (s["id"], s["level"], len(doc_words(s) if exam else script_words(s)), site, gem))
     ready = sum(take_ready(st, s) for s in sets + items if not on_site_gemini(manifest, s))
     print("\nSite: %s · Gemini takes waiting to go on the site: %d" % (", ".join("%d %s" % (n, e) for e, n in sorted(counts.items())) or "none", ready))
@@ -1023,6 +1125,13 @@ def status(sets, items):
             print("%s: %d of %d items on the site with Gemini, %d more ready" % (exam, sum(on_site_gemini(manifest, s) for s in mine), len(mine),
                   sum(take_ready(st, s) and not on_site_gemini(manifest, s) for s in mine)))
     print("Script targets for about 2:15: " + " · ".join("%s at least %d words (Gemini reads %.0f a minute, from %d reads)" % (lv, t["minWords"], t["wpm"], t["reads"]) for lv, t in targets.items()))
+    if items:
+        print("Exam: spoken words (the question included) for the length each level allows; a take is kept unless it's "
+              "more than %d%% under the minimum, and noted when it's more than %d%% over the maximum:" % (round(LENGTH_TOLERANCE * 100), round(LENGTH_TOLERANCE * 100)))
+        print("\n".join(exam_range_lines(exam_targets(st, items, manifest))))
+        long = long_items(st, items, manifest)
+        if long:
+            print("Rewrite later (more than %d%% over): %s" % (round(LENGTH_TOLERANCE * 100), ", ".join(long)))
 
 
 def main():

@@ -230,7 +230,7 @@
   - The local site and the claude.ai page keep separate progress. Claude features (corrections, extra sets, "Suggest 3") only work on claude.ai.
 - `tools/make_audio.py` (+ `tools/export_co.js`): records the listening sets, and the CO exam's items into `site/audio/co-exam-1/NN.mp4`. `tools/recordings.json` notes which voices made each file, from which version of the script.
   - The exam's items (ids `co-exam-1-NN`, from `export_co.js --exam`) are recorded with Microsoft voices only for now, by the default run. Each level has its own pace: about 130 words a minute at A1–A2, the sets' rates at B1–B2, about 185 at C1–C2. The narrator reads every question at the same pace. There's a pause after each spoken option and before the question.
-    - Each recording must last what its level allows in `coLevels.secs`.
+    - Each recording should last what its level allows in `coLevels.secs` (the question included), with 15% of room (`LENGTH_TOLERANCE`, decided 2026-10-11): one more than 15% under the minimum is turned down; one over the maximum is always kept, and one more than 15% over is kept with a « rewrite later » note.
     - `--gemini`, `--use-gemini` and `--status` leave the exam out, so the routine's count of 31 is unchanged.
     - Moving the exam to Gemini (about 4 nights) is for later, once the sets are done. The narrator would then be recorded on its own and joined on, since Gemini reads at most 2 speakers in one request, and the routine's `SKILL.md` would need its count of 31 raised.
   - `python3 tools/make_audio.py` records new or changed sets with Microsoft voices (edge-tts) and deletes audio that no set uses. `--force` re-records every set; set ids re-record just those. A recording under 1:45 or over 4 minutes fails.
@@ -246,7 +246,9 @@
   - **The CO exam (Examen blanc) is converted to Gemini too**, item by item, after the sets. Progress is the same record, `tools/recordings.json` (`engine: "gemini"` with the item's current hash); `--status` ends with "co-exam-1: N of 39 items on the site with Gemini". A new exam, a new item or a changed script or cast is "to do" by itself, so there is no list to update.
     - An item is two recordings joined: its document (one request; the speakers other than `Q`, at most 2, because Gemini reads at most 2 per request and 17 items have 3) and the narrator's question, with a 1.6 s pause between.
     - Narrator questions are recorded apart: every missing question with the same voice goes in one request per 16 (`NARRATOR_CHUNK`), each followed by silence, then cut apart at the silences (`split_clips`: 2 s or more below -50 dB). A batch is kept only if it holds exactly the expected number of clips and its transcript matches. Clips are cached in the Gemini folder as `q-<hash>.wav`. In the 2026-10-09 test Gemini left gaps of about 9 s.
-    - Picture and reply items ask for about a second of silence after each spoken option (`OPTION_NOTE`); the first takes showed 0.8–1 s. Pace follows the level (`PACE_EXAM`, A1 slow … C2 natural). Length is judged against the level's `secs` (`TCF_CANADA.coLevels`), and the words checked are the document's (`doc_words`).
+    - Picture and reply items ask for about a second of silence after each spoken option (`OPTION_NOTE`); the first takes showed 0.8–1 s. Pace follows the level (`PACE_EXAM`, A1 slow … C2 natural). Length is judged against the level's `secs` (`TCF_CANADA.coLevels`) with the 15% tolerance above, and the words checked are the document's (`doc_words`).
+    - Gemini's pace at each exam level is learned like the sets' (`exam_wpm`, the median of every read of a current script; `DEFAULT_WPM_EXAM` until a level has one), and gives each level and kind of item a range of spoken words that fills its length (`exam_targets`, saved under `exam` in `tools/word-targets.json`). Each request prints the length it expects, and `--status` shows it for every item still to do, with the ranges.
+    - Items kept while more than 15% over are listed at the end of each run (« Kept, but more than 15% over… rewrite later »), in `--status` and by `check_co.js`, so their scripts can be shortened later. A failure for length alone that the current rule would pass is cleared, and its saved take is checked again without a new request.
     - Exam casts use Paris Gemini voices only; the Québec Microsoft voices (sylvie, jean) stay as the fallback recording. `check_co.js` only rejects a Québec Gemini voice paired with a Paris Microsoft one.
     - `python3 tools/make_audio.py --gemini <ids>` records just those. An unknown `--option` stops with a message (`--help` used to start a Microsoft recording).
     - 39 items plus 2 narrator batches is about 4–5 days at 10 requests a day.
@@ -257,7 +259,7 @@
     - 39 items, with the level blocks and kinds of `coExam`;
     - pictures with a drawing, and spoken options read in order with every letter right at least once;
     - a narrator's question at the end of each document;
-    - the spoken words and recording lengths of `coLevels`, and the casts;
+    - the spoken words and recording lengths of `coLevels` (failing only a recording more than 15% under the minimum, and listing those more than 15% over to rewrite), and the casts;
     - the option-length limits, and `check_ce.js`'s word-matching rule for B1–B2;
     - a total of 30–34 minutes with the pauses;
     - no left-over files in the exam folder.
