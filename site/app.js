@@ -286,7 +286,6 @@
     gen: {},
     prod: {},
     vocab: null,
-    vDir: lsGet("tcf-vdir", "en-fr"),
     vTheme: "",
     vCount: 10,
     w: {
@@ -603,7 +602,11 @@
     const p = settings().pace || {};
     // Kept within believable bounds, so one rushed round or a session left open doesn't skew the plan.
     const within = (x, lo, hi, d) => (x ? Math.min(hi, Math.max(lo, x)) : d);
-    return { q: within(median(rounds.map((d) => d.secs / d.total)), 15, 120, 30), rev: within(median(arr(p.rev)), 3, 40, 8), nw: within(median(arr(p.nw)), 8, 90, 25) };
+    // Seconds a review card (its repeats after a miss included) and a new card (its checks included). Sessions
+    // before the checks kept seconds an answer (rev) and seconds to read a new card (nw), used until there are new
+    // figures: a new card's two checks come to about one review answer, as you saw it a minute before.
+    const rev = within(median(arr(p.rev)), 3, 40, 8), nw = within(median(arr(p.nw)), 8, 90, 25);
+    return { q: within(median(rounds.map((d) => d.secs / d.total)), 15, 120, 30), rc: within(median(arr(p.rc)), 3, 60, rev * 1.1), nc: within(median(arr(p.nc)), 10, 150, nw + rev) };
   }
   const writeMin = (task) => median(list("writing").filter((w) => w.task === task && w.minutes > 0).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 3).map((w) => w.minutes));
   const coWords = (set) => arr(set && set.lines).reduce((n, l) => n + countWords(l.text), 0);
@@ -818,15 +821,15 @@
     const newOn = !!planned && !backlog && hasNew(theme);
     const nNew = newOn ? Math.min(ui.vCount, themeCards(theme, cards).filter(isNew).length) : 0;
     const parts = [];
-    if (due > 0 || did.review) parts.push({ kind: "review", tok: planned ? "vocab.review" : "vocab", exact: !!planned, done: !!did.review, min: typeof did.review === "number" ? did.review : Math.min(due, 100) * 1.1 * pace.rev / 60 });
-    if (newOn || did.new) parts.push({ kind: "new", tok: "vocab.new", exact: true, done: !!did.new, min: typeof did.new === "number" ? did.new : nNew * pace.nw / 60 });
+    if (due > 0 || did.review) parts.push({ kind: "review", tok: planned ? "vocab.review" : "vocab", exact: !!planned, done: !!did.review, min: typeof did.review === "number" ? did.review : Math.min(due, 100) * pace.rc / 60 });
+    if (newOn || did.new) parts.push({ kind: "new", tok: "vocab.new", exact: true, done: !!did.new, min: typeof did.new === "number" ? did.new : nNew * pace.nc / 60 });
     const min = parts.reduce((a, p) => a + p.min, 0) + (parts.length > 1 ? SWITCH_MIN : 0);
     const cur = parts.find((p) => !p.done);
     const lbl = THEME[theme] ? THEME[theme].label : "";
     const line1 = !parts.length ? "Nothing due today: tick it off." : !cur ? "Done." : cur.kind === "new" ? `${nNew} new · ${lbl}.` : newOn ? `${due} due, then ${nNew} new · ${lbl}.` : `${due} due card${due === 1 ? "" : "s"}${planned && !backlog ? " · no new ones left to learn" : ""}.`;
     const adapted = backlog && planned ? `${due} cards due: new cards wait until fewer than ${BACKLOG} are due.` : why;
     return {
-      go: "vocab", title: backlog && planned ? "Cards: review only today" : newOn && theme !== planned ? `Cards + ${nNew} new: ${lbl}` : null, adapted, line1, line2: "Recall each card before you flip it.",
+      go: "vocab", title: backlog && planned ? "Cards: review only today" : newOn && theme !== planned ? `Cards + ${nNew} new: ${lbl}` : null, adapted, line1, line2: cur && cur.kind === "new" ? "Each new card comes back twice in the session, to check you can recall it." : "Recall each card before you flip it. A miss comes back until you get it.",
       chips: [due ? chip(`${due} due`) : null, nNew ? chip(`${nNew} new`) : null].filter(Boolean), parts, min: parts.length ? min : 1, empty: !parts.length,
       launch: () => {
         if (ui.vocab && !ui.vocab.finished) { goTo("#vocab"); return; }
@@ -1920,21 +1923,97 @@
     const m = cards || allCards();
     return [...S.srs.entries()].filter(([id, st]) => m.has(id) && st && st.due && st.due <= t).map(([id]) => id);
   }
+  // The review schedule works like Anki's. Each card keeps its gap to the next review (ivl, in days) and its own
+  // growth factor (ease). A right answer multiplies the gap by the ease, counting half of any days the card was
+  // late, up to 30 days (the cap suits a test a few months away). The ease drops 0.2 at each miss (down to 1.3)
+  // and rises 0.05 with each right answer (up to 2.5), so a card you keep missing grows more slowly and one you
+  // keep getting right a little faster. A miss sends the card back to tomorrow on the priority pile, where it
+  // stays until it's right on two days. Gaps of 3 days or more vary by a day or so (Anki's fuzz), so cards learned
+  // together don't stay due together. Only English → French moves the schedule: French → English is practice.
+  const SRS = { cap: 30, ease: 2, easeMin: 1.3, easeMax: 2.5, lapse: 0.2, gain: 0.05, known: 4 };
+  // The stage a gap belongs to: 1 day, 2, 3–6, 7–13, 14–20, then 21 or more (mastered, Anki's "mature").
+  const stageOf = (ivl) => (ivl >= 21 ? 5 : ivl >= 14 ? 4 : ivl >= 7 ? 3 : ivl >= 3 ? 2 : ivl >= 2 ? 1 : 0);
+  const ease2 = (x) => Math.min(SRS.easeMax, Math.max(SRS.easeMin, Math.round(x * 100) / 100));
+  // A copy of a card's schedule. One saved before gaps and eases were kept gets its gap from its stage (on the old
+  // ladder of 1, 2, 4, 7, 14 and 30 days) and its ease from its misses, 0.1 less for each.
+  function srsOf(st) {
+    const s = Object.assign({ stage: 0, lapses: 0, reps: 0 }, st);
+    if (!(s.ivl > 0)) s.ivl = s.pri ? 1 : IV[Math.max(0, Math.min(IV.length - 1, s.stage || 0))];
+    s.ivl = Math.min(SRS.cap, s.ivl);
+    if (!(s.ease > 0)) s.ease = ease2(SRS.ease - 0.1 * (s.lapses || 0));
+    return s;
+  }
+  // The gap after a right answer: the gap so far, plus half the days it was late, times the ease, and always at
+  // least a day longer, up to the cap.
+  const srsNext = (ivl, ease, late) => Math.min(SRS.cap, Math.max(ivl + 1, Math.round((ivl + late / 2) * ease)));
+  // Anki's fuzz: a gap of 3 days or more moves by up to a day, plus 15% of its days from 2.5 to 7, 10% of those from
+  // 7 to 20 and 5% beyond (4 days → 3–5, 16 → 13–19). It's never below the last gap plus one, except at the cap, so
+  // mastered cards spread over 27–30 days. It comes out the same for a card on a given day.
+  function srsFuzz(n, prev, id, t) {
+    if (n < 2.5) return n;
+    const d = 1 + 0.15 * (Math.min(n, 7) - 2.5) + 0.1 * Math.max(0, Math.min(n, 20) - 7) + 0.05 * Math.max(0, n - 20);
+    const hi = Math.min(SRS.cap, Math.round(n + d));
+    const lo = Math.min(hi, Math.max(Math.round(n - d), Math.min(prev + 1, SRS.cap - Math.round(d))));
+    let h = 0;
+    for (const ch of id + "|" + t) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0;
+    return lo + ((h >>> 0) % (hi - lo + 1));
+  }
+  // One review of a card, right or missed. A missed card shown again in the same session doesn't come here.
   function srsGrade(id, ok) {
     const t = todayStr();
-    const st = clone(S.srs.get(id) || { stage: 0, lapses: 0, reps: 0 });
+    const st = srsOf(S.srs.get(id));
+    const late = st.due ? Math.max(0, daysBetween(st.due, t)) : 0;
     st.reps = (st.reps || 0) + 1;
     st.last = t;
-    if (!ok) { st.lapses = (st.lapses || 0) + 1; st.pri = true; st.pStreak = 0; st.stage = 0; st.due = addDays(t, 1); }
-    else if (st.pri) {
+    if (!ok) {
+      st.lapses = (st.lapses || 0) + 1;
+      st.ease = ease2(st.ease - SRS.lapse);
+      st.pri = true;
+      st.pStreak = 0;
+      st.ivl = 1;
+    } else if (st.pri) {
       st.pStreak = (st.pStreak || 0) + 1;
-      if (st.pStreak >= 2) { st.pri = false; st.stage = 1; st.due = addDays(t, IV[1]); } else st.due = addDays(t, 1);
-    } else { st.stage = Math.min((st.stage || 0) + 1, IV.length - 1); st.due = addDays(t, IV[st.stage]); }
+      if (st.pStreak >= 2) { st.pri = false; st.ivl = srsFuzz(srsNext(1, st.ease, late), 1, id, t); } else st.ivl = 1;
+    } else {
+      const prev = st.ivl;
+      st.ease = ease2(st.ease + SRS.gain);
+      st.ivl = srsFuzz(srsNext(prev, st.ease, late), prev, id, t);
+    }
+    st.stage = st.pri ? 0 : stageOf(st.ivl);
+    st.due = addDays(t, st.ivl);
     put("srs", id, st);
   }
+  // A card starts its schedule: tomorrow, or in about 4 days for one you already knew (Anki's "Easy" on a new card).
   function srsLearn(id, known) {
-    const t = todayStr();
-    put("srs", id, { stage: known ? 2 : 0, due: addDays(t, known ? IV[2] : IV[0]), lapses: 0, reps: 1, last: t, pri: false, learned: t });
+    const t = todayStr(), ivl = known ? srsFuzz(SRS.known, 0, id, t) : 1;
+    put("srs", id, { stage: stageOf(ivl), ivl, ease: SRS.ease, due: addDays(t, ivl), lapses: 0, reps: 1, last: t, pri: false, learned: t });
+  }
+  // French → English practice only keeps the day a card was last practised (rec), so the next practice starts
+  // with the cards practised longest ago. Its schedule stays as it was.
+  function srsPractised(id, t) {
+    const st = S.srs.get(id);
+    if (st && st.rec !== t) put("srs", id, Object.assign({}, st, { rec: t }));
+  }
+
+  // A session is a queue of steps, each { id, k }:
+  // - show: a new card, with its answer. Got it, next → checked a few cards later (learn 1), then further on
+  //   (learn 2), then it leaves the session for tomorrow, as Anki's learning steps do. I already know this → one
+  //   check further on (known); right, it goes to 4 days.
+  // - learn, known: recall a new card. A miss starts its checks again (learn 1, a few cards later).
+  // - rev: a review, which moves the schedule. A miss comes back a few cards later (re) until you get it right;
+  //   those repeats don't move the schedule again, nor count toward clearing the priority pile.
+  // - prac: French → English practice, which never moves the schedule. A miss comes back the same way.
+  const VOCAB_V = 2; // the session's shape: one saved in the tab before it changed is dropped
+  const GAP = { soon: 3, again: 4, later: 6 };
+  const PRACTICE_N = 20;
+  // Puts a step back in the queue, gap steps after the current one (or at the end).
+  const vocabAgain = (v, e, gap) => v.queue.splice(Math.min(v.i + 1 + gap, v.queue.length), 0, e);
+  // Your learned cards, the ones practised French → English longest ago (or never) first, and of those the ones
+  // reviewed longest ago, so the cards you saw today come last.
+  function practiceIds(cards) {
+    return [...S.srs.entries()].filter(([id, st]) => st && cards.has(id) && str(cards.get(id).en).trim())
+      .sort((a, b) => str(a[1].rec).localeCompare(str(b[1].rec)) || str(a[1].last).localeCompare(str(b[1].last)))
+      .map(([id]) => id);
   }
   function vocabStart(mode) {
     const cards = allCards();
@@ -1944,38 +2023,60 @@
       const pri = ids.filter((id) => S.srs.get(id).pri);
       ids = pri.concat(ids.filter((id) => !S.srs.get(id).pri)).slice(0, 100);
       if (!ids.length) { toast("Nothing is due today."); return; }
+    } else if (mode === "practice") {
+      ids = shuffle(practiceIds(cards).slice(0, PRACTICE_N));
+      if (!ids.length) { toast("Learn some cards first."); return; }
     } else {
+      mode = "new";
       const th = ui.vTheme || defaultTheme();
       ids = themeCards(th, cards).filter(isNew).slice(0, ui.vCount).map((c) => c.id);
       if (!ids.length) { toast("No new cards left in this theme. Build more with Claude, or pick another theme."); return; }
     }
-    ui.vocab = { mode, queue: ids, i: 0, shown: mode === "new", ok: 0, miss: 0, requeued: {}, finished: false, edit: false, secs: 0, lastT: Date.now() };
+    const k = mode === "new" ? "show" : mode === "practice" ? "prac" : "rev";
+    ui.vocab = { v: VOCAB_V, mode, queue: ids.map((id) => ({ id, k })), i: 0, total: ids.length, shown: k === "show", ok: 0, miss: 0, known: 0, first: {}, finished: false, edit: false, secs: 0, lastT: Date.now() };
     render(true);
     window.scrollTo(0, 0);
   }
   function vocabAdvance() {
     const v = ui.vocab;
     v.i++;
-    v.shown = v.mode === "new";
-    if (v.i >= v.queue.length) { v.finished = true; vocabPace(v); autoTick(v.mode === "review" ? "vocab.review" : "vocab.new", { min: (v.secs || 0) / 60 }); }
+    const e = v.queue[v.i];
+    v.shown = !!e && e.k === "show";
+    if (!e) {
+      v.finished = true;
+      vocabPace(v);
+      if (v.mode !== "practice") autoTick(v.mode === "review" ? "vocab.review" : "vocab.new", { min: (v.secs || 0) / 60 });
+    }
     render(true);
   }
+  // ok is Got it; on a new card shown with its answer, Got it, next (true) or I already know this (false).
   function vocabGrade(ok) {
     const v = ui.vocab;
     if (!v || v.finished) return;
-    const id = v.queue[v.i];
+    const e = v.queue[v.i];
+    if (!e || (e.k !== "show" && !v.shown)) return;
     activeTick(v, 90);
-    if (v.mode === "new") { srsLearn(id, !ok); v.ok++; vocabAdvance(); return; }
-    if (!v.shown) return;
-    srsGrade(id, ok);
-    if (ok) v.ok++; else { v.miss++; if (!v.requeued[id]) { v.requeued[id] = true; v.queue.push(id); } }
+    if (e.k === "show") {
+      srsLearn(e.id, false);
+      vocabAgain(v, ok ? { id: e.id, k: "learn", n: 1 } : { id: e.id, k: "known" }, ok ? GAP.soon : GAP.later);
+    } else if (e.k === "learn" || e.k === "known") {
+      // Each card's first check is its score for the session.
+      if (!(e.id in v.first)) { v.first[e.id] = ok ? 1 : 0; if (ok) v.ok++; else v.miss++; }
+      if (!ok) vocabAgain(v, { id: e.id, k: "learn", n: 1 }, GAP.soon);
+      else if (e.k === "known") { srsLearn(e.id, true); v.known++; }
+      else if (e.n === 1) vocabAgain(v, { id: e.id, k: "learn", n: 2 }, GAP.later);
+    } else if (e.k === "rev" || e.k === "prac") {
+      if (e.k === "rev") srsGrade(e.id, ok); else srsPractised(e.id, todayStr());
+      if (ok) v.ok++; else { v.miss++; vocabAgain(v, { id: e.id, k: "re" }, GAP.again); }
+    } else if (!ok) vocabAgain(v, { id: e.id, k: "re" }, GAP.again);
     vocabAdvance();
   }
-  // Your seconds a card, kept for the last 5 sessions of each kind, so the plan's minutes follow your own pace.
+  // Your seconds a card, its checks or repeats included, kept for the last 5 sessions of each kind, so the plan's
+  // minutes follow your own pace. Practice isn't in the plan, so it isn't kept.
   function vocabPace(v) {
-    const n = v.mode === "new" ? v.queue.length : v.ok + v.miss;
-    if (!n || !(v.secs > 0)) return;
-    const k = v.mode === "new" ? "nw" : "rev", p = Object.assign({}, settings().pace || {});
+    const n = v.total || 0;
+    if (!n || !(v.secs > 0) || v.mode === "practice") return;
+    const k = v.mode === "new" ? "nc" : "rc", p = Object.assign({}, settings().pace || {});
     p[k] = arr(p[k]).concat(Math.round((v.secs / n) * 10) / 10).slice(-5);
     saveSettings({ pace: p });
   }
@@ -3762,6 +3863,8 @@
         // A running clock carries on from when it started, so the time spent reloading counts, as on the real test.
         if (timer.running) { clearInterval(timer.iv); timer.iv = setInterval(paintTimer, 250); }
       }
+      // A card session saved before its steps changed shape can't be read: it's dropped, and the cards keep their schedule.
+      if (ui.vocab && ui.vocab.v !== VOCAB_V) ui.vocab = null;
       if (s.audio) coRemount(s.audio);
       // A listening exam can't play again by itself after a refresh, so it comes back paused, clock included.
       if (examRunning() && skillOf(ui.cx) === "co" && ui.cx.play) { ui.cx.play.paused = true; if (timer.home === XSPEC.co.home) timerPause(); }
@@ -3928,8 +4031,8 @@
     return { n, days, html: CH.cols({ key, h, legend: false, series: [{ id: "due", label: "Cards due", color: "var(--c-voc)" }], data: n.map((v) => [v]), label: "Cards due each day this week",
       x: days.map((d, i) => ({ label: i ? DAYS_SHORT[dow(d)] : "auj.", today: !i, tip: `${i ? dayLabel(d) : "Today"} · ${n[i]} card${n[i] === 1 ? "" : "s"}${i ? "" : " (with any overdue)"}` })) }) };
   }
-  // Cards by the gap to their next review, on the ordered blue scale.
-  const STAGES = [["1–2 days", (st) => st.pri || (st.stage || 0) <= 1], ["4–7 days", (st) => !st.pri && (st.stage === 2 || st.stage === 3)], ["14 days", (st) => !st.pri && st.stage === 4], ["30 days · mastered", (st) => !st.pri && st.stage >= 5]];
+  // Cards by the gap to their next review, on the ordered blue scale (stageOf: 3–13 days is stages 2 and 3).
+  const STAGES = [["1–2 days", (st) => st.pri || (st.stage || 0) <= 1], ["3–13 days", (st) => !st.pri && (st.stage === 2 || st.stage === 3)], ["14–20 days", (st) => !st.pri && st.stage === 4], ["21–30 days · mastered", (st) => !st.pri && st.stage >= 5]];
   const stageChart = (srs, key, compact) => CH.stack(STAGES.map(([l, f], i) => ({ label: l, value: srs.filter(([, st]) => f(st)).length, color: `var(--o-${i + 1})` })), { key, compact, label: "Your cards by the gap to their next review" });
 
   VIEWS.today = {
@@ -5174,14 +5277,15 @@
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition: a new card comes back after 1, 2, 4, 7, 14, then 30 days. Anything you miss joins a priority pile reviewed daily until you get it right twice. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
+      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition, as in Anki. A new card is checked twice in the session, then comes back tomorrow, and each right answer about doubles the gap, up to 30 days. A card you miss comes back in the session until you get it, then daily on the priority pile until you get it right on two days, and its gaps grow more slowly from then on; one you keep getting right grows a little faster. Gaps vary by a day or so, so cards learned together don't all come back on the same day. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       ${waitPanel()}
       ${exPanel()}
       <div class="grid2 v-home">
         <section class="panel stack" data-spot>
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
           ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
-          <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button></div>
+          <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button>${learned ? `<button class="btn ghost" data-act="v-start" data-mode="practice">Practise French → English</button>` : ""}</div>
+          ${learned ? `<p class="small muted">Reviews ask English → French. The practice takes the ${Math.min(learned, PRACTICE_N)} cards practised that way longest ago, and doesn't change their schedule.</p>` : ""}
           ${srs.length ? `<div class="v-week"><p class="small muted">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></p>${week.html}</div>${stageChart(srs, "v-stages", true)}` : ""}
           <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
         </section>
@@ -5193,7 +5297,6 @@
           ${left ? "" : `<p class="small muted">No new cards left in this theme. ${claudeBtn("build-" + theme, "v-build", "Build 20 more with Claude", `data-theme="${theme}"`, "btn ghost sm")}</p>`}
         </section>
       </div>
-      <div class="row"><span class="small muted">Card direction</span><div class="seg" role="group" aria-label="Card direction"><button data-act="v-dir" data-dir="en-fr" aria-pressed="${ui.vDir === "en-fr"}">English → French</button><button data-act="v-dir" data-dir="fr-en" aria-pressed="${ui.vDir === "fr-en"}">French → English</button></div><span class="small muted">English → French trains the words you'll need to produce.</span></div>
       <section class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
         ${fold("deck", `Voir les ${T.VOCAB.length} thèmes · Show the deck`, `<div class="table-wrap"><table class="deck"><thead><tr><th>Theme</th><th>Learned</th><th>Mastered</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`)}
       </section>
@@ -5208,27 +5311,40 @@
       </div>`)}</section>
     </div>`;
   }
+  // What a step is, over the card: a check of a new card, or a card back after a miss.
+  const STEP_TAG = { learn: ["info", "Check: recall it"], known: ["info", "Check: you said you knew it"], re: ["bad", "Again: you missed it"] };
   function vocabCard() {
     const v = ui.vocab;
     const cards = allCards();
-    const id = v.queue[v.i];
+    const e = v.queue[v.i] || {};
+    const id = e.id;
     const c = cards.get(id) || { fr: "?", en: "?", theme: "" };
     const st = S.srs.get(id);
     const th = THEME[c.theme];
-    const enFirst = ui.vDir === "en-fr";
-    const front = cardSide(c, enFirst ? "en" : "fr");
-    const back = cardSide(c, enFirst ? "fr" : "en");
+    // Reviews and new cards ask English → French; the practice asks French → English.
+    const frFirst = v.mode === "practice";
+    const front = cardSide(c, frFirst ? "fr" : "en");
+    const back = cardSide(c, frFirst ? "en" : "fr");
+    const show = e.k === "show", tag = STEP_TAG[e.k];
+    // The bar counts steps, with the checks still to come for each new card; the count is the cards done.
+    const ahead = v.queue.slice(v.i);
+    const todo = ahead.reduce((n, x) => n + 1 + (x.k === "show" ? 2 : x.k === "learn" && x.n === 1 ? 1 : 0), 0);
+    const pct = (v.i / (v.i + todo)) * 100;
+    const done = v.total - new Set(ahead.map((x) => x.id)).size;
     let buttons;
-    if (v.mode === "new") buttons = `<button class="btn primary" data-act="v-grade" data-ok="1">Got it, next <span class="kbd">2</span></button><button class="btn" data-act="v-grade" data-ok="0">I already know this <span class="kbd">3</span></button>`;
+    if (show) buttons = `<button class="btn primary" data-act="v-grade" data-ok="1">Got it, next <span class="kbd">2</span></button><button class="btn" data-act="v-grade" data-ok="0">I already know this <span class="kbd">3</span></button>`;
     else if (!v.shown) buttons = `<button class="btn primary" data-act="v-show">Show answer <span class="kbd">Space</span></button>`;
     else buttons = `<button class="btn" data-act="v-grade" data-ok="0">Missed <span class="kbd">1</span></button><button class="btn primary" data-act="v-grade" data-ok="1">Got it <span class="kbd">2</span></button>`;
+    const label = v.mode === "new" ? "Learning new cards" : v.mode === "practice" ? "Practice · French → English" : "Review";
     return `<div class="wrap">
-      <div class="row between"><span class="eyebrow">${v.mode === "new" ? "Learning new cards" : "Review"} · ${v.i + 1} / ${v.queue.length}</span><span class="row"><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
-      <div class="bar"><i style="width:${(v.i / v.queue.length) * 100}%" data-tween="vbar-${v.mode}" data-tw="width" data-to="${(v.i / v.queue.length) * 100}"></i></div>
+      <div class="row between"><span class="eyebrow">${label} · ${done} / ${v.total} done</span><span class="row"><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
+      <div class="bar"><i style="width:${pct}%" data-tween="vbar-${v.mode}" data-tw="width" data-to="${pct}"></i></div>
       <section class="panel flash" data-m="slide" data-k="vc-${esc(id)}-${v.i}">
-        <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri ? " · priority" : ""}</p>
+        <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri && v.mode === "review" ? " · priority" : ""}</p>
+        ${tag ? `<div class="row"><span class="pill ${tag[0]}" data-m="pop" data-k="vt-${esc(id)}-${v.i}">${tag[1]}</span></div>` : ""}
         ${v.edit ? vocabEditForm(id) : `${front}
-        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : `<p class="muted small">Say it out loud before you flip.</p>`}
+        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : `<p class="muted small">${frFirst ? "Say what it means before you flip." : "Say it out loud before you flip."}</p>`}
+        ${show ? `<p class="small muted">Got it → two checks in this session. Already know it → one check, then about 4 days.</p>` : ""}
         <div class="row">${buttons}</div>`}
       </section>
     </div>`;
@@ -5268,7 +5384,7 @@
   function vocabEditOpen() {
     const v = ui.vocab;
     if (!v || v.finished || v.edit) return;
-    const c = allCards().get(v.queue[v.i]);
+    const c = allCards().get((v.queue[v.i] || {}).id);
     if (!c) return;
     CARD_FIELDS.forEach((k) => { ui.form["ve-" + k] = str(c[k]); });
     v.edit = true;
@@ -5286,7 +5402,7 @@
   function vocabEditSave() {
     const v = ui.vocab;
     if (!v || !v.edit) return;
-    const id = v.queue[v.i];
+    const id = (v.queue[v.i] || {}).id;
     const c = allCards().get(id);
     const val = (k) => str(ui.form["ve-" + k]).trim();
     if (!c) return;
@@ -5303,16 +5419,22 @@
   function vocabDone() {
     const v = ui.vocab;
     const due = dueIds().length;
-    const sk = hk(v.queue.join("|")), perfect = v.mode !== "new" && v.ok > 0 && !v.miss;
+    const sk = hk(v.queue.map((e) => e.id).join("|")), perfect = v.mode !== "new" && v.ok > 0 && !v.miss;
     const rm = v.mode === "new" ? ["bonjour", "Nouvelles cartes en poche ! Elles reviennent demain.", "New cards in the bag! They come back tomorrow."]
       : perfect ? ["bravo", "Séance parfaite ! Bravo.", "A perfect session! Well done."]
+      : v.mode === "practice" ? ["bonjour", "Bien joué ! Ton planning ne change pas.", "Nice work! Your schedule stays as it was."]
       : ["bonjour", "Bien joué ! Les ratées reviennent demain.", "Nice work! The ones you missed come back tomorrow."];
+    const n = v.total, checked = v.ok + v.miss;
+    const lede = v.mode === "new"
+      ? `You recalled ${v.ok} of ${checked} at the first check. ${!v.known ? "They come back tomorrow for their first review." : v.known >= n ? "They come back in about 4 days, since you knew them." : `The ${v.known} you knew come back in about 4 days, the others tomorrow.`}`
+      : v.mode === "practice" ? `Practice only: the schedule didn't change.${v.miss ? ` The ${v.miss} you missed came back until you got ${v.miss > 1 ? "them" : "it"}.` : ""}`
+      : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile: back tomorrow, until you get ${v.miss > 1 ? "them" : "it"} right on two days.` : "Clean session.";
     return `<div class="wrap"><section class="panel stack" data-m="pop" data-k="vdone-${sk}">
-      <p class="eyebrow">Session complete</p>
-      <p class="scorebig"${perfect ? ` data-m="burst" data-k="vperfect-${sk}"` : ""}>${v.mode === "new" ? `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.queue.length}">${v.queue.length}</span> new` : `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.ok}">${v.ok}</span> / ${v.ok + v.miss}`}</p>
+      <p class="eyebrow">${v.mode === "practice" ? "Practice complete" : "Session complete"}</p>
+      <p class="scorebig"${perfect ? ` data-m="burst" data-k="vperfect-${sk}"` : ""}>${v.mode === "new" ? `<span data-tween="vdone-${sk}" data-tw="count" data-to="${n}">${n}</span> new` : `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.ok}">${v.ok}</span> / ${checked}`}</p>
       ${greet(rm[0], rm[1], rm[2], "sm")}
-      <p class="lede">${v.mode === "new" ? "These come back tomorrow for their first review." : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile for daily review.` : "Clean session."}${due ? ` ${due} card${due > 1 ? "s are" : " is"} still due.` : ""}</p>
-      <div class="row"><button class="btn primary" data-act="v-close">Back to the deck</button>${due ? `<button class="btn" data-act="v-start" data-mode="review">Review the rest</button>` : ""}</div>
+      <p class="lede">${lede}${due ? ` ${due} card${due > 1 ? "s are" : " is"} still due.` : ""}</p>
+      <div class="row"><button class="btn primary" data-act="v-close">Back to the deck</button>${due ? `<button class="btn" data-act="v-start" data-mode="review">Review the rest</button>` : ""}${v.mode === "practice" ? `<button class="btn" data-act="v-start" data-mode="practice">Practise more</button>` : ""}</div>
     </section></div>`;
   }
 
@@ -5888,7 +6010,7 @@
     const set = new Set();
     for (const [d, doc] of S.days) if (doc && doc.done && Object.keys(doc.done).length) set.add(d);
     ["drills", "comp", "writing", "errors"].forEach((c) => list(c).forEach((x) => x.date && set.add(x.date)));
-    for (const st of S.srs.values()) if (st && st.last) set.add(st.last);
+    for (const st of S.srs.values()) { if (st && st.last) set.add(st.last); if (st && st.rec) set.add(st.rec); }
     return set;
   }
   // A score's place along the NCLC scale, from NCLC 4 (0) to 10+ (1), each band the same width.
@@ -6469,7 +6591,7 @@
     "v-edit-save": () => vocabEditSave(),
     "v-edit-cancel": () => vocabEditClose(),
     "v-edit-restore": () => {
-      const v = ui.vocab, id = v && v.queue[v.i];
+      const v = ui.vocab, id = v && (v.queue[v.i] || {}).id;
       if (id && DECK.has(id)) remove("cards", id);
       if (v) v.edit = false;
       ui.confirm = "";
@@ -6478,7 +6600,6 @@
     },
     "v-close": () => { ui.vocab = null; render(true); },
     "v-count": (el) => { ui.vCount = Number(el.dataset.n); render(true); },
-    "v-dir": (el) => { ui.vDir = el.dataset.dir; lsSet("tcf-vdir", ui.vDir); render(true); },
     "v-build": (el) => vocabBuild(el.dataset.theme),
     "card-del": (el) => cardDelete(el.dataset.id),
     "grab-open": () => grabOpen(),
@@ -6811,9 +6932,9 @@
       return;
     }
     if (route.view === "vocab" && ui.vocab && !ui.vocab.finished) {
-      const v = ui.vocab;
+      const v = ui.vocab, step = v.queue[v.i] || {};
       if (e.key === "e" || e.key === "E") { e.preventDefault(); vocabEditOpen(); return; }
-      if (v.mode === "new") { if (e.key === "2" || e.key === "Enter") { e.preventDefault(); vocabGrade(true); } else if (e.key === "3") { e.preventDefault(); vocabGrade(false); } return; }
+      if (step.k === "show") { if (e.key === "2" || e.key === "Enter") { e.preventDefault(); vocabGrade(true); } else if (e.key === "3") { e.preventDefault(); vocabGrade(false); } return; }
       if (!v.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); v.shown = true; render(true); }
       else if (v.shown && e.key === "1") { e.preventDefault(); vocabGrade(false); }
       else if (v.shown && (e.key === "2" || e.key === "Enter")) { e.preventDefault(); vocabGrade(true); }
