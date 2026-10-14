@@ -47,6 +47,7 @@
       - He blinks, twitches an ear and swishes his tail every few seconds, and hops when he cheers (CSS in `index.html`; his eyes, ears and tail are groups in `REMY_BODY` and `REMY_EYES`).
       - He closes a card session (cheering after a perfect one), and waits with a line in the empty states: no cards due, no mistakes yet, an empty error log, and Évolution before any attempt.
       - With headphones above a listening set before it's checked, and with glasses and a red pen over a writing correction (the count of mistakes and the main category).
+      - With his eyes shut (the café mood) over a set or exam checked with its answers hidden.
     - **Rewards,** all worked out from progress already saved, with no new data:
       - The streak leaf: Pousse 1–6 days, Doré 7–13, Orangé 14–29, Rouge érable 30+. It shows in the sidebar and on Régularité.
       - The "Très bien !" stamp lands on a day's header once all its blocks are ticked, in place of the day's ring. It lands with a thunk only right after the last tick (`ui.thunk`), and maple leaves burst from it (`TCFMotion.burst`).
@@ -134,6 +135,11 @@
       - Unfinished attempts stay the record: one changed since the copy was saved (on another device, say) wins over it. A copy that can't be drawn is dropped.
       - Bump `TAB_V` in `app.js` when the shape of `ui` changes, so an older copy is dropped rather than misread.
     - Switching level or topic in Compréhension and back brings back the set you had there, as you left it: with your answers so far, or checked, with its results.
+    - **Hidden answers** (`ansHidden` in `app.js`): the user asked on 2026-10-14 to hide a checked reading or listening set's answers, so that trying it again isn't spoiled by a glance.
+      - « Score only », next to « Check my answers », checks the set and shows just the score. After a check, « Hide the answers » and « Show the answers » switch them; « Check my answers » always shows them.
+      - While a set's answers are hidden, its page shows a card instead of the questions: the score, Rémy with his eyes shut, « Try this set again » and « Show the answers ». Coming back to the set, opening the attempt from the history and a refresh keep them hidden. Its rows in the history tree don't mark the questions missed, and a listening set's transcript closes with the answers (it can still be opened on purpose).
+      - A practice exam's review has the same switch over « Every question ».
+      - Kept in `settings.main.ansHidden`, by set or exam id, until the answers are shown. Before your progress has loaded, a checked set's answers stay hidden.
     - Grammaire has three ways to practise across topics, above the topic list: the mixed review, Your mistakes and Find the mistakes.
     - The **mixed review** takes every topic of the current and earlier phases that has been drilled (the four Phase 1 topics before any), most-missed in the last two weeks first, then the ones practised longest ago, and deals its 15 questions among them in turn, from each topic's sets at the phase's levels.
     - **The review schedule** works like Anki's (the user asked on 2026-10-14 for the cards to follow Anki's way of reviewing; `SRS` in `app.js`):

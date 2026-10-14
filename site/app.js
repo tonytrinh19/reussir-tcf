@@ -3011,7 +3011,7 @@
       arr(a.answers).forEach((k, j) => { if (k != null) ui.c.ans[skill][j] = k; });
       ui.c.submitted[skill] = true;
       ui.c.saved[skill] = last.saved;
-      if (skill === "co") ui.c.script = true;
+      if (skill === "co") ui.c.script = !ansHidden(set.id);
     } else compRestore(skill);
     return true;
   }
@@ -3076,7 +3076,17 @@
     } else ui.c.failed[key] = true;
     render(true);
   }
-  function compSubmit(skill) {
+  // Answers you chose to keep hidden after checking, by set or exam id (settings.main.ansHidden), so that trying
+  // it again isn't spoiled by a glance: "Score only" checks a set without showing them, and Hide or Show switches
+  // them on a checked set or exam. Before your progress has loaded, a checked set's answers stay hidden too.
+  const ansHidden = (id) => !loaded || !!(id && (settings().ansHidden || {})[id]);
+  function ansHide(id, hide) {
+    if (!id || !loaded || !!(settings().ansHidden || {})[id] === !!hide) return;
+    const m = Object.assign({}, settings().ansHidden || {});
+    if (hide) m[id] = true; else delete m[id];
+    saveSettings({ ansHidden: m });
+  }
+  function compSubmit(skill, hide) {
     const set = ui.c.set[skill];
     if (!set) return;
     const ans = ui.c.ans[skill];
@@ -3103,7 +3113,17 @@
     ui.c.open[doc.theme ? `${skill}:t:${doc.theme}` : `${skill}:g:mixed`] = true;
     ui.c.open[`${skill}:s:${doc.setId}`] = true;
     autoTick("comp." + skill);
-    if (skill === "co") ui.c.script = true;
+    ansHide(set.id, !!hide);
+    // The transcript opens with the answers, since the explanations quote it.
+    if (skill === "co") ui.c.script = !hide;
+    render(true);
+  }
+  // Shows or hides a checked set's answers (and, for listening, the transcript with them).
+  function compAnsToggle(skill, show) {
+    const set = ui.c.set[skill];
+    if (!set || !ui.c.submitted[skill]) return;
+    ansHide(set.id, !show);
+    if (skill === "co") ui.c.script = show;
     render(true);
   }
   function compGap(skill, i, kind) {
@@ -3146,7 +3166,7 @@
     ui.c.submitted[skill] = true;
     ui.c.saved[skill] = a.id;
     ui.c.review[skill] = a;
-    if (skill === "co") ui.c.script = true;
+    if (skill === "co") ui.c.script = !ansHidden(a.setId);
   }
 
   // After a reading set: the last three sets at its level, next to the phase goal of 70%, and where that
@@ -3173,7 +3193,8 @@
     const gaps = a.gaps || {};
     const hasAns = !!qs && Array.isArray(a.answers);
     const missed = hasAns ? qs.map((q, i) => (a.answers[i] === q.answer ? -1 : i)).filter((i) => i >= 0) : Object.keys(gaps).map(Number);
-    const tags = missed.map((i) => `<span class="miss">Q${i + 1} ✗${gaps[i] ? " · " + (gaps[i] === "vocab" ? "vocabulary" : "comprehension") : ""}</span>`).join("");
+    // While the set's answers are hidden, the misses aren't marked either: they'd give away where to look.
+    const tags = ansHidden(a.setId) ? `<span class="small muted">answers hidden</span>` : missed.map((i) => `<span class="miss">Q${i + 1} ✗${gaps[i] ? " · " + (gaps[i] === "vocab" ? "vocabulary" : "comprehension") : ""}</span>`).join("");
     return `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}${mins(a.secs) ? `<span class="small muted">${mins(a.secs)}</span>` : ""}${a.timed ? `<span class="pill info">timed</span>` : ""}${tags}${hasAns ? `<button class="btn ghost sm" data-act="c-review" data-skill="${skill}" data-id="${esc(a.id)}">Review</button>` : ""}</div>`;
   }
   // A set: started and not finished yet (with Resume), or its attempts, newest first.
@@ -3661,7 +3682,9 @@
     if (cx && cx.done) {
       const r = cx.result, retake = retakeIds().has(cx.attemptId);
       const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
-      const review = cx.exam.items.map((it, j) => {
+      // The questions with their answers, unless you've hidden them for this exam.
+      const xhid = ansHidden(cx.exam.id);
+      const review = xhid ? "" : cx.exam.items.map((it, j) => {
         const a = cx.ans[j];
         if (skill === "co") return coxReviewItem(it, j, a);
         const ok = a === it.answer;
@@ -3684,7 +3707,13 @@
           <div class="row">${next}</div>
           ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
-        <section class="sec"><h2 class="h2">Every question</h2><p class="small muted">In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`;
+        ${xhid ? `<section class="sec"><h2 class="h2">Every question</h2><div class="panel stack ans-hid" data-m="pop" data-k="xhid-${esc(cx.exam.id)}-${esc(r.date)}">
+          <p class="h3">${ico("eye")}Réponses cachées <small class="muted">· answers hidden</small></p>
+          <p class="small muted">Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p>
+          ${greet("cafe", "Pas de coup d'œil ! Les réponses t'attendent.", "No peeking! The answers will wait for you.", "sm")}
+          <div class="row"><button class="btn" data-act="x-show">Show the answers</button></div>
+        </div></section>`
+          : `<section class="sec"><div class="sec-head"><h2 class="h2">Every question</h2><button class="btn ghost sm" data-act="x-hide">Hide the answers</button></div><p class="small muted">In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`}`;
     }
     const exams = compAttempts(skill).filter((a) => a.kind === "exam"), retakes = retakeIds();
     // One row per built-in exam, so each note sits by its own exam. The ones not done yet are the primary choice.
@@ -5643,7 +5672,17 @@
       const mineP = cePace(sl), myClock = Math.round(PACE_STEPS[mineP.k][0] * per * nq);
       const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Your clock: ${fmtClock(myClock)}, ${mineP.label}. Exam pace for ${nq} ${esc(sl)} questions is ${fmtClock(per * nq)}.</span>${timerUI("comp.ce", "Lecture CE", steps.concat([[1200, "20:00"]]), myClock)}</div>` : "";
       const docOf = (q, i) => (q.doc ? `<article class="sheet"><p class="eyebrow">Document ${i + 1}${q.doc.type ? ` · ${esc(q.doc.type)}` : ""}</p>${q.doc.title ? `<h3>${typo(q.doc.title)}</h3>` : ""}<p class="fr">${typo(q.doc.text)}</p></article>` : "");
-      const qs = set ? `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
+      // Checked with the answers hidden (Score only, or Hide): just the score, so trying the set again isn't spoiled.
+      const hid = !!set && submitted && ansHidden(set.id);
+      const nq2 = set ? set.questions.length : 0;
+      const scoreBig = set && submitted ? `<span class="scorebig"${score === nq2 ? ` data-m="burst" data-k="cperf-${esc(set.id)}-${esc(ui.c.saved[skill] || "")}"` : ""}><span data-tween="cs-${esc(set.id)}" data-tw="count" data-to="${score}">${score}</span>/${nq2}</span>` : "";
+      const trend = set && skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : "";
+      const qs = !set ? "" : hid ? `<section class="panel stack ans-hid" data-m="pop" data-k="chid-${esc(set.id)}-${esc(ui.c.saved[skill] || "")}">
+          <p class="h3">${ico("eye")}Réponses cachées <small class="muted">· answers hidden</small></p>
+          <div class="row">${scoreBig}<p class="small muted">Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p></div>
+          ${greet("cafe", "Pas de coup d'œil ! Les réponses t'attendent.", "No peeking! The answers will wait for you.", "sm")}
+          <div class="row"><button class="btn primary" data-act="c-reset" data-skill="${skill}">Try this set again</button><button class="btn" data-act="c-show" data-skill="${skill}">Show the answers</button>${trend}</div>
+        </section>` : `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
         return `<li${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
           const st = submitted ? (k === q.answer ? "ok" : ans[i] === k ? "bad" : "") : "";
@@ -5653,7 +5692,7 @@
         ${miss ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `<span class="scorebig"${score === set.questions.length ? ` data-m="burst" data-k="cperf-${esc(set.id)}-${esc(ui.c.saved[skill] || "")}"` : ""}><span data-tween="cs-${esc(set.id)}" data-tw="count" data-to="${score}">${score}</span>/${set.questions.length}</span><button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : ""}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>` : "";
+        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button><button class="btn ghost" data-act="c-hide" data-skill="${skill}">Hide the answers</button>${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button><button class="btn ghost" data-act="c-submit-hid" data-skill="${skill}" title="Check your answers but see only your score, so you can try the set again without spoilers">Score only</button>`}</div>`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       return `<div class="wrap">
         ${head}
@@ -6704,6 +6743,9 @@
     },
     "c-new": (el) => { const sk = el.dataset.skill; const key = compKey(sk); delete ui.c.cache[key]; delete ui.c.failed[key]; compReset(sk); ui.c.set[sk] = null; compGenerate(sk); },
     "c-submit": (el) => compSubmit(el.dataset.skill),
+    "c-submit-hid": (el) => compSubmit(el.dataset.skill, true),
+    "c-hide": (el) => compAnsToggle(el.dataset.skill, false),
+    "c-show": (el) => compAnsToggle(el.dataset.skill, true),
     "c-reset": (el) => { const sk = el.dataset.skill; compReset(sk); if (ui.c.set[sk]) prepSet(ui.c.set[sk]); render(true); },
     "c-play": coPlay,
     "c-pause": coPause,
@@ -6742,6 +6784,8 @@
     "x-quit-yes": () => { const sk = skillOf(ui.cx); if (sk === "co") coxStop(); ui.cx = null; ipDrop(XSPEC[sk].ip); timerSet(0, "", ""); render(true); },
     "x-review": (el) => examReview(el.dataset.id),
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
+    "x-hide": () => { const cx = ui.cx; if (cx && cx.done) { ansHide(cx.exam.id, true); render(true); } },
+    "x-show": () => { const cx = ui.cx; if (cx && cx.done) { ansHide(cx.exam.id, false); render(true); } },
     // The same exam again, from its results: a built-in one from the bank, one of Claude's from the copy on screen.
     "x-retake": () => { const cx = ui.cx; if (!cx) return; const sk = skillOf(cx); examStart(XSPEC[sk].bank().find((e) => e.id === cx.exam.id) || cx.exam, sk); },
     "cox-ok": () => { const cx = ui.cx; if (cx && !cx.done && cx.skill === "co" && cx.play && cx.play.phase === "answer" && !cx.play.paused) coxNext(); },
