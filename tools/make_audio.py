@@ -132,6 +132,8 @@ SPLIT_DB, SPLIT_SECONDS, CLIP_PAD = -50.0, 2.0, 0.15  # silence that separates n
 # is retried after 15 s, 30 s, 60 s, and the batch stops cleanly at BATCH_MINUTES, so the rest of
 # run.sh still puts the ready takes on the site. urlopen's own timeout only covers each wait for the
 # next bytes, so an answer that trickled in once held a request for over an hour (2026-10-03).
+# Every limit here is on the wall clock (time.time): the monotonic clock and time.sleep pause while
+# the Mac sleeps, so on battery one item once held a run for 13 hours (2026-10-14).
 REQUEST_TIMEOUT, TRIES, BATCH_MINUTES = 240, 4, 40
 
 
@@ -455,7 +457,7 @@ class Busy(Exception):
     or the batch has run out of time."""
 
 
-DEADLINE = [None]  # time.monotonic() after which no new attempt starts (set by run_gemini)
+DEADLINE = [None]  # time.time() after which no new attempt starts (set by run_gemini)
 
 
 def fetch(req, limit):
@@ -471,7 +473,9 @@ def fetch(req, limit):
             box["error"] = e
     t = threading.Thread(target=run, daemon=True)
     t.start()
-    t.join(limit)
+    end = time.time() + limit
+    while t.is_alive() and time.time() < end:
+        t.join(1)
     if t.is_alive():
         raise TimeoutError("no full answer")
     if "error" in box:
@@ -479,8 +483,15 @@ def fetch(req, limit):
     return box["data"]
 
 
+def nap(secs):
+    """time.sleep on the wall clock, so a sleeping Mac doesn't stretch it."""
+    end = time.time() + secs
+    while time.time() < end:
+        time.sleep(min(1, end - time.time()))
+
+
 def out_of_time():
-    return DEADLINE[0] is not None and time.monotonic() >= DEADLINE[0]
+    return DEADLINE[0] is not None and time.time() >= DEADLINE[0]
 
 
 def api_key():
@@ -501,7 +512,7 @@ def gemini(path, body, key, what):
         if out_of_time():
             raise Busy("out of time: the batch ran %d minutes" % BATCH_MINUTES)
         req = urllib.request.Request(GEMINI_API + path, data=data, method="POST", headers={"x-goog-api-key": key, "Content-Type": "application/json"})
-        start = time.monotonic()
+        start = time.time()
         wait = 15 * 2 ** attempt
         try:
             limit = REQUEST_TIMEOUT if DEADLINE[0] is None else max(1, min(REQUEST_TIMEOUT, DEADLINE[0] - start))
@@ -517,14 +528,14 @@ def gemini(path, body, key, what):
             problem = "error %s" % e.code
         except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
             reason = getattr(e, "reason", e)
-            problem = ("no full answer in %.0f s" % (time.monotonic() - start) if isinstance(reason, (TimeoutError, socket.timeout))
+            problem = ("no full answer in %.0f s" % (time.time() - start) if isinstance(reason, (TimeoutError, socket.timeout))
                        else "%s (%s)" % (type(reason).__name__, str(reason)[:80] or "connection lost"))
-        took = time.monotonic() - start
+        took = time.time() - start
         if attempt == TRIES - 1:
             print("    %s: attempt %d of %d failed after %.0f s: %s. Giving up." % (what, attempt + 1, TRIES, took, problem), flush=True)
             raise Busy("%s, %d tries" % (problem, TRIES))
         print("    %s: attempt %d of %d failed after %.0f s: %s. Retrying in %.0f s." % (what, attempt + 1, TRIES, took, problem, wait), flush=True)
-        time.sleep(wait)
+        nap(wait)
 
 
 def to_pcm(raw, mime):
@@ -915,7 +926,7 @@ def run_gemini(sets, items, only=None):
         print("Already on the site with Gemini, skipped: %d" % len(done), flush=True)
     print("Gemini: %d set%s or exam item%s to record" % (len(todo), "" if len(todo) == 1 else "s", "" if len(todo) == 1 else "s"), flush=True)
     wpm = exam_wpm(st, items, manifest)
-    DEADLINE[0] = time.monotonic() + BATCH_MINUTES * 60
+    DEADLINE[0] = time.time() + BATCH_MINUTES * 60
     try:
         # The narrator's questions first (one request per six), unless every item waiting has its clip.
         for chunk in narrator_chunks(todo):
