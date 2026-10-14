@@ -1223,7 +1223,8 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 .fx-sheet .fx-sheet-title .fx-en { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); }
 .fx-sheet-acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 28px 2px 58px; }
 .fx-cacher-tip { margin: 8px 28px 0 58px; color: var(--accent); }
-.fx-toc { margin: 14px 28px 0 58px; }
+/* Its margins count against max-width, so a sheet with many sections stays inside the card. */
+.fx-toc { margin: 14px 28px 0 58px; max-width: calc(100% - 86px); }
 .fx-body { display: grid; gap: 22px; padding: 10px 28px 26px 58px; container-type: inline-size; }
 .fx-scope { display: grid; gap: 14px; min-width: 0; }
 .fx-body p { margin: 0; }
@@ -1250,6 +1251,8 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 .fx-slot.verb:hover { translate: none; box-shadow: none; }
 .fx-arrow { align-self: center; color: var(--ink-3); font-weight: 800; }
 .fx-scope .sw { padding: 0 1px; border-radius: 4px; box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--sc) 85%, transparent); transition: background-color .2s, box-shadow .2s; }
+/* A word split in two (a stem and its ending) reads as one word. */
+.fx-scope .sw:has(+ .sw) { padding-right: 0; } .fx-scope .sw + .sw { padding-left: 0; }
 .fx-scope:has(.fx-slot.s1:hover) .sw.s1, .fx-scope[data-lit="1"] .sw.s1,
 .fx-scope:has(.fx-slot.s2:hover) .sw.s2, .fx-scope[data-lit="2"] .sw.s2,
 .fx-scope:has(.fx-slot.s3:hover) .sw.s3, .fx-scope[data-lit="3"] .sw.s3,
@@ -1328,6 +1331,8 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
   .fx-sheet::before { left: 22px; }
   .fx-sheet-title, .fx-sheet-acts, .fx-body, .fx-sheet-foot { padding-left: 34px; padding-right: 16px; }
   .fx-cacher-tip, .fx-toc { margin-left: 34px; margin-right: 16px; }
+  .fx-toc { max-width: calc(100% - 50px); }
+  .fx-table th, .fx-table td { padding: 8px; }
 }
 /* A chain that can't fit on one line stacks, one slot per row, with the arrows pointing down. */
 @container (max-width: 620px) {

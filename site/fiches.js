@@ -95,6 +95,165 @@
 ! Ton erreur fréquente : ~~afin qu'il pourrait~~ ++afin qu'il puisse++ · ~~avant qu'il serait trop tard~~ ++avant qu'il soit trop tard++. Jamais de conditionnel après afin que ou avant que.`,
     },
     {
+      id: "conjugaison", tag: "grammaire", for: "grammar.conditionnel",
+      title: "Conjuguer : le radical et les terminaisons", en: "How to build each tense and mood, and the irregular verbs",
+      body: `# Trois formes pour tout conjuguer
+| Pour former… | On part de… | Exemple |
+|---|---|---|
+| l'imparfait | « nous » au présent | nous **finiss**ons → je **finiss**ais |
+| le futur et le conditionnel | l'infinitif | **finir** → je **finir**ai · je **finir**ais |
+| le subjonctif | « ils » au présent | ils **finiss**ent → que je **finiss**e |
+> Nous → imparfait. Infinitif → futur et conditionnel. Ils → subjonctif.
+
+# L'imparfait
+>> nous parlons, nous finissons, nous prenons :: « nous » au présent | parl-, finiss-, pren- :: le radical : on enlève -ons | -ais -ais -ait -ions -iez -aient :: les terminaisons
+| Personne | parler | finir | prendre |
+|---|---|---|---|
+| je | {2:parl}{3:**ais**} | {2:finiss}{3:**ais**} | {2:pren}{3:**ais**} |
+| tu | {2:parl}{3:**ais**} | {2:finiss}{3:**ais**} | {2:pren}{3:**ais**} |
+| il, elle, on | {2:parl}{3:**ait**} | {2:finiss}{3:**ait**} | {2:pren}{3:**ait**} |
+| nous | {2:parl}{3:**ions**} | {2:finiss}{3:**ions**} | {2:pren}{3:**ions**} |
+| vous | {2:parl}{3:**iez**} | {2:finiss}{3:**iez**} | {2:pren}{3:**iez**} |
+| ils, elles | {2:parl}{3:**aient**} | {2:finiss}{3:**aient**} | {2:pren}{3:**aient**} |
+> Un seul irrégulier : être → j'**ét**ais.
+- -cer et -ger gardent leur son devant a : je commen**ç**ais, je mang**e**ais.
+- Les verbes en -ier prennent deux i à nous et vous : nous étud**ii**ons, vous étud**ii**ez.
+= Quand j'{2:habit}{3:**ais**} à Lyon, je {2:pren}{3:**ais**} le métro tous les jours. — When I lived in Lyon, I took the metro every day.
+
+# Le futur simple
+>> parler, finir, prendre :: l'infinitif | parler-, finir-, prendr- :: le radical : -re perd son e | -ai -as -a -ons -ez -ont :: les terminaisons
+| Personne | parler | finir | prendre |
+|---|---|---|---|
+| je | {2:parler}{3:**ai**} | {2:finir}{3:**ai**} | {2:prendr}{3:**ai**} |
+| tu | {2:parler}{3:**as**} | {2:finir}{3:**as**} | {2:prendr}{3:**as**} |
+| il, elle, on | {2:parler}{3:**a**} | {2:finir}{3:**a**} | {2:prendr}{3:**a**} |
+| nous | {2:parler}{3:**ons**} | {2:finir}{3:**ons**} | {2:prendr}{3:**ons**} |
+| vous | {2:parler}{3:**ez**} | {2:finir}{3:**ez**} | {2:prendr}{3:**ez**} |
+| ils, elles | {2:parler}{3:**ont**} | {2:finir}{3:**ont**} | {2:prendr}{3:**ont**} |
+> Les terminaisons, c'est avoir au présent : (j')ai, (tu) as, (il) a, (nous av)ons, (vous av)ez, (ils) ont.
+- Le changement du présent reste : j'achète → j'achèterai, j'appelle → j'appellerai, je paie → je paierai.
+- Pour l'avenir, le futur après quand, lorsque et dès que : quand j'**arriverai**, je t'appellerai (pas ~~quand j'arrive~~).
+! Ton erreur fréquente : ~~je achèterai~~ ++j'achèterai++ · ~~je irai~~ ++j'irai++. Devant une voyelle, je devient j'.
+= Quand nous {2:arriver}{3:**ons**} à Montréal, nous {2:chercher}{3:**ons**} un appartement. — When we get to Montreal, we'll look for a flat.
+
+# Le conditionnel présent
+>> je parlerai, je finirai, je prendrai :: le futur | parler-, finir-, prendr- :: le même radical | -ais -ais -ait -ions -iez -aient :: les terminaisons de l'imparfait
+| Personne | parler | finir | prendre |
+|---|---|---|---|
+| je | {2:parler}{3:**ais**} | {2:finir}{3:**ais**} | {2:prendr}{3:**ais**} |
+| tu | {2:parler}{3:**ais**} | {2:finir}{3:**ais**} | {2:prendr}{3:**ais**} |
+| il, elle, on | {2:parler}{3:**ait**} | {2:finir}{3:**ait**} | {2:prendr}{3:**ait**} |
+| nous | {2:parler}{3:**ions**} | {2:finir}{3:**ions**} | {2:prendr}{3:**ions**} |
+| vous | {2:parler}{3:**iez**} | {2:finir}{3:**iez**} | {2:prendr}{3:**iez**} |
+| ils, elles | {2:parler}{3:**aient**} | {2:finir}{3:**aient**} | {2:prendr}{3:**aient**} |
+> Conditionnel = le radical du futur + les terminaisons de l'imparfait.
+- Pour demander poliment : je voudrais, j'aimerais, pourriez-vous… ?
+! Futur ou conditionnel ? Une lettre change le sens : je **ferai** (c'est prévu) · je **ferais** (si…). Après si + imparfait : si j'avais le temps, je ~~ferai~~ ++ferais++ du sport.
+= Si j'avais plus de temps, je {2:prendr}{3:**ais**} des cours du soir. — If I had more time, I'd take evening classes.
+= Nous {2:aimer}{3:**ions**} visiter l'appartement samedi. — We'd like to see the flat on Saturday.
+
+# Le subjonctif présent
+>> ils parlent, ils finissent, ils prennent :: « ils » au présent | parl-, finiss-, prenn- :: le radical : on enlève -ent | -e -es -e -ions -iez -ent :: les terminaisons
+| Personne | parler | finir | prendre |
+|---|---|---|---|
+| que je | {2:parl}{3:**e**} | {2:finiss}{3:**e**} | {2:prenn}{3:**e**} |
+| que tu | {2:parl}{3:**es**} | {2:finiss}{3:**es**} | {2:prenn}{3:**es**} |
+| qu'il, qu'elle | {2:parl}{3:**e**} | {2:finiss}{3:**e**} | {2:prenn}{3:**e**} |
+| que nous | {2:parl}{3:**ions**} | {2:finiss}{3:**ions**} | {2:pren}{3:**ions**} |
+| que vous | {2:parl}{3:**iez**} | {2:finiss}{3:**iez**} | {2:pren}{3:**iez**} |
+| qu'ils, qu'elles | {2:parl}{3:**ent**} | {2:finiss}{3:**ent**} | {2:prenn}{3:**ent**} |
+> Nous et vous gardent le radical de « nous » : nous prenons → que nous prenions. Le plus souvent, c'est la forme de l'imparfait.
+- Quand l'employer : la fiche « Subjonctif ou indicatif ? ».
+! Ton erreur fréquente : ~~afin qu'il pourrait~~ ++afin qu'il puisse++. Après afin que, avant que, bien que : le subjonctif, jamais le conditionnel.
+= Il faut que je {2:finiss}{3:**e**} ce dossier avant vendredi. — I have to finish this file before Friday.
+= Mon employeur souhaite que nous {2:pren}{3:**ions**} nos congés en août. — My employer wants us to take our holidays in August.
+
+# Les temps composés
+>> #4 avoir, être :: l'auxiliaire, au temps simple voulu | #5 fini, partie, pris :: le participe passé
+| Temps composé | Temps de l'auxiliaire | Exemple |
+|---|---|---|
+| passé composé | présent | j'{4:ai} {5:fini} · elle {4:est} {5:partie} |
+| plus-que-parfait | imparfait | j'{4:avais} {5:fini} · elle {4:était} {5:partie} |
+| futur antérieur | futur | j'{4:aurai} {5:fini} · elle {4:sera} {5:partie} |
+| conditionnel passé | conditionnel | j'{4:aurais} {5:fini} · elle {4:serait} {5:partie} |
+| subjonctif passé | subjonctif | que j'{4:aie} {5:fini} · qu'elle {4:soit} {5:partie} |
+> Seul l'auxiliaire change de temps ; le participe ne bouge pas. Avec être, il s'accorde avec le sujet.
+! Une action avant une autre, au passé : le plus-que-parfait. Quand je suis arrivé, le bus ~~est déjà parti~~ ++était déjà parti++.
+= Si j'avais su, j'{4:aurais} {5:pris} un autre vol. — If I'd known, I'd have taken another flight.
+= Je t'appellerai dès que j'{4:aurai} {5:reçu} la réponse. — I'll call you as soon as I've had the answer.
+
+# Les irréguliers : futur et conditionnel
+>> être, avoir, aller, faire :: l'infinitif | ser-, aur-, ir-, fer- :: un radical à apprendre | -ai, -ais :: futur ou conditionnel
+| Infinitif | Futur | Conditionnel |
+|---|---|---|
+| être | je {2:ser}{3:**ai**} | je {2:ser}{3:**ais**} |
+| avoir | j'{2:aur}{3:**ai**} | j'{2:aur}{3:**ais**} |
+| aller | j'{2:ir}{3:**ai**} | j'{2:ir}{3:**ais**} |
+| faire | je {2:fer}{3:**ai**} | je {2:fer}{3:**ais**} |
+| pouvoir | je {2:pourr}{3:**ai**} | je {2:pourr}{3:**ais**} |
+| vouloir | je {2:voudr}{3:**ai**} | je {2:voudr}{3:**ais**} |
+| savoir | je {2:saur}{3:**ai**} | je {2:saur}{3:**ais**} |
+| devoir | je {2:devr}{3:**ai**} | je {2:devr}{3:**ais**} |
+| venir, tenir | je {2:viendr}{3:**ai**} · je {2:tiendr}{3:**ai**} | je {2:viendr}{3:**ais**} · je {2:tiendr}{3:**ais**} |
+| voir | je {2:verr}{3:**ai**} | je {2:verr}{3:**ais**} |
+| envoyer | j'{2:enverr}{3:**ai**} | j'{2:enverr}{3:**ais**} |
+| recevoir | je {2:recevr}{3:**ai**} | je {2:recevr}{3:**ais**} |
+| courir, mourir | je {2:courr}{3:**ai**} · je {2:mourr}{3:**ai**} | je {2:courr}{3:**ais**} · je {2:mourr}{3:**ais**} |
+| falloir | il {2:faudr}{3:**a**} | il {2:faudr}{3:**ait**} |
+| valoir | il {2:vaudr}{3:**a**} | il {2:vaudr}{3:**ait**} mieux |
+> Deux r : pouvoir, voir, envoyer, courir, mourir → pourrai, verrai, enverrai, courrai, mourrai.
+> Le conditionnel prend toujours le radical du futur : si tu sais l'un, tu sais l'autre.
+= Je {2:pourr}{3:**ais**} commencer dès le mois prochain. — I could start as early as next month.
+= Il {2:vaudr}{3:**ait**} mieux réserver avant l'été. — It would be better to book before the summer.
+
+# Les irréguliers : subjonctif
+>> être, avoir, aller, faire :: l'infinitif | sois, aie, aill-, fass- :: à apprendre par cœur | -e -es -e -ions -iez -ent :: les terminaisons, sauf être et avoir
+| Infinitif | que je (j')… | que nous… |
+|---|---|---|
+| être | {2:sois} | {2:soyons} |
+| avoir | {2:aie} | {2:ayons} |
+| aller | {2:aill}{3:**e**} | {2:all}{3:**ions**} |
+| faire | {2:fass}{3:**e**} | {2:fass}{3:**ions**} |
+| pouvoir | {2:puiss}{3:**e**} | {2:puiss}{3:**ions**} |
+| savoir | {2:sach}{3:**e**} | {2:sach}{3:**ions**} |
+| vouloir | {2:veuill}{3:**e**} | {2:voul}{3:**ions**} |
+| falloir | qu'il {2:faill}{3:**e**} | — |
+> Être et avoir ont leurs propres terminaisons : que je sois, tu sois, il soit, nous soyons, vous soyez, ils soient · que j'aie, tu aies, il ait, nous ayons, vous ayez, ils aient.
+## Deux radicaux, mais la règle marche
+| Infinitif | ils… | que je… | que nous… |
+|---|---|---|---|
+| venir | viennent | {2:vienn}{3:**e**} | {2:ven}{3:**ions**} |
+| prendre | prennent | {2:prenn}{3:**e**} | {2:pren}{3:**ions**} |
+| devoir | doivent | {2:doiv}{3:**e**} | {2:dev}{3:**ions**} |
+| recevoir | reçoivent | {2:reçoiv}{3:**e**} | {2:recev}{3:**ions**} |
+| boire | boivent | {2:boiv}{3:**e**} | {2:buv}{3:**ions**} |
+| voir | voient | {2:voi}{3:**e**} | {2:voy}{3:**ions**} |
+| croire | croient | {2:croi}{3:**e**} | {2:croy}{3:**ions**} |
+= Il faut que tu {2:fass}{3:**es**} ta demande avant la fin du mois. — You have to apply before the end of the month.
+= Je ne pense pas qu'il {2:puiss}{3:**e**} venir demain. — I don't think he can come tomorrow.
+
+# Les participes passés irréguliers
+| Finale | Verbes |
+|---|---|
+| -u | avoir → **eu** · pouvoir → **pu** · savoir → **su** · voir → **vu** · vouloir → **voulu** · devoir → **dû** · falloir → **fallu** · venir → **venu** · tenir → **tenu** · lire → **lu** · boire → **bu** · croire → **cru** · recevoir → **reçu** · connaître → **connu** · vivre → **vécu** · courir → **couru** |
+| -is | prendre → **pris** · apprendre → **appris** · comprendre → **compris** · mettre → **mis** · promettre → **promis** |
+| -it | faire → **fait** · dire → **dit** · écrire → **écrit** · conduire → **conduit** · traduire → **traduit** |
+| -ert | ouvrir → **ouvert** · offrir → **offert** · découvrir → **découvert** · souffrir → **souffert** |
+| à part | être → **été** · naître → **né** · mourir → **mort** · craindre → **craint** · peindre → **peint** |
+> Au féminin, -is, -it et -ert s'entendent : la lettre que j'ai écri**te**, la décision qu'il a pri**se**, la porte qu'elle a ouver**te**.
+
+# Toutes les terminaisons d'un coup d'œil
+| Personne | Imparfait | Futur | Conditionnel | Subjonctif |
+|---|---|---|---|---|
+| je | -ais | -ai | -ais | -e |
+| tu | -ais | -as | -ais | -es |
+| il, elle, on | -ait | -a | -ait | -e |
+| nous | -ions | -ons | -ions | -ions |
+| vous | -iez | -ez | -iez | -iez |
+| ils, elles | -aient | -ont | -aient | -ent |
+> -ions et -iez reviennent trois fois : imparfait, conditionnel, subjonctif. Le futur garde -ons et -ez, comme le présent.`,
+    },
+    {
       id: "phrases-si", tag: "grammaire", for: "grammar.si",
       title: "Les phrases avec si", en: "The three kinds of if-clause",
       body: `# Les trois types
