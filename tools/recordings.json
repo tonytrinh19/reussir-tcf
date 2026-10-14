@@ -252,57 +252,62 @@
   }
  },
  "co-exam-1-16": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-14",
+  "engine": "gemini",
   "hash": "9dcc4fa9cbff",
-  "seconds": 34.7,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 27.2,
   "voices": {
-   "A": "vivienne",
-   "B": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-podcaster-6",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-17": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-14",
+  "engine": "gemini",
   "hash": "93c6c4d5ee7b",
-  "seconds": 29.5,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 25.8,
   "voices": {
-   "A": "remy",
-   "B": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-8",
+   "B": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-18": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-14",
+  "engine": "gemini",
   "hash": "6c88ad5de219",
-  "seconds": 30.3,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 24.8,
   "voices": {
-   "A": "remy",
-   "B": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-advisor-2",
+   "B": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-19": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-14",
+  "engine": "gemini",
   "hash": "5a0261de3e4b",
-  "seconds": 28.1,
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 26.1,
   "voices": {
-   "A": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-2",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-20": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-14",
+  "engine": "gemini",
   "hash": "bfa872f3ac71",
-  "seconds": 46.2,
+  "pace": "Speak at a natural pace.",
+  "seconds": 36.7,
   "voices": {
-   "A": "vivienne",
-   "B": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-1",
+   "B": "fr-fr-tutor-7",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-21": {
