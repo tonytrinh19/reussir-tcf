@@ -3,6 +3,11 @@
 //  - Every built-in card has at least 2 examples, each written "French — English", the French at most 26 words,
 //    and no example sentence appears twice across the decks. Every key in examples.js names a real card, so a
 //    card whose French side was reworded doesn't silently lose its examples.
+//  - No French side is on two cards (give or take capitals, brackets and the final stop): one copy of each word
+//    across all decks. No two cards of a deck share an id (app.js makes it from the French side), so a card's
+//    progress and the links to it (the expression of the day's) find the right one.
+//  - Every expression (EXPRESSIONS, the expression of the day and the Expressions deck) has its French and its
+//    meaning, and a register, if it has one, of Québec, familier or soutenu.
 //  - Every sheet has a unique id, a title, a known tag, and a "for" that names a grammar topic or a writing task.
 //    Its markup is well formed: each order chain has at least 2 slots (one of them a word slot), every {n:word}
 //    names a slot of the chain above it, every table row has as many cells as its header, and every **, ~~,
@@ -39,6 +44,27 @@ for (const th of T.VOCAB) {
   }
 }
 console.log(`Examples: ${lines} on ${cards} cards (${(lines / cards).toFixed(1)} a card)`);
+
+/* ---------- one copy of each card, and an id for each ---------- */
+const slug = (s) => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "x";
+const sameFr = (s) => String(s).normalize("NFC").toLowerCase().replace(/[’]/g, "'").replace(/\(.*?\)/g, "").replace(/[.!?…\s]+$/, "").replace(/\s+/g, " ").trim();
+const frSeen = new Map();
+for (const th of T.VOCAB) {
+  const ids = new Map();
+  for (const c of th.cards) {
+    const k = sameFr(c[0]);
+    if (frSeen.has(k)) fail(`${th.id}: "${c[0]}" is also a card in ${frSeen.get(k)}`);
+    else frSeen.set(k, `${th.id} ("${c[0]}")`);
+    const id = slug(c[0]);
+    if (ids.has(id)) fail(`${th.id}: "${c[0]}" and "${ids.get(id)}" would get the same card id (${th.id}--${id})`);
+    else ids.set(id, c[0]);
+  }
+}
+const REGS = ["Québec", "familier", "soutenu"];
+for (const x of T.EXPRESSIONS || []) {
+  if (!x || !String(x.fr || "").trim() || !String(x.en || "").trim()) { fail(`EXPRESSIONS: an entry without its French or its meaning: ${JSON.stringify(x)}`); continue; }
+  if (x.reg && !REGS.includes(x.reg)) fail(`EXPRESSIONS: "${x.fr}" has the register "${x.reg}" (${REGS.join(", ")})`);
+}
 
 /* ---------- the sheets ---------- */
 const TAGS = ["grammaire", "ecrit", "oral", "vocabulaire", "examen"];

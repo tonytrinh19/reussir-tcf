@@ -30,7 +30,7 @@ const errors = [];
 const fail = (msg) => errors.push(msg);
 const words = (s) => (String(s || "").match(/\S+/g) || []).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 const pct = (x) => Math.round(x * 100) + "%";
-const TOPICS = T.VOCAB.filter((t) => t.id !== "connecteurs" && t.id !== "pieges" && !t.own).map((t) => t.id);
+const TOPICS = T.VOCAB.filter((t) => !t.general && !t.own).map((t) => t.id);
 
 function checkQuestion(where, q) {
   if (!q.q) fail(`${where}: no question`);

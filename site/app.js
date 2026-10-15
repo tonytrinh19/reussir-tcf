@@ -1107,12 +1107,23 @@
   }
   const miniPass = () => { const s = settings(), P = T.PHASES[s.phase - 1]; return `<a class="mini-pass" href="#progress"><span class="top"><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase ${s.phase} · ${esc(P.name)}</b>${flightSVG(true)}<span>Semaine ${weekNo()} · ${esc(P.weeks)}</span></a>`; };
 
-  // L'expression du jour: a new saying every morning, on a scrap of notebook paper.
+  // L'expression du jour: a new saying every morning, on a scrap of notebook paper. Each one is a card in the
+  // Expressions deck, and the scrap says where you are with it and links to the deck. The list is grouped by
+  // use, so the days step through it several places at a time and the groups take turns.
+  const XP_REG = { "Québec": "Québec. ", familier: "Informal. ", soutenu: "Formal. " };
   function expressionCard() {
     const xs = arr(T.EXPRESSIONS);
     if (!xs.length) return "";
-    const [fr, en] = xs[((daysBetween("2026-01-01", todayStr()) % xs.length) + xs.length) % xs.length];
-    return `<figure class="note-card seyes"><span class="tape" aria-hidden="true"></span><p class="eyebrow">Expression du jour</p><p class="fr" lang="fr">${typo(fr)}</p><p class="en">${esc(en)}</p></figure>`;
+    const n = xs.length, d = ((daysBetween("2026-01-01", todayStr()) % n) + n) % n;
+    const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+    const x = xs[(d * [17, 13, 11, 7, 1].find((k) => gcd(k, n) === 1)) % n];
+    const say = /[.!?…)]$/.test(x.fr) ? x.fr : x.fr + (/ (que|à)$/.test(x.fr) ? "…" : ".");
+    const mean = x.lit ? `Literally “${x.lit}”: ${x.en}` : cap(x.en);
+    const line = (XP_REG[x.reg] || "") + mean + (/[.!?]$/.test(mean) ? "" : ".");
+    const id = "expressions--" + slug(x.fr), st = S.srs.get(id);
+    const where = !DECK.has(id) ? "" : !st ? "nouvelle · new card" : !st.pri && st.stage >= 5 ? "maîtrisée · mastered"
+      : st.due <= todayStr() ? "à revoir aujourd'hui · due today" : `à revoir le ${shortDate(st.due)} · due ${shortDate(st.due)}`;
+    return `<figure class="note-card seyes"><span class="tape" aria-hidden="true"></span><p class="eyebrow">Expression du jour</p><p class="fr" lang="fr">${typo(cap(say))}</p><p class="en">${esc(line)}</p>${where ? `<a class="xp-deck" href="#vocab.new.expressions">${ico("vocab")}<span>Expressions · ${where}</span></a>` : ""}</figure>`;
   }
 
   /* =============== errors =============== */
@@ -1916,7 +1927,7 @@
     const base = th.id + "--" + slug(c[0]);
     let id = base, k = 2;
     while (DECK.has(id)) id = base + "-" + k++;
-    DECK.set(id, { id, fr: c[0], en: c[1], ex: c[2] || "", theme: th.id });
+    DECK.set(id, Object.assign({ id, fr: c[0], en: c[1], ex: c[2] || "", theme: th.id }, c[3] ? { frNote: c[3] } : {}));
   }));
   function allCards() {
     const m = new Map(DECK);
@@ -2098,7 +2109,7 @@
     const th = THEME[theme];
     if (!th) return;
     const have = themeCards(theme).map((c) => c.fr);
-    const prompt = `Create 20 French vocabulary flashcards for the TCF Canada theme "${th.label}" (${th.en}) for a B1→B2 learner.\nPrioritize collocations and verb + preposition pairs over isolated nouns. Include 2–3 connectors or linking phrases useful for arguing about this topic, 1–2 idiomatic expressions, and 2 B1→B2 "sophistication swaps" (for those, the English side reads "B2 upgrade of: <the plain B1 phrase in French>").\nDon't repeat any of: ${have.join("; ")}.\nEach card: {"fr": "French, with the article or preposition when useful", "en": "short English meaning", "ex": "two natural French example sentences that show the word in real use (a TCF Canada situation: settling in Canada, work, housing, health, the environment, public life), each followed by \" — \" and its English, on two lines separated by \\n, max 20 words each"}.\nReply with only JSON: {"cards": [ ... ]}`;
+    const prompt = `Create 20 French vocabulary flashcards for the TCF Canada theme "${th.label}" (${th.en}) for a B1→B2 learner.\n${th.brief || `Prioritize collocations and verb + preposition pairs over isolated nouns. Include 2–3 connectors or linking phrases useful for arguing about this topic, 1–2 idiomatic expressions, and 2 B1→B2 "sophistication swaps" (for those, the English side reads "B2 upgrade of: <the plain B1 phrase in French>").`}\nDon't repeat any of: ${have.join("; ")}.\nEach card: {"fr": "French, with the article or preposition when useful", "en": "short English meaning",${th.brief ? ` "note": "Literally “its word-for-word meaning”. when it's figurative, else empty",` : ""} "ex": "two natural French example sentences that show the word in real use (a TCF Canada situation: settling in Canada, work, housing, health, the environment, public life), each followed by \" — \" and its English, on two lines separated by \\n, max 20 words each"}.\nReply with only JSON: {"cards": [ ... ]}`;
     const out = await ask("build-" + theme, prompt);
     if (!out) return;
     const seen = new Set([...allCards().values()].map((c) => norm(c.fr)));
@@ -2106,7 +2117,7 @@
     for (const c of arr(out.cards).slice(0, 30)) {
       if (!c || !c.fr || !c.en || seen.has(norm(c.fr))) continue;
       seen.add(norm(c.fr));
-      put("cards", "c-" + uid(), { fr: str(c.fr), en: str(c.en), ex: str(c.ex), theme, created: todayStr(), by: "claude" });
+      put("cards", "c-" + uid(), Object.assign({ fr: str(c.fr), en: str(c.en), ex: str(c.ex), theme, created: todayStr(), by: "claude" }, str(c.note).trim() ? { frNote: str(c.note).trim() } : {}));
       n++;
     }
     toast(n ? `Added ${n} cards to ${th.label}.` : "No new cards came back. Try again.");
@@ -2909,7 +2920,8 @@
 
   const samplesFor = (skill) => (skill === "ce" ? T.COMP.ceSets : T.COMP.coSets);
   // Topics for comprehension sets: the vocabulary themes, minus the two that are language lists rather than topics.
-  const COMP_TOPICS = T.VOCAB.filter((t2) => t2.id !== "connecteurs" && t2.id !== "pieges" && !t2.own);
+  // Compréhension's topics are the theme decks: not the ones for every topic (general) or your own.
+  const COMP_TOPICS = T.VOCAB.filter((t2) => !t2.general && !t2.own);
   // The level a skill's sets are at: the one you picked on the page, or else where your progress puts you (the coach's ladder).
   function compLevel(skill) { const sk = skill || ui.c.skill; return (ui.c.lv && ui.c.lv[sk]) || compLadder(sk).level; }
   const compKey = (skill) => `${skill}|${compLevel(skill)}|${ui.c.theme || ""}`;

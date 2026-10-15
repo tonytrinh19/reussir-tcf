@@ -465,9 +465,10 @@ window.TCF = (function () {
     ["Rare connectors", "Nonobstant, partant, derechef: outside TCF register."],
   ];
 
-  /* Vocabulary (Document 4). Card = [fr, en, example?] */
+  /* Vocabulary (Document 4). Card = [fr, en, example?]. A deck marked general (connectors, traps, expressions)
+     serves every topic, so it isn't one of Compréhension's topics. */
   const VOCAB = [
-    { id: "connecteurs", label: "Connecteurs", en: "Connectors", full: true, cards: [
+    { id: "connecteurs", label: "Connecteurs", en: "Connectors", full: true, general: true, cards: [
       // cependant, pourtant, toutefois, néanmoins, en effet, par conséquent, puisque, bien que and malgré are in "Mes cartes Anki" (anki.js).
       ["mais", "but"], ["donc", "so, therefore"], ["alors", "so, then"],
       ["par contre", "on the other hand (everyday)"], ["en revanche", "on the other hand (formal)"],
@@ -739,7 +740,7 @@ window.TCF = (function () {
     ],
   };
   VOCAB.forEach((th) => { (MORE_CARDS[th.id] || []).forEach((c) => th.cards.push(c)); });
-  VOCAB.push({ id: "pieges", label: "Pièges", en: "Common traps (Document 2 checklist)", full: true, cards: [
+  VOCAB.push({ id: "pieges", label: "Pièges", en: "Common traps (Document 2 checklist)", full: true, general: true, cards: [
     ["C'est un bon médecin.", "He's a good doctor. (c'est or il est?)"], ["Il est médecin.", "He's a doctor. (c'est or il est?)"],
     ["à Montréal · en France · au Canada · aux États-Unis", "in Montréal · in France · in Canada · in the US"],
     ["J'ai seulement deux minutes.", "I only have two minutes."], ["Il est seul ce soir.", "He's alone tonight."],
@@ -947,52 +948,100 @@ window.TCF = (function () {
     ],
   };
 
-  /* L'expression du jour (brand kit): a new saying every morning on a scrap of notebook paper, on Aujourd'hui.
-     [French, English: the literal meaning, then what it means]. A few are from Québec, and say so. */
+  /* L'expression du jour and the Expressions deck share this list, so the saying on Aujourd'hui is always a card
+     you can learn. The user asked on 2026-10-14 for a deck of these, keeping the ones likely to be useful for the
+     TCF Canada. FEI publishes no list of idioms: it marks the range of vocabulary and how well it fits the
+     situation, so an expression in the right place helps and one in the wrong place costs. These are the ones a
+     B1 → B2 candidate meets in the test's documents (the news, the radio, everyday talk) or can use to argue in
+     Écrit Tâches 2–3 and Orale Tâche 3, a few proverbs worth quoting, and a few from Québec, which say so.
+     { fr, en: the meaning (the card's English side), lit: word for word, reg: Québec, familier or soutenu,
+     note: how it's used }. The examples are in examples.js, under expressions. */
   const EXPRESSIONS = [
-    ["C'est en forgeant qu'on devient forgeron.", "Literally “it's by forging that you become a blacksmith”: practice makes perfect."],
-    ["Petit à petit, l'oiseau fait son nid.", "Literally “little by little, the bird builds its nest”: slow, steady work gets there."],
-    ["Qui ne tente rien n'a rien.", "Literally “who tries nothing has nothing”: nothing ventured, nothing gained."],
-    ["Il ne faut pas mettre la charrue avant les bœufs.", "Literally “don't put the plough before the oxen”: don't put the cart before the horse."],
-    ["Vouloir, c'est pouvoir.", "Literally “to want is to be able”: where there's a will, there's a way."],
-    ["Les petits ruisseaux font les grandes rivières.", "Literally “little streams make great rivers”: small efforts add up."],
-    ["Paris ne s'est pas fait en un jour.", "Literally “Paris wasn't built in a day”: the French take on “Rome wasn't built in a day”."],
-    ["Mieux vaut tard que jamais.", "Literally “better late than never”, word for word."],
-    ["Avoir le cœur sur la main.", "Literally “to have your heart on your hand”: to be very generous."],
-    ["Poser un lapin à quelqu'un.", "Literally “to put a rabbit on someone”: to stand someone up."],
-    ["Avoir un chat dans la gorge.", "Literally “to have a cat in your throat”: to have a frog in your throat."],
-    ["Coûter les yeux de la tête.", "Literally “to cost the eyes of your head”: to cost an arm and a leg."],
-    ["Tomber dans les pommes.", "Literally “to fall into the apples”: to faint."],
-    ["Mettre les bouchées doubles.", "Literally “to take double mouthfuls”: to work twice as hard to catch up."],
-    ["Il pleut des cordes.", "Literally “it's raining ropes”: it's pouring."],
-    ["Être dans la lune.", "Literally “to be in the moon”: to be daydreaming."],
-    ["Avoir du pain sur la planche.", "Literally “to have bread on the board”: to have a lot of work ahead."],
-    ["Donner sa langue au chat.", "Literally “to give your tongue to the cat”: to give up guessing."],
-    ["Chercher la petite bête.", "Literally “to look for the little beast”: to nitpick."],
-    ["Avoir le cafard.", "Literally “to have the cockroach”: to feel down."],
-    ["Appeler un chat un chat.", "Literally “to call a cat a cat”: to call a spade a spade."],
-    ["Faire d'une pierre deux coups.", "Literally “to make two hits with one stone”: to kill two birds with one stone."],
-    ["Ce n'est pas la mer à boire.", "Literally “it's not the sea to drink”: it's not that hard."],
-    ["Remettre les pendules à l'heure.", "Literally “to set the clocks to the right time”: to set the record straight."],
-    ["Avoir plus d'une corde à son arc.", "Literally “to have more than one string to your bow”: to have more than one skill or option."],
-    ["Qui vivra verra.", "Literally “who lives will see”: time will tell."],
-    ["L'habit ne fait pas le moine.", "Literally “the habit doesn't make the monk”: don't judge a book by its cover."],
-    ["Il faut battre le fer pendant qu'il est chaud.", "Literally “strike the iron while it's hot”: seize the moment."],
-    ["Après la pluie, le beau temps.", "Literally “after the rain, fine weather”: good times follow hard ones."],
-    ["Chaque chose en son temps.", "Literally “each thing in its time”: one thing at a time."],
-    ["Il n'y a pas de fumée sans feu.", "Literally “there's no smoke without fire”: rumours usually hold some truth."],
-    ["Tourner autour du pot.", "Literally “to turn around the pot”: to beat around the bush."],
-    ["Mettre la main à la pâte.", "Literally “to put your hand in the dough”: to pitch in and help."],
-    ["Être comme un poisson dans l'eau.", "Literally “to be like a fish in water”: to be completely at ease."],
-    ["Voir la vie en rose.", "Literally “to see life in pink”: to look on the bright side."],
-    ["Avoir la main verte.", "Literally “to have the green hand”: to have a green thumb."],
-    ["Les doigts dans le nez.", "Literally “fingers in the nose”: easily, hands down (informal)."],
-    ["Il fait un froid de canard.", "Literally “it's duck cold”: it's freezing."],
-    ["Lâche pas la patate !", "Québec. Literally “don't let go of the potato!”: hang in there, don't give up."],
-    ["C'est de valeur.", "Québec. Literally “it's of value”: what a pity, that's too bad."],
-    ["Tomber en amour.", "Québec. “To fall in love”, where France says tomber amoureux."],
-    ["Avoir de la misère à comprendre.", "Québec. Literally “to have misery understanding”: to have a hard time understanding."],
+    // To argue, weigh up and nuance (Écrit Tâches 2–3, Orale Tâche 3)
+    { fr: "peser le pour et le contre", en: "to weigh up the pros and cons", lit: "to weigh the for and the against" },
+    { fr: "le revers de la médaille", en: "the downside, the other side of the coin", lit: "the back of the medal", note: "Often c'est le revers de la médaille, after an advantage." },
+    { fr: "être à double tranchant", en: "to be a double-edged sword", lit: "to be two-edged", note: "Also une arme à double tranchant." },
+    { fr: "trouver un juste milieu", en: "to find a happy medium", lit: "to find a fair middle" },
+    { fr: "mettre de l'eau dans son vin", en: "to tone down one's demands, to compromise", lit: "to put water in one's wine" },
+    { fr: "Il ne faut pas jeter le bébé avec l'eau du bain.", en: "don't throw the baby out with the bathwater", note: "Keep what works while you fix what doesn't." },
+    { fr: "Tout le monde y trouve son compte.", en: "everyone gets something out of it", lit: "everyone finds their account in it", note: "Y trouver son compte: to get something out of it." },
+    { fr: "Le jeu en vaut la chandelle.", en: "it's worth the effort or the risk (idiom)", lit: "the game is worth the candle", note: "In everyday talk: ça vaut le coup." },
+    { fr: "force est de constater que", en: "one has to admit that, the fact is that", reg: "soutenu", note: "Opens an observation in a Tâche 2 or 3; the indicatif follows." },
+    { fr: "il va de soi que", en: "it goes without saying that", lit: "it goes by itself that", note: "The indicatif follows." },
+    { fr: "se mettre à la place de quelqu'un", en: "to put oneself in someone's shoes", lit: "to put oneself in someone's place" },
+    { fr: "une goutte d'eau dans l'océan", en: "a drop in the ocean", lit: "a drop of water in the ocean" },
+    { fr: "la partie émergée de l'iceberg", en: "the tip of the iceberg", lit: "the part of the iceberg above the water" },
+    { fr: "un pas dans la bonne direction", en: "a step in the right direction" },
+    { fr: "Mieux vaut prévenir que guérir.", en: "prevention is better than cure; better safe than sorry", lit: "better to prevent than to cure" },
+    { fr: "vouloir le beurre et l'argent du beurre", en: "to want to have one's cake and eat it", lit: "to want the butter and the money for the butter", note: "Often negative: on ne peut pas avoir le beurre et l'argent du beurre." },
+    { fr: "ne pas mettre tous ses œufs dans le même panier", en: "not to put all one's eggs in one basket" },
+    { fr: "Il ne faut pas mettre la charrue avant les bœufs.", en: "don't put the cart before the horse", lit: "don't put the plough before the oxen" },
+    // In the news (CO and CE: society, the economy, politics)
+    { fr: "tirer la sonnette d'alarme", en: "to sound the alarm", lit: "to pull the alarm bell", note: "Tirer la sonnette d'alarme sur quelque chose." },
+    { fr: "monter en flèche", en: "to soar, to skyrocket (prices, rents, demand)", lit: "to rise like an arrow", note: "The opposite: chuter, s'effondrer." },
+    { fr: "joindre les deux bouts", en: "to make ends meet", lit: "to join the two ends" },
+    { fr: "se serrer la ceinture", en: "to tighten one's belt" },
+    { fr: "un parcours du combattant", en: "an ordeal, an obstacle course (paperwork, procedures)", lit: "a soldier's assault course" },
+    { fr: "un coup de pouce", en: "a little boost, a helping push", lit: "a push of the thumb", note: "A small help that makes the difference: a grant, a recommendation. Practical help is un coup de main." },
+    { fr: "faire marche arrière", en: "to back down, to reverse a decision", lit: "to go into reverse" },
+    { fr: "changer la donne", en: "to change the game, to shift the situation", lit: "to change the deal (in cards)" },
+    { fr: "mettre la clé sous la porte", en: "to close down (a business)", lit: "to put the key under the door", note: "For a shop, a factory, a company. Also written clef." },
+    { fr: "être à bout de souffle", en: "to be running out of steam, overstretched", lit: "to be at the end of one's breath" },
+    { fr: "faire boule de neige", en: "to snowball", lit: "to make a snowball" },
+    { fr: "la goutte d'eau qui fait déborder le vase", en: "the last straw", lit: "the drop that makes the vase overflow" },
+    { fr: "jeter de l'huile sur le feu", en: "to add fuel to the fire", lit: "to throw oil on the fire" },
+    { fr: "mettre des bâtons dans les roues à quelqu'un", en: "to put obstacles in someone's way", lit: "to put sticks in someone's wheels" },
+    { fr: "avoir le vent en poupe", en: "to be on a roll, to be booming", lit: "to have the wind at the stern" },
+    { fr: "être monnaie courante", en: "to be commonplace", lit: "to be current coin", note: "No article: c'est monnaie courante." },
+    { fr: "du jour au lendemain", en: "overnight, from one day to the next", lit: "from the day to the next day" },
+    { fr: "faire le point", en: "to take stock, to review where things stand", note: "From sailing, where it means fixing the ship's position. Faire le point sur quelque chose." },
+    // Work and effort
+    { fr: "avoir du pain sur la planche", en: "to have a lot of work ahead", lit: "to have bread on the board" },
+    { fr: "mettre les bouchées doubles", en: "to work twice as hard to catch up", lit: "to take double mouthfuls" },
+    { fr: "mettre la main à la pâte", en: "to pitch in, to do the work oneself", lit: "to put one's hand in the dough" },
+    { fr: "donner un coup de main à quelqu'un", en: "to lend someone a hand", lit: "to give someone a blow of the hand" },
+    { fr: "avoir plus d'une corde à son arc", en: "to have more than one skill or option", lit: "to have more than one string to one's bow" },
+    { fr: "baisser les bras", en: "to give up", lit: "to lower one's arms" },
+    { fr: "tenir le coup", en: "to hold up, to cope", lit: "to hold the blow" },
+    { fr: "faire d'une pierre deux coups", en: "to kill two birds with one stone", lit: "to make two hits with one stone" },
+    { fr: "avoir du mal à (+ inf.)", en: "to have trouble (doing something)", note: "In Québec: avoir de la misère à." },
+    // Settling in
+    { fr: "sauter le pas", en: "to take the plunge", lit: "to jump the step" },
+    { fr: "repartir de zéro", en: "to start again from scratch", lit: "to start again from zero", note: "Also heard: repartir à zéro." },
+    { fr: "avoir le mal du pays", en: "to be homesick", lit: "to have the sickness of the country" },
+    { fr: "être comme un poisson dans l'eau", en: "to be completely at ease", lit: "to be like a fish in water" },
+    { fr: "accueillir quelqu'un à bras ouverts", en: "to welcome someone with open arms" },
+    { fr: "être dans le même bateau", en: "to be in the same boat" },
+    { fr: "prendre son mal en patience", en: "to wait it out patiently, to grin and bear it", lit: "to take one's trouble in patience" },
+    { fr: "coûter les yeux de la tête", en: "to cost an arm and a leg", lit: "to cost the eyes of one's head" },
+    // Everyday talk
+    { fr: "Ce n'est pas la mer à boire.", en: "it's not that hard", lit: "it's not the sea to drink" },
+    { fr: "Ça vaut le coup.", en: "it's worth it (everyday)", note: "Ça vaut le coup de + infinitif. More idiomatic: le jeu en vaut la chandelle." },
+    { fr: "poser un lapin à quelqu'un", en: "to stand someone up", lit: "to put a rabbit on someone" },
+    { fr: "tourner autour du pot", en: "to beat around the bush", lit: "to turn around the pot" },
+    { fr: "Il pleut des cordes.", en: "it's pouring", lit: "it's raining ropes" },
+    { fr: "Il fait un froid de canard.", en: "it's freezing cold", lit: "it's duck cold" },
+    { fr: "avoir le cafard", en: "to feel down, to have the blues", lit: "to have the cockroach" },
+    // Proverbs worth quoting
+    { fr: "Qui ne tente rien n'a rien.", en: "nothing ventured, nothing gained", lit: "who tries nothing has nothing" },
+    { fr: "C'est en forgeant qu'on devient forgeron.", en: "practice makes perfect", lit: "it's by forging that you become a blacksmith" },
+    { fr: "Petit à petit, l'oiseau fait son nid.", en: "slowly but surely, step by step", lit: "little by little, the bird builds its nest" },
+    { fr: "Paris ne s'est pas fait en un jour.", en: "Rome wasn't built in a day", lit: "Paris wasn't made in a day" },
+    { fr: "Les petits ruisseaux font les grandes rivières.", en: "small efforts add up", lit: "little streams make great rivers" },
+    { fr: "L'habit ne fait pas le moine.", en: "don't judge a book by its cover", lit: "the habit doesn't make the monk" },
+    // From Québec
+    { fr: "Lâche pas la patate !", en: "hang in there, don't give up!", lit: "don't let go of the potato", reg: "Québec", note: "In France: courage, ne lâche rien !" },
+    { fr: "C'est de valeur.", en: "what a shame, too bad", lit: "it's of value", reg: "Québec", note: "In France: c'est dommage. C'est de valeur que + subjonctif." },
+    { fr: "avoir de la misère à (+ inf.)", en: "to have a hard time (doing something)", lit: "to have misery at", reg: "Québec", note: "In France: avoir du mal à." },
+    { fr: "C'est plate.", en: "it's boring; what a drag", lit: "it's flat", reg: "Québec", note: "In France: c'est ennuyeux, or c'est dommage. Plate doesn't change: un film plate." },
+    { fr: "tomber en amour", en: "to fall in love", reg: "Québec", note: "In France: tomber amoureux. Tomber en amour avec quelqu'un ou quelque chose." },
   ];
+  // The deck: the meaning, marked when the register matters, then the literal meaning and the note on the French side.
+  const REG_EN = { "Québec": "Québec", familier: "informal", soutenu: "formal" };
+  VOCAB.push({ id: "expressions", label: "Expressions", en: "Idioms and set phrases for the TCF", full: true, general: true,
+    brief: "Only idiomatic expressions and set phrases, never single words: ones a B1 → B2 candidate meets in TCF Canada documents (the news, radio interviews, everyday conversation) or can use to argue in Expression écrite Tâches 2–3 and Expression orale Tâche 3. Mostly standard French; a few from Québec, ending the English side with (Québec), and informal ones with (informal). For a figurative one, \"note\" gives its word-for-word meaning, like this: Literally “to have bread on the board”.",
+    cards: EXPRESSIONS.map((x) => [x.fr, x.en + (x.reg ? ` (${REG_EN[x.reg]})` : ""), "", [x.lit && `Literally “${x.lit}”.`, x.note].filter(Boolean).join(" ")]) });
+  [1, 2, 3].forEach((i) => PHASES[i].vocab.push("expressions"));
 
   return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, COMP, NCLC, EXAM, AUTOFAIL, CRITERIA, TCF_CANADA, EXPRESSIONS };
 })();
