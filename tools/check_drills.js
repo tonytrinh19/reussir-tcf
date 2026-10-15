@@ -5,7 +5,11 @@
 //  - every point (the rule a sentence tests) has at least 4 sentences, so a rule you keep missing can get
 //    extra sentences in later rounds that aren't the one you missed;
 //  - no sentence appears twice in a topic, because the app recognises a sentence it has asked by its wording;
-//  - the answer fits the elision around the gap (j'___ needs a vowel, je ___ can't take one).
+//  - the answer fits the elision around the gap (j'___ needs a vowel, je ___ can't take one), and no right answer
+//    misses an elision itself (je ai, que il, si il…);
+//  - a correction (« Corrigez : « … » ») doesn't accept the sentence it asks you to correct;
+//  - putting words in order (« Mettez dans l'ordre : « a / b / c » ») uses exactly the words given, which
+//    aren't already in the order of any accepted answer.
 // It also checks that the plan's grammar blocks and every topic's criterion set exist (the mixed review falls
 // back to that set), and the texts of Find the mistakes (proofread.js): each mistake marked once, as whole
 // words, with real corrections; the length for the level; and no elision slip in the corrected text or outside
@@ -39,6 +43,17 @@ function checkElision(w, q, answers) {
   if (/(^|[\s«(])(je|que|de|ne|me|te|se|le|la|lorsque|puisque|jusque) ___/i.test(q) && answers.some((a) => VOWEL.test(a))) fail(`${w}: an answer starts with a vowel after a word that elides before one`);
   if (/(^|[\s«(])si ___/i.test(q) && answers.some((a) => /^ils?\b/i.test(a))) fail(`${w}: si before il is written s'il`);
 }
+// A right answer that misses an elision: je ai, que il, de un, si il… (not before the words that never elide:
+// oui, onze, and a y that sounds like a consonant, as in yoga or yaourt).
+const ANS_SLIP = /(^|[\s'’«(])(?:je|me|te|se|ne|de|que|lorsque|puisque|jusque) (?=[aeiouyâàéèêëîïôûù])(?!oui\b|onze|onzi|y[aeéèêoôuû])|(^|[\s«(])si (?=ils?\b)/i;
+function checkSlips(w, rights) {
+  rights.forEach((a) => { const m = String(a).match(ANS_SLIP); if (m) fail(`${w}: a right answer misses an elision at "${String(a).slice(m.index, m.index + 14)}…"`); });
+}
+// The sentence a correction shows, and the words a sentence to put in order is made of.
+const wrongOf = (src) => { const m = String(src).match(/^Corrigez[^«]*« (.+?) »/); return m ? m[1] : null; };
+const wordsOf = (src) => { const m = String(src).match(/^Mettez[^«]*« (.+) »$/); return m ? m[1].split(" / ").map((x) => x.trim().toLowerCase()) : null; };
+// An answer's words: no final punctuation, split at spaces and hyphens, and after an apostrophe (s'est → s' est).
+const tokensOf = (a) => String(a).toLowerCase().replace(/[.!?…\s]+$/, "").replace(/[,;:]/g, " ").split(/[\s-]+/).filter(Boolean).flatMap((t) => t.split(/(?<=['’])/));
 
 let total = 0;
 for (const tp of T.TOPICS) {
@@ -76,6 +91,7 @@ for (const tp of T.TOPICS) {
           if (!options.every(text)) fail(`${w}: an option is empty`);
           if (new Set(options.map(norm)).size !== options.length) fail(`${w}: two options are the same`);
           checkElision(w, q, [options[0]]);
+          checkSlips(w, [options[0]]);
         }
         if (!text(why)) fail(`${w}: no explanation`);
       } else {
@@ -89,6 +105,15 @@ for (const tp of T.TOPICS) {
           if (answers.some((a) => String(a) !== String(a).trim() || String(a).includes("___"))) fail(`${w}: an accepted answer has stray spaces or a ___`);
           if (new Set(answers.map(norm)).size !== answers.length) fail(`${w}: the same answer is listed twice`);
           checkElision(w, q, answers);
+          checkSlips(w, answers);
+          const bad = wrongOf(src);
+          if (bad !== null && answers.some((a) => norm(a) === norm(bad))) fail(`${w}: an accepted answer is the sentence to correct`);
+          const given = wordsOf(src);
+          if (given) {
+            const sorted = (xs) => xs.slice().sort().join(" ");
+            answers.forEach((a) => { if (sorted(tokensOf(a)) !== sorted(given)) fail(`${w}: "${a}" doesn't use exactly the words given (${given.join(" / ")})`); });
+            answers.forEach((a) => { if (tokensOf(a).join(" ") === given.join(" ")) fail(`${w}: the words are already in the order of "${a}"`); });
+          }
         }
         if (!text(why)) fail(`${w}: no explanation`);
       }

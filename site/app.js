@@ -1863,8 +1863,10 @@
     const tp = TOPIC[topicId];
     const set = tp.sets.find((s) => s.id === setId) || tp.sets[0];
     const ex = set.items[0];
+    // A choice set either gaps every question or asks about whole sentences, with no ___ anywhere.
+    const gapless = set.kind === "choice" && set.items.every((x) => !String(x[0]).includes("___"));
     const fmt = set.kind === "choice"
-      ? `Each item: {"q": "French sentence with ___ for the gap", "options": ["the correct option", "distractor", "distractor"], "why": "short English explanation"}. The FIRST option must be the correct one.`
+      ? `Each item: {"q": "${gapless ? "the question, with no ___ gap" : "French sentence with ___ for the gap"}", "options": ["the correct option", "distractor", "distractor"], "why": "short English explanation"}. The FIRST option must be the correct one.`
       : `Each item: {"src": "optional cue or source sentence shown above the question (can be empty)", "q": "French sentence with exactly one ___ gap, with the infinitive or cue in parentheses when needed", "a": ["every acceptable answer for the gap, exactly as it should be typed"], "why": "short English explanation"}.`;
     const example = set.kind === "choice" ? JSON.stringify({ q: ex[0], options: ex[1], why: ex[2] }) : JSON.stringify({ src: ex[0], q: ex[1], a: ex[2], why: ex[3] });
     const avoid = shuffle(set.items).slice(0, 12).map((x) => (set.kind === "choice" ? x[0] : x[1] === "___" ? x[0] : x[1])).join(" / ");
