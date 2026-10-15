@@ -5322,7 +5322,7 @@
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
           ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
           <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button>${learned ? `<button class="btn ghost" data-act="v-start" data-mode="practice">Practise French → English</button>` : ""}</div>
-          ${learned ? `<p class="small muted">Reviews ask English → French. The practice takes the ${Math.min(learned, PRACTICE_N)} cards practised that way longest ago, and doesn't change their schedule.</p>` : ""}
+          ${learned ? `<p class="small muted">Reviews ask English → French and move the schedule. French → English practice takes ${Math.min(learned, PRACTICE_N)} card${Math.min(learned, PRACTICE_N) === 1 ? "" : "s"}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.</p>` : ""}
           ${srs.length ? `<div class="v-week"><p class="small muted">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></p>${week.html}</div>${stageChart(srs, "v-stages", true)}` : ""}
           <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
         </section>
