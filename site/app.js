@@ -2124,10 +2124,47 @@
     } else if (!pass) vocabAgain(v, { id: e.id, k: "re" }, GAP.again);
     vocabAdvance();
   }
-  // Tells motion.js a card was graded, before the next one is drawn, so it can play the grade from its button.
+  // A grade's feedback: a soft tone, and motion.js's light halo from the button (told before the next card is drawn).
   function gradeFx(g) {
+    tone(g !== G.again);
     const btn = document.querySelector(`.grade4 [data-g="${g}"]`), card = document.querySelector("section.flash");
     if (btn) document.dispatchEvent(new CustomEvent("tcf:grade", { detail: { g, btn, card } }));
+  }
+  // The grading tones, made on the spot with Web Audio (no files): a light two-note chime for Hard, Good or Easy, a
+  // soft low bump for Again. They play from the click or key that grades, as browsers require; the sound button in
+  // a session's header (or M) turns them off on this device (tcf-sound, like the theme).
+  let AC = null;
+  const soundOn = () => lsGet("tcf-sound", "on") !== "off";
+  function tone(pass) {
+    if (!soundOn()) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      AC = AC || new Ctx();
+      if (AC.state === "suspended") AC.resume();
+      const t0 = AC.currentTime + 0.01;
+      const note = (f, at, dur, peak, type, to) => {
+        const o = AC.createOscillator(), gn = AC.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(f, at);
+        if (to) o.frequency.exponentialRampToValueAtTime(to, at + dur);
+        gn.gain.setValueAtTime(0.0001, at);
+        gn.gain.exponentialRampToValueAtTime(peak, at + 0.012);
+        gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+        o.connect(gn);
+        gn.connect(AC.destination);
+        o.start(at);
+        o.stop(at + dur + 0.02);
+      };
+      if (pass) { note(880, t0, 0.2, 0.1, "sine"); note(1318.5, t0 + 0.07, 0.26, 0.07, "sine"); }
+      else note(240, t0, 0.2, 0.11, "triangle", 170);
+    } catch (_) {}
+  }
+  function soundToggle() {
+    const on = !soundOn();
+    lsSet("tcf-sound", on ? "on" : "off");
+    if (on) tone(true);
+    render(true);
   }
   // Your seconds a card, its checks or repeats included, kept for the last 5 sessions of each kind, so the plan's
   // minutes follow your own pace. Practice isn't in the plan, so it isn't kept.
@@ -5367,7 +5404,7 @@
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
+      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A soft tone marks each grade; the sound button in a session (or M) turns it off. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       ${waitPanel()}
       ${exPanel()}
       <div class="grid2 v-home">
@@ -5439,7 +5476,7 @@
     }
     const label = v.mode === "new" ? "Learning new cards" : v.mode === "practice" ? "Practice · French → English" : "Review";
     return `<div class="wrap">
-      <div class="row between"><span class="eyebrow">${label} · ${done} / ${v.total} done</span><span class="row"><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
+      <div class="row between"><span class="eyebrow">${label} · ${done} / ${v.total} done</span><span class="row"><button class="btn ghost sm v-sound" data-act="v-sound" aria-pressed="${soundOn()}" title="${soundOn() ? "Turn the grading tones off" : "Turn the grading tones on"}">${ico(soundOn() ? "sound" : "mute")}${soundOn() ? "Sound" : "Muted"} <span class="kbd">M</span></button><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
       <div class="bar"><i style="width:${pct}%" data-tween="vbar-${v.mode}" data-tw="width" data-to="${pct}"></i></div>
       <section class="panel flash" data-m="slide" data-k="vc-${esc(id)}-${v.i}">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri && v.mode === "review" ? " · priority" : ""}</p>
@@ -6706,6 +6743,7 @@
     "v-show": () => { if (ui.vocab) { ui.vocab.shown = true; render(true); } },
     "v-grade": (el) => { const g = Number(el.dataset.g); gradeFx(g); vocabGrade(g); },
     "v-learn": (el) => vocabLearn(el.dataset.path),
+    "v-sound": soundToggle,
     "v-quit": () => { ui.vocab = null; render(true); },
     "v-edit": () => vocabEditOpen(),
     "v-edit-save": () => vocabEditSave(),
@@ -7059,6 +7097,7 @@
     if (route.view === "vocab" && ui.vocab && !ui.vocab.finished) {
       const v = ui.vocab, step = v.queue[v.i] || {};
       if (e.key === "e" || e.key === "E") { e.preventDefault(); vocabEditOpen(); return; }
+      if (e.key === "m" || e.key === "M") { e.preventDefault(); soundToggle(); return; }
       if (step.k === "show") { if (e.key === "2" || e.key === "Enter") { e.preventDefault(); vocabLearn("learn"); } else if (e.key === "3") { e.preventDefault(); vocabLearn("known"); } return; }
       if (!v.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); v.shown = true; render(true); }
       else if (v.shown && /^[1-4]$/.test(e.key)) { e.preventDefault(); gradeFx(Number(e.key)); vocabGrade(Number(e.key)); }
