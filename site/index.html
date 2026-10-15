@@ -727,6 +727,19 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .flash .prompt { font: 700 24px/1.3 var(--f-ui); }
 .flash .answer { font: 400 30px/1.25 var(--f-text); color: var(--accent); }
 .flash .ex { font: italic 400 16px/1.5 var(--f-text); color: var(--ink-2); max-width: 52ch; margin: 0 auto; }
+/* The four grades after a recall (FSRS): each with its key and, where it sets the schedule, the gap it would give. */
+.row > .grade4 { flex: 1 1 100%; }
+.grade4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 540px; margin: 0 auto; }
+.btn.grade { flex-direction: column; gap: 4px; padding: 10px 6px 9px; white-space: normal; }
+.btn.grade .g-name { display: inline-flex; align-items: center; gap: 6px; }
+.btn.grade .g-gap { font-size: 12px; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.btn.grade.primary .g-gap { color: inherit; opacity: .9; }
+.btn.grade.g1 { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, var(--rule-2)); }
+.btn.grade.g1 .g-gap { color: inherit; }
+@media (max-width: 560px) { .btn.grade .kbd { display: none; } }
+/* The grading tones' switch, in a session's header. */
+.v-sound .ico { width: 16px; height: 16px; }
+.v-sound[aria-pressed="false"] { color: var(--ink-3); }
 .ex-l { display: block; }
 .ex-l + .ex-l { margin-top: 10px; }
 .ex-en { display: block; margin-top: 1px; font: 400 13px/1.45 var(--f-ui); font-style: normal; color: var(--ink-3); }
@@ -1415,6 +1428,13 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 /* The maple leaves that fly off a stamp or a perfect score. */
 .m-burst { position: fixed; z-index: 40; width: 0; height: 0; pointer-events: none; }
 .m-burst svg { position: absolute; left: -10px; top: -11px; width: 20px; height: 22px; overflow: visible; }
+/* Grading (motion.js): a light halo around the button you pressed, in its grade's colour (pale ink, blue ink, the
+   reward gold), which grows a few pixels and fades; on Again it gives a small shake in red pen. */
+.m-halo { position: fixed; z-index: 30; pointer-events: none; box-sizing: border-box; border: 2px solid currentColor; border-radius: var(--r); }
+.m-halo.g1 { color: var(--red); }
+.m-halo.g2 { color: var(--ink-3); }
+.m-halo.g3 { color: var(--accent); }
+.m-halo.g4 { color: var(--leaf-2); }
 </style>
 
 <!-- Brand kit shapes (from the "Réussir le TCF Brand Kit" design): the maple leaf, the é tile's clip, the stamp
@@ -1447,6 +1467,8 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
     <symbol id="i-exam" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="1.5"/><path class="pen" d="M8.5 3v18"/><path d="M11 8h5.5M11 11.5h5.5M11 15h3.5"/></symbol>
     <symbol id="i-plane" viewBox="0 0 24 24"><path transform="rotate(45 12 12)" d="M12 2.5c.8 0 1.5.9 1.5 2V10l7 4.2v1.9l-7-2.1v4.6l2 1.5v1.4L12 20.4l-3.5 1.1v-1.4l2-1.5V14l-7 2.1v-1.9l7-4.2V4.5c0-1.1.7-2 1.5-2z"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="pen-solid" d="M10.2 8.6v6.8a.6.6 0 0 0 .9.5l5.3-3.4a.6.6 0 0 0 0-1l-5.3-3.4a.6.6 0 0 0-.9.5z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="pen" d="M15.5 9.3a4 4 0 0 1 0 5.4M18.1 6.8a7.6 7.6 0 0 1 0 10.4"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="pen" d="M15.8 9.6l4.8 4.8M20.6 9.6l-4.8 4.8"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M3 10.5c2.3 3.3 5.3 5 9 5s6.7-1.7 9-5"/><path class="pen" d="M6.6 13.6 5.2 15.8M12 15.5v2.6M17.4 13.6l1.4 2.2"/></symbol>
     <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle class="pen-solid" cx="12" cy="12" r="1.7"/></symbol>
     <symbol id="i-stamp" viewBox="0 0 24 24"><circle cx="12" cy="5.2" r="2.4"/><path d="M10.6 7.4 10 12.5h4l-.6-5.1"/><rect x="4.5" y="12.5" width="15" height="4" rx="1"/><path class="pen" d="M6 20.5h12"/></symbol>
@@ -1489,4 +1511,5 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 <script src="comp-co.js"></script>
 <script src="motion.js"></script>
 <script src="charts.js"></script>
+<script src="ts-fsrs.js"></script>
 <script src="app.js"></script>

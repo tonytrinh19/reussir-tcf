@@ -11,7 +11,8 @@
    highlight, slides the toast in and out, opens folds gently, throws the maple leaves (TCFMotion.burst), lights up
    cards and tilts tiles under a mouse, and runs the overview's section bar (a tap scrolls to the section; the pill
    follows the one you're reading). On the Fiches it slides the cards into place as you filter them, peels a note
-   off the board and turns over a blank you tap in Cacher mode. It only reads the page, moves it and scrolls it: it never writes data, calls
+   off the board and turns over a blank you tap in Cacher mode. On Vocabulaire it marks each grade (the "tcf:grade"
+   event) with a light halo around the button you pressed, or a small shake on Again. It only reads the page, moves it and scrolls it: it never writes data, calls
    the app or stores anything, and the site works the same without it. With reduced motion asked for, nothing
    moves. */
 (() => {
@@ -486,6 +487,30 @@
     setTimeout(() => box.remove(), 2400);
   }
 
+  /* ---------- grading ---------- */
+  // A card graded on Vocabulaire (the "tcf:grade" event, which app.js sends just before it draws the next card): a
+  // light halo around the button you pressed, which grows a few pixels and fades, in the grade's colour; on Again
+  // it gives a small shake in red pen instead. It plays over the page, so the next card arrives at once.
+  function gradeFx(d) {
+    if (still() || !d || !d.btn || !d.btn.getBoundingClientRect) return;
+    const r = d.btn.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const h = document.createElement("div");
+    h.className = "m-halo g" + d.g;
+    h.setAttribute("aria-hidden", "true");
+    Object.assign(h.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px" });
+    document.body.appendChild(h);
+    // The timing is in the keyframes, so the halo stays visible for its first third before it fades.
+    const grow = (f) => `scale(${(1 + (16 * f) / r.width).toFixed(3)}, ${(1 + (16 * f) / r.height).toFixed(3)})`;
+    const a = d.g === 1
+      ? h.animate([{ opacity: 0.9, transform: "none", easing: "ease-in-out" }, { opacity: 0.85, transform: "translateX(-4px)", offset: 0.2, easing: "ease-in-out" }, { opacity: 0.7, transform: "translateX(4px)", offset: 0.45, easing: "ease-in-out" }, { opacity: 0.4, transform: "translateX(-2px)", offset: 0.7, easing: "ease-out" }, { opacity: 0, transform: "none" }], { duration: 400 })
+      : h.animate([{ opacity: 0.8, transform: "none", easing: "cubic-bezier(.2, .7, .3, 1)" }, { opacity: 0.6, transform: grow(0.55), offset: 0.35, easing: "ease-in" }, { opacity: 0, transform: grow(1) }], { duration: 440 });
+    const gone = () => h.remove();
+    a.onfinish = gone;
+    a.oncancel = gone;
+    setTimeout(gone, 900);
+  }
+
   /* ---------- the Fiches ---------- */
   // Filtering the cards: the ones that stay slide to their new places, the ones that go fold away where they
   // were (a copy fades out there, since the card itself is already hidden), and the ones that come back pop in.
@@ -537,6 +562,7 @@
     try { transition(once, dir); } catch (e) { console.warn("motion:", e); once(); }
   } });
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
+  document.addEventListener("tcf:grade", (e) => safe(() => gradeFx(e.detail)));
   window.addEventListener("resize", () => safe(() => { placePill(true); spy(true); }));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => { placePill(true); spy(true); }));
   safe(watchToast);
