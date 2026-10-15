@@ -11,7 +11,8 @@
    highlight, slides the toast in and out, opens folds gently, throws the maple leaves (TCFMotion.burst), lights up
    cards and tilts tiles under a mouse, and runs the overview's section bar (a tap scrolls to the section; the pill
    follows the one you're reading). On the Fiches it slides the cards into place as you filter them, peels a note
-   off the board and turns over a blank you tap in Cacher mode. It only reads the page, moves it and scrolls it: it never writes data, calls
+   off the board and turns over a blank you tap in Cacher mode. On Vocabulaire it plays each grade (the "tcf:grade"
+   event): rings bloom from the button for Hard, Good and Easy, and the card wobbles away on Again. It only reads the page, moves it and scrolls it: it never writes data, calls
    the app or stores anything, and the site works the same without it. With reduced motion asked for, nothing
    moves. */
 (() => {
@@ -486,6 +487,88 @@
     setTimeout(() => box.remove(), 2400);
   }
 
+  /* ---------- grading with feeling ---------- */
+  // A card graded on Vocabulaire (the "tcf:grade" event, which app.js sends just before it draws the next card):
+  // rings bloom from the button, wider and brighter as the grade goes up (Easy in the reward gold, with a glow and a
+  // few leaves floating up), and on Again the card gives a small sympathetic wobble, then sinks and fades: it's
+  // going back in the pile. They play over the page, so the next card arrives at once.
+  const GRADE_FX = {
+    2: { rings: [[0.75, 1.45, 620, 0]], peak: 0.6 },
+    3: { rings: [[0.7, 1.85, 680, 0]], peak: 0.85 },
+    4: { rings: [[0.65, 2.4, 900, 0], [0.65, 1.75, 780, 130]], peak: 1, glow: true, leaves: 3 },
+  };
+  const BLOOM = "cubic-bezier(.22, .65, .3, 1)";
+  function gradeFx(d) {
+    if (still() || !d) return;
+    if (d.g === 1) { wobble(d.card); return; }
+    const fx = GRADE_FX[d.g];
+    if (!fx || !d.btn || !d.btn.getBoundingClientRect) return;
+    const r = d.btn.getBoundingClientRect();
+    if (!r.width && !r.height) return;
+    const box = document.createElement("div");
+    box.className = "m-grade g" + d.g;
+    box.setAttribute("aria-hidden", "true");
+    box.style.left = r.left + r.width / 2 + "px";
+    box.style.top = r.top + r.height / 2 + "px";
+    box.style.setProperty("--R", Math.max(r.width, r.height) / 2 + "px");
+    box.innerHTML = (fx.glow ? `<i class="m-glow"></i>` : "") + fx.rings.map(() => `<i class="m-ring"></i>`).join("")
+      + Array.from({ length: fx.leaves || 0 }, (_, i) => `<svg viewBox="0 0 24 26" style="fill:${FILLS[1 + (i % 3)]}"><use href="#leaf" width="24" height="26"/></svg>`).join("");
+    document.body.appendChild(box);
+    const els = [...box.children], anims = [];
+    let k = 0;
+    // A ring grows fast at first and slows as it reaches its size, but stays bright for the first half before it
+    // fades: the timing is in the keyframes, so the fade doesn't run ahead with the growth.
+    const sc = (a, b, f) => `scale(${(a + (b - a) * f).toFixed(3)})`;
+    const ring = (a, b, peak) => [
+      { opacity: 0, transform: sc(a, b, 0), easing: BLOOM },
+      { opacity: peak, transform: sc(a, b, 0.42), offset: 0.16, easing: "linear" },
+      { opacity: peak * 0.7, transform: sc(a, b, 0.82), offset: 0.55, easing: "ease-out" },
+      { opacity: 0, transform: sc(a, b, 1) },
+    ];
+    if (fx.glow) anims.push(els[k++].animate([{ opacity: 0, transform: "scale(.55)", easing: BLOOM }, { opacity: 0.9, transform: "scale(1.05)", offset: 0.25, easing: "ease-in-out" }, { opacity: 0, transform: "scale(1.85)" }], { duration: 900 }));
+    fx.rings.forEach(([a, b, ms, delay]) => anims.push(els[k++].animate(ring(a, b, fx.peak), { duration: ms, delay, fill: "backwards" })));
+    // The leaves float up from the button's top edge, drifting apart.
+    const top = -r.height / 2;
+    els.slice(k).forEach((leaf, i) => {
+      const dx = (i - 1) * 26 + (Math.random() - 0.5) * 12, up = 52 + Math.random() * 28, rot = (Math.random() - 0.5) * 140;
+      anims.push(leaf.animate([
+        { transform: `translate(0px, ${top}px) scale(.35) rotate(0deg)`, opacity: 0 },
+        { transform: `translate(${(dx * 0.45).toFixed(1)}px, ${(top - up * 0.45).toFixed(1)}px) scale(1) rotate(${(rot * 0.4).toFixed(0)}deg)`, opacity: 1, offset: 0.3 },
+        { transform: `translate(${dx.toFixed(1)}px, ${(top - up).toFixed(1)}px) scale(.8) rotate(${rot.toFixed(0)}deg)`, opacity: 0 },
+      ], { duration: 1000 + Math.random() * 200, delay: 80 + i * 80, easing: "cubic-bezier(.2, .7, .4, 1)", fill: "backwards" }));
+    });
+    let left = anims.length;
+    const gone = () => { if (--left <= 0) box.remove(); };
+    anims.forEach((a) => { a.onfinish = gone; a.oncancel = gone; });
+    setTimeout(() => box.remove(), 1800);
+  }
+  // Again: a copy of the card, where it was, sways a few times, less each time, then sinks a little; it fades as it
+  // goes, so the next card shows through.
+  function wobble(card) {
+    if (!card || !card.getBoundingClientRect) return;
+    const r = card.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const g = card.cloneNode(true);
+    [g, ...g.querySelectorAll("*")].forEach((n) => ["id", "data-m", "data-k", "data-tween", "data-spot", "data-tilt", "data-act"].forEach((a) => n.removeAttribute(a)));
+    g.setAttribute("aria-hidden", "true");
+    g.inert = true;
+    g.classList.add("m-wobble");
+    Object.assign(g.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", margin: "0", pointerEvents: "none", zIndex: "6", viewTransitionName: "none" });
+    document.body.appendChild(g);
+    const a = g.animate([
+      { transform: "none", opacity: 1 },
+      { transform: "translateX(-6px) rotate(-2.5deg)", opacity: 0.92, offset: 0.14 },
+      { transform: "translateX(5px) rotate(2deg)", opacity: 0.75, offset: 0.3 },
+      { transform: "translateX(-3px) rotate(-1.2deg)", opacity: 0.5, offset: 0.46 },
+      { transform: "translateX(1.5px) rotate(.6deg)", opacity: 0.28, offset: 0.62 },
+      { transform: "translateY(10px) scale(.98)", opacity: 0 },
+    ], { duration: 600, easing: "ease-out", fill: "forwards" });
+    const gone = () => g.remove();
+    a.onfinish = gone;
+    a.oncancel = gone;
+    setTimeout(gone, 1100);
+  }
+
   /* ---------- the Fiches ---------- */
   // Filtering the cards: the ones that stay slide to their new places, the ones that go fold away where they
   // were (a copy fades out there, since the card itself is already hidden), and the ones that come back pop in.
@@ -537,6 +620,7 @@
     try { transition(once, dir); } catch (e) { console.warn("motion:", e); once(); }
   } });
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
+  document.addEventListener("tcf:grade", (e) => safe(() => gradeFx(e.detail)));
   window.addEventListener("resize", () => safe(() => { placePill(true); spy(true); }));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => { placePill(true); spy(true); }));
   safe(watchToast);

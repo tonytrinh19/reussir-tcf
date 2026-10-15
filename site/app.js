@@ -1944,70 +1944,86 @@
     const m = cards || allCards();
     return [...S.srs.entries()].filter(([id, st]) => m.has(id) && st && st.due && st.due <= t).map(([id]) => id);
   }
-  // The review schedule works like Anki's. Each card keeps its gap to the next review (ivl, in days) and its own
-  // growth factor (ease). A right answer multiplies the gap by the ease, counting half of any days the card was
-  // late, up to 30 days (the cap suits a test a few months away). The ease drops 0.2 at each miss (down to 1.3)
-  // and rises 0.05 with each right answer (up to 2.5), so a card you keep missing grows more slowly and one you
-  // keep getting right a little faster. A miss sends the card back to tomorrow on the priority pile, where it
-  // stays until it's right on two days. Gaps of 3 days or more vary by a day or so (Anki's fuzz), so cards learned
-  // together don't stay due together. Only English → French moves the schedule: French → English is practice.
-  const SRS = { cap: 30, ease: 2, easeMin: 1.3, easeMax: 2.5, lapse: 0.2, gain: 0.05, known: 4 };
+  // The review schedule is FSRS, the scheduler Anki offers (ts-fsrs 5.4.2, FSRS-6, in ts-fsrs.js; the user asked for
+  // it on 2026-10-15). Each card has a memory state: its stability (s, the days until your chance of recalling it
+  // falls to 90%) and its difficulty (d, 1 to 10). Each review is graded Again, Hard, Good or Easy; FSRS works out
+  // the new state and brings the card back when its chance of recall falls to 90% (Anki's default), never more than
+  // 30 days away (the cap suits a test a few months away). Only English → French moves the schedule.
+  // Days are whole: FSRS's short-term steps are off, since the session's own checks stand in for them, and a day is
+  // that date at noon UTC, as ts-fsrs counts elapsed days by UTC calendar day.
+  const SRS = { retention: 0.9, cap: 30, logMax: 100 };
+  const G = { again: 1, hard: 2, good: 3, easy: 4 };
+  const FS = window.FSRS;
+  const FSR = FS && FS.fsrs({ request_retention: SRS.retention, maximum_interval: SRS.cap, enable_fuzz: true, enable_short_term: false });
+  const dayDate = (s) => new Date(s + "T12:00:00Z");
+  const r4 = (x) => Math.round(x * 1e4) / 1e4;
+  // A gap as FSRS sets it, back under the cap: ts-fsrs spaces Hard, Good and Easy at least a day apart, which can
+  // take them a day or two past it.
+  const capped = (n) => Math.max(1, Math.min(SRS.cap, Math.round(n) || 1));
   // The stage a gap belongs to: 1 day, 2, 3–6, 7–13, 14–20, then 21 or more (mastered, Anki's "mature").
   const stageOf = (ivl) => (ivl >= 21 ? 5 : ivl >= 14 ? 4 : ivl >= 7 ? 3 : ivl >= 3 ? 2 : ivl >= 2 ? 1 : 0);
-  const ease2 = (x) => Math.min(SRS.easeMax, Math.max(SRS.easeMin, Math.round(x * 100) / 100));
-  // A copy of a card's schedule. One saved before gaps and eases were kept gets its gap from its stage (on the old
-  // ladder of 1, 2, 4, 7, 14 and 30 days) and its ease from its misses, 0.1 less for each.
+  // The gap of a schedule from before FSRS: its ivl, or from its stage on the old ladder of 1, 2, 4, 7, 14 and 30 days.
   function srsOf(st) {
     const s = Object.assign({ stage: 0, lapses: 0, reps: 0 }, st);
     if (!(s.ivl > 0)) s.ivl = s.pri ? 1 : IV[Math.max(0, Math.min(IV.length - 1, s.stage || 0))];
     s.ivl = Math.min(SRS.cap, s.ivl);
-    if (!(s.ease > 0)) s.ease = ease2(SRS.ease - 0.1 * (s.lapses || 0));
     return s;
   }
-  // The gap after a right answer: the gap so far, plus half the days it was late, times the ease, and always at
-  // least a day longer, up to the cap.
-  const srsNext = (ivl, ease, late) => Math.min(SRS.cap, Math.max(ivl + 1, Math.round((ivl + late / 2) * ease)));
-  // Anki's fuzz: a gap of 3 days or more moves by up to a day, plus 15% of its days from 2.5 to 7, 10% of those from
-  // 7 to 20 and 5% beyond (4 days → 3–5, 16 → 13–19). It's never below the last gap plus one, except at the cap, so
-  // mastered cards spread over 27–30 days. It comes out the same for a card on a given day.
-  function srsFuzz(n, prev, id, t) {
-    if (n < 2.5) return n;
-    const d = 1 + 0.15 * (Math.min(n, 7) - 2.5) + 0.1 * Math.max(0, Math.min(n, 20) - 7) + 0.05 * Math.max(0, n - 20);
-    const hi = Math.min(SRS.cap, Math.round(n + d));
-    const lo = Math.min(hi, Math.max(Math.round(n - d), Math.min(prev + 1, SRS.cap - Math.round(d))));
-    let h = 0;
-    for (const ch of id + "|" + t) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0;
-    return lo + ((h >>> 0) % (hi - lo + 1));
+  // The ts-fsrs card for a saved schedule (a new object: saved progress is frozen on claude.ai). One saved before
+  // FSRS (no st) starts from its gap as its stability, the gap at which recall is 90%, and from its misses: FSRS's
+  // difficulty after a Good, raised by its rule for Again once per miss. Its SM-2 ease isn't used: it was a day old
+  // when FSRS came, and mostly came from the misses anyway.
+  function srsCard(doc, now) {
+    if (!doc || doc.st === FS.State.New) return FS.createEmptyCard(now);
+    if (doc.st != null) return { due: dayDate(doc.due), stability: doc.s, difficulty: doc.d, elapsed_days: 0, scheduled_days: doc.ivl || 0, learning_steps: 0, reps: doc.reps || 0, lapses: doc.lapses || 0, state: doc.st, last_review: dayDate(doc.last || doc.due) };
+    const o = srsOf(doc);
+    let d = FSR.init_difficulty(G.good);
+    for (let k = 0; k < Math.min(o.lapses || 0, 10); k++) d = FSR.next_difficulty(d, G.again);
+    const last = o.last || (o.due ? addDays(o.due, -o.ivl) : o.learned) || todayStr();
+    return { due: dayDate(o.due || last), stability: o.ivl, difficulty: d, elapsed_days: 0, scheduled_days: o.ivl, learning_steps: 0, reps: Math.max(1, o.reps || 0), lapses: o.lapses || 0, state: FS.State.Review, last_review: dayDate(last) };
   }
-  // One review of a card, right or missed. A missed card shown again in the same session doesn't come here.
-  function srsGrade(id, ok) {
+  // The schedule to save after a grade: FSRS's new card as the site keeps it, with the grade added to the card's
+  // history (log, its last 100 grades, so FSRS could one day be tuned to you). A copy; the SM-2 fields go.
+  function srsDoc(prev, c, g, t, log) {
+    const ivl = capped(c.scheduled_days);
+    const doc = Object.assign({}, prev, { due: addDays(t, ivl), ivl, s: r4(c.stability), d: r4(c.difficulty), st: c.state, reps: c.reps, lapses: c.lapses, last: t, learned: (prev && prev.learned) || t, pri: g === G.again, stage: g === G.again ? 0 : stageOf(ivl), log: log.slice(-SRS.logMax) });
+    delete doc.ease;
+    delete doc.pStreak;
+    return doc;
+  }
+  const srsMissing = () => { if (!FSR) toast("The card scheduler didn't load. Reload the page to try again."); return !FSR; };
+  // One review of a card, graded 1–4. A card shown again in the same session doesn't come here.
+  function srsGrade(id, g) {
+    if (srsMissing()) return;
+    const t = todayStr(), now = dayDate(t), prev = S.srs.get(id);
+    const { card } = FSR.next(srsCard(prev, now), now, g);
+    put("srs", id, srsDoc(prev, card, g, t, arr(prev && prev.log).concat([[t, g]])));
+  }
+  // A new card's first rating, from an empty card: Good when it's shown, so ending a session early loses nothing
+  // (not in its history, since you haven't recalled it yet), then the grade of its first check.
+  function srsStart(id, g, shown) {
+    if (srsMissing()) return;
+    const t = todayStr(), now = dayDate(t);
+    const { card } = FSR.next(FS.createEmptyCard(now), now, g);
+    put("srs", id, srsDoc({ learned: t }, card, g, t, shown ? [] : [[t, g]]));
+  }
+  // A card saved from a page joins the reviews tomorrow, still new: its first review is its first rating.
+  function srsLearn(id) {
     const t = todayStr();
-    const st = srsOf(S.srs.get(id));
-    const late = st.due ? Math.max(0, daysBetween(st.due, t)) : 0;
-    st.reps = (st.reps || 0) + 1;
-    st.last = t;
-    if (!ok) {
-      st.lapses = (st.lapses || 0) + 1;
-      st.ease = ease2(st.ease - SRS.lapse);
-      st.pri = true;
-      st.pStreak = 0;
-      st.ivl = 1;
-    } else if (st.pri) {
-      st.pStreak = (st.pStreak || 0) + 1;
-      if (st.pStreak >= 2) { st.pri = false; st.ivl = srsFuzz(srsNext(1, st.ease, late), 1, id, t); } else st.ivl = 1;
-    } else {
-      const prev = st.ivl;
-      st.ease = ease2(st.ease + SRS.gain);
-      st.ivl = srsFuzz(srsNext(prev, st.ease, late), prev, id, t);
-    }
-    st.stage = st.pri ? 0 : stageOf(st.ivl);
-    st.due = addDays(t, st.ivl);
-    put("srs", id, st);
+    put("srs", id, { st: 0, due: addDays(t, 1), ivl: 1, stage: 0, reps: 0, lapses: 0, learned: t, pri: false });
   }
-  // A card starts its schedule: tomorrow, or in about 4 days for one you already knew (Anki's "Easy" on a new card).
-  function srsLearn(id, known) {
-    const t = todayStr(), ivl = known ? srsFuzz(SRS.known, 0, id, t) : 1;
-    put("srs", id, { stage: stageOf(ivl), ivl, ease: SRS.ease, due: addDays(t, ivl), lapses: 0, reps: 1, last: t, pri: false, learned: t });
+  // The gap each grade would give a card today, for its buttons: a review's, or a new card's first check's.
+  function srsPreview(id, fresh) {
+    if (!FSR) return null;
+    const now = dayDate(todayStr());
+    const p = FSR.repeat(fresh ? FS.createEmptyCard(now) : srsCard(S.srs.get(id), now), now);
+    return [G.again, G.hard, G.good, G.easy].map((g) => capped(p[g].card.scheduled_days));
+  }
+  // Your chance of recalling a card today, as FSRS reckons it, for a card it has scheduled.
+  function srsRecall(st) {
+    if (!FSR || !st || st.st == null || st.st === FS.State.New || !(st.s > 0)) return null;
+    const now = dayDate(todayStr());
+    return FSR.get_retrievability(srsCard(st, now), now, false);
   }
   // French → English practice only keeps the day a card was last practised (rec), so the next practice starts
   // with the cards practised longest ago. Its schedule stays as it was.
@@ -2018,12 +2034,13 @@
 
   // A session is a queue of steps, each { id, k }:
   // - show: a new card, with its answer. Got it, next → checked a few cards later (learn 1), then further on
-  //   (learn 2), then it leaves the session for tomorrow, as Anki's learning steps do. I already know this → one
-  //   check further on (known); right, it goes to 4 days.
-  // - learn, known: recall a new card. A miss starts its checks again (learn 1, a few cards later).
-  // - rev: a review, which moves the schedule. A miss comes back a few cards later (re) until you get it right;
-  //   those repeats don't move the schedule again, nor count toward clearing the priority pile.
-  // - prac: French → English practice, which never moves the schedule. A miss comes back the same way.
+  //   (learn 2), then it leaves the session, as Anki's learning steps do. I already know this → one check further on
+  //   (known). Either way the card's first check is its first rating, which FSRS schedules from (Easy on learn 1
+  //   also ends its checks).
+  // - learn, known: recall a new card, graded 1–4. Again starts its checks again (learn 1, a few cards later).
+  // - rev: a review, which moves the schedule. Again comes back a few cards later (re) until it's passed; those
+  //   repeats don't move the schedule again.
+  // - prac: French → English practice, which never moves the schedule. Again comes back the same way.
   const VOCAB_V = 2; // the session's shape: one saved in the tab before it changed is dropped
   const GAP = { soon: 3, again: 4, later: 6 };
   const PRACTICE_N = 20;
@@ -2070,27 +2087,47 @@
     }
     render(true);
   }
-  // ok is Got it; on a new card shown with its answer, Got it, next (true) or I already know this (false).
-  function vocabGrade(ok) {
+  // A new card shown with its answer: Got it, next (two checks) or I already know this (one).
+  function vocabLearn(path) {
     const v = ui.vocab;
     if (!v || v.finished) return;
     const e = v.queue[v.i];
-    if (!e || (e.k !== "show" && !v.shown)) return;
+    if (!e || e.k !== "show") return;
     activeTick(v, 90);
-    if (e.k === "show") {
-      srsLearn(e.id, false);
-      vocabAgain(v, ok ? { id: e.id, k: "learn", n: 1 } : { id: e.id, k: "known" }, ok ? GAP.soon : GAP.later);
-    } else if (e.k === "learn" || e.k === "known") {
-      // Each card's first check is its score for the session.
-      if (!(e.id in v.first)) { v.first[e.id] = ok ? 1 : 0; if (ok) v.ok++; else v.miss++; }
-      if (!ok) vocabAgain(v, { id: e.id, k: "learn", n: 1 }, GAP.soon);
-      else if (e.k === "known") { srsLearn(e.id, true); v.known++; }
-      else if (e.n === 1) vocabAgain(v, { id: e.id, k: "learn", n: 2 }, GAP.later);
-    } else if (e.k === "rev" || e.k === "prac") {
-      if (e.k === "rev") srsGrade(e.id, ok); else srsPractised(e.id, todayStr());
-      if (ok) v.ok++; else { v.miss++; vocabAgain(v, { id: e.id, k: "re" }, GAP.again); }
-    } else if (!ok) vocabAgain(v, { id: e.id, k: "re" }, GAP.again);
+    srsStart(e.id, G.good, true);
+    if (path === "known") vocabAgain(v, { id: e.id, k: "known" }, GAP.later);
+    else vocabAgain(v, { id: e.id, k: "learn", n: 1 }, GAP.soon);
     vocabAdvance();
+  }
+  // A recall, graded 1–4 (Again, Hard, Good, Easy). A new card's first check is its first rating and a review moves
+  // its schedule; a repeat or practice only decides whether the card comes back in the session (Again) or is done.
+  function vocabGrade(g) {
+    const v = ui.vocab;
+    if (!v || v.finished || !(g >= G.again && g <= G.easy)) return;
+    const e = v.queue[v.i];
+    if (!e || e.k === "show" || !v.shown) return;
+    activeTick(v, 90);
+    const pass = g !== G.again;
+    if (e.k === "learn" || e.k === "known") {
+      // Each card's first check is its score for the session, and its first rating.
+      if (!(e.id in v.first)) {
+        v.first[e.id] = pass ? 1 : 0;
+        if (pass) v.ok++; else v.miss++;
+        if (pass && e.k === "known") v.known++;
+        srsStart(e.id, g, false);
+      }
+      if (!pass) vocabAgain(v, { id: e.id, k: "learn", n: 1 }, GAP.soon);
+      else if (e.k === "learn" && e.n === 1 && g !== G.easy) vocabAgain(v, { id: e.id, k: "learn", n: 2 }, GAP.later);
+    } else if (e.k === "rev" || e.k === "prac") {
+      if (e.k === "rev") srsGrade(e.id, g); else srsPractised(e.id, todayStr());
+      if (pass) v.ok++; else { v.miss++; vocabAgain(v, { id: e.id, k: "re" }, GAP.again); }
+    } else if (!pass) vocabAgain(v, { id: e.id, k: "re" }, GAP.again);
+    vocabAdvance();
+  }
+  // Tells motion.js a card was graded, before the next one is drawn, so it can play the grade from its button.
+  function gradeFx(g) {
+    const btn = document.querySelector(`.grade4 [data-g="${g}"]`), card = document.querySelector("section.flash");
+    if (btn) document.dispatchEvent(new CustomEvent("tcf:grade", { detail: { g, btn, card } }));
   }
   // Your seconds a card, its checks or repeats included, kept for the last 5 sessions of each kind, so the plan's
   // minutes follow your own pace. Practice isn't in the plan, so it isn't kept.
@@ -2336,7 +2373,7 @@
     if (note) doc.enNote = note;
     if (g.src) doc.src = g.src;
     put("cards", id, doc);
-    if (en) srsLearn(id, false);
+    if (en) srsLearn(id);
     if (settings().grabTheme !== theme) saveSettings({ grabTheme: theme });
     grabClose();
     toast(en ? `Saved to ${THEME[theme].label}. It comes up in your reviews from tomorrow.` : `Saved to ${THEME[theme].label}. Give it a meaning under À chercher on Vocabulaire.`);
@@ -2353,7 +2390,7 @@
     if (!doc.seen) doc.seen = g.seen;
     put("cards", c.id, doc);
     const joins = !!str(c.en).trim() && !S.srs.has(c.id);
-    if (joins) srsLearn(c.id, false);
+    if (joins) srsLearn(c.id);
     grabClose();
     toast(`Added to « ${c.fr} » in ${themeLabel(c.theme)}.${joins ? " It comes up in your reviews from tomorrow." : ""}`);
   }
@@ -2454,14 +2491,14 @@
       delete doc.id;
       if (!doc.seen) doc.seen = c.seen;
       put("cards", same.id, doc);
-      if (!S.srs.has(same.id)) srsLearn(same.id, false);
+      if (!S.srs.has(same.id)) srsLearn(same.id);
       remove("cards", id);
       return "merged";
     }
     const doc = Object.assign({}, c, { fr, en });
     if (note) doc.enNote = note; else delete doc.enNote;
     put("cards", id, doc);
-    if (!S.srs.has(id)) srsLearn(id, false);
+    if (!S.srs.has(id)) srsLearn(id);
     return true;
   }
 
@@ -5297,10 +5334,12 @@
     const st = S.srs.get(c.id);
     const state = st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning";
     const notes = [c.frNote, c.enNote].map((n) => str(n).trim()).filter(Boolean);
+    const rc = srsRecall(st), sd = st && Math.max(1, Math.round(st.s || 0));
     return `<li><details class="peek" ${foldAttr("peek-" + c.id)}><summary><span class="peek-fr">${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="muted small">${state}</span></summary>
       <div class="peek-body">
         <p class="peek-en">${esc(c.en || "")}</p>
         ${notes.length ? `<p class="small muted">${notes.map(esc).join("<br>")}</p>` : ""}
+        ${rc != null ? `<p class="small muted num">Mémoire · Memory: ${Math.round(rc * 100)}% chance of recall today · stability ${sd} day${sd === 1 ? "" : "s"} · difficulty ${st.d.toFixed(1)}/10</p>` : ""}
         ${c.ex ? `<p class="ex-list">${exHTML(c)}</p>` : `<p class="small muted">No examples yet.</p>`}
         ${DECK.has(c.id) ? "" : `<div class="row">${confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</div>`}
       </div></details></li>`;
@@ -5328,7 +5367,7 @@
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition, as in Anki. A new card is checked twice in the session, then comes back tomorrow, and each right answer about doubles the gap, up to 30 days. A card you miss comes back in the session until you get it, then daily on the priority pile until you get it right on two days, and its gaps grow more slowly from then on; one you keep getting right grows a little faster. Gaps vary by a day or so, so cards learned together don't all come back on the same day. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
+      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       ${waitPanel()}
       ${exPanel()}
       <div class="grid2 v-home">
@@ -5364,6 +5403,7 @@
   }
   // What a step is, over the card: a check of a new card, or a card back after a miss.
   const STEP_TAG = { learn: ["info", "Check: recall it"], known: ["info", "Check: you said you knew it"], re: ["bad", "Again: you missed it"] };
+  const GRADES = [[G.again, "Again"], [G.hard, "Hard"], [G.good, "Good"], [G.easy, "Easy"]];
   function vocabCard() {
     const v = ui.vocab;
     const cards = allCards();
@@ -5382,10 +5422,21 @@
     const todo = ahead.reduce((n, x) => n + 1 + (x.k === "show" ? 2 : x.k === "learn" && x.n === 1 ? 1 : 0), 0);
     const pct = (v.i / (v.i + todo)) * 100;
     const done = v.total - new Set(ahead.map((x) => x.id)).size;
-    let buttons;
-    if (show) buttons = `<button class="btn primary" data-act="v-grade" data-ok="1">Got it, next <span class="kbd">2</span></button><button class="btn" data-act="v-grade" data-ok="0">I already know this <span class="kbd">3</span></button>`;
-    else if (!v.shown) buttons = `<button class="btn primary" data-act="v-show">Show answer <span class="kbd">Space</span></button>`;
-    else buttons = `<button class="btn" data-act="v-grade" data-ok="0">Missed <span class="kbd">1</span></button><button class="btn primary" data-act="v-grade" data-ok="1">Got it <span class="kbd">2</span></button>`;
+    let buttons, hint = "";
+    if (show) {
+      buttons = `<button class="btn primary" data-act="v-learn" data-path="learn">Got it, next <span class="kbd">2</span></button><button class="btn" data-act="v-learn" data-path="known">I already know this <span class="kbd">3</span></button>`;
+      hint = "Got it, next → two checks in this session. I already know this → one. Your first check's grade sets when it comes back.";
+    } else if (!v.shown) buttons = `<button class="btn primary" data-act="v-show">Show answer <span class="kbd">Space</span></button>`;
+    else {
+      // A review and a new card's first check set the schedule, so their buttons say when each grade brings the card back.
+      const first = (e.k === "learn" || e.k === "known") && !(id in v.first), graded = e.k === "rev" || first;
+      const gaps = graded ? srsPreview(id, first) : null;
+      const sub = (g) => (gaps ? (gaps[g - 1] <= 1 ? "tomorrow" : `${gaps[g - 1]} days`) : g === G.again ? "back soon" : "done");
+      buttons = `<div class="grade4" data-m="rise" data-k="g4-${esc(id)}-${v.i}">${GRADES.map(([g, name]) => `<button class="btn grade g${g}${g === G.good ? " primary" : ""}" data-act="v-grade" data-g="${g}"><span class="g-name">${name}<span class="kbd">${g}</span></span><span class="g-gap">${sub(g)}</span></button>`).join("")}</div>`;
+      hint = graded ? (first ? "This first check sets when the card comes back. Again also brings it back in this session." : "Again also brings the card back in this session.")
+        : v.mode === "practice" ? "Practice doesn't move the schedule: Again brings the card back, the others finish it."
+        : "Already scheduled today: Again brings it back in this session, the others finish it.";
+    }
     const label = v.mode === "new" ? "Learning new cards" : v.mode === "practice" ? "Practice · French → English" : "Review";
     return `<div class="wrap">
       <div class="row between"><span class="eyebrow">${label} · ${done} / ${v.total} done</span><span class="row"><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
@@ -5395,7 +5446,7 @@
         ${tag ? `<div class="row"><span class="pill ${tag[0]}" data-m="pop" data-k="vt-${esc(id)}-${v.i}">${tag[1]}</span></div>` : ""}
         ${v.edit ? vocabEditForm(id) : `${front}
         ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : `<p class="muted small">${frFirst ? "Say what it means before you flip." : "Say it out loud before you flip."}</p>`}
-        ${show ? `<p class="small muted">Got it → two checks in this session. Already know it → one check, then about 4 days.</p>` : ""}
+        ${hint ? `<p class="small muted">${hint}</p>` : ""}
         <div class="row">${buttons}</div>`}
       </section>
     </div>`;
@@ -5467,19 +5518,26 @@
     toast("Card saved.");
     render(true);
   }
+  // When a session's cards come back, from their schedules: « on 18 oct. » or « between 16 and 22 oct. ».
+  function backWhen(ids) {
+    const ds = ids.map((id) => (S.srs.get(id) || {}).due).filter(Boolean).sort();
+    if (!ds.length) return "soon";
+    return ds[0] === ds[ds.length - 1] ? `on ${shortDate(ds[0])}` : `between ${shortDate(ds[0])} and ${shortDate(ds[ds.length - 1])}`;
+  }
   function vocabDone() {
     const v = ui.vocab;
     const due = dueIds().length;
     const sk = hk(v.queue.map((e) => e.id).join("|")), perfect = v.mode !== "new" && v.ok > 0 && !v.miss;
-    const rm = v.mode === "new" ? ["bonjour", "Nouvelles cartes en poche ! Elles reviennent demain.", "New cards in the bag! They come back tomorrow."]
+    const rm = v.mode === "new" ? ["bonjour", "Nouvelles cartes en poche !", "New cards in the bag!"]
       : perfect ? ["bravo", "Séance parfaite ! Bravo.", "A perfect session! Well done."]
       : v.mode === "practice" ? ["bonjour", "Bien joué ! Ton planning ne change pas.", "Nice work! Your schedule stays as it was."]
-      : ["bonjour", "Bien joué ! Les ratées reviennent demain.", "Nice work! The ones you missed come back tomorrow."];
+      : ["bonjour", "Bien joué ! Les ratées reviennent bientôt.", "Nice work! The ones you missed come back soon."];
     const n = v.total, checked = v.ok + v.miss;
+    const ids = (k) => [...new Set(v.queue.filter((x) => x.k === k).map((x) => x.id))];
     const lede = v.mode === "new"
-      ? `You recalled ${v.ok} of ${checked} at the first check. ${!v.known ? "They come back tomorrow for their first review." : v.known >= n ? "They come back in about 4 days, since you knew them." : `The ${v.known} you knew come back in about 4 days, the others tomorrow.`}`
+      ? `You recalled ${v.ok} of ${checked} at the first check. They come back ${backWhen(ids("show"))} for their first review.`
       : v.mode === "practice" ? `Practice only: the schedule didn't change.${v.miss ? ` The ${v.miss} you missed came back until you got ${v.miss > 1 ? "them" : "it"}.` : ""}`
-      : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile: back tomorrow, until you get ${v.miss > 1 ? "them" : "it"} right on two days.` : "Clean session.";
+      : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile: FSRS brings ${v.miss > 1 ? "them" : "it"} back ${backWhen(ids("re"))}, and counts ${v.miss > 1 ? "them" : "it"} as a little harder from now on.` : "Clean session.";
     return `<div class="wrap"><section class="panel stack" data-m="pop" data-k="vdone-${sk}">
       <p class="eyebrow">${v.mode === "practice" ? "Practice complete" : "Session complete"}</p>
       <p class="scorebig"${perfect ? ` data-m="burst" data-k="vperfect-${sk}"` : ""}>${v.mode === "new" ? `<span data-tween="vdone-${sk}" data-tw="count" data-to="${n}">${n}</span> new` : `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.ok}">${v.ok}</span> / ${checked}`}</p>
@@ -6646,7 +6704,8 @@
     "prod-check": (el) => prodCheck(el.dataset.topic),
     "v-start": (el) => { if (el.dataset.mode === "new") ui.vTheme = (document.getElementById("v-theme") || {}).value || ui.vTheme; vocabStart(el.dataset.mode); },
     "v-show": () => { if (ui.vocab) { ui.vocab.shown = true; render(true); } },
-    "v-grade": (el) => vocabGrade(el.dataset.ok === "1"),
+    "v-grade": (el) => { const g = Number(el.dataset.g); gradeFx(g); vocabGrade(g); },
+    "v-learn": (el) => vocabLearn(el.dataset.path),
     "v-quit": () => { ui.vocab = null; render(true); },
     "v-edit": () => vocabEditOpen(),
     "v-edit-save": () => vocabEditSave(),
@@ -7000,10 +7059,10 @@
     if (route.view === "vocab" && ui.vocab && !ui.vocab.finished) {
       const v = ui.vocab, step = v.queue[v.i] || {};
       if (e.key === "e" || e.key === "E") { e.preventDefault(); vocabEditOpen(); return; }
-      if (step.k === "show") { if (e.key === "2" || e.key === "Enter") { e.preventDefault(); vocabGrade(true); } else if (e.key === "3") { e.preventDefault(); vocabGrade(false); } return; }
+      if (step.k === "show") { if (e.key === "2" || e.key === "Enter") { e.preventDefault(); vocabLearn("learn"); } else if (e.key === "3") { e.preventDefault(); vocabLearn("known"); } return; }
       if (!v.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); v.shown = true; render(true); }
-      else if (v.shown && e.key === "1") { e.preventDefault(); vocabGrade(false); }
-      else if (v.shown && (e.key === "2" || e.key === "Enter")) { e.preventDefault(); vocabGrade(true); }
+      else if (v.shown && /^[1-4]$/.test(e.key)) { e.preventDefault(); gradeFx(Number(e.key)); vocabGrade(Number(e.key)); }
+      else if (v.shown && (e.key === " " || e.key === "Enter")) { e.preventDefault(); gradeFx(G.good); vocabGrade(G.good); }
     }
   });
   // The navigation's order, for the way a new page slides in (motion.js): forward to the left, back to the right,

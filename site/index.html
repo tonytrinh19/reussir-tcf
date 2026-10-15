@@ -727,6 +727,16 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .flash .prompt { font: 700 24px/1.3 var(--f-ui); }
 .flash .answer { font: 400 30px/1.25 var(--f-text); color: var(--accent); }
 .flash .ex { font: italic 400 16px/1.5 var(--f-text); color: var(--ink-2); max-width: 52ch; margin: 0 auto; }
+/* The four grades after a recall (FSRS): each with its key and, where it sets the schedule, the gap it would give. */
+.row > .grade4 { flex: 1 1 100%; }
+.grade4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 540px; margin: 0 auto; }
+.btn.grade { flex-direction: column; gap: 4px; padding: 10px 6px 9px; white-space: normal; }
+.btn.grade .g-name { display: inline-flex; align-items: center; gap: 6px; }
+.btn.grade .g-gap { font-size: 12px; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.btn.grade.primary .g-gap { color: inherit; opacity: .9; }
+.btn.grade.g1 { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, var(--rule-2)); }
+.btn.grade.g1 .g-gap { color: inherit; }
+@media (max-width: 560px) { .btn.grade .kbd { display: none; } }
 .ex-l { display: block; }
 .ex-l + .ex-l { margin-top: 10px; }
 .ex-en { display: block; margin-top: 1px; font: 400 13px/1.45 var(--f-ui); font-style: normal; color: var(--ink-3); }
@@ -1415,6 +1425,17 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 /* The maple leaves that fly off a stamp or a perfect score. */
 .m-burst { position: fixed; z-index: 40; width: 0; height: 0; pointer-events: none; }
 .m-burst svg { position: absolute; left: -10px; top: -11px; width: 20px; height: 22px; overflow: visible; }
+/* Grading with feeling (motion.js): rings bloom from the button you pressed, in the grade's colour (Hard pale ink,
+   Good blue ink, Easy the reward gold, with a glow and leaves), and on Again the card wobbles, then fades away. */
+.m-grade { position: fixed; z-index: 30; width: 0; height: 0; pointer-events: none; }
+.m-grade.g2 { color: var(--ink-3); }
+.m-grade.g3 { color: var(--accent); }
+.m-grade.g4 { color: var(--leaf-2); }
+.m-grade i { position: absolute; left: calc(var(--R) * -1); top: calc(var(--R) * -1); width: calc(var(--R) * 2); height: calc(var(--R) * 2); border-radius: 50%; }
+.m-grade .m-ring { border: 2.5px solid currentColor; box-shadow: 0 0 12px color-mix(in srgb, currentColor 50%, transparent), inset 0 0 8px color-mix(in srgb, currentColor 30%, transparent); }
+.m-grade .m-glow { background: radial-gradient(circle, color-mix(in srgb, currentColor 55%, transparent) 0%, color-mix(in srgb, currentColor 22%, transparent) 42%, transparent 70%); }
+.m-grade svg { position: absolute; left: -10px; top: -11px; width: 20px; height: 22px; overflow: visible; }
+.m-wobble { box-shadow: var(--shadow-lg); }
 </style>
 
 <!-- Brand kit shapes (from the "Réussir le TCF Brand Kit" design): the maple leaf, the é tile's clip, the stamp
@@ -1489,4 +1510,5 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 <script src="comp-co.js"></script>
 <script src="motion.js"></script>
 <script src="charts.js"></script>
+<script src="ts-fsrs.js"></script>
 <script src="app.js"></script>
