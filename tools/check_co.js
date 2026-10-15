@@ -38,7 +38,7 @@ const MS_VOICES = ["vivienne", "remy"];
 const errors = [];
 const fail = (msg) => errors.push(msg);
 const pct = (x) => Math.round(x * 100) + "%";
-const TOPICS = T.VOCAB.filter((t) => t.id !== "connecteurs" && t.id !== "pieges" && !t.own).map((t) => t.id);
+const TOPICS = T.VOCAB.filter((t) => !t.general && !t.own).map((t) => t.id);
 
 // Same as content_hash in tools/make_audio.py: it changes whenever the script or the cast changes.
 const stable = (x) => (Array.isArray(x) ? `[${x.map(stable).join(",")}]`

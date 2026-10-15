@@ -1537,6 +1537,292 @@
         "Après que la loi a été adoptée, les loyers ont été mieux encadrés. — After the law was passed, rents were better regulated.",
       ],
     },
+    expressions: {
+      "peser le pour et le contre": [
+        "Avant d'accepter un poste à Calgary, j'ai longuement pesé le pour et le contre. — Before accepting a job in Calgary, I weighed up the pros and cons for a long time.",
+        "Il faut peser le pour et le contre avant d'interdire la voiture au centre-ville. — We need to weigh up the pros and cons before banning cars downtown.",
+      ],
+      "le revers de la médaille": [
+        "Le télétravail fait gagner du temps, mais le revers de la médaille, c'est l'isolement. — Remote work saves time, but the downside is isolation.",
+        "Le tourisme fait vivre la région ; le revers de la médaille, ce sont des loyers hors de prix. — Tourism keeps the region alive; the flip side is sky-high rents.",
+      ],
+      "être à double tranchant": [
+        "Les réseaux sociaux sont à double tranchant : ils informent, mais ils propagent aussi des rumeurs. — Social media is a double-edged sword: it informs, but it also spreads rumours.",
+        "Pour les petites entreprises, la hausse du salaire minimum est une mesure à double tranchant. — For small businesses, raising the minimum wage is a double-edged measure.",
+      ],
+      "trouver un juste milieu": [
+        "Entre le télétravail complet et le bureau tous les jours, il faut trouver un juste milieu. — Between working from home full-time and the office every day, we need to find a happy medium.",
+        "J'essaie de trouver un juste milieu entre mes études et mon travail à temps partiel. — I'm trying to strike a balance between my studies and my part-time job.",
+      ],
+      "mettre de l'eau dans son vin": [
+        "Pour obtenir un accord, le syndicat et la direction ont dû mettre de l'eau dans leur vin. — To reach an agreement, the union and management both had to compromise.",
+        "Si chacun met un peu d'eau dans son vin, la colocation se passera bien. — If everyone compromises a little, the flat-share will go well.",
+      ],
+      "Il ne faut pas jeter le bébé avec l'eau du bain.": [
+        "Notre système de santé a des défauts, mais il ne faut pas jeter le bébé avec l'eau du bain. — Our health system has its flaws, but we shouldn't throw the baby out with the bathwater.",
+        "Réformer l'examen, d'accord, mais il ne faut pas jeter le bébé avec l'eau du bain. — Reform the exam, fine, but let's not throw the baby out with the bathwater.",
+      ],
+      "Tout le monde y trouve son compte.": [
+        "Avec la semaine de quatre jours, tout le monde y trouve son compte, les employés comme l'entreprise. — With the four-day week, everyone gets something out of it, the employees and the company alike.",
+        "Au marché fermier du samedi, producteurs et clients y trouvent leur compte. — At the Saturday farmers' market, producers and customers both benefit.",
+      ],
+      "Le jeu en vaut la chandelle.": [
+        "Apprendre le français prend du temps, mais le jeu en vaut la chandelle. — Learning French takes time, but it's well worth the effort.",
+        "Rénover une vieille maison coûte cher ; je ne suis pas sûr que le jeu en vaille la chandelle. — Renovating an old house is expensive; I'm not sure it's worth it.",
+      ],
+      "force est de constater que": [
+        "Force est de constater que les loyers ont augmenté beaucoup plus vite que les salaires. — One has to admit that rents have risen much faster than wages.",
+        "Malgré les campagnes de prévention, force est de constater que les jeunes vapotent de plus en plus. — Despite the prevention campaigns, the fact is that more and more young people are vaping.",
+      ],
+      "il va de soi que": [
+        "Il va de soi que les nouveaux arrivants devraient avoir accès à des cours de français gratuits. — It goes without saying that newcomers should have access to free French classes.",
+        "Si vous ne pouvez pas venir ce jour-là, il va de soi que nous changerons la date. — If you can't come that day, it goes without saying that we'll change the date.",
+      ],
+      "se mettre à la place de quelqu'un": [
+        "Mettez-vous à la place des parents qui attendent une place en garderie depuis deux ans. — Put yourself in the shoes of parents who've been waiting two years for a daycare spot.",
+        "Avant de critiquer les grévistes, essayons de nous mettre à leur place. — Before we criticise the strikers, let's try to put ourselves in their shoes.",
+      ],
+      "une goutte d'eau dans l'océan": [
+        "Ces cent logements sociaux ne sont qu'une goutte d'eau dans l'océan face à la crise. — These hundred social housing units are just a drop in the ocean given the crisis.",
+        "Mon geste semble une goutte d'eau dans l'océan, mais si tout le monde faisait pareil… — What I do seems a drop in the ocean, but if everyone did the same…",
+      ],
+      "la partie émergée de l'iceberg": [
+        "Les plaintes officielles ne sont que la partie émergée de l'iceberg. — The official complaints are just the tip of the iceberg.",
+        "Selon les infirmières, les urgences débordées ne sont que la partie émergée de l'iceberg. — According to the nurses, the overcrowded emergency rooms are only the tip of the iceberg.",
+      ],
+      "un pas dans la bonne direction": [
+        "La gratuité des transports pour les étudiants est un pas dans la bonne direction. — Free transit for students is a step in the right direction.",
+        "Cette loi n'est pas parfaite, mais c'est un pas dans la bonne direction. — This law isn't perfect, but it's a step in the right direction.",
+      ],
+      "Mieux vaut prévenir que guérir.": [
+        "Mieux vaut prévenir que guérir : le sport à l'école coûte moins cher que les soins plus tard. — Prevention is better than cure: sport at school costs less than treatment later on.",
+        "J'ai fait installer mes pneus d'hiver avant la première neige ; mieux vaut prévenir que guérir. — I had my winter tyres put on before the first snow; better safe than sorry.",
+      ],
+      "vouloir le beurre et l'argent du beurre": [
+        "Exiger de meilleurs services publics sans payer plus d'impôts, c'est vouloir le beurre et l'argent du beurre. — Demanding better public services without paying more tax is wanting to have your cake and eat it.",
+        "Un grand appartement au centre-ville pour un petit loyer ? Tu veux le beurre et l'argent du beurre ! — A big flat downtown for low rent? You want to have your cake and eat it!",
+      ],
+      "ne pas mettre tous ses œufs dans le même panier": [
+        "Je cherche du travail à Montréal et à Ottawa : je ne mets pas tous mes œufs dans le même panier. — I'm looking for work in Montréal and in Ottawa: I'm not putting all my eggs in one basket.",
+        "Une région qui dépend d'une seule usine met tous ses œufs dans le même panier. — A region that depends on a single factory is putting all its eggs in one basket.",
+      ],
+      "Il ne faut pas mettre la charrue avant les bœufs.": [
+        "Trouve un appartement avant d'acheter des meubles : il ne faut pas mettre la charrue avant les bœufs. — Find a flat before you buy furniture: don't put the cart before the horse.",
+        "Lancer le projet sans budget, ce serait mettre la charrue avant les bœufs. — Launching the project without a budget would be putting the cart before the horse.",
+      ],
+      "tirer la sonnette d'alarme": [
+        "Les médecins de famille tirent la sonnette d'alarme : les listes d'attente ne cessent de s'allonger. — Family doctors are sounding the alarm: the waiting lists keep getting longer.",
+        "Des scientifiques tirent la sonnette d'alarme sur la fonte rapide des glaciers. — Scientists are sounding the alarm about the rapid melting of the glaciers.",
+      ],
+      "monter en flèche": [
+        "Dans les grandes villes, les loyers ont monté en flèche en cinq ans. — In the big cities, rents have soared in five years.",
+        "Le prix du panier d'épicerie monte en flèche, et les banques alimentaires débordent. — The cost of groceries is skyrocketing, and the food banks are overwhelmed.",
+      ],
+      "joindre les deux bouts": [
+        "Avec deux emplois, elle arrive tout juste à joindre les deux bouts. — With two jobs, she's only just making ends meet.",
+        "De plus en plus d'étudiants ont du mal à joindre les deux bouts à la fin du mois. — More and more students struggle to make ends meet at the end of the month.",
+      ],
+      "se serrer la ceinture": [
+        "Avec la hausse des taux d'intérêt, beaucoup de familles doivent se serrer la ceinture. — With interest rates going up, many families have to tighten their belts.",
+        "La ville va se serrer la ceinture : plusieurs projets seront reportés. — The city is going to tighten its belt: several projects will be put off.",
+      ],
+      "un parcours du combattant": [
+        "Faire reconnaître son diplôme d'infirmière au Canada est un vrai parcours du combattant. — Getting your nursing degree recognised in Canada is a real obstacle course.",
+        "Trouver un logement à Montréal en juillet relève du parcours du combattant. — Finding a place to live in Montréal in July is an ordeal.",
+      ],
+      "un coup de pouce": [
+        "Le gouvernement offre un coup de pouce aux familles pour payer la garderie. — The government is giving families a boost to pay for daycare.",
+        "Grâce au coup de pouce d'une ancienne collègue, j'ai décroché un entretien. — Thanks to a helping hand from a former colleague, I landed an interview.",
+      ],
+      "faire marche arrière": [
+        "Face aux protestations, la mairie a fait marche arrière sur la hausse des tarifs. — In the face of the protests, city hall backed down on the fare increase.",
+        "J'avais accepté l'offre, mais j'ai fait marche arrière en lisant le contrat. — I'd accepted the offer, but I backed out when I read the contract.",
+      ],
+      "changer la donne": [
+        "L'intelligence artificielle pourrait changer la donne sur le marché du travail. — Artificial intelligence could change the game on the job market.",
+        "Une ligne de train rapide changerait la donne pour les habitants des banlieues. — A fast train line would be a game-changer for people in the suburbs.",
+      ],
+      "mettre la clé sous la porte": [
+        "Faute de clients, la librairie du quartier a dû mettre la clé sous la porte. — For lack of customers, the neighbourhood bookshop had to close down.",
+        "Sans aide publique, de nombreuses petites fermes risquent de mettre la clé sous la porte. — Without public support, many small farms may have to shut down.",
+      ],
+      "être à bout de souffle": [
+        "Après des années de pénurie de personnel, le système de santé est à bout de souffle. — After years of staff shortages, the health system is running out of steam.",
+        "Les bénévoles de la banque alimentaire sont à bout de souffle depuis l'hiver. — The food bank volunteers have been stretched to the limit since the winter.",
+      ],
+      "faire boule de neige": [
+        "Une simple publication sur les réseaux sociaux a fait boule de neige. — A simple social media post snowballed.",
+        "Quelques voisins ont commencé à composter, puis l'initiative a fait boule de neige dans tout le quartier. — A few neighbours started composting, then the idea snowballed across the whole neighbourhood.",
+      ],
+      "la goutte d'eau qui fait déborder le vase": [
+        "Cette nouvelle hausse de loyer a été la goutte d'eau qui fait déborder le vase. — This latest rent increase was the last straw.",
+        "Pour les employés, la suppression des primes a été la goutte d'eau qui a fait déborder le vase. — For the employees, losing their bonuses was the last straw.",
+      ],
+      "jeter de l'huile sur le feu": [
+        "Les déclarations du ministre n'ont fait que jeter de l'huile sur le feu. — The minister's statements only added fuel to the fire.",
+        "Évite de lui répondre sur ce ton, tu vas jeter de l'huile sur le feu. — Don't answer him in that tone, you'll only add fuel to the fire.",
+      ],
+      "mettre des bâtons dans les roues à quelqu'un": [
+        "La lenteur administrative met des bâtons dans les roues des entrepreneurs immigrants. — Red tape puts obstacles in the way of immigrant entrepreneurs.",
+        "Mon ancien propriétaire m'a mis des bâtons dans les roues pour me rendre ma caution. — My old landlord made it hard for me to get my deposit back.",
+      ],
+      "avoir le vent en poupe": [
+        "Les voitures électriques ont le vent en poupe au Québec. — Electric cars are booming in Québec.",
+        "Le covoiturage a le vent en poupe chez les jeunes travailleurs. — Carpooling is on the rise among young workers.",
+      ],
+      "être monnaie courante": [
+        "Dans ce secteur, les heures supplémentaires non payées sont monnaie courante. — In this sector, unpaid overtime is commonplace.",
+        "Les retards de train sont devenus monnaie courante cet hiver. — Train delays became commonplace this winter.",
+      ],
+      "du jour au lendemain": [
+        "On ne devient pas bilingue du jour au lendemain. — You don't become bilingual overnight.",
+        "L'usine a fermé du jour au lendemain, et deux cents personnes ont perdu leur emploi. — The factory closed overnight, and two hundred people lost their jobs.",
+      ],
+      "faire le point": [
+        "Faisons le point sur votre dossier avant l'entretien de la semaine prochaine. — Let's go over where your file stands before next week's interview.",
+        "Six mois après mon arrivée, j'ai fait le point sur ce qui avait marché ou non. — Six months after I arrived, I took stock of what had worked and what hadn't.",
+      ],
+      "avoir du pain sur la planche": [
+        "Avec trois examens en mai, j'ai du pain sur la planche. — With three exams in May, I've got my work cut out for me.",
+        "Le nouveau gouvernement aura du pain sur la planche pour régler la crise du logement. — The new government will have its work cut out solving the housing crisis.",
+      ],
+      "mettre les bouchées doubles": [
+        "Il me reste un mois avant le TCF, alors je mets les bouchées doubles. — I've got a month left before the TCF, so I'm doubling my efforts.",
+        "Pour finir le chantier avant l'hiver, l'entreprise a mis les bouchées doubles. — To finish the building site before winter, the company redoubled its efforts.",
+      ],
+      "mettre la main à la pâte": [
+        "Pour la fête de quartier, tous les voisins ont mis la main à la pâte. — For the street party, all the neighbours pitched in.",
+        "La directrice n'hésite pas à mettre la main à la pâte quand l'équipe est débordée. — The manager doesn't hesitate to pitch in when the team is swamped.",
+      ],
+      "donner un coup de main à quelqu'un": [
+        "Tu peux me donner un coup de main pour déménager samedi ? — Can you give me a hand with the move on Saturday?",
+        "Les organismes communautaires donnent un coup de main aux nouveaux arrivants pour remplir leurs formulaires. — Community organisations help newcomers fill in their forms.",
+      ],
+      "avoir plus d'une corde à son arc": [
+        "Elle est infirmière et traductrice : elle a plus d'une corde à son arc. — She's a nurse and a translator: she has more than one string to her bow.",
+        "Sur le marché du travail actuel, mieux vaut avoir plus d'une corde à son arc. — In today's job market, it's best to have more than one skill to offer.",
+      ],
+      "baisser les bras": [
+        "Après trois refus, j'avais envie de baisser les bras, mais j'ai encore postulé. — After three rejections, I felt like giving up, but I applied again.",
+        "Il ne faut pas baisser les bras face au changement climatique : chaque geste compte. — We mustn't give up in the face of climate change: every action counts.",
+      ],
+      "tenir le coup": [
+        "Le premier hiver a été dur, mais j'ai tenu le coup grâce à mes amis. — The first winter was hard, but I held up thanks to my friends.",
+        "Les infirmières ne pourront pas tenir le coup longtemps avec de tels horaires. — Nurses won't be able to cope for long with hours like these.",
+      ],
+      "faire d'une pierre deux coups": [
+        "En allant au travail à vélo, je fais d'une pierre deux coups : du sport et des économies. — By cycling to work, I kill two birds with one stone: exercise and savings.",
+        "Rénover les écoles pour réduire leur consommation d'énergie, c'est faire d'une pierre deux coups. — Renovating schools to cut their energy use kills two birds with one stone.",
+      ],
+      "avoir du mal à (+ inf.)": [
+        "Au début, j'avais du mal à comprendre l'accent québécois. — At first, I had trouble understanding the Québec accent.",
+        "Beaucoup de PME ont du mal à recruter du personnel qualifié. — Many small businesses struggle to recruit qualified staff.",
+      ],
+      "sauter le pas": [
+        "Après des années d'hésitation, nous avons sauté le pas et déposé notre demande de résidence permanente. — After years of hesitating, we took the plunge and applied for permanent residence.",
+        "Beaucoup de jeunes rêvent de créer leur entreprise, mais peu osent sauter le pas. — Many young people dream of starting a business, but few dare take the plunge.",
+      ],
+      "repartir de zéro": [
+        "En arrivant au Canada, j'ai dû repartir de zéro : nouveau pays, nouvelle langue, nouveau métier. — When I arrived in Canada, I had to start from scratch: new country, new language, new job.",
+        "Repartir de zéro à quarante ans demande beaucoup de courage. — Starting over at forty takes a lot of courage.",
+      ],
+      "avoir le mal du pays": [
+        "Pendant les fêtes de fin d'année, j'ai souvent le mal du pays. — Over the holidays, I often feel homesick.",
+        "Les appels vidéo aident les immigrants qui ont le mal du pays à garder le lien avec leur famille. — Video calls help homesick immigrants stay in touch with their families.",
+      ],
+      "être comme un poisson dans l'eau": [
+        "Après six mois à Québec, ma fille est comme un poisson dans l'eau à l'école. — After six months in Québec City, my daughter is completely at home at school.",
+        "Dans un milieu de travail bilingue, je me sens comme un poisson dans l'eau. — In a bilingual workplace, I feel completely at ease.",
+      ],
+      "accueillir quelqu'un à bras ouverts": [
+        "Les habitants de la petite ville nous ont accueillis à bras ouverts. — The people of the small town welcomed us with open arms.",
+        "Les régions qui manquent de main-d'œuvre accueillent les travailleurs étrangers à bras ouverts. — Regions short of workers welcome foreign workers with open arms.",
+      ],
+      "être dans le même bateau": [
+        "Ne t'inquiète pas, tous les nouveaux arrivants sont dans le même bateau. — Don't worry, all newcomers are in the same boat.",
+        "Face à la hausse des taxes municipales, locataires et propriétaires sont dans le même bateau. — With municipal taxes going up, tenants and owners are in the same boat.",
+      ],
+      "prendre son mal en patience": [
+        "Le traitement des demandes prend huit mois, il faut donc prendre son mal en patience. — Applications take eight months to process, so you have to be patient.",
+        "En attendant un médecin de famille, beaucoup de patients prennent leur mal en patience. — While they wait for a family doctor, many patients grin and bear it.",
+      ],
+      "coûter les yeux de la tête": [
+        "À Vancouver, un appartement de deux chambres coûte les yeux de la tête. — In Vancouver, a two-bedroom apartment costs an arm and a leg.",
+        "La garderie privée coûte les yeux de la tête, c'est pourquoi l'État devrait plafonner les tarifs. — Private daycare costs an arm and a leg, which is why the state should cap the fees.",
+      ],
+      "Ce n'est pas la mer à boire.": [
+        "Remplir ce formulaire, ce n'est pas la mer à boire : je vais t'aider. — Filling in this form isn't that hard: I'll help you.",
+        "Une heure de français par jour, ce n'est pas la mer à boire si on s'organise bien. — An hour of French a day isn't asking much if you organise yourself well.",
+      ],
+      "Ça vaut le coup.": [
+        "Le parc national est loin, mais ça vaut le coup d'y aller en automne. — The national park is far, but it's worth going in the autumn.",
+        "Ça vaut le coup de comparer les forfaits avant de choisir un fournisseur internet. — It's worth comparing plans before you choose an internet provider.",
+      ],
+      "poser un lapin à quelqu'un": [
+        "Désolé de t'avoir posé un lapin hier, j'avais complètement oublié notre rendez-vous. — Sorry I stood you up yesterday, I'd completely forgotten our meeting.",
+        "Le technicien nous a posé un lapin deux fois ; je ne recommande pas cette entreprise. — The technician stood us up twice; I don't recommend this company.",
+      ],
+      "tourner autour du pot": [
+        "Arrête de tourner autour du pot et dis-moi ce qui ne va pas. — Stop beating around the bush and tell me what's wrong.",
+        "Pendant le débat, le candidat a tourné autour du pot au lieu de parler du logement. — During the debate, the candidate beat around the bush instead of talking about housing.",
+      ],
+      "Il pleut des cordes.": [
+        "Il pleut des cordes, prends ton parapluie et tes bottes. — It's pouring, take your umbrella and your boots.",
+        "Il pleuvait des cordes, alors le festival a été reporté à dimanche. — It was pouring, so the festival was put off until Sunday.",
+      ],
+      "Il fait un froid de canard.": [
+        "Il fait un froid de canard ce matin : moins vingt-cinq avec le vent ! — It's freezing this morning: minus twenty-five with the wind chill!",
+        "Même quand il fait un froid de canard, certains Montréalais continuent d'aller au travail à vélo. — Even when it's freezing cold, some Montrealers keep cycling to work.",
+      ],
+      "avoir le cafard": [
+        "En novembre, quand les journées raccourcissent, j'ai souvent le cafard. — In November, when the days get shorter, I often feel down.",
+        "Beaucoup d'étudiants étrangers ont le cafard pendant leur premier hiver loin de chez eux. — Many international students feel low during their first winter away from home.",
+      ],
+      "Qui ne tente rien n'a rien.": [
+        "J'ai postulé même sans toute l'expérience demandée : qui ne tente rien n'a rien. — I applied even without all the experience they asked for: nothing ventured, nothing gained.",
+        "Émigrer comporte des risques, mais qui ne tente rien n'a rien. — Emigrating has its risks, but nothing ventured, nothing gained.",
+      ],
+      "C'est en forgeant qu'on devient forgeron.": [
+        "Je parle français avec mes voisins tous les jours : c'est en forgeant qu'on devient forgeron. — I speak French with my neighbours every day: practice makes perfect.",
+        "Les stages sont essentiels dans une formation, car c'est en forgeant qu'on devient forgeron. — Work placements are essential in any training, because practice makes perfect.",
+      ],
+      "Petit à petit, l'oiseau fait son nid.": [
+        "Je comprends un peu mieux la radio chaque semaine : petit à petit, l'oiseau fait son nid. — I understand the radio a little better every week: slowly but surely.",
+        "Elle a commencé avec un comptoir au marché, puis elle a ouvert un restaurant : petit à petit, l'oiseau fait son nid. — She started with a market stall, then opened a restaurant: step by step.",
+      ],
+      "Paris ne s'est pas fait en un jour.": [
+        "Ne te décourage pas si tu fais encore des fautes : Paris ne s'est pas fait en un jour. — Don't lose heart if you still make mistakes: Rome wasn't built in a day.",
+        "La transition énergétique prendra des décennies ; Paris ne s'est pas fait en un jour. — The energy transition will take decades; Rome wasn't built in a day.",
+      ],
+      "Les petits ruisseaux font les grandes rivières.": [
+        "Je mets vingt dollars de côté chaque semaine : les petits ruisseaux font les grandes rivières. — I put twenty dollars aside every week: small amounts add up.",
+        "Trier ses déchets peut sembler inutile, mais les petits ruisseaux font les grandes rivières. — Sorting your waste may seem pointless, but small efforts add up.",
+      ],
+      "L'habit ne fait pas le moine.": [
+        "Il est toujours en jean, mais c'est un excellent avocat : l'habit ne fait pas le moine. — He's always in jeans, but he's an excellent lawyer: don't judge a book by its cover.",
+        "Un CV impressionnant ne garantit rien ; l'habit ne fait pas le moine. — An impressive CV guarantees nothing; appearances can be deceptive.",
+      ],
+      "Lâche pas la patate !": [
+        "Il te reste juste l'oral à passer, lâche pas la patate ! — You've only got the speaking test left, hang in there!",
+        "Les Québécois disent souvent « Lâche pas la patate ! » pour encourager quelqu'un qui doute. — Quebecers often say “Lâche pas la patate!” to encourage someone who's having doubts.",
+      ],
+      "C'est de valeur.": [
+        "Tu ne peux pas venir au souper ? C'est de valeur, on aurait aimé te voir. — You can't come to dinner? What a shame, we'd have liked to see you.",
+        "C'est de valeur que le centre communautaire ferme le dimanche. — It's a pity that the community centre is closed on Sundays.",
+      ],
+      "avoir de la misère à (+ inf.)": [
+        "Au début, j'avais de la misère à suivre les conversations au bureau. — At first, I had a hard time following conversations at the office.",
+        "Plusieurs familles ont de la misère à payer l'épicerie depuis la hausse des prix. — Many families have had a hard time paying for groceries since prices went up.",
+      ],
+      "C'est plate.": [
+        "Ce film est plate, on change de poste ? — This film is boring, shall we change channels?",
+        "C'est plate que le dernier autobus passe si tôt la fin de semaine. — It's a drag that the last bus runs so early on weekends.",
+      ],
+      "tomber en amour": [
+        "Nous sommes tombés en amour avec la ville de Québec dès notre première visite. — We fell in love with Québec City on our very first visit.",
+        "Beaucoup d'immigrants tombent en amour avec les grands espaces canadiens. — Many immigrants fall in love with Canada's wide open spaces.",
+      ],
+    },
   };
   // Each card keeps its own examples first; a line whose French is already there isn't added again.
   const frOf = (l) => l.split(" — ")[0].replace(/\s+/g, " ").trim().toLowerCase();

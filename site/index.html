@@ -409,6 +409,13 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .note-card .eyebrow { line-height: 32px; }
 .note-card .fr { font: 400 19px/32px var(--f-hand); color: var(--accent); }
 .note-card .en { font-size: 13.5px; line-height: 32px; color: var(--ink-2); }
+/* The saying's card in the Expressions deck, on the scrap's last line. */
+.note-card .xp-deck { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; line-height: 32px; text-decoration: none; }
+.note-card .xp-deck .ico { width: 16px; height: 16px; }
+.note-card .xp-deck::after { content: "→"; transition: transform var(--dur) var(--ease); }
+.note-card .xp-deck:hover span { text-decoration: underline; }
+.note-card .xp-deck:hover::after { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) { .note-card .xp-deck:hover::after { transform: none; } }
 
 /* Tabs and segmented buttons: a tray with the current one raised out of it. */
 .tabs { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: var(--sunk); overflow-x: auto; width: fit-content; max-width: 100%; scrollbar-width: none; }
