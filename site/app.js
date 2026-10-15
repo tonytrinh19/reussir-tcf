@@ -1068,22 +1068,30 @@
       <div class="stamps">${STAMPS.map((st, i) => `<figure class="stamp-cell">${stampSVG(st, got[i])}<figcaption><b>${esc(st.name)}</b><small>${esc(got[i] ? st.got : st.todo)}</small></figcaption></figure>`).join("")}</div></section>`;
   }
 
-  // Carte d'embarquement: the five phases as one flight from B1 to NCLC 7. The plane moves each week, and the gate
-  // is today's first open block. A small version sits at the foot of the sidebar.
+  // Carte d'embarquement: the five phases as one flight from B1 to NCLC 7. The plane flies in your current phase's
+  // stretch of the route and moves on each week, and the gate is today's first open block. A small version sits at
+  // the foot of the sidebar.
   function passWeeks() {
     const starts = T.PHASES.map((p) => Number((String(p.weeks).match(/\d+/) || [1])[0]));
     const total = Number((String(T.PHASES[T.PHASES.length - 1].weeks).match(/(\d+)\D*$/) || [0, 21])[1]);
     return { starts, total };
   }
+  // Where the plane is: this week when it falls in your phase's weeks, else the phase's first week when you're ahead
+  // of the plan, or its last when you're behind. So switching phase moves the plane to that phase.
+  function passAt() {
+    const s = settings(), w = weekNo(), { starts, total } = passWeeks(), i = s.phase - 1;
+    const first = starts[i] || 1, last = i + 1 < starts.length ? starts[i + 1] - 1 : total;
+    return Math.min(Math.max(w, first), Math.max(first, last));
+  }
   function flightSVG(mini) {
-    const s = settings(), w = weekNo(), { starts, total } = passWeeks();
+    const s = settings(), w = weekNo(), { starts, total } = passWeeks(), at = passAt();
     const X = (k) => +(10 + ((Math.min(Math.max(k, 1), total + 1) - 1) / total) * 274).toFixed(2);
-    const x = X(w);
+    const x = X(at);
     const dots = starts.map((k, i) => {
       const n = i + 1, past = n < s.phase, cur = n === s.phase, cx = X(k);
       return `<circle cx="${cx}" cy="20" r="4.2" style="fill:var(${past ? "--accent" : "--surface"});stroke:var(${past || cur ? "--accent" : "--rule-2"})" stroke-width="2"/>${mini ? "" : `<text x="${cx}" y="37" text-anchor="middle" style="font:${cur ? 700 : 500} 10px var(--f-ui);fill:var(${cur ? "--ink" : "--ink-3"})">${n}</text>`}`;
     }).join("");
-    return `<svg class="flight" viewBox="0 0 300 ${mini ? 30 : 40}" role="img" aria-label="Week ${w} of ${total}: Phase ${s.phase} of ${T.PHASES.length}"><path d="M${x} 20H284" style="stroke:var(--rule-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 6"/><path d="M10 20H${x}" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"${mini ? "" : ` data-m="draw" data-k="route-${w}"`}/>${dots}<use href="#leaf" x="285" y="11.5" width="15" height="16.3" style="fill:var(--leaf-4)"/><g${mini ? "" : ` data-m="fly" data-k="plane-${w}" data-dx="${+(x - 10).toFixed(2)}"`}><g transform="translate(${+(x - 10).toFixed(2)} 10) rotate(45 10 10)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-plane" style="fill:var(--surface)"/></svg></g></g></svg>`;
+    return `<svg class="flight" viewBox="0 0 300 ${mini ? 30 : 40}" role="img" aria-label="Week ${w} of ${total}: Phase ${s.phase} of ${T.PHASES.length}"><path d="M${x} 20H284" style="stroke:var(--rule-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 6"/><path d="M10 20H${x}" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"${mini ? "" : ` data-m="draw" data-k="route-${at}" data-fly="route"`}/>${dots}<use href="#leaf" x="285" y="11.5" width="15" height="16.3" style="fill:var(--leaf-4)"/><g${mini ? "" : ` data-m="fly" data-k="plane-${at}" data-dx="${+(x - 10).toFixed(2)}" data-fly="plane"`}><g transform="translate(${+(x - 10).toFixed(2)} 10) rotate(45 10 10)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-plane" style="fill:var(--surface)"/></svg></g></g></svg>`;
   }
   const BARCODE = `<svg class="barcode" viewBox="0 0 118 46" preserveAspectRatio="none" aria-hidden="true">${[[0, 1], [2, 2], [5, 3], [10, 4], [16, 1], [18, 2], [21, 3], [27, 4], [34, 1], [37, 2], [41, 3], [47, 4], [54, 1], [57, 2], [61, 3], [65, 4], [70, 1], [74, 2], [79, 3], [83, 4], [88, 1], [92, 2], [97, 3], [102, 4], [108, 1], [110, 2], [113, 3]].map(([x, w]) => `<rect x="${x}" y="0" width="${w}" height="46"/>`).join("")}</svg>`;
   function passHTML() {
@@ -5314,7 +5322,7 @@
           <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
           ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
           <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button>${learned ? `<button class="btn ghost" data-act="v-start" data-mode="practice">Practise French → English</button>` : ""}</div>
-          ${learned ? `<p class="small muted">Reviews ask English → French. The practice takes the ${Math.min(learned, PRACTICE_N)} cards practised that way longest ago, and doesn't change their schedule.</p>` : ""}
+          ${learned ? `<p class="small muted">Reviews ask English → French and move the schedule. French → English practice takes ${Math.min(learned, PRACTICE_N)} card${Math.min(learned, PRACTICE_N) === 1 ? "" : "s"}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.</p>` : ""}
           ${srs.length ? `<div class="v-week"><p class="small muted">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></p>${week.html}</div>${stageChart(srs, "v-stages", true)}` : ""}
           <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
         </section>
@@ -6416,7 +6424,7 @@
         </section>
 
         <section class="sec" id="sec-phase">
-          ${dashHead(ico("plane"), "Carte d'embarquement · Boarding pass", "The five phases as one flight from B1 to NCLC 7. The plane moves each week; the gate is today's first open block.")}
+          ${dashHead(ico("plane"), "Carte d'embarquement · Boarding pass", "The five phases as one flight from B1 to NCLC 7. The plane flies in your current phase and moves on each week; the gate is today's first open block.")}
           <div class="phase-grid">
             <div class="phase-side">
               <div id="sec-pass">${passHTML()}</div>

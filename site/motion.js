@@ -39,10 +39,12 @@
     burst: (el) => burst(el),
     // A stamp pressed onto the page, one after another (the scale property keeps its tilt).
     press: (el, i) => el.animate([{ scale: "1.35", opacity: 0 }, { scale: ".94", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 160 + Math.min(i, 10) * 70, easing: EASE, fill: "backwards" }),
-    // The boarding pass's plane flies along its route to this week (data-dx: how far it has come).
-    fly: (el) => { const dx = Number(el.getAttribute("data-dx")) || 0; return dx > 0 ? el.animate([{ translate: `${-dx}px 0` }, { translate: "0 0" }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }) : null; },
-    // A line that draws itself: the part of the route already flown.
-    draw: (el) => { const L = el.getTotalLength ? el.getTotalLength() : 0; return L ? el.animate([{ strokeDasharray: `${L}`, strokeDashoffset: L }, { strokeDasharray: `${L}`, strokeDashoffset: 0 }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }) : null; },
+    // The boarding pass's plane flies along its route to where you are (data-dx: how far that is): from the departure
+    // as the page opens, or on (or back) from where it was when the phase changes.
+    fly: (el) => { const dx = Number(el.getAttribute("data-dx")) || 0, d = dx - flownFrom(el, dx); return d ? el.animate([{ translate: `${-d}px 0` }, { translate: "0 0" }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }) : null; },
+    // A line that draws itself: the part of the route already flown, from where it ended before (a shorter route
+    // simply shows, as the plane flies back along it).
+    draw: (el) => { const L = el.getTotalLength ? el.getTotalLength() : 0, from = Math.min(L, flownFrom(el, L)); return L > from ? el.animate([{ strokeDasharray: `${L}`, strokeDashoffset: L - from }, { strokeDasharray: `${L}`, strokeDashoffset: 0 }], { duration: 900, delay: 150, easing: EASE, fill: "backwards" }) : null; },
     // A tile dealt onto the table, one after another (the overview's headline numbers).
     deal: (el, i) => el.animate([{ opacity: 0, transform: "translateY(16px) scale(.96)" }, { opacity: 1, transform: "none" }], { duration: 520, delay: 60 + Math.min(i, 8) * 70, easing: POP, fill: "backwards" }),
     chart: (el) => chartIn(el),
@@ -88,6 +90,17 @@
     el.querySelectorAll(".c-mark").forEach((m) => add(m, [{ left: "0%", opacity: 0 }, { opacity: 1, offset: 0.12 }, { left: m.style.left, opacity: 1 }], { duration: 1000, delay: 220 }));
     el.querySelectorAll(".c-ghost").forEach((g, i) => add(g, [{ opacity: 0, scale: ".4" }, { opacity: 1, scale: "1" }], { duration: 300, delay: 320 + i * 70 }));
     return out;
+  }
+
+  // How far along the boarding pass's plane and route (data-fly) were when they last moved, so a phase change moves
+  // them on from there. A page's entrance starts them from the departure again.
+  const flown = new Map();
+  function flownFrom(el, now) {
+    const id = el.getAttribute("data-fly");
+    if (!id) return 0;
+    const from = flown.has(id) ? flown.get(id) : 0;
+    flown.set(id, now);
+    return from;
   }
 
   /* ---------- after each redraw ---------- */
@@ -205,6 +218,7 @@
     if (io) waiting.forEach((w, el) => io.unobserve(el));
     waiting.clear();
     waitKeys = new Set();
+    flown.clear();
   }
   function prune(keys) {
     waiting.forEach((w, el) => { if (!el.isConnected) { if (io) io.unobserve(el); waiting.delete(el); } });
