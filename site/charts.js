@@ -64,8 +64,9 @@
     return chart(o.key, "c-stack", `<div class="c-bar">${bar}</div>${o.legend === false ? "" : leg}`, o.label);
   }
 
-  // Dots, and the lines between them, on a value axis: series [{ label, color, line, area, points: [{ x 0–1, y,
-  // tip, hollow }] }], bands [{ from, to, label, cls }], refs [{ y, label }], ticks [y…], xs [{ x, label }].
+  // Dots, and the lines between them, on a value axis: series [{ label, color, line, area, dots (false: the line
+  // alone), legend (false: not in the legend), points: [{ x 0–1, y, tip, hollow }] }], bands [{ from, to, label,
+  // cls }], refs [{ y, label }], ticks [y…], xs [{ x, label }]; o.legend false leaves the legend out.
   function plot(o) {
     const lo = o.yMin, hi = o.yMax;
     const Y = (v) => clamp((v - lo) / (hi - lo), 0, 1);
@@ -77,10 +78,10 @@
       const area = s.area ? `<path class="c-area" d="${d} L${(s.points[s.points.length - 1].x * 100).toFixed(2)} 100 L${(s.points[0].x * 100).toFixed(2)} 100 Z" style="fill:${s.color}"/>` : "";
       return `${area}<path class="c-line" d="${d}" style="stroke:${s.color}"/>`;
     }).join("");
-    const dots = o.series.flatMap((s) => s.points.map((p) => `<span class="c-dot${p.hollow ? " hollow" : ""}" style="left:${pc(p.x)};bottom:${pc(Y(p.y))};--c:${s.color}"${tip(p.tip)}></span>`)).join("");
+    const dots = o.series.filter((s) => s.dots !== false).flatMap((s) => s.points.map((p) => `<span class="c-dot${p.hollow ? " hollow" : ""}" style="left:${pc(p.x)};bottom:${pc(Y(p.y))};--c:${s.color}"${tip(p.tip)}></span>`)).join("");
     const end = o.end ? `<span class="c-end${o.end.x >= 0.8 ? " r" : ""}" style="left:${pc(o.end.x)};bottom:${pc(Y(o.end.y))}">${esc(o.end.label)}</span>` : "";
     const xs = (o.xs || []).map((x) => xLabel(x.x, x.label)).join("");
-    const leg = o.series.length > 1 ? legend(o.series, "dot") : "";
+    const shown = o.series.filter((s) => s.legend !== false), leg = o.legend !== false && shown.length > 1 ? legend(shown, "dot") : "";
     return chart(o.key, `c-plotc${bands ? " has-bands" : ""}`, `<div class="c-plot" style="height:${o.h || 170}px">${bands}${grid}${refs}<svg class="c-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>${dots}${end}</div><div class="c-xs">${xs}</div>${leg}`, o.label);
   }
 
@@ -117,6 +118,35 @@
     const ghosts = (o.ghosts || []).map((g) => `<span class="c-ghost" style="left:${pc(g.pos)}"${tip(g.tip)}></span>`).join("");
     const mark = o.pos == null ? "" : `<span class="c-mark${o.ok ? " ok" : ""}" style="left:${pc(o.pos)}"${tip(o.tip)}></span>`;
     return chart(o.key, "c-bullet", `<div class="c-btrack" style="--n:${o.bands.length}">${bands}${ghosts}${mark}</div>`, o.label);
+  }
+
+  // A radar of a few axes, clockwise from the top: axes [{ label, sub, value (0–1 along the axis, or null for
+  // nothing yet), tip }]. Each axis runs from o.min at the centre to 1 at the edge; o.rings are hairline rings and
+  // o.target the dashed one, labelled o.targetLabel. The shape is filled only when every axis has a value;
+  // otherwise only neighbouring values are joined. Marks are HTML over the SVG, so they keep their size.
+  function radar(axes, o) {
+    const n = axes.length, W = 320, H = o.h || 270, cx = W / 2, cy = H / 2, R = Math.min(cy - 30, cx - 74);
+    const lo = o.min == null ? 0 : o.min;
+    const ang = (i) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    const at = (i, v) => { const r = (clamp(v, lo, 1) - lo) / (1 - lo) * R; return [cx + Math.cos(ang(i)) * r, cy + Math.sin(ang(i)) * r]; };
+    const xy = (p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+    const ring = (v, cls) => `<polygon class="${cls}" points="${axes.map((_, i) => xy(at(i, v))).join(" ")}"/>`;
+    const spokes = axes.map((_, i) => { const e = at(i, 1); return `<line class="c-rs" x1="${cx}" y1="${cy}" x2="${e[0].toFixed(1)}" y2="${e[1].toFixed(1)}"/>`; }).join("");
+    const rings = (o.rings || []).map((v) => ring(v, "c-rr")).join("") + ring(1, "c-rr c-redge") + (o.target != null ? ring(o.target, "c-rr c-rtarget") : "");
+    const color = o.color || "var(--accent)";
+    const has = axes.map((a) => a.value != null);
+    const shape = has.every(Boolean)
+      ? `<polygon class="c-rshape" points="${axes.map((a, i) => xy(at(i, a.value))).join(" ")}" style="--c:${color}"/>`
+      : axes.map((a, i) => { const j = (i + 1) % n; return has[i] && has[j] && n > 2 ? `<line class="c-rseg" x1="${at(i, a.value)[0].toFixed(1)}" y1="${at(i, a.value)[1].toFixed(1)}" x2="${at(j, axes[j].value)[0].toFixed(1)}" y2="${at(j, axes[j].value)[1].toFixed(1)}" style="--c:${color}"/>` : ""; }).join("");
+    const pos = (p) => `left:${pc(p[0] / W)};top:${pc(p[1] / H)}`;
+    const dots = axes.map((a, i) => (a.value == null ? "" : `<span class="c-rdot" style="${pos(at(i, a.value))};--c:${color}"${tip(a.tip)}></span>`)).join("");
+    const labels = axes.map((a, i) => {
+      const c = Math.cos(ang(i)), sn = Math.sin(ang(i)), e = [cx + c * (R + 14), cy + sn * (R + 14)];
+      const side = Math.abs(c) < 0.3 ? (sn < 0 ? "top" : "bottom") : c > 0 ? "right" : "left";
+      return `<span class="c-rlab ${side}${a.value == null ? " none" : ""}" style="${pos(e)}"><b>${esc(a.label)}</b>${a.sub ? `<small>${esc(a.sub)}</small>` : ""}</span>`;
+    }).join("");
+    const tl = o.target != null && o.targetLabel ? `<span class="c-rtl" style="${pos(at(0, o.target))}">${esc(o.targetLabel)}</span>` : "";
+    return chart(o.key, "c-radar", `<div class="c-rbox" style="aspect-ratio:${W} / ${H}"><svg class="c-rsvg" viewBox="0 0 ${W} ${H}" aria-hidden="true">${rings}${spokes}<g class="c-rfig">${shape}</g></svg>${tl}${dots}${labels}</div>`, o.label);
   }
 
   // The table twin of a chart: the same numbers, readable without hovering.
@@ -163,5 +193,5 @@
   // A redraw replaces the marks: a tooltip whose mark is gone goes too.
   document.addEventListener("tcf:render", () => { if (tipFor && !tipFor.isConnected) hideTip(); });
 
-  window.TCFCharts = Object.freeze({ legend, cols, hbars, stack, plot, ring, spark, strip, bullet, table, fr });
+  window.TCFCharts = Object.freeze({ legend, cols, hbars, stack, plot, ring, spark, strip, bullet, radar, table, fr });
 })();
