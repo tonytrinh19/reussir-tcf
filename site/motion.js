@@ -90,6 +90,10 @@
     cells.forEach((c, i) => add(c, [{ opacity: 0, scale: ".3" }, { opacity: 1, scale: "1" }], { duration: 320, delay: 40 + i * Math.min(12, 700 / cells.length), easing: POP }));
     el.querySelectorAll(".c-mark").forEach((m) => add(m, [{ left: "0%", opacity: 0 }, { opacity: 1, offset: 0.12 }, { left: m.style.left, opacity: 1 }], { duration: 1000, delay: 220 }));
     el.querySelectorAll(".c-ghost").forEach((g, i) => add(g, [{ opacity: 0, scale: ".4" }, { opacity: 1, scale: "1" }], { duration: 300, delay: 320 + i * 70 }));
+    // The radar: its shape grows out of the centre, then its dots pop, one skill after another.
+    el.querySelectorAll(".c-rfig").forEach((g) => add(g, [{ scale: "0", opacity: 0 }, { scale: "1.04", opacity: 1, offset: 0.7 }, { scale: "1", opacity: 1 }], { duration: 760, delay: 120 }));
+    el.querySelectorAll(".c-rdot").forEach((d, i) => add(d, [{ scale: "0", opacity: 0 }, { scale: "1.35", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 520 + i * 90, easing: POP }));
+    el.querySelectorAll(".c-rlab, .c-rtl").forEach((l, i) => add(l, [{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 260 + i * 60 }));
     return out;
   }
 
@@ -287,6 +291,32 @@
     t.ready.catch(() => {});
   }
 
+  /* ---------- the overview's tiles ---------- */
+  // A tile opened or closed grows into its full row, or back, while the other tiles glide to their new places: the
+  // View Transitions API, with every tile named for the moment (data-vt="bento", index.html), and the tile you
+  // tapped lifted above the others. Without the API, with reduced motion or in a background tab, the page is drawn.
+  function expand(update, id) {
+    if (still() || document.hidden || typeof document.startViewTransition !== "function") { update(); return; }
+    const root = document.documentElement;
+    const lift = document.createElement("style");
+    if (/^[a-z0-9-]+$/.test(id || "")) lift.textContent = `::view-transition-group(bt-${id}) { z-index: 3; }`;
+    document.head.appendChild(lift);
+    let t = null;
+    try {
+      root.setAttribute("data-vt", "bento");
+      t = document.startViewTransition(update);
+    } catch (e) {
+      root.removeAttribute("data-vt");
+      lift.remove();
+      if (!t) update();
+      return;
+    }
+    vt = t;
+    const end = () => { if (vt === t) { vt = null; root.removeAttribute("data-vt"); } lift.remove(); };
+    t.finished.then(end, end);
+    t.ready.catch(() => {});
+  }
+
   /* ---------- the navigation highlight ---------- */
   let pill = null;
   function placePill(instant) {
@@ -316,7 +346,7 @@
     }
   }
 
-  /* ---------- the overview's section bar ---------- */
+  /* ---------- a section bar (a sheet's contents on the Fiches) ---------- */
   // A tap scrolls to the section (at once with reduced motion). As you scroll, the bar marks the section you're
   // reading, and its pill glides there.
   document.addEventListener("click", (e) => {
@@ -431,14 +461,15 @@
       new MutationObserver(() => safe(() => { if (was && !el.hidden && !still()) el.animate(frames, { duration: ms, easing: POP }); was = el.hidden; })).observe(el, { attributes: true, attributeFilter: ["hidden"] });
     });
   }
-  // Switching between light and dark fades the colours over a moment instead of snapping.
-  document.addEventListener("click", (e) => {
-    if (still() || !e.target.closest || !e.target.closest('[data-act="theme"]')) return;
+  // Switching between light and dark, by the button or at sunset and sunrise (theme.js), fades the colours over
+  // a moment instead of snapping.
+  document.addEventListener("tcf:theme", (e) => {
+    if (still() || !(e.detail && e.detail.changed)) return;
     const root = document.documentElement;
     root.classList.add("theme-fade");
     clearTimeout(root.__mFade);
     root.__mFade = setTimeout(() => root.classList.remove("theme-fade"), 400);
-  }, true);
+  });
 
   /* ---------- folds ---------- */
   // A fold you open shows its contents gently. Folds drawn open by a redraw stay still.
@@ -555,7 +586,7 @@
     el.animate([{ opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 340, easing: EASE });
   }
 
-  window.TCFMotion = Object.freeze({ burst: (el, opts) => safe(() => burst(el, opts)), flip: (els, mutate) => { let ran = false; try { flip(els, () => { ran = true; mutate(); }); } catch (e) { console.warn("motion:", e); if (!ran) mutate(); } }, peel: (el) => peel(el).catch(() => {}), reveal: (el) => safe(() => reveal(el)), transition: (update, dir) => {
+  window.TCFMotion = Object.freeze({ expand: (update, id) => { let ran = false; try { expand(() => { ran = true; update(); }, id); } catch (e) { console.warn("motion:", e); if (!ran) update(); } }, burst: (el, opts) => safe(() => burst(el, opts)), flip: (els, mutate) => { let ran = false; try { flip(els, () => { ran = true; mutate(); }); } catch (e) { console.warn("motion:", e); if (!ran) mutate(); } }, peel: (el) => peel(el).catch(() => {}), reveal: (el) => safe(() => reveal(el)), transition: (update, dir) => {
     // The page is drawn exactly once, whatever happens to the transition.
     let ran = false;
     const once = () => { if (!ran) { ran = true; update(); } };

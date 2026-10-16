@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>Réussir le TCF</title>
-<script>try { if (localStorage.getItem("tcf-theme") === "dark") document.documentElement.classList.add("dark"); } catch (e) {}</script>
+<script src="theme.js"></script>
 <meta name="description" content="Daily TCF Canada practice toward NCLC 7: today's plan, grammar drills, spaced-repetition vocabulary, timed writing with corrections, listening and reading practice, and progress.">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400..800;1,400..700&family=Playwrite+FR+Moderne:wght@300;400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
 <style>
-/* The warm notebook: cream paper by default, and a warm charcoal dark mode you switch on in the sidebar,
-   remembered in this browser. It deliberately ignores the system and claude.ai theme.
+/* The warm notebook: cream paper by day and a warm charcoal dark mode from sunset to sunrise (theme.js); the
+   sidebar's switch holds until the next sunset or sunrise. It deliberately ignores the system and claude.ai theme.
    Blue ink for actions and progress, the teacher's red pen only for corrections and mistakes, autumn-leaf
    colours for rewards. Nunito for the interface, Source Serif 4 for French text, Playwrite FR for handwriting.
    Corners: 12 px on controls, 18 px on cards, 24 px on the big ones. Buttons have a lip that presses down. */
@@ -141,6 +141,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .theme-btn { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border: 1.5px solid var(--rule-2); border-radius: 999px; background: var(--surface); color: var(--ink-2); font-size: 13px; font-weight: 700; line-height: 1; cursor: pointer; white-space: nowrap; transition: color var(--dur-fast), border-color var(--dur-fast); }
 .theme-btn:hover { color: var(--ink); border-color: var(--ink-3); }
 .theme-btn svg { width: 14px; height: 14px; flex: none; }
+.theme-btn .tb-l { display: grid; gap: 3px; text-align: left; }
+.theme-btn small { font-size: 11px; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .rail-foot .theme-btn { justify-self: start; }
 .rail-top .theme-btn { display: none; }
 .brand b { display: block; font: 800 18.5px/1.1 var(--f-ui); letter-spacing: -.015em; }
@@ -188,6 +190,7 @@ main { min-width: 0; padding-block: 32px 88px; padding-inline: 44px; }
   .nav a .ico { width: 17px; height: 17px; }
   .rail-foot { display: none; }
   .rail-top .theme-btn { display: inline-flex; padding: 6px 10px; }
+  .rail-top .theme-btn small { display: none; }
   main { padding-inline: 16px; padding-block: 20px 64px; }
 }
 
@@ -926,6 +929,7 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 700; }
 .stat span { font-size: 13px; color: var(--ink-3); }
 .exam { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .exam div { padding: 15px 16px; border: 1px solid var(--rule); border-radius: 16px; background: var(--surface); display: grid; gap: 4px; }
+.exam .sk { justify-self: start; }
 
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20; background: var(--ink); color: var(--paper); padding: 11px 18px; border-radius: 14px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-lg); max-width: calc(100vw - 32px); }
 .toast-ghost { pointer-events: none; }
@@ -1082,10 +1086,10 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 
 /* ---------- the dashboard (Progrès → Vue d'ensemble) ---------- */
 .wrap.dash { max-width: 1180px; gap: 34px; }
-.dash > .sec, #sec-pass { scroll-margin-top: 78px; }
-@media (max-width: 880px) { .dash > .sec, #sec-pass { scroll-margin-top: calc(var(--rail-h, 0px) + 70px); } }
-.dash .sec-head .h2 > .ico { width: 22px; height: 22px; }
-/* The section bar: sticks under the top as you scroll, with a pill on the section you're reading. */
+.dash > .sec, .btile, #sec-pass { scroll-margin-top: 20px; }
+@media (max-width: 880px) { .dash > .sec, .btile, #sec-pass { scroll-margin-top: calc(var(--rail-h, 0px) + 14px); } }
+/* A section bar: sticks under the top as you scroll, with a pill on the section you're reading (a sheet's
+   contents on the Fiches). */
 .dash-nav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); z-index: 4; justify-self: start; display: flex; gap: 2px; max-width: 100%; padding: 5px; margin-bottom: -12px; border-radius: 999px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--surface) 84%, transparent); -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3); box-shadow: var(--shadow); overflow-x: auto; scrollbar-width: none; }
 .dash-nav::-webkit-scrollbar { display: none; }
 @media (max-width: 880px) { .dash-nav { top: calc(env(safe-area-inset-top, 0px) + var(--rail-h, 0px) + 8px); } }
@@ -1142,19 +1146,11 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 .r-key-d { width: 12px; height: 12px; margin-left: 10px; border-radius: 50%; background: var(--accent); }
 .r-key-g { width: 10px; height: 10px; margin-left: 10px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--ink-3); }
 @container (max-width: 820px) { .r-row { grid-template-columns: minmax(0, 1fr) auto; } .r-row .c-bullet { grid-column: 1 / -1; grid-row: 2; } .r-val { grid-column: 1 / -1; } .r-gap { grid-column: 2; grid-row: 1; } }
-/* The boarding pass beside this phase's criteria. */
-#sec-phase { container-type: inline-size; }
-.phase-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-@container (max-width: 880px) { .phase-grid { grid-template-columns: minmax(0, 1fr); } }
-.phase-side { display: grid; gap: 16px; align-content: start; min-width: 0; }
+/* The phase tile: the criteria ring under the pass, and the criteria. */
 .crit-top { display: flex; align-items: center; gap: 14px; }
 .crit-card .criteria li:last-child { border-bottom: 0; }
 /* Facts, the heatmap, topic tiles, the cards that slip, the practice exams. */
-.since { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px 30px; align-items: center; }
-@container (max-width: 720px) { .since { grid-template-columns: minmax(0, 1fr); } }
-.since .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .since-heat { overflow-x: auto; }
-.since .heat { grid-template-rows: repeat(7, 14px); grid-auto-columns: 14px; gap: 4px; }
 .facts { margin: 0; display: grid; }
 .facts > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule); }
 .facts > div:last-child { border-bottom: 0; }
@@ -1176,6 +1172,113 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
 .exams-l li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
 .exams-l li:last-child { border-bottom: 0; }
 .exams-l b { font: 800 18px/1 var(--f-ui); font-variant-numeric: tabular-nums; }
+/* ---------- the bento: the overview as tiles ---------- */
+/* Bands of tiles whose spans add up to 12: a band is a row that wraps on narrow screens, its tiles growing to fill
+   the line, so there are no holes. An open tile goes first in its band at full width, with its face kept at the
+   width it had (and sticky while you read the details beside it); the band's other tiles wrap below it. */
+.bento { display: grid; gap: 16px; }
+.band { display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch; }
+.btile { --span: 6; flex: var(--span) 1 calc(var(--span) * 100% / 12 - 16px); min-width: min(100%, 268px); position: relative; isolation: isolate; container-type: inline-size; display: grid; grid-template-rows: auto 1fr; border-radius: var(--r-card); border: 1px solid var(--rule); background: var(--surface); box-shadow: var(--shadow); }
+.btile.open { order: -1; flex-basis: 100%; border-color: var(--rule-2); box-shadow: var(--shadow-lg); }
+.bt-h { display: flex; align-items: center; gap: 11px; width: 100%; min-width: 0; padding: 15px 16px 8px 18px; border: 0; border-radius: var(--r-card) var(--r-card) 0 0; background: none; color: var(--ink); font: inherit; text-align: left; }
+button.bt-h { cursor: pointer; }
+button.bt-h:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.bt-ico { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 11px; background: var(--sunk); }
+.bt-ico .ico { width: 19px; height: 19px; color: var(--ink); --pen: var(--red); }
+.bt-t { display: grid; gap: 1px; min-width: 0; }
+.bt-t b { font: 800 15.5px/1.2 var(--f-ui); }
+.bt-t small { font: 600 12px/1.25 var(--f-ui); color: var(--ink-3); }
+.bt-x { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px 6px 11px; border-radius: 999px; background: var(--sunk); color: var(--ink-2); font: 700 12px/1 var(--f-ui); transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease); }
+.bt-x .ico { width: 15px; height: 15px; --pen: currentColor; }
+button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: var(--accent-ink); }
+@container (max-width: 330px) { .bt-x > span { display: none; } .bt-x { padding: 7px; } }
+.bt-body { display: grid; gap: 16px; min-width: 0; padding: 6px 18px 18px; align-content: start; }
+.bt-pair { display: grid; gap: 18px 22px; min-width: 0; }
+.bt-face { container-type: inline-size; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.bt-more, .bt-wide { container-type: inline-size; display: grid; gap: 16px; min-width: 0; align-content: start; }
+/* The face column is exactly as wide as the face was in the closed tile: a closed tile is span/12 of (the band
+   + a 16px gap) less the gap, less its padding and border (54px in all), so the face doesn't move as it opens. */
+.btile.open:not(.full) .bt-pair { grid-template-columns: minmax(0, calc(var(--span) / 12 * (100% + 54px) - 54px)) minmax(0, 1fr); align-items: start; }
+.btile.open:not(.full) .bt-face { position: sticky; top: 16px; }
+@media (max-width: 880px) { .btile.open:not(.full) .bt-face { top: calc(var(--rail-h, 0px) + 12px); } }
+@container (max-width: 760px) { .btile.open:not(.full) .bt-pair { grid-template-columns: minmax(0, 1fr); } .btile.open .bt-face { position: static; } }
+.bt-foot { display: flex; justify-content: flex-end; }
+.bt-foot .btn .ico { width: 15px; height: 15px; }
+/* Inside a tile, the details' cards lie flat on it. */
+.bt-more .dash-card, .bt-wide .dash-card { box-shadow: none; background: color-mix(in srgb, var(--sunk) 45%, var(--surface)); padding: 16px 16px 18px; }
+.bt-more .dash-grid, .bt-wide .dash-grid { gap: 12px; }
+.bt-hero { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0; }
+.bt-hero b { display: inline-flex; align-items: baseline; gap: 6px; font: 800 27px/1.1 var(--f-ui); letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bt-hero b small { font-size: 15px; letter-spacing: 0; color: var(--ink-3); }
+.bt-hero b .leaf-ico { width: 21px; height: 23px; align-self: center; }
+.bt-hero > span { font-size: 13px; line-height: 1.4; color: var(--ink-3); min-width: 0; }
+.bento-foot { margin: 4px 2px 0; }
+/* The week ahead: the plan's minutes over the cards due, the same days under each. */
+.ahead { display: grid; gap: 4px; }
+.ah-cap { font: 800 11px/1.2 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.ahead .c-chart + .ah-cap { margin-top: 8px; }
+/* Grammar topics as rings, Compréhension's two rows. */
+.g-rings { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 12px 8px; }
+.g-ring { display: grid; justify-items: center; gap: 6px; padding: 8px 4px; border-radius: 14px; color: var(--ink); text-decoration: none; text-align: center; transition: background-color var(--dur-fast) var(--ease); }
+.g-ring:hover { background: var(--sunk); }
+.g-ring small { font: 700 11.5px/1.25 var(--f-ui); color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cf { display: grid; }
+.cf-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "sk t sp" "sk x x"; gap: 4px 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.cf-row:last-child { border-bottom: 0; }
+.cf-row > .sk { grid-area: sk; align-self: start; }
+.cf-t { grid-area: t; display: grid; gap: 1px; min-width: 0; }
+.cf-t b { font: 800 19px/1.1 var(--f-ui); font-variant-numeric: tabular-nums; }
+.cf-t small, .cf-x small { font-size: 12px; color: var(--ink-3); }
+.cf-row > .c-spark { grid-area: sp; }
+.cf-x { grid-area: x; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 700 13px/1.2 var(--f-ui); }
+.btile .stamps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 8px; }
+.bt-face .since-heat .heat { grid-template-rows: repeat(7, 17px); grid-auto-columns: 17px; gap: 4px; }
+.btile .stamp { max-width: 84px; }
+.ex-face { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.ex-face div { padding: 12px 14px; }
+.btile #sec-pass .pass { max-width: none; }
+/* The radar: the four skills on the NCLC scale, marks in HTML over the SVG. */
+.c-radar { margin: 0; }
+.c-rbox { position: relative; width: 100%; max-width: 420px; margin: 0 auto; }
+.c-rsvg { display: block; width: 100%; height: 100%; overflow: visible; }
+.c-rr { fill: none; stroke: var(--c-grid); stroke-width: 1; }
+.c-redge { stroke: var(--rule-2); }
+.c-rtarget { stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 4 4; fill: color-mix(in srgb, var(--green) 6%, transparent); }
+.c-rs { stroke: var(--c-grid); stroke-width: 1; }
+.c-rfig { transform-box: view-box; transform-origin: 50% 50%; }
+.c-rshape { fill: color-mix(in srgb, var(--c) 16%, transparent); stroke: var(--c); stroke-width: 2; stroke-linejoin: round; }
+.c-rseg { stroke: var(--c); stroke-width: 2; stroke-linecap: round; }
+.c-rdot { position: absolute; z-index: 2; width: 11px; height: 11px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2.5px var(--surface); translate: -50% -50%; transition: scale var(--dur-fast) var(--ease); }
+.c-rdot::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; }
+.c-rdot.c-on { scale: 1.45; }
+.c-rlab { position: absolute; display: grid; gap: 1px; white-space: nowrap; pointer-events: none; }
+.c-rlab b { font: 800 12.5px/1.2 var(--f-ui); color: var(--ink); }
+.c-rlab small { font: 700 11.5px/1.2 var(--f-ui); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.c-rlab.none small { font-weight: 600; color: var(--ink-3); font-style: italic; }
+.c-rlab.top { translate: -50% -100%; text-align: center; justify-items: center; }
+.c-rlab.bottom { translate: -50% 0; text-align: center; justify-items: center; }
+.c-rlab.right { translate: 0 -50%; }
+.c-rlab.left { translate: -100% -50%; text-align: right; justify-items: end; }
+/* A side label has the room between the radar and the edge (78 of the box's 360 units), and wraps inside it. */
+.c-rlab.left, .c-rlab.right { width: max-content; max-width: 21.5%; white-space: normal; }
+.c-rtl { position: absolute; translate: 8px -50%; padding: 1px 6px; border-radius: 6px; background: var(--surface); color: var(--ink-2); font: 800 10.5px/1.4 var(--f-ui); white-space: nowrap; pointer-events: none; }
+
+/* Opening a tile (motion.js, TCFMotion.expand): every tile is named for the moment, so each one's place and size
+   morph together. The pictures aren't stretched: each is drawn at its own size from the top left and clipped by
+   the growing box, the old one cross-fading into the new one, and the box carries the tile's shadow. The page
+   behind (the root) doesn't cross-fade, so nothing ghosts. */
+:root[data-vt="bento"] .btile, :root[data-vt="bento"] .bento-foot { view-transition-name: var(--vtn); }
+:root[data-vt="bento"]::view-transition-old(root) { display: none; }
+:root[data-vt="bento"]::view-transition-new(root), :root[data-vt="bento"]::view-transition-new(rail) { animation: none; mix-blend-mode: normal; }
+:root[data-vt="bento"]::view-transition-group(*) { animation-duration: .48s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); border-radius: var(--r-card); box-shadow: var(--shadow); }
+:root[data-vt="bento"]::view-transition-group(root), :root[data-vt="bento"]::view-transition-group(rail), :root[data-vt="bento"]::view-transition-group(bt-foot) { border-radius: 0; box-shadow: none; }
+:root[data-vt="bento"]::view-transition-image-pair(*) { isolation: isolate; overflow: clip; border-radius: var(--r-card); }
+:root[data-vt="bento"]::view-transition-image-pair(root), :root[data-vt="bento"]::view-transition-image-pair(rail) { overflow: visible; border-radius: 0; }
+:root[data-vt="bento"]::view-transition-old(*), :root[data-vt="bento"]::view-transition-new(*) { height: 100%; object-fit: none; object-position: left top; mix-blend-mode: plus-lighter; }
+/* The two pictures fade with the same timing (and the browser adds them up), so a tile that only moves never dims. */
+:root[data-vt="bento"]::view-transition-old(*) { animation: vt-fade-out .3s cubic-bezier(.4, 0, .2, 1) both; }
+:root[data-vt="bento"]::view-transition-new(*) { animation: vt-fade-in .3s cubic-bezier(.4, 0, .2, 1) both; }
+
 /* ---------- Fiches: a desk of revision cards ---------- */
 /* Each kind of sheet has its colour (the band, the table headings), from the skill palette. */
 .t-grammaire { --tc: var(--c-gra); --tci: var(--sk-gra); }
@@ -1380,13 +1483,6 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
   [data-spot]::after, .kpi::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: radial-gradient(260px circle at var(--sx, 50%) var(--sy, 0%), color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; opacity: 0; transition: opacity .4s var(--ease); pointer-events: none; }
   [data-spot]:hover::before, [data-spot]:hover::after, .kpi:hover::before, .kpi:hover::after { opacity: 1; }
 }
-/* Cards fade up as you scroll to them, where the browser can tie an animation to scrolling. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .dash-card, #sec-pass, .dash .stamps { animation: dash-in linear both; animation-timeline: view(); animation-range: entry 0% entry 120px; }
-  }
-}
-@keyframes dash-in { from { opacity: 0; translate: 0 26px; scale: .975; } to { opacity: 1; translate: none; scale: none; } }
 
 /* ---------- mini charts on the other pages ---------- */
 /* The planned minutes behind each day's column, as an outline. */
@@ -1471,6 +1567,10 @@ table.c-table { width: 100%; border-collapse: collapse; font-size: 13px; font-va
     <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="pen" d="M15.8 9.6l4.8 4.8M20.6 9.6l-4.8 4.8"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M3 10.5c2.3 3.3 5.3 5 9 5s6.7-1.7 9-5"/><path class="pen" d="M6.6 13.6 5.2 15.8M12 15.5v2.6M17.4 13.6l1.4 2.2"/></symbol>
     <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle class="pen-solid" cx="12" cy="12" r="1.7"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14.5 4.5h5v5M9.5 19.5h-5v-5"/><path class="pen" d="M19.5 4.5 13.5 10.5M4.5 19.5l6-6"/></symbol>
+    <symbol id="i-collapse" viewBox="0 0 24 24"><path d="M13.5 5.5v5h5M10.5 18.5v-5h-5"/><path class="pen" d="M13.5 10.5l6-6M10.5 13.5l-6 6"/></symbol>
+    <symbol id="i-ahead" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path class="pen" d="M9 14.8h6m-2.2-2.3 2.3 2.3-2.3 2.3"/></symbol>
+    <symbol id="i-curve" viewBox="0 0 24 24"><path d="M4 3.5v16.5h16.5"/><path class="pen" d="M7 6.5c1.6 0 2.7 3.8 4.6 6.6 1.6 2.3 4.2 3.5 8 3.6"/></symbol>
     <symbol id="i-stamp" viewBox="0 0 24 24"><circle cx="12" cy="5.2" r="2.4"/><path d="M10.6 7.4 10 12.5h4l-.6-5.1"/><rect x="4.5" y="12.5" width="15" height="4" rx="1"/><path class="pen" d="M6 20.5h12"/></symbol>
   </defs>
 </svg>
