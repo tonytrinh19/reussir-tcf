@@ -4999,6 +4999,8 @@
   // (so it replaces the original until you restore it), and a hidden starter with hidden: true.
   const FX_TAGS = { grammaire: ["Grammaire", "grammar"], ecrit: ["Écrit", "writing"], oral: ["Oral", "listen"], vocabulaire: ["Vocabulaire", "vocab"], examen: ["Examen", "exam"] };
   const FX_BASE = new Map((T.FICHES || []).map((f) => [f.id, f]));
+  // A starter sheet in French in immersion (Gemini's, from fr.js), unless you've edited it: your text stays yours.
+  const fxBody = (f) => { const fr = immersion() && T.FR && T.FR.fiches && T.FR.fiches[f.id], base = FX_BASE.get(f.id); return fr && base && base.body === f.body ? fr : f.body; };
   const fxTagOf = (f) => (FX_TAGS[f.tag] ? f.tag : "grammaire");
   // A name the View Transitions API accepts, so a card can grow into its sheet.
   const fxVt = (id) => "fx-" + String(id).replace(/[^A-Za-z0-9_-]/g, "_");
@@ -5138,7 +5140,7 @@
 
   function fxCard(f) {
     const tag = fxTagOf(f), [label, icon] = FX_TAGS[tag];
-    const prev = str(f.body).split("\n").map((l) => l.trim()).filter((l) => l && !/^(>>|#|\||!)/.test(l)).slice(0, 3)
+    const prev = str(fxBody(f)).split("\n").map((l) => l.trim()).filter((l) => l && !/^(>>|#|\||!)/.test(l)).slice(0, 3)
       .map((l) => typo(l.replace(/^[-=>•]\s*/, "").replace(/\{\d:([^}]*)\}/g, "$1").replace(/\*\*|~~|\+\+|==/g, "").split(" — ")[0])).join(" · ");
     return `<a class="fx-card t-${tag}" href="#fiches.${esc(f.id)}" data-tag="${tag}" data-text="${esc(fxPlain(f))}" data-tilt data-spot data-m="deal" data-k="fxc-${esc(f.id)}" style="--tilt:${fxTilt(f.id)}deg;view-transition-name:${fxVt(f.id)}">
       <span class="fx-band">${ico(icon)}<span>${label}</span>${f.mine ? `<span class="fx-mine">à moi</span>` : ""}</span>
@@ -5222,7 +5224,7 @@
   }
   function fxSheet(f) {
     const tag = fxTagOf(f), [label, icon] = FX_TAGS[tag];
-    const { html, heads } = ficheHTML(f.body, { key: f.id });
+    const { html, heads } = ficheHTML(fxBody(f), { key: f.id });
     const topic = f.for && f.for.startsWith("grammar.") ? TOPIC[f.for.split(".")[1]] : null;
     const practise = f.for ? `<a class="btn primary sm" href="#${esc(f.for)}">${ico(topic ? "grammar" : "writing")}S'entraîner : ${esc(topic ? topic.title : fxRouteLabel(f.for).replace(/^Écrit · /, ""))}</a>` : "";
     const restore = f.starter && f.changed ? (ui.confirm === "fx-restore" ? `<button class="btn danger sm" data-act="fx-restore" data-id="${esc(f.id)}">Restore the original</button><button class="btn ghost sm" data-act="confirm-cancel">Keep my edits</button>` : `<button class="btn ghost sm" data-act="confirm" data-key="fx-restore">Restore the original</button>`) : "";

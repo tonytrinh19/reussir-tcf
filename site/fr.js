@@ -1731,6 +1731,7 @@ window.TCF.FR = {
 "→ fiche": "→ fiche",
 "✓ NCLC 7 reached": "✓ NCLC 7 atteint"
 },
+"fiches": {},
 "patterns": [
 [
 "–{0} mots",
