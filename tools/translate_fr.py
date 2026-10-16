@@ -8,7 +8,7 @@
     python3 tools/translate_fr.py --redo RE  translate again the phrases whose English or French matches RE
     python3 tools/translate_fr.py --content  the learning material instead (explanations, rule names, the grammar
                                              notes, the starter sheets), on the flash models only, until their free
-                                             daily quotas run out; the nightly fr-content-gemini routine runs this
+                                             daily quotas run out; the fr-content-gemini routine runs this daily at 8 AM
     python3 tools/translate_fr.py --content --dry 20   try 20 on a lite model and print them, saving nothing
     --only RE (with --content) only the material whose English, kind or sheet id matches RE; --max N batches at most
 

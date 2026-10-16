@@ -3,7 +3,7 @@
 // French in site/fr.js, with the same placeholders. When one is missing:
 //   node tools/i18n_extract.js && python3 tools/translate_fr.py
 // The learning material (explanations, rule names, grammar notes, the starter sheets) is reported, not required:
-// the nightly fr-content-gemini routine translates it on the flash models (python3 tools/translate_fr.py --content).
+// the daily (8 AM) fr-content-gemini routine translates it on the flash models (python3 tools/translate_fr.py --content).
 "use strict";
 const fs = require("fs");
 const path = require("path");
