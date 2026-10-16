@@ -15663,15 +15663,6 @@
   ]
  },
  {
-  "id": "a29670658a50",
-  "text": "Got it, next → two checks in this session. I already know this → one. Your first check's grade sets when it comes back.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Got it, next → two checks in this session. I already know this → one. Your first check's grade sets when it comes back."
-  ]
- },
- {
   "id": "58833ea45050",
   "text": "Grâce à for a good result, à cause de for a bad one",
   "kind": "exact",

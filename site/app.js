@@ -5510,8 +5510,9 @@
     const done = v.total - new Set(ahead.map((x) => x.id)).size;
     let buttons, hint = "";
     if (show) {
+      // Got it, next → two checks in this session; I already know this → one. The first check's grade sets when
+      // the card comes back. (Not shown on the card: the user asked on 2026-10-16 to keep it out of the interface.)
       buttons = `<button class="btn primary" data-act="v-learn" data-path="learn">Got it, next <span class="kbd">2</span></button><button class="btn" data-act="v-learn" data-path="known">I already know this <span class="kbd">3</span></button>`;
-      hint = "Got it, next → two checks in this session. I already know this → one. Your first check's grade sets when it comes back.";
     } else if (!v.shown) buttons = `<button class="btn primary" data-act="v-show">Show answer <span class="kbd">Space</span></button>`;
     else {
       // A review and a new card's first check set the schedule, so their buttons say when each grade brings the card back.
