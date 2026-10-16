@@ -195,6 +195,32 @@ function dataPhrases() {
   return out;
 }
 
+/* ---------- the learning material's English (the user asked on 2026-10-16 for it in French too) ---------- */
+// Explanations after an answer, drill rule names, the grammar topics' notes, Find the mistakes' explanations, and
+// the starter sheets whole (their markup splits a line across elements, so a sheet is translated as one). Cards,
+// example translations and « Quelle phrase est correcte ? »'s meanings stay English: they're the prompts.
+function contentPhrases() {
+  const ctx = { console };
+  ctx.window = ctx; ctx.globalThis = ctx;
+  vm.createContext(ctx);
+  for (const f of ["data.js", "drills.js", "proofread.js", "fiches.js", "comp-ce.js", "exam-ce.js", "exam-co.js", "comp-co.js"]) vm.runInContext(fs.readFileSync(path.join(SITE, f), "utf8"), ctx);
+  const T = ctx.TCF, out = [];
+  const add = (s, kind, extra) => { if (typeof s === "string" && s.trim() && english(s)) out.push(Object.assign({ text: s.trim(), where: "content:" + kind }, extra || {})); };
+  (T.TOPICS || []).forEach((tp) => {
+    ["why", "know", "master"].forEach((k) => add(tp[k], "topic"));
+    (tp.sets || []).forEach((st) => {
+      st.points.forEach((p) => add(p, "rule"));
+      st.items.forEach((it) => add(st.kind === "choice" ? it[2] : it[3], "drill"));
+    });
+  });
+  (T.LOW_PRIORITY || []).forEach((x) => add(x[1], "topic"));
+  (T.PROOFREAD || []).forEach((t) => (t.mistakes || []).forEach((m) => add(m[3], "hunt")));
+  const whys = (o) => { if (Array.isArray(o)) o.forEach(whys); else if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) { if (k === "why" && typeof v === "string") add(v, "comp"); else whys(v); } };
+  whys([(T.COMP || {}).ceSets, (T.COMP || {}).coSets, (T.COMP || {}).ceExams, (T.COMP || {}).coExams]);
+  (T.FICHES || []).forEach((f) => { if (typeof f.body === "string") out.push({ text: f.body, where: "content:fiche", fiche: f.id }); });
+  return out;
+}
+
 /* ---------- run ---------- */
 // Every phrase, sorted. tools/check_fr.js uses this too.
 function extract() {
@@ -221,6 +247,11 @@ function extract() {
   const body = html.slice(html.indexOf("<body") >= 0 ? html.indexOf("<body") : html.indexOf("</style>")).replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "").replace(/<svg[\s\S]*?<\/svg>/g, "");
   collect(body, "index.html", "", false);
   for (const d of dataPhrases()) collect(d.text, d.where, "", false);
+  // The learning material goes in as it is: whole explanations, and whole sheets.
+  for (const c of contentPhrases()) {
+    if (units.has(c.text)) continue;
+    units.set(c.text, Object.assign({ id: crypto.createHash("sha1").update(c.text).digest("hex").slice(0, 12), text: c.text, kind: c.fiche ? "fiche" : "exact", where: c.where, ctx: [] }, c.fiche ? { fiche: c.fiche } : {}));
+  }
   return [...units.values()].sort((a, b) => a.text.localeCompare(b.text));
 }
 module.exports = { extract };

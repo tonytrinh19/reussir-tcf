@@ -541,7 +541,6 @@ window.TCF.FR = {
 "Go to the exam": "Aller à l'examen",
 "Good": "Bien",
 "Got it, next": "Compris, suivant",
-"Got it, next → two checks in this session. I already know this → one. Your first check's grade sets when it comes back.": "Compris, suivant → deux vérifications dans cette session. Je sais déjà → une. La note de ta première vérification se fixe à son retour.",
 "Graded against the criteria France Éducation International publishes for the TCF Canada. Its internal marking grids aren't public, so treat the score as an estimate.": "Évalué selon les critères publiés par France Éducation International pour le TCF Canada. Ses grilles de notation internes n'étant pas publiques, considère ce score comme une estimation.",
 "Graded readers from A1 to B2: novels and classics rewritten for learners, as e-books too. Start at B1.": "Lectures graduées de A1 à B2 : romans et classiques réécrits pour apprenants, également en e-books. Commence au B1.",
 "Grammaire": "Grammaire",
@@ -1731,6 +1730,7 @@ window.TCF.FR = {
 "→ fiche": "→ fiche",
 "✓ NCLC 7 reached": "✓ NCLC 7 atteint"
 },
+"fiches": {},
 "patterns": [
 [
 "–{0} mots",
