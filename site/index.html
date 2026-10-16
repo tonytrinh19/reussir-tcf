@@ -143,6 +143,12 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .theme-btn svg { width: 14px; height: 14px; flex: none; }
 .theme-btn .tb-l { display: grid; gap: 3px; text-align: left; }
 .theme-btn small { font-size: 11px; font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* « Pense en français »: a small FR mark, filled in blue ink while immersion is on; the English glosses (Rémy's
+   second line, topic and deck subtitles, a writing prompt's English) step aside while it's on. */
+.fr-mark { display: grid; place-items: center; min-width: 22px; height: 16px; padding: 0 3px; border-radius: 5px; border: 1.5px solid currentColor; font: 800 9.5px/1 var(--f-ui); letter-spacing: .04em; }
+.fr-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--ink); }
+.fr-btn[aria-pressed="true"] .fr-mark { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+:root[data-fr] .en-gloss, :root[data-fr] .tabs a > small { display: none !important; }
 .rail-foot .theme-btn { justify-self: start; }
 .rail-top .theme-btn { display: none; }
 .brand b { display: block; font: 800 18.5px/1.1 var(--f-ui); letter-spacing: -.015em; }
@@ -191,6 +197,7 @@ main { min-width: 0; padding-block: 32px 88px; padding-inline: 44px; }
   .rail-foot { display: none; }
   .rail-top .theme-btn { display: inline-flex; padding: 6px 10px; }
   .rail-top .theme-btn small { display: none; }
+  .rail-top .fr-btn .tb-l { display: none; }
   main { padding-inline: 16px; padding-block: 20px 64px; }
 }
 
@@ -386,6 +393,8 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .fields div { display: grid; gap: 1px; min-width: 0; }
 .fields dt { font: 700 10.5px/1.2 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .fields dd { margin: 0; font-weight: 700; font-size: 14.5px; }
+/* The gate: today's first open block, cut short on one line by CSS (so its French can replace it whole). */
+.fields dd { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pass-stub { position: relative; border-left: 2px dashed var(--rule-2); padding: 18px 16px; display: grid; gap: 10px; align-content: space-between; justify-items: start; }
 .pass-stub::before, .pass-stub::after { content: ""; position: absolute; left: -11px; width: 20px; height: 20px; border-radius: 50%; background: var(--paper); border: 1px solid var(--rule-2); }
 .pass-stub::before { top: -11px; } .pass-stub::after { bottom: -11px; }
@@ -1580,6 +1589,7 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
     <div class="rail-top">
       <a class="brand" href="#today"><svg class="tile" viewBox="0 0 100 100" aria-hidden="true"><g clip-path="url(#clip-tile)"><rect class="t-bg" width="100" height="100"/><path class="t-l1" d="M0 4H100"/><path class="t-l2" d="M0 12H100"/><path class="t-l1" d="M0 20H100"/><path class="t-l1" d="M0 28H100"/><path class="t-l1" d="M0 36H100"/><path class="t-l2" d="M0 44H100"/><path class="t-l1" d="M0 52H100"/><path class="t-l1" d="M0 60H100"/><path class="t-l1" d="M0 68H100"/><path class="t-l2" d="M0 76H100"/><path class="t-l1" d="M0 84H100"/><path class="t-l1" d="M0 92H100"/><path class="t-l1" d="M48 0V100M80 0V100"/><path class="t-m" d="M16 0V100"/></g><rect class="t-edge" x=".75" y=".75" width="98.5" height="98.5" rx="21.5"/><path class="t-e" stroke-width="7.5" d="M20 72C30 72 50 67 58 58C64 51 62 44 53 44C44 44 37 52 37 61C37 71 44 76.5 53 76.5C63 76.5 72 71 80 63"/><use class="t-leaf" href="#leaf" x="45" y="13" width="24" height="26" transform="rotate(24 57 26)"/></svg><span><b>Réussir le TCF</b><small>TCF Canada · cible NCLC 7</small></span></a>
       <button type="button" class="theme-btn" data-act="theme" data-theme-btn>Dark mode</button>
+      <button type="button" class="theme-btn fr-btn" data-act="lang" data-lang-btn>FR</button>
     </div>
     <nav class="nav" aria-label="Sections">
       <a href="#today" data-nav="today" title="Today"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-today"/></svg>Aujourd'hui</a>
@@ -1600,6 +1610,8 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
 <aside class="nextup" id="nextup" aria-label="Next in today's plan" aria-live="polite" hidden></aside>
 
 <script src="data.js"></script>
+<script src="fr.js"></script>
+<script src="i18n.js"></script>
 <script src="drills.js"></script>
 <script src="proofread.js"></script>
 <script src="anki.js"></script>

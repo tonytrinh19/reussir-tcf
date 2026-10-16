@@ -1,0 +1,7 @@
+[
+  ". It replaces \"span\" in the corrected text, so it has to fit the words around it",
+  ". Known recurring errors:",
+  "$1 dollars",
+  "$1 heures",
+  "$1 heures $2"
+]
