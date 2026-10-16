@@ -463,6 +463,12 @@
   }
   // Switching between light and dark, by the button or at sunset and sunrise (theme.js), fades the colours over
   // a moment instead of snapping.
+  // Switching « Pense en français » on or off: the page's text comes in again, gently.
+  document.addEventListener("tcf:lang", () => {
+    const v = document.getElementById("view");
+    if (still() || !v || !v.animate) return;
+    v.animate([{ opacity: 0.35, filter: "blur(1.5px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 380, easing: EASE });
+  });
   document.addEventListener("tcf:theme", (e) => {
     if (still() || !(e.detail && e.detail.changed)) return;
     const root = document.documentElement;

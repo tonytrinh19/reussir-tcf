@@ -73,7 +73,7 @@
     const tip = sun ? `Automatic: dark from sunset (${hhmm(sun.set)}) to sunrise (${hhmm(sun.rise)}).${mine ? ` Your choice holds until ${hhmm(nx.at)}, then it's automatic again.` : " Switch it and your choice holds until the next sunset or sunrise."}` : "";
     document.querySelectorAll("[data-theme-btn]").forEach((b) => {
       b.innerHTML = `${dark ? ICON_SUN : ICON_MOON}<span class="tb-l"><span>${dark ? "Light mode" : "Dark mode"}</span>${line ? `<small>${line}</small>` : ""}</span>`;
-      b.setAttribute("aria-label", (dark ? "Switch to light mode" : "Switch to dark mode") + (line ? ` (${line})` : ""));
+      b.setAttribute("aria-label", dark ? (line ? `Switch to light mode (${line})` : "Switch to light mode") : line ? `Switch to dark mode (${line})` : "Switch to dark mode");
       if (tip) b.title = tip;
     });
   }
@@ -83,6 +83,47 @@
     paintTheme();
   }
   document.addEventListener("tcf:theme", () => paintTheme());
+
+  /* =============== « Pense en français »: full immersion =============== */
+  // The interface in French only (i18n.js swaps each phrase on screen for Gemini's French from fr.js). It's saved in
+  // your settings, so every device follows, with a copy in this browser for the first draw. Cards and the
+  // explanations after an answer stay as they are: they're the learning material.
+  const I18N = window.TCFI18n || null;
+  let frShown = null;
+  function immersion() {
+    const f = loaded ? settings().fr : undefined;
+    return f != null ? !!f : lsGet("tcf-fr", "") === "on";
+  }
+  // What Claude writes its explanations and comments in: French in immersion.
+  const replyLang = () => (immersion() ? "French" : "English");
+  function paintLang() {
+    const on = immersion();
+    document.querySelectorAll("[data-lang-btn]").forEach((b) => {
+      b.innerHTML = `<span class="fr-mark" aria-hidden="true">FR</span><span class="tb-l"><span lang="fr">Pense en français</span><small>${on ? "tout en français" : "French only, everywhere"}</small></span>`;
+      b.setAttribute("aria-pressed", String(on));
+      b.title = on ? "Immersion: tout le site en français. Touche pour revenir à l'anglais." : "Full immersion: the whole interface in French, no English.";
+    });
+  }
+  // Puts the language on the page: <html lang>, data-fr (which hides the English glosses), and i18n.js.
+  function applyLang() {
+    const on = immersion();
+    if (on === frShown) return;
+    frShown = on;
+    const root = document.documentElement;
+    root.lang = on ? "fr" : "en";
+    root.toggleAttribute("data-fr", on);
+    lsSet("tcf-fr", on ? "on" : "off");
+    if (I18N) I18N.set(on);
+    paintLang();
+  }
+  function toggleLang() {
+    const on = !immersion();
+    lsSet("tcf-fr", on ? "on" : "off");
+    if (loaded) saveSettings({ fr: on });
+    applyLang();
+    render(true);
+    document.dispatchEvent(new CustomEvent("tcf:lang", { detail: { on, changed: true } }));
+  }
 
   /* =============== store (claude.ai db, or this browser as a fallback) =============== */
   // "speaking" holds the attempts saved before the Oral page was removed. The site no longer reads it, but it
@@ -281,7 +322,7 @@
   const CE_SET_SIZE = 4;
   // Exam pace for one reading question, in seconds: 60 minutes for 39 items is quicker at A1–A2 and slower at C1–C2.
   const CE_PACE = { B1: 90, B2: 105 };
-  const PROFILE = EXAM_BRIEF + "\nLEARNER PROFILE: adult B1 learner of French preparing the TCF Canada, target NCLC 7 (B2) in all four skills. Write explanations in English. Known recurring errors: " + T.KNOWN_ERRORS.join("; ") + ".";
+  const profile = (lang) => EXAM_BRIEF + "\nLEARNER PROFILE: adult B1 learner of French preparing the TCF Canada, target NCLC 7 (B2) in all four skills. Write explanations in " + (lang || replyLang()) + ". Known recurring errors: " + T.KNOWN_ERRORS.join("; ") + ".";
 
   /* =============== UI state =============== */
   const dayIndex = daysBetween("2026-01-01", todayStr());
@@ -674,7 +715,7 @@
     const cl = (c) => `${fmtClock(c)} clock`;
     const kName = (c, l) => { const k = PACE_STEPS.findIndex((s) => Math.round(s[0] * (CE_PACE[l] || 90) * CE_SET_SIZE) === c); return k >= 0 ? PACE_STEPS[k][1] : ""; };
     const passTxt = skill === "ce" ? "3/4 in time" : "5/6+";
-    const stTxt = skill === "ce" ? (st.level !== lvl ? `a ${st.level} set at ${fmtClock(st.clock)}` : `a second set at ${fmtClock(st.clock)}`) : `a ${st.level === lvl ? "second " : ""}B2 set`;
+    const stTxt = skill === "ce" ? (st.level !== lvl ? `a ${st.level} set at ${fmtClock(st.clock)}` : `a second set at ${fmtClock(st.clock)}`) : (st.level === lvl ? "a second B2 set" : "a B2 set");
     let line1, line2, chips = [];
     const cur = parts.find((p) => !p.done);
     if (!done[0]) {
@@ -1024,7 +1065,7 @@
     return `<svg class="mascot m-${k}" viewBox="0 0 120 140" role="img" aria-label="${m.label}">${REMY_BODY}${m.face}${REMY_NOSE}${m.top || ""}${REMY_TOQUE}${m.extra}</svg>`;
   }
   // Rémy and his line: always in French, with the English underneath.
-  const greet = (mood, fr, en, cls) => `<div class="greet${cls ? " " + cls : ""}">${remy(mood)}<p class="bubble" data-m="pop" data-k="${esc(mood + "|" + fr)}"><span lang="fr">${typo(fr)}</span><small>${esc(en)}</small></p></div>`;
+  const greet = (mood, fr, en, cls) => `<div class="greet${cls ? " " + cls : ""}">${remy(mood)}<p class="bubble" data-m="pop" data-k="${esc(mood + "|" + fr)}"><span lang="fr">${typo(fr)}</span><small class="en-gloss">${esc(en)}</small></p></div>`;
   // The last day before `date` with anything done: a ticked block or a finished attempt.
   function lastActive(date) {
     let last = "";
@@ -1067,7 +1108,7 @@
     const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
       : `<use class="st-leaf" href="#leaf" x="35.5" y="33" width="29" height="31.5"/><text class="st-n" x="50" y="${st.num.length > 1 ? 54.5 : 55}" text-anchor="middle"${st.num.length > 1 ? ' style="font-size:11px"' : ""}>${st.num}</text>`;
     const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(st.reps))}</textPath></text>${center}`;
-    return `<svg class="stamp ${on ? "on" : "off"}"${on ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${esc(st.name)}, ${on ? "earned" : "still to earn"}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
+    return `<svg class="stamp ${on ? "on" : "off"}"${on ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${on ? `${esc(st.name)}, earned` : `${esc(st.name)}, still to earn`}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
   }
   // A teacher's stamp for each milestone, worked out from what you've done.
   function stampShelf() {
@@ -1106,7 +1147,7 @@
     const s = settings(), P = T.PHASES[s.phase - 1], { total } = passWeeks();
     const t = todayStr(), plan = planFor(s.phase, t), done = (S.days.get(t) || {}).done || {};
     const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k)]) : -1;
-    const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${clip(plan[open][2], 26)}`;
+    const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${plan[open][2]}`;
     const mins = plan ? `${planMins(t, s.phase)} min` : "Repos";
     return `<div class="pass"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
       <div class="route"><div class="city"><small>Départ · From</small><b>B1</b><span>Where you started</span></div>${flightSVG(false)}<div class="city r"><small>Arrivée · To</small><b>NCLC&#160;7</b><span>All four skills</span></div></div>
@@ -1423,7 +1464,7 @@
     const log = src.ref === "log";
     const fixes = src.errs.map((e, n) => `${n + 1}. « ${str(e.wrong)} » → « ${str(e.right)} »${e.why ? ` (${str(e.why)})` : ""}`).join("\n");
     const texts = log ? "" : `THE LEARNER'S TEXT:\n"""\n${src.text}\n"""\n\nTHE CORRECTED TEXT:\n"""\n${src.corrected}\n"""\n\n`;
-    return `You are preparing a French learner's own mistakes for an exercise. The learner (adult, B1, aiming for B2, NCLC 7, at the TCF Canada) ${log ? "sees each mistake as a sentence with a gap and picks the right version from 4 options" : "sees their text again as the teacher corrected it, with their mistakes put back as they wrote them, taps the mistakes, then picks each correction from 4 options"}. Every question must have exactly one right answer, so be strict.\n\n${texts}THE TEACHER'S CORRECTIONS (what the learner wrote → the correction):\n${fixes}\n\nFor each correction, give:\n- "n": its number.\n- "kind": "error" if what the learner wrote is incorrect French (grammar, spelling, accents, agreement, elision, mood or tense, a wrong word, preposition or construction); "style" if it was already correct French and the correction only sounds more natural or more formal; "skip" if it isn't a point of French (a person's name, punctuation or capital letters only, a missing sentence, or no real change).\n- "span": ${log ? "the correction, written as it should be in a sentence" : `the shortest excerpt of THE CORRECTED TEXT that holds the whole correction, copied exactly, character for character, in whole words (at most 10 words). Use "" if the correction isn't in the corrected text`}.\n- "wrong": the same excerpt with only this mistake in it, the way the learner wrote it${log ? "" : `. It replaces "span" in the corrected text, so it has to fit the words around it`}.\n- "near": for "error", 3 other versions of the excerpt, each with one real mistake of the same kind as the learner's that a B1 learner might make (gender, agreement, accent, mood, preposition, word order…). Each must be wrong French, and different from "span", from "wrong" and from each other. For "style", 1 version with a real grammar or spelling mistake. For "skip", [].\n- "why": one short sentence in English giving the rule, for the learner.${log ? `\n- "sentence": a natural B1–B2 sentence on a TCF Canada theme (settling in Canada, work, housing, studies) that uses the correction, with ___ in place of exactly "span".` : ""}\nReply with only JSON: {"items": [{"n": 1, "kind": "error", "span": "...", "wrong": "...", "near": ["...", "...", "..."], "why": "..."${log ? `, "sentence": "..."` : ""}}]}`;
+    return `You are preparing a French learner's own mistakes for an exercise. The learner (adult, B1, aiming for B2, NCLC 7, at the TCF Canada) ${log ? "sees each mistake as a sentence with a gap and picks the right version from 4 options" : "sees their text again as the teacher corrected it, with their mistakes put back as they wrote them, taps the mistakes, then picks each correction from 4 options"}. Every question must have exactly one right answer, so be strict.\n\n${texts}THE TEACHER'S CORRECTIONS (what the learner wrote → the correction):\n${fixes}\n\nFor each correction, give:\n- "n": its number.\n- "kind": "error" if what the learner wrote is incorrect French (grammar, spelling, accents, agreement, elision, mood or tense, a wrong word, preposition or construction); "style" if it was already correct French and the correction only sounds more natural or more formal; "skip" if it isn't a point of French (a person's name, punctuation or capital letters only, a missing sentence, or no real change).\n- "span": ${log ? "the correction, written as it should be in a sentence" : `the shortest excerpt of THE CORRECTED TEXT that holds the whole correction, copied exactly, character for character, in whole words (at most 10 words). Use "" if the correction isn't in the corrected text`}.\n- "wrong": the same excerpt with only this mistake in it, the way the learner wrote it${log ? "" : `. It replaces "span" in the corrected text, so it has to fit the words around it`}.\n- "near": for "error", 3 other versions of the excerpt, each with one real mistake of the same kind as the learner's that a B1 learner might make (gender, agreement, accent, mood, preposition, word order…). Each must be wrong French, and different from "span", from "wrong" and from each other. For "style", 1 version with a real grammar or spelling mistake. For "skip", [].\n- "why": one short sentence in ${replyLang()} giving the rule, for the learner.${log ? `\n- "sentence": a natural B1–B2 sentence on a TCF Canada theme (settling in Canada, work, housing, studies) that uses the correction, with ___ in place of exactly "span".` : ""}\nReply with only JSON: {"items": [{"n": 1, "kind": "error", "span": "...", "wrong": "...", "near": ["...", "...", "..."], "why": "..."${log ? `, "sentence": "..."` : ""}}]}`;
   }
   // Claude's answer, checked: the excerpt has to be in the corrected text as whole words (if it isn't, the
   // correction itself is looked for), the options all different, and a correction that changes nothing isn't a mistake.
@@ -1849,7 +1890,7 @@
     const it = d.items[k];
     const r = d.results[k];
     if (!it || !r) return;
-    const prompt = `A French grammar drill item.\nCue shown to the learner: ${it.src || "(none)"}\nSentence with the gap: ${it.q}\nExpected answer(s) for the gap: ${it.a.join(" | ")}\nLearner's answer: ${r.given}\n\nIs the learner's answer also fully correct, natural French for this gap, given the cue? Be strict about accents, agreement and mood. Reply with only JSON: {"correct": true or false, "explanation": "one or two sentences in English"}`;
+    const prompt = `A French grammar drill item.\nCue shown to the learner: ${it.src || "(none)"}\nSentence with the gap: ${it.q}\nExpected answer(s) for the gap: ${it.a.join(" | ")}\nLearner's answer: ${r.given}\n\nIs the learner's answer also fully correct, natural French for this gap, given the cue? Be strict about accents, agreement and mood. Reply with only JSON: {"correct": true or false, "explanation": "one or two sentences in ${replyLang()}"}`;
     const out = await ask("dispute-" + k, prompt, { tier: "quick" });
     if (!out) return;
     r.claude = { correct: !!out.correct, explanation: str(out.explanation) };
@@ -1893,7 +1934,7 @@
     const levelNote = lvl === "B2"
       ? "Target level B2: longer sentences with subordinate clauses, compound tenses and TCF-register vocabulary (work, housing, immigration, environment, public debate). Include the traps a B2 grader looks for."
       : lvl === "B1+" ? "Target level B1+: everyday sentences, each with one genuinely tricky point." : "Target level B1: short, clear sentences that isolate the structure, but not trivial.";
-    const prompt = `Write ${set.take} NEW practice items for a French grammar drill.\nTopic: ${tp.title} (${tp.en}). What to master: ${tp.master}\nDrill: ${set.title}.\n${levelNote}\n${PROFILE}\nRules: use TCF Canada-style contexts (work, housing, immigration paperwork, transit, environment, daily life in Canada). Vary persons and verbs. Every item must have one clearly correct answer; list every acceptable variant. Don't reuse these sentences: ${avoid}.\n${fmt}\n${set.ask ? `The learner sees this instruction above every item, so each item must fit it: "${set.ask}"\n` : ""}${set.hint ? "Item format note: " + set.hint + "\n" : ""}Example item: ${example}\nReply with only JSON: {"items": [ ... ]}`;
+    const prompt = `Write ${set.take} NEW practice items for a French grammar drill.\nTopic: ${tp.title} (${tp.en}). What to master: ${tp.master}\nDrill: ${set.title}.\n${levelNote}\n${profile("English")}\nRules: use TCF Canada-style contexts (work, housing, immigration paperwork, transit, environment, daily life in Canada). Vary persons and verbs. Every item must have one clearly correct answer; list every acceptable variant. Don't reuse these sentences: ${avoid}.\n${fmt}\n${set.ask ? `The learner sees this instruction above every item, so each item must fit it: "${set.ask}"\n` : ""}${set.hint ? "Item format note: " + set.hint + "\n" : ""}Example item: ${example}\nReply with only JSON: {"items": [ ... ]}`;
     const out = await ask("gen-" + topicId + "." + setId, prompt);
     if (!out) return;
     const items = arr(out.items).map((x) => {
@@ -1910,7 +1951,7 @@
     const st = ui.prod[topicId] || { text: "" };
     const text = str(st.text).trim();
     if (text.length < 10) { toast("Write your answer first."); return; }
-    const prompt = `You are a French teacher checking a B1→B2 learner's production exercise.\nExercise: ${tp.prod.prompt}\nPass criterion: ${tp.prod.check}.\n${PROFILE}\nLearner's answer:\n"""\n${text}\n"""\nReply with only JSON: {"pass": true or false, "comment": "2–3 sentences in English on whether the criterion is met and why", "errors": [{"wrong": "exact excerpt", "right": "correction", "why": "short English explanation"}], "improved": "a corrected, improved version in French"}`;
+    const prompt = `You are a French teacher checking a B1→B2 learner's production exercise.\nExercise: ${tp.prod.prompt}\nPass criterion: ${tp.prod.check}.\n${profile()}\nLearner's answer:\n"""\n${text}\n"""\nReply with only JSON: {"pass": true or false, "comment": "2–3 sentences in ${replyLang()} on whether the criterion is met and why", "errors": [{"wrong": "exact excerpt", "right": "correction", "why": "short ${replyLang()} explanation"}], "improved": "a corrected, improved version in French"}`;
     const out = await ask("prod-" + topicId, prompt);
     if (!out) return;
     const fb = { pass: !!out.pass, comment: str(out.comment), errors: arr(out.errors).filter((e) => e && e.wrong).slice(0, 15).map((e) => ({ wrong: str(e.wrong), right: str(e.right), why: str(e.why) })), improved: str(out.improved) };
@@ -2700,7 +2741,7 @@
     const parts = task === "t3" ? `\nLearner's part 1 (first paragraph): ${ps[0] ? countWords(ps[0]) : 0} words (TCF Canada: 40–60). Part 2 (everything after it): ${ps.slice(1).reduce((n, x) => n + countWords(x), 0)} words (TCF Canada: 80–120).` : "";
     const t3 = task === "t3" ? `"tache3": {"compared_both": true or false (part 1 presents and compares BOTH documents' viewpoints), "opinion_after_comparison": true or false (the learner's own position comes in part 2, after the comparison), "notes": "one sentence"}, ` : "";
     const critNames = TC.ee.criteria.map(([n]) => n);
-    const prompt = `You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct the learner's text and grade it strictly the way the TCF Canada does, using the TCF Canada rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.\n\n${EE_RUBRIC}\n\nTASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. Learner's word count (anything between two spaces): ${words}.${parts}\nPROMPT: ${p.q}${docs}\n\n${PROFILE}\n\nLEARNER'S TEXT:\n"""\n${text}\n"""\n\nGrade this task on the TCF Canada 0–20 scale. If the word count is outside the range, the text is off-topic or the instructions are ignored, cap the score accordingly (it can be A1 non atteint). List every grammar, spelling, agreement and word-choice error, most important first (max 25). Quote "wrong" exactly as it appears in the text, just enough to locate it. Error categories (use the id): ${Object.keys(CAT).join(", ")}.\nReply with only JSON:\n{"score20": integer from 0 to 20 for this task on the TCF Canada scale, "level": "A1 | A2 | B1 | B2 | C1 | C2 (the level that score corresponds to)", "summary": "2–3 sentences in English", "criteria": [{"name": "one of: ${critNames.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in English"}] (one entry per criterion, in that order), "compliance": {"on_topic": true or false, "length_ok": true or false, "register_ok": true or false, "notes": "one sentence"}, ${t3}"errors": [{"wrong": "...", "right": "...", "category": "...", "why": "short English explanation"}], "corrected_text": "the full corrected text, keeping the learner's ideas and paragraph breaks", "upgrades": [{"from": "a B1 phrase from the text", "to": "a B2 alternative"}], "strengths": ["up to 3"], "homework": ["1–3 short, concrete follow-up tasks for tomorrow"]}`;
+    const prompt = `You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct the learner's text and grade it strictly the way the TCF Canada does, using the TCF Canada rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.\n\n${EE_RUBRIC}\n\nTASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. Learner's word count (anything between two spaces): ${words}.${parts}\nPROMPT: ${p.q}${docs}\n\n${profile()}\n\nLEARNER'S TEXT:\n"""\n${text}\n"""\n\nGrade this task on the TCF Canada 0–20 scale. If the word count is outside the range, the text is off-topic or the instructions are ignored, cap the score accordingly (it can be A1 non atteint). List every grammar, spelling, agreement and word-choice error, most important first (max 25). Quote "wrong" exactly as it appears in the text, just enough to locate it. Error categories (use the id): ${Object.keys(CAT).join(", ")}.\nReply with only JSON:\n{"score20": integer from 0 to 20 for this task on the TCF Canada scale, "level": "A1 | A2 | B1 | B2 | C1 | C2 (the level that score corresponds to)", "summary": "2–3 sentences in ${replyLang()}", "criteria": [{"name": "one of: ${critNames.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in ${replyLang()}"}] (one entry per criterion, in that order), "compliance": {"on_topic": true or false, "length_ok": true or false, "register_ok": true or false, "notes": "one sentence"}, ${t3}"errors": [{"wrong": "...", "right": "...", "category": "...", "why": "short ${replyLang()} explanation"}], "corrected_text": "the full corrected text, keeping the learner's ideas and paragraph breaks", "upgrades": [{"from": "a B1 phrase from the text", "to": "a B2 alternative"}], "strengths": ["up to 3"], "homework": ["1–3 short, concrete follow-up tasks for tomorrow"]}`;
     const out = await ask("w-correct", prompt);
     if (!out) { timerUnfinish("writing." + task, clockWas); render(true); return; }
     const fb = cleanFb(out, task);
@@ -2739,7 +2780,7 @@
       `SUBJECT:\n${p.q}${docs}`,
       `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.`,
       `MY TEXT:\n"""\n${text}\n"""`,
-      `Reply in English with:\n${asks.map((a, i) => `${i + 1}. ${a}`).join("\n")}`,
+      `Reply in ${replyLang()} with:\n${asks.map((a, i) => `${i + 1}. ${a}`).join("\n")}`,
     ].join("\n\n");
   }
   // Copy to the clipboard. The page can run in a frame where the Clipboard API is blocked, so fall back
@@ -3279,7 +3320,8 @@
     const L = TC.ceLevels[lvl];
     const xs = list("comp").filter((c2) => c2.skill === "ce" && c2.level === lvl && c2.total).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 3);
     const right = xs.reduce((n, c2) => n + c2.score, 0), total = xs.reduce((n, c2) => n + c2.total, 0);
-    const trend = total ? `Your last ${xs.length > 1 ? xs.length + " " + lvl + " sets" : lvl + " set"}: ${Math.round((100 * right) / total)}% right, and the phase goal is 70%. ` : "";
+    const pc = Math.round((100 * right) / total);
+    const trend = !total ? "" : xs.length > 1 ? `Your last ${xs.length} ${lvl} sets: ${pc}% right, and the phase goal is 70%. ` : `Your last ${lvl} set: ${pc}% right, and the phase goal is 70%. `;
     return `${trend}${L ? `${lvl} items are questions ${L.items} on the real test. ` : ""}One set is too short for a 100–699 score; the Examen blanc estimates one.`;
   }
 
@@ -3331,7 +3373,7 @@
       const done = at.filter((s) => stats.has(s.id));
       if (!done.length) return "";
       const best = at.length === 1 ? stats.get(done[0].id).best : null;
-      const txt = done.length < at.length ? `${l} ${done.length}/${at.length}` : `${l} ✓${best ? ` best ${best.score}/${best.total}` : ""}`;
+      const txt = done.length < at.length ? `${l} ${done.length}/${at.length}` : (best ? `${l} ✓ best ${best.score}/${best.total}` : `${l} ✓`);
       return `<span class="lv ${done.length === at.length ? "done" : ""}">${txt}</span>`;
     }).join("");
     const n = sets.reduce((x, s) => x + (stats.has(s.id) ? stats.get(s.id).attempts.length : 0), 0);
@@ -4038,6 +4080,8 @@
     // The first draw with your progress loaded can change what's on screen (a newer copy of the round, say),
     // so it isn't put off while a field has focus; the field, its text and the caret are kept.
     if (loaded && !hydrated) { hydrate(); force = true; }
+    // The language: from this browser's copy until your settings load (or change on another device).
+    applyLang();
     const ae = document.activeElement;
     const typing = isTyping(ae) && viewEl.contains(ae);
     if (typing && !force) { pendingRender = true; paintFoot(); return; }
@@ -4085,8 +4129,9 @@
     // Where your progress is saved, on one line; that and whether Claude is ready open with a tap.
     const saved = backend.kind === "db" ? "Saved on claude.ai" : backend.kind === "server" ? "Saved on this computer" : backend.kind === "local" ? "Saved in this browser only" : "Loading your progress…";
     const dot = backend.kind === "local" ? "warn" : backend.kind === "loading" ? "" : "on";
-    footEl.innerHTML = `${miniPass()}${tm}${streakPill(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}</div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button>`;
+    footEl.innerHTML = `${miniPass()}${tm}${streakPill(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}</div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button><button type="button" class="theme-btn fr-btn" data-act="lang" data-lang-btn></button>`;
     paintTheme();
+    paintLang();
   }
   function confirmBtn(key, label, act, attrs) {
     if (ui.confirm === key) return `<button class="btn sm danger" data-act="${act}" ${attrs}>Confirm</button><button class="btn sm ghost" data-act="confirm-cancel">Cancel</button>`;
@@ -4323,7 +4368,7 @@
         fix: d >= 0 ? `${EN_DAYS[d]}'s grammar slot` : mixedDay >= 0 ? `${EN_DAYS[mixedDay]}'s mixed review, most-missed first` : "the mixed review, most-missed first", go: "grammar." + x.tp.id, have: cm.n / cm.need, label2: `mastered ${Math.min(cm.n, cm.need)}/${cm.need} days` });
     });
     const lex = (rc.counts.get("lexique") || 0), mic = (rc.counts.get("micro") || 0);
-    if (lex + mic >= 2) out.push({ sev: 2 * (lex + mic), ico: "vocab", label: lex >= mic ? "Word choice" : "Micro-errors", ev: `×${Math.max(lex, mic)} in your last ${rc.n} texts${lex && mic ? `, and ${lex >= mic ? "micro-errors" : "word choice"} ×${Math.min(lex, mic)}` : ""}`, ex: ex(rc.ex.get(lex >= mic ? "lexique" : "micro")), fix: "Pièges cards this week, and Your mistakes", go: "grammar.mine" });
+    if (lex + mic >= 2) out.push({ sev: 2 * (lex + mic), ico: "vocab", label: lex >= mic ? "Word choice" : "Micro-errors", ev: `×${Math.max(lex, mic)} in your last ${rc.n} texts${lex && mic ? (lex >= mic ? `, and micro-errors ×${Math.min(lex, mic)}` : `, and word choice ×${Math.min(lex, mic)}`) : ""}`, ex: ex(rc.ex.get(lex >= mic ? "lexique" : "micro")), fix: "Pièges cards this week, and Your mistakes", go: "grammar.mine" });
     const acc = (rc.counts.get("accord") || 0) + (rc.counts.get("elision") || 0);
     if (acc >= 2) out.push({ sev: 2 * acc, ico: "errors", label: "Agreement & elision", ev: `×${acc} in your last ${rc.n} texts`, ex: ex(rc.ex.get("accord") || rc.ex.get("elision")), fix: "Find the mistakes, and the 3-minute proofreading pass", go: "grammar.hunt" });
     const lastW = list("writing").filter((w) => w.fb).sort((a, b) => (b.ts || 0) - (a.ts || 0))[0], LW = lastW && T.WRITING[lastW.task];
@@ -4354,7 +4399,7 @@
     const counts = errorCounts(21).slice(0, 5).map(([c, v]) => `${CAT[c]}: ${v.n}`).join("; ") || "nothing logged yet";
     const open = list("homework").filter((h) => !h.done).map((h) => h.text);
     const routes = T.TOPICS.map((tp) => "grammar." + tp.id).concat(["vocab", "writing.t1", "writing.t2", "writing.t3", "comp.co", "comp.ce", "comp.ce.exam", "comp.co.exam"]);
-    const prompt = `You set daily homework for a TCF Canada learner.\n${PROFILE}\nCurrent phase: ${s.phase}, ${P.name}: ${P.goal}\nMost frequent error categories over the last 3 weeks: ${counts}.\nOpen homework already assigned: ${open.join(" | ") || "none"}.\nSuggest 3 short, concrete homework tasks for tomorrow (5–15 minutes each), each aimed at one weakness, and say where to do it in the app, using one of: ${routes.join(", ")}.\nReply with only JSON: {"homework": [{"text": "task in English, with French examples if useful", "go": "one of the routes"}]}`;
+    const prompt = `You set daily homework for a TCF Canada learner.\n${profile()}\nCurrent phase: ${s.phase}, ${P.name}: ${P.goal}\nMost frequent error categories over the last 3 weeks: ${counts}.\nOpen homework already assigned: ${open.join(" | ") || "none"}.\nSuggest 3 short, concrete homework tasks for tomorrow (5–15 minutes each), each aimed at one weakness, and say where to do it in the app, using one of: ${routes.join(", ")}.\nReply with only JSON: {"homework": [{"text": "task in ${replyLang()}, with French examples if useful", "go": "one of the routes"}]}`;
     const out = await ask("hw-suggest", prompt);
     if (!out) return;
     ui.hwSug = arr(out.homework).slice(0, 3).filter((h) => h && h.text).map((h) => ({ text: str(h.text), go: routes.includes(str(h.go)) ? str(h.go) : "" }));
@@ -4407,7 +4452,7 @@
         const ring = last ? CH.ring(v, { size: 34, stroke: 4, color: m.ok || (p && v >= p - 1e-9) ? "var(--green)" : "var(--accent)", target: p, text: String(Math.round(v * 100)), tip: `Latest round ${last.score}/${last.total} · ${shortDate(last.date)}${p ? `\nTarget ${Math.round(p * 100)} % on the day's first round` : ""}` }) : "";
         return `<li><a href="#grammar.${tp.id}">
           <span class="n">${tp.n}</span>
-          <span class="t"><b>${esc(tp.title)}</b><small>${esc(tp.en)}</small></span>
+          <span class="t"><b>${esc(tp.title)}</b><small class="en-gloss">${esc(tp.en)}</small></span>
           <span class="meta">${tp.phase === s.phase ? `<span class="pill info">Phase ${tp.phase}</span>` : ""}${ring}${statusPill(m)}</span>
         </a></li>`;
       }).join("")}</ol>
@@ -4541,7 +4586,7 @@
     }).join("");
     const pr = tp.prod ? prodPanel(tp) : "";
     const head = `<div><a class="btn ghost sm" href="#grammar">← All topics</a></div>
-      <header class="stack tight"><p class="eyebrow">Topic ${tp.n} · Phase ${tp.phase} focus${tp.phase === s.phase ? " · this phase" : ""}</p><h1 class="title">${esc(tp.title)}<small>${esc(tp.en)}</small></h1>${fxTabs("grammar." + tp.id)}</header>`;
+      <header class="stack tight"><p class="eyebrow">Topic ${tp.n} · Phase ${tp.phase} focus${tp.phase === s.phase ? " · this phase" : ""}</p><h1 class="title">${esc(tp.title)}<small class="en-gloss">${esc(tp.en)}</small></h1>${fxTabs("grammar." + tp.id)}</header>`;
     // During a round: the question, with the notes a tap away. History and mastery come back with the results.
     if (active && !ui.drill.done) return `<div class="wrap focus">${head}${drillBox(tp.id)}${fold("notes-" + tp.id, "Notes · L'essentiel, tes erreurs, des exemples", `<div class="notes">${topicNotes(tp)}</div>`)}</div>`;
     return `<div class="wrap">
@@ -5400,7 +5445,7 @@
       const lr = cs.filter((c) => S.srs.has(c.id)).length;
       const ms = cs.filter((c) => (S.srs.get(c.id) || {}).stage >= 5).length;
       return `<tr>
-        <td><b class="fr">${esc(th.label)}</b><br><span class="small muted">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
+        <td><b class="fr">${esc(th.label)}</b><br><span class="small muted en-gloss">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
         <td class="n">${lr} / ${cs.length}</td><td class="n">${ms}</td>
         <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
@@ -5624,7 +5669,7 @@
             <span class="row"><button class="btn sm" data-act="w-next">Another prompt</button>${claudeBtn("w-gen", "w-gen", "New prompt from Claude", "", "btn sm")}</span></div>
           ${ui.confirm === "w-switch-w-next" || ui.confirm === "w-switch-w-gen" ? `<div class="notice warn small">A new prompt would leave your draft answering the wrong question, so the draft would be discarded.<div class="row" style="margin-top:8px"><button class="btn sm danger" data-act="${ui.confirm.slice(9)}">Discard the draft and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep my draft</button></div></div>` : ""}
           <p class="fr">${typo(p.q)}</p>
-          ${p.en ? `<p class="small muted">${esc(p.en)}</p>` : ""}
+          ${p.en ? `<p class="small muted en-gloss">${esc(p.en)}</p>` : ""}
           ${docs}
         </section>
         <details class="fold"><summary>Structure and template</summary>
@@ -5845,7 +5890,7 @@
   function whenOf(ts) {
     if (!ts) return "";
     const d = new Date(ts), day = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    return `${day === todayStr() ? "Today" : shortDate(day)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return day === todayStr() ? `Today ${pad(d.getHours())}:${pad(d.getMinutes())}` : `${shortDate(day)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
   const unfinished = () => list("inprogress").filter((x) => x && SECTION[x.kind]).sort((a, b) => (b.updated || 0) - (a.updated || 0));
   function ipProgress(ip) {
@@ -6262,7 +6307,7 @@
       ${tile("days", "today", "Jours actifs", D.span.toLowerCase(), `${n("days", D.active)}${D.studyDays ? `<small>/${D.studyDays}</small>` : ""}`, D.streak ? `Streak of ${D.streak} day${D.streak > 1 ? "s" : ""} · best ${D.best}` : `No streak right now · best ${D.best}`, "", CH.strip(D.strip.map((x) => ({ level: x.level, rest: x.rest, today: x.today, tip: dayTip(x) })), { label: `${D.active} of ${D.studyDays} study days with something done` }))}
       ${tile("acc", "grammar", "Précision", "grammar, first rounds", D.acc == null ? "—" : n("acc", Math.round(D.acc * 100), " %"), "The day's first round of each set, last 14 days", accPts == null ? "" : delta(accPts, accPts >= 0, `${accPts >= 0 ? "+" : "−"}${Math.abs(accPts)} pts on the 14 days before`), CH.spark(D.accWeeks.map((a) => (a == null ? null : a * 100)), { w: 150, h: 34, min: 0, max: 100, color: "var(--c-gra)" }))}
       ${tile("cards", "vocab", "Cartes", "learned", n("cards", D.learned), `${D.mastered} mastered · ${D.due} due today`, D.learnedWeek ? delta(D.learnedWeek, true, `+${D.learnedWeek} this week`) : "", CH.spark(D.learnedWeeks, { w: 150, h: 34, color: "var(--c-voc)" }))}
-      ${tile("rate", "errors", "Fautes", "per 100 words", rN ? CH.fr(rateNow, 1) : "—", rN ? `Your last ${Math.min(3, nR) > 1 ? Math.min(3, nR) + " corrected texts, on average" : "corrected text"} (latest ${shortDate(rN.w.date)})` : "Once Claude corrects a text", dRate == null ? "" : delta(dRate, dRate <= 0, `${dRate <= 0 ? "−" : "+"}${CH.fr(Math.abs(dRate), 1)} on your first ${k > 1 ? k + " texts" : "text"}`), CH.spark(D.rates.map((x) => x.rate), { w: 150, h: 34, min: 0, color: "var(--red)" }))}
+      ${tile("rate", "errors", "Fautes", "per 100 words", rN ? CH.fr(rateNow, 1) : "—", rN ? (Math.min(3, nR) > 1 ? `Your last ${Math.min(3, nR)} corrected texts, on average (latest ${shortDate(rN.w.date)})` : `Your last corrected text (latest ${shortDate(rN.w.date)})`) : "Once Claude corrects a text", dRate == null ? "" : delta(dRate, dRate <= 0, (k > 1 ? `${dRate <= 0 ? "−" : "+"}${CH.fr(Math.abs(dRate), 1)} on your first ${k} texts` : `${dRate <= 0 ? "−" : "+"}${CH.fr(Math.abs(dRate), 1)} on your first text`)), CH.spark(D.rates.map((x) => x.rate), { w: 150, h: 34, min: 0, color: "var(--red)" }))}
     </div>`;
   }
 
@@ -6304,7 +6349,7 @@
   function skillRadar(E) {
     const N = NCLC_UP.length, at = (n) => Math.max(0, NCLC_UP.findIndex((r) => r.n === n)) / N;
     return CH.radar(E.skills.map((x) => ({ label: `${T.SKILLS[x.k].code} · ${T.SKILLS[x.k].label}`, sub: x.est == null ? "pas encore de score" : `NCLC ${nclcLabel(x.nc)}`, value: x.est == null ? null : nclcPos(x.k, x.est), tip: x.est == null ? "" : `${x.name} · NCLC ${nclcLabel(x.nc)}\n${x.valTxt} · ${x.note}` })),
-      { key: "radar", min: -0.14, rings: [at(5), at(9)], target: at(7), targetLabel: "NCLC 7", label: `Each skill on the NCLC scale: ${E.skills.map((x) => `${T.SKILLS[x.k].code} ${x.est == null ? "no score yet" : "NCLC " + nclcLabel(x.nc)}`).join(", ")}` });
+      { key: "radar", min: -0.14, rings: [at(5), at(9)], target: at(7), targetLabel: "NCLC 7", label: "Each skill on the NCLC scale, against the NCLC 7 ring" });
   }
 
   // Where each skill stands against NCLC 7: the latest estimate, the ones before it, and how far there is to go.
@@ -6314,7 +6359,7 @@
       const empty = k === "eo" ? "Speaking is practised off the site: log a mock's score below." : k === "co" ? "No score yet: the CO practice exam gives a first estimate." : k === "ce" ? "No score yet: the CE practice exam gives a first estimate." : "No score yet: correct a writing task with Claude.";
       return `<div class="r-row">
         <span class="r-skill">${skChip(k)}<b>${name}</b></span>
-        ${CH.bullet({ key: "ready-" + k, bands: NCLC_UP.map((r) => ({ label: r.nclc, target: r.n === 7 })), pos: est == null ? null : nclcPos(k, est), ok, tip: est == null ? "" : `${valTxt} · NCLC ${nclcLabel(nc)}\n${note}`, ghosts: ghosts.slice(-6).map((h) => ({ pos: nclcPos(k, h.v), tip: `${scoreText(k, h.v)} · NCLC ${nclcLabel(nclcOf(k, h.v))}\n${h.src} · ${shortDate(h.date)}` })), label: `${name}: ${est == null ? "no score yet" : `${valTxt}, NCLC ${nclcLabel(nc)}`}` })}
+        ${CH.bullet({ key: "ready-" + k, bands: NCLC_UP.map((r) => ({ label: r.nclc, target: r.n === 7 })), pos: est == null ? null : nclcPos(k, est), ok, tip: est == null ? "" : `${valTxt} · NCLC ${nclcLabel(nc)}\n${note}`, ghosts: ghosts.slice(-6).map((h) => ({ pos: nclcPos(k, h.v), tip: `${scoreText(k, h.v)} · NCLC ${nclcLabel(nclcOf(k, h.v))}\n${h.src} · ${shortDate(h.date)}` })), label: est == null ? `${name}: no score yet` : `${name}: ${valTxt}, NCLC ${nclcLabel(nc)}` })}
         <span class="r-val">${est == null ? `<small>${empty}</small>` : `<b>${valTxt} · NCLC ${nclcLabel(nc)}</b><small>${esc(note)}</small>`}</span>
         ${gap}
       </div>`;
@@ -6520,7 +6565,7 @@
     return { used, html: CH.cols({
       key, h, legend: false, series: used.map((k) => ({ id: k, label: T.SKILLS[k].label, color: skColor(k) })), data: A.map((a) => used.map((k) => a.by[k] || 0)),
       label: `Minutes the plan asks each day: ${hm(A.reduce((m, a) => m + a.total, 0))} in all`,
-      x: A.map((a, i) => ({ label: labels && (A.length <= 7 || !(i % 2)) ? aheadLabel(a) : "", today: !a.i, rest: !a.plan, tip: `${aheadName(a)}${!a.plan ? " · rest day" : !a.i && !a.total ? " · the whole plan is done" : ` · ≈ ${hm(a.total)}${a.i ? " planned" : " still to do"}`}${used.filter((k) => a.by[k]).map((k) => `\n${T.SKILLS[k].label} · ${a.by[k]} min`).join("")}` })),
+      x: A.map((a, i) => ({ label: labels && (A.length <= 7 || !(i % 2)) ? aheadLabel(a) : "", today: !a.i, rest: !a.plan, tip: `${aheadName(a)}${!a.plan ? " · rest day" : !a.i && !a.total ? " · the whole plan is done" : (a.i ? ` · ≈ ${hm(a.total)} planned` : ` · ≈ ${hm(a.total)} still to do`)}${used.filter((k) => a.by[k]).map((k) => `\n${T.SKILLS[k].label} · ${a.by[k]} min`).join("")}` })),
     }) };
   }
   const aheadDue = (A, key, h) => CH.cols({ key, h, legend: false, series: [{ id: "due", label: "Cards due", color: "var(--c-voc)" }], data: A.map((a) => [a.due]), label: `Cards due each day: ${A.reduce((m, a) => m + a.due, 0)} in all`,
@@ -6541,7 +6586,7 @@
   }
   function aheadWide(D) {
     const A = aheadDays(D, 14);
-    return card(12, "Jour par jour · day by day", "Today counts only the blocks still open", CH.table(["Day", "The plan", "Minutes", "Cards due", "Reviews"], A.map((a) => [aheadName(a), !a.plan ? "Rest day" : a.blocks.length ? a.blocks.map((b) => clip(b, 40)).join(" · ") : "All done", a.plan ? hm(a.total) : "", a.due, a.due ? `≈ ${hm(a.rev)}` : ""])));
+    return card(12, "Jour par jour · day by day", "Today counts only the blocks still open", CH.table(["Day", "The plan", "Minutes", "Cards due", "Reviews"], A.map((a) => [aheadName(a), !a.plan ? "Rest day" : a.blocks.length ? a.blocks.join(" · ") : "All done", a.plan ? hm(a.total) : "", a.due, a.due ? `≈ ${hm(a.rev)}` : ""])));
   }
 
   // What you'd recall over the next 30 days if you stopped reviewing today: FSRS's chance of recall, averaged over
@@ -6603,7 +6648,7 @@
   const BENTO_ALIAS = { pass: "phase" };
   function tile(id, span, o) {
     const can = !!o.more, open = can && ui.bento === id;
-    const head = `<span class="bt-ico">${ico(o.icon)}</span><span class="bt-t"><b>${o.title}</b><small>${o.en}</small></span>`;
+    const head = `<span class="bt-ico">${ico(o.icon)}</span><span class="bt-t"><b>${o.title}</b><small class="en-gloss">${o.en}</small></span>`;
     return `<article class="btile${open ? " open" : ""}${span >= 12 ? " full" : ""}" id="sec-${id}" style="--span:${span};--vtn:bt-${id}" data-spot data-m="deal" data-k="tile-${id}">
       ${can ? `<button type="button" class="bt-h" id="tb-${id}" data-act="tile" data-id="${id}" aria-expanded="${open}" aria-controls="tm-${id}" title="${open ? "Close" : "Open the details"}">${head}<span class="bt-x"><span>${open ? "Réduire" : "Détails"}</span>${ico(open ? "collapse" : "expand")}</span></button>` : `<div class="bt-h">${head}</div>`}
       <div class="bt-body" id="tm-${id}"><div class="bt-pair"><div class="bt-face">${o.face}</div>${open ? `<div class="bt-more">${o.more()}</div>` : ""}</div>${open && o.wide ? `<div class="bt-wide">${o.wide()}</div>` : ""}${open ? `<div class="bt-foot"><button type="button" class="btn sm ghost" data-act="tile" data-id="${id}">${ico("collapse")}Réduire · close</button></div>` : ""}</div>
@@ -6826,6 +6871,7 @@
   const ACTS = {
     day: (el) => { ui.day = el.dataset.date; render(true); },
     theme: toggleTheme,
+    lang: toggleLang,
     tile: (el) => bentoToggle(el.dataset.id),
     stop: (el) => { const c = busy[el.dataset.key]; if (c) c.abort(); },
     confirm: (el) => { ui.confirm = el.dataset.key; render(true); },
