@@ -405,117 +405,128 @@
   }
  },
  "co-exam-1-29": {
-  "date": "2026-10-09",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "ba0d4cba233b",
-  "seconds": 43.1,
+  "pace": "Speak at a natural pace.",
+  "seconds": 31.8,
   "voices": {
-   "A": "vivienne",
-   "B": "jean",
-   "Q": "vivienne"
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-30": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "13c2ddda349c",
-  "seconds": 43.1,
+  "pace": "Speak at a natural pace.",
+  "seconds": 44.8,
   "voices": {
-   "A": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-tutor-6",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-31": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "bcc6c4f5d26e",
-  "seconds": 43.3,
+  "pace": "Speak at a natural pace.",
+  "seconds": 41.4,
   "voices": {
-   "A": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-11",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-32": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "042e3025fcd3",
-  "seconds": 43.0,
+  "pace": "Speak at a natural pace.",
+  "seconds": 38.9,
   "voices": {
-   "A": "remy",
-   "B": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-advisor-4",
+   "B": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-33": {
-  "date": "2026-10-09",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "0d11184f5eb5",
-  "seconds": 44.6,
+  "pace": "Speak at a natural pace.",
+  "seconds": 37.5,
   "voices": {
-   "A": "sylvie",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-34": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "b5529c015e6e",
-  "seconds": 42.6,
+  "pace": "Speak at a natural pace.",
+  "seconds": 42.8,
   "voices": {
-   "A": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-35": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "878c10fc54e8",
-  "seconds": 51.5,
+  "pace": "Speak at a natural pace.",
+  "seconds": 48.8,
   "voices": {
-   "A": "vivienne",
-   "B": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-csagent-3",
+   "B": "fr-fr-training-4",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-36": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "7717c1db0916",
-  "seconds": 51.5,
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 53.3,
   "voices": {
-   "A": "remy",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-37": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "eadce97cb838",
-  "seconds": 51.5,
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 60.6,
   "voices": {
-   "A": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-38": {
-  "date": "2026-10-09",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "827d63f310f3",
-  "seconds": 49.6,
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 42.4,
   "voices": {
-   "A": "jean",
-   "B": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-podcaster-12",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-exam-1-39": {
-  "date": "2026-10-05",
-  "engine": "microsoft",
+  "date": "2026-10-16",
+  "engine": "gemini",
   "hash": "3f2c3835a703",
-  "seconds": 48.7,
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 55.1,
   "voices": {
-   "A": "vivienne",
-   "Q": "vivienne"
+   "A": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
   }
  },
  "co-famille-b1": {
