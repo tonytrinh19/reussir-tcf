@@ -2543,7 +2543,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> <i></i> <p>……</p> … …"
+   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
   ]
  },
  {
@@ -2680,7 +2680,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … <button>Close</button> …"
+   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … <button>Close</button> …"
   ]
  },
  {
@@ -2761,7 +2761,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> <i></i> <p>……</p> … …"
+   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
   ]
  },
  {
@@ -3476,6 +3476,15 @@
   ]
  },
  {
+  "id": "ae3c2104e1bd",
+  "text": "{0} more to equal it.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Record: … days · … more to equal it.</p>"
+  ]
+ },
+ {
   "id": "697a634bc0ca",
   "text": "{0} most recent",
   "kind": "pattern",
@@ -3567,7 +3576,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
   ]
  },
  {
@@ -3595,6 +3604,16 @@
   "where": "app",
   "ctx": [
    "… Any topic … …… <button>History · … of … done ↓</button>"
+  ]
+ },
+ {
+  "id": "6818a95c7c35",
+  "text": "{0} of {1} exit criteria met",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<small>Enregistrement · Check-in</small><span>…</span>",
+   "<span> … …/…</span>"
   ]
  },
  {
@@ -3697,12 +3716,30 @@
   ]
  },
  {
+  "id": "a31db03ab0f0",
+  "text": "{0} of {1}. The others are underlined in red.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… of …. The others are underlined in red."
+  ]
+ },
+ {
   "id": "5d7b321659dc",
   "text": "{0} of 20 reviews",
   "kind": "pattern",
   "where": "app",
   "ctx": [
    "… of 20 reviews"
+  ]
+ },
+ {
+  "id": "a978e4e350e3",
+  "text": "{0} of 3 milestones passed",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "……"
   ]
  },
  {
@@ -4408,7 +4445,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
   ]
  },
  {
@@ -4508,6 +4545,24 @@
   "where": "app",
   "ctx": [
    "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+  ]
+ },
+ {
+  "id": "5800fc0f5a9d",
+  "text": "{0}Record: {1} days",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Record: … days · … more to equal it.</p>"
+  ]
+ },
+ {
+  "id": "d302a7f5bc6c",
+  "text": "{0}Record: {1} days · {2} more to equal it.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Record: … days · … more to equal it.</p>"
   ]
  },
  {
@@ -5555,6 +5610,15 @@
   "ctx": []
  },
  {
+  "id": "81173e742c9d",
+  "text": "A clean sheet, well done!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A clean sheet, well done!"
+  ]
+ },
+ {
   "id": "904d2b234754",
   "text": "a clear, structured argument or exchange: introduction, development, conclusion, connectors",
   "kind": "exact",
@@ -5665,7 +5729,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
   ]
  },
  {
@@ -6017,6 +6081,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "519675ffcced",
+  "text": "A little more work on these.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A little more work on these."
+  ]
  },
  {
   "id": "0cc1bd76fbe7",
@@ -6453,6 +6526,15 @@
   ]
  },
  {
+  "id": "fa58951c9d58",
+  "text": "A retake: it doesn't count toward your estimate.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A retake: it doesn't count toward your estimate."
+  ]
+ },
+ {
   "id": "2570fa478e3c",
   "text": "À revoir · to look at again",
   "kind": "exact",
@@ -6738,6 +6820,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "bfaa1f5af818",
+  "text": "A tough one? Read it again with the answers.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A tough one? Read it again with the answers."
+  ]
  },
  {
   "id": "7f6a1ec2f32b",
@@ -7870,6 +7961,15 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "c5b6dc3304b1",
+  "text": "All right, and inside the clock!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "All right, and inside the clock!"
+  ]
  },
  {
   "id": "ff1db2c6c49b",
@@ -9177,7 +9277,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span>Semaine … · …</span></a>"
+   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>"
   ]
  },
  {
@@ -9484,6 +9584,15 @@
   "ctx": []
  },
  {
+  "id": "c57f120f6768",
+  "text": "Beau travail, ça rentre !",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Beau travail, ça rentre !"
+  ]
+ },
+ {
   "id": "1685e6055785",
   "text": "Beaucoup de questions follows the verb, so posé doesn't agree.",
   "kind": "exact",
@@ -9656,6 +9765,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "4715e1e8f5c6",
+  "text": "Bien entendu ! Tu as l'oreille.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Bien entendu ! Tu as l'oreille."
+  ]
  },
  {
   "id": "e1a23f4f7c0f",
@@ -9988,6 +10106,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "07698fd4a355",
+  "text": "Ça viendra. On reprend demain, ça va rentrer.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ça viendra. On reprend demain, ça va rentrer."
+  ]
  },
  {
   "id": "0a6917af0c2d",
@@ -10449,7 +10576,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
   ]
  },
  {
@@ -10458,7 +10585,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
   ]
  },
  {
@@ -10467,7 +10594,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
   ]
  },
  {
@@ -10476,7 +10603,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … ……<button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
   ]
  },
  {
@@ -10485,7 +10612,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … ……<button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
   ]
  },
  {
@@ -10823,6 +10950,15 @@
   ]
  },
  {
+  "id": "48431e7fc690",
+  "text": "Check-in",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<small>Enregistrement · Check-in</small><span>…</span>"
+  ]
+ },
+ {
   "id": "c6e8b57e4620",
   "text": "Check: recall it",
   "kind": "exact",
@@ -10846,6 +10982,15 @@
   "kind": "exact",
   "where": "drill",
   "ctx": []
+ },
+ {
+  "id": "1bcbf58971c4",
+  "text": "Chin up! Reread the rule, then retry the misses.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Chin up! Reread the rule, then retry the misses."
+  ]
  },
  {
   "id": "c059e6c3858c",
@@ -11276,7 +11421,7 @@
   "where": "attr:title",
   "ctx": [
    "<p>…Save to your cards</p><button>×</button>",
-   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … <button>Close</button> …",
+   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … <button>Close</button> …",
    "… <p>Your text is back with all … of your mistakes in it, as you wrote them; everything else is corrected. Tap each word that looks wrong (tap it again to unmark it), then check.</p> … <button>Check · … marked</button><button>Close</button>"
   ]
  },
@@ -11485,7 +11630,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>",
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>",
    "Comment ça marche · How it works"
   ]
  },
@@ -11495,7 +11640,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>",
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>",
    "Comment ça marche · How it works"
   ]
  },
@@ -11955,7 +12100,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
   ]
  },
  {
@@ -12784,6 +12929,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
+   "… <p>Nouveau tampon !</p><b>…</b><span>…</span><a>Voir mes tampons</a> …<button>×</button>",
    "<button>×</button>",
    "<p>Claude's suggestions. Nothing is saved unless you add it.</p> … <button>Dismiss</button>"
   ]
@@ -13384,6 +13530,15 @@
   ]
  },
  {
+  "id": "bc905ca0044f",
+  "text": "Eagle eye! {0} of {1}, found and fixed.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Eagle eye! … of …, found and fixed."
+  ]
+ },
+ {
   "id": "bd255607d31d",
   "text": "earlier scores",
   "kind": "exact",
@@ -13537,7 +13692,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> <i></i> <p>……</p> … …"
+   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
   ]
  },
  {
@@ -13820,7 +13975,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> <i></i> <p>……</p> … …"
+   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
   ]
  },
  {
@@ -13849,7 +14004,17 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<small>Enregistrement · Check-in</small><span>…</span>",
    "Enregistrement"
+  ]
+ },
+ {
+  "id": "db87ae113d8e",
+  "text": "Enregistrement · Check-in",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<small>Enregistrement · Check-in</small><span>…</span>"
   ]
  },
  {
@@ -14949,6 +15114,15 @@
   ]
  },
  {
+  "id": "6cf3dd15f7a7",
+  "text": "Finish today's plan to start a streak",
+  "kind": "exact",
+  "where": "attr:title",
+  "ctx": [
+   "<a>…Nouvelle série ?…</a>"
+  ]
+ },
+ {
   "id": "2d92099164c5",
   "text": "Finish without correction",
   "kind": "exact",
@@ -15260,7 +15434,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
   ]
  },
  {
@@ -15711,6 +15885,15 @@
   "ctx": []
  },
  {
+  "id": "ef5363b6c0cd",
+  "text": "Getting there. A look at the corrections?",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Getting there. A look at the corrections?"
+  ]
+ },
+ {
   "id": "9b15c81ccabb",
   "text": "ghost sm",
   "kind": "exact",
@@ -15918,6 +16101,15 @@
   "kind": "exact",
   "where": "writing",
   "ctx": []
+ },
+ {
+  "id": "58f5eb0f33b4",
+  "text": "Guess the meaning, then turn it over.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span></span> …<p>Guess the meaning, then turn it over.</p>… …<p>…</p> ……"
+  ]
  },
  {
   "id": "9c595385271f",
@@ -16488,7 +16680,7 @@
   "where": "app",
   "ctx": [
    "Comment ça se passe · How it works",
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>",
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>",
    "Comment ça marche · How it works"
   ]
  },
@@ -17419,6 +17611,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "dad5ca35080b",
+  "text": "It'll come. We'll pick it up tomorrow, it'll sink in.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "It'll come. We'll pick it up tomorrow, it'll sink in."
+  ]
  },
  {
   "id": "c475466fb818",
@@ -18642,7 +18843,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> Level Correct Points … <p>……</p> … … …",
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …",
    "…",
    "Date Task Words Level …"
   ]
@@ -18693,6 +18894,15 @@
   "where": "app",
   "ctx": [
    "Liste"
+  ]
+ },
+ {
+  "id": "8eb59fa781af",
+  "text": "Listen again with the transcript, it helps.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Listen again with the transcript, it helps."
   ]
  },
  {
@@ -20330,12 +20540,30 @@
   ]
  },
  {
+  "id": "c103861337a3",
+  "text": "NCLC 7 atteint ! Quel examen !",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "NCLC 7 atteint ! Quel examen !"
+  ]
+ },
+ {
   "id": "eff17629ee6d",
   "text": "NCLC 7 ATTEINT ★",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "NCLC 7 ATTEINT ★"
+  ]
+ },
+ {
+  "id": "7ac07dc6951b",
+  "text": "NCLC 7 reached! What an exam!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "NCLC 7 reached! What an exam!"
   ]
  },
  {
@@ -21087,6 +21315,13 @@
   ]
  },
  {
+  "id": "74df2c56c568",
+  "text": "New stamp",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": []
+ },
+ {
   "id": "3c2eea50879a",
   "text": "New words: immigration & admin",
   "kind": "exact",
@@ -21152,7 +21387,7 @@
   "where": "app",
   "ctx": [
    "<button>Next text</button>",
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
   ]
  },
  {
@@ -21171,6 +21406,15 @@
   "where": "app",
   "ctx": [
    "<p><b>Next week's two aren't picked yet.</b> Open this to choose them.</p>"
+  ]
+ },
+ {
+  "id": "b2a5e8aba12a",
+  "text": "Nice work, it's sinking in!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Nice work, it's sinking in!"
   ]
  },
  {
@@ -21858,6 +22102,33 @@
   ]
  },
  {
+  "id": "263480e52a40",
+  "text": "Not a single mistake! Hats off.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Not a single mistake! Hats off."
+  ]
+ },
+ {
+  "id": "671ede984dc5",
+  "text": "Not bad! Go over the misses below.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Not bad! Go over the misses below."
+  ]
+ },
+ {
+  "id": "7aab84aa110f",
+  "text": "Not bad! The explanations show where the trap was.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Not bad! The explanations show where the trap was."
+  ]
+ },
+ {
   "id": "86cc0f23824e",
   "text": "not corrected",
   "kind": "exact",
@@ -21886,12 +22157,30 @@
   ]
  },
  {
+  "id": "506d4e5745e4",
+  "text": "Not met yet",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Not met yet"
+  ]
+ },
+ {
   "id": "e45714907316",
   "text": "Not now",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "<li> <p><b>…</b> <span>· …</span></p> Examples <span>one per line, French — English</span> … <button>Save</button><button>Not now</button> </li>"
+  ]
+ },
+ {
+  "id": "ab1651b59cfb",
+  "text": "Not one mistake got past you. Hats off!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Not one mistake got past you. Hats off!"
   ]
  },
  {
@@ -22293,6 +22582,24 @@
   "ctx": []
  },
  {
+  "id": "cafe5f11d6a3",
+  "text": "nouveau",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>nouveau</span>"
+  ]
+ },
+ {
+  "id": "31858261faa3",
+  "text": "Nouveau tampon !",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <p>Nouveau tampon !</p><b>…</b><span>…</span><a>Voir mes tampons</a> …<button>×</button>"
+  ]
+ },
+ {
   "id": "01e3f654ba82",
   "text": "nouvelle",
   "kind": "exact",
@@ -22327,8 +22634,8 @@
   "where": "app",
   "ctx": [
    "· now …",
-   "<span><span><i></i></span><small>… · now …</small></span>",
-   "now"
+   "now",
+   "<span><span><i></i></span><small>… · now …</small></span>"
   ]
  },
  {
@@ -22356,6 +22663,15 @@
   "where": "app",
   "ctx": [
    "objectif 90 %"
+  ]
+ },
+ {
+  "id": "c5664b95f00b",
+  "text": "Objectif atteint ! Bravo.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Objectif atteint ! Bravo."
   ]
  },
  {
@@ -22402,7 +22718,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
   ]
  },
  {
@@ -22421,6 +22737,16 @@
   "where": "app",
   "ctx": [
    "… of … days so far: the day's first round at …, a week apart"
+  ]
+ },
+ {
+  "id": "b70d674c2c7f",
+  "text": "of {0} exit criteria met",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<small>Enregistrement · Check-in</small><span>…</span>",
+   "<span> … …/…</span>"
   ]
  },
  {
@@ -22505,6 +22831,15 @@
   ]
  },
  {
+  "id": "ccc9cdfca5c4",
+  "text": "of {0}. The others are underlined in red.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… of …. The others are underlined in red."
+  ]
+ },
+ {
   "id": "26e11a6ecd8b",
   "text": "of 20 reviews",
   "kind": "exact",
@@ -22514,12 +22849,21 @@
   ]
  },
  {
+  "id": "0913eadd6146",
+  "text": "of 3 milestones passed",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "……"
+  ]
+ },
+ {
   "id": "58ed02249ab5",
   "text": "of about",
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
   ]
  },
  {
@@ -22528,7 +22872,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>…Régularité</h2>… <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
+   "<h2>…Régularité</h2>… … <p>Cette semaine · <b>…</b> of about …</p>… … <summary>Comment ça marche · How it works</summary><p>…A day counts once every block in its plan is ticked. Sundays don't break a streak.</p>"
   ]
  },
  {
@@ -22704,6 +23048,15 @@
   "ctx": []
  },
  {
+  "id": "113e71db473b",
+  "text": "On progresse. Un coup d'œil aux corrections ?",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "On progresse. Un coup d'œil aux corrections ?"
+  ]
+ },
+ {
   "id": "1b6949b2876e",
   "text": "on the clock",
   "kind": "exact",
@@ -22852,6 +23205,15 @@
   "where": "app",
   "ctx": [
    "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+  ]
+ },
+ {
+  "id": "dbf1bd35a96a",
+  "text": "One more practice exam: that's how you improve.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "One more practice exam: that's how you improve."
   ]
  },
  {
@@ -24061,6 +24423,24 @@
   "ctx": []
  },
  {
+  "id": "67126020a6ab",
+  "text": "Perfect! Nothing got past you.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Perfect! Nothing got past you."
+  ]
+ },
+ {
+  "id": "2307768eb43f",
+  "text": "Perfect! Nothing to correct.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Perfect! Nothing to correct."
+  ]
+ },
+ {
   "id": "5dcbfcb051d2",
   "text": "Persisting since your very first session. Writing and correcting hasn't extinguished it, so it needs a different practice mode: isolated, fast, daily.",
   "kind": "exact",
@@ -24091,7 +24471,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span>Semaine … · …</span></a>",
+   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>",
    "<p>…</p> <b>Phase … · …</b><span>Semaine …</span><span>…</span>… … … … ……………",
    "<span>Phase …</span>"
   ]
@@ -24102,7 +24482,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span>Semaine … · …</span></a>",
+   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>",
    "<p>…</p> <b>Phase … · …</b><span>Semaine …</span><span>…</span>… … … … ……………",
    "… of … criteria met Phase … · …"
   ]
@@ -24448,7 +24828,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
   ]
  },
  {
@@ -25233,6 +25613,15 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "ff156edb6c27",
+  "text": "Proofreading takes practice. Keep at it, it comes!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Proofreading takes practice. Keep at it, it comes!"
+  ]
  },
  {
   "id": "6e72146be562",
@@ -26061,11 +26450,29 @@
   "ctx": []
  },
  {
+  "id": "2e4b94940bda",
+  "text": "Record run: {0} days in a row!",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…<b>Record run: … days in a row!</b></p>"
+  ]
+ },
+ {
   "id": "eb93b058cad2",
   "text": "Record the score as a baseline, not as pass/fail.",
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "37bfc661bc20",
+  "text": "Record: {0} days · {1} more to equal it.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Record: … days · … more to equal it.</p>"
+  ]
  },
  {
   "id": "89d47f136872",
@@ -26099,6 +26506,15 @@
   "where": "app",
   "ctx": [
    "<button>…Réduire · close</button>"
+  ]
+ },
+ {
+  "id": "e2a7a72603d6",
+  "text": "Réécoute avec la transcription, ça aide.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Réécoute avec la transcription, ça aide."
   ]
  },
  {
@@ -26221,6 +26637,15 @@
   "where": "app",
   "ctx": [
    "<a>← All topics</a> <p>Relecture</p><h1>Find the mistakes<small>Tap the words that look wrong, then correct them</small></h1>… … …"
+  ]
+ },
+ {
+  "id": "b84e356e994f",
+  "text": "Relire, ça s'apprend. On s'entraîne, ça vient !",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Relire, ça s'apprend. On s'entraîne, ça vient !"
   ]
  },
  {
@@ -26513,7 +26938,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>…</span>… <button>…</button> <button>Reset</button> …"
+   "<span>…</span>… <button>…</button> <button>Reset</button> … …"
   ]
  },
  {
@@ -26652,7 +27077,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … <button>Close</button> …"
+   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … <button>Close</button> …"
   ]
  },
  {
@@ -27091,6 +27516,15 @@
   ]
  },
  {
+  "id": "ec173e07feba",
+  "text": "Right, but a little slow: mind the clock.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Right, but a little slow: mind the clock."
+  ]
+ },
+ {
   "id": "00c76e2afd0a",
   "text": "role=\"img\" aria-label=\"{0}\"",
   "kind": "pattern",
@@ -27484,6 +27918,15 @@
   "where": "app",
   "ctx": [
    "<p>Sans faute !</p>"
+  ]
+ },
+ {
+  "id": "de3707de3940",
+  "text": "Sans faute ! Chapeau.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Sans faute ! Chapeau."
   ]
  },
  {
@@ -29215,6 +29658,15 @@
   ]
  },
  {
+  "id": "6ce394eb67b0",
+  "text": "So close to NCLC 7! One more push.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "So close to NCLC 7! One more push."
+  ]
+ },
+ {
   "id": "401baed264dc",
   "text": "so far · {0} this week",
   "kind": "pattern",
@@ -30300,6 +30752,15 @@
   ]
  },
  {
+  "id": "9cba899b803f",
+  "text": "Target met! Well done.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Target met! Well done."
+  ]
+ },
+ {
   "id": "0bf2d20b7490",
   "text": "Targeted grammar drill",
   "kind": "exact",
@@ -31035,7 +31496,7 @@
   "where": "app",
   "ctx": [
    "<summary>The corrected text</summary> <p>…</p>",
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
   ]
  },
  {
@@ -32808,6 +33269,15 @@
   ]
  },
  {
+  "id": "845bc954795c",
+  "text": "Those mistakes are fixed now!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Those mistakes are fixed now!"
+  ]
+ },
+ {
   "id": "cfd76bebd9a7",
   "text": "Three elisions: s', qu', n'.",
   "kind": "exact",
@@ -33014,7 +33484,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<span>…</span>… <button>…</button> <button>Reset</button> …"
+   "<span>…</span>… <button>…</button> <button>Reset</button> … …"
   ]
  },
  {
@@ -33539,6 +34009,15 @@
   ]
  },
  {
+  "id": "27fccf56b3c9",
+  "text": "Tu as atteint l'objectif. Bien joué !",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Tu as atteint l'objectif. Bien joué !"
+  ]
+ },
+ {
   "id": "a5fe333ff875",
   "text": "Tu is the subject, so the object is ce que.",
   "kind": "exact",
@@ -33560,6 +34039,42 @@
   "kind": "exact",
   "where": "phase",
   "ctx": []
+ },
+ {
+  "id": "da1e733020f8",
+  "text": "Turn back",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Turn back"
+  ]
+ },
+ {
+  "id": "0916919dd333",
+  "text": "Turn over",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Turn over"
+  ]
+ },
+ {
+  "id": "90b0e0a9e784",
+  "text": "Turn the bell off",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Turn the bell off"
+  ]
+ },
+ {
+  "id": "94d332529730",
+  "text": "Turn the bell on",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Turn the bell on"
+  ]
  },
  {
   "id": "8fcb213c5718",
@@ -33928,6 +34443,15 @@
   "ctx": []
  },
  {
+  "id": "1af94c975d73",
+  "text": "Un examen blanc de plus : c'est comme ça qu'on progresse.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Un examen blanc de plus : c'est comme ça qu'on progresse."
+  ]
+ },
+ {
   "id": "5dda0a4016de",
   "text": "Un mois plus tôt points back to an earlier past: plus-que-parfait.",
   "kind": "exact",
@@ -34258,6 +34782,15 @@
   "ctx": []
  },
  {
+  "id": "e9512e10cbdd",
+  "text": "Very good! Nearly all right.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Very good! Nearly all right."
+  ]
+ },
+ {
   "id": "48af1ebd8a03",
   "text": "Victims « se sentent moins anxieuses » and offenders « récidivent moins souvent », yet the programme « ne remplace pas la peine » and is voluntary for both sides.",
   "kind": "exact",
@@ -34332,6 +34865,15 @@
   ]
  },
  {
+  "id": "4e92ba1c8058",
+  "text": "Voir mes tampons",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <p>Nouveau tampon !</p><b>…</b><span>…</span><a>Voir mes tampons</a> …<button>×</button>"
+  ]
+ },
+ {
   "id": "a06a7d5a2d66",
   "text": "Voir: que je voie, but vous voyiez (from nous voyons).",
   "kind": "exact",
@@ -34345,7 +34887,7 @@
   "where": "app",
   "ctx": [
    "<span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span> <small>Départ · From</small><b>B1</b><span>Where you started</span> … <small>Arrivée · To</small><b>NCLC 7</b><span>All four skills</span> Phase … · … Semaine · Week … sur … Porte · Gate …",
-   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span>Semaine … · …</span></a>"
+   "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>"
   ]
  },
  {
@@ -34644,6 +35186,24 @@
   "kind": "exact",
   "where": "phase",
   "ctx": []
+ },
+ {
+  "id": "c80f61ea8d46",
+  "text": "Well heard! You've got the ear for it.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Well heard! You've got the ear for it."
+  ]
+ },
+ {
+  "id": "4edabf5e729d",
+  "text": "Well read! The traps didn't catch you.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Well read! The traps didn't catch you."
+  ]
  },
  {
   "id": "a381bcaef87e",
@@ -35765,6 +36325,15 @@
   "where": "app",
   "ctx": [
    "You're moving up to B2 in …!"
+  ]
+ },
+ {
+  "id": "7e0baade7e6a",
+  "text": "You've hit the target. Nice work!",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "You've hit the target. Nice work!"
   ]
  },
  {

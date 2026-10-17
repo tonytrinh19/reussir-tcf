@@ -357,6 +357,24 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .streak.t4 { background: color-mix(in srgb, var(--leaf-4) 16%, transparent); } .streak.t4 svg, .leaf-ico.t4 { fill: var(--leaf-4); }
 .leaf-ico.t0 { fill: var(--ink-3); }
 .streak small { font-weight: 700; color: var(--ink-3); font-size: 11.5px; }
+/* The sidebar's streak: the pill, with the last seven days as dots in the tier's leaf colour (full, half for a day
+   part done, hollow for nothing, a dash for Sunday's rest, a ring for today while it's open). With no streak it
+   asks for a new one. It links to today's plan. */
+.streak.sf { text-decoration: none; gap: 7px; padding-right: 11px; transition: transform var(--dur-fast) var(--ease); }
+.streak.sf:hover { transform: translateY(-1px); }
+.streak.t0 { background: var(--sunk); color: var(--ink-2); } .streak.t0 svg { fill: var(--leaf-1); }
+.sf-days { display: inline-flex; align-items: center; gap: 3px; margin-left: 2px; }
+.sf-days i { --c: var(--leaf-1); width: 6px; height: 6px; border-radius: 50%; box-shadow: inset 0 0 0 1.2px var(--rule-2); }
+.streak.t2 .sf-days i { --c: var(--leaf-2); } .streak.t3 .sf-days i { --c: var(--leaf-3); } .streak.t4 .sf-days i { --c: var(--leaf-4); }
+.sf-days i.l3 { background: var(--c); box-shadow: none; }
+.sf-days i.l1 { background: color-mix(in srgb, var(--c) 45%, transparent); box-shadow: none; }
+.sf-days i.rest { height: 2px; border-radius: 1px; box-shadow: none; background: var(--rule-2); }
+.sf-days i.now:not(.l3) { box-shadow: inset 0 0 0 1.5px var(--c); }
+@media (prefers-reduced-motion: reduce) { .streak.sf:hover { transform: none; } }
+/* Régularité's record: the longest run so far, to beat. */
+.sc-rec { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--ink-2); }
+.sc-rec svg { width: 14px; height: 15px; flex: none; }
+.sc-rec.on b { color: var(--ink); }
 /* Stamps to collect: earned ones sit a little crooked; the ones still to earn wait in grey. */
 .stamps { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 18px 10px; }
 @media (max-width: 1100px) { .stamps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -374,6 +392,7 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .stamp-cell figcaption { display: grid; gap: 2px; justify-items: center; }
 .stamp-cell b { font: 700 13.5px/1.2 var(--f-ui); }
 .stamp-cell small { color: var(--ink-3); font-size: 12px; line-height: 1.3; max-width: 17ch; }
+.st-new { font: 800 10px/1 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent); padding: 3px 7px; border-radius: 999px; }
 /* "Journée validée": a stamp lands on the day's header once every block is ticked. */
 .tb-stamp { width: 150px; height: auto; color: var(--red); transform: rotate(-11deg); overflow: visible; flex: none; }
 .tb-stamp text { fill: currentColor; font-family: var(--f-ui); font-weight: 800; font-size: 15.5px; letter-spacing: .05em; }
@@ -404,20 +423,64 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .seat b { font: 600 38px/1 var(--f-text); color: var(--red); }
 .barcode { width: 100%; height: 46px; display: block; }
 .barcode rect { fill: var(--ink); }
+/* Check-in: a box per exit criterion of the phase, ticked in blue ink once it's met; with all of them, the pass is
+   stamped « Prêt à embarquer » (in validated green, at the foot of the pass, tilted like a real stamp). */
+.checkin { display: grid; gap: 5px; }
+.checkin small { font: 700 10.5px/1.2 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.ck-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.ck { width: 19px; height: 19px; border: 1.5px solid var(--rule-2); border-radius: 5px; display: grid; place-items: center; background: var(--surface); cursor: default; }
+.ck.on { border-color: var(--accent); background: var(--accent-soft); }
+.ck svg { width: 15px; height: 15px; fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.pass-main { position: relative; }
+.board-stamp { position: absolute; right: 18px; bottom: 8px; width: min(180px, calc(100% - 44px)); height: auto; color: var(--green); transform: rotate(-7deg); pointer-events: none; overflow: visible; opacity: .92; }
+:root:not(.dark) .board-stamp { mix-blend-mode: multiply; }
+/* The pass grows a little at the bottom to make room for it, so it doesn't hide a field. */
+.pass.boarded .pass-main { padding-bottom: 72px; }
+.board-stamp text { fill: currentColor; font: 800 14.5px var(--f-ui); letter-spacing: .06em; }
+.board-stamp .tb-o { fill: none; stroke: currentColor; stroke-width: 3; }
+.board-stamp .tb-i { fill: none; stroke: currentColor; stroke-width: 1.2; }
+.bs-plane { fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; --pen: currentColor; }
 @media (max-width: 620px) {
   .pass { grid-template-columns: minmax(0, 1fr); }
   .pass-stub { border-left: 0; border-top: 2px dashed var(--rule-2); grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 16px; }
   .pass-stub::before, .pass-stub::after { top: -11px; bottom: auto; }
   .pass-stub::before { left: -11px; } .pass-stub::after { left: auto; right: -11px; }
   .city b { font-size: 26px; }
+  .checkin { grid-column: 1 / -1; order: 3; }
+  .board-stamp { width: min(158px, calc(100% - 40px)); right: 16px; bottom: 8px; }
+  .pass.boarded .pass-main { padding-bottom: 66px; }
 }
 .mini-pass { border: 1px solid var(--rule); border-radius: 14px; padding: 10px 11px 8px; display: grid; gap: 3px; background: var(--surface); text-decoration: none; color: var(--ink-3); box-shadow: var(--shadow-sm); transition: border-color var(--dur-fast), transform var(--dur-fast) var(--ease); }
 .mini-pass:hover { border-color: var(--rule-2); transform: translateY(-1px); }
 .mini-pass .top { display: flex; justify-content: space-between; gap: 6px; font: 800 9.5px/1.2 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 .mini-pass b { color: var(--ink); font-size: 13px; line-height: 1.25; }
 .mini-pass svg { width: 100%; height: auto; display: block; }
+.mini-pass .bot { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.mp-ck { display: inline-flex; align-items: center; gap: 2px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.mini-pass .mp-ck svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.mp-ck.all { color: var(--green); }
 /* L'expression du jour: a new saying every morning on a scrap of notebook paper. */
-.note-card { --mx: 48px; position: relative; transform: rotate(-1.2deg); padding: 30px 18px 16px 64px; border: 1px solid var(--rule); border-radius: 6px; box-shadow: var(--shadow); display: grid; gap: 0; margin: 10px 0 0; transition: transform var(--dur) var(--ease); }
+/* It turns over (the meaning is on its back): its two faces share one grid cell, so the scrap fits the taller one,
+   and they turn together around the vertical axis; the tape stays where it is. With reduced motion, they cross-fade. */
+.note-card { position: relative; transform: rotate(-1.2deg); margin: 10px 0 0; transition: transform var(--dur) var(--ease); perspective: 1100px; cursor: pointer; }
+.xp-in { display: grid; transform-style: preserve-3d; transition: transform 560ms cubic-bezier(.3, .7, .2, 1); }
+.note-card.turned .xp-in { transform: rotateY(180deg); }
+.xp-face { grid-area: 1 / 1; --mx: 48px; display: grid; align-content: start; padding: 30px 18px 16px 64px; border: 1px solid var(--rule); border-radius: 6px; box-shadow: var(--shadow); backface-visibility: hidden; -webkit-backface-visibility: hidden; min-width: 0; }
+.xp-back { transform: rotateY(180deg); }
+.note-card .tape { z-index: 2; }
+.xp-hint { margin: 0; font-size: 13px; line-height: 32px; color: var(--ink-3); }
+.xp-btn { justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; height: 28px; margin-top: 2px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--surface); color: var(--accent); font: 700 12.5px/1 var(--f-ui); cursor: pointer; }
+.xp-btn:hover { border-color: var(--accent); }
+.xp-btn span { font-size: 14px; }
+.xp-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.xp-foot .xp-btn { margin: 0; width: 28px; padding: 0; justify-content: center; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) {
+  .xp-in, .note-card.turned .xp-in { transition: none; transform: none; }
+  .xp-back { transform: none; }
+  .xp-face { transition: opacity 200ms ease; }
+  .xp-back, .note-card.turned .xp-front { opacity: 0; }
+  .note-card.turned .xp-back { opacity: 1; }
+}
 .note-card:hover { transform: rotate(-.4deg) translateY(-2px); }
 .note-card .tape { position: absolute; top: -11px; left: calc(50% - 56px); width: 112px; height: 24px; transform: rotate(2.5deg); background: var(--tape); border-left: 1px dashed color-mix(in srgb, var(--accent) 30%, transparent); border-right: 1px dashed color-mix(in srgb, var(--accent) 30%, transparent); }
 .note-card .eyebrow { line-height: 32px; }
@@ -455,6 +518,11 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 
 .bar { height: 8px; border-radius: 999px; background: var(--sunk); overflow: hidden; }
 .bar > i { display: block; height: 100%; background: var(--green); border-radius: inherit; }
+/* A long card session's milestones: three maple leaves along the bar, pale until the bar passes them, then gold. */
+.vbar { position: relative; }
+.vbar .ms { position: absolute; top: 50%; translate: -50% -50%; width: 20px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: var(--paper); }
+.vbar .ms svg { width: 14px; height: 15px; fill: var(--rule-2); transition: fill var(--dur) var(--ease); }
+.vbar .ms.on svg { fill: var(--leaf-2); filter: drop-shadow(0 1px 1px rgb(var(--shade) / .25)); }
 
 /* red-pen corrections */
 .pen-wrong { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; color: var(--ink-2); font-family: var(--f-text); }
@@ -806,7 +874,7 @@ textarea.seyes:focus { outline: none; box-shadow: none; }
 .meter.over .fill { background: var(--red); }
 .meter.over .lab b { color: var(--red); }
 .timer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.timer .clock { font: 800 22px/1 var(--f-ui); font-variant-numeric: tabular-nums; min-width: 4.2ch; }
+.timer .clock { display: inline-block; font: 800 22px/1 var(--f-ui); font-variant-numeric: tabular-nums; min-width: 4.2ch; }
 .timer .clock.over { color: var(--red); }
 .timer.done .clock { color: var(--green); }
 .timer.done .clock.over { color: var(--red); }
@@ -970,6 +1038,24 @@ table.nclc tr.target td { background: var(--green-soft); font-weight: 700; }
 body:has(#nextup:not([hidden])) .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
 body:has(#nextup:not([hidden])) #view { padding-bottom: 96px; }
 @media (prefers-reduced-motion: reduce) { .nu-tick { animation: none; } }
+/* A stamp just earned: pressed into the margin of a notebook scrap at the top of the page, with Rémy cheering
+   (app.js's #award, moved by motion.js). It isn't modal: it goes away by itself, on a click elsewhere or on Esc. */
+.award { --mx: 116px; position: fixed; top: calc(14px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 21; width: min(460px, calc(100vw - 32px)); display: grid; grid-template-columns: 92px minmax(0, 1fr) auto; align-items: center; gap: 4px 22px; padding: 14px 14px 12px 12px; border: 1px solid var(--rule-2); border-radius: var(--r-card); box-shadow: var(--shadow-lg); }
+.award[hidden] { display: none; }
+.aw-stamp { display: grid; place-items: center; }
+.aw-stamp .stamp { width: 92px; max-width: none; }
+.aw-txt { display: grid; gap: 1px; min-width: 0; padding-block: 2px; }
+.aw-kick { margin: 0; font: 400 15px/1.5 var(--f-hand); color: var(--accent); }
+.aw-txt b { font: 800 17px/1.25 var(--f-ui); }
+.aw-txt span { font-size: 13px; line-height: 1.35; color: var(--ink-2); }
+.aw-go { justify-self: start; margin-top: 6px; font-size: 13px; font-weight: 700; text-decoration: none; }
+.aw-go::after { content: " →"; }
+.aw-go:hover { text-decoration: underline; }
+.award .mascot { width: 52px; align-self: end; }
+.aw-x { position: absolute; top: 4px; right: 4px; padding: 2px 9px; }
+@media (min-width: 881px) { .award { left: calc(50% + 122px); width: min(460px, calc(100vw - 276px)); } }
+@media (max-width: 880px) { .award { top: calc(env(safe-area-inset-top, 0px) + var(--rail-h, 0px) + 10px); } }
+@media (max-width: 420px) { .award { --mx: 92px; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 4px 18px; } .aw-stamp .stamp { width: 70px; } .award .mascot { width: 42px; } }
 .grab { position: fixed; right: 20px; bottom: 20px; z-index: 15; width: min(380px, calc(100vw - 40px)); max-height: calc(100vh - 40px); overflow: auto; display: grid; gap: 12px; padding: 18px 20px; box-shadow: var(--shadow-lg); }
 .grab-btn[hidden], .grab[hidden] { display: none; }
 .grab-dup { display: grid; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--sunk); }
@@ -1277,7 +1363,7 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
 .c-redge { stroke: var(--rule-2); }
 .c-rtarget { stroke: var(--ink-3); stroke-width: 1.5; stroke-dasharray: 4 4; fill: color-mix(in srgb, var(--green) 6%, transparent); }
 .c-rs { stroke: var(--c-grid); stroke-width: 1; }
-.c-rfig { transform-box: view-box; transform-origin: 50% 50%; }
+.c-rfig, .c-rtarget { transform-box: view-box; transform-origin: 50% 50%; }
 .c-rshape { fill: color-mix(in srgb, var(--c) 16%, transparent); stroke: var(--c); stroke-width: 2; stroke-linejoin: round; }
 .c-rseg { stroke: var(--c); stroke-width: 2; stroke-linecap: round; }
 .c-rdot { position: absolute; z-index: 2; width: 11px; height: 11px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2.5px var(--surface); translate: -50% -50%; transition: scale var(--dur-fast) var(--ease); }
@@ -1631,6 +1717,7 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
 <button type="button" class="grab-btn" id="grab-btn" data-act="grab-open" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-vocab"/></svg>Save to cards</button>
 <aside class="grab panel" id="grab" aria-label="Save to your cards" hidden></aside>
 <aside class="nextup" id="nextup" aria-label="Next in today's plan" aria-live="polite" hidden></aside>
+<aside class="award seyes" id="award" aria-label="New stamp" aria-live="polite" hidden></aside>
 
 <script src="data.js"></script>
 <script src="fr.js"></script>

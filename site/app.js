@@ -135,6 +135,9 @@
   let backend = { kind: "loading" };
   let loaded = false;
   let hydrated = false;
+  // Every collection has arrived (loaded can also be set by the 6 s fallback, with some still on their way), and a
+  // count of the changes to your progress, so the stamps are only worked out again after something changed.
+  let allIn = false, dataRev = 0;
   const pendingOps = [];
   const chains = new Map();
 
@@ -153,6 +156,7 @@
   }
   function put(coll, id, data) {
     S[coll].set(id, data);
+    dataRev++;
     scheduleRender();
     const op = ["set", coll, id, data];
     if (backend.kind === "loading") { pendingOps.push(op); return Promise.resolve(); }
@@ -160,6 +164,7 @@
   }
   function remove(coll, id) {
     S[coll].delete(id);
+    dataRev++;
     scheduleRender();
     const op = ["del", coll, id];
     if (backend.kind === "loading") { pendingOps.push(op); return Promise.resolve(); }
@@ -184,7 +189,7 @@
       return Promise.resolve();
     };
     backend = { kind: "local", set: save, del: save };
-    loaded = true;
+    loaded = allIn = true;
     flushPending();
     render(false);
   }
@@ -213,7 +218,7 @@
     for (const c of COLLS) for (const [id, v] of Object.entries(data[c] || {})) if (!S[c].has(id)) S[c].set(id, v);
     backend = { kind: "server", set: (c, id, d) => req("PUT", c, id, d), del: (c, id) => req("DELETE", c, id) };
     carried.forEach(([c, id, v]) => run(["set", c, id, v]));
-    loaded = true;
+    loaded = allIn = true;
     flushPending();
     render(false);
     return true;
@@ -221,11 +226,14 @@
 
   function useDb(db) {
     let first = 0;
+    const arrived = new Set();
     for (const c of COLLS) {
       db.collection(c).onSnapshot((snap) => {
         const m = new Map();
         snap.docs.forEach((d) => { if (d.exists) m.set(d.id, d.data()); });
         S[c] = m;
+        dataRev++;
+        if (!arrived.has(c)) { arrived.add(c); if (arrived.size >= COLLS.length) allIn = true; }
         if (!loaded && ++first >= COLLS.length) loaded = true;
         scheduleRender();
       }, (err) => {
@@ -361,6 +369,7 @@
     thunk: null, // a day whose stamp should land with a thunk on the next Today render
     grab: null, // the "Save to your cards" panel, while it's open
     nextUp: null, // the next bar: the block just ticked (or whose first part was just done), so it can say what's next
+    xp: null, // the day L'expression du jour was turned over to its meaning
   };
 
   /* =============== Claude (sample capability) =============== */
@@ -450,20 +459,29 @@
   function timerElapsedMin(home) { return timer.home === home && timerStarted() ? Math.max(1, Math.round((timer.total - timerRemaining()) / 60)) : null; }
   function paintTimer() {
     const r = timerRemaining();
-    // The practice exam is handed in at 0:00, as on the real test.
-    if (timer.running && r <= 0 && ui.cx && !ui.cx.done && timer.home === XSPEC[skillOf(ui.cx)].home) { examSubmit("time"); return; }
+    // The practice exam is handed in at 0:00, as on the real test, with the bell.
+    if (timer.running && r <= 0 && ui.cx && !ui.cx.done && timer.home === XSPEC[skillOf(ui.cx)].home) { timerRing("bell"); examSubmit("time"); return; }
     const cap = timerCap(), capMin = Math.round(cap / 60);
     if (timer.running && r <= -cap) {
       timerPause();
       toast(timer.alerted ? `${timer.label}: the clock stopped after ${capMin} min of overtime.` : `Time's up: ${timer.label}. The clock stopped after ${capMin} min of overtime.`);
       timer.alerted = true;
+      timerRing("low");
     } else if (timer.running && r <= 0 && !timer.alerted) {
       timer.alerted = true;
       toast(`Time's up: ${timer.label}. The clock counts overtime for up to ${capMin} min, then stops.`);
+      timerRing("bell");
     }
     document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
     document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timerBtnLabel(); });
   }
+  // At 0:00 the desk bell rings and the clock shakes like an alarm clock (motion.js, on "tcf:ring"); at the end of
+  // the overtime, one low strike. The clock's own Sound button (or a card session's) turns the bell off.
+  function timerRing(kind) {
+    tone(kind);
+    document.dispatchEvent(new CustomEvent("tcf:ring", { detail: { kind } }));
+  }
+  const soundBtn = (act, off, on) => `<button class="btn ghost sm v-sound" data-act="${act}" aria-pressed="${soundOn()}" title="${soundOn() ? off : on}">${ico(soundOn() ? "sound" : "mute")}${soundOn() ? "Sound" : "Muted"}</button>`;
   function timerUI(home, label, presets, def) {
     const mine = timer.home === home;
     const first = def || presets[0][0];
@@ -476,6 +494,7 @@
       <button class="btn sm primary" data-act="timer-toggle" data-home="${home}" data-sec="${cur}" data-label="${esc(label)}" ${mine ? "data-timer-btn" : ""}>${btn}</button>
       <button class="btn sm" data-act="timer-reset" data-home="${home}" data-sec="${cur}" data-label="${esc(label)}">Reset</button>
       <div class="seg" role="group" aria-label="Timer length">${presets.map((p) => `<button data-act="timer-preset" data-home="${home}" data-sec="${p[0]}" data-label="${esc(label)}" aria-pressed="${cur === p[0]}">${esc(p[1])}</button>`).join("")}</div>
+      ${soundBtn("timer-sound", "Turn the bell off", "Turn the bell on")}
     </div>`;
   }
 
@@ -1034,6 +1053,19 @@
   const TIERS = [null, { name: "Pousse", to: 6 }, { name: "Doré", to: 13 }, { name: "Orangé", to: 29 }, { name: "Rouge érable", to: Infinity }];
   const tierOf = (n) => (n >= 30 ? 4 : n >= 14 ? 3 : n >= 7 ? 2 : n >= 1 ? 1 : 0);
   const streakPill = (n) => { const t = tierOf(n); return t ? `<span class="streak t${t}" title="Série : ${TIERS[t].name}">${leafSvg()}${n} jour${n > 1 ? "s" : ""}</span>` : ""; };
+  // The sidebar's streak: the pill with the last seven days as dots (full, part done, nothing, Sunday's rest, today
+  // still open). With no streak it asks for a new one, over the same dots, and links to today's plan.
+  function streakFoot(n) {
+    const t = tierOf(n), today = todayStr();
+    const dots = [6, 5, 4, 3, 2, 1, 0].map((k) => {
+      const d = addDays(today, -k), st = dayStats(d);
+      const cls = dayComplete(d) ? "l3" : st && st.n ? "l1" : !st ? "rest" : "";
+      return `<i class="${cls}${d === today ? " now" : ""}"></i>`;
+    }).join("");
+    const days = `<span class="sf-days" aria-hidden="true">${dots}</span>`;
+    return t ? `<a class="streak sf t${t}" href="#today" title="Série : ${TIERS[t].name}">${leafSvg()}${n} jour${n > 1 ? "s" : ""}${days}</a>`
+      : `<a class="streak sf t0" href="#today" title="Finish today's plan to start a streak">${leafSvg()}Nouvelle série ?${days}</a>`;
+  }
   // The longest run of complete days so far (Sundays neither count nor break it; today can't break it), for the stamps.
   function longestStreak() {
     const dates = [...S.days.keys()].filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
@@ -1073,6 +1105,45 @@
     const k = REMY[mood] ? mood : "bonjour", m = REMY[k];
     return `<svg class="mascot m-${k}" viewBox="0 0 120 140" role="img" aria-label="${m.label}">${REMY_BODY}${m.face}${REMY_NOSE}${m.top || ""}${REMY_TOQUE}${m.extra}</svg>`;
   }
+  // What Rémy says over a score: a line for how it went (perfect, the target met or 80%+, half or more, less),
+  // fitted to the exercise. Each band has a few wordings, picked by the attempt's key, so the line stays the same
+  // on every redraw and changes from one attempt to the next.
+  function remyScore(kind, score, total, o) {
+    const x = o || {}, r = total ? score / total : 0;
+    // A text with every mistake caught but fine words marked too isn't a clean sheet.
+    const band = total && score >= total && !x.flawed ? "perfect" : x.met || r >= 0.8 ? "good" : r >= 0.5 ? "ok" : "low";
+    const pick = (lines) => lines[parseInt(hk(x.key || ""), 36) % lines.length];
+    const mood = { perfect: "bravo", good: "bravo", ok: "bonjour", low: "cafe" }[band];
+    if (kind === "exam") {
+      if (x.retake) return ["bonjour", "Un nouvel essai : il ne compte pas dans l'estimation.", "A retake: it doesn't count toward your estimate."];
+      if (x.nclc >= 7) return ["bravo", "NCLC 7 atteint ! Quel examen !", "NCLC 7 reached! What an exam!"];
+      if (x.nclc === 6) return ["bonjour", "Si près du NCLC 7 ! Encore un effort.", "So close to NCLC 7! One more push."];
+      return ["cafe", "Un examen blanc de plus : c'est comme ça qu'on progresse.", "One more practice exam: that's how you improve."];
+    }
+    if (x.retry) return score >= total ? ["bravo", "Ces fautes-là sont corrigées !", "Those mistakes are fixed now!"] : ["bonjour", "Encore un petit effort sur celles-ci.", "A little more work on these."];
+    const L = {
+      perfect: [["Sans faute ! Chapeau.", "Not a single mistake! Hats off."], ["Parfait ! Rien à corriger.", "Perfect! Nothing to correct."], ["Un sans-faute, bravo !", "A clean sheet, well done!"]],
+      good: [["Très bien ! Presque tout juste.", "Very good! Nearly all right."], ["Beau travail, ça rentre !", "Nice work, it's sinking in!"]],
+      ok: [["Pas mal ! Revois les ratées ci-dessous.", "Not bad! Go over the misses below."], ["On progresse. Un coup d'œil aux corrections ?", "Getting there. A look at the corrections?"]],
+      low: [["Ça viendra. On reprend demain, ça va rentrer.", "It'll come. We'll pick it up tomorrow, it'll sink in."], ["Courage ! Relis la règle, puis réessaie les ratées.", "Chin up! Reread the rule, then retry the misses."]],
+    };
+    if (kind === "drill" && x.met && band === "good") L.good = [["Objectif atteint ! Bravo.", "Target met! Well done."], ["Tu as atteint l'objectif. Bien joué !", "You've hit the target. Nice work!"]];
+    if (kind === "hunt" || kind === "mine") {
+      L.perfect = [["Parfait ! Rien ne t'a échappé.", "Perfect! Nothing got past you."], ["Pas une faute ne t'a échappé. Chapeau !", "Not one mistake got past you. Hats off!"]];
+      L.good = [[`Œil de lynx ! ${score} sur ${total}, trouvées et corrigées.`, `Eagle eye! ${score} of ${total}, found and fixed.`]];
+      L.ok = [[`${score} sur ${total}. Les autres sont soulignées en rouge.`, `${score} of ${total}. The others are underlined in red.`]];
+      L.low = [["Relire, ça s'apprend. On s'entraîne, ça vient !", "Proofreading takes practice. Keep at it, it comes!"]];
+    }
+    if (kind === "ce" || kind === "co") {
+      if (kind === "ce" && band === "perfect" && x.inClock) return ["bravo", "Tout juste, et dans les temps !", "All right, and inside the clock!"];
+      if (kind === "ce" && (band === "good" || band === "perfect") && x.inClock === false) return ["bonjour", "C'est juste, mais un peu lent : attention au chrono.", "Right, but a little slow: mind the clock."];
+      L.good = kind === "co" ? [["Bien entendu ! Tu as l'oreille.", "Well heard! You've got the ear for it."]] : [["Bien lu ! Les pièges ne t'ont pas eu.", "Well read! The traps didn't catch you."]];
+      L.ok = [["Pas mal ! Les explications disent où était le piège.", "Not bad! The explanations show where the trap was."]];
+      L.low = kind === "co" ? [["Réécoute avec la transcription, ça aide.", "Listen again with the transcript, it helps."]] : [["Un texte coriace ? Relis-le avec les réponses.", "A tough one? Read it again with the answers."]];
+    }
+    const [fr, en] = pick(L[band]);
+    return [mood, fr, en];
+  }
   // Rémy and his line: always in French, with the English underneath.
   const greet = (mood, fr, en, cls) => `<div class="greet${cls ? " " + cls : ""}">${remy(mood)}<p class="bubble" data-m="pop" data-k="${esc(mood + "|" + fr)}"><span lang="fr">${typo(fr)}</span><small class="en-gloss">${esc(en)}</small></p></div>`;
   // The last day before `date` with anything done: a ticked block or a finished attempt.
@@ -1104,26 +1175,76 @@
 
   // Tampons: a teacher's rubber stamp for each milestone, in a different ink each.
   const STAMPS = [
-    { name: "Première séance", ring: "PREMIÈRE SÉANCE ★ ", reps: 3, icon: "today", ink: "--accent", rot: -8, got: "Your first full day's plan", todo: "To earn: a full day's plan", earned: () => [...S.days.keys()].some((d) => dayComplete(d)) },
-    { name: "7 jours d'affilée", ring: "7 JOURS D'AFFILÉE ★ ", reps: 3, num: "7", ink: "--red", rot: 7, got: "Seven days in a row", todo: "To earn: seven days in a row", earned: (x) => x.best >= 7 },
-    { name: "Zéro faute", ring: "ZÉRO FAUTE ★ ", reps: 4, icon: "bilan", ink: "--green", rot: -4, got: "A drill round with no misses", todo: "To earn: a drill round with no misses", earned: () => list("drills").some((d) => d.set !== "prod" && d.total > 0 && d.score >= d.total) },
-    { name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", ink: "--amber", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: () => S.srs.size >= 100 },
-    { name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
-    { name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
-    { name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: () => list("comp").some((c) => c.kind === "exam") },
-    { name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+    { id: "first", name: "Première séance", ring: "PREMIÈRE SÉANCE ★ ", reps: 3, icon: "today", ink: "--accent", rot: -8, got: "Your first full day's plan", todo: "To earn: a full day's plan", earned: () => [...S.days.keys()].some((d) => dayComplete(d)) },
+    { id: "d7", name: "7 jours d'affilée", ring: "7 JOURS D'AFFILÉE ★ ", reps: 3, num: "7", ink: "--red", rot: 7, got: "Seven days in a row", todo: "To earn: seven days in a row", earned: (x) => x.best >= 7 },
+    { id: "zero", name: "Zéro faute", ring: "ZÉRO FAUTE ★ ", reps: 4, icon: "bilan", ink: "--green", rot: -4, got: "A drill round with no misses", todo: "To earn: a drill round with no misses", earned: () => list("drills").some((d) => d.set !== "prod" && d.total > 0 && d.score >= d.total) },
+    { id: "c100", name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", ink: "--amber", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: () => S.srs.size >= 100 },
+    { id: "p1", name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
+    { id: "d30", name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
+    { id: "exam", name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: () => list("comp").some((c) => c.kind === "exam") },
+    { id: "nclc7", name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
   ];
-  function stampSVG(st, on) {
+  function stampSVG(st, on, bare) {
     const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
       : `<use class="st-leaf" href="#leaf" x="35.5" y="33" width="29" height="31.5"/><text class="st-n" x="50" y="${st.num.length > 1 ? 54.5 : 55}" text-anchor="middle"${st.num.length > 1 ? ' style="font-size:11px"' : ""}>${st.num}</text>`;
     const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(st.reps))}</textPath></text>${center}`;
-    return `<svg class="stamp ${on ? "on" : "off"}"${on ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${on ? `${esc(st.name)}, earned` : `${esc(st.name)}, still to earn`}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
+    return `<svg class="stamp ${on ? "on" : "off"}"${on && !bare ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${on ? `${esc(st.name)}, earned` : `${esc(st.name)}, still to earn`}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
   }
-  // A teacher's stamp for each milestone, worked out from what you've done.
+  // A teacher's stamp for each milestone, worked out from what you've done. One earned in the last week says so.
   function stampShelf() {
     const x = { best: longestStreak() };
     const got = STAMPS.map((st) => !!st.earned(x));
-    return { n: got.filter(Boolean).length, html: `<div class="stamps">${STAMPS.map((st, i) => `<figure class="stamp-cell">${stampSVG(st, got[i])}<figcaption><b>${esc(st.name)}</b><small>${esc(got[i] ? st.got : st.todo)}</small></figcaption></figure>`).join("")}</div>` };
+    const when = (S.settings.get("main") || {}).stamps || {}, wk = addDays(todayStr(), -6);
+    return { n: got.filter(Boolean).length, html: `<div class="stamps">${STAMPS.map((st, i) => `<figure class="stamp-cell">${stampSVG(st, got[i])}<figcaption><b>${esc(st.name)}</b>${got[i] && typeof when[st.id] === "string" && when[st.id] >= wk ? `<span class="st-new">nouveau</span>` : ""}<small>${esc(got[i] ? st.got : st.todo)}</small></figcaption></figure>`).join("")}</div>` };
+  }
+
+  // A stamp earned gets its moment: the first time it's earned, it's pressed onto the page with a thud and a burst
+  // of leaves (#award; motion.js moves it). Which stamps have had theirs is kept in settings.main.stamps (the day of
+  // each), so it happens once, on every device. The very first check records what was already earned, quietly, as
+  // true rather than a day, so none of those is tagged new.
+  // It's worked out again only after your progress has changed, and never before all of it has arrived.
+  const awardEl = document.getElementById("award");
+  let stampRev = -1, awardT = 0, awardAt = 0;
+  const awardQ = [];
+  function stampCheck() {
+    if (!allIn || !hydrated || !awardEl || dataRev === stampRev) return;
+    stampRev = dataRev;
+    const had = (S.settings.get("main") || {}).stamps;
+    const x = { best: longestStreak() };
+    const fresh = STAMPS.filter((st) => !(had && had[st.id]) && st.earned(x));
+    if (had && !fresh.length) return;
+    const t = todayStr();
+    saveSettings({ stamps: Object.assign({}, had || {}, Object.fromEntries(fresh.map((st) => [st.id, had ? t : true]))) });
+    if (!had) return;
+    fresh.forEach((st) => awardQ.push(st.id));
+    awardNext();
+  }
+  function awardNext() {
+    if (!awardEl || !awardEl.hidden || !awardQ.length) return;
+    const id = awardQ.shift(), st = STAMPS.find((x) => x.id === id);
+    if (!st) { awardNext(); return; }
+    awardEl.innerHTML = `<div class="aw-stamp">${stampSVG(st, true, true)}</div>
+      <div class="aw-txt"><p class="aw-kick">Nouveau tampon !</p><b>${esc(st.name)}</b><span>${esc(st.got)}</span><a class="aw-go" href="#progress.stamps">Voir mes tampons</a></div>
+      ${remy("bravo")}<button type="button" class="btn ghost sm aw-x" aria-label="Dismiss">×</button>`;
+    awardEl.hidden = false;
+    awardAt = Date.now();
+    // The thud as the stamp meets the page (motion.js presses it on, and it lands about a third of a second in).
+    tone("thunk", 0.33);
+    clearTimeout(awardT);
+    awardT = setTimeout(awardClose, 6500);
+  }
+  function awardClose() {
+    if (!awardEl || awardEl.hidden) return;
+    clearTimeout(awardT);
+    awardEl.hidden = true;
+    awardEl.innerHTML = "";
+    if (awardQ.length) awardT = setTimeout(awardNext, 400);
+  }
+  if (awardEl) {
+    awardEl.addEventListener("click", (e) => { if (e.target.closest(".aw-x, a")) awardClose(); });
+    // A click anywhere else, once it has been seen for a moment, puts it away; so does Esc (and only that, then).
+    document.addEventListener("pointerdown", (e) => { if (!awardEl.hidden && !awardEl.contains(e.target) && Date.now() - awardAt > 900) awardClose(); }, true);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !awardEl.hidden) { e.stopImmediatePropagation(); awardClose(); } }, true);
   }
 
   // Carte d'embarquement: the five phases as one flight from B1 to NCLC 7. The plane flies in your current phase's
@@ -1152,22 +1273,43 @@
     return `<svg class="flight" viewBox="0 0 300 ${mini ? 30 : 40}" role="img" aria-label="Week ${w} of ${total}: Phase ${s.phase} of ${T.PHASES.length}"><path d="M${x} 20H284" style="stroke:var(--rule-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0.1 6"/><path d="M10 20H${x}" style="stroke:var(--accent)" stroke-width="2.4" stroke-linecap="round"${mini ? "" : ` data-m="draw" data-k="route-${at}" data-fly="route"`}/>${dots}<use href="#leaf" x="285" y="11.5" width="15" height="16.3" style="fill:var(--leaf-4)"/><g${mini ? "" : ` data-m="fly" data-k="plane-${at}" data-dx="${+(x - 10).toFixed(2)}" data-fly="plane"`}><g transform="translate(${+(x - 10).toFixed(2)} 10) rotate(45 10 10)"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" style="color:var(--accent)"><use href="#i-plane" style="fill:var(--surface)"/></svg></g></g></svg>`;
   }
   const BARCODE = `<svg class="barcode" viewBox="0 0 118 46" preserveAspectRatio="none" aria-hidden="true">${[[0, 1], [2, 2], [5, 3], [10, 4], [16, 1], [18, 2], [21, 3], [27, 4], [34, 1], [37, 2], [41, 3], [47, 4], [54, 1], [57, 2], [61, 3], [65, 4], [70, 1], [74, 2], [79, 3], [83, 4], [88, 1], [92, 2], [97, 3], [102, 4], [108, 1], [110, 2], [113, 3]].map(([x, w]) => `<rect x="${x}" y="0" width="${w}" height="46"/>`).join("")}</svg>`;
+  // Check-in: the phase's exit criteria, each met or not. Worked out again only when your progress changes, since
+  // the sidebar's small pass shows the count on every redraw.
+  let ckMemo = null;
+  function checkIn(phase) {
+    const k = `${dataRev}|${phase}|${todayStr()}`;
+    if (ckMemo && ckMemo.k === k) return ckMemo.v;
+    const crit = arr(T.CRITERIA[phase]), ok = crit.map((c) => !!criterionStatus(c).ok), n = ok.filter(Boolean).length;
+    ckMemo = { k, v: { crit, ok, n, all: crit.length > 0 && n === crit.length } };
+    return ckMemo.v;
+  }
+  const TICK_PATH = `<path d="M6.5 12.5l3.6 3.6 7.4-8"/>`;
+  // Once every criterion is met, the pass is stamped « Prêt à embarquer ».
+  const boardStamp = (phase) => `<svg class="board-stamp" viewBox="0 0 214 56" role="img" aria-label="Stamp: Prêt à embarquer" data-m="press" data-k="board-${phase}"><g filter="url(#ink)"><rect class="tb-o" x="2.5" y="2.5" width="209" height="51" rx="10"/><rect class="tb-i" x="8" y="8" width="198" height="40" rx="6"/><svg class="bs-plane" x="16" y="14" width="28" height="28" viewBox="0 0 24 24"><use href="#i-plane"/></svg><text x="128" y="34.5" text-anchor="middle">PRÊT À EMBARQUER</text></g></svg>`;
   function passHTML() {
     const s = settings(), P = T.PHASES[s.phase - 1], { total } = passWeeks();
+    const ck = checkIn(s.phase);
+    // One box per criterion, ticked in blue ink when it's met; they're pressed in, one after another, as the page opens.
+    const boxes = ck.crit.length ? `<div class="checkin"><small>Enregistrement · Check-in</small><span class="ck-row" role="img" aria-label="${ck.n} of ${ck.crit.length} exit criteria met">${ck.crit.map((c, i) => `<i class="ck${ck.ok[i] ? " on" : ""}" data-tip="${esc(c.text)}\n${ck.ok[i] ? "Met" : "Not met yet"}"${ck.ok[i] ? ` data-m="press" data-k="ck-${s.phase}-${esc(c.id)}"` : ""}>${ck.ok[i] ? `<svg viewBox="0 0 24 24" aria-hidden="true">${TICK_PATH}</svg>` : ""}</i>`).join("")}</span></div>` : "";
     const t = todayStr(), plan = planFor(s.phase, t), done = (S.days.get(t) || {}).done || {};
     const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k)]) : -1;
     const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${plan[open][2]}`;
     const mins = plan ? `${planMins(t, s.phase)} min` : "Repos";
-    return `<div class="pass"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
+    return `<div class="pass${ck.all ? " boarded" : ""}"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
       <div class="route"><div class="city"><small>Départ · From</small><b>B1</b><span>Where you started</span></div>${flightSVG(false)}<div class="city r"><small>Arrivée · To</small><b>NCLC&#160;7</b><span>All four skills</span></div></div>
-      <dl class="fields"><div><dt>Phase</dt><dd>${s.phase} · ${esc(P.name)}</dd></div><div><dt>Semaine · Week</dt><dd>${weekNo()} sur ${total}</dd></div><div><dt>Porte · Gate</dt><dd>${esc(gate)}</dd></div><div><dt>Aujourd'hui · Today</dt><dd>${mins}</dd></div></dl></div>
-      <div class="pass-stub"><div class="seat"><small>Siège · Seat</small><b>7A</b></div>${BARCODE}</div></div>`;
+      <dl class="fields"><div><dt>Phase</dt><dd>${s.phase} · ${esc(P.name)}</dd></div><div><dt>Semaine · Week</dt><dd>${weekNo()} sur ${total}</dd></div><div><dt>Porte · Gate</dt><dd>${esc(gate)}</dd></div><div><dt>Aujourd'hui · Today</dt><dd>${mins}</dd></div></dl>${ck.all ? boardStamp(s.phase) : ""}</div>
+      <div class="pass-stub"><div class="seat"><small>Siège · Seat</small><b>7A</b></div>${boxes}${BARCODE}</div></div>`;
   }
-  const miniPass = () => { const s = settings(), P = T.PHASES[s.phase - 1]; return `<a class="mini-pass" href="#progress"><span class="top"><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase ${s.phase} · ${esc(P.name)}</b>${flightSVG(true)}<span>Semaine ${weekNo()} · ${esc(P.weeks)}</span></a>`; };
+  const miniPass = () => {
+    const s = settings(), P = T.PHASES[s.phase - 1], ck = checkIn(s.phase);
+    const n = ck.crit.length ? `<span class="mp-ck${ck.all ? " all" : ""}" title="${ck.n} of ${ck.crit.length} exit criteria met"><svg viewBox="0 0 24 24" aria-hidden="true">${TICK_PATH}</svg>${ck.n}/${ck.crit.length}</span>` : "";
+    return `<a class="mini-pass" href="#progress"><span class="top"><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase ${s.phase} · ${esc(P.name)}</b>${flightSVG(true)}<span class="bot"><span>Semaine ${weekNo()} · ${esc(P.weeks)}</span>${n}</span></a>`;
+  };
 
   // L'expression du jour: a new saying every morning, on a scrap of notebook paper. Each one is a card in the
-  // Expressions deck, and the scrap says where you are with it and links to the deck. The list is grouped by
-  // use, so the days step through it several places at a time and the groups take turns.
+  // Expressions deck. The scrap shows the saying, for you to guess what it means; a tap turns it over to its meaning,
+  // where you are with its card and a link to the deck. It stays turned for the day (ui.xp, kept in the tab). The
+  // list is grouped by use, so the days step through it several places at a time and the groups take turns.
   const XP_REG = { "Québec": "Québec. ", familier: "Informal. ", soutenu: "Formal. " };
   function expressionCard() {
     const xs = arr(T.EXPRESSIONS);
@@ -1181,7 +1323,12 @@
     const id = "expressions--" + slug(x.fr), st = S.srs.get(id);
     const where = !DECK.has(id) ? "" : !st ? "nouvelle · new card" : !st.pri && st.stage >= 5 ? "maîtrisée · mastered"
       : st.due <= todayStr() ? "à revoir aujourd'hui · due today" : `à revoir le ${shortDate(st.due)} · due ${shortDate(st.due)}`;
-    return `<figure class="note-card seyes"><span class="tape" aria-hidden="true"></span><p class="eyebrow">Expression du jour</p><p class="fr" lang="fr">${typo(cap(say))}</p><p class="en">${esc(line)}</p>${where ? `<a class="xp-deck" href="#vocab.new.expressions">${ico("vocab")}<span>Expressions · ${where}</span></a>` : ""}</figure>`;
+    const on = ui.xp === todayStr(), fr = `<p class="eyebrow">Expression du jour</p><p class="fr" lang="fr">${typo(cap(say))}</p>`;
+    const turn = (label, back) => `<button type="button" class="xp-btn" data-act="xp-flip" aria-label="${label}">${back ? "↺" : `<span aria-hidden="true">↻</span> ${label}`}</button>`;
+    return `<figure class="note-card xp${on ? " turned" : ""}" data-act="xp-flip"><span class="tape" aria-hidden="true"></span><div class="xp-in">
+      <div class="xp-face xp-front seyes"${on ? " inert" : ""}>${fr}<p class="xp-hint">Guess the meaning, then turn it over.</p>${turn("Turn over")}</div>
+      <div class="xp-face xp-back seyes"${on ? "" : " inert"}>${fr}<p class="en">${esc(line)}</p><div class="xp-foot">${where ? `<a class="xp-deck" href="#vocab.new.expressions">${ico("vocab")}<span>Expressions · ${where}</span></a>` : "<span></span>"}${turn("Turn back", true)}</div></div>
+    </div></figure>`;
   }
 
   /* =============== errors =============== */
@@ -2130,6 +2277,7 @@
     }
     const k = mode === "new" ? "show" : mode === "practice" ? "prac" : "rev";
     ui.vocab = { v: VOCAB_V, mode, queue: ids.map((id) => ({ id, k })), i: 0, total: ids.length, shown: k === "show", ok: 0, miss: 0, known: 0, first: {}, finished: false, edit: false, secs: 0, lastT: Date.now() };
+    lastGrade = 0;
     render(true);
     window.scrollTo(0, 0);
   }
@@ -2182,46 +2330,81 @@
     } else if (!pass) vocabAgain(v, { id: e.id, k: "re" }, GAP.again);
     vocabAdvance();
   }
+  // The last grade given in a card session, so a milestone leaf passed on an Again stays silent.
+  let lastGrade = 0;
   // A grade's feedback: a soft tone, and motion.js's light halo from the button (told before the next card is drawn).
   function gradeFx(g) {
-    tone(g !== G.again);
+    tone(g !== G.again ? "pass" : "again");
+    lastGrade = g;
     const btn = document.querySelector(`.grade4 [data-g="${g}"]`), card = document.querySelector("section.flash");
     if (btn) document.dispatchEvent(new CustomEvent("tcf:grade", { detail: { g, btn, card } }));
   }
-  // The grading tones, made on the spot with Web Audio (no files): a light two-note chime for Hard, Good or Easy, a
-  // soft low bump for Again. They play from the click or key that grades, as browsers require; the sound button in
-  // a session's header (or M) turns them off on this device (tcf-sound, like the theme).
+  // The site's sounds, made on the spot with Web Audio (no files): for a grade, a light two-note chime for Hard, Good
+  // or Easy and a soft low bump for Again; a third, higher note when a card session passes a milestone leaf
+  // ("leaf"); a soft rubber-stamp thud when a stamp lands ("thunk"); two gentle desk-bell strikes when a clock
+  // reaches 0:00 ("bell") and one low strike when its overtime ends ("low"). Browsers only let a page start sound
+  // from a click or a key, so the first one on the page wakes the audio up, and later sounds (a stamp, the clock)
+  // can then play by themselves. The sound button in a card session's header or by a clock (or M in a session)
+  // turns them all off on this device (tcf-sound, like the theme).
   let AC = null;
   const soundOn = () => lsGet("tcf-sound", "on") !== "off";
-  function tone(pass) {
-    if (!soundOn()) return;
+  function audioCtx() {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
-      if (!Ctx) return;
+      if (!Ctx) return null;
       AC = AC || new Ctx();
       if (AC.state === "suspended") AC.resume();
-      const t0 = AC.currentTime + 0.01;
+      return AC;
+    } catch (_) { return null; }
+  }
+  const audioPrime = () => { if (soundOn()) audioCtx(); };
+  ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, audioPrime, { capture: true, passive: true }));
+  function tone(kind, delay) {
+    if (!soundOn()) return;
+    const ac = audioCtx();
+    if (!ac) return;
+    try {
+      const t0 = ac.currentTime + 0.01 + (delay || 0);
       const note = (f, at, dur, peak, type, to) => {
-        const o = AC.createOscillator(), gn = AC.createGain();
-        o.type = type;
+        const o = ac.createOscillator(), gn = ac.createGain();
+        o.type = type || "sine";
         o.frequency.setValueAtTime(f, at);
         if (to) o.frequency.exponentialRampToValueAtTime(to, at + dur);
         gn.gain.setValueAtTime(0.0001, at);
         gn.gain.exponentialRampToValueAtTime(peak, at + 0.012);
         gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
         o.connect(gn);
-        gn.connect(AC.destination);
+        gn.connect(ac.destination);
         o.start(at);
         o.stop(at + dur + 0.02);
       };
-      if (pass) { note(880, t0, 0.2, 0.1, "sine"); note(1318.5, t0 + 0.07, 0.26, 0.07, "sine"); }
-      else note(240, t0, 0.2, 0.11, "triangle", 170);
+      // A bell: the strike and a quieter, higher partial, both ringing on.
+      const strike = (f, at, dur, peak) => { note(f, at, dur, peak); note(f * 2.76, at, dur * 0.45, peak * 0.28); };
+      if (kind === "pass") { note(880, t0, 0.2, 0.1); note(1318.5, t0 + 0.07, 0.26, 0.07); }
+      else if (kind === "again") note(240, t0, 0.2, 0.11, "triangle", 170);
+      else if (kind === "leaf") note(1760, t0 + 0.14, 0.34, 0.06);
+      else if (kind === "thunk") {
+        // A low thud, with a brush of paper as the stamp meets the page.
+        note(150, t0, 0.22, 0.15, "triangle", 62);
+        const n = Math.floor(ac.sampleRate * 0.06), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+        const src = ac.createBufferSource(), lp = ac.createBiquadFilter(), gn = ac.createGain();
+        src.buffer = buf;
+        lp.type = "lowpass";
+        lp.frequency.value = 1400;
+        gn.gain.value = 0.12;
+        src.connect(lp);
+        lp.connect(gn);
+        gn.connect(ac.destination);
+        src.start(t0);
+      } else if (kind === "bell") { strike(1046.5, t0, 1.3, 0.085); strike(1046.5, t0 + 0.42, 1.6, 0.075); }
+      else if (kind === "low") strike(523.25, t0, 1.4, 0.08);
     } catch (_) {}
   }
   function soundToggle() {
     const on = !soundOn();
     lsSet("tcf-sound", on ? "on" : "off");
-    if (on) tone(true);
+    if (on) tone("pass");
     render(true);
   }
   // Your seconds a card, its checks or repeats included, kept for the last 5 sessions of each kind, so the plan's
@@ -3857,6 +4040,7 @@
           <p class="eyebrow">${esc(cx.exam.title)} · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
           <div class="row"><span class="scorebig"${!r.review && !retake && (nclcOf(skill, r.est) || 0) >= 7 ? ` data-m="burst" data-k="x7-${esc(cx.exam.id)}-${esc(r.date)}-${r.est}"` : ""}>≈ <span data-tween="xest-${esc(cx.exam.id)}-${esc(r.date)}" data-tw="count" data-to="${r.est}">${r.est}</span></span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span>${retake ? `<span class="pill info">retake · not counted</span>` : ""}</div>
           <p class="small">${r.correct} of ${r.total} correct${mins(r.secs) ? ` in ${mins(r.secs)}` : ""}. NCLC 7 in ${skill === "co" ? "listening is 458–502" : "reading is 453–498"}.</p>
+          ${greet(...remyScore("exam", r.correct, r.total, { retake, nclc: nclcOf(skill, r.est) || 0 }), "sm")}
           <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
           <p class="small muted">${esc(spec.note)}${retake ? " You'd taken this exam before, so you'll have remembered some answers: this score is kept as a retake and doesn't count toward your NCLC estimate." : r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
           <div class="row">${next}</div>
@@ -3995,7 +4179,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
-  const TAB_UI = ["bento", "day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp"];
+  const TAB_UI = ["bento", "day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -4129,6 +4313,7 @@
     paintTimer();
     paintGrab();
     paintNextUp();
+    stampCheck();
     paintMarks();
     grabCheck();
     tabSoon();
@@ -4146,7 +4331,7 @@
     // Where your progress is saved, on one line; that and whether Claude is ready open with a tap.
     const saved = backend.kind === "db" ? "Saved on claude.ai" : backend.kind === "server" ? "Saved on this computer" : backend.kind === "local" ? "Saved in this browser only" : "Loading your progress…";
     const dot = backend.kind === "local" ? "warn" : backend.kind === "loading" ? "" : "on";
-    footEl.innerHTML = `${miniPass()}${tm}${streakPill(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}</div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button><button type="button" class="theme-btn fr-btn" data-act="lang" data-lang-btn></button>`;
+    footEl.innerHTML = `${miniPass()}${tm}${streakFoot(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}</div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button><button type="button" class="theme-btn fr-btn" data-act="lang" data-lang-btn></button>`;
     paintTheme();
     paintLang();
   }
@@ -4278,6 +4463,8 @@
       const el = ui.thunk && document.getElementById("tb-stamp");
       if (!el || el.dataset.date !== ui.thunk) return;
       ui.thunk = null;
+      // The stamp's thud as it lands (with reduced motion too: the sound follows its own switch).
+      tone("thunk", 0.26);
       if (typeof el.animate !== "function" || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
       el.animate([{ transform: "rotate(-11deg) scale(1.4)", opacity: 0.3 }, { transform: "rotate(-11deg) scale(.95)", opacity: 1, offset: 0.55 }, { transform: "rotate(-11deg) scale(1)", opacity: 1 }], { duration: 500, easing: "cubic-bezier(.2, .8, .3, 1.25)" });
       // …and a handful of maple leaves fly off it as it lands (motion.js; without it, nothing happens).
@@ -4366,7 +4553,11 @@
     const n = streak(), t = tierOf(n);
     const next = t === 4 ? "Rouge érable from day 30: the leaf stays red. " : t ? `${TIERS[t].name} until day ${TIERS[t].to}, then ${TIERS[t + 1].name.toLowerCase()}. ` : "";
     const wk = weekChart();
-    return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>
+    // The longest run so far, to beat: on it, or how far there is to go to equal it.
+    const best = longestStreak();
+    const rec = best < 2 ? "" : n >= best ? `<p class="small sc-rec on" data-m="pop" data-k="rec-${n}">${leafSvg("leaf-ico t" + t)}<b>Record run: ${n} days in a row!</b></p>`
+      : `<p class="small sc-rec">${leafSvg("leaf-ico t" + tierOf(best))}Record: ${best} days · ${best - n} more to equal it.</p>`;
+    return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${rec}
       <div class="mini-week"><p class="small muted">Cette semaine · <b>${hm(wk.done)}</b> of about ${hm(wk.plan)}</p>${wk.html}</div>${heatmap(8)}
       <details class="fold-x" ${foldAttr("streak-how")}><summary>Comment ça marche · How it works</summary><p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></details></section>`;
   }
@@ -4672,6 +4863,7 @@
     return `<section class="panel drill" id="drill-area" data-m="pop" data-k="done-${rk}">
       <div class="row between"><span class="eyebrow">${esc(d.title)} · results</span>${target != null && d.src !== "retry" ? `<span class="pill ${met ? "ok" : "warn"}"${met ? ` data-m="pop" data-k="met-${rk}"` : ""}>${met ? "Target met" : `Target ${pct(target)}`}</span>` : ""}</div>
       <div class="row"><span class="scorebig"><span data-tween="score-${rk}" data-tw="count" data-to="${score}">${score}</span>/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
+      ${greet(...remyScore("drill", score, n, { key: rk, met: met && d.src !== "retry", retry: d.src === "retry" }), "sm")}
       ${breakdown}
       ${misses.length ? `<div class="stack tight"><p class="h3">Review</p><ul class="misses">${misses.map(({ it, k, r }) => `<li>
           ${it.point ? `<p><span class="pill">${esc(it.point)}</span></p>` : ""}
@@ -4889,6 +5081,7 @@
     const next = !!mineNextText(all);
     return `<section class="panel drill mh" id="drill-area" data-m="pop" data-k="mhdone-${key}">${head}
       <div class="row mh-score"><span class="scorebig"><span data-tween="mhs-${key}" data-tw="count" data-to="${caught}">${caught}</span>/${rows.length}</span><span class="muted">caught: found and fixed${pr ? ` · found ${found} of ${n}` : ""}${extra ? ` · ${extra}` : ""}</span></div>
+      ${greet(...remyScore("mine", caught, rows.length, { key }), "sm")}
       ${pr ? mhText(pr, h, key) : ""}
       ${misses.length ? `<div class="stack tight"><p class="h3">À revoir · to look at again</p><ul class="misses">${misses.map(({ c, found: f }, i) => `<li data-m="rise" data-k="mhmiss-${key}-${i}">
           <p class="row" style="gap:6px">${c.k >= 0 ? `<span class="pr-n bad">${c.k + 1}</span>` : `<span class="pill">Hors texte</span>`}<span class="pill bad">${f ? "Wrong fix" : "Not spotted"}</span><span class="pill">${esc(CAT[catOf(c.cat)])}</span></p>
@@ -5112,6 +5305,7 @@
     const LABEL = { ok: ["Caught", "ok"], accent: ["Check the accents", "bad"], bad: ["Not quite", "bad"], missed: ["Not spotted", "bad"] };
     return `<section class="panel drill" id="drill-area">${head}
       <div class="row"><span class="scorebig"><span data-tween="hunt-${pr.id}" data-tw="count" data-to="${caught}">${caught}</span>/${n}</span><span class="muted">caught: found and corrected · found ${fk.length} of ${n}${extra ? ` · ${extra}` : ""}</span></div>
+      ${greet(...remyScore("hunt", caught, n, { flawed: !!h.extra, key: `${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}` }), "sm")}
       ${prText(pr, h)}
       <ul class="misses">${pr.mistakes.map(([wrong, a, cat, why], k) => `<li>
         <p class="row" style="gap:6px"><span class="pr-n">${k + 1}</span><span class="pill ${LABEL[h.verdicts[k]][1]}">${LABEL[h.verdicts[k]][0]}</span><span class="pill">${esc(CAT[catOf(cat)])}</span></p>
@@ -5623,6 +5817,22 @@
   // What a step is, over the card: a check of a new card, or a card back after a miss.
   const STEP_TAG = { learn: ["info", "Check: recall it"], known: ["info", "Check: you said you knew it"], re: ["bad", "Again: you missed it"] };
   const GRADES = [[G.again, "Again"], [G.hard, "Hard"], [G.good, "Good"], [G.easy, "Easy"]];
+  // A session's progress bar. A long one (12 steps or more) has three maple leaves on it, at a quarter, half and
+  // three quarters: each turns gold and pops as the bar passes it, with a third, higher note on the grade's chime.
+  // The bar can slip back when Again adds a repeat, so the furthest leaf reached is kept on the session (ms), and a
+  // gold leaf stays gold.
+  function vocabBar(v, pct, steps) {
+    const bar = `<div class="bar"><i style="width:${pct}%" data-tween="vbar-${v.mode}" data-tw="width" data-to="${pct}"></i></div>`;
+    if (steps < 12) return bar;
+    const reach = Math.min(3, Math.floor(pct / 25));
+    if (reach > (v.ms || 0)) {
+      v.ms = reach;
+      if (lastGrade && lastGrade !== G.again) tone("leaf");
+    }
+    const vk = hk(`${v.mode}|${v.total}|${(v.queue[0] || {}).id}`);
+    const leaves = [1, 2, 3].map((n) => `<span class="ms${n <= (v.ms || 0) ? " on" : ""}" style="left:${n * 25}%"${n <= (v.ms || 0) ? ` data-m="pop" data-k="vms-${vk}-${n}"` : ""}>${leafSvg()}</span>`).join("");
+    return `<div class="vbar" role="img" aria-label="${v.ms || 0} of 3 milestones passed">${bar}${leaves}</div>`;
+  }
   function vocabCard() {
     const v = ui.vocab;
     const cards = allCards();
@@ -5660,7 +5870,7 @@
     const label = v.mode === "new" ? "Learning new cards" : v.mode === "practice" ? "Practice · French → English" : "Review";
     return `<div class="wrap">
       <div class="row between"><span class="eyebrow">${label} · ${done} / ${v.total} done</span><span class="row"><button class="btn ghost sm v-sound" data-act="v-sound" aria-pressed="${soundOn()}" title="${soundOn() ? "Turn the grading tones off" : "Turn the grading tones on"}">${ico(soundOn() ? "sound" : "mute")}${soundOn() ? "Sound" : "Muted"} <span class="kbd">M</span></button><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
-      <div class="bar"><i style="width:${pct}%" data-tween="vbar-${v.mode}" data-tw="width" data-to="${pct}"></i></div>
+      ${vocabBar(v, pct, v.i + todo)}
       <section class="panel flash" data-m="slide" data-k="vc-${esc(id)}-${v.i}">
         <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri && v.mode === "review" ? " · priority" : ""}</p>
         ${tag ? `<div class="row"><span class="pill ${tag[0]}" data-m="pop" data-k="vt-${esc(id)}-${v.i}">${tag[1]}</span></div>` : ""}
@@ -5993,7 +6203,8 @@
         ${miss ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button><button class="btn ghost" data-act="c-hide" data-skill="${skill}">Hide the answers</button>${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button><button class="btn ghost" data-act="c-submit-hid" data-skill="${skill}" title="Check your answers but see only your score, so you can try the set again without spoilers">Score only</button>`}</div>`;
+        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button><button class="btn ghost" data-act="c-hide" data-skill="${skill}">Hide the answers</button>${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button><button class="btn ghost" data-act="c-submit-hid" data-skill="${skill}" title="Check your answers but see only your score, so you can try the set again without spoilers">Score only</button>`}</div>
+        ${submitted ? greet(...remyScore(skill, score, nq2, { key: `${set.id}-${ui.c.saved[skill] || ""}`, inClock: savedDoc && savedDoc.timed && savedDoc.clock ? savedDoc.secs <= savedDoc.clock : null }), "sm") : ""}`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       return `<div class="wrap">
         ${head}
@@ -7040,6 +7251,21 @@
     "ip-resume": (el) => ipResume(el.dataset.id),
     "plan-start": (el) => startBlock(Number(el.dataset.i)),
     "nextup-close": () => { ui.nextUp = null; render(true); },
+    // L'expression du jour turns over where it is, without a redraw, so the turn plays (a link on its back just opens).
+    "xp-flip": (el, e) => {
+      if (e && e.target && e.target.closest && e.target.closest("a")) return;
+      const fig = el.closest(".xp");
+      if (!fig) return;
+      const on = !fig.classList.contains("turned");
+      ui.xp = on ? todayStr() : null;
+      fig.classList.toggle("turned", on);
+      const front = fig.querySelector(".xp-front"), back = fig.querySelector(".xp-back");
+      const moveFocus = fig.contains(document.activeElement);
+      if (front) front.inert = on;
+      if (back) back.inert = !on;
+      const btn = (on ? back : front) && (on ? back : front).querySelector(".xp-btn");
+      if (moveFocus && btn) btn.focus({ preventScroll: true });
+    },
     "ip-discard": (el) => ipDiscard(el.dataset.id),
     "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; render(true); },
     "h-more": () => { ui.hist.limit += 30; render(true); },
@@ -7098,6 +7324,7 @@
     "v-grade": (el) => { const g = Number(el.dataset.g); gradeFx(g); vocabGrade(g); },
     "v-learn": (el) => vocabLearn(el.dataset.path),
     "v-sound": soundToggle,
+    "timer-sound": () => { const on = !soundOn(); lsSet("tcf-sound", on ? "on" : "off"); if (on) tone("bell"); render(true); },
     "v-quit": () => { ui.vocab = null; render(true); },
     "v-edit": () => vocabEditOpen(),
     "v-edit-save": () => vocabEditSave(),
