@@ -3467,6 +3467,15 @@
   ]
  },
  {
+  "id": "73cb5a003fd5",
+  "text": "{0} more stamp{1} for {2}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… more stamp… for …"
+  ]
+ },
+ {
   "id": "ae3c2104e1bd",
   "text": "{0} more to equal it.",
   "kind": "pattern",
@@ -3508,11 +3517,11 @@
   "id": "7388d66750e0",
   "text": "{0} of {1}",
   "kind": "pattern",
-  "where": "app",
+  "where": "attr:title",
   "ctx": [
+   "<span><i></i></span><small>…/…</small>",
    "<span><span>Claude is preparing your texts</span> · <b>… of …</b> ready</span><button>Stop</button> <i></i>",
-   "<p>You found <b>… of …</b>….……</p>",
-   "… <p>You found <b>… of …</b>…. Now correct the ones you found. The ones you missed are in red; their corrections come after.</p> … … … <button>Check my corrections</button>"
+   "<p>You found <b>… of …</b>….……</p>"
   ]
  },
  {
@@ -5006,6 +5015,42 @@
   ]
  },
  {
+  "id": "ff1bb18b22e4",
+  "text": "10 exercices",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "10 exercices"
+  ]
+ },
+ {
+  "id": "0d9fcc4291e2",
+  "text": "10 EXERCICES ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "10 EXERCICES ★"
+  ]
+ },
+ {
+  "id": "2eadeeb02065",
+  "text": "10 heures de vol",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "10 heures de vol"
+  ]
+ },
+ {
+  "id": "dd36d6c5a067",
+  "text": "10 HEURES DE VOL ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "10 HEURES DE VOL ★"
+  ]
+ },
+ {
   "id": "53b68d2effa5",
   "text": "10-sentence présent → passé composé drill, mixing regular reflexives and inherently pronominal verbs.",
   "kind": "exact",
@@ -5060,6 +5105,42 @@
   "where": "app",
   "ctx": [
    "100 CARTES ★"
+  ]
+ },
+ {
+  "id": "7d2d1c8c0fed",
+  "text": "100 exercices",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "100 exercices"
+  ]
+ },
+ {
+  "id": "2256e5f6aaa1",
+  "text": "100 EXERCICES ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "100 EXERCICES ★"
+  ]
+ },
+ {
+  "id": "9ddb56ca6fd7",
+  "text": "100 heures de vol",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "100 heures de vol"
+  ]
+ },
+ {
+  "id": "32fd25b1d365",
+  "text": "100 HEURES DE VOL ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "100 HEURES DE VOL ★"
   ]
  },
  {
@@ -5147,6 +5228,15 @@
   "where": "app",
   "ctx": [
    "15 questions from every topic so far, most missed first."
+  ]
+ },
+ {
+  "id": "9ab857764506",
+  "text": "150 cards mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "150 cards mastered"
   ]
  },
  {
@@ -5348,6 +5438,69 @@
   ]
  },
  {
+  "id": "afa186f9a490",
+  "text": "50 exercices",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "50 exercices"
+  ]
+ },
+ {
+  "id": "f6fc05ea6293",
+  "text": "50 EXERCICES ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "50 EXERCICES ★"
+  ]
+ },
+ {
+  "id": "fb6f14075354",
+  "text": "50 heures de vol",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "50 heures de vol"
+  ]
+ },
+ {
+  "id": "02d372b184ad",
+  "text": "50 HEURES DE VOL ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "50 HEURES DE VOL ★"
+  ]
+ },
+ {
+  "id": "3825fc290050",
+  "text": "500 cards reviewed",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "500 cards reviewed"
+  ]
+ },
+ {
+  "id": "da345c5ee320",
+  "text": "500 cartes",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "500 cartes"
+  ]
+ },
+ {
+  "id": "def5bff312b1",
+  "text": "500 CARTES ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "500 CARTES ★"
+  ]
+ },
+ {
   "id": "cb0139aa29d4",
   "text": "60 min mock",
   "kind": "exact",
@@ -5425,6 +5578,24 @@
   "kind": "exact",
   "where": "criteria",
   "ctx": []
+ },
+ {
+  "id": "4f9bbe4f531a",
+  "text": "90 % partout",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "90 % partout"
+  ]
+ },
+ {
+  "id": "36e978e672fc",
+  "text": "90 % PARTOUT ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "90 % PARTOUT ★"
+  ]
  },
  {
   "id": "d724b180fa44",
@@ -5714,6 +5885,33 @@
   "ctx": []
  },
  {
+  "id": "491e2d5eb962",
+  "text": "A corrected text for Tâches 1, 2 and 3",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A corrected text for Tâches 1, 2 and 3"
+  ]
+ },
+ {
+  "id": "052defb03f47",
+  "text": "A corrected text with under 2 mistakes per 100 words",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A corrected text with under 2 mistakes per 100 words"
+  ]
+ },
+ {
+  "id": "57e94f3e92a3",
+  "text": "A corrected text with under 5 mistakes per 100 words",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A corrected text with under 5 mistakes per 100 words"
+  ]
+ },
+ {
   "id": "3677f1c419e7",
   "text": "A counted, completed result: the passé composé.",
   "kind": "exact",
@@ -5908,6 +6106,15 @@
   "ctx": []
  },
  {
+  "id": "fdb30da21bb8",
+  "text": "A full day after four days or more away",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A full day after four days or more away"
+  ]
+ },
+ {
   "id": "aabdf65a454f",
   "text": "A full Écrite mock rated B2 on 2 of 3 tasks",
   "kind": "exact",
@@ -6024,6 +6231,24 @@
   "ctx": []
  },
  {
+  "id": "60d99946a696",
+  "text": "A hundred exercises finished",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A hundred exercises finished"
+  ]
+ },
+ {
+  "id": "e0d9e5d0fa82",
+  "text": "A hundred hours of study ticked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A hundred hours of study ticked"
+  ]
+ },
+ {
   "id": "4cae1d836a27",
   "text": "A hypothesis (sans toi = if you weren't here): je serais.",
   "kind": "exact",
@@ -6089,6 +6314,15 @@
   "ctx": []
  },
  {
+  "id": "fe3a17f19e90",
+  "text": "A listening or reading set in every topic",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A listening or reading set in every topic"
+  ]
+ },
+ {
   "id": "7d46b0bd783f",
   "text": "A listening set without a miss",
   "kind": "exact",
@@ -6133,6 +6367,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "7e5a0a7ad93f",
+  "text": "A mixed review at 90% or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A mixed review at 90% or more"
+  ]
  },
  {
   "id": "7dd945447ca5",
@@ -6442,6 +6685,15 @@
   "ctx": []
  },
  {
+  "id": "035d431c502c",
+  "text": "A practice exam with every question answered in time",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A practice exam with every question answered in time"
+  ]
+ },
+ {
   "id": "a68cfc07b1f7",
   "text": "A process still going on in the scene: imparfait.",
   "kind": "exact",
@@ -6502,12 +6754,30 @@
   ]
  },
  {
+  "id": "8f8da080d1b1",
+  "text": "A reading and a listening practice exam",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A reading and a listening practice exam"
+  ]
+ },
+ {
   "id": "c80322eb72e9",
   "text": "A reading set at exam pace, 3 of 4 or better",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "A reading set at exam pace, 3 of 4 or better"
+  ]
+ },
+ {
+  "id": "84602cf51e0e",
+  "text": "A reading set without a miss",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A reading set without a miss"
   ]
  },
  {
@@ -6809,12 +7079,30 @@
   ]
  },
  {
-  "id": "58ee9cfdd9f7",
-  "text": "a teacher's stamp for each milestone",
+  "id": "ce211f30b930",
+  "text": "A text finished inside its exam clock",
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "a teacher's stamp for each milestone"
+   "A text finished inside its exam clock"
+  ]
+ },
+ {
+  "id": "2e945778be4b",
+  "text": "A text scored 10/20 or more (NCLC 7)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A text scored 10/20 or more (NCLC 7)"
+  ]
+ },
+ {
+  "id": "c0746d864e62",
+  "text": "A text scored 14/20 or more (NCLC 9)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A text scored 14/20 or more (NCLC 9)"
   ]
  },
  {
@@ -6860,6 +7148,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "cccfecb672b8",
+  "text": "A week with both watched mistakes kept at bay",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A week with both watched mistakes kept at bay"
+  ]
  },
  {
   "id": "d1c9cfb1cb1e",
@@ -7945,6 +8242,15 @@
   "where": "app",
   "ctx": [
    "<button>All exams</button><a>Scores and NCLC</a>"
+  ]
+ },
+ {
+  "id": "b5647429b4f1",
+  "text": "All five reading practice exams",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "All five reading practice exams"
   ]
  },
  {
@@ -9687,6 +9993,24 @@
   "ctx": []
  },
  {
+  "id": "72edfd49822b",
+  "text": "Belles expressions",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Belles expressions"
+  ]
+ },
+ {
+  "id": "921a2b405235",
+  "text": "BELLES EXPRESSIONS ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "BELLES EXPRESSIONS ★"
+  ]
+ },
+ {
   "id": "e4bf8e327ec2",
   "text": "below NCLC 4",
   "kind": "exact",
@@ -9886,6 +10210,15 @@
   "where": "app",
   "ctx": [
    "# Titre a section heading - point a bullet | a | b | a table: the first row is the header > … a taped note, for the memory trick ! … a red-pen “Attention” box = Phrase — English an example >> me te :: label | le la | *verbe an order chain: numbered, coloured s"
+  ]
+ },
+ {
+  "id": "4d963cfab70d",
+  "text": "Bonus",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Bonus"
   ]
  },
  {
@@ -10169,6 +10502,15 @@
   "kind": "exact",
   "where": "free",
   "ctx": []
+ },
+ {
+  "id": "1bbcfa58ac9b",
+  "text": "Canadian passport",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Canadian passport"
+  ]
  },
  {
   "id": "c5a13a385366",
@@ -11024,6 +11366,24 @@
   "kind": "exact",
   "where": "index.html",
   "ctx": []
+ },
+ {
+  "id": "bf84a2b8083c",
+  "text": "Cinq examens",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Cinq examens"
+  ]
+ },
+ {
+  "id": "e31fc96fcf7a",
+  "text": "CINQ EXAMENS BLANCS ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "CINQ EXAMENS BLANCS ★"
+  ]
  },
  {
   "id": "679df65c98b4",
@@ -12051,6 +12411,42 @@
   "ctx": []
  },
  {
+  "id": "a64169299154",
+  "text": "Copie impeccable",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Copie impeccable"
+  ]
+ },
+ {
+  "id": "62239a119861",
+  "text": "COPIE IMPECCABLE ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "COPIE IMPECCABLE ★"
+  ]
+ },
+ {
+  "id": "84621fae77ad",
+  "text": "Copie propre",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Copie propre"
+  ]
+ },
+ {
+  "id": "a628d8b992bc",
+  "text": "COPIE PROPRE ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "COPIE PROPRE ★"
+  ]
+ },
+ {
   "id": "4aaf9204b706",
   "text": "Copied: the task, the TCF Canada rules and your draft ({0} words). Paste it into any AI chat.",
   "kind": "pattern",
@@ -12674,6 +13070,24 @@
   "ctx": []
  },
  {
+  "id": "49dfb4f886a9",
+  "text": "Derniers tampons",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Derniers tampons · latest</p> …"
+  ]
+ },
+ {
+  "id": "38d20e8c06e5",
+  "text": "Derniers tampons · latest",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Derniers tampons · latest</p> …"
+  ]
+ },
+ {
   "id": "b73c04261ec5",
   "text": "Des → de before a plural adjective (written register).",
   "kind": "exact",
@@ -12754,6 +13168,24 @@
   "where": "app",
   "ctx": [
    "<h2>…Devoirs · Homework</h2> … <button>Add</button> …"
+  ]
+ },
+ {
+  "id": "b6592f464937",
+  "text": "Devoirs faits",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Devoirs faits"
+  ]
+ },
+ {
+  "id": "efe26db75cf2",
+  "text": "DEVOIRS FAITS ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "DEVOIRS FAITS ★"
   ]
  },
  {
@@ -12937,9 +13369,27 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "… <p>Nouveau tampon !</p><b>…</b><span>…</span><a>Voir mes tampons</a> …<button>×</button>",
+   "… <p>Nouveau tampon !</p><b>…</b><span>…</span>…<a>Voir mes tampons</a> …<button>×</button>",
    "<button>×</button>",
    "<p>Claude's suggestions. Nothing is saved unless you add it.</p> … <button>Dismiss</button>"
+  ]
+ },
+ {
+  "id": "db21bd20420a",
+  "text": "Dix copies",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Dix copies"
+  ]
+ },
+ {
+  "id": "232257a72568",
+  "text": "DIX COPIES ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "DIX COPIES ★"
   ]
  },
  {
@@ -13987,6 +14437,15 @@
   ]
  },
  {
+  "id": "cf6427142652",
+  "text": "Endurance",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Endurance"
+  ]
+ },
+ {
   "id": "649df08a448e",
   "text": "English",
   "kind": "exact",
@@ -14359,6 +14818,60 @@
   "ctx": []
  },
  {
+  "id": "3b69511536e3",
+  "text": "Every B1 listening set at 5 of 6 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every B1 listening set at 5 of 6 or better"
+  ]
+ },
+ {
+  "id": "349acb784dd6",
+  "text": "Every B1 reading set at 3 of 4 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every B1 reading set at 3 of 4 or better"
+  ]
+ },
+ {
+  "id": "05f710da098b",
+  "text": "Every B1 text of Find the mistakes done",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every B1 text of Find the mistakes done"
+  ]
+ },
+ {
+  "id": "170413667e8d",
+  "text": "Every B2 listening set at 5 of 6 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every B2 listening set at 5 of 6 or better"
+  ]
+ },
+ {
+  "id": "83e954de1c38",
+  "text": "Every B2 reading set at 3 of 4 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every B2 reading set at 3 of 4 or better"
+  ]
+ },
+ {
+  "id": "0dc536b55f95",
+  "text": "Every B2 text of Find the mistakes done",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every B2 text of Find the mistakes done"
+  ]
+ },
+ {
   "id": "9a782802f043",
   "text": "Every built-in exam done: a retake is practice, and its score won't count.",
   "kind": "exact",
@@ -14384,11 +14897,29 @@
   "ctx": []
  },
  {
+  "id": "0b87c25d9a2a",
+  "text": "Every day from Monday to Saturday",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every day from Monday to Saturday"
+  ]
+ },
+ {
   "id": "194c2478ed39",
   "text": "Every difficulty is solved by someone « à point nommé », so exile becomes « une suite de bonnes surprises ». The critic praises the humour and the dialogue.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "d92c7d7f03e5",
+  "text": "Every grammar topic mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every grammar topic mastered"
+  ]
  },
  {
   "id": "33f3fe3e4a3f",
@@ -14397,6 +14928,15 @@
   "where": "app",
   "ctx": [
    "Every grammar, spelling, agreement and word-choice mistake, most important first, as: wrong → right (why)."
+  ]
+ },
+ {
+  "id": "1fb5c32d28b1",
+  "text": "Every miss of a round fixed on a retry",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every miss of a round fixed on a retry"
   ]
  },
  {
@@ -14413,6 +14953,15 @@
   "where": "app",
   "ctx": [
    "<p>Every mistake from Claude's corrections of your writing and production checks, and from your error log.</p>"
+  ]
+ },
+ {
+  "id": "c953029faddf",
+  "text": "Every mistake of a text found and fixed, nothing else marked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every mistake of a text found and fixed, nothing else marked"
   ]
  },
  {
@@ -14449,6 +14998,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "419057bfd768",
+  "text": "Every set of one topic at 90% or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Every set of one topic at 90% or more"
+  ]
  },
  {
   "id": "54281a2f114f",
@@ -14658,6 +15216,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "Examens blancs",
    "<span>Examens blancs</span><span>…</span>",
    "<span>…</span><span>A1–C2</span><span>Examens blancs</span>"
   ]
@@ -15008,6 +15567,42 @@
   ]
  },
  {
+  "id": "8ae7b7db0673",
+  "text": "Fifty card reviews in one day",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Fifty card reviews in one day"
+  ]
+ },
+ {
+  "id": "a20ba22d745e",
+  "text": "Fifty cards mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Fifty cards mastered"
+  ]
+ },
+ {
+  "id": "63d5aafe8cbc",
+  "text": "Fifty exercises finished",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Fifty exercises finished"
+  ]
+ },
+ {
+  "id": "f0ef3666c762",
+  "text": "Fifty hours of study ticked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Fifty hours of study ticked"
+  ]
+ },
+ {
   "id": "3ca282871fdc",
   "text": "Fill in both the French and the English.",
   "kind": "exact",
@@ -15207,6 +15802,24 @@
   "where": "app",
   "ctx": [
    "· first try"
+  ]
+ },
+ {
+  "id": "6393d81f6803",
+  "text": "Five grammar topics mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Five grammar topics mastered"
+  ]
+ },
+ {
+  "id": "60f47cbe8fba",
+  "text": "Five homework tasks done",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Five homework tasks done"
   ]
  },
  {
@@ -16682,6 +17295,15 @@
   "ctx": []
  },
  {
+  "id": "b0d7797dc553",
+  "text": "hours and exercises",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "hours and exercises"
+  ]
+ },
+ {
   "id": "1dd6a17cb403",
   "text": "How it works",
   "kind": "exact",
@@ -17851,6 +18473,15 @@
   ]
  },
  {
+  "id": "9cd9bcd81585",
+  "text": "keeping at it",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "keeping at it"
+  ]
+ },
+ {
   "id": "8b626cfb0120",
   "text": "keeps slot colour 2",
   "kind": "exact",
@@ -18261,6 +18892,15 @@
   "ctx": []
  },
  {
+  "id": "1481d0a0ceb1",
+  "text": "latest",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Derniers tampons · latest</p> …"
+  ]
+ },
+ {
   "id": "3592fd817757",
   "text": "latest estimate",
   "kind": "exact",
@@ -18565,6 +19205,24 @@
   ]
  },
  {
+  "id": "78f1ce0a9037",
+  "text": "Lecture B1",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Lecture B1"
+  ]
+ },
+ {
+  "id": "cb43e99fee7d",
+  "text": "Lecture B2",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Lecture B2"
+  ]
+ },
+ {
   "id": "22a09145a4da",
   "text": "Lecture libre",
   "kind": "exact",
@@ -18572,6 +19230,24 @@
   "ctx": [
    "<a>…Écoute libre<small>easy listening</small></a><a>…Lecture libre<small>easy reading</small></a>",
    "Lecture libre"
+  ]
+ },
+ {
+  "id": "af61d84be944",
+  "text": "Lecture parfaite",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Lecture parfaite"
+  ]
+ },
+ {
+  "id": "b366852535c1",
+  "text": "LECTURE PARFAITE ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "LECTURE PARFAITE ★"
   ]
  },
  {
@@ -19252,6 +19928,15 @@
   "ctx": []
  },
  {
+  "id": "eac604a849a5",
+  "text": "Ma fiche",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ma fiche"
+  ]
+ },
+ {
   "id": "8b34bf9d14bc",
   "text": "Madame",
   "kind": "exact",
@@ -19477,6 +20162,24 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "cfba05ccc760",
+  "text": "Marathon",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Marathon"
+  ]
+ },
+ {
+  "id": "aca89a2ca334",
+  "text": "MARATHON ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "MARATHON ★"
+  ]
  },
  {
   "id": "1dd93e5a3b39",
@@ -20235,6 +20938,15 @@
   ]
  },
  {
+  "id": "594dca704099",
+  "text": "MON CARNET ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "MON CARNET ★"
+  ]
+ },
+ {
   "id": "932eeb1076c8",
   "text": "Monday",
   "kind": "exact",
@@ -20274,6 +20986,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "716753f38d01",
+  "text": "more stamp{0} for",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… more stamp… for …"
+  ]
  },
  {
   "id": "f19c03a938b9",
@@ -20787,6 +21508,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "94ba2234337c",
+  "text": "nearly there",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Presque · nearly there</p> …"
+  ]
  },
  {
   "id": "bc5db4e7057f",
@@ -22605,12 +23335,21 @@
   ]
  },
  {
+  "id": "70c610357019",
+  "text": "Nouveau statut :",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Nouveau statut : <b>…</b></span>"
+  ]
+ },
+ {
   "id": "31858261faa3",
   "text": "Nouveau tampon !",
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Nouveau tampon !</p><b>…</b><span>…</span><a>Voir mes tampons</a> …<button>×</button>"
+   "… <p>Nouveau tampon !</p><b>…</b><span>…</span>…<a>Voir mes tampons</a> …<button>×</button>"
   ]
  },
  {
@@ -22695,6 +23434,15 @@
   "where": "app",
   "ctx": [
    "Objectif NCLC 7"
+  ]
+ },
+ {
+  "id": "5702830759b3",
+  "text": "Objectifs",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Objectifs"
   ]
  },
  {
@@ -23424,6 +24172,15 @@
   "where": "app",
   "ctx": [
    "Open the details"
+  ]
+ },
+ {
+  "id": "d7bfc5bbfbe2",
+  "text": "open the tile for the whole collection",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "stamps collected · open the tile for the whole collection"
   ]
  },
  {
@@ -24250,6 +25007,15 @@
   ]
  },
  {
+  "id": "03bd43d24b49",
+  "text": "Passeport canadien",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Passeport canadien"
+  ]
+ },
+ {
   "id": "586f15b40667",
   "text": "Passive in the plus-que-parfait: avait été pourvu.",
   "kind": "exact",
@@ -24473,6 +25239,24 @@
   ]
  },
  {
+  "id": "601c44aac69d",
+  "text": "permanent residence",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "permanent residence"
+  ]
+ },
+ {
+  "id": "34f3e548ea67",
+  "text": "Permis de travail",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Permis de travail"
+  ]
+ },
+ {
   "id": "5dcbfcb051d2",
   "text": "Persisting since your very first session. Writing and correcting hasn't extinguished it, so it needs a different practice mode: isolated, fast, daily.",
   "kind": "exact",
@@ -24553,6 +25337,33 @@
   "where": "app",
   "ctx": [
    "Phase 1 exit criteria met"
+  ]
+ },
+ {
+  "id": "063122af1e28",
+  "text": "Phase 2 exit criteria met",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Phase 2 exit criteria met"
+  ]
+ },
+ {
+  "id": "0096fe6860dd",
+  "text": "Phase 3 exit criteria met",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Phase 3 exit criteria met"
+  ]
+ },
+ {
+  "id": "b8a122859a13",
+  "text": "Phase 4 exit criteria met",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Phase 4 exit criteria met"
   ]
  },
  {
@@ -24789,6 +25600,42 @@
   "where": "app",
   "ctx": [
    "· played …×"
+  ]
+ },
+ {
+  "id": "4564751556f5",
+  "text": "Plume d'or",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Plume d'or"
+  ]
+ },
+ {
+  "id": "28ece6a7e234",
+  "text": "PLUME D'OR ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "PLUME D'OR ★"
+  ]
+ },
+ {
+  "id": "9bbf9e9d95f1",
+  "text": "Plume NCLC 7",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Plume NCLC 7"
+  ]
+ },
+ {
+  "id": "59441b2e03a7",
+  "text": "PLUME NCLC 7 ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "PLUME NCLC 7 ★"
   ]
  },
  {
@@ -25148,6 +25995,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "practice exams",
    "…Examens blancs · practice exams"
   ]
  },
@@ -25341,6 +26189,24 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "9a6cb006f8dd",
+  "text": "Presque",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Presque · nearly there</p> …"
+  ]
+ },
+ {
+  "id": "1f40f0b9b64c",
+  "text": "Presque · nearly there",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Presque · nearly there</p> …"
+  ]
  },
  {
   "id": "72729c5d943a",
@@ -26672,6 +27538,42 @@
   ]
  },
  {
+  "id": "6dadb73dd9d1",
+  "text": "Relecture B1",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Relecture B1"
+  ]
+ },
+ {
+  "id": "be4717d13ab7",
+  "text": "RELECTURE B1 ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "RELECTURE B1 ★"
+  ]
+ },
+ {
+  "id": "e6e15cd16307",
+  "text": "Relecture B2",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Relecture B2"
+  ]
+ },
+ {
+  "id": "150fa2ccea8a",
+  "text": "RELECTURE B2 ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "RELECTURE B2 ★"
+  ]
+ },
+ {
   "id": "b84e356e994f",
   "text": "Relire, ça s'apprend. On s'entraîne, ça vient !",
   "kind": "exact",
@@ -27229,6 +28131,24 @@
   "where": "app",
   "ctx": [
    "Retake this set"
+  ]
+ },
+ {
+  "id": "44d5b5857832",
+  "text": "Retour gagnant",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Retour gagnant"
+  ]
+ },
+ {
+  "id": "1f25c713b19d",
+  "text": "RETOUR GAGNANT ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "RETOUR GAGNANT ★"
   ]
  },
  {
@@ -29681,6 +30601,15 @@
   ]
  },
  {
+  "id": "429ecfc7ee41",
+  "text": "Sixty days in a row",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Sixty days in a row"
+  ]
+ },
+ {
   "id": "ec9f630c8693",
   "text": "Skill",
   "kind": "exact",
@@ -29835,6 +30764,24 @@
   "ctx": []
  },
  {
+  "id": "291bd06da87a",
+  "text": "Sous surveillance",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Sous surveillance"
+  ]
+ },
+ {
+  "id": "d44457723245",
+  "text": "SOUS SURVEILLANCE ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "SOUS SURVEILLANCE ★"
+  ]
+ },
+ {
   "id": "6d8c9b124d52",
   "text": "Space",
   "kind": "exact",
@@ -29927,6 +30874,24 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "4e7f12bd7338",
+  "text": "stamps collected",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "stamps collected · open the tile for the whole collection"
+  ]
+ },
+ {
+  "id": "9a15dfa4225c",
+  "text": "stamps collected · open the tile for the whole collection",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "stamps collected · open the tile for the whole collection"
+  ]
  },
  {
   "id": "2b020927d3c6",
@@ -30079,12 +31044,57 @@
   "ctx": []
  },
  {
+  "id": "48a3661d8464",
+  "text": "status",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <p>Statut · status</p> <p><b>…</b><small>…</small></p> … <p>…</p> … …"
+  ]
+ },
+ {
   "id": "bae7d5be7082",
   "text": "Status",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "Status"
+  ]
+ },
+ {
+  "id": "3f201e9a0692",
+  "text": "Status {0} of {1}:",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "… <p>Statut · status</p> <p><b>…</b><small>…</small></p> … <p>…</p> … …"
+  ]
+ },
+ {
+  "id": "79e5520ef513",
+  "text": "Status {0} of {1}: {2}",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "… <p>Statut · status</p> <p><b>…</b><small>…</small></p> … <p>…</p> … …"
+  ]
+ },
+ {
+  "id": "659499f38a56",
+  "text": "Statut",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <p>Statut · status</p> <p><b>…</b><small>…</small></p> … <p>…</p> … …"
+  ]
+ },
+ {
+  "id": "9405610353ba",
+  "text": "Statut · status",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <p>Statut · status</p> <p><b>…</b><small>…</small></p> … <p>…</p> … …"
   ]
  },
  {
@@ -30236,6 +31246,15 @@
   "ctx": []
  },
  {
+  "id": "da0dd4657912",
+  "text": "study permit",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "study permit"
+  ]
+ },
+ {
   "id": "9a5a8befd0ff",
   "text": "study time",
   "kind": "exact",
@@ -30260,6 +31279,15 @@
   "where": "app",
   "ctx": [
    "<p>… style tip… to practise.</p>"
+  ]
+ },
+ {
+  "id": "0911e53f7f7e",
+  "text": "style=\"font-size:{0}px\"",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "style=\"font-size:…px\""
   ]
  },
  {
@@ -30987,11 +32015,56 @@
   "ctx": []
  },
  {
+  "id": "eede5f0b5391",
+  "text": "Ten exercises finished",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ten exercises finished"
+  ]
+ },
+ {
+  "id": "ff75ea3e9fc7",
+  "text": "Ten hours of study ticked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ten hours of study ticked"
+  ]
+ },
+ {
   "id": "c0cf136c21f8",
   "text": "Ten minutes of world news a day, read slowly, with the transcript.",
   "kind": "exact",
   "where": "free",
   "ctx": []
+ },
+ {
+  "id": "59f51bc342a5",
+  "text": "Ten of your own mistakes fixed",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ten of your own mistakes fixed"
+  ]
+ },
+ {
+  "id": "66f609cbc444",
+  "text": "Ten texts corrected",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ten texts corrected"
+  ]
+ },
+ {
+  "id": "4ba62c530e0b",
+  "text": "Ten words saved from the pages to your cards",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ten words saved from the pages to your cards"
+  ]
  },
  {
   "id": "cc44ad8201cb",
@@ -31274,6 +32347,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "d58cee133fa4",
+  "text": "the big goals",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "the big goals"
+  ]
  },
  {
   "id": "9661be51676e",
@@ -31820,6 +32902,15 @@
   "where": "app",
   "ctx": [
    "The last 12, newest first"
+  ]
+ },
+ {
+  "id": "8bb56c0e6316",
+  "text": "the little extras",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "the little extras"
   ]
  },
  {
@@ -32510,6 +33601,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "93ed7843199f",
+  "text": "The site switched to French only",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The site switched to French only"
+  ]
  },
  {
   "id": "01af97326a80",
@@ -33243,6 +34343,15 @@
   "ctx": []
  },
  {
+  "id": "10eb8f1fe41b",
+  "text": "Three notes on your Pense-bête",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Three notes on your Pense-bête"
+  ]
+ },
+ {
   "id": "5b331cbfd20c",
   "text": "Three phrases from my text rewritten at B2 level, and the three things I should work on first.",
   "kind": "exact",
@@ -33513,6 +34622,15 @@
   ]
  },
  {
+  "id": "006de7aff95f",
+  "text": "To earn: 150 cards mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: 150 cards mastered"
+  ]
+ },
+ {
   "id": "6ba5f9ceb6d5",
   "text": "To earn: 300 cards reviewed",
   "kind": "exact",
@@ -33522,12 +34640,66 @@
   ]
  },
  {
+  "id": "4a7379812dc1",
+  "text": "To earn: 500 cards reviewed",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: 500 cards reviewed"
+  ]
+ },
+ {
+  "id": "a628b99aa65f",
+  "text": "To earn: a corrected text for each of the three tasks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a corrected text for each of the three tasks"
+  ]
+ },
+ {
+  "id": "db4291c8f575",
+  "text": "To earn: a corrected text with under 2 mistakes per 100 words",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a corrected text with under 2 mistakes per 100 words"
+  ]
+ },
+ {
+  "id": "ae86250be34b",
+  "text": "To earn: a corrected text with under 5 mistakes per 100 words",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a corrected text with under 5 mistakes per 100 words"
+  ]
+ },
+ {
   "id": "a0e063b3bf24",
   "text": "To earn: a drill round with no misses",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "To earn: a drill round with no misses"
+  ]
+ },
+ {
+  "id": "dc4779b4605d",
+  "text": "To earn: a Find the mistakes text with everything caught",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a Find the mistakes text with everything caught"
+  ]
+ },
+ {
+  "id": "0bc3dd54b0e8",
+  "text": "To earn: a full day after a break of four days or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a full day after a break of four days or more"
   ]
  },
  {
@@ -33549,12 +34721,66 @@
   ]
  },
  {
+  "id": "21bc8cf980fc",
+  "text": "To earn: a hundred exercises finished",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a hundred exercises finished"
+  ]
+ },
+ {
+  "id": "f163960ae33f",
+  "text": "To earn: a hundred hours of study ticked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a hundred hours of study ticked"
+  ]
+ },
+ {
+  "id": "d50a09e5b501",
+  "text": "To earn: a listening or reading set in every topic",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a listening or reading set in every topic"
+  ]
+ },
+ {
   "id": "413c13cf92d3",
   "text": "To earn: a listening set without a miss, first try",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "To earn: a listening set without a miss, first try"
+  ]
+ },
+ {
+  "id": "b0b391b529c9",
+  "text": "To earn: a mixed review at 90% or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a mixed review at 90% or more"
+  ]
+ },
+ {
+  "id": "265bd0fc3836",
+  "text": "To earn: a practice exam in reading and one in listening",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a practice exam in reading and one in listening"
+  ]
+ },
+ {
+  "id": "24ae59aba4e4",
+  "text": "To earn: a practice exam with every question answered in time",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a practice exam with every question answered in time"
   ]
  },
  {
@@ -33567,6 +34793,15 @@
   ]
  },
  {
+  "id": "c915fa27acde",
+  "text": "To earn: a reading set without a miss, first try",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a reading set without a miss, first try"
+  ]
+ },
+ {
   "id": "f26a06b20425",
   "text": "To earn: a text corrected by Claude",
   "kind": "exact",
@@ -33576,12 +34811,192 @@
   ]
  },
  {
+  "id": "9384972c2329",
+  "text": "To earn: a text finished inside its task's exam time",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a text finished inside its task's exam time"
+  ]
+ },
+ {
+  "id": "11644fde7241",
+  "text": "To earn: a text scored 10/20 or more by Claude",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a text scored 10/20 or more by Claude"
+  ]
+ },
+ {
+  "id": "817937464b54",
+  "text": "To earn: a text scored 14/20 or more by Claude",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a text scored 14/20 or more by Claude"
+  ]
+ },
+ {
+  "id": "11c7a24fa1a2",
+  "text": "To earn: a week where your two mistakes to watch don't come back",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a week where your two mistakes to watch don't come back"
+  ]
+ },
+ {
+  "id": "2aa1b061eaac",
+  "text": "To earn: all five reading practice exams",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: all five reading practice exams"
+  ]
+ },
+ {
+  "id": "d0a1ba11d665",
+  "text": "To earn: every B1 listening set at 5 of 6 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every B1 listening set at 5 of 6 or better"
+  ]
+ },
+ {
+  "id": "bab548dc26b1",
+  "text": "To earn: every B1 reading set at 3 of 4 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every B1 reading set at 3 of 4 or better"
+  ]
+ },
+ {
+  "id": "c13863e683a8",
+  "text": "To earn: every B1 text of Find the mistakes",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every B1 text of Find the mistakes"
+  ]
+ },
+ {
+  "id": "3b100b9a09c5",
+  "text": "To earn: every B2 listening set at 5 of 6 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every B2 listening set at 5 of 6 or better"
+  ]
+ },
+ {
+  "id": "0d8859571637",
+  "text": "To earn: every B2 reading set at 3 of 4 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every B2 reading set at 3 of 4 or better"
+  ]
+ },
+ {
+  "id": "05e009bda37e",
+  "text": "To earn: every B2 text of Find the mistakes",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every B2 text of Find the mistakes"
+  ]
+ },
+ {
+  "id": "e74caa0c4c01",
+  "text": "To earn: every day of one week, Monday to Saturday",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every day of one week, Monday to Saturday"
+  ]
+ },
+ {
+  "id": "1e601431b1f6",
+  "text": "To earn: every grammar topic mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every grammar topic mastered"
+  ]
+ },
+ {
+  "id": "e55250f99811",
+  "text": "To earn: every set of one grammar topic at 90% or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: every set of one grammar topic at 90% or more"
+  ]
+ },
+ {
+  "id": "778035f59cbf",
+  "text": "To earn: fifty card reviews in one day",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: fifty card reviews in one day"
+  ]
+ },
+ {
+  "id": "eb7353f35cca",
+  "text": "To earn: fifty cards mastered (three weeks or more between reviews)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: fifty cards mastered (three weeks or more between reviews)"
+  ]
+ },
+ {
+  "id": "7e20966ddca3",
+  "text": "To earn: fifty exercises finished",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: fifty exercises finished"
+  ]
+ },
+ {
+  "id": "268e0f7629ac",
+  "text": "To earn: fifty hours of study ticked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: fifty hours of study ticked"
+  ]
+ },
+ {
   "id": "d50fb4f41a84",
   "text": "To earn: first practice exam, CE or CO",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "To earn: first practice exam, CE or CO"
+  ]
+ },
+ {
+  "id": "962e639f3ba1",
+  "text": "To earn: five grammar topics mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: five grammar topics mastered"
+  ]
+ },
+ {
+  "id": "d738b71fd579",
+  "text": "To earn: five homework tasks done",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: five homework tasks done"
   ]
  },
  {
@@ -33603,6 +35018,15 @@
   ]
  },
  {
+  "id": "6a422682c742",
+  "text": "To earn: retry today's misses and get them all right",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: retry today's misses and get them all right"
+  ]
+ },
+ {
   "id": "bd6db5c4fe2d",
   "text": "To earn: seven days in a row",
   "kind": "exact",
@@ -33612,12 +35036,93 @@
   ]
  },
  {
+  "id": "b53880dc594f",
+  "text": "To earn: sixty days in a row",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: sixty days in a row"
+  ]
+ },
+ {
+  "id": "ba72e4bb3279",
+  "text": "To earn: ten exercises finished (drills, sets, texts)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: ten exercises finished (drills, sets, texts)"
+  ]
+ },
+ {
+  "id": "628242df40cf",
+  "text": "To earn: ten hours of study ticked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: ten hours of study ticked"
+  ]
+ },
+ {
+  "id": "60a61dbd032d",
+  "text": "To earn: ten of your own mistakes fixed (caught twice in a row)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: ten of your own mistakes fixed (caught twice in a row)"
+  ]
+ },
+ {
+  "id": "47b90fbc1a99",
+  "text": "To earn: ten texts corrected",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: ten texts corrected"
+  ]
+ },
+ {
+  "id": "26287646be81",
+  "text": "To earn: ten words saved to Mon carnet from the pages",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: ten words saved to Mon carnet from the pages"
+  ]
+ },
+ {
   "id": "0acdda1660dc",
   "text": "To earn: the Phase 1 exit criteria",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "To earn: the Phase 1 exit criteria"
+  ]
+ },
+ {
+  "id": "759f6da01819",
+  "text": "To earn: the Phase 2 exit criteria",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: the Phase 2 exit criteria"
+  ]
+ },
+ {
+  "id": "e01a2409478c",
+  "text": "To earn: the Phase 3 exit criteria",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: the Phase 3 exit criteria"
+  ]
+ },
+ {
+  "id": "3ff3f9b64a20",
+  "text": "To earn: the Phase 4 exit criteria",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: the Phase 4 exit criteria"
   ]
  },
  {
@@ -33639,12 +35144,57 @@
   ]
  },
  {
+  "id": "f7eb70201893",
+  "text": "To earn: three notes on the Pense-bête",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: three notes on the Pense-bête"
+  ]
+ },
+ {
+  "id": "7b84c7051a78",
+  "text": "To earn: turn on « Pense en français »",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: turn on « Pense en français »"
+  ]
+ },
+ {
+  "id": "adf49ee07de7",
+  "text": "To earn: twenty cards of the Expressions deck learned",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: twenty cards of the Expressions deck learned"
+  ]
+ },
+ {
+  "id": "6f685fd16d7f",
+  "text": "To earn: write a revision sheet of your own",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: write a revision sheet of your own"
+  ]
+ },
+ {
   "id": "3b72ddf8111f",
   "text": "To earn: your last 3 B1 sets in listening (70%) or reading (75%)",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "To earn: your last 3 B1 sets in listening (70%) or reading (75%)"
+  ]
+ },
+ {
+  "id": "724ef0f42042",
+  "text": "To earn: your latest round of every grammar topic at 90% or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: your latest round of every grammar topic at 90% or more"
   ]
  },
  {
@@ -33934,6 +35484,15 @@
   ]
  },
  {
+  "id": "e3921038ff8d",
+  "text": "TOUT-TERRAIN ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "TOUT-TERRAIN ★"
+  ]
+ },
+ {
   "id": "43dda0480d59",
   "text": "Toutefois: a connector that starts a new sentence.",
   "kind": "exact",
@@ -34159,6 +35718,15 @@
   "where": "attr:placeholder",
   "ctx": [
    "<p>…</p> <p>… Log your scores here to keep them with the rest.</p> … <p>Log a score from elsewhere</p> Score Out of Source <button>Log … score at …</button>"
+  ]
+ },
+ {
+  "id": "b2380d6f35bc",
+  "text": "Twenty expressions learned",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Twenty expressions learned"
   ]
  },
  {
@@ -34828,6 +36396,24 @@
   "ctx": []
  },
  {
+  "id": "48ede3d0c8a8",
+  "text": "Visa de visiteur",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Visa de visiteur"
+  ]
+ },
+ {
+  "id": "732b18468bdd",
+  "text": "visitor visa",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "visitor visa"
+  ]
+ },
+ {
   "id": "a181b3f91109",
   "text": "Visits have doubled, and the crowds damage the vegetation and « nuit à la qualité de la visite ». Cyclists and shuttle users are simply exempt from booking; nobody is forced to come by bike.",
   "kind": "exact",
@@ -34900,7 +36486,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Nouveau tampon !</p><b>…</b><span>…</span><a>Voir mes tampons</a> …<button>×</button>"
+   "… <p>Nouveau tampon !</p><b>…</b><span>…</span>…<a>Voir mes tampons</a> …<button>×</button>"
   ]
  },
  {
@@ -35862,6 +37448,15 @@
   ]
  },
  {
+  "id": "868d679188e2",
+  "text": "work permit",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "work permit"
+  ]
+ },
+ {
   "id": "300c81ad61b2",
   "text": "Working sick halves output, spreads illness and « coûterait aux entreprises deux à trois fois plus cher que les absences » : staying home is better for the company too. The researchers want employers to act, with paid sick days, not sanctions.",
   "kind": "exact",
@@ -36360,6 +37955,15 @@
   ]
  },
  {
+  "id": "0eef59422f61",
+  "text": "You've reached the last status on the road.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "You've reached the last status on the road."
+  ]
+ },
+ {
   "id": "190ad954707e",
   "text": "Young",
   "kind": "exact",
@@ -36759,6 +38363,15 @@
   ]
  },
  {
+  "id": "1fa5aea96f01",
+  "text": "Your latest round of every topic at 90% or more",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your latest round of every topic at 90% or more"
+  ]
+ },
+ {
   "id": "0aa6d2295850",
   "text": "your latest, then the trend",
   "kind": "exact",
@@ -36866,6 +38479,15 @@
   "where": "app",
   "ctx": [
    "… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+  ]
+ },
+ {
+  "id": "a845c2368fc0",
+  "text": "Your own revision sheet",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your own revision sheet"
   ]
  },
  {
