@@ -472,6 +472,15 @@
   ]
  },
  {
+  "id": "ca3b6b6c1afc",
+  "text": "· this week",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h2>…À surveiller<small> · this week</small></h2><a>Change</a> …"
+  ]
+ },
+ {
   "id": "b2dc5cbaf46e",
   "text": "· time ran out",
   "kind": "exact",
@@ -2597,7 +2606,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -4102,7 +4111,7 @@
   "where": "app",
   "ctx": [
    "…–… words",
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -4111,7 +4120,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -4385,6 +4394,15 @@
   ]
  },
  {
+  "id": "152f57c4c934",
+  "text": "{0}/2 picked",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… <h3>Pour la semaine du …</h3><span>…</span> <p>Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your "
+  ]
+ },
+ {
   "id": "b8457c64c704",
   "text": "{0}A day counts once every block in its plan is ticked. Sundays don't break a streak.",
   "kind": "pattern",
@@ -4553,6 +4571,15 @@
   "where": "app",
   "ctx": [
    "…/2 corrected writing submissions so far"
+  ]
+ },
+ {
+  "id": "1c6c4e1e6ed4",
+  "text": "/2 picked",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <h3>Pour la semaine du …</h3><span>…</span> <p>Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your "
   ]
  },
  {
@@ -4775,6 +4802,15 @@
   ]
  },
  {
+  "id": "f5e02436c4ad",
+  "text": "×{0} this week",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<span>×… this week</span>"
+  ]
+ },
+ {
   "id": "cf2621037332",
   "text": "<!-- Brand kit shapes (from the \"Réussir le TCF Brand Kit\" design): the maple leaf, the é tile's clip, the stamp ring and ink texture, and the icons. Pages use them with",
   "kind": "exact",
@@ -4851,6 +4887,15 @@
   "where": "app",
   "ctx": [
    "… ✓ best …/…"
+  ]
+ },
+ {
+  "id": "d01c402bbe42",
+  "text": "✓ kept at bay",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>✓ kept at bay</span>"
   ]
  },
  {
@@ -8443,7 +8488,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -9924,6 +9969,13 @@
   "ctx": []
  },
  {
+  "id": "704a5f74db1a",
+  "text": "c'est vs il/elle est, prepositions with places, seul/seulement, leur/ses, les/des",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
   "id": "64b829d9afe0",
   "text": "Ça is the subject: dérangerait (third person).",
   "kind": "exact",
@@ -10637,6 +10689,24 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "475f2b69572f",
+  "text": "Cette semaine · this week",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Cette semaine · this week"
+  ]
+ },
+ {
+  "id": "64fbd995d3b6",
+  "text": "Change",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h2>…À surveiller<small> · this week</small></h2><a>Change</a> …"
+  ]
  },
  {
   "id": "d4e2e14e2c06",
@@ -11593,6 +11663,13 @@
   "ctx": []
  },
  {
+  "id": "d66b66d7edb9",
+  "text": "conditionnel used instead of subjonctif after afin que / avant que",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
   "id": "6262b4512881",
   "text": "Conditionnel: after si + imparfait, au cas où, unconfirmed news",
   "kind": "exact",
@@ -11844,7 +11921,7 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -11853,7 +11930,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -13573,6 +13650,13 @@
   "ctx": []
  },
  {
+  "id": "e3683b754392",
+  "text": "embedded questions with an infinitive or inversion (pourquoi je sortir, quand serai-je)",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
   "id": "a2e135836970",
   "text": "Embedded: quand je serai, never quand serai-je.",
   "kind": "exact",
@@ -14870,7 +14954,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -15259,6 +15343,15 @@
   ]
  },
  {
+  "id": "858ecc9c2ebb",
+  "text": "Friday's « Plan next week » block picks the two for the week ahead, from the coach's suggestions.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Friday's « Plan next week » block picks the two for the week ahead, from the coach's suggestions.</p>"
+  ]
+ },
+ {
   "id": "0b1e95cfd977",
   "text": "from",
   "kind": "exact",
@@ -15320,6 +15413,15 @@
   "where": "app",
   "ctx": [
    "From your own grades"
+  ]
+ },
+ {
+  "id": "da052e58a3e1",
+  "text": "From your recurring errors",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "From your recurring errors"
   ]
  },
  {
@@ -15592,6 +15694,20 @@
   "text": "Gérard sleeps badly « mais en connaissance de cause », stays up for his charts and smiles at the doctor: his obsession is the very cause of his fatigue.",
   "kind": "exact",
   "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "d548eebe76fa",
+  "text": "Gérondif / participles",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
+  "id": "5cddbf15d776",
+  "text": "Gérondif + participles",
+  "kind": "exact",
+  "where": "plan",
   "ctx": []
  },
  {
@@ -16753,6 +16869,13 @@
   "ctx": []
  },
  {
+  "id": "8542ed80e783",
+  "text": "imperative + object pronoun order (m'envoie instead of envoie-moi), persisting since the first session",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
   "id": "25a195373f42",
   "text": "Imperative + pronoun",
   "kind": "exact",
@@ -17018,6 +17141,13 @@
   "ctx": []
  },
  {
+  "id": "b1228df510d7",
+  "text": "infinitive after si (si on vivre)",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
   "id": "b815be3f9f9f",
   "text": "Informal.",
   "kind": "exact",
@@ -17066,7 +17196,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -17528,12 +17658,57 @@
   "ctx": []
  },
  {
+  "id": "aaa015d3c0df",
+  "text": "Keep these two",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Keep these two"
+  ]
+ },
+ {
   "id": "8b626cfb0120",
   "text": "keeps slot colour 2",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "# Titre a section heading - point a bullet | a | b | a table: the first row is the header > … a taped note, for the memory trick ! … a red-pen “Attention” box = Phrase — English an example >> me te :: label | le la | *verbe an order chain: numbered, coloured s"
+  ]
+ },
+ {
+  "id": "382fd2f046f1",
+  "text": "kept at bay this week",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "kept at bay this week"
+  ]
+ },
+ {
+  "id": "67e70beec46f",
+  "text": "Kept for the week of {0}: {1} and {2}.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Kept for the week of …: … and …."
+  ]
+ },
+ {
+  "id": "e67285e3533f",
+  "text": "Kept: {0} and {1}. Change them if you like.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Kept: … and …. Change them if you like."
+  ]
+ },
+ {
+  "id": "1cbd05b53a12",
+  "text": "Kept: change them if you like",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Kept: change them if you like"
   ]
  },
  {
@@ -17681,6 +17856,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "384f4f1fc4b8",
+  "text": "La semaine dernière · last week",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "La semaine dernière · last week"
+  ]
  },
  {
   "id": "bae52269833d",
@@ -17867,6 +18051,15 @@
   "where": "app",
   "ctx": [
    "Last time: … words, in range."
+  ]
+ },
+ {
+  "id": "c4a9438e08d9",
+  "text": "last week",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "La semaine dernière · last week"
   ]
  },
  {
@@ -18771,11 +18964,20 @@
   ]
  },
  {
-  "id": "5331ac21223a",
-  "text": "Look at your criteria and this week's misses. Pick the two mistakes you'll watch for in next week's writing.",
+  "id": "d07185733087",
+  "text": "Look at your criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing.",
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "3583bca9e910",
+  "text": "Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your error log and your drills.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <h3>Pour la semaine du …</h3><span>…</span> <p>Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your "
+  ]
  },
  {
   "id": "6846f4929a2f",
@@ -20954,6 +21156,24 @@
   ]
  },
  {
+  "id": "77cb44f677fc",
+  "text": "Next week's two are kept: {0} and {1}.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>Next week's two are kept: … and ….</p>"
+  ]
+ },
+ {
+  "id": "44a11be0d2ba",
+  "text": "Next week's two aren't picked yet.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p><b>Next week's two aren't picked yet.</b> Open this to choose them.</p>"
+  ]
+ },
+ {
   "id": "1ca0f3dec5d7",
   "text": "Nice work! The ones you missed come back soon.",
   "kind": "exact",
@@ -21064,6 +21284,15 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "6f2525ee18fd",
+  "text": "No corrected text this week yet",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "No corrected text this week yet"
+  ]
  },
  {
   "id": "eb51633b84e8",
@@ -21570,6 +21799,15 @@
   ]
  },
  {
+  "id": "54c08e6327e1",
+  "text": "no text yet",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>no text yet</span>"
+  ]
+ },
+ {
   "id": "6eef6648406c",
   "text": "None",
   "kind": "exact",
@@ -21585,6 +21823,15 @@
   "where": "app",
   "ctx": [
    "None in the last 3 weeks"
+  ]
+ },
+ {
+  "id": "5ca39b8c26b4",
+  "text": "None picked for this week yet",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "None picked for this week yet"
   ]
  },
  {
@@ -22804,6 +23051,15 @@
   ]
  },
  {
+  "id": "27581d6667f0",
+  "text": "Open this to choose them.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p><b>Next week's two aren't picked yet.</b> Open this to choose them.</p>"
+  ]
+ },
+ {
   "id": "eed8ec68db48",
   "text": "Opinion after comparison",
   "kind": "exact",
@@ -23554,6 +23810,13 @@
   "ctx": []
  },
  {
+  "id": "bf014e89359d",
+  "text": "passé composé where the plus-que-parfait is needed for implied anteriority",
+  "kind": "exact",
+  "where": "category",
+  "ctx": []
+ },
+ {
   "id": "4fe91285f0c7",
   "text": "Passé composé with être, and agreement with the reflexive pronoun (elle s'est levée), except when a direct object follows, which blocks agreement (elle s'est lavé les mains). Negation wraps both parts (elle ne s'est pas levée). Inherently pronominal verbs (se rendre compte, s'apercevoir, se souvenir) never drop the reflexive pronoun.",
   "kind": "exact",
@@ -23992,6 +24255,24 @@
   "kind": "exact",
   "where": "drill",
   "ctx": []
+ },
+ {
+  "id": "1f216298416f",
+  "text": "Pick two",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Pick two"
+  ]
+ },
+ {
+  "id": "b7af26045dd9",
+  "text": "Pick two: the two mistakes you'll watch for.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Pick two: the two mistakes you'll watch for."
+  ]
  },
  {
   "id": "5367a273bc44",
@@ -24872,6 +25153,13 @@
   "text": "Pronominal verbs always take être: s'est levée.",
   "kind": "exact",
   "where": "content:drill",
+  "ctx": []
+ },
+ {
+  "id": "acc631404e92",
+  "text": "pronominal verbs in passé composé (être + agreement; dropping the reflexive on se rendre compte, s'inquiéter, s'aider de)",
+  "kind": "exact",
+  "where": "category",
   "ctx": []
  },
  {
@@ -29334,6 +29622,15 @@
   ]
  },
  {
+  "id": "d1bdbc3bf15c",
+  "text": "still ×{0} this week",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "still ×… this week"
+  ]
+ },
+ {
   "id": "2aeff4dd5a85",
   "text": "Still connecting to Claude. Try again in a moment.",
   "kind": "exact",
@@ -29425,7 +29722,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -29824,6 +30121,13 @@
   "text": "Tâche 3 starts by reporting what two documents say, and that is reported speech.",
   "kind": "exact",
   "where": "content:topic",
+  "ctx": []
+ },
+ {
+  "id": "c34f78a0302d",
+  "text": "Tâche 3: skipped the comparison of the two documents twice; word count once over 180 and once under 120",
+  "kind": "exact",
+  "where": "category",
   "ctx": []
  },
  {
@@ -30662,6 +30966,15 @@
   "where": "app",
   "ctx": [
    "The CO Examen blanc stands in for both timed sets today."
+  ]
+ },
+ {
+  "id": "df746aeb8bb6",
+  "text": "The coach suggests {0} and {1}.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "The coach suggests … and …."
   ]
  },
  {
@@ -32453,6 +32766,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "Cette semaine · this week",
+   "<h2>…À surveiller<small> · this week</small></h2><a>Change</a> …",
    "this week"
   ]
  },
@@ -32463,6 +32778,15 @@
   "where": "attr:aria-label",
   "ctx": [
    "<p>…</p> <b>Phase … · …</b><span>Semaine …</span><span>…</span>… … … … ……………"
+  ]
+ },
+ {
+  "id": "e684bf663b0e",
+  "text": "This week I'm watching for two mistakes in my writing: {0}. Check these first, and tell me whether each one appears.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "This week I'm watching for two mistakes in my writing: …. Check these first, and tell me whether each one appears."
   ]
  },
  {
@@ -32575,6 +32899,24 @@
   ]
  },
  {
+  "id": "8127ea7c5d8f",
+  "text": "time they came back this week, in {0} corrected text",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "time they came back this week, in … corrected text…"
+  ]
+ },
+ {
+  "id": "ec286cd50c53",
+  "text": "time they came back this week, in {0} corrected text{1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "time they came back this week, in … corrected text…"
+  ]
+ },
+ {
   "id": "9307f5898b83",
   "text": "Time words in reported speech",
   "kind": "exact",
@@ -32673,6 +33015,24 @@
   "where": "attr:aria-label",
   "ctx": [
    "<span>…</span>… <button>…</button> <button>Reset</button> …"
+  ]
+ },
+ {
+  "id": "923a1698233b",
+  "text": "times they came back this week, in {0} corrected text",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "times they came back this week, in … corrected text…"
+  ]
+ },
+ {
+  "id": "0b9e01dfa4bb",
+  "text": "times they came back this week, in {0} corrected text{1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "times they came back this week, in … corrected text…"
   ]
  },
  {
@@ -33276,6 +33636,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "e6157efc6ce1",
+  "text": "two mistakes to watch",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "two mistakes to watch"
+  ]
  },
  {
   "id": "f92e9788f15b",
@@ -34103,6 +34472,15 @@
   ]
  },
  {
+  "id": "68bb84bbcdad",
+  "text": "Watch these two",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Watch these two"
+  ]
+ },
+ {
   "id": "a351d8ab54f6",
   "text": "We arrive, so nous is the subject; cherché doesn't agree with avoir here.",
   "kind": "exact",
@@ -34166,6 +34544,15 @@
   "where": "app",
   "ctx": [
    "Wednesday"
+  ]
+ },
+ {
+  "id": "c0ee32d825d6",
+  "text": "week",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "week"
   ]
  },
  {
@@ -35965,7 +36352,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … …<button>Copy for another AI"
+   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
  {
@@ -36020,6 +36407,15 @@
   "where": "app",
   "ctx": [
    "Your three most frequent kinds of mistake"
+  ]
+ },
+ {
+  "id": "342a156debb3",
+  "text": "Your two, and how often they came back",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>…</h3><span>Your two, and how often they came back</span> …"
   ]
  },
  {
