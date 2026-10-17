@@ -4454,7 +4454,7 @@
         <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
-          <aside class="side">${continueCard()}${sel === t ? watchCard() + blockersCard() : ""}${expressionCard()}${homeworkCard()}${streakCard()}</aside>
+          <aside class="side">${expressionCard()}${continueCard()}${sel === t ? watchCard() + blockersCard() : ""}${homeworkCard()}${streakCard()}</aside>
         </div>
       </div>`;
     },
