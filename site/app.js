@@ -4077,7 +4077,7 @@
   const fold = (key, label, body, dflt) => `<details class="fold-x" ${foldAttr(key, dflt)}><summary>${label}</summary>${body}</details>`;
   // A short, stable key for motion.js (data-k) from any text: the same round or set gives the same key.
   const hk = (s) => { let h = 0; for (const ch of String(s)) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
-  let pendingRender = false, raf = 0, pointerDown = false;
+  let pendingRender = false, raf = 0, pointerDown = false, holdH = false;
   function scheduleRender() {
     if (raf) return;
     raf = requestAnimationFrame(() => { raf = 0; render(false); });
@@ -4104,6 +4104,14 @@
       // A state brought back from before the refresh that can't be drawn is dropped, rather than coming back on every refresh.
       if (tabCheck) { tabDrop(); render(force); return; }
       html = `<div class="wrap"><div class="notice warn">Something went wrong drawing this page: ${esc(e && e.message)}</div></div>`;
+    }
+    // Safari, laying out a redraw, first measures the parts with container queries (Progrès's tiles, the Fiches) as
+    // empty, so a page scrolled further down than that jumped to the top. The view keeps its height until the new
+    // page has been laid out once, after i18n.js has put in its French (in immersion), so it's measured only then.
+    if (!holdH) {
+      holdH = true;
+      viewEl.style.minHeight = viewEl.offsetHeight + "px";
+      queueMicrotask(() => { void viewEl.offsetHeight; viewEl.style.minHeight = ""; holdH = false; });
     }
     viewEl.innerHTML = html;
     if (fid) {

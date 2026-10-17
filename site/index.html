@@ -120,7 +120,9 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html, body { min-height: 100%; }
+/* Every redraw replaces the whole page, so the browser's scroll anchoring has nothing to follow and only moved
+   the page (a pick in À surveiller jumped it by hundreds of pixels). */
+html, body { min-height: 100%; overflow-anchor: none; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 15.5px/1.55 var(--f-ui); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 a { color: var(--accent); text-underline-offset: .18em; }
 button, input, select, textarea { font: inherit; color: inherit; }
