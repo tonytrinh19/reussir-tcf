@@ -1179,42 +1179,193 @@
   // "Journée validée": the teacher's stamp on the day's header once every block is ticked.
   const tbStamp = (date) => `<svg class="tb-stamp" id="tb-stamp" data-date="${date}" viewBox="0 0 176 66" role="img" aria-label="Stamp: Très bien !"><g filter="url(#ink)"><rect class="tb-o" x="2.5" y="2.5" width="171" height="61" rx="11"/><rect class="tb-i" x="8.5" y="8.5" width="159" height="49" rx="7"/><use class="tb-leaf" href="#leaf" x="18" y="17" width="29" height="31.5" transform="rotate(-8 32.5 32.75)"/><text x="109" y="39.5" text-anchor="middle">TRÈS BIEN&#160;!</text></g></svg>`;
 
-  // Tampons: a teacher's rubber stamp for each milestone, in a different ink each, from the first day to NCLC 7 in
-  // all four skills. Stamps added later carry their batch (set), so the ones you'd already earned by then are
-  // recorded without a celebration (see stampCheck).
-  const STAMP_SET = 2;
-  const STAMPS = [
-    { id: "first", name: "Première séance", ring: "PREMIÈRE SÉANCE ★ ", reps: 3, icon: "today", ink: "--accent", rot: -8, got: "Your first full day's plan", todo: "To earn: a full day's plan", earned: () => [...S.days.keys()].some((d) => dayComplete(d)) },
-    { id: "copy", set: 2, name: "Première copie", ring: "PREMIÈRE COPIE ★ ", reps: 3, icon: "writing", ink: "--amber", rot: 6, got: "Your first text corrected", todo: "To earn: a text corrected by Claude", earned: () => list("writing").some((w) => w.fb && Array.isArray(w.fb.errors)) },
-    { id: "d7", name: "7 jours d'affilée", ring: "7 JOURS D'AFFILÉE ★ ", reps: 3, num: "7", ink: "--red", rot: 7, got: "Seven days in a row", todo: "To earn: seven days in a row", earned: (x) => x.best >= 7 },
-    { id: "zero", name: "Zéro faute", ring: "ZÉRO FAUTE ★ ", reps: 4, icon: "bilan", ink: "--green", rot: -4, got: "A drill round with no misses", todo: "To earn: a drill round with no misses", earned: () => list("drills").some((d) => d.set !== "prod" && d.total > 0 && d.score >= d.total) },
-    { id: "ear", set: 2, name: "Oreille fine", ring: "OREILLE FINE ★ ", reps: 4, icon: "listen", ink: "--accent", rot: -9, got: "A listening set without a miss", todo: "To earn: a listening set without a miss, first try", earned: () => firstTries(list("comp").filter((c) => c.skill === "co" && c.kind !== "exam" && c.total)).some((c) => c.score >= c.total) },
-    { id: "c100", name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", ink: "--amber", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: () => S.srs.size >= 100 },
-    { id: "pace", set: 2, name: "Au chrono", ring: "AU CHRONO ★ ", reps: 4, icon: "timer", ink: "--red", rot: 8, got: "A reading set at exam pace, 3 of 4 or better", todo: "To earn: a reading set at exam pace, 3 of 4 or better", earned: () => firstTries(list("comp").filter((c) => c.skill === "ce" && c.kind !== "exam" && c.total)).some((c) => c.secs > 0 && c.secs <= (CE_PACE[c.level] || 90) * c.total && c.score / c.total >= 0.75 - 1e-9) },
-    { id: "exam", name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: () => list("comp").some((c) => c.kind === "exam") },
-    { id: "d14", set: 2, name: "14 jours d'affilée", ring: "14 JOURS D'AFFILÉE ★ ", reps: 3, num: "14", ink: "--amber", rot: -5, got: "Fourteen days in a row", todo: "To earn: fourteen days in a row", earned: (x) => x.best >= 14 },
-    { id: "rule", set: 2, name: "Règle maîtrisée", ring: "RÈGLE MAÎTRISÉE ★ ", reps: 3, icon: "grammar", ink: "--red", rot: 11, got: "A grammar topic mastered", todo: "To earn: a grammar topic's target, twice a week apart", earned: () => T.TOPICS.some((tp) => topicMastery(tp).ok) },
-    { id: "p1", name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
-    { id: "c300", set: 2, name: "300 cartes", ring: "300 CARTES ★ ", reps: 4, icon: "vocab", ink: "--green", rot: -7, got: "300 cards reviewed", todo: "To earn: 300 cards reviewed", earned: () => S.srs.size >= 300 },
-    { id: "b2", set: 2, name: "Niveau B2", ring: "NIVEAU B2 ★ ", reps: 4, num: "B2", ink: "--amber", rot: 4, got: "Ready for B2 in listening or reading", todo: "To earn: your last 3 B1 sets in listening (70%) or reading (75%)", earned: () => ["co", "ce"].some((sk) => { const l = compLadder(sk); return l.a1 != null && l.a1 >= LADDER_UP[sk] - 1e-9; }) },
-    { id: "d30", name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
-    { id: "nclc7", name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
-    { id: "nclc7all", set: 2, name: "NCLC 7 partout", ring: "NCLC 7 PARTOUT ★ ", reps: 3, icon: "plane", ink: "--green", rot: -10, got: "NCLC 7 in all four skills, on one test", todo: "To earn: NCLC 7 in all four skills, on one test", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].every((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+  // Tampons: a teacher's rubber stamp for each milestone, from the first day to NCLC 7 in all four skills, in
+  // families (STAMP_FAM), each in its own ink. Stamps added later carry their batch (set), so the ones you'd already
+  // earned by then are recorded without a celebration (see stampCheck). A stamp with a count to reach has `prog`
+  // ([what you have, what it takes]), shown under it until it's earned.
+  const STAMP_SET = 3;
+  const STAMP_FAM = [
+    ["streak", "Régularité", "keeping at it", "--sk-eo"],
+    ["endu", "Endurance", "hours and exercises", "--sk-bil"],
+    ["gram", "Grammaire", "grammar", "--sk-gra"],
+    ["fix", "Fautes", "your mistakes", "--red"],
+    ["voc", "Vocabulaire", "vocabulary", "--sk-voc"],
+    ["comp", "Compréhension", "listening and reading", "--sk-ce"],
+    ["write", "Écrit", "writing", "--sk-ee"],
+    ["exam", "Examens blancs", "practice exams", "--sk-co"],
+    ["goal", "Objectifs", "the big goals", "--amber"],
+    ["bonus", "Bonus", "the little extras", "--accent"],
   ];
+  // Your status grows with your stamps, along the road to Canada.
+  const RANKS = [[0, "Visa de visiteur", "visitor visa"], [5, "Permis d'études", "study permit"], [12, "Permis de travail", "work permit"], [24, "Résidence permanente", "permanent residence"], [38, "Citoyenneté", "citizenship"], [52, "Passeport canadien", "Canadian passport"]];
+  const rankOf = (n) => { let i = 0; RANKS.forEach(([k], j) => { if (n >= k) i = j; }); return i; };
+  const PHASE_OK = (n) => { const c = T.CRITERIA[n] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); };
+  const phaseProg = (n) => { const c = T.CRITERIA[n] || []; return [c.filter((x) => criterionStatus(x).ok).length, c.length]; };
+  const builtCleared = (x, sets, level, share) => { const ss = sets.filter((s2) => s2.level === level); return [ss.filter((s2) => (x.bestOf.get(s2.id) || 0) >= share - 1e-9).length, ss.length]; };
+  const proofDone = (x, level) => { const ids = PR.filter((p) => p.level === level).map((p) => p.id), done = new Set(x.hunts.map((d) => d.text)); return [ids.filter((i) => done.has(i)).length, ids.length]; };
+  const atLeast = (have, need) => [Math.min(have, need), need];
+  const STAMPS = [
+    // Régularité
+    { id: "first", fam: "streak", name: "Première séance", ring: "PREMIÈRE SÉANCE ★ ", reps: 3, icon: "today", rot: -8, got: "Your first full day's plan", todo: "To earn: a full day's plan", earned: (x) => x.full.length > 0 },
+    { id: "d7", fam: "streak", name: "7 jours d'affilée", ring: "7 JOURS D'AFFILÉE ★ ", reps: 3, num: "7", rot: 7, got: "Seven days in a row", todo: "To earn: seven days in a row", earned: (x) => x.best >= 7, prog: (x) => atLeast(x.best, 7) },
+    { id: "comeback", set: 3, fam: "streak", name: "Retour gagnant", ring: "RETOUR GAGNANT ★ ", icon: "today", got: "A full day after four days or more away", todo: "To earn: a full day after a break of four days or more", earned: (x) => x.full.some((d) => { const l = lastActive(d); return !!l && daysBetween(l, d) >= 4; }) },
+    { id: "week", set: 3, fam: "streak", name: "Semaine parfaite", ring: "SEMAINE PARFAITE ★ ", icon: "ahead", got: "Every day from Monday to Saturday", todo: "To earn: every day of one week, Monday to Saturday", earned: (x) => x.weekBest >= 6, prog: (x) => atLeast(x.weekBest, 6) },
+    { id: "d14", set: 2, fam: "streak", name: "14 jours d'affilée", ring: "14 JOURS D'AFFILÉE ★ ", reps: 3, num: "14", rot: -5, got: "Fourteen days in a row", todo: "To earn: fourteen days in a row", earned: (x) => x.best >= 14, prog: (x) => atLeast(x.best, 14) },
+    { id: "d30", fam: "streak", name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30, prog: (x) => atLeast(x.best, 30) },
+    { id: "d60", set: 3, fam: "streak", name: "60 jours", ring: "60 JOURS D'AFFILÉE ★ ", num: "60", got: "Sixty days in a row", todo: "To earn: sixty days in a row", earned: (x) => x.best >= 60, prog: (x) => atLeast(x.best, 60) },
+    // Endurance
+    { id: "e10", set: 3, fam: "endu", name: "10 exercices", ring: "10 EXERCICES ★ ", icon: "homework", got: "Ten exercises finished", todo: "To earn: ten exercises finished (drills, sets, texts)", earned: (x) => x.done >= 10, prog: (x) => atLeast(x.done, 10) },
+    { id: "e50", set: 3, fam: "endu", name: "50 exercices", ring: "50 EXERCICES ★ ", icon: "homework", got: "Fifty exercises finished", todo: "To earn: fifty exercises finished", earned: (x) => x.done >= 50, prog: (x) => atLeast(x.done, 50) },
+    { id: "e100", set: 3, fam: "endu", name: "100 exercices", ring: "100 EXERCICES ★ ", icon: "homework", got: "A hundred exercises finished", todo: "To earn: a hundred exercises finished", earned: (x) => x.done >= 100, prog: (x) => atLeast(x.done, 100) },
+    { id: "h10", set: 3, fam: "endu", name: "10 heures de vol", ring: "10 HEURES DE VOL ★ ", num: "10", got: "Ten hours of study ticked", todo: "To earn: ten hours of study ticked", earned: (x) => x.mins >= 600, prog: (x) => atLeast(Math.floor(x.mins / 60), 10) },
+    { id: "h50", set: 3, fam: "endu", name: "50 heures de vol", ring: "50 HEURES DE VOL ★ ", num: "50", got: "Fifty hours of study ticked", todo: "To earn: fifty hours of study ticked", earned: (x) => x.mins >= 3000, prog: (x) => atLeast(Math.floor(x.mins / 60), 50) },
+    { id: "h100", set: 3, fam: "endu", name: "100 heures de vol", ring: "100 HEURES DE VOL ★ ", num: "100", got: "A hundred hours of study ticked", todo: "To earn: a hundred hours of study ticked", earned: (x) => x.mins >= 6000, prog: (x) => atLeast(Math.floor(x.mins / 60), 100) },
+    // Grammaire
+    { id: "zero", fam: "gram", name: "Zéro faute", ring: "ZÉRO FAUTE ★ ", reps: 4, icon: "bilan", rot: -4, got: "A drill round with no misses", todo: "To earn: a drill round with no misses", earned: (x) => x.rounds.some((d) => d.score >= d.total) },
+    { id: "mixed", set: 3, fam: "gram", name: "Tout-terrain", ring: "TOUT-TERRAIN ★ ", icon: "grammar", got: "A mixed review at 90% or more", todo: "To earn: a mixed review at 90% or more", earned: (x) => x.gram.some((d) => d.topic === "mixed" && d.score / d.total >= 0.9 - 1e-9) },
+    { id: "retry", set: 3, fam: "gram", name: "Deuxième chance", ring: "DEUXIÈME CHANCE ★ ", icon: "grammar", got: "Every miss of a round fixed on a retry", todo: "To earn: retry today's misses and get them all right", earned: (x) => x.rounds.some((d) => retriesOf(d).some((r) => r.total > 0 && r.score >= r.total)) },
+    { id: "rule", set: 2, fam: "gram", name: "Règle maîtrisée", ring: "RÈGLE MAÎTRISÉE ★ ", reps: 3, icon: "grammar", rot: 11, got: "A grammar topic mastered", todo: "To earn: a grammar topic's target, twice a week apart", earned: (x) => x.mastered >= 1 },
+    { id: "crack", set: 3, fam: "gram", name: "Sujet bouclé", ring: "SUJET BOUCLÉ ★ ", icon: "grammar", got: "Every set of one topic at 90% or more", todo: "To earn: every set of one grammar topic at 90% or more", earned: (x) => x.crack[0] >= x.crack[1], prog: (x) => x.crack },
+    { id: "rule5", set: 3, fam: "gram", name: "5 règles", ring: "5 RÈGLES MAÎTRISÉES ★ ", num: "5", got: "Five grammar topics mastered", todo: "To earn: five grammar topics mastered", earned: (x) => x.mastered >= 5, prog: (x) => atLeast(x.mastered, 5) },
+    { id: "all90", set: 3, fam: "gram", name: "90 % partout", ring: "90 % PARTOUT ★ ", num: "90", got: "Your latest round of every topic at 90% or more", todo: "To earn: your latest round of every grammar topic at 90% or more", earned: (x) => x.at90 >= T.TOPICS.length, prog: (x) => [x.at90, T.TOPICS.length] },
+    { id: "ruleall", set: 3, fam: "gram", name: "Toute la grammaire", ring: "TOUTE LA GRAMMAIRE ★ ", icon: "target", got: "Every grammar topic mastered", todo: "To earn: every grammar topic mastered", earned: (x) => x.mastered >= T.TOPICS.length, prog: (x) => [x.mastered, T.TOPICS.length] },
+    // Fautes
+    { id: "lynx", set: 3, fam: "fix", name: "Œil de lynx", ring: "ŒIL DE LYNX ★ ", icon: "eye", got: "Every mistake of a text found and fixed, nothing else marked", todo: "To earn: a Find the mistakes text with everything caught", earned: (x) => x.hunts.some((d) => d.score >= d.total && !d.extra) },
+    { id: "fix10", set: 3, fam: "fix", name: "10 fautes corrigées", ring: "10 FAUTES CORRIGÉES ★ ", icon: "errors", got: "Ten of your own mistakes fixed", todo: "To earn: ten of your own mistakes fixed (caught twice in a row)", earned: (x) => x.fixed >= 10, prog: (x) => atLeast(x.fixed, 10) },
+    { id: "watch", set: 3, fam: "fix", name: "Sous surveillance", ring: "SOUS SURVEILLANCE ★ ", icon: "eye", got: "A week with both watched mistakes kept at bay", todo: "To earn: a week where your two mistakes to watch don't come back", earned: (x) => x.watchKept },
+    { id: "proof1", set: 3, fam: "fix", name: "Relecture B1", ring: "RELECTURE B1 ★ ", num: "B1", got: "Every B1 text of Find the mistakes done", todo: "To earn: every B1 text of Find the mistakes", earned: (x) => { const p = proofDone(x, "B1"); return p[1] > 0 && p[0] >= p[1]; }, prog: (x) => proofDone(x, "B1") },
+    { id: "proof2", set: 3, fam: "fix", name: "Relecture B2", ring: "RELECTURE B2 ★ ", num: "B2", got: "Every B2 text of Find the mistakes done", todo: "To earn: every B2 text of Find the mistakes", earned: (x) => { const p = proofDone(x, "B2"); return p[1] > 0 && p[0] >= p[1]; }, prog: (x) => proofDone(x, "B2") },
+    // Vocabulaire
+    { id: "c100", fam: "voc", name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: (x) => x.cards >= 100, prog: (x) => atLeast(x.cards, 100) },
+    { id: "c300", set: 2, fam: "voc", name: "300 cartes", ring: "300 CARTES ★ ", reps: 4, icon: "vocab", rot: -7, got: "300 cards reviewed", todo: "To earn: 300 cards reviewed", earned: (x) => x.cards >= 300, prog: (x) => atLeast(x.cards, 300) },
+    { id: "c500", set: 3, fam: "voc", name: "500 cartes", ring: "500 CARTES ★ ", icon: "vocab", got: "500 cards reviewed", todo: "To earn: 500 cards reviewed", earned: (x) => x.cards >= 500, prog: (x) => atLeast(x.cards, 500) },
+    { id: "m50", set: 3, fam: "voc", name: "50 maîtrisées", ring: "50 CARTES MAÎTRISÉES ★ ", num: "50", got: "Fifty cards mastered", todo: "To earn: fifty cards mastered (three weeks or more between reviews)", earned: (x) => x.masteredCards >= 50, prog: (x) => atLeast(x.masteredCards, 50) },
+    { id: "m150", set: 3, fam: "voc", name: "150 maîtrisées", ring: "150 CARTES MAÎTRISÉES ★ ", num: "150", got: "150 cards mastered", todo: "To earn: 150 cards mastered", earned: (x) => x.masteredCards >= 150, prog: (x) => atLeast(x.masteredCards, 150) },
+    { id: "marathon", set: 3, fam: "voc", name: "Marathon", ring: "MARATHON ★ ", icon: "timer", got: "Fifty card reviews in one day", todo: "To earn: fifty card reviews in one day", earned: (x) => x.dayReviews >= 50, prog: (x) => atLeast(x.dayReviews, 50) },
+    { id: "carnet", set: 3, fam: "voc", name: "Mon carnet", ring: "MON CARNET ★ ", icon: "fiches", got: "Ten words saved from the pages to your cards", todo: "To earn: ten words saved to Mon carnet from the pages", earned: (x) => x.carnet >= 10, prog: (x) => atLeast(x.carnet, 10) },
+    { id: "idioms", set: 3, fam: "voc", name: "Belles expressions", ring: "BELLES EXPRESSIONS ★ ", icon: "comp", got: "Twenty expressions learned", todo: "To earn: twenty cards of the Expressions deck learned", earned: (x) => x.idioms >= 20, prog: (x) => atLeast(x.idioms, 20) },
+    // Compréhension
+    { id: "ear", set: 2, fam: "comp", ink: "--sk-co", name: "Oreille fine", ring: "OREILLE FINE ★ ", reps: 4, icon: "listen", rot: -9, got: "A listening set without a miss", todo: "To earn: a listening set without a miss, first try", earned: (x) => x.firsts("co").some((c) => c.score >= c.total) },
+    { id: "ce4", set: 3, fam: "comp", name: "Lecture parfaite", ring: "LECTURE PARFAITE ★ ", icon: "read", got: "A reading set without a miss", todo: "To earn: a reading set without a miss, first try", earned: (x) => x.firsts("ce").some((c) => c.score >= c.total) },
+    { id: "pace", set: 2, fam: "comp", name: "Au chrono", ring: "AU CHRONO ★ ", reps: 4, icon: "timer", rot: 8, got: "A reading set at exam pace, 3 of 4 or better", todo: "To earn: a reading set at exam pace, 3 of 4 or better", earned: (x) => x.firsts("ce").some((c) => c.secs > 0 && c.secs <= (CE_PACE[c.level] || 90) * c.total && c.score / c.total >= 0.75 - 1e-9) },
+    { id: "cob1", set: 3, fam: "comp", ink: "--sk-co", name: "Écoute B1", ring: "TOUTE L'ÉCOUTE B1 ★ ", num: "B1", got: "Every B1 listening set at 5 of 6 or better", todo: "To earn: every B1 listening set at 5 of 6 or better", earned: (x) => { const p = builtCleared(x, T.COMP.coSets, "B1", 0.75); return p[0] >= p[1]; }, prog: (x) => builtCleared(x, T.COMP.coSets, "B1", 0.75) },
+    { id: "ceb1", set: 3, fam: "comp", name: "Lecture B1", ring: "TOUTE LA LECTURE B1 ★ ", num: "B1", got: "Every B1 reading set at 3 of 4 or better", todo: "To earn: every B1 reading set at 3 of 4 or better", earned: (x) => { const p = builtCleared(x, T.COMP.ceSets, "B1", 0.75); return p[0] >= p[1]; }, prog: (x) => builtCleared(x, T.COMP.ceSets, "B1", 0.75) },
+    { id: "b2", set: 2, fam: "comp", name: "Niveau B2", ring: "NIVEAU B2 ★ ", reps: 4, num: "B2", rot: 4, got: "Ready for B2 in listening or reading", todo: "To earn: your last 3 B1 sets in listening (70%) or reading (75%)", earned: () => ["co", "ce"].some((sk) => { const l = compLadder(sk); return l.a1 != null && l.a1 >= LADDER_UP[sk] - 1e-9; }) },
+    { id: "cob2", set: 3, fam: "comp", ink: "--sk-co", name: "Écoute B2", ring: "TOUTE L'ÉCOUTE B2 ★ ", num: "B2", got: "Every B2 listening set at 5 of 6 or better", todo: "To earn: every B2 listening set at 5 of 6 or better", earned: (x) => { const p = builtCleared(x, T.COMP.coSets, "B2", 0.75); return p[0] >= p[1]; }, prog: (x) => builtCleared(x, T.COMP.coSets, "B2", 0.75) },
+    { id: "ceb2", set: 3, fam: "comp", name: "Lecture B2", ring: "TOUTE LA LECTURE B2 ★ ", num: "B2", got: "Every B2 reading set at 3 of 4 or better", todo: "To earn: every B2 reading set at 3 of 4 or better", earned: (x) => { const p = builtCleared(x, T.COMP.ceSets, "B2", 0.75); return p[0] >= p[1]; }, prog: (x) => builtCleared(x, T.COMP.ceSets, "B2", 0.75) },
+    { id: "tour", set: 3, fam: "comp", name: "Tour des sujets", ring: "TOUR DES SUJETS ★ ", icon: "plane", got: "A listening or reading set in every topic", todo: "To earn: a listening or reading set in every topic", earned: (x) => x.topics[0] >= x.topics[1], prog: (x) => x.topics },
+    // Écrit
+    { id: "copy", set: 2, fam: "write", name: "Première copie", ring: "PREMIÈRE COPIE ★ ", reps: 3, icon: "writing", rot: 6, got: "Your first text corrected", todo: "To earn: a text corrected by Claude", earned: (x) => x.texts.length > 0 },
+    { id: "tasks3", set: 3, fam: "write", name: "Les trois tâches", ring: "LES TROIS TÂCHES ★ ", num: "3", got: "A corrected text for Tâches 1, 2 and 3", todo: "To earn: a corrected text for each of the three tasks", earned: (x) => x.tasks >= 3, prog: (x) => [x.tasks, 3] },
+    { id: "intime", set: 3, fam: "write", name: "Dans les temps", ring: "DANS LES TEMPS ★ ", icon: "timer", got: "A text finished inside its exam clock", todo: "To earn: a text finished inside its task's exam time", earned: () => list("writing").some((w) => w.minutes > 0 && T.WRITING[w.task] && w.minutes <= T.WRITING[w.task].exam) },
+    { id: "clean", set: 3, fam: "write", name: "Copie propre", ring: "COPIE PROPRE ★ ", icon: "writing", got: "A corrected text with under 5 mistakes per 100 words", todo: "To earn: a corrected text with under 5 mistakes per 100 words", earned: (x) => x.per100 < 5 },
+    { id: "ee7", set: 3, fam: "write", name: "Plume NCLC 7", ring: "PLUME NCLC 7 ★ ", num: "10", got: "A text scored 10/20 or more (NCLC 7)", todo: "To earn: a text scored 10/20 or more by Claude", earned: (x) => x.score20 >= 10 },
+    { id: "w10", set: 3, fam: "write", name: "Dix copies", ring: "DIX COPIES ★ ", num: "10", got: "Ten texts corrected", todo: "To earn: ten texts corrected", earned: (x) => x.texts.length >= 10, prog: (x) => atLeast(x.texts.length, 10) },
+    { id: "neat", set: 3, fam: "write", name: "Copie impeccable", ring: "COPIE IMPECCABLE ★ ", icon: "bilan", got: "A corrected text with under 2 mistakes per 100 words", todo: "To earn: a corrected text with under 2 mistakes per 100 words", earned: (x) => x.per100 < 2 },
+    { id: "ee9", set: 3, fam: "write", name: "Plume d'or", ring: "PLUME D'OR ★ ", num: "14", got: "A text scored 14/20 or more (NCLC 9)", todo: "To earn: a text scored 14/20 or more by Claude", earned: (x) => x.score20 >= 14 },
+    // Examens blancs
+    { id: "exam", fam: "exam", name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: (x) => x.exams.length > 0 },
+    { id: "examfull", set: 3, fam: "exam", name: "Jusqu'au bout", ring: "JUSQU'AU BOUT ★ ", icon: "exam", got: "A practice exam with every question answered in time", todo: "To earn: a practice exam with every question answered in time", earned: (x) => x.exams.some((c) => !c.timeUp && arr(c.answers).length && arr(c.answers).every((v) => v != null)) },
+    { id: "both", set: 3, fam: "exam", name: "Les deux épreuves", ring: "CE ET CO ★ ", icon: "listen", got: "A reading and a listening practice exam", todo: "To earn: a practice exam in reading and one in listening", earned: (x) => ["ce", "co"].every((sk) => x.exams.some((c) => skillOf(c) === sk)), prog: (x) => [["ce", "co"].filter((sk) => x.exams.some((c) => skillOf(c) === sk)).length, 2] },
+    { id: "exams5", set: 3, fam: "exam", name: "Cinq examens", ring: "CINQ EXAMENS BLANCS ★ ", num: "5", got: "All five reading practice exams", todo: "To earn: all five reading practice exams", earned: (x) => x.ceExams >= T.COMP.ceExams.length, prog: (x) => [x.ceExams, T.COMP.ceExams.length] },
+    // Objectifs
+    { id: "p1", fam: "goal", name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => PHASE_OK(1), prog: () => phaseProg(1) },
+    { id: "p2", set: 3, fam: "goal", name: "Phase 2 validée", ring: "PHASE 2 VALIDÉE ★ ", num: "2", got: "Phase 2 exit criteria met", todo: "To earn: the Phase 2 exit criteria", earned: () => PHASE_OK(2), prog: () => phaseProg(2) },
+    { id: "p3", set: 3, fam: "goal", name: "Phase 3 validée", ring: "PHASE 3 VALIDÉE ★ ", num: "3", got: "Phase 3 exit criteria met", todo: "To earn: the Phase 3 exit criteria", earned: () => PHASE_OK(3), prog: () => phaseProg(3) },
+    { id: "p4", set: 3, fam: "goal", name: "Phase 4 validée", ring: "PHASE 4 VALIDÉE ★ ", num: "4", got: "Phase 4 exit criteria met", todo: "To earn: the Phase 4 exit criteria", earned: () => PHASE_OK(4), prog: () => phaseProg(4) },
+    { id: "nclc7", fam: "goal", name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+    { id: "nclc7all", set: 2, fam: "goal", name: "NCLC 7 partout", ring: "NCLC 7 PARTOUT ★ ", reps: 3, icon: "plane", rot: -10, got: "NCLC 7 in all four skills, on one test", todo: "To earn: NCLC 7 in all four skills, on one test", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].every((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+    // Bonus
+    { id: "immersion", set: 3, fam: "bonus", name: "Pense en français", ring: "PENSE EN FRANÇAIS ★ ", num: "FR", got: "The site switched to French only", todo: "To earn: turn on « Pense en français »", earned: () => settings().fr === true },
+    { id: "fiche", set: 3, fam: "bonus", name: "Ma fiche", ring: "MA PREMIÈRE FICHE ★ ", icon: "fiches", got: "Your own revision sheet", todo: "To earn: write a revision sheet of your own", earned: () => list("fiches").some((f) => f.kind !== "note" && /^f-/.test(f.id)) },
+    { id: "notes", set: 3, fam: "bonus", name: "Pense-bête", ring: "PENSE-BÊTE ★ ", icon: "fiches", got: "Three notes on your Pense-bête", todo: "To earn: three notes on the Pense-bête", earned: () => fxNotes().length >= 3, prog: () => atLeast(fxNotes().length, 3) },
+    { id: "homework", set: 3, fam: "bonus", name: "Devoirs faits", ring: "DEVOIRS FAITS ★ ", icon: "homework", got: "Five homework tasks done", todo: "To earn: five homework tasks done", earned: () => list("homework").filter((h) => h.done).length >= 5, prog: () => atLeast(list("homework").filter((h) => h.done).length, 5) },
+  ];
+  const STAMP_INK = (st) => st.ink || (STAMP_FAM.find((f) => f[0] === st.fam) || [])[3] || "--accent";
+  // A tilt for each stamp, as if pressed by hand: its own, or one worked out from its id.
+  const stampRot = (st) => (st.rot != null ? st.rot : (parseInt(hk(st.id), 36) % 23) - 11);
+  // What the stamps are worked out from, gathered once for each check.
+  function stampCtx() {
+    const drills = list("drills"), comp = list("comp").filter((c) => c.total);
+    const rounds = drills.filter((d) => d.total > 0 && d.set !== "prod");
+    const gram = rounds.filter((d) => (TOPIC[d.topic] || d.topic === "mixed") && d.src !== "retry");
+    const texts = list("writing").filter((w) => w.fb && Array.isArray(w.fb.errors));
+    const days = [...S.days.keys()].filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+    const full = days.filter((d) => dayComplete(d));
+    // The most days done in one week, Monday to Saturday.
+    const perWeek = new Map();
+    full.forEach((d) => { if (dow(d) < 6) { const m = mondayOf(d); perWeek.set(m, (perWeek.get(m) || 0) + 1); } });
+    // The best share right on each set, any try.
+    const bestOf = new Map();
+    comp.filter((c) => c.kind !== "exam" && c.setId).forEach((c) => bestOf.set(c.setId, Math.max(bestOf.get(c.setId) || 0, c.score / c.total)));
+    const firsts = (sk) => firstTries(comp.filter((c) => c.skill === sk && c.kind !== "exam"));
+    // A grammar topic's sets at 90%+: the closest topic to having all of them.
+    const at90 = (tp, set) => gram.some((d) => d.topic === tp.id && d.set === set && d.score / d.total >= 0.9 - 1e-9);
+    const crack = T.TOPICS.map((tp) => [tp.sets.filter((s2) => at90(tp, s2.id)).length, tp.sets.length]).sort((a, b) => b[0] / b[1] - a[0] / a[1])[0] || [0, 1];
+    const latest90 = T.TOPICS.filter((tp) => { const ds = gram.filter((d) => d.topic === tp.id).sort((a, b) => (a.ts || 0) - (b.ts || 0)); const l = ds[ds.length - 1]; return !!l && l.score / l.total >= 0.9 - 1e-9; }).length;
+    // The topics with a listening or reading set done.
+    const themeOf = new Map(T.COMP.ceSets.concat(T.COMP.coSets).map((s2) => [s2.id, arr(s2.themes)[0]]));
+    const seen = new Set(comp.filter((c) => c.kind !== "exam").map((c) => c.theme || themeOf.get(c.setId)).filter(Boolean));
+    // The most card reviews in one day, from the grades kept on the cards.
+    const perDay = new Map();
+    S.srs.forEach((st) => arr(st.log).forEach((g) => { const d = Array.isArray(g) ? g[0] : null; if (d) perDay.set(d, (perDay.get(d) || 0) + 1); }));
+    const watch = settings().watch || {};
+    const exams = comp.filter((c) => c.kind === "exam");
+    return {
+      best: longestStreak(), full, weekBest: Math.max(0, ...perWeek.values()), rounds, gram, hunts: rounds.filter((d) => d.topic === "hunt"), texts, bestOf, firsts, exams,
+      mins: days.reduce((a, d) => a + minTotal(dayMinutes(d)), 0),
+      done: rounds.length + comp.filter((c) => c.kind !== "exam").length + list("writing").length,
+      mastered: T.TOPICS.filter((tp) => topicMastery(tp).ok).length, crack, at90: latest90,
+      fixed: mineStatus().filter((m) => m.kind === "error" && m.state === "fixed").length,
+      watchKept: Object.entries(watch).some(([mon, v]) => addDays(mon, 6) < todayStr() && arr(v && v.picks).length === 2 && v.picks.every((p) => { const w = watchCount(p.key, mon); return w.texts > 0 && w.n === 0; })),
+      cards: S.srs.size, masteredCards: [...S.srs.values()].filter((st) => !st.pri && st.stage >= 5).length, dayReviews: Math.max(0, ...perDay.values()),
+      carnet: list("cards").filter((c) => c.theme === "carnet").length, idioms: [...S.srs.keys()].filter((k) => k.startsWith("expressions--")).length,
+      topics: [COMP_TOPICS.filter((t2) => seen.has(t2.id)).length, COMP_TOPICS.length],
+      tasks: new Set(texts.map((w) => w.task).filter((t2) => T.WRITING[t2])).size,
+      per100: Math.min(Infinity, ...texts.filter((w) => w.words >= 60).map((w) => (w.fb.errors.length / w.words) * 100)),
+      score20: Math.max(0, ...texts.map((w) => Number(w.fb.score20) || 0)),
+      ceExams: new Set(exams.filter((c) => skillOf(c) === "ce").map((c) => c.setId).filter((id) => T.COMP.ceExams.some((e) => e.id === id))).size,
+    };
+  }
   function stampSVG(st, on, bare) {
+    const n = str(st.num), small = n.length > 2 ? 9.5 : n.length > 1 ? 11 : 0;
     const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
-      : `<use class="st-leaf" href="#leaf" x="35.5" y="33" width="29" height="31.5"/><text class="st-n" x="50" y="${st.num.length > 1 ? 54.5 : 55}" text-anchor="middle"${st.num.length > 1 ? ' style="font-size:11px"' : ""}>${st.num}</text>`;
-    const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(st.reps))}</textPath></text>${center}`;
-    return `<svg class="stamp ${on ? "on" : "off"}"${on && !bare ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${on ? `${esc(st.name)}, earned` : `${esc(st.name)}, still to earn`}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
+      : `<use class="st-leaf" href="#leaf" x="35.5" y="33" width="29" height="31.5"/><text class="st-n" x="50" y="${small ? 54.5 : 55}" text-anchor="middle"${small ? ` style="font-size:${small}px"` : ""}>${esc(n)}</text>`;
+    const reps = st.reps || Math.max(2, Math.round(56 / st.ring.length));
+    const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(reps))}</textPath></text>${center}`;
+    return `<svg class="stamp ${on ? "on" : "off"}"${on && !bare ? ` data-m="press" data-k="stamp-${esc(st.id)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${on ? `${esc(st.name)}, earned` : `${esc(st.name)}, still to earn`}" style="color:var(${on ? STAMP_INK(st) : "--ink-3"});transform:rotate(${on ? stampRot(st) : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
   }
-  // A teacher's stamp for each milestone, worked out from what you've done. A stamp once earned stays (a level can
-  // slip back, a stamp doesn't), and one earned in the last week says so.
-  function stampShelf() {
-    const x = { best: longestStreak() };
-    const when = (S.settings.get("main") || {}).stamps || {}, wk = addDays(todayStr(), -6);
-    const got = STAMPS.map((st) => !!when[st.id] || !!st.earned(x));
-    return { n: got.filter(Boolean).length, html: `<div class="stamps">${STAMPS.map((st, i) => `<figure class="stamp-cell">${stampSVG(st, got[i])}<figcaption><b>${esc(st.name)}</b>${got[i] && typeof when[st.id] === "string" && when[st.id] >= wk ? `<span class="st-new">nouveau</span>` : ""}<small>${esc(got[i] ? st.got : st.todo)}</small></figcaption></figure>`).join("")}</div>` };
+  // The collection: which stamps you have (a stamp once earned stays, even if a level slips back), when you got
+  // them, and how far you are from each of the others.
+  function stampBook() {
+    const x = stampCtx(), when = (S.settings.get("main") || {}).stamps || {}, wk = addDays(todayStr(), -6);
+    const rows = STAMPS.map((st) => {
+      const got = !!when[st.id] || !!st.earned(x);
+      const pr = !got && st.prog ? st.prog(x) : null;
+      return { st, got, day: typeof when[st.id] === "string" ? when[st.id] : "", isNew: got && typeof when[st.id] === "string" && when[st.id] >= wk, pr: pr && pr[1] > 0 ? pr : null };
+    });
+    return { rows, n: rows.filter((r) => r.got).length };
   }
+  const stampCell = (r) => `<figure class="stamp-cell" style="--fc:var(${STAMP_INK(r.st)})">${stampSVG(r.st, r.got)}<figcaption><b>${esc(r.st.name)}</b>${r.isNew ? `<span class="st-new">nouveau</span>` : ""}<small>${esc(r.got ? r.st.got : r.st.todo)}</small>${r.pr ? `<span class="st-prog" title="${r.pr[0]} of ${r.pr[1]}"><i style="width:${Math.round((r.pr[0] / r.pr[1]) * 100)}%"></i></span><small class="num">${r.pr[0]}/${r.pr[1]}</small>` : ""}</figcaption></figure>`;
+  // The tile's face: your status on the road to Canada, the stamps you're closest to, and your latest ones.
+  function stampsFace(B) {
+    const N = STAMPS.length, ri = rankOf(B.n), [k0, name, en] = RANKS[ri], nx = RANKS[ri + 1];
+    const fill = nx ? (B.n - k0) / (nx[0] - k0) : 1;
+    const track = RANKS.map(([k, nm, e2], i) => { const f = i < ri ? 1 : i > ri ? 0 : fill; return `<span class="pp-seg${i <= ri ? " on" : ""}${i === ri ? " cur" : ""}" data-tip="${esc(nm)}\n${esc(e2)} · from ${k} stamps"><span class="pp-bar"><i style="width:${Math.round(f * 100)}%"${i === ri ? ` data-tween="pp-rank" data-tw="width" data-to="${Math.round(f * 100)}"` : ""}></i></span><small>${esc(nm)}</small></span>`; }).join("");
+    const near = B.rows.filter((r) => !r.got && r.pr && r.pr[0] > 0).sort((a, b) => b.pr[0] / b.pr[1] - a.pr[0] / a.pr[1] || (a.pr[1] - a.pr[0]) - (b.pr[1] - b.pr[0])).slice(0, 4);
+    const last = B.rows.filter((r) => r.got && r.day).sort((a, b) => b.day.localeCompare(a.day)).slice(0, 6);
+    return `${tileHero(`${B.n}<small>/${N}</small>`, "stamps collected · open the tile for the whole collection")}
+      <div class="pp-top"><div class="pp-rank" style="--rk:var(${["--sk-eo", "--sk-ce", "--sk-co", "--sk-gra", "--sk-ee", "--red"][ri]})">
+        <p class="pp-k">Statut · status</p>
+        <p class="pp-r"><b>${esc(name)}</b><small class="en-gloss">${esc(en)}</small></p>
+        <div class="pp-track" role="img" aria-label="Status ${ri + 1} of ${RANKS.length}: ${esc(name)}">${track}</div>
+        <p class="small muted">${nx ? `${nx[0] - B.n} more stamp${nx[0] - B.n > 1 ? "s" : ""} for ${esc(nx[1])}` : "You've reached the last status on the road."}</p>
+      </div>
+      ${near.length ? `<div class="pp-near"><p class="h3">Presque · nearly there</p><ul>${near.map((r) => `<li style="--fc:var(${STAMP_INK(r.st)})">${stampSVG(r.st, false)}<span><b>${esc(r.st.name)}</b><small>${esc(r.st.todo)}</small><span class="st-prog"><i data-tween="pp-n-${r.st.id}" data-tw="width" data-to="${Math.round((r.pr[0] / r.pr[1]) * 100)}" style="width:${Math.round((r.pr[0] / r.pr[1]) * 100)}%"></i></span></span><b class="num">${r.pr[0]}/${r.pr[1]}</b></li>`).join("")}</ul></div>` : ""}</div>
+      ${last.length ? `<div class="pp-last"><p class="h3">Derniers tampons · latest</p><div class="stamps">${last.map(stampCell).join("")}</div></div>` : ""}`;
+  }
+  // The whole collection, family by family.
+  const stampsMore = (B) => `<div class="pp-fams">${STAMP_FAM.map(([f, name, en, ink]) => { const rs = B.rows.filter((r) => r.st.fam === f); return `<section class="pp-fam" style="--fc:var(${ink})"><h4 class="pp-fh"><span>${esc(name)}</span><small class="en-gloss">${esc(en)}</small><b class="num">${rs.filter((r) => r.got).length}/${rs.length}</b></h4><div class="stamps">${rs.map(stampCell).join("")}</div></section>`; }).join("")}</div>`;
 
   // A stamp earned gets its moment: the first time it's earned, it's pressed onto the page with a thud and a burst
   // of leaves (#award; motion.js moves it). Which stamps have had theirs is kept in settings.main.stamps (the day of
@@ -1230,21 +1381,23 @@
     if (!allIn || !hydrated || !awardEl || dataRev === stampRev) return;
     stampRev = dataRev;
     const main = S.settings.get("main") || {}, had = main.stamps, seen = had ? Number(main.stampSet) || 1 : 0;
-    const x = { best: longestStreak() };
+    const x = stampCtx();
     const fresh = STAMPS.filter((st) => !(had && had[st.id]) && st.earned(x));
     if (had && !fresh.length && seen >= STAMP_SET) return;
     const t = todayStr(), added = (st) => (st.set || 1) > seen;
     saveSettings({ stampSet: STAMP_SET, stamps: Object.assign({}, had || {}, Object.fromEntries(fresh.map((st) => [st.id, had ? t : true]))) });
     if (!had) return;
-    fresh.filter((st) => !added(st)).forEach((st) => awardQ.push(st.id));
+    // Each award knows how many stamps you have with it, so the one that brings a new status says so.
+    let n = STAMPS.filter((st) => had[st.id]).length + fresh.filter(added).length;
+    fresh.filter((st) => !added(st)).forEach((st) => awardQ.push({ id: st.id, n: ++n }));
     awardNext();
   }
   function awardNext() {
     if (!awardEl || !awardEl.hidden || !awardQ.length) return;
-    const id = awardQ.shift(), st = STAMPS.find((x) => x.id === id);
+    const q = awardQ.shift(), st = STAMPS.find((x) => x.id === q.id), rk = RANKS.find(([k]) => k > 0 && k === q.n);
     if (!st) { awardNext(); return; }
     awardEl.innerHTML = `<div class="aw-stamp">${stampSVG(st, true, true)}</div>
-      <div class="aw-txt"><p class="aw-kick">Nouveau tampon !</p><b>${esc(st.name)}</b><span>${esc(st.got)}</span><a class="aw-go" href="#progress.stamps">Voir mes tampons</a></div>
+      <div class="aw-txt"><p class="aw-kick">Nouveau tampon !</p><b>${esc(st.name)}</b><span>${esc(st.got)}</span>${rk ? `<span class="aw-rank">Nouveau statut : <b>${esc(rk[1])}</b></span>` : ""}<a class="aw-go" href="#progress.stamps">Voir mes tampons</a></div>
       ${remy("bravo")}<button type="button" class="btn ghost sm aw-x" aria-label="Dismiss">×</button>`;
     awardEl.hidden = false;
     awardAt = Date.now();
@@ -7036,7 +7189,7 @@
   // and closes it again. One is open at a time (ui.bento), and motion.js glides the tiles to their new places
   // (TCFMotion.expand).
   const BENTO = [[["scores", 5], ["phase", 7]], [["ahead", 7], ["retention", 5]], [["time", 6], ["grammar", 6]], [["errors", 4], ["week", 4], ["vocab", 4]], [["comp", 6], ["writing", 6]], [["stamps", 12]]];
-  const BENTO_MORE = new Set(BENTO.flat().map(([id]) => id).filter((id) => id !== "stamps"));
+  const BENTO_MORE = new Set(BENTO.flat().map(([id]) => id));
   const BENTO_ALIAS = { pass: "phase" };
   function tile(id, span, o) {
     const can = !!o.more, open = can && ui.bento === id;
@@ -7066,7 +7219,7 @@
     const G = grammarRows(), gDone = G.filter((r) => r.m.ok).length;
     const counts = errorCounts(0), recent21 = errorCounts(21);
     const R = retentionData(D);
-    const stamps = stampShelf();
+    const stamps = stampBook();
     const ms = mineStatus(), msLeft = ms.filter((m) => m.state !== "fixed").length;
     const stats = [
       [list("drills").filter((d) => d.set !== "prod").length, "drill rounds"],
@@ -7175,7 +7328,7 @@
         face: (() => { const l3 = D.scores.slice(-3), avg = l3.length ? l3.reduce((a, x) => a + x.score, 0) / l3.length : null; return (avg == null ? tileHero("—", "Once Claude corrects a text") : tileHero(`${CH.fr(avg, 1)}<small>/20</small>`, `the average of your last ${l3.length > 1 ? l3.length + " scores" : "score"} · NCLC ${nclcLabel(nclcOf("ee", avg))} · 10/20 is NCLC 7`)) + eePlot(D, 124); })(),
         more: () => writingMore(D),
       },
-      stamps: { icon: "stamp", title: "Tampons", en: "stamps", face: tileHero(`${stamps.n}<small>/${STAMPS.length}</small>`, "a teacher's stamp for each milestone") + stamps.html },
+      stamps: { icon: "stamp", title: "Tampons", en: "stamps", face: stampsFace(stamps), more: () => stampsMore(stamps) },
     };
   }
 
