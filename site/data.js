@@ -112,7 +112,7 @@ window.TCF = (function () {
           ["voc", 10, "Cards + 10–15 new: family & society", "", "", "vocab.new.famille"],
           ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
           ["ee", 40, "Tâche 3 on the clock", "The two-part template: compare both documents (40–60 words), then your position (80–120). 25 minutes, then the proofreading pass.", "Part 1 names both positions; 120–180 words.", "writing.t3"],
-          ["bil", 10, "Plan next week", "Look at your criteria and this week's misses. Pick the two mistakes you'll watch for in next week's writing.", "", "progress"],
+          ["bil", 10, "Plan next week", "Look at your criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing.", "", "progress.week"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
@@ -160,7 +160,7 @@ window.TCF = (function () {
           ["gra", 20, "Gérondif + participles", "", "", "grammar.gerondif"],
           ["gra", 10, "Your mistakes", "", "", "grammar.mine"],
           ["ee", 40, "Tâche 3 on the clock", "25 minutes, then the proofreading pass.", "Part 1 compares both documents; 120–180 words.", "writing.t3"],
-          ["bil", 10, "Plan next week", "", "", "progress"],
+          ["bil", 10, "Plan next week", "Look at your criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing.", "", "progress.week"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [
@@ -203,7 +203,7 @@ window.TCF = (function () {
           ["voc", 10, "Cards + 10–15 new: politics & civic life", "", "", "vocab.new.gouvernement"],
           ["gra", 15, "Your mistakes", "", "", "grammar.mine"],
           ["ce", 25, "Timed reading set", "One set on the clock, then your misses without it.", "", "comp.ce"],
-          ["bil", 10, "Plan next week", "", "", "progress"],
+          ["bil", 10, "Plan next week", "Look at your criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing.", "", "progress.week"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
         [

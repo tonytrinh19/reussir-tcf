@@ -322,12 +322,13 @@
   const CE_SET_SIZE = 4;
   // Exam pace for one reading question, in seconds: 60 minutes for 39 items is quicker at A1–A2 and slower at C1–C2.
   const CE_PACE = { B1: 90, B2: 105 };
-  const profile = (lang) => EXAM_BRIEF + "\nLEARNER PROFILE: adult B1 learner of French preparing the TCF Canada, target NCLC 7 (B2) in all four skills. Write explanations in " + (lang || replyLang()) + ". Known recurring errors: " + T.KNOWN_ERRORS.join("; ") + ".";
+  const profile = (lang) => EXAM_BRIEF + "\nLEARNER PROFILE: adult B1 learner of French preparing the TCF Canada, target NCLC 7 (B2) in all four skills. Write explanations in " + (lang || replyLang()) + ". Known recurring errors: " + T.KNOWN_ERRORS.join("; ") + "." + watchBrief();
 
   /* =============== UI state =============== */
   const dayIndex = daysBetween("2026-01-01", todayStr());
   const ui = {
     bento: null, // the overview's open tile
+    watchPick: null, // the two mistakes being picked for a week (À surveiller), before they're kept
     day: null,
     drill: null,
     hunt: null, // the Find the mistakes text being done: its id, the words tapped, then what was found and typed
@@ -952,11 +953,19 @@
     else if (go === "grammar" || go.startsWith("grammar.")) st = grammarStep(b, key, date);
     else if (go.startsWith("vocab")) st = vocabStep(b, key, date);
     else if (go.startsWith("writing")) st = writingStep(b, key, date);
+    else if (go === "progress.week") st = watchStep(b, key, date);
     else st = plain("");
     st.min = st.min > 0 ? rmin(st.min) : 0;
     st.key = key;
     st.adapted = st.adapted || "";
     return st;
+  }
+  // « Plan next week »: the coach's two for the week ahead (or the two you've kept), and Start opens the planner.
+  function watchStep(b, key, date) {
+    const target = watchTarget(date), saved = watchOf(target), C = watchChoices(date), name = (k) => (C.rows.find((r) => r.key === k) || { label: CAT[k] || k }).label;
+    const kept = saved ? saved.picks.map((p) => p.label) : [];
+    const line2 = kept.length === 2 ? `Kept: ${kept[0]} and ${kept[1]}. Change them if you like.` : C.rec.length === 2 ? `The coach suggests ${name(C.rec[0])} and ${name(C.rec[1])}.` : "";
+    return { go: b[5], line1: b[3] || "", line2, chips: [], parts: [], min: b[1], launch: () => goTo("#" + b[5]) };
   }
   // The block a token finishes a part of, among today's unticked blocks: the first whose next part it matches,
   // or, failing that, the first whose route it matches as before.
@@ -2778,7 +2787,7 @@
       `${EE_RUBRIC}\nSCORE BANDS: ${TC.bands}`,
       `TASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. My word count: ${countWords(text)}.${parts}`,
       `SUBJECT:\n${p.q}${docs}`,
-      `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.`,
+      `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.${watchBrief(true)}`,
       `MY TEXT:\n"""\n${text}\n"""`,
       `Reply in ${replyLang()} with:\n${asks.map((a, i) => `${i + 1}. ${a}`).join("\n")}`,
     ].join("\n\n");
@@ -4252,7 +4261,7 @@
         <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
-          <aside class="side">${continueCard()}${sel === t ? blockersCard() : ""}${expressionCard()}${homeworkCard()}${streakCard()}</aside>
+          <aside class="side">${continueCard()}${sel === t ? watchCard() + blockersCard() : ""}${expressionCard()}${homeworkCard()}${streakCard()}</aside>
         </div>
       </div>`;
     },
@@ -4394,6 +4403,122 @@
       : `<p class="small muted">Nothing stands out right now. Your corrections, drills and sets will show here what's holding you back.</p>`;
     return `<section class="panel stack tight" data-spot><h2 class="h3 with-ico">${ico("target")}Ce qui te freine<small class="muted"> · What's holding you back</small></h2>${body}${untagged ? `<p class="small muted">Tag your reading and listening misses (vocabulary or comprehension gap) so the plan can pick the words you need: ${untagged} set${untagged > 1 ? "s" : ""} untagged lately.</p>` : ""}</section>`;
   }
+  /* =============== À surveiller: the two mistakes you watch for in a week's writing =============== */
+  // Picked on Friday's « Plan next week » block (#progress.week) for the week ahead (the user asked for this on
+  // 2026-10-16, with the choices calibrated like the coach's). The choices are the kinds of mistake in your
+  // writing, weighed as gramNeed weighs a grammar topic: 2 for each error in your last 3 corrected texts, 1 for
+  // each error-log entry in 21 days, 1 for each miss on the topic's drills in 14 days. The coach's bar for a
+  // blocker (twice in your last texts, or 4 points) makes a choice « conseil du coach »; a pick of the week now
+  // ending that still shows up counts its misses again, so it stays on top. They show on Aujourd'hui and while you
+  // write, and Claude checks them first in your corrections. Kept in settings.main.watch by the week's Monday.
+  const WATCH_WEEKS = 8;
+  const watchOf = (mon) => { const w = settings().watch; return (w && w[mon] && arr(w[mon].picks).length) ? w[mon] : null; };
+  const watchNow = () => watchOf(mondayOf(todayStr()));
+  // The week a plan made today is for: from Friday, the next one; earlier in the week, this one (a block caught up).
+  const watchTarget = (t) => (dow(t) >= 4 ? addDays(mondayOf(t), 7) : mondayOf(t));
+  // How often a kind of mistake came back in a week: in the texts corrected then, and the errors you logged.
+  function watchCount(cat, mon) {
+    const end = addDays(mon, 6), inWeek = (d) => d >= mon && d <= end;
+    let n = 0, texts = 0;
+    list("writing").forEach((w) => { if (w.fb && Array.isArray(w.fb.errors) && inWeek(str(w.date))) { texts++; w.fb.errors.forEach((e) => { if (catOf(e.category) === cat) n++; }); } });
+    list("errors").forEach((e) => { if (inWeek(str(e.date)) && catOf(e.category) === cat) n++; });
+    return { n, texts };
+  }
+  function watchChoices(t) {
+    const rc = recentCats(3), since = addDays(t, -21), logN = new Map(), exLog = new Map();
+    list("errors").forEach((e) => { if (str(e.date) >= since) { const c = catOf(e.category); logN.set(c, (logN.get(c) || 0) + 1); if (!exLog.has(c)) exLog.set(c, e); } });
+    const gn = new Map(gramNeed().map((x) => [x.tp.id, x]));
+    // When planning next week, the week now ending is the one to look back on.
+    const back = watchTarget(t) > mondayOf(t) ? mondayOf(t) : addDays(mondayOf(t), -7), was = watchOf(back);
+    const prev = was ? was.picks.map((p) => p.key) : [];
+    const keys = new Set([...rc.counts.keys(), ...logN.keys(), ...[...gn.values()].filter((x) => x.m).map((x) => x.tp.id), ...prev]);
+    const rows = [...keys].filter((k) => CAT[k] && k !== "autre").map((k) => {
+      const w = rc.counts.get(k) || 0, l = logN.get(k) || 0, g = gn.get(k), m = g ? g.m : 0;
+      const last = prev.includes(k) ? watchCount(k, back) : null;
+      const score = 2 * w + l + m + (last ? last.n : 0);
+      const ex = rc.ex.get(k) || exLog.get(k) || (g && g.ex) || null;
+      return { key: k, label: CAT[k], w, l, m, score, ex: ex && ex.wrong ? { wrong: str(ex.wrong), right: str(ex.right) } : null, blocker: w >= 2 || score >= 4, last, texts: rc.n };
+    }).filter((r) => r.score > 0 || r.last);
+    rows.sort((a, b) => b.blocker - a.blocker || b.score - a.score || b.w - a.w);
+    // Nothing to go on yet (no corrected text, nothing logged or missed): the recurring errors from your profile.
+    if (!rows.length) T.KNOWN_ERRORS.slice(0, 6).forEach((x, i) => rows.push({ key: "known-" + i, label: x, w: 0, l: 0, m: 0, score: 0, ex: null, blocker: false, last: null, texts: 0, profile: true }));
+    const rec = rows.slice(0, 2).map((r) => r.key);
+    return { rows: rows.slice(0, 6), rec, back, was };
+  }
+  const watchEv = (r) => [r.w ? `×${r.w} in your last ${r.texts} texts` : "", r.l ? `×${r.l} logged` : "", r.m ? `${r.m} drill misses` : "", r.last ? (r.last.n ? `still ×${r.last.n} this week` : r.last.texts ? "kept at bay this week" : "") : "", r.profile ? "From your recurring errors" : ""].filter(Boolean).join(" · ");
+  const watchEx = (ex) => (ex ? `<span class="pen-wrong">${esc(ex.wrong)}</span> → ${esc(ex.right)}` : "");
+  // A pick's week so far: kept at bay (no text yet, or none of it in them), or how often it came back.
+  function watchState(p, mon) {
+    if (/^known-/.test(p.key)) return "";
+    const c = watchCount(p.key, mon);
+    return !c.texts && !c.n ? `<span class="pill">no text yet</span>` : c.n ? `<span class="pill bad">×${c.n} this week</span>` : `<span class="pill ok">✓ kept at bay</span>`;
+  }
+  const watchRows = (w, mon) => `<ul class="wt-list">${w.picks.map((p) => `<li><b>${esc(p.label)}</b>${p.ex ? `<small class="blk-ex">${watchEx(p.ex)}</small>` : ""}${watchState(p, mon)}</li>`).join("")}</ul>`;
+  // For Claude: this week's two, checked first in a correction.
+  function watchBrief(first) {
+    const w = watchNow();
+    if (!w) return "";
+    const list2 = w.picks.map((p) => `${p.label}${p.ex ? ` (e.g. « ${p.ex.wrong} » → « ${p.ex.right} »)` : ""}`).join("; ");
+    return first ? ` This week I'm watching for two mistakes in my writing: ${list2}. Check these first, and tell me whether each one appears.` : ` This week the learner is watching for two mistakes in their writing: ${list2}. When you correct a text, check these first and say in the summary whether each one appears.`;
+  }
+  function watchSave() {
+    const t = todayStr(), mon = watchTarget(t), C = watchChoices(t), pick = arr(ui.watchPick || C.rec);
+    if (pick.length !== 2) { toast("Pick two: the two mistakes you'll watch for."); return; }
+    const picks = pick.map((k) => { const r = C.rows.find((x) => x.key === k) || { key: k, label: CAT[k] || k }; return { key: r.key, label: r.label, ex: r.ex || null }; });
+    const all = Object.assign({}, settings().watch);
+    all[mon] = { picks, at: t, rec: C.rec };
+    // The last few weeks only.
+    Object.keys(all).sort().slice(0, -WATCH_WEEKS).forEach((k) => delete all[k]);
+    saveSettings({ watch: all });
+    ui.watchPick = null;
+    autoTick("progress.week");
+    toast(`Kept for the week of ${shortDate(mon)}: ${picks[0].label} and ${picks[1].label}.`);
+    render(true);
+  }
+  function watchToggle(k) {
+    const t = todayStr(), C = watchChoices(t), saved = watchOf(watchTarget(t));
+    let pick = arr(ui.watchPick || (saved ? saved.picks.map((p) => p.key) : C.rec)).slice();
+    if (pick.includes(k)) pick = pick.filter((x) => x !== k);
+    else { pick.push(k); if (pick.length > 2) pick.shift(); }
+    ui.watchPick = pick;
+    render(true);
+  }
+  // The tile's face: this week's two and how they're doing, or what to do.
+  function watchFace() {
+    const t = todayStr(), now = watchNow(), mon = mondayOf(t), target = watchTarget(t), next = target > mon ? watchOf(target) : null;
+    const cs = now ? now.picks.filter((p) => !/^known-/.test(p.key)).map((p) => watchCount(p.key, mon)) : [], texts = cs.length ? cs[0].texts : 0, total = cs.reduce((a, c) => a + c.n, 0);
+    const head = !now ? tileHero("—", "None picked for this week yet") : texts ? tileHero(String(total), total === 1 ? `time they came back this week, in ${texts} corrected text${texts === 1 ? "" : "s"}` : `times they came back this week, in ${texts} corrected text${texts === 1 ? "" : "s"}`) : tileHero("—", "No corrected text this week yet");
+    const body = now ? watchRows(now, mon) : `<p class="small muted">Friday's « Plan next week » block picks the two for the week ahead, from the coach's suggestions.</p>`;
+    const cta = target > mon ? (next ? `<p class="small muted">Next week's two are kept: ${esc(next.picks[0].label)} and ${esc((next.picks[1] || {}).label || "")}.</p>` : `<p class="small"><b>Next week's two aren't picked yet.</b> Open this to choose them.</p>`) : "";
+    return head + body + cta;
+  }
+  // The planner: the choices for the week ahead, the coach's two first.
+  function watchMore() {
+    const t = todayStr(), target = watchTarget(t), C = watchChoices(t), saved = watchOf(target);
+    const pick = arr(ui.watchPick || (saved ? saved.picks.map((p) => p.key) : C.rec));
+    const opts = C.rows.map((r) => `<button type="button" class="wt-opt${pick.includes(r.key) ? " on" : ""}" data-act="watch-pick" data-k="${esc(r.key)}" aria-pressed="${pick.includes(r.key)}">
+        <span class="wt-tick" aria-hidden="true">${pick.includes(r.key) ? "✓" : ""}</span>
+        <span class="wt-main"><b>${esc(r.label)}</b>${C.rec.includes(r.key) && !r.profile ? `<span class="pill info">conseil du coach</span>` : ""}<small>${esc(watchEv(r))}</small>${r.ex ? `<small class="blk-ex">${watchEx(r.ex)}</small>` : ""}</span></button>`).join("");
+    const look = C.was ? `<article class="dash-card"><div class="dash-ch"><h3 class="h3">${C.back === mondayOf(t) ? "Cette semaine · this week" : "La semaine dernière · last week"}</h3><span class="small muted">Your two, and how often they came back</span></div>${watchRows(C.was, C.back)}</article>` : "";
+    return `${look}<article class="dash-card">
+        <div class="dash-ch"><h3 class="h3">Pour la semaine du ${shortDate(target)}</h3><span class="small muted">${saved ? "Kept: change them if you like" : "Pick two"}</span></div>
+        <p class="small muted">Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your error log and your drills.</p>
+        <div class="wt-opts">${opts}</div>
+        <div class="row"><button class="btn primary" data-act="watch-save" ${pick.length === 2 ? "" : "disabled"}>${saved ? "Keep these two" : "Watch these two"}</button><span class="small muted">${pick.length}/2 picked</span></div>
+      </article>`;
+  }
+  // Aujourd'hui and the writing page: this week's two, a glance.
+  function watchCard() {
+    const w = watchNow();
+    if (!w) return "";
+    return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${ico("eye")}À surveiller<small class="muted"> · this week</small></h2><a class="small" href="#progress.week">Change</a></div>${watchRows(w, mondayOf(todayStr()))}</section>`;
+  }
+  function watchStrip() {
+    const w = watchNow();
+    if (!w) return "";
+    return `<div class="wt-strip">${ico("eye")}<span><b>À surveiller cette semaine :</b> ${w.picks.map((p) => `<span class="wt-chip" title="${esc(p.ex ? `${p.ex.wrong} → ${p.ex.right}` : p.label)}">${esc(p.label)}</span>`).join("")}</span></div>`;
+  }
+
   async function suggestHomework() {
     const s = settings(), P = T.PHASES[s.phase - 1];
     const counts = errorCounts(21).slice(0, 5).map(([c, v]) => `${CAT[c]}: ${v.n}`).join("; ") || "nothing logged yet";
@@ -5684,6 +5809,7 @@
             <div><button class="btn sm" data-act="w-skeleton">Insert the skeleton</button></div>
           </div>
         </details>
+        ${watchStrip()}
         <section class="panel editor">
           <div class="ed-bar"><div class="meter" id="w-meter"></div>${timerUI("writing." + task, W.name + " écrit", presets)}</div>
           <textarea id="w-text" class="seyes" data-input="w-text" spellcheck="false" autocomplete="off" autocorrect="off" lang="fr" placeholder="Écrivez ici…" aria-label="Your text">${esc(text)}</textarea>
@@ -6646,7 +6772,7 @@
   // full width of its band, with its details beside the face (more) and, for the longer ones, below both (wide),
   // and closes it again. One is open at a time (ui.bento), and motion.js glides the tiles to their new places
   // (TCFMotion.expand).
-  const BENTO = [[["scores", 5], ["phase", 7]], [["ahead", 7], ["retention", 5]], [["time", 6], ["grammar", 6]], [["errors", 4], ["vocab", 4], ["comp", 4]], [["writing", 6], ["stamps", 6]], [["exam", 12]]];
+  const BENTO = [[["scores", 5], ["phase", 7]], [["ahead", 7], ["retention", 5]], [["time", 6], ["grammar", 6]], [["errors", 4], ["week", 4], ["vocab", 4]], [["comp", 4], ["writing", 4], ["stamps", 4]], [["exam", 12]]];
   const BENTO_MORE = new Set(BENTO.flat().map(([id]) => id).filter((id) => id !== "stamps"));
   const BENTO_ALIAS = { pass: "phase" };
   function tile(id, span, o) {
@@ -6770,6 +6896,7 @@
             <div class="row"><button class="btn" data-act="e-add">Add to the log</button></div>
           </div>`)}</div>`,
       },
+      week: { icon: "eye", title: "À surveiller", en: "two mistakes to watch", face: watchFace(), more: () => watchMore() },
       vocab: {
         icon: "vocab", title: "Vocabulaire", en: "your cards",
         face: tileHero(`${D.mastered}<small>/${D.learned}</small>`, "cards mastered, a gap of 21 days or more") + (D.learned ? stageChart(D.srs, "voc-stages") : hint("Learn your first cards in Vocabulaire.")),
@@ -6876,6 +7003,8 @@
     theme: toggleTheme,
     lang: toggleLang,
     tile: (el) => bentoToggle(el.dataset.id),
+    "watch-pick": (el) => watchToggle(el.dataset.k),
+    "watch-save": watchSave,
     stop: (el) => { const c = busy[el.dataset.key]; if (c) c.abort(); },
     confirm: (el) => { ui.confirm = el.dataset.key; render(true); },
     "confirm-cancel": () => { ui.confirm = ""; render(true); },

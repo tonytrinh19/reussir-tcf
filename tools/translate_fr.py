@@ -373,7 +373,7 @@ def main():
     except DailyLimit as e:
         print("Stopped at Gemini's daily limit: the rest goes on the next run. (%s)" % e)
     write(strings, cache)
-    left = [u for u in strings if u["text"] not in cache]
+    left = [u for u in strings if not is_content(u) and u["text"] not in cache]
     if left:
         print("%d still to do: run it again (`--status` lists them)." % len(left))
 

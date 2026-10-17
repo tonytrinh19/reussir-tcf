@@ -111,7 +111,7 @@ function runs(text, isTemplate) {
 
 /* ---------- which runs are English interface text ---------- */
 // Common English words (none of them also French), to tell English from French.
-const EN = new Set("the a an and or of to in on at for with from by your you it is are be not no this that these those all any every each more less than then when what how why which who here there now today tomorrow week day days cards card review reviews start show check next back done open close save delete add edit new set sets round rounds answer answers practice practise learn learned mistakes mistake error errors words word text texts task tasks topic topics block blocks only one two three first last latest still left about after before until again hard good easy try yet so as if but do does did has have had will would can could should may might must get got make made take see shows shown keep kept nothing something anything up out off over under per most least best".split(" "));
+const EN = new Set("the a an and or of to in on at for with from by your you it is are be not no this that these those all any every each more less than then when what how why which who here there now today tomorrow week day days cards card review reviews start show check next back done open close save delete add edit new set sets round rounds answer answers practice practise learn learned mistakes mistake error errors words word text texts task tasks topic topics block blocks only one two three first last latest still left about after before until again hard good easy try yet so as if but do does did has have had will would can could should may might must get got make made take see shows shown keep kept nothing something anything up out off over under per most least best participles".split(" "));
 const FRW = /\b(le|la|les|des|du|une|un|est|et|pour|avec|dans|sur|pas|ton|ta|tes|tu|vos|votre|nous|vous|ce|cette|ces|aux|au|qui|que|ne|se|en|sont|être|avoir|fait|faire|encore|déjà|aujourd'hui|demain|semaine|jour|jours)\b/i;
 const english = (s) => {
   const ws = (s.toLowerCase().match(/[a-z']+/g) || []);
@@ -173,6 +173,8 @@ function dataPhrases() {
   Object.values(T.CRITERIA || {}).forEach((cs) => cs.forEach((c) => add(c.text, "criteria")));
   (T.PHASES || []).forEach((p) => { add(p.goal, "phase"); add(p.level, "phase"); add(p.name, "phase"); add(p.weeks, "phase"); });
   Object.values(T.CATEGORIES || {}).forEach((v) => add(typeof v === "string" ? v : v && v.label, "category"));
+  // Shown as choices in À surveiller when there's nothing else to go on yet.
+  (T.KNOWN_ERRORS || []).forEach((x) => add(x, "category"));
   (T.EXAM || []).forEach((e) => { add(e.fmt, "exam"); add(e.note, "exam"); });
   (T.AUTOFAIL || []).forEach((x) => add(x, "exam"));
   const TC = T.TCF_CANADA || {};
