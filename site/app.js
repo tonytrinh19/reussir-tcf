@@ -3997,6 +3997,8 @@
     return { left: p.left, all: coxReadSecs(it) + len + ans };
   }
   const coxPos = () => { const p = ui.cx && ui.cx.play; if (!p || p.phase !== "listen") return 0; return coxAudio && coxSrc && !p.paused ? coxAudio.currentTime || 0 : p.pos || 0; };
+  // How much of the recording has played, in %, so a redraw (an answer saved, a pause) draws the bar where it is.
+  const coxHeardPct = (it) => { const len = coxLen(it); return len ? Math.min(100, (coxPos() / len) * 100) : 0; };
   // One Audio element plays the whole exam. Playing it once inside the click that starts or resumes the exam
   // lets the later items play by themselves, which Safari on iPhone would otherwise block.
   function coxUnlock() {
@@ -4119,8 +4121,7 @@
     if (!cx || cx.done || cx.skill !== "co" || !cx.play) return;
     const left = Math.max(0, Math.ceil(cx.play.left)) + " s";
     document.querySelectorAll("[data-cox-left]").forEach((el) => { el.textContent = left; });
-    const a = coxAudio, dur = a && coxSrc && isFinite(a.duration) ? a.duration : 0;
-    const w = dur ? Math.min(100, ((a.currentTime || 0) / dur) * 100) : 0;
+    const w = coxHeardPct(cx.exam.items[cx.i]);
     document.querySelectorAll("[data-cox-bar]").forEach((el) => { el.style.width = w + "%"; });
     const q = coxItemLeft(cx), qw = Math.max(0, Math.min(100, (q.left / q.all) * 100));
     document.querySelectorAll("[data-cox-q]").forEach((el) => { el.textContent = fmtClock(Math.max(0, q.left)); });
@@ -4141,7 +4142,7 @@
     const clock = `<div class="timer cox-clock" title="This question's time: reading, the recording and the answer. The next one starts by itself when it runs out."><span class="clock" data-cox-q>${fmtClock(Math.max(0, q.left))}</span><button class="btn sm" data-act="${paused ? "cox-resume" : "cox-pause"}">${paused ? "Resume" : "Pause"}</button><div class="bar cox-qbar" aria-hidden="true"><i data-cox-qbar style="width:${Math.max(0, Math.min(100, (q.left / q.all) * 100))}%"></i></div></div>`;
     const strip = `<div class="qnav cox-strip" aria-label="Progress: question ${cx.i + 1} of ${n}">${cx.exam.items.map((x, j) => `<span class="${cx.ans[j] != null ? "done" : ""}"${cx.ans[j] != null ? ` data-m="pop" data-k="xs-${esc(cx.exam.id)}-${j}"` : ""} ${j === cx.i ? `aria-current="true"` : ""}>${j + 1}</span>`).join("")}</div>`;
     const phase = p.phase === "read" ? `<span class="pill">Lecture</span><span class="small muted">The recording starts in <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`
-      : p.phase === "listen" ? `<span class="pill info">Écoute</span><div class="bar cox-bar" aria-hidden="true"><i data-cox-bar style="width:0%"></i></div>`
+      : p.phase === "listen" ? `<span class="pill info">Écoute</span><div class="bar cox-bar" aria-hidden="true"><i data-cox-bar style="width:${coxHeardPct(it)}%"></i></div>`
       : `<span class="pill warn">Réponse</span><span class="small muted">Time left to answer: <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`;
     const pick = (k, label) => `<label class="opt${it.kind === "doc" ? "" : " letter"}"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${label}</span></label>`;
     const body = it.kind === "doc"
