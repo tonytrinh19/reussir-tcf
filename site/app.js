@@ -2517,7 +2517,8 @@
   // ("leaf"); a soft rubber-stamp thud when a stamp lands ("thunk"). For the clock: a stopwatch click and two rising
   // notes when it starts or resumes ("start"), two falling ones when it's paused ("pause"), a click and a low note
   // when it's reset or the task is finished ("stop"), two gentle desk-bell strikes at 0:00 ("bell"), a quiet
-  // tick-tock once a second in overtime ("tick", "tock") and one low strike when the overtime ends ("low"). Browsers only let a page start sound
+  // tick-tock once a second in overtime ("tick", "tock") and one low strike when the overtime ends ("low"); the beep that
+  // starts each listening exam question ("beep"). Browsers only let a page start sound
   // from a click or a key, so the first one on the page wakes the audio up, and later sounds (a stamp, the clock)
   // can then play by themselves. The sound button in a card session's header or by a clock (or M in a session)
   // turns them all off on this device (tcf-sound, like the theme).
@@ -2594,6 +2595,7 @@
       else if (kind === "stop") { click(t0, 0.28); click(t0 + 0.07, 0.22); note(392, t0 + 0.1, 0.32, 0.07, "triangle"); }
       else if (kind === "tick") { click(t0, 0.2, 3600); note(2093, t0, 0.03, 0.012); }
       else if (kind === "tock") { click(t0, 0.17, 2400); note(1568, t0, 0.03, 0.01); }
+      else if (kind === "beep") note(1000, t0, 0.22, 0.07);
     } catch (_) {}
   }
   function soundToggle() {
@@ -3877,7 +3879,7 @@
     timerSet(X.spec.minutes * 60, X.label, X.home);
     tone("start");
     timerStart();
-    if (skill === "co") { stopAudio(); ui.cx.play = coxFresh(ex.items[0]); coxUnlock(); examKeep(); }
+    if (skill === "co") { stopAudio(); ui.cx.play = coxFresh(ex.items[0]); coxUnlock(); coxDurations(ex); examKeep(); tone("beep", 0.35); }
     goTo("#" + X.home);
     window.scrollTo(0, 0);
     if (skill === "co") coxRun();
@@ -3946,6 +3948,7 @@
       if (["read", "listen", "answer"].includes(ip.phase)) Object.assign(p, { phase: ip.phase, left: Number(ip.phaseLeft) > 0 ? Number(ip.phaseLeft) : p.left, pos: Number(ip.pos) || 0 });
       ui.cx.play = p;
       coxUnlock();
+      coxDurations(ex);
     }
     goTo("#" + X.home);
     window.scrollTo(0, 0);
@@ -3966,14 +3969,33 @@
   }
 
   /* ---------- the CO exam, item by item ---------- */
-  // As on the real test, each item runs by itself: a pause to read (the picture or the written options), the
-  // recording once (a document's ends with its question, read by the narrator), then a short window to answer.
-  // Valider, or the end of the window, moves on, and there's no going back. Pause stops the clock, the countdown
-  // and the recording together; leaving the page or the tab pauses too, and a refresh brings the exam back paused.
+  // As on the real test, each item runs by itself and takes its own fixed time: a beep, a pause to read (the
+  // picture or the written options), the recording once (a document's ends with its question, read by the
+  // narrator), then a short window to answer. When the window ends the next item starts, whether you've answered
+  // or not: no going back and no going faster. The clock on screen is the item's (the 35 minutes still run behind
+  // it, and the schedule fits inside them). Pause stops the clock, the countdown and the recording together;
+  // leaving the page or the tab pauses too, and a refresh brings the exam back paused.
   const SILENT = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
   let coxAudio = null, coxSrc = "", coxTick = 0, coxToken = 0;
   const coxReadSecs = (it) => (it.kind === "reply" ? TC.coExam.read.reply : TC.coExam.read[it.level]);
   const coxFresh = (it) => ({ phase: "read", left: coxReadSecs(it), pos: 0, paused: false });
+  // Each recording's length, read from its file's header when the exam starts, so an item's clock is known from
+  // its first second. Until it's in (or for the browser's voice), the middle of the level's range stands in.
+  const coxDur = {};
+  function coxDurations(exam) {
+    exam.items.forEach((it) => {
+      if (!it.audio || coxDur[it.audio]) return;
+      try { const a = new Audio(); a.preload = "metadata"; a.onloadedmetadata = () => { if (isFinite(a.duration)) coxDur[it.audio] = a.duration; }; a.src = it.audio; } catch (_) {}
+    });
+  }
+  const coxLen = (it) => (it.audio && coxSrc === it.audio && coxAudio && isFinite(coxAudio.duration) && coxAudio.duration) || coxDur[it.audio] || (() => { const r = (TC.coLevels[it.level] || {}).secs || [20, 40]; return (r[0] + r[1]) / 2; })();
+  // What's left of the current item: its reading pause, the rest of the recording and the window to answer.
+  function coxItemLeft(cx) {
+    const p = cx.play, it = cx.exam.items[cx.i], ans = TC.coExam.answer[it.level], len = coxLen(it);
+    if (p.phase === "read") return { left: p.left + len + ans, all: coxReadSecs(it) + len + ans };
+    if (p.phase === "listen") return { left: Math.max(0, len - coxPos()) + ans, all: coxReadSecs(it) + len + ans };
+    return { left: p.left, all: coxReadSecs(it) + len + ans };
+  }
   const coxPos = () => { const p = ui.cx && ui.cx.play; if (!p || p.phase !== "listen") return 0; return coxAudio && coxSrc && !p.paused ? coxAudio.currentTime || 0 : p.pos || 0; };
   // One Audio element plays the whole exam. Playing it once inside the click that starts or resumes the exam
   // lets the later items play by themselves, which Safari on iPhone would otherwise block.
@@ -4067,6 +4089,7 @@
     cx.i++;
     cx.play = coxFresh(cx.exam.items[cx.i]);
     examKeep();
+    tone("beep");
     render(true);
     window.scrollTo(0, 0);
     coxRun();
@@ -4099,6 +4122,9 @@
     const a = coxAudio, dur = a && coxSrc && isFinite(a.duration) ? a.duration : 0;
     const w = dur ? Math.min(100, ((a.currentTime || 0) / dur) * 100) : 0;
     document.querySelectorAll("[data-cox-bar]").forEach((el) => { el.style.width = w + "%"; });
+    const q = coxItemLeft(cx), qw = Math.max(0, Math.min(100, (q.left / q.all) * 100));
+    document.querySelectorAll("[data-cox-q]").forEach((el) => { el.textContent = fmtClock(Math.max(0, q.left)); });
+    document.querySelectorAll("[data-cox-qbar]").forEach((el) => { el.style.width = qw + "%"; });
   }
   // A drawing from exam-co.js, in the page's ink. During the exam it's hidden from screen readers, since a
   // description would give the answer away; the review describes it.
@@ -4111,7 +4137,8 @@
   function coxView(cx, back) {
     const it = cx.exam.items[cx.i], n = cx.exam.items.length, p = cx.play || coxFresh(it);
     const paused = !!p.paused;
-    const clock = `<div class="timer"><span class="clock" data-timer>${fmtClock(timerRemaining())}</span><button class="btn sm" data-act="${paused ? "cox-resume" : "cox-pause"}">${paused ? "Resume" : "Pause"}</button></div>`;
+    const q = coxItemLeft(Object.assign({}, cx, { play: p }));
+    const clock = `<div class="timer cox-clock" title="This question's time: reading, the recording and the answer. The next one starts by itself when it runs out."><span class="clock" data-cox-q>${fmtClock(Math.max(0, q.left))}</span><button class="btn sm" data-act="${paused ? "cox-resume" : "cox-pause"}">${paused ? "Resume" : "Pause"}</button><div class="bar cox-qbar" aria-hidden="true"><i data-cox-qbar style="width:${Math.max(0, Math.min(100, (q.left / q.all) * 100))}%"></i></div></div>`;
     const strip = `<div class="qnav cox-strip" aria-label="Progress: question ${cx.i + 1} of ${n}">${cx.exam.items.map((x, j) => `<span class="${cx.ans[j] != null ? "done" : ""}"${cx.ans[j] != null ? ` data-m="pop" data-k="xs-${esc(cx.exam.id)}-${j}"` : ""} ${j === cx.i ? `aria-current="true"` : ""}>${j + 1}</span>`).join("")}</div>`;
     const phase = p.phase === "read" ? `<span class="pill">Lecture</span><span class="small muted">The recording starts in <b class="num" data-cox-left>${Math.ceil(p.left)} s</b></span>`
       : p.phase === "listen" ? `<span class="pill info">Écoute</span><div class="bar cox-bar" aria-hidden="true"><i data-cox-bar style="width:0%"></i></div>`
@@ -4129,7 +4156,7 @@
         <p class="small muted">${COX_CONSIGNE[it.kind]}</p>
         ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, "")}</figure>` : ""}
         ${body}
-        <div class="row"><button class="btn primary" data-act="cox-ok" ${p.phase === "answer" && !paused ? "" : "disabled"}>Valider <span class="kbd">↵</span></button><span class="small muted">Choose at any time${it.kind === "doc" ? "" : " (A–D on the keyboard)"}. Valider confirms once the recording has ended, and it's final.</span></div>
+        <p class="small muted">Choose at any time${it.kind === "doc" ? "" : " (A–D on the keyboard)"}. When this question's time runs out, the next one starts by itself, as on the real test.</p>
       </section>
       <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
   }
@@ -4260,7 +4287,7 @@
     const rules = skill === "co"
       ? `<p>39 questions in about 35 minutes, getting harder from A1 to C2, as on the TCF Canada. Each recording plays once, and the exam moves on by itself.</p>
         ${fold("x-rules-co", "Comment ça se passe · How it works", `<div class="stack tight"><ul class="small" style="margin:0;padding-left:20px">
-          <li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li>
+          <li>As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or not: no going back, no going faster, and a blank counts as wrong.</li>
           <li>Questions 1–4: look at the picture and listen to four statements, then choose the one that matches it. Questions 5–7: listen to a question and four replies, then choose the right reply. From question 8: read the four options, listen to the document and its question, then choose.</li>
           <li>Use headphones if you can. If you're interrupted, Pause stops everything; the real test doesn't stop.</li>
           <li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.</li>
@@ -4524,7 +4551,9 @@
     const s = settings(), P = T.PHASES[s.phase - 1];
     const store = backend.kind === "db" ? `<span class="status-dot on"></span>Progress saved on claude.ai` : backend.kind === "server" ? `<span class="status-dot on"></span>Progress saved on this computer` : backend.kind === "local" ? `<span class="status-dot warn"></span>Progress saved in this browser only` : `<span class="status-dot"></span>Loading your progress…`;
     const cl = sample ? `<span class="status-dot on"></span>Claude ready` : claudeState === "pending" ? `<span class="status-dot"></span>Connecting to Claude…` : claudeState === "off" ? `<span class="status-dot"></span>Claude off (reload to allow)` : "";
-    const tm = timer.total && !timer.done && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}">${ico("timer")}<span>${esc(timer.label)}</span><b data-timer>${fmtClock(timerRemaining())}</b></a>` : "";
+    // The listening exam paces itself question by question, so the sidebar shows where it is rather than its 35 minutes.
+    const coQ = timer.home === XSPEC.co.home && examRunning() && skillOf(ui.cx) === "co" ? `${ui.cx.i + 1}/${ui.cx.exam.items.length}` : "";
+    const tm = timer.total && !timer.done && (timer.running || timerStarted()) ? `<a class="mini-timer" href="#${esc(timer.home)}">${ico("timer")}<span>${esc(timer.label)}</span><b ${coQ ? "" : "data-timer"}>${coQ ? `Q ${coQ}` : fmtClock(timerRemaining())}</b></a>` : "";
     // Where your progress is saved, on one line; that and whether Claude is ready open with a tap.
     const saved = backend.kind === "db" ? "Saved on claude.ai" : backend.kind === "server" ? "Saved on this computer" : backend.kind === "local" ? "Saved in this browser only" : "Loading your progress…";
     const dot = backend.kind === "local" ? "warn" : backend.kind === "loading" ? "" : "on";
@@ -7674,7 +7703,6 @@
     "x-show": () => { const cx = ui.cx; if (cx && cx.done) { ansHide(cx.exam.id, false); render(true); } },
     // The same exam again, from its results: a built-in one from the bank, one of Claude's from the copy on screen.
     "x-retake": () => { const cx = ui.cx; if (!cx) return; const sk = skillOf(cx); examStart(XSPEC[sk].bank().find((e) => e.id === cx.exam.id) || cx.exam, sk); },
-    "cox-ok": () => { const cx = ui.cx; if (cx && !cx.done && cx.skill === "co" && cx.play && cx.play.phase === "answer" && !cx.play.paused) coxNext(); },
     "cox-pause": () => { tone("pause"); coxPause(); },
     "cox-resume": () => { tone("start"); coxResume(); },
     "p-phase": (el) => { saveSettings({ phase: Number(el.dataset.n) }); toast(`Phase ${el.dataset.n}: ${T.PHASES[Number(el.dataset.n) - 1].name}.`); },
@@ -7847,7 +7875,6 @@
         examKeep();
         return;
       }
-      if (e.key === "Enter" && p.phase === "answer" && !p.paused) { e.preventDefault(); coxNext(); return; }
       if (e.key === " " && !(t && t.closest && t.closest("button, a, label"))) { e.preventDefault(); if (p.paused) { tone("start"); coxResume(); } else { tone("pause"); coxPause(); } return; }
     }
     if (t && t.closest && t.closest("input, textarea, select, button, a, [contenteditable]")) return;

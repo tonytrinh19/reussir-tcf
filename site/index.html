@@ -967,6 +967,10 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .cox-phase { gap: 12px; min-height: 30px; }
 .cox-bar { flex: 1; max-width: 360px; }
 .cox-bar > i { background: var(--accent); transition: width .2s linear; }
+/* the question's own clock: its time left, and a bar that empties over the whole question */
+.cox-clock { display: grid; grid-template-columns: auto auto; align-items: center; justify-items: end; gap: 6px 8px; }
+.cox-qbar { grid-column: 1 / -1; justify-self: stretch; height: 5px; }
+.cox-qbar > i { background: var(--accent); transition: width .2s linear; }
 .pic-card { --mx: 40px; margin: 0; padding: 14px 18px 10px 52px; border: 1px solid var(--rule); border-radius: 14px; justify-self: start; width: min(100%, 480px); }
 svg.scene { display: block; width: 100%; height: auto; color: var(--accent); }
 .letters { display: flex; flex-wrap: wrap; gap: 10px; }

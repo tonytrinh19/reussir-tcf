@@ -204,6 +204,7 @@ window.TCF.FR = {
 "Are Monday's specific errors gone?": "Les erreurs spécifiques de lundi ont-elles disparu ?",
 "Are the corrected forms in your rewrite?": "Les formes corrigées figurent-elles dans ta réécriture ?",
 "Arrivée · To": "Arrivée · To",
+"As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or not: no going back, no going faster, and a blank counts as wrong.": "Comme au vrai examen, chaque question commence par un bip et a sa propre durée : quelques secondes pour lire, l'enregistrement, puis quelques secondes pour répondre. Le chrono affiche le temps restant pour cette question. Une fois écoulé, la question suivante démarre automatiquement, que tu aies répondu ou non : pas de retour en arrière, impossible d'accélérer, et une case vide compte comme une erreur.",
 "As on the test, each document has one question. Read it, then answer.": "Comme lors du test, chaque document comporte une question. Lis-la, puis réponds.",
 "As the phase note says: the CO Examen blanc once, instead of Saturday's timed sets.": "Comme l'indique la note de phase : l'examen blanc CO une seule fois, au lieu des séries chronométrées du samedi.",
 "At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.": "À 0:00, l'examen t'est rendu automatiquement. Tu peux mettre le chrono en pause en cas d'interruption.",
@@ -479,7 +480,6 @@ window.TCF.FR = {
 "EXAMEN BLANC ★": "EXAMEN BLANC ★",
 "Each error has a category.": "Chaque erreur a une catégorie.",
 "Each new card comes back twice in the session, to check you can recall it.": "Chaque nouvelle carte revient deux fois dans la session pour vérifier que tu t'en souviens.",
-"Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.": "Chaque question dispose de quelques secondes pour être lue, puis de l'enregistrement, puis de quelques secondes pour répondre. Valider confirme ta réponse et continue. Impossible de revenir en arrière, et une réponse vide compte comme fausse.",
 "Each skill on the NCLC scale, against the NCLC 7 ring": "Chaque compétence sur l'échelle NCLC, par rapport à l'anneau NCLC 7",
 "Each text Claude corrected, oldest to latest": "Chaque texte corrigé par Claude, du plus ancien au plus récent",
 "Earlier sets": "Séries précédentes",
@@ -1363,6 +1363,7 @@ window.TCF.FR = {
 "This first check sets when the card comes back. Again also brings it back in this session.": "Ce premier choix détermine quand la carte revient. « À revoir » la ramène aussi dans cette session.",
 "This miss was a…": "Cette erreur était une…",
 "This page lost access to its saved data. Reload to reconnect.": "Cette page a perdu l'accès à ses données enregistrées. Recharge la page pour te reconnecter.",
+"This question's time: reading, the recording and the answer. The next one starts by itself when it runs out.": "Temps pour cette question : lecture, enregistrement et réponse. La suivante démarre automatiquement une fois le temps écoulé.",
 "This round is from before whole rounds were saved, so only the questions you missed are here.": "Ce tour date d'avant l'enregistrement des tours complets, seules les questions ratées s'y trouvent donc.",
 "This sentence is already one of its examples.": "Cette phrase fait déjà partie de ses exemples.",
 "This set has since been replaced, so it can't be opened again.": "Ce thème a été remplacé depuis, il ne peut donc plus être ouvert.",
@@ -1496,7 +1497,6 @@ window.TCF.FR = {
 "Untimed reading set": "Série de lecture sans chrono",
 "Up next": "Prochaine étape",
 "Use headphones if you can. If you're interrupted, Pause stops everything; the real test doesn't stop.": "Utilise un casque si possible. Si tu es interrompu, Pause met tout en pause ; le vrai test ne s'arrête pas.",
-"Valider": "Valider",
 "Vary connectors correctly across a 150-word paragraph with no repeats.": "Varier correctement les connecteurs dans un paragraphe de 150 mots, sans répétition.",
 "Very good! Nearly all right.": "Très bien ! Presque tout bon.",
 "Visa de visiteur": "Visa de visiteur",
@@ -1564,7 +1564,7 @@ window.TCF.FR = {
 "Wrong fix": "Correction erronée",
 "You can add the sentence you found it in to that card's examples.": "Tu peux ajouter la phrase où tu l'as trouvée aux exemples de cette carte.",
 "You found": "Tu as trouvé",
-"You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.": "Tu as quelques secondes pour lire chaque question, puis l'enregistrement, puis quelques secondes pour répondre. Valider confirme ta réponse et passe à la suite. Impossible de revenir en arrière, et une case vide compte comme une erreur.",
+"You get an estimated score out of 699 with its NCLC level, added to Progress → Scores and NCLC.": "Tu obtiens un score estimé sur 699 et son niveau NCLC, ajoutés dans Progrès → Scores et NCLC.",
 "You have an unfinished exam:": "Tu as un examen en cours :",
 "You have unsaved changes: ⌘↵ saves them, Cancel throws them away.": "Modifications non enregistrées : ⌘↵ les enregistre, Annuler les supprime.",
 "You understood nearly everything.": "Tu as presque tout compris.",
@@ -3292,8 +3292,8 @@ window.TCF.FR = {
 "Vérifier · {0} marqué(s)"
 ],
 [
-"Choose at any time{0}. Valider confirms once the recording has ended, and it's final.",
-"Choisis à tout moment{0}. Valider confirme une fois l'enregistrement terminé, et c'est définitif."
+"Choose at any time{0}. When this question's time runs out, the next one starts by itself, as on the real test.",
+"Choisis ta réponse à tout moment{0}. Quand le temps de cette question est écoulé, la suivante démarre automatiquement, comme au vrai examen."
 ],
 [
 "Claude didn't finish the {0} questions. Try again.",

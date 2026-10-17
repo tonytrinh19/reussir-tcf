@@ -9126,6 +9126,15 @@
   "ctx": []
  },
  {
+  "id": "5566acef75a8",
+  "text": "As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or not: no going back, no going faster, and a blank counts as wrong.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<li>As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or no"
+  ]
+ },
+ {
   "id": "db231332c7fd",
   "text": "As on the test, each document has one question. Read it, then answer.",
   "kind": "exact",
@@ -11343,12 +11352,12 @@
   ]
  },
  {
-  "id": "c059e6c3858c",
-  "text": "Choose at any time{0}. Valider confirms once the recording has ended, and it's final.",
+  "id": "a37bdb52bce0",
+  "text": "Choose at any time{0}. When this question's time runs out, the next one starts by itself, as on the real test.",
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <button>Valider <span>↵</span></button><span>Choose at any time…. Valider confirms once the recording has ended, and it's final.</span> …"
+   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <p>Choose at any time…. When this question's time runs out, the next one starts by itself, as on the real test.</p> …"
   ]
  },
  {
@@ -13942,15 +13951,6 @@
   "where": "app",
   "ctx": [
    "Each new card comes back twice in the session, to check you can recall it."
-  ]
- },
- {
-  "id": "1d7445798042",
-  "text": "Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li> <li>Questions 1–4: look at the picture and listen to four statemen"
   ]
  },
  {
@@ -26902,7 +26902,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <button>Valider <span>↵</span></button><span>Choose at any time…. Valider confirms once the recording has ended, and it's final.</span> …",
+   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <p>Choose at any time…. When this question's time runs out, the next one starts by itself, as on the real test.</p> …",
    "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
   ]
  },
@@ -26912,7 +26912,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <button>Valider <span>↵</span></button><span>Choose at any time…. Valider confirms once the recording has ended, and it's final.</span> …",
+   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <p>Choose at any time…. When this question's time runs out, the next one starts by itself, as on the real test.</p> …",
    "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
   ]
  },
@@ -26974,7 +26974,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li> <li>Questions 1–4: look at the picture and listen to four statemen"
+   "<li>As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or no"
   ]
  },
  {
@@ -34208,6 +34208,15 @@
   ]
  },
  {
+  "id": "cc8e9b9343eb",
+  "text": "This question's time: reading, the recording and the answer. The next one starts by itself when it runs out.",
+  "kind": "exact",
+  "where": "attr:title",
+  "ctx": [
+   "<span>…</span><button>…</button> <i></i>"
+  ]
+ },
+ {
   "id": "6eaceae91b6f",
   "text": "This round is from before whole rounds were saved, so only the questions you missed are here.",
   "kind": "exact",
@@ -36203,7 +36212,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li> <li>Questions 1–4: look at the picture and listen to four statemen"
+   "<li>As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or no"
   ]
  },
  {
@@ -36246,7 +36255,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li> <li>Questions 1–4: look at the picture and listen to four statemen"
+   "<li>As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or no"
   ]
  },
  {
@@ -36278,15 +36287,6 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
- },
- {
-  "id": "be4220f72059",
-  "text": "Valider",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <button>Valider <span>↵</span></button><span>Choose at any time…. Valider confirms once the recording has ended, and it's final.</span> …"
-  ]
  },
  {
   "id": "1186b15e9e18",
@@ -37853,7 +37853,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<li>Each question has a few seconds to read, then the recording, then a few seconds to answer. Valider confirms your answer and goes on. There's no going back, and a blank counts as wrong.</li> <li>Questions 1–4: look at the picture and listen to four statemen",
+   "<li>As on the real test, each question starts with a beep and has its own fixed time: a few seconds to read, the recording, then a few seconds to answer. The clock shows this question's time. When it runs out, the next question starts by itself, answered or no",
    "<li>Answers stay hidden until you hand in, and a blank counts as wrong.</li><li>At 0:00 the exam is handed in for you. You can pause the clock if you're interrupted.</li><li>You get an estimated score out of 699 with its NCLC level, added to Progress → Scores "
   ]
  },
