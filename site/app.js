@@ -425,12 +425,13 @@
   // most 10), so a clock left running in a tab you've left doesn't count on for hours. It's worked out from
   // the time it started, so it stops at the same point even if the page was in the background.
   const timerCap = () => Math.min(600, Math.max(60, Math.round(timer.total / 2)));
+  let overTick = -1; // the second of overtime last ticked
   const timerRemaining = () => (timer.running ? Math.max(-timerCap(), timer.base - (Date.now() - timer.t0) / 1000) : timer.left);
   const timerStarted = () => timer.running || (timer.total > 0 && Math.abs(timer.left - timer.total) > 0.5);
   const timerCapped = () => timer.total > 0 && timerRemaining() <= -timerCap() + 0.5;
   const timerBtnLabel = () => (timer.running ? "Pause" : timer.done || timerCapped() ? "Restart" : timerStarted() ? "Resume" : "Start");
   function fmtClock(sec) { const neg = sec < -0.5; const s = Math.abs(Math.round(sec)); return (neg ? "+" : "") + Math.floor(s / 60) + ":" + pad(s % 60); }
-  function timerSet(sec, label, home) { timerPause(); timer.total = timer.left = sec; timer.label = label; timer.home = home; timer.alerted = false; timer.done = false; }
+  function timerSet(sec, label, home) { timerPause(); timer.total = timer.left = sec; timer.label = label; timer.home = home; timer.alerted = false; timer.done = false; overTick = -1; }
   function timerStart() {
     if (timer.running || !timer.total) return;
     // A clock that stopped at the end of its overtime, or because you finished, starts again from the full time.
@@ -445,6 +446,7 @@
   function timerFinish(home) {
     if (timer.home !== home || timer.done || !timerStarted()) return false;
     const was = timer.running;
+    tone("stop");
     timerPause();
     timer.done = true;
     paintTimer();
@@ -471,6 +473,10 @@
       timer.alerted = true;
       toast(`Time's up: ${timer.label}. The clock counts overtime for up to ${capMin} min, then stops.`);
       timerRing("bell");
+    } else if (timer.running && r < -1) {
+      // Overtime: a quiet tick-tock, once a second (the bell has the first second to itself).
+      const k = Math.floor(-r);
+      if (k !== overTick) { overTick = k; tone(k % 2 ? "tick" : "tock"); }
     }
     document.querySelectorAll("[data-timer]").forEach((el) => { el.textContent = fmtClock(r); el.classList.toggle("over", r < 0); });
     document.querySelectorAll("[data-timer-btn]").forEach((b) => { b.textContent = timerBtnLabel(); });
@@ -1173,16 +1179,27 @@
   // "Journée validée": the teacher's stamp on the day's header once every block is ticked.
   const tbStamp = (date) => `<svg class="tb-stamp" id="tb-stamp" data-date="${date}" viewBox="0 0 176 66" role="img" aria-label="Stamp: Très bien !"><g filter="url(#ink)"><rect class="tb-o" x="2.5" y="2.5" width="171" height="61" rx="11"/><rect class="tb-i" x="8.5" y="8.5" width="159" height="49" rx="7"/><use class="tb-leaf" href="#leaf" x="18" y="17" width="29" height="31.5" transform="rotate(-8 32.5 32.75)"/><text x="109" y="39.5" text-anchor="middle">TRÈS BIEN&#160;!</text></g></svg>`;
 
-  // Tampons: a teacher's rubber stamp for each milestone, in a different ink each.
+  // Tampons: a teacher's rubber stamp for each milestone, in a different ink each, from the first day to NCLC 7 in
+  // all four skills. Stamps added later carry their batch (set), so the ones you'd already earned by then are
+  // recorded without a celebration (see stampCheck).
+  const STAMP_SET = 2;
   const STAMPS = [
     { id: "first", name: "Première séance", ring: "PREMIÈRE SÉANCE ★ ", reps: 3, icon: "today", ink: "--accent", rot: -8, got: "Your first full day's plan", todo: "To earn: a full day's plan", earned: () => [...S.days.keys()].some((d) => dayComplete(d)) },
+    { id: "copy", set: 2, name: "Première copie", ring: "PREMIÈRE COPIE ★ ", reps: 3, icon: "writing", ink: "--amber", rot: 6, got: "Your first text corrected", todo: "To earn: a text corrected by Claude", earned: () => list("writing").some((w) => w.fb && Array.isArray(w.fb.errors)) },
     { id: "d7", name: "7 jours d'affilée", ring: "7 JOURS D'AFFILÉE ★ ", reps: 3, num: "7", ink: "--red", rot: 7, got: "Seven days in a row", todo: "To earn: seven days in a row", earned: (x) => x.best >= 7 },
     { id: "zero", name: "Zéro faute", ring: "ZÉRO FAUTE ★ ", reps: 4, icon: "bilan", ink: "--green", rot: -4, got: "A drill round with no misses", todo: "To earn: a drill round with no misses", earned: () => list("drills").some((d) => d.set !== "prod" && d.total > 0 && d.score >= d.total) },
+    { id: "ear", set: 2, name: "Oreille fine", ring: "OREILLE FINE ★ ", reps: 4, icon: "listen", ink: "--accent", rot: -9, got: "A listening set without a miss", todo: "To earn: a listening set without a miss, first try", earned: () => firstTries(list("comp").filter((c) => c.skill === "co" && c.kind !== "exam" && c.total)).some((c) => c.score >= c.total) },
     { id: "c100", name: "100 cartes", ring: "100 CARTES ★ ", reps: 4, icon: "vocab", ink: "--amber", rot: 10, got: "100 cards reviewed", todo: "To earn: 100 cards reviewed", earned: () => S.srs.size >= 100 },
-    { id: "p1", name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
-    { id: "d30", name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
+    { id: "pace", set: 2, name: "Au chrono", ring: "AU CHRONO ★ ", reps: 4, icon: "timer", ink: "--red", rot: 8, got: "A reading set at exam pace, 3 of 4 or better", todo: "To earn: a reading set at exam pace, 3 of 4 or better", earned: () => firstTries(list("comp").filter((c) => c.skill === "ce" && c.kind !== "exam" && c.total)).some((c) => c.secs > 0 && c.secs <= (CE_PACE[c.level] || 90) * c.total && c.score / c.total >= 0.75 - 1e-9) },
     { id: "exam", name: "Examen blanc", ring: "EXAMEN BLANC ★ ", reps: 3, icon: "exam", ink: "--green", rot: -6, got: "Your first practice exam", todo: "To earn: first practice exam, CE or CO", earned: () => list("comp").some((c) => c.kind === "exam") },
+    { id: "d14", set: 2, name: "14 jours d'affilée", ring: "14 JOURS D'AFFILÉE ★ ", reps: 3, num: "14", ink: "--amber", rot: -5, got: "Fourteen days in a row", todo: "To earn: fourteen days in a row", earned: (x) => x.best >= 14 },
+    { id: "rule", set: 2, name: "Règle maîtrisée", ring: "RÈGLE MAÎTRISÉE ★ ", reps: 3, icon: "grammar", ink: "--red", rot: 11, got: "A grammar topic mastered", todo: "To earn: a grammar topic's target, twice a week apart", earned: () => T.TOPICS.some((tp) => topicMastery(tp).ok) },
+    { id: "p1", name: "Phase 1 validée", ring: "PHASE 1 VALIDÉE ★ ", reps: 3, icon: "progress", ink: "--accent", rot: -12, got: "Phase 1 exit criteria met", todo: "To earn: the Phase 1 exit criteria", earned: () => { const c = T.CRITERIA[1] || []; return c.length > 0 && c.every((x) => criterionStatus(x).ok); } },
+    { id: "c300", set: 2, name: "300 cartes", ring: "300 CARTES ★ ", reps: 4, icon: "vocab", ink: "--green", rot: -7, got: "300 cards reviewed", todo: "To earn: 300 cards reviewed", earned: () => S.srs.size >= 300 },
+    { id: "b2", set: 2, name: "Niveau B2", ring: "NIVEAU B2 ★ ", reps: 4, num: "B2", ink: "--amber", rot: 4, got: "Ready for B2 in listening or reading", todo: "To earn: your last 3 B1 sets in listening (70%) or reading (75%)", earned: () => ["co", "ce"].some((sk) => { const l = compLadder(sk); return l.a1 != null && l.a1 >= LADDER_UP[sk] - 1e-9; }) },
+    { id: "d30", name: "30 jours", ring: "30 JOURS D'AFFILÉE ★ ", reps: 3, num: "30", ink: "--red", rot: 5, got: "Thirty days in a row", todo: "To earn: thirty days in a row", earned: (x) => x.best >= 30 },
     { id: "nclc7", name: "NCLC 7", ring: "NCLC 7 ATTEINT ★ ", reps: 3, icon: "target", ink: "--accent", rot: 9, got: "The target, reached in a skill", todo: "To earn: the target, in any skill", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].some((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
+    { id: "nclc7all", set: 2, name: "NCLC 7 partout", ring: "NCLC 7 PARTOUT ★ ", reps: 3, icon: "plane", ink: "--green", rot: -10, got: "NCLC 7 in all four skills, on one test", todo: "To earn: NCLC 7 in all four skills, on one test", earned: () => scoredMocks().some((m) => ["co", "ce", "ee", "eo"].every((k) => (nclcOf(k, m[k]) || 0) >= 7)) },
   ];
   function stampSVG(st, on, bare) {
     const center = st.icon ? `<svg class="st-ic" x="35" y="35" width="30" height="30" viewBox="0 0 24 24"><use href="#i-${st.icon}"/></svg>`
@@ -1190,18 +1207,21 @@
     const inner = `<circle class="st-o" cx="50" cy="50" r="46"/><circle class="st-i" cx="50" cy="50" r="30.5"/><text class="st-t"><textPath href="#ring34" lengthAdjust="spacing" textLength="211.6">${esc(st.ring.repeat(st.reps))}</textPath></text>${center}`;
     return `<svg class="stamp ${on ? "on" : "off"}"${on && !bare ? ` data-m="press" data-k="stamp-${esc(st.name)}"` : ""} viewBox="0 0 100 100" role="img" aria-label="${on ? `${esc(st.name)}, earned` : `${esc(st.name)}, still to earn`}" style="color:var(${on ? st.ink : "--ink-3"});transform:rotate(${on ? st.rot : 0}deg)"><g${on ? ' filter="url(#ink)"' : ""}>${inner}</g></svg>`;
   }
-  // A teacher's stamp for each milestone, worked out from what you've done. One earned in the last week says so.
+  // A teacher's stamp for each milestone, worked out from what you've done. A stamp once earned stays (a level can
+  // slip back, a stamp doesn't), and one earned in the last week says so.
   function stampShelf() {
     const x = { best: longestStreak() };
-    const got = STAMPS.map((st) => !!st.earned(x));
     const when = (S.settings.get("main") || {}).stamps || {}, wk = addDays(todayStr(), -6);
+    const got = STAMPS.map((st) => !!when[st.id] || !!st.earned(x));
     return { n: got.filter(Boolean).length, html: `<div class="stamps">${STAMPS.map((st, i) => `<figure class="stamp-cell">${stampSVG(st, got[i])}<figcaption><b>${esc(st.name)}</b>${got[i] && typeof when[st.id] === "string" && when[st.id] >= wk ? `<span class="st-new">nouveau</span>` : ""}<small>${esc(got[i] ? st.got : st.todo)}</small></figcaption></figure>`).join("")}</div>` };
   }
 
   // A stamp earned gets its moment: the first time it's earned, it's pressed onto the page with a thud and a burst
   // of leaves (#award; motion.js moves it). Which stamps have had theirs is kept in settings.main.stamps (the day of
   // each), so it happens once, on every device. The very first check records what was already earned, quietly, as
-  // true rather than a day, so none of those is tagged new.
+  // true rather than a day, so none of those is tagged new. Stamps added to the site since your last check
+  // (settings.main.stampSet, the batch you've seen) that you'd already earned are recorded quietly too, but with the
+  // day, so they're tagged new on the Tampons tile instead of each taking a turn at the top of the page.
   // It's worked out again only after your progress has changed, and never before all of it has arrived.
   const awardEl = document.getElementById("award");
   let stampRev = -1, awardT = 0, awardAt = 0;
@@ -1209,14 +1229,14 @@
   function stampCheck() {
     if (!allIn || !hydrated || !awardEl || dataRev === stampRev) return;
     stampRev = dataRev;
-    const had = (S.settings.get("main") || {}).stamps;
+    const main = S.settings.get("main") || {}, had = main.stamps, seen = had ? Number(main.stampSet) || 1 : 0;
     const x = { best: longestStreak() };
     const fresh = STAMPS.filter((st) => !(had && had[st.id]) && st.earned(x));
-    if (had && !fresh.length) return;
-    const t = todayStr();
-    saveSettings({ stamps: Object.assign({}, had || {}, Object.fromEntries(fresh.map((st) => [st.id, had ? t : true]))) });
+    if (had && !fresh.length && seen >= STAMP_SET) return;
+    const t = todayStr(), added = (st) => (st.set || 1) > seen;
+    saveSettings({ stampSet: STAMP_SET, stamps: Object.assign({}, had || {}, Object.fromEntries(fresh.map((st) => [st.id, had ? t : true]))) });
     if (!had) return;
-    fresh.forEach((st) => awardQ.push(st.id));
+    fresh.filter((st) => !added(st)).forEach((st) => awardQ.push(st.id));
     awardNext();
   }
   function awardNext() {
@@ -2341,8 +2361,10 @@
   }
   // The site's sounds, made on the spot with Web Audio (no files): for a grade, a light two-note chime for Hard, Good
   // or Easy and a soft low bump for Again; a third, higher note when a card session passes a milestone leaf
-  // ("leaf"); a soft rubber-stamp thud when a stamp lands ("thunk"); two gentle desk-bell strikes when a clock
-  // reaches 0:00 ("bell") and one low strike when its overtime ends ("low"). Browsers only let a page start sound
+  // ("leaf"); a soft rubber-stamp thud when a stamp lands ("thunk"). For the clock: a stopwatch click and two rising
+  // notes when it starts or resumes ("start"), two falling ones when it's paused ("pause"), a click and a low note
+  // when it's reset or the task is finished ("stop"), two gentle desk-bell strikes at 0:00 ("bell"), a quiet
+  // tick-tock once a second in overtime ("tick", "tock") and one low strike when the overtime ends ("low"). Browsers only let a page start sound
   // from a click or a key, so the first one on the page wakes the audio up, and later sounds (a stamp, the clock)
   // can then play by themselves. The sound button in a card session's header or by a clock (or M in a session)
   // turns them all off on this device (tcf-sound, like the theme).
@@ -2380,6 +2402,21 @@
       };
       // A bell: the strike and a quieter, higher partial, both ringing on.
       const strike = (f, at, dur, peak) => { note(f, at, dur, peak); note(f * 2.76, at, dur * 0.45, peak * 0.28); };
+      // A stopwatch's click: a few milliseconds of filtered noise.
+      const click = (at, peak, hz) => {
+        const n = Math.floor(ac.sampleRate * 0.012), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+        const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), gn = ac.createGain();
+        src.buffer = buf;
+        bp.type = "bandpass";
+        bp.frequency.value = hz || 3200;
+        bp.Q.value = 1.2;
+        gn.gain.value = peak;
+        src.connect(bp);
+        bp.connect(gn);
+        gn.connect(ac.destination);
+        src.start(at);
+      };
       if (kind === "pass") { note(880, t0, 0.2, 0.1); note(1318.5, t0 + 0.07, 0.26, 0.07); }
       else if (kind === "again") note(240, t0, 0.2, 0.11, "triangle", 170);
       else if (kind === "leaf") note(1760, t0 + 0.14, 0.34, 0.06);
@@ -2399,6 +2436,11 @@
         src.start(t0);
       } else if (kind === "bell") { strike(1046.5, t0, 1.3, 0.085); strike(1046.5, t0 + 0.42, 1.6, 0.075); }
       else if (kind === "low") strike(523.25, t0, 1.4, 0.08);
+      else if (kind === "start") { click(t0, 0.3); note(659.25, t0 + 0.03, 0.14, 0.07); note(987.77, t0 + 0.11, 0.2, 0.065); }
+      else if (kind === "pause") { click(t0, 0.25); note(880, t0 + 0.03, 0.14, 0.06); note(587.33, t0 + 0.11, 0.22, 0.055); }
+      else if (kind === "stop") { click(t0, 0.28); click(t0 + 0.07, 0.22); note(392, t0 + 0.1, 0.32, 0.07, "triangle"); }
+      else if (kind === "tick") { click(t0, 0.2, 3600); note(2093, t0, 0.03, 0.012); }
+      else if (kind === "tock") { click(t0, 0.17, 2400); note(1568, t0, 0.03, 0.01); }
     } catch (_) {}
   }
   function soundToggle() {
@@ -3680,6 +3722,7 @@
     ui.cx = { skill, exam: ex, i: 0, ans: {}, done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
     if (exam === ui.cxReady) ui.cxReady = null;
     timerSet(X.spec.minutes * 60, X.label, X.home);
+    tone("start");
     timerStart();
     if (skill === "co") { stopAudio(); ui.cx.play = coxFresh(ex.items[0]); coxUnlock(); examKeep(); }
     goTo("#" + X.home);
@@ -3742,6 +3785,7 @@
     const full = X.spec.minutes * 60;
     timerSet(full, X.label, X.home);
     if (ip.left != null) timer.left = Math.min(full, Math.max(0, Number(ip.left)));
+    tone("start");
     timerStart();
     if (skill === "co") {
       stopAudio();
@@ -6991,7 +7035,7 @@
   // full width of its band, with its details beside the face (more) and, for the longer ones, below both (wide),
   // and closes it again. One is open at a time (ui.bento), and motion.js glides the tiles to their new places
   // (TCFMotion.expand).
-  const BENTO = [[["scores", 5], ["phase", 7]], [["ahead", 7], ["retention", 5]], [["time", 6], ["grammar", 6]], [["errors", 4], ["week", 4], ["vocab", 4]], [["comp", 4], ["writing", 4], ["stamps", 4]], [["exam", 12]]];
+  const BENTO = [[["scores", 5], ["phase", 7]], [["ahead", 7], ["retention", 5]], [["time", 6], ["grammar", 6]], [["errors", 4], ["week", 4], ["vocab", 4]], [["comp", 6], ["writing", 6]], [["stamps", 12]]];
   const BENTO_MORE = new Set(BENTO.flat().map(([id]) => id).filter((id) => id !== "stamps"));
   const BENTO_ALIAS = { pass: "phase" };
   function tile(id, span, o) {
@@ -7132,18 +7176,6 @@
         more: () => writingMore(D),
       },
       stamps: { icon: "stamp", title: "Tampons", en: "stamps", face: tileHero(`${stamps.n}<small>/${STAMPS.length}</small>`, "a teacher's stamp for each milestone") + stamps.html },
-      exam: {
-        icon: "exam", title: "L'épreuve", en: "the exam, cold",
-        face: `<div class="exam ex-face">${T.EXAM.map((e) => `<div><span class="sk ${e.code.toLowerCase()}">${e.code}</span><b>${esc(e.name)}</b><span class="small">${esc(e.fmt)}</span></div>`).join("")}</div>`,
-        more: () => `<div class="exam">${T.EXAM.map((e) => `<div><span class="sk ${e.code.toLowerCase()}">${e.code}</span><b>${esc(e.name)}</b><span class="small muted">${esc(e.note)}</span></div>`).join("")}</div>
-          <p class="small">A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: ${T.AUTOFAIL.map(esc).join(" · ")}. About 2 h 47 in total.</p>
-          <div class="grid2">
-            <div class="stack tight"><p class="h3">How writing is graded</p><ul class="small" style="margin:0;padding-left:20px">${TC.ee.criteria.map(([n, d]) => `<li><b>${esc(n)}</b>: ${esc(d)}</li>`).join("")}</ul></div>
-            <div class="stack tight"><p class="h3">How speaking is graded</p><ul class="small" style="margin:0;padding-left:20px">${TC.eo.criteria.map(([n, d]) => `<li><b>${esc(n)}</b>: ${esc(d)}</li>`).join("")}</ul></div>
-          </div>
-          <p class="small muted">Source: ${esc(TC.source)}. Everything on this site, including Claude's corrections and scores, follows these TCF Canada rules. Scores out of 20: B1 6–9, B2 10–13, C1 14–15, C1–C2 16–20.</p>
-          <p class="small muted">From your roadmap notes: for sessions from September 1, 2026, re-marking requests for Expression écrite and orale aren't being accepted for about a year. Treat every mock as the one real attempt.</p>`,
-      },
     };
   }
 
@@ -7206,13 +7238,14 @@
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.focus();
   }
+  // Start, Pause and Resume, Reset: each has its sound, so you hear the clock do what you asked.
   function timerAct(el, kind) {
     const home = el.dataset.home, sec = Number(el.dataset.sec), label = el.dataset.label;
     if (kind === "preset") { timerSet(sec, label, home); }
-    else if (kind === "reset") { timerSet(timer.home === home ? timer.total : sec, label, home); }
+    else if (kind === "reset") { tone("stop"); timerSet(timer.home === home ? timer.total : sec, label, home); }
     else {
       if (timer.home !== home) timerSet(sec, label, home);
-      if (timer.running) timerPause(); else timerStart();
+      if (timer.running) { tone("pause"); timerPause(); } else { tone("start"); timerStart(); }
     }
     render(true);
   }
@@ -7489,8 +7522,8 @@
     // The same exam again, from its results: a built-in one from the bank, one of Claude's from the copy on screen.
     "x-retake": () => { const cx = ui.cx; if (!cx) return; const sk = skillOf(cx); examStart(XSPEC[sk].bank().find((e) => e.id === cx.exam.id) || cx.exam, sk); },
     "cox-ok": () => { const cx = ui.cx; if (cx && !cx.done && cx.skill === "co" && cx.play && cx.play.phase === "answer" && !cx.play.paused) coxNext(); },
-    "cox-pause": () => coxPause(),
-    "cox-resume": () => coxResume(),
+    "cox-pause": () => { tone("pause"); coxPause(); },
+    "cox-resume": () => { tone("start"); coxResume(); },
     "p-phase": (el) => { saveSettings({ phase: Number(el.dataset.n) }); toast(`Phase ${el.dataset.n}: ${T.PHASES[Number(el.dataset.n) - 1].name}.`); },
     "m-add": () => {
       const f = ui.form;
@@ -7662,7 +7695,7 @@
         return;
       }
       if (e.key === "Enter" && p.phase === "answer" && !p.paused) { e.preventDefault(); coxNext(); return; }
-      if (e.key === " " && !(t && t.closest && t.closest("button, a, label"))) { e.preventDefault(); if (p.paused) coxResume(); else coxPause(); return; }
+      if (e.key === " " && !(t && t.closest && t.closest("button, a, label"))) { e.preventDefault(); if (p.paused) { tone("start"); coxResume(); } else { tone("pause"); coxPause(); } return; }
     }
     if (t && t.closest && t.closest("input, textarea, select, button, a, [contenteditable]")) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;

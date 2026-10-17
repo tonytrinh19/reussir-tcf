@@ -175,8 +175,6 @@ function dataPhrases() {
   Object.values(T.CATEGORIES || {}).forEach((v) => add(typeof v === "string" ? v : v && v.label, "category"));
   // Shown as choices in À surveiller when there's nothing else to go on yet.
   (T.KNOWN_ERRORS || []).forEach((x) => add(x, "category"));
-  (T.EXAM || []).forEach((e) => { add(e.fmt, "exam"); add(e.note, "exam"); });
-  (T.AUTOFAIL || []).forEach((x) => add(x, "exam"));
   const TC = T.TCF_CANADA || {};
   ["ee", "eo"].forEach((k) => ((TC[k] || {}).criteria || []).forEach(([n, d]) => { add(n, "rubric"); add(d, "rubric"); }));
   add(TC.source, "rubric");
