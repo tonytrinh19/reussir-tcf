@@ -12,7 +12,9 @@
    cards and tilts tiles under a mouse, and runs the overview's section bar (a tap scrolls to the section; the pill
    follows the one you're reading). On the Fiches it slides the cards into place as you filter them, peels a note
    off the board and turns over a blank you tap in Cacher mode. On Vocabulaire it marks each grade (the "tcf:grade"
-   event) with a light halo around the button you pressed, or a small shake on Again. It only reads the page, moves it and scrolls it: it never writes data, calls
+   event) with a light halo around the button you pressed, or a small shake on Again. A stamp just earned (#award)
+   is pressed onto its scrap with a burst of leaves, and a clock at 0:00 ("tcf:ring") shakes like an alarm clock.
+   It only reads the page, moves it and scrolls it: it never writes data, calls
    the app or stores anything, and the site works the same without it. With reduced motion asked for, nothing
    moves. */
 (() => {
@@ -90,9 +92,11 @@
     cells.forEach((c, i) => add(c, [{ opacity: 0, scale: ".3" }, { opacity: 1, scale: "1" }], { duration: 320, delay: 40 + i * Math.min(12, 700 / cells.length), easing: POP }));
     el.querySelectorAll(".c-mark").forEach((m) => add(m, [{ left: "0%", opacity: 0 }, { opacity: 1, offset: 0.12 }, { left: m.style.left, opacity: 1 }], { duration: 1000, delay: 220 }));
     el.querySelectorAll(".c-ghost").forEach((g, i) => add(g, [{ opacity: 0, scale: ".4" }, { opacity: 1, scale: "1" }], { duration: 300, delay: 320 + i * 70 }));
-    // The radar: its shape grows out of the centre, then its dots pop, one skill after another.
-    el.querySelectorAll(".c-rfig").forEach((g) => add(g, [{ scale: "0", opacity: 0 }, { scale: "1.04", opacity: 1, offset: 0.7 }, { scale: "1", opacity: 1 }], { duration: 760, delay: 120 }));
-    el.querySelectorAll(".c-rdot").forEach((d, i) => add(d, [{ scale: "0", opacity: 0 }, { scale: "1.35", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 520 + i * 90, easing: POP }));
+    // The radar: the dashed target ring (NCLC 7) comes in first, then the shape grows out of the centre toward it,
+    // then its dots pop, one skill after another.
+    el.querySelectorAll(".c-rtarget").forEach((r) => add(r, [{ scale: ".55", opacity: 0 }, { scale: "1.03", opacity: 1, offset: 0.7 }, { scale: "1", opacity: 1 }], { duration: 520, delay: 40 }));
+    el.querySelectorAll(".c-rfig").forEach((g) => add(g, [{ scale: "0", opacity: 0 }, { scale: "1.04", opacity: 1, offset: 0.7 }, { scale: "1", opacity: 1 }], { duration: 760, delay: 320 }));
+    el.querySelectorAll(".c-rdot").forEach((d, i) => add(d, [{ scale: "0", opacity: 0 }, { scale: "1.35", opacity: 1, offset: 0.6 }, { scale: "1", opacity: 1 }], { duration: 420, delay: 720 + i * 90, easing: POP }));
     el.querySelectorAll(".c-rlab, .c-rtl").forEach((l, i) => add(l, [{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: 260 + i * 60 }));
     return out;
   }
@@ -461,6 +465,25 @@
       new MutationObserver(() => safe(() => { if (was && !el.hidden && !still()) el.animate(frames, { duration: ms, easing: POP }); was = el.hidden; })).observe(el, { attributes: true, attributeFilter: ["hidden"] });
     });
   }
+  // A stamp just earned (#award): the scrap drops in, the stamp is pressed into its margin, then maple leaves
+  // fly off it.
+  function watchAward() {
+    const el = document.getElementById("award");
+    if (!el || typeof MutationObserver !== "function") return;
+    let was = el.hidden;
+    new MutationObserver(() => safe(() => {
+      const now = el.hidden;
+      if (was && !now && !still()) {
+        el.animate([{ opacity: 0, translate: "0 -16px" }, { opacity: 1, translate: "0 0" }], { duration: 320, easing: POP });
+        const st = el.querySelector(".stamp"), txt = el.querySelector(".aw-txt"), rm = el.querySelector(".mascot");
+        if (st) st.animate([{ scale: "1.9", opacity: 0 }, { scale: ".9", opacity: 1, offset: 0.62 }, { scale: "1", opacity: 1 }], { duration: 400, delay: 110, easing: EASE, fill: "backwards" });
+        if (txt) txt.animate([{ opacity: 0, translate: "0 6px" }, { opacity: 1, translate: "0 0" }], { duration: 300, delay: 260, easing: EASE, fill: "backwards" });
+        if (rm) rm.animate([{ opacity: 0, translate: "0 10px" }, { opacity: 1, translate: "0 -3px", offset: 0.7 }, { opacity: 1, translate: "0 0" }], { duration: 420, delay: 380, easing: POP, fill: "backwards" });
+        if (st) setTimeout(() => safe(() => burst(st, { count: 28 })), 360);
+      }
+      was = now;
+    })).observe(el, { attributes: true, attributeFilter: ["hidden"] });
+  }
   // Switching between light and dark, by the button or at sunset and sunrise (theme.js), fades the colours over
   // a moment instead of snapping.
   // Switching « Pense en français » on or off: the page's text comes in again, gently.
@@ -548,6 +571,17 @@
     setTimeout(gone, 900);
   }
 
+  /* ---------- a clock at 0:00 ---------- */
+  // The "tcf:ring" event (app.js rings the bell): every clock on screen shakes like an alarm clock, the page's own
+  // more than the sidebar's card.
+  function ring() {
+    if (still()) return;
+    document.querySelectorAll("[data-timer]").forEach((el) => {
+      const card = el.closest(".mini-timer"), t = card || el, a = card ? 3 : 8;
+      t.animate([0, -a, a * 0.85, -a * 0.8, a * 0.6, -a * 0.4, a * 0.2, 0].map((d, i, all) => ({ rotate: `${d}deg`, offset: i / (all.length - 1) })), { duration: 900, easing: "ease-out" });
+    });
+  }
+
   /* ---------- the Fiches ---------- */
   // Filtering the cards: the ones that stay slide to their new places, the ones that go fold away where they
   // were (a copy fades out there, since the card itself is already hidden), and the ones that come back pop in.
@@ -600,8 +634,10 @@
   } });
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
   document.addEventListener("tcf:grade", (e) => safe(() => gradeFx(e.detail)));
+  document.addEventListener("tcf:ring", () => safe(ring));
   window.addEventListener("resize", () => safe(() => { placePill(true); spy(true); }));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => safe(() => { placePill(true); spy(true); }));
   safe(watchToast);
   safe(watchGrab);
+  safe(watchAward);
 })();

@@ -91,6 +91,7 @@ window.TCF.FR = {
 "A French grammar drill item.": "Un exercice de grammaire française.",
 "A Tâche 3 draft that compares both documents before the opinion, within 120–180 words, in one sitting": "Un brouillon de tâche 3 qui compare les deux documents avant de donner son avis, en 120 à 180 mots, rédigé d'une seule traite",
 "A baseline: no clock yet.": "Une référence de base : pas encore de chronomètre.",
+"A clean sheet, well done!": "Un sans-faute, bien joué !",
 "A day counts once every block in its plan is ticked. Sundays don't break a streak.": "Un jour est validé dès que chaque bloc de son plan est coché. Les dimanches ne cassent pas la série.",
 "A dedicated proofreading pass on every submission: read once, hunting only for missed elisions.": "Une phase de relecture dédiée à chaque production : lecture unique, à la recherche des seules élisions manquantes.",
 "A drill criterion counts the day's first round only, and needs the target on two days at least a week apart: what you still know a week later is what you'll know on test day. Comprehension counts your first try at each set.": "Le critère d'un exercice ne compte que le premier tour de la journée et requiert l'objectif atteint sur deux jours espacés d'au moins une semaine : ce que tu sais encore une semaine plus tard est ce que tu sauras le jour de l'examen. La compréhension compte ton premier essai sur chaque série.",
@@ -101,17 +102,20 @@ window.TCF.FR = {
 "A fresh prompt, 15 minutes. Then 3 minutes of proofreading: accents, agreement, elision, verb + preposition.": "Un nouveau sujet, 15 minutes. Puis 3 minutes de relecture : accents, accord, élision, verbe + préposition.",
 "A full untimed listening set.": "Une série d'écoute complète sans chronomètre.",
 "A full Écrite mock rated B2 on 2 of 3 tasks": "Un examen blanc d'écriture complet évalué B2 sur 2 tâches sur 3",
+"A little more work on these.": "Encore un peu de travail là-dessus.",
 "A new prompt would leave your draft answering the wrong question, so the draft would be discarded.": "Avec un nouveau sujet, ton brouillon ne répondrait plus à la bonne question et serait supprimé.",
 "A new segment, exposure only.": "Un nouveau segment, exposition seulement.",
 "A perfect session! Well done.": "Session parfaite ! Bien joué.",
 "A podcast in clear French for intermediate learners: psychology, history, culture. Start with the early episodes; the transcripts are on the site.": "Un balado en français clair pour les apprenants intermédiaires : psychologie, histoire, culture. Commence par les premiers épisodes ; les transcriptions sont sur le site.",
 "A quick coffee, and back to it?": "Un petit café et on s'y remet ?",
 "A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.": "Refaire un test est un bon entraînement, mais comme tu te souviendras de certaines réponses, ce score ne comptera pas pour ton estimation NCLC.",
+"A retake: it doesn't count toward your estimate.": "Un nouvel essai : il ne compte pas dans ton estimation.",
 "A round is one of your corrected texts with every mistake Claude found in it put back, exactly as you wrote it; the rest is the corrected version. Tap the words that look wrong and check, then pick the right version of each mistake you found, from four. A mistake is caught when it's found and fixed, and fixed once you've caught it twice in a row. Your EE drafts come first, the one with the most mistakes not fixed yet. Mistakes that aren't in a text (from your error log) come as « Hors texte » cards, and style tips, where what you wrote was already correct, are practised apart.": "Un tour consiste en l'un de tes textes corrigés dans lequel toutes les erreurs trouvées par Claude ont été remises telles que tu les as écrites ; le reste correspond à la version corrigée. Tape sur les mots qui te semblent incorrects et vérifie, puis choisis la bonne version de chaque erreur parmi quatre. Une erreur est validée quand elle est trouvée et corrigée, et réussie quand tu l'as trouvée deux fois de suite. Tes brouillons d'EE passent en premier, en commençant par celui qui a le plus d'erreurs non corrigées. Les erreurs qui ne proviennent pas d'un texte (issues de ton journal d'erreurs) apparaissent sous forme de cartes « Hors texte », et les conseils de style, là où ce que tu as écrit était déjà correct, sont travaillés à part.",
 "A score out of 20 on the TCF Canada scale, with the CEFR and NCLC levels it corresponds to. If the word count is outside the range, the text is off-topic or the instructions aren't followed, cap the score as the TCF Canada would.": "Un score sur 20 selon l'échelle du TCF Canada, avec les niveaux CECR et NCLC correspondants. Si le nombre de mots est hors limites, que le texte est hors sujet ou que les consignes ne sont pas respectées, le score est plafonné comme le ferait le TCF Canada.",
 "A short text like the ones the TCF asks you to write, with a few mistakes of the kinds you make. It's the proofreading pass to do on every draft before you hand it in.": "Un texte court semblable à ceux demandés au TCF, comportant quelques erreurs du type de celles que tu fais. C'est l'exercice de relecture à effectuer sur chaque brouillon avant de le rendre.",
 "A study day, on average": "Un jour d'étude, en moyenne",
 "A task skipped": "Tâche ignorée",
+"A tough one? Read it again with the answers.": "Difficile ? Relis avec les réponses.",
 "A word that keeps coming back is worth a card: add it in Vocabulaire, two or three a session at most.": "Un mot qui revient souvent mérite une carte : ajoute-le dans Vocabulaire, deux ou trois par session au maximum.",
 "A writing task can be marked": "Une tâche d'expression écrite peut être notée",
 "Accented letters": "Lettres accentuées",
@@ -144,6 +148,7 @@ window.TCF.FR = {
 "All exams": "Tous les examens",
 "All four skills": "Les quatre compétences",
 "All four skills back to back at the real length (~2 h 47), at the time of day you've booked.": "Toutes les quatre compétences à la suite à la durée réelle (~2 h 47), à l'heure de la journée que tu as réservée.",
+"All right, and inside the clock!": "C'est bon, et dans les temps !",
 "All three tasks on the real 60-minute clock.": "Les trois tâches dans le temps réel de 60 minutes.",
 "All topics": "Tous les thèmes",
 "All your history →": "Tout ton historique →",
@@ -210,9 +215,11 @@ window.TCF.FR = {
 "Back to the sheet": "Retour à la feuille",
 "Back to today": "Revenir à aujourd'hui",
 "Baseline on file: one CO sample and one CE sample": "Référence enregistrée : un échantillon de CO et un échantillon de CE",
+"Beau travail, ça rentre !": "Beau travail, ça rentre !",
 "Before you submit": "Avant de rendre",
 "Below NCLC 4": "En dessous du NCLC 4",
 "Best so far": "Meilleur score",
+"Bien entendu ! Tu as l'oreille.": "Bien entendu ! Tu as l'oreille.",
 "Boarding pass": "Carte d'embarquement",
 "Booking, ID requirements and test-centre details confirmed": "Réservation, exigences d'identité et détails du centre d'examen confirmés",
 "Both sides need some text.": "Les deux côtés ont besoin de texte.",
@@ -277,9 +284,11 @@ window.TCF.FR = {
 "Check the ranges: CO and CE go to 699, EE and EO to 20.": "Vérifie les échelles : la CO et la CE vont jusqu'à 699, l'EE et l'EO jusqu'à 20.",
 "Check with Claude": "Vérifier avec Claude",
 "Check your answers but see only your score, so you can try the set again without spoilers": "Vérifie tes réponses tout en ne voyant que ton score, pour pouvoir refaire la série sans voir les solutions",
+"Check-in": "",
 "Check: recall it": "Vérification : rappelle-toi",
 "Check: you said you knew it": "Vérification : tu as dit que tu le savais",
 "Checklist": "Checklist",
+"Chin up! Reread the rule, then retry the misses.": "Courage ! Relis la règle, puis réessaie les ratées.",
 "Choose what you'd enjoy in English too. Twenty minutes you look forward to beat an hour you put off.": "Choisis ce qui te ferait plaisir en anglais aussi. Vingt minutes qui te font envie valent mieux qu'une heure repoussée.",
 "Claude couldn't answer. Try again.": "Claude n'a pas pu répondre. Réessaye.",
 "Claude declined that request. Try rephrasing it.": "Claude a refusé cette demande. Essaye de la reformuler.",
@@ -443,6 +452,7 @@ window.TCF.FR = {
 "English": "Anglais",
 "English side": "Côté anglais",
 "Enregistrement": "Enregistrement",
+"Enregistrement · Check-in": "Enregistrement",
 "Enter": "Entrée",
 "Enter a score and a total, with the score no higher than the total.": "Entre un score et un total, le score ne pouvant pas dépasser le total.",
 "Enter at least one score.": "Entre au moins un score.",
@@ -505,6 +515,7 @@ window.TCF.FR = {
 "Find the mistakes, and the 3-minute proofreading pass": "Relecture et exercice de relecture de 3 minutes",
 "Finish a writing task, a listening or reading set, or a drill round, and your progress shows here.": "Termine une tâche d'expression écrite, une série d'écoute ou de lecture, ou un exercice, et ta progression s'affichera ici.",
 "Finish or quit the exam in progress first.": "Termine ou quitte d'abord l'examen en cours.",
+"Finish today's plan to start a streak": "Termine ta séance du jour pour lancer une série",
 "Finish without correction": "Terminer sans correction",
 "Finished": "Terminé",
 "Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.": "Les tours d'exercices terminés, les séries de lecture et d'écoute, les examens blancs et les tâches d'expression écrite s'accumulent ici.",
@@ -542,6 +553,7 @@ window.TCF.FR = {
 "Full timed CO mock": "Examen blanc de CO chronométré complet",
 "Full timed dress rehearsals. Find your single weakest skill and spend most of the time there.": "Examens blancs complets chronométrés. Trouve ton point faible principal et concentre tes efforts là.",
 "Gate": "Porte",
+"Getting there. A look at the corrections?": "On progresse. Un coup d'œil aux corrections ?",
 "Give the sheet a title.": "Donne un titre à la fiche.",
 "Go to the exam": "Aller à l'examen",
 "Good": "Bien",
@@ -552,6 +564,7 @@ window.TCF.FR = {
 "Grammar drills": "Exercices de grammaire",
 "Grammar: one round, then Retry the misses, and two rounds at most in a sitting. Only the day's first round counts toward a criterion, and each topic comes back a week later. Easy listening and reading go outside your study time. Once this phase, take the CO Examen blanc on a Saturday instead of the timed sets, as your listening baseline.": "Grammaire : un tour, puis Reprendre les erreurs, et deux tours au maximum par session. Seul le premier tour du jour compte pour un critère, et chaque point revient une semaine plus tard. L'écoute et la lecture faciles se font en dehors de ton temps d'étude. Une fois cette phase passée, passe l'examen blanc de CO un samedi à la place des séries chronométrées, pour établir ton niveau d'écoute de référence.",
 "Greeting": "Salutation",
+"Guess the meaning, then turn it over.": "Devine le sens, puis retourne la carte.",
 "Gérondif + participles": "Gérondif + participes",
 "Gérondif / participles": "Gérondif / participes",
 "Hand in": "Soumettre",
@@ -602,6 +615,7 @@ window.TCF.FR = {
 "It comes up in your reviews from tomorrow.": "Il apparaîtra dans tes révisions à partir de demain.",
 "It has been added to Progress → Scores and NCLC.": "Il a été ajouté à Progrès → Scores et NCLC.",
 "It takes every topic of this phase and the earlier ones that you've drilled (Phase 1's four until you have), so what you learned weeks ago keeps coming back. The topics you missed most in the last two weeks come first, then the ones practised longest ago. The difficulty follows your phase: B1 in Phase 1, up to B1+ in Phase 2, B1+ and B2 from Phase 3. The results tell you which topic is still weakest.": "Il reprend tous les thèmes de cette phase et des précédentes que tu as pratiqués (les quatre de la phase 1 dès que tu les as vus), pour que ce que tu as appris il y a des semaines revienne régulièrement. Les thèmes que tu as le plus ratés ces deux dernières semaines arrivent en premier, puis ceux pratiqués il y a le plus longtemps. La difficulté suit ta phase : B1 en phase 1, jusqu'à B1+ en phase 2, B1+ et B2 à partir de la phase 3. Les résultats t'indiquent quel thème reste le plus fragile.",
+"It'll come. We'll pick it up tomorrow, it'll sink in.": "Ça viendra. On reprend demain, ça va rentrer.",
 "It's already in": "C'est déjà dans",
 "Item format note:": "Note sur le format de l'élément :",
 "Jeunes et maîtrisées · young and mastered": "Jeunes et maîtrisées",
@@ -642,6 +656,7 @@ window.TCF.FR = {
 "Light mode": "Mode clair",
 "Linked page": "Page liée",
 "Liste": "Liste",
+"Listen again with the transcript, it helps.": "Réécoute avec la transcription, ça aide.",
 "Listen closely: the answers come in the same order as the questions.": "Écoute bien : les réponses suivent le même ordre que les questions.",
 "Listening": "Écoute",
 "Listening and reading (CO": "Compréhension orale et écrite (CO",
@@ -717,6 +732,8 @@ window.TCF.FR = {
 "NCLC 6": "NCLC 6",
 "NCLC 7": "NCLC 7",
 "NCLC 7 ATTEINT ★": "NCLC 7 ATTEINT ★",
+"NCLC 7 atteint ! Quel examen !": "NCLC 7 atteint ! Quel examen !",
+"NCLC 7 reached! What an exam!": "NCLC 7 atteint ! Quel examen !",
 "NCLC 7, your target": "NCLC 7, ton objectif",
 "Needs a corrected Tâche 3 that passes both structure checks and the word count": "Nécessite une Tâche 3 corrigée qui valide les critères de structure et le nombre de mots",
 "New": "Nouveau",
@@ -727,6 +744,7 @@ window.TCF.FR = {
 "New prompt from Claude": "Nouvelle consigne de Claude",
 "New round": "Nouveau tour",
 "New set from Claude": "Nouvelle série de Claude",
+"New stamp": "Nouveau tampon",
 "New words: immigration & admin": "Nouveaux mots : immigration et administration",
 "Newest first": "Les plus récents d'abord",
 "Next": "Suivant",
@@ -736,6 +754,7 @@ window.TCF.FR = {
 "Next →": "Suivant →",
 "Nice work! The ones you missed come back soon.": "Beau travail ! Celles que tu as ratées reviendront bientôt.",
 "Nice work! Your schedule stays as it was.": "Beau travail ! Ton planning reste inchangé.",
+"Nice work, it's sinking in!": "Beau travail, ça rentre !",
 "No attempts yet": "Aucun essai pour l'instant",
 "No card missed twice yet.": "Aucune carte ratée deux fois pour l'instant.",
 "No corrected text this week yet": "Pas encore de texte corrigé cette semaine",
@@ -774,8 +793,13 @@ window.TCF.FR = {
 "None in the last 3 weeks": "Aucun ces 3 dernières semaines",
 "None picked for this week yet": "Rien de sélectionné pour cette semaine",
 "Not a real mistake? Leave it out of Your mistakes": "Ce n'est pas une vraie erreur ? Retire-la de Mes erreurs",
+"Not a single mistake! Hats off.": "Pas une seule erreur ! Chapeau.",
+"Not bad! Go over the misses below.": "Pas mal ! Revois les erreurs ci-dessous.",
+"Not bad! The explanations show where the trap was.": "Pas mal ! Les explications montrent où était le piège.",
 "Not corrected": "Non corrigé",
+"Not met yet": "Pas encore atteint",
 "Not now": "Pas maintenant",
+"Not one mistake got past you. Hats off!": "Aucune faute ne t'a échappé. Chapeau !",
 "Not practised yet": "Pas encore pratiqué",
 "Not prepared yet": "Pas encore préparé",
 "Not quite": "Pas tout à fait",
@@ -805,12 +829,15 @@ window.TCF.FR = {
 "Nothing yet.": "Rien pour l'instant.",
 "Nothing yet. When Claude corrects a writing task or a production check, or you log an error in Progrès, the mistakes come here.": "Rien pour l'instant. Quand Claude corrige une tâche d'expression ou une vérification de production, ou que tu notes une erreur dans Progrès, les erreurs s'affichent ici.",
 "Nothing yet. Your first set becomes your baseline.": "Rien pour l'instant. Ta première série sert de référence.",
+"Nouveau tampon !": "Nouveau tampon !",
 "Nouvelle fiche": "Nouvelle fiche",
 "Now pick the right version of each one.": "Choisis maintenant la bonne version de chacune.",
 "Objectif NCLC 7": "Objectif NCLC 7",
+"Objectif atteint ! Bravo.": "Objectif atteint ! Bravo.",
 "Off topic": "Hors sujet",
 "Official practice": "Pratique officielle",
 "Official practice and scores from elsewhere": "Pratique officielle et résultats externes",
+"On progresse. Un coup d'œil aux corrections ?": "On progresse. Un coup d'œil aux corrections ?",
 "On topic": "Dans le sujet",
 "On your commute, while you cook, before bed. It's the input half of the plan, and it's how vocabulary and speed grow.": "Dans les transports, en cuisinant, avant de dormir. C'est la moitié réceptive du plan, et c'est ainsi que ton vocabulaire et ta vitesse progressent.",
 "Once Claude corrects a text": "Une fois que Claude a corrigé un texte",
@@ -820,6 +847,7 @@ window.TCF.FR = {
 "One CE set (four short documents, one question each), no timer.": "Une série CE (quatre courts documents, une question chacun), sans chronomètre.",
 "One full timed mock of whichever skill is currently weakest. Log the score in Progrès → Scores.": "Un examen blanc complet chronométré de la compétence qui est actuellement la plus faible. Note le score dans Progrès → Scores.",
 "One line worth remembering. ↵ to pin it.": "Une ligne à retenir. ↵ pour l'épingler.",
+"One more practice exam: that's how you improve.": "Un examen blanc de plus : c'est comme ça qu'on progresse.",
 "One paragraph correctly using at least 2 different concession structures.": "Un paragraphe utilisant correctement au moins 2 structures de concession différentes.",
 "One round of the mistakes from your own corrected writing.": "Un tour sur les erreurs de tes propres écrits corrigés.",
 "One round, then Retry the misses.": "Un tour, puis Reprendre les erreurs.",
@@ -866,6 +894,8 @@ window.TCF.FR = {
 "Pause": "Pause",
 "Paused. Pick it up from this page, from Today or from Progrès → Historique.": "En pause. Reprends depuis cette page, depuis Aujourd'hui ou depuis Progrès → Historique.",
 "Per 100 words": "Pour 100 mots",
+"Perfect! Nothing got past you.": "Parfait ! Rien ne t'a échappé.",
+"Perfect! Nothing to correct.": "Parfait ! Rien à corriger.",
 "Phase": "Phase",
 "Phase 1 exit criteria met": "Critères de sortie de la phase 1 atteints",
 "Pick something you can follow without pausing: you know nearly every word. If you're lost every few sentences, go easier, not harder.": "Choisis un contenu que tu peux suivre sans t'arrêter : tu connais presque tous les mots. Si tu es perdu toutes les quelques phrases, choisis plus facile, pas plus difficile.",
@@ -926,6 +956,7 @@ window.TCF.FR = {
 "Pronominal verbs": "Verbes pronominaux",
 "Proofread Monday's draft hunting only for missed elisions, then a 10-item embedded-question drill.": "Relis le brouillon de lundi en traquant uniquement les élisions oubliées, puis fais un exercice de 10 questions enchâssées.",
 "Proofread a short text: tap the mistakes, then correct them.": "Relis un texte court : touche les erreurs, puis corrige-les.",
+"Proofreading takes practice. Keep at it, it comes!": "Relire, ça s'apprend. On s'entraîne, ça vient !",
 "Put the sentence above into the passé composé: type the missing words.": "Mets la phrase ci-dessus au passé composé : écris les mots manquants.",
 "Put the verb in brackets in the conditionnel.": "Mets le verbe entre parenthèses au conditionnel.",
 "Put the verb in brackets in the conditionnel: présent or passé, as the sentence needs.": "Mets le verbe entre parenthèses au conditionnel présent ou passé, selon le sens de la phrase.",
@@ -969,6 +1000,7 @@ window.TCF.FR = {
 "Register shift: rewrite blunt requests as polite conditionnel ones.": "Changement de registre : reformule les demandes directes en propositions polies au conditionnel.",
 "Relative pronouns": "Pronoms relatifs",
 "Relecture": "Relecture",
+"Relire, ça s'apprend. On s'entraîne, ça vient !": "Relire, ça s'apprend. On s'entraîne, ça vient !",
 "Remove": "Supprimer",
 "Remove this note": "Supprimer cette note",
 "Replaced by the Examen blanc": "Remplacé par l'examen blanc",
@@ -1020,6 +1052,7 @@ window.TCF.FR = {
 "Rewrite this paragraph with a different cause or consequence connector each time, no repeats, same meaning:": "Réécris ce paragraphe avec un connecteur de cause ou de conséquence différent à chaque fois, sans répétition, en gardant le même sens :",
 "Rewrite with pronouns": "Réécrire avec des pronoms",
 "Right once": "Juste une fois",
+"Right, but a little slow: mind the clock.": "C'est bon, mais un peu lent : attention au chrono.",
 "Rouge érable from day 30: the leaf stays red.": "Rouge érable à partir du jour 30 : la feuille reste rouge.",
 "Rule": "Règle",
 "Run the same week shape until the Phase 1 exit criteria are met, with fresh drill content each week.": "Maintiens le même rythme hebdomadaire jusqu'à l'atteinte des critères de sortie de la phase 1, avec de nouveaux exercices chaque semaine.",
@@ -1032,9 +1065,11 @@ window.TCF.FR = {
 "Rémy the rat, waving hello": "Rémy le rat qui faitcoucou",
 "Rémy the rat, with glasses and a red pen": "Rémy le rat avec des lunettes et un stylo rouge",
 "Répartition · the split": "Répartition",
+"Réécoute avec la transcription, ça aide.": "Réécoute avec la transcription, ça aide.",
 "SCORE BANDS:": "PALIERS DE SCORE :",
 "Same-day review": "Révision le jour même",
 "Sans faute !": "Sans faute !",
+"Sans faute ! Chapeau.": "Sans faute ! Chapeau.",
 "Saturday": "Samedi",
 "Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.": "Point final du samedi : pour chacun, une phrase nommant précisément ce qui ne va pas et la correction. Si tu ne peux pas l'écrire en une phrase, cet élément demande une semaine de plus.",
 "Save": "Enregistrer",
@@ -1089,6 +1124,7 @@ window.TCF.FR = {
 "Since you started": "Depuis tes débuts",
 "Six batches, from A1 to C2. It usually takes one to three minutes, and you can practise on another page meanwhile.": "Six lots, de A1 à C2. Cela prend généralement une à trois minutes, et tu peux t'entraîner sur une autre page entre-temps.",
 "Skill": "Compétence",
+"So close to NCLC 7! One more push.": "Tout près du NCLC 7 ! Encore un effort.",
 "Something went wrong drawing this page:": "Une erreur est survenue lors de l'affichage de cette page :",
 "Sound": "Son",
 "Source": "Source",
@@ -1160,6 +1196,7 @@ window.TCF.FR = {
 "Target level B1: short, clear sentences that isolate the structure, but not trivial.": "Niveau cible B1 : phrases courtes et claires qui isolent la structure, sans pour autant être simplistes.",
 "Target level B2: longer sentences with subordinate clauses, compound tenses and TCF-register vocabulary (work, housing, immigration, environment, public debate). Include the traps a B2 grader looks for.": "Niveau cible B2 : phrases plus longues avec propositions subordonnées, temps composés et vocabulaire de registre TCF (travail, logement, immigration, environnement, débat public). Intègre les pièges qu'un évaluateur B2 recherche.",
 "Target met": "Cible atteinte",
+"Target met! Well done.": "Objectif atteint ! Bravo.",
 "Targeted grammar drill": "Exercice de grammaire ciblé",
 "Task": "Tâche",
 "Task structure": "Structure de la tâche",
@@ -1232,6 +1269,7 @@ window.TCF.FR = {
 "This usually takes 10–40 seconds. It stays here if you switch back to this theme later.": "Cela prend généralement entre 10 et 40 secondes. Le texte restera ici si tu reviens sur ce thème plus tard.",
 "This week": "Cette semaine",
 "This week's errors": "Erreurs de la semaine",
+"Those mistakes are fixed now!": "Ces fautes sont corrigées maintenant !",
 "Three phrases from my text rewritten at B2 level, and the three things I should work on first.": "Trois phrases de mon texte réécrites au niveau B2, et les trois points sur lesquels je dois travailler en premier.",
 "Three tasks, 60 minutes.": "Trois tâches, 60 minutes.",
 "Thursday": "Jeudi",
@@ -1265,8 +1303,13 @@ window.TCF.FR = {
 "Transcription": "Transcription",
 "Try": "Essayer",
 "Try this set again": "Refaire cette série",
+"Tu as atteint l'objectif. Bien joué !": "Tu as atteint l'objectif. Bien joué !",
 "Tuesday": "Mardi",
 "Turn B2 ability into exam-day reliability. No new grammar: fix whatever the mocks surface.": "Transforme tes compétences B2 en réflexes le jour J. Pas de nouvelle grammaire : corrige tout ce que les examens blancs révèlent.",
+"Turn back": "Retourner",
+"Turn over": "Retourner",
+"Turn the bell off": "Désactiver la sonnerie",
+"Turn the bell on": "Activer la sonnerie",
 "Turn the grading tones off": "Désactiver les sons de notation",
 "Turn the grading tones on": "Activer les sons de notation",
 "Turn the question above into an indirect question: type the missing words.": "Transforme la question ci-dessus en question indirecte : écris les mots manquants.",
@@ -1283,6 +1326,7 @@ window.TCF.FR = {
 "Tâche 2: relevant, well-formed and varied questions suited to the situation, reacting to the answers": "Tâche 2 : questions pertinentes, bien formées et variées adaptées à la situation, en réaction aux réponses",
 "Tâche 3 on the clock": "Tâche 3 minutée",
 "Tâche 3: skipped the comparison of the two documents twice; word count once over 180 and once under 120": "Tâche 3 : comparaison des deux documents oubliée deux fois ; longueur une fois au-dessus de 180 et une fois sous 120 mots",
+"Un examen blanc de plus : c'est comme ça qu'on progresse.": "Un examen blanc de plus : c'est comme ça qu'on progresse.",
 "Un petit café, et on s'y remet ?": "Un petit café, et on s'y remet ?",
 "Under the line is exam pace or quicker": "En dessous de la ligne, c'est le rythme de l'examen ou plus rapide.",
 "Unfinished": "Inachevé",
@@ -1292,10 +1336,12 @@ window.TCF.FR = {
 "Use headphones if you can. If you're interrupted, Pause stops everything; the real test doesn't stop.": "Utilise un casque si possible. Si tu es interrompu, Pause met tout en pause ; le vrai test ne s'arrête pas.",
 "Valider": "Valider",
 "Vary connectors correctly across a 150-word paragraph with no repeats.": "Varier correctement les connecteurs dans un paragraphe de 150 mots, sans répétition.",
+"Very good! Nearly all right.": "Très bien ! Presque tout bon.",
 "Vocabulaire": "Vocabulaire",
 "Vocabulary cards": "Cartes de vocabulaire",
 "Vocabulary gap": "Lacune de vocabulaire",
 "Voice: the browser's default.": "Voix : celle par défaut du navigateur.",
+"Voir mes tampons": "Voir mes tampons",
 "Vol TCF-7": "Vol TCF-7",
 "Vue d'ensemble": "Vue d'ensemble",
 "Watch these two": "À surveiller",
@@ -1311,6 +1357,8 @@ window.TCF.FR = {
 "Weeks 1–3": "Semaines 1 à 3",
 "Weeks 4–8": "Semaines 4 à 8",
 "Weeks 9–14": "Semaines 9 à 14",
+"Well heard! You've got the ear for it.": "Bien écouté ! Tu as l'oreille fine.",
+"Well read! The traps didn't catch you.": "Bien lu ! Tu as évité tous les pièges.",
 "What goes wrong, and the fix, in one sentence": "Ce qui cloche et la correction, en une phrase",
 "What happened, 2–3 sentences": "Ce qui s'est passé, 2–3 phrases",
 "What is the conditionnel doing in this sentence? Pick its use.": "Quelle est la fonction du conditionnel dans cette phrase ? Choisis son emploi.",
@@ -1360,6 +1408,7 @@ window.TCF.FR = {
 "You understood nearly everything.": "Tu as presque tout compris.",
 "You wrote:": "Tu as écrit :",
 "You'd taken this exam before, so you'll have remembered some answers: this score is kept as a retake and doesn't count toward your NCLC estimate.": "Tu avais déjà passé cet examen, donc tu te souvenais de certaines réponses : ce score est conservé comme une reprise et ne compte pas pour ton estimation NCLC.",
+"You've hit the target. Nice work!": "Dans le mille ! Beau travail !",
 "Young": "Récente",
 "Young · a gap under 21 days": "Récente · un écart de moins de 21 jours",
 "Your answer": "Ta réponse",
@@ -1580,11 +1629,13 @@ window.TCF.FR = {
 "not started": "non commencé",
 "nothing logged yet": "rien enregistré pour l'instant",
 "nothing ticked": "rien de coché",
+"nouveau": "nouveau",
 "nouvelle": "nouvelle",
 "nouvelle · new card": "nouvelle · carte neuve",
 "now": "maintenant",
 "objectif 90 %": "objectif 90 %",
 "of 20 reviews": "sur 20 révisions",
+"of 3 milestones passed": "sur 3 étapes franchies",
 "of about": "sur environ",
 "of your mistakes, one card each.": "de tes erreurs, une carte chacune.",
 "of your texts to prepare first.": "de tes textes à préparer en priorité.",
@@ -1753,6 +1804,7 @@ window.TCF.FR = {
 "· your target": "· ton objectif",
 "À revoir cette semaine · due this week:": "À revoir cette semaine :",
 "À revoir · to look at again": "À revoir",
+"Ça viendra. On reprend demain, ça va rentrer.": "Ça viendra. On reprend demain, ça va rentrer.",
 "Écoute · listening sets": "CO · séries d'écoute",
 "à revoir aujourd'hui · due today": "à revoir aujourd'hui",
 "“A1 non atteint”": "« A1 non atteint »",
@@ -2287,6 +2339,10 @@ window.TCF.FR = {
 "{0} erreurs à trouver, puis à corriger."
 ],
 [
+"{0} more to equal it.",
+"Encore {0} pour l'égaler."
+],
+[
 "{0} most recent",
 "{0} plus récents"
 ],
@@ -2339,6 +2395,10 @@ window.TCF.FR = {
 "{0} sur {1} faits ↓"
 ],
 [
+"{0} of {1} exit criteria met",
+"{0} sur {1} critères de sortie remplis"
+],
+[
 "{0} of {1} exit criteria met. {2}",
 "{0} sur {1} critères de sortie validés. {2}"
 ],
@@ -2383,8 +2443,16 @@ window.TCF.FR = {
 "{0} sur {1} textes pas encore faits"
 ],
 [
+"{0} of {1}. The others are underlined in red.",
+"{0} sur {1}. Les autres sont soulignées en rouge."
+],
+[
 "{0} of 20 reviews",
 "{0} sur 20 révisions"
+],
+[
+"{0} of 3 milestones passed",
+"{0} sur 3 étapes franchies"
 ],
 [
 "{0} of about {1} planned",
@@ -2741,6 +2809,14 @@ window.TCF.FR = {
 [
 "{0}Nouvelle fiche",
 "{0}Nouvelle fiche"
+],
+[
+"{0}Record: {1} days",
+"{0}Record : {1} jours"
+],
+[
+"{0}Record: {1} days · {2} more to equal it.",
+"{0}Record : {1} jours · encore {2} pour l'égaler."
 ],
 [
 "{0}Réduire · close",
@@ -3191,6 +3267,10 @@ window.TCF.FR = {
 "à revoir, puis {0} nouvelles · {1}."
 ],
 [
+"Eagle eye! {0} of {1}, found and fixed.",
+"Œil de lynx ! {0} sur {1}, trouvées et corrigées."
+],
+[
 "error{0} in your last 2 submissions",
 "erreur{0} dans tes 2 dernières soumissions"
 ],
@@ -3587,6 +3667,10 @@ window.TCF.FR = {
 "sur {0} jours jusqu'à présent : le premier tour du jour à {1}, à une semaine d'intervalle"
 ],
 [
+"of {0} exit criteria met",
+"sur {0} critères de sortie remplis"
+],
+[
 "of {0} exit criteria met.",
 "sur {0} critères de sortie validés."
 ],
@@ -3621,6 +3705,10 @@ window.TCF.FR = {
 [
 "of {0} texts not done yet",
 "sur {0} textes pas encore faits"
+],
+[
+"of {0}. The others are underlined in red.",
+"sur {0}. Les autres sont soulignées en rouge."
 ],
 [
 "of about {0}",
@@ -3805,6 +3893,14 @@ window.TCF.FR = {
 [
 "Ready: {0}.",
 "Prêt : {0}."
+],
+[
+"Record run: {0} days in a row!",
+"Record en cours : {0} jours d'affilée !"
+],
+[
+"Record: {0} days · {1} more to equal it.",
+"Record : {0} jours · encore {1} pour l'égaler."
 ],
 [
 "regardless of grammar if: {0}. About 2 h 47 in total.",
