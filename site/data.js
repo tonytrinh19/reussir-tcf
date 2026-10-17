@@ -644,15 +644,6 @@ window.TCF = (function () {
     { nclc: "4", n: 4, cefr: "A2", co: 331, ce: 342, ee: 4, eo: 4, coR: "331–368", ceR: "342–374", eR: "4–5" },
   ];
 
-  const EXAM = [
-    { code: "CO", name: "Compréhension orale", fmt: "39 questions · 35 min", note: "Multiple choice. Each recording plays once." },
-    { code: "CE", name: "Compréhension écrite", fmt: "39 questions · 60 min", note: "Multiple choice, from short notices to long articles." },
-    { code: "EE", name: "Expression écrite", fmt: "3 tâches · 60 min", note: "T1 60–120 words · T2 120–150 · T3 120–180, comparing two documents." },
-    { code: "EO", name: "Expression orale", fmt: "3 tâches · 12 min", note: "T1 2 min, no prep · T2 5 min 30 incl. 2 min prep · T3 4 min 30, no prep." },
-  ];
-
-  const AUTOFAIL = ["Word count not respected", "Illegible", "Off-topic", "A task skipped"];
-
   /* Phase exit criteria (Document 1). auto = rule the app can check itself. A drill rule counts the day's first
      round of the set only, on two days at least a week apart (coldMet in app.js), and comp counts your first try
      at each set. Speaking is practised off the site, so its checks are ticked by hand. */
@@ -886,10 +877,6 @@ window.TCF = (function () {
       note: "An estimate from the points per level that TCF prep sites use. France Éducation International scores the real test with item response theory and doesn't publish its method.",
     },
   };
-  EXAM[0].note = "Multiple choice, four options, one correct. Each recording is heard once, and questions get harder as you go (A1 → C2). Some items use Canadian accents or contexts.";
-  EXAM[1].note = "Multiple choice, four options, from notices, ads and letters up to opinion articles and long, complex texts, in rising difficulty.";
-  EXAM[2].note = "T1 message, 60–120 words · T2 article or letter with opinions, 120–150 · T3 compare two ~90-word documents (part 1, 40–60 words), then take a position (part 2, 80–120). No dictionary, and only the final text is marked.";
-  EXAM[3].note = "T1 entretien dirigé, 2 min, no prep · T2 interaction, 5 min 30 including 2 min prep (short notes allowed) · T3 point of view, 4 min 30, no prep. You can ask the examiner to repeat.";
 
   /* Tâche 3 follows the official two-part split, and the built-in documents are lengthened toward the official ~90 words. */
   WRITING.t3.expected = "Two short documents (about 90 words each) give differing views on a social issue. Write a text that first compares both viewpoints (part 1), then takes your position (part 2).";
@@ -1043,5 +1030,5 @@ window.TCF = (function () {
     cards: EXPRESSIONS.map((x) => [x.fr, x.en + (x.reg ? ` (${REG_EN[x.reg]})` : ""), "", [x.lit && `Literally “${x.lit}”.`, x.note].filter(Boolean).join(" ")]) });
   [1, 2, 3].forEach((i) => PHASES[i].vocab.push("expressions"));
 
-  return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, COMP, NCLC, EXAM, AUTOFAIL, CRITERIA, TCF_CANADA, EXPRESSIONS };
+  return { SKILLS, PHASES, PLAN, CATEGORIES, KNOWN_ERRORS, TOPICS, LOW_PRIORITY, VOCAB, WRITING, COMP, NCLC, CRITERIA, TCF_CANADA, EXPRESSIONS };
 })();

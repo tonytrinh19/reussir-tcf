@@ -535,15 +535,6 @@
   ]
  },
  {
-  "id": "799d9cd7a73a",
-  "text": "“A1 non atteint”",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
-  ]
- },
- {
   "id": "4088048fe587",
   "text": "“Yes, but” paragraph: state a position, concede the opposite with bien que / alors que, then pivot back to your view.",
   "kind": "exact",
@@ -5246,6 +5237,33 @@
   ]
  },
  {
+  "id": "528ba6de253e",
+  "text": "300 cards reviewed",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "300 cards reviewed"
+  ]
+ },
+ {
+  "id": "bf05daf157f8",
+  "text": "300 cartes",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "300 cartes"
+  ]
+ },
+ {
+  "id": "2a443d26636b",
+  "text": "300 CARTES ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "300 CARTES ★"
+  ]
+ },
+ {
   "id": "a12a2174c266",
   "text": "35 min",
   "kind": "exact",
@@ -5271,20 +5289,6 @@
   "ctx": [
    "39 questions"
   ]
- },
- {
-  "id": "ca0f2a29a52e",
-  "text": "39 questions · 35 min",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "741a5aa79aaf",
-  "text": "39 questions · 60 min",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
  },
  {
   "id": "095473fdf3fe",
@@ -5342,13 +5346,6 @@
   "ctx": [
    "5 seconds forward"
   ]
- },
- {
-  "id": "b4bfffeb619b",
-  "text": "60 min",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
  },
  {
   "id": "cb0139aa29d4",
@@ -6004,6 +6001,15 @@
   "ctx": []
  },
  {
+  "id": "2cd033acb80a",
+  "text": "A grammar topic mastered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A grammar topic mastered"
+  ]
+ },
+ {
   "id": "2420bb8403ca",
   "text": "A habit (used to, le dimanche): the imparfait.",
   "kind": "exact",
@@ -6081,6 +6087,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "7d46b0bd783f",
+  "text": "A listening set without a miss",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A listening set without a miss"
+  ]
  },
  {
   "id": "519675ffcced",
@@ -6487,6 +6502,15 @@
   ]
  },
  {
+  "id": "c80322eb72e9",
+  "text": "A reading set at exam pace, 3 of 4 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A reading set at exam pace, 3 of 4 or better"
+  ]
+ },
+ {
   "id": "2443c1c1f472",
   "text": "a red-pen “Attention” box",
   "kind": "exact",
@@ -6785,13 +6809,6 @@
   ]
  },
  {
-  "id": "a5a01a429e12",
-  "text": "A task skipped",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
   "id": "58ee9cfdd9f7",
   "text": "a teacher's stamp for each milestone",
   "kind": "exact",
@@ -6886,15 +6903,6 @@
   "where": "app",
   "ctx": [
    "A word that keeps coming back is worth a card: add it in Vocabulaire, two or three a session at most."
-  ]
- },
- {
-  "id": "8e83f8f8e677",
-  "text": "A writing task can be marked",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
   ]
  },
  {
@@ -15445,6 +15453,15 @@
   "ctx": []
  },
  {
+  "id": "150b1495257c",
+  "text": "Fourteen days in a row",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Fourteen days in a row"
+  ]
+ },
+ {
   "id": "6d2830b1e76d",
   "text": "FR",
   "kind": "exact",
@@ -15596,15 +15613,6 @@
   "where": "app",
   "ctx": [
    "From your recurring errors"
-  ]
- },
- {
-  "id": "c8494d7cca3e",
-  "text": "From your roadmap notes: for sessions from September 1, 2026, re-marking requests for Expression écrite and orale aren't being accepted for about a year. Treat every mock as the one real attempt.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
   ]
  },
  {
@@ -16694,15 +16702,6 @@
   ]
  },
  {
-  "id": "cfbd57c2e016",
-  "text": "How speaking is graded",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
-  ]
- },
- {
   "id": "14360bd3be4b",
   "text": "How the criteria count",
   "kind": "exact",
@@ -16761,15 +16760,6 @@
   "where": "app",
   "ctx": [
    "Format · how to write a sheet"
-  ]
- },
- {
-  "id": "7ab941832e09",
-  "text": "How writing is graded",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
   ]
  },
  {
@@ -16979,13 +16969,6 @@
   "text": "Il y a trois jours → trois jours plus tôt (or auparavant).",
   "kind": "exact",
   "where": "content:drill",
-  "ctx": []
- },
- {
-  "id": "b3719f2b7d7c",
-  "text": "Illegible",
-  "kind": "exact",
-  "where": "exam",
   "ctx": []
  },
  {
@@ -20382,20 +20365,6 @@
   ]
  },
  {
-  "id": "cf18ccccbfbd",
-  "text": "Multiple choice, four options, from notices, ads and letters up to opinion articles and long, complex texts, in rising difficulty.",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "b06df21df6a0",
-  "text": "Multiple choice, four options, one correct. Each recording is heard once, and questions get harder as you go (A1 → C2). Some items use Canadian accents or contexts.",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
   "id": "81e0f4cda560",
   "text": "Mute h: d'habiter.",
   "kind": "exact",
@@ -20555,6 +20524,33 @@
   "where": "app",
   "ctx": [
    "NCLC 7 ATTEINT ★"
+  ]
+ },
+ {
+  "id": "ce3cc0e14a56",
+  "text": "NCLC 7 in all four skills, on one test",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "NCLC 7 in all four skills, on one test"
+  ]
+ },
+ {
+  "id": "d66a0a1c90a0",
+  "text": "NCLC 7 partout",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "NCLC 7 partout"
+  ]
+ },
+ {
+  "id": "c9bac6f6291d",
+  "text": "NCLC 7 PARTOUT ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "NCLC 7 PARTOUT ★"
   ]
  },
  {
@@ -21433,6 +21429,24 @@
   "where": "app",
   "ctx": [
    "Nice work! Your schedule stays as it was."
+  ]
+ },
+ {
+  "id": "507b4e3d3aec",
+  "text": "Niveau B2",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Niveau B2"
+  ]
+ },
+ {
+  "id": "2fb980df30a9",
+  "text": "NIVEAU B2 ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "NIVEAU B2 ★"
   ]
  },
  {
@@ -23620,6 +23634,24 @@
   "where": "app",
   "ctx": [
    "Ordre"
+  ]
+ },
+ {
+  "id": "c9b29add4677",
+  "text": "Oreille fine",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Oreille fine"
+  ]
+ },
+ {
+  "id": "a1bc9afefb99",
+  "text": "OREILLE FINE ★",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "OREILLE FINE ★"
   ]
  },
  {
@@ -26356,6 +26388,15 @@
   ]
  },
  {
+  "id": "a2dc98e5a2cb",
+  "text": "Ready for B2 in listening or reading",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Ready for B2 in listening or reading"
+  ]
+ },
+ {
   "id": "532eff732348",
   "text": "Ready: {0}.",
   "kind": "pattern",
@@ -26523,15 +26564,6 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
- },
- {
-  "id": "ec5a42cd6210",
-  "text": "regardless of grammar if: {0}. About 2 h 47 in total.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
-  ]
  },
  {
   "id": "b73ac46d7192",
@@ -29796,15 +29828,6 @@
   ]
  },
  {
-  "id": "5336dcdcdb69",
-  "text": "Source: {0}. Everything on this site, including Claude's corrections and scores, follows these TCF Canada rules. Scores out of 20: B1 6–9, B2 10–13, C1 14–15, C1–C2 16–20.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… <p>A writing task can be marked <b>“A1 non atteint”</b> regardless of grammar if: …. About 2 h 47 in total.</p> <p>How writing is graded</p> … <p>How speaking is graded</p> … <p>Source: …. Everything on this site, including Claude's corrections and scores, f"
-  ]
- },
- {
   "id": "f54498e5486a",
   "text": "Sourire À quelqu'un: indirect object, no agreement. Souri never agrees.",
   "kind": "exact",
@@ -30473,62 +30496,6 @@
   "text": "T' + es + a hyphen + tu: t'es-tu renseigné ?",
   "kind": "exact",
   "where": "content:drill",
-  "ctx": []
- },
- {
-  "id": "2642620df03f",
-  "text": "T1 entretien dirigé, 2 min, no prep",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "1f2ebd3c3d7a",
-  "text": "T1 entretien dirigé, 2 min, no prep · T2 interaction, 5 min 30 including 2 min prep (short notes allowed) · T3 point of view, 4 min 30, no prep. You can ask the examiner to repeat.",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "55f384cf60c3",
-  "text": "T1 message, 60–120 words",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "896e756f2199",
-  "text": "T1 message, 60–120 words · T2 article or letter with opinions, 120–150 · T3 compare two ~90-word documents (part 1, 40–60 words), then take a position (part 2, 80–120). No dictionary, and only the final text is marked.",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "9a11072454b6",
-  "text": "T2 article or letter with opinions, 120–150",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "141f26c307d8",
-  "text": "T2 interaction, 5 min 30 including 2 min prep (short notes allowed)",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "26297a4a7eb9",
-  "text": "T3 compare two ~90-word documents (part 1, 40–60 words), then take a position (part 2, 80–120). No dictionary, and only the final text is marked.",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
-  "id": "a953bea898a1",
-  "text": "T3 point of view, 4 min 30, no prep. You can ask the examiner to repeat.",
-  "kind": "exact",
-  "where": "exam",
   "ctx": []
  },
  {
@@ -31597,15 +31564,6 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
- },
- {
-  "id": "72bde9b4157e",
-  "text": "the exam, cold",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "the exam, cold"
-  ]
  },
  {
   "id": "3973aac74257",
@@ -33555,6 +33513,15 @@
   ]
  },
  {
+  "id": "6ba5f9ceb6d5",
+  "text": "To earn: 300 cards reviewed",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: 300 cards reviewed"
+  ]
+ },
+ {
   "id": "a0e063b3bf24",
   "text": "To earn: a drill round with no misses",
   "kind": "exact",
@@ -33573,12 +33540,66 @@
   ]
  },
  {
+  "id": "2770f88a89d5",
+  "text": "To earn: a grammar topic's target, twice a week apart",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a grammar topic's target, twice a week apart"
+  ]
+ },
+ {
+  "id": "413c13cf92d3",
+  "text": "To earn: a listening set without a miss, first try",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a listening set without a miss, first try"
+  ]
+ },
+ {
+  "id": "bbccc0918e95",
+  "text": "To earn: a reading set at exam pace, 3 of 4 or better",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a reading set at exam pace, 3 of 4 or better"
+  ]
+ },
+ {
+  "id": "f26a06b20425",
+  "text": "To earn: a text corrected by Claude",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: a text corrected by Claude"
+  ]
+ },
+ {
   "id": "d50fb4f41a84",
   "text": "To earn: first practice exam, CE or CO",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "To earn: first practice exam, CE or CO"
+  ]
+ },
+ {
+  "id": "c0f27e41d63b",
+  "text": "To earn: fourteen days in a row",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: fourteen days in a row"
+  ]
+ },
+ {
+  "id": "347e31d60cdc",
+  "text": "To earn: NCLC 7 in all four skills, on one test",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: NCLC 7 in all four skills, on one test"
   ]
  },
  {
@@ -33615,6 +33636,15 @@
   "where": "app",
   "ctx": [
    "To earn: thirty days in a row"
+  ]
+ },
+ {
+  "id": "3b72ddf8111f",
+  "text": "To earn: your last 3 B1 sets in listening (70%) or reading (75%)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "To earn: your last 3 B1 sets in listening (70%) or reading (75%)"
   ]
  },
  {
@@ -35754,13 +35784,6 @@
   ]
  },
  {
-  "id": "88df92fb4eb9",
-  "text": "Word count not respected",
-  "kind": "exact",
-  "where": "exam",
-  "ctx": []
- },
- {
   "id": "164637a3cc59",
   "text": "Word counts on all three tasks; comparison present in Tâche 3.",
   "kind": "exact",
@@ -36625,6 +36648,15 @@
   "where": "app",
   "ctx": [
    "Your first practice exam"
+  ]
+ },
+ {
+  "id": "b1c8185aad9c",
+  "text": "Your first text corrected",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your first text corrected"
   ]
  },
  {
