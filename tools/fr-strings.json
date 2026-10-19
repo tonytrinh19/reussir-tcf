@@ -563,6 +563,13 @@
   "ctx": []
  },
  {
+  "id": "d912a23d7af8",
+  "text": "« À l'intérieur, c'est complet, mais je peux vous installer sur la terrasse » — « Parfait ». Inside is full; they keep the same restaurant; and a table for four was the first booking, before they became six.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "fcef5e1496db",
   "text": "« À partir d'un certain seuil, le tourisme détruit ce qu'il vient admirer : une ville vivante. » The author rejects closing borders and grants that tourism « fait vivre des millions de personnes ».",
   "kind": "exact",
@@ -572,6 +579,13 @@
  {
   "id": "04fbd41cb8b1",
   "text": "« achetez une paire et obtenez la deuxième à moitié prix… uniquement sur les modèles signalés par une étiquette rouge ». Green-label shoes are already reduced and aren't included.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "751b094a89fb",
+  "text": "« Alors c'est réglé, on l'inscrit au soccer », the sport Léa wanted. Swimming was the other option; they sign her up this autumn, not later; and Chloé's mother offers to drive, but nobody asks Chloé to play.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -591,6 +605,13 @@
   "ctx": []
  },
  {
+  "id": "70949b78f6e0",
+  "text": "« Au début… je les corrigeais. Aujourd'hui, c'est moi qui dis « chiller » sans y penser »: he now speaks like the people around him. French is everywhere at work, so he isn't learning English there; he has stopped correcting his colleagues; and he finds the town quiet but never says he wants to leave.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "2361ba69011a",
   "text": "« au Québec… l'électricité vient presque entièrement des barrages hydroélectriques » (hydro = water). Coal is where the advantage is weaker, and the batteries are still made mostly in Asia.",
   "kind": "exact",
@@ -600,6 +621,13 @@
  {
   "id": "f582e276ad88",
   "text": "« au-delà d'un certain seuil, la multiplication des possibilités devient une charge » and the widest choice leaves people least satisfied. He says he isn't asking for our choices to be taken away; the jam study shows the opposite of buying more with more choice; and freedom measured by choice is the common belief he questions.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "02aad489410e",
+  "text": "« au-delà d'un certain seuil, le choix cesse d'être un pouvoir et devient une charge »: too much choice becomes a burden. She doesn't want a single yogurt, so she isn't asking to limit products; « plus de choix rend plus libre » is the belief she questions; and she never blames laziness.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -654,6 +682,13 @@
   "ctx": []
  },
  {
+  "id": "961f1f4f7fa5",
+  "text": "« C'est l'écran qui remplace la conversation »: screens do harm when they take the place of talking. He says « dans l'idéal » before two, but refuses a strict ban and blames no tired parent; and children learn to talk « parce qu'on lui parle », not from cartoons.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "1014e14c0377",
   "text": "« C'est lorsque deux activités font appel au langage ou à la réflexion que le cerveau sature. » Music without words while tidying is fine, and so are automatic tasks like walking and talking.",
   "kind": "exact",
@@ -689,8 +724,22 @@
   "ctx": []
  },
  {
+  "id": "00f152538474",
+  "text": "« C'est une raison de la réparer, pas de l'abandonner »: the ideal stands but must be better applied. He accepts all the figures on unequal starts; he defends merit against « le piston, l'héritage, le hasard de la naissance »; and « ils ne doivent rien à personne » is the arrogant version he calls a danger.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "c1a7bc7f27cf",
   "text": "« c'est voyager moins souvent, mais plus longtemps ». Walking or cycling is how people imagine it, « mais ce n'est pas l'essentiel ».",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "d21d62058525",
+  "text": "« Ça fait combien de temps » asks how long: « Depuis trois ans, à peu près ». B says where the flat is in the building, C talks about moving out, and D says how far Gatineau is from Ottawa.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -724,8 +773,57 @@
   "ctx": []
  },
  {
+  "id": "08fd28b02877",
+  "text": "« Ce n'est pas la perfection qui compte, c'est la proportion »: cut down the share of industrial food. He says avoiding it all isn't realistic; he suggests cooking two or three times a week, not every day; and breakfast cereals « ne sont pas du poison ».",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "4d2128b74491",
+  "text": "« Ce n'est pas une défaite, c'est une adaptation »: he is changing the business calmly. He says skiing itself isn't threatened, only skiing « tel qu'on l'a connu »; he is moving into summer activities; and he already makes snow on almost every slope.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "b1bb816eaa7e",
+  "text": "« Ce n'est pas une révolution : c'est revenir à la manière dont on construisait les villes il y a cent ans ». She denies it's a revolution; the suburbs are the main challenge, but the idea isn't only for them; and she shows how it can be done, so she doesn't call it impossible.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "b36b55979f62",
   "text": "« ce ne sont pas eux qui partent le plus. Les départs concernent surtout des couples avec de jeunes enfants, et des salariés qui peuvent travailler de chez eux ». Retirees are the cliché he corrects, and students and immigrants are why the big cities keep growing.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "b653ac82b0b0",
+  "text": "« Ce qu'on cultive surtout, ici, c'est l'habitude de manger frais », with the schoolchildren planting and tasting. Feeding the whole village is what people think, but « on en est loin »; the price of lettuce is only the background; and the children come to grow vegetables, not to buy them.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "ff7a9687c7a1",
+  "text": "« Ce que je défends, ce sont ces moments vides, sans stimulation, où le cerveau se met à vagabonder », which the phone no longer leaves room for. Boredom at work is exactly what he doesn't praise; he blames the phone for filling every gap but never asks for a ban; and he wants the brain without stimulation, not exercises.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "36e262a9ba10",
+  "text": "« Ce que je note, maintenant, c'est leur jugement »: what they kept or rejected from the AI's answers. She says banning it is « perdu d'avance »; the first draft is still written, in class, by hand; and they must explain their choices, so the tool doesn't do the work for them.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "e9af60f736ed",
+  "text": "« ce que je paie, au fond, ce n'est pas un bureau : ce sont des collègues »: she pays so as not to work alone all day. Eighty euros is « pas rien », so it isn't about a cheap price; the desk itself isn't what she values; and the people there work for other firms, but she isn't changing employer.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -794,8 +892,22 @@
   "ctx": []
  },
  {
+  "id": "7557e46aaad4",
+  "text": "« Ce qui me fait rester… c'est que je connais presque tous les gens que j'aide »: the people he helps. No pay is mentioned; fires are rare, most calls are road accidents; and he has another job, as an electrician.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "5fe44eeee97a",
   "text": "« ce qui ne prouvait rien, sinon que le candidat suivant avait répondu, lui, qu'il était trop exigeant envers lui-même » : the next answer was just as canned, so the hiring says nothing about his.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "746b21cb8b9b",
+  "text": "« ce qui nous a surpris, c'est le reste. Les disputes ont beaucoup diminué… On voulait de l'ombre, on a eu du calme ». The cooler yard was the goal, not the surprise; the children no longer fight over the football pitch and build huts instead; and nothing is said about how fast the trees grew.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -829,6 +941,13 @@
   "ctx": []
  },
  {
+  "id": "9719ce8f62c5",
+  "text": "« certaines personnes n'ont jamais autant acheté que depuis qu'elles achètent d'occasion… Le problème, c'est la quantité »: second-hand can push people to buy more. She grants that a coat worn twice is one less to make, so it isn't useless; she says outright she isn't arguing for new clothes; and she describes what resale apps do without calling for a ban.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "27a84cb429cb",
   "text": "« certains reviendront, c'est certain. Mais la plupart des familles que j'ai rencontrées ont fait leur choix ». The hour's drive is twice a week, and the cities keep growing.",
   "kind": "exact",
@@ -843,8 +962,36 @@
   "ctx": []
  },
  {
+  "id": "d5874b2e5d7b",
+  "text": "« cet hiver, le service de vélos en libre-service restera ouvert au centre-ville »: downtown keeps bikes through the cold season. The other neighbourhoods wait until April; November is when the bikes used to disappear; and the two hundred bikes go near existing metro stations.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "32a3c811a8ff",
+  "text": "« Cette fois, je m'en occupe [des diapositives], et toi, tu présentes ». He offered to make the slides, but she says he did them last time; nobody splits the talk in half; and Monday evening is when she sends him everything so he can rehearse on his own.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "2777a6cc3434",
   "text": "« cette réponse l'a soulagée : ce n'était pas elle qui était visée ». He didn't apologise that day, and she never got her jewellery back.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "853faf274015",
+  "text": "« ceux qui ont… des besoins particuliers… risquent d'y perdre »: the most vulnerable could end up with less. He fully agrees on simplifying (« je vous suis entièrement »); he never talks about the cost to the state; and paying aid without conditions is the economist's idea, not his reservation.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "3afaed63fabf",
+  "text": "« Ceux qui restent… restent parce qu'ils ont un mot à dire sur l'endroit où ils vivent ». The lower rent is an advantage she mentions first, not what keeps people; the hours members give aren't paid; and the garden is just her neighbour's task.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -892,6 +1039,13 @@
   "ctx": []
  },
  {
+  "id": "ab21e5ee923b",
+  "text": "« choisir une activité régulière, toujours avec les mêmes personnes… La confiance naît de la répétition ». She explicitly doesn't ask anyone to give up screens; someone to call at 2 a.m. is what many young people lack, not her advice; and having many online contacts is what she says isn't enough.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "c0f2cc34c38d",
   "text": "« Comme mon autobus part à 5 h, je ne pourrai pas passer vous voir avant de partir : j'ai donc laissé ma clé au concierge. » The heating and the date she comes back (the 22nd) are in the message, but they aren't the reason.",
   "kind": "exact",
@@ -915,6 +1069,13 @@
  {
   "id": "6403bf2ee16c",
   "text": "« d'autres pratiques sont bien réelles et faciles à constater : des pièces collées plutôt que vissées ». A breakdown planned on purpose is what's very hard to prove.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "5c5e67e6bf38",
+  "text": "« dans vingt ans, en août, il n'y en aura peut-être plus… Ce n'est pas de la panique : c'est de la prudence »: she calmly prepares for scarcer water. Today they have more water than ever in spring, so the shortage isn't this summer; she takes the problem seriously; and she changes varieties rather than giving up apricots.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1018,6 +1179,13 @@
   "ctx": []
  },
  {
+  "id": "6a6e6b5ac0a4",
+  "text": "« elles entrent en concurrence avec les abeilles sauvages, qui, elles, sont vraiment menacées »: too many city hives can harm wild bees. She wants flowers before more hives; it's the wild bees, not the honeybees, that are threatened; and she criticises hives used as publicity without asking companies to stop communicating.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "ec8e57d751cc",
   "text": "« elles profitent surtout aux ménages qui ont les moyens de s'offrir une voiture neuve ». He agrees they launched the market; used cars are what experts would rather subsidise.",
   "kind": "exact",
@@ -1041,6 +1209,13 @@
  {
   "id": "ba6d65a216b0",
   "text": "« en faire notre seule stratégie, c'est parier sur une vitesse qu'aucune économie n'a jamais atteinte ». She explicitly says it isn't a decoy (« je ne dis pas que… un leurre »), that some countries did cut emissions, and moving production abroad is what hides emissions, not a solution.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "213767ccc439",
+  "text": "« Est-ce qu'on pourrait faire l'entrevue par vidéo, jeudi après-midi ? — Oui, aucun problème »: online, on Thursday afternoon. Tuesday was the first date; Thursday at ten is the recruiter's offer, which he can't take; and nobody mentions the phone.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1095,8 +1270,22 @@
   "ctx": []
  },
  {
+  "id": "656bbdb6bf52",
+  "text": "« ici, je ne suis pas un numéro. Mes chefs me connaissent, mes patients… me remercient »: being known and close to people. She'd turn down a better salary elsewhere, so pay isn't it; Montréal is eight hours away; and the winter is long, not mild.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "2e0cc1414533",
   "text": "« il a fallu embaucher du personnel supplémentaire ou réorganiser les horaires »",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "89a3c4980837",
+  "text": "« il dénonçait une société qui avait fait du travail une valeur morale »: the cult of work raised into a virtue. Reading the book as praise of naps is the « contresens » the speaker points out; machines come into his own closing question, not Lafargue's target; and the workers he mentions were demanding work, not refusing it.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1130,6 +1319,13 @@
   "ctx": []
  },
  {
+  "id": "b562c174d711",
+  "text": "« Il fait quel temps » asks about the weather: « Il neige depuis ce matin ». A talks about a past trip, B about the distance from Toronto, and C about a flight.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "b11a37d1e92e",
   "text": "« il faudrait aussi compter et payer les heures passées à répondre aux messages le soir ». Leaving early is the employers' argument.",
   "kind": "exact",
@@ -1139,6 +1335,13 @@
  {
   "id": "6468d0c7b277",
   "text": "« Il indique seulement si l'appareil sera facile à réparer ». It says nothing about electricity use, and ten is the top of the scale, not years.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "724595d5ddb8",
+  "text": "« il manque la traduction officielle de votre diplôme… pour le déposer sur votre portail étudiant »: send in a translated document. It must be an official translation; the office asks people to write rather than come in; and nothing is said about fees.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1174,6 +1377,13 @@
  {
   "id": "65bb7eed1a89",
   "text": "« il y a une différence entre l'ennui que l'on subit et celui que l'on s'accorde, entre la cellule et la chaise longue », after « L'ennui imposé n'a rien de fécond ».",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "7cce793d8e84",
+  "text": "« ils n'ont plus peur d'ouvrir les choses »: the confidence to repair their own things. Half the visitors leave with their object still broken, so nothing is guaranteed; he repairs « avec eux », not for them; and nothing is sold.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1221,6 +1431,13 @@
   "ctx": []
  },
  {
+  "id": "ac6f555a06c1",
+  "text": "« J'apporte plutôt les boissons : du jus et de l'eau pétillante ». The salad is what she makes, a dessert is what she first asked him for, and the cake will be Karim's.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "ee48803bdba2",
   "text": "« J'étais sûre que je n'y arriverais jamais », yet she now reads the paper, makes video calls and books appointments online, and « je ne panique plus ». She learned in the library's workshop, whose leader is very patient.",
   "kind": "exact",
@@ -1256,8 +1473,29 @@
   "ctx": []
  },
  {
+  "id": "1e6c25d826f2",
+  "text": "« je demande qu'on garde le droit de payer avec ce qu'on tient dans la main »: keep cash as a way to pay. The end of cash is what worries her; she doesn't ask to control apps, she defends people who don't trust them; and the envelope is an example, not a savings tip.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "be7fec5d9079",
   "text": "« Je demande simplement qu'on garde le choix », after defending those who rely on cash. He asks for nothing to be banned, says « Je ne réclame pas qu'on revienne en arrière », and « plus sûr » is one of the arguments for cards, not a call about theft.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "939eae900396",
+  "text": "« je dors enfin pendant la fonte des neiges », though his father built the house: relief, despite his regrets. Anger was only his first reaction (« j'étais furieux »); he made no money; and his father built the house, but he hasn't left him.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "c7348c7bef3e",
+  "text": "« Je leur montre simplement que quelqu'un qui leur ressemble est passé par là »: a role model they can identify with. He says he gives no speeches; maths is what he teaches in class, not what he offers on Wednesdays; and Creole is the language his own teachers didn't understand, not his advice.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1277,6 +1515,13 @@
   "ctx": []
  },
  {
+  "id": "568d4d839fc0",
+  "text": "« Je n'ai plus l'impression d'avoir un arrangement, mais un grand-père »: a family bond. Money was the reason at the start (« au début »); the errands are her side of the deal, not a job; and their arguments are friendly, not real conflict.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "da7565225a3b",
   "text": "« Je ne demande ni un meilleur salaire ni moins d'heures. Je vous demande de me rendre le temps que l'administration me prend » : nearly a third of her time goes on paperwork.",
   "kind": "exact",
@@ -1286,6 +1531,13 @@
  {
   "id": "76692e69f4ac",
   "text": "« Je ne dis pas aux gens d'arrêter la viande ; je leur dis d'en manger moins, mais de meilleure qualité ». She refuses a ban, offers pulses « le reste du temps », not at every meal, and the care she asks for is for cooking pulses.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "45e2aa5163c2",
+  "text": "« Je ne vous dis pas d'ignorer les avis. Lisez-les comme on lit un témoignage, pas comme un verdict »: read them critically. She explicitly doesn't say to ignore them; she never asks for more negative reviews; and her dentist shows that a low rating can hide an excellent professional, so the best-rated aren't always the best.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1319,6 +1571,20 @@
   "ctx": []
  },
  {
+  "id": "17529a665047",
+  "text": "« je veux qu'ils aient envie d'aller poser des questions à leurs grands-parents »: getting young readers to ask their families about the past. He says « Mon but n'est pas de leur faire un cours »; he chose comics over a novel; and he wants to show without explaining, not to describe the mines in detail.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "681b17ff997c",
+  "text": "« je vous apporte un radiateur électrique ce soir »: he'll lend her a heater. The technician only comes tomorrow morning; the landlord doesn't repair the heating himself; and no hotel is mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "1dea8410bd9b",
   "text": "« Je vous conseille le métro : la station Laurier est à cinq minutes à pied. » The car park is paid and often full.",
   "kind": "exact",
@@ -1342,6 +1608,13 @@
  {
   "id": "117454e78ad8",
   "text": "« l'autobus repartira à l'heure prévue, avec ou sans les retardataires ». Fifteen dollars is the cable car, and the other groups are why the bus can't wait.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "5180e9748594",
+  "text": "« l'eau du robinet doit être bouillie… avant d'être bue »: boil the water they drink. They can still use it unboiled to wash and do the laundry; « jusqu'à nouvel ordre » is how long the advisory lasts; and bottled water isn't mentioned.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1382,6 +1655,13 @@
   "ctx": []
  },
  {
+  "id": "b80c656527d5",
+  "text": "« l'un des rares moments où tout le monde est jugé sur la même copie », while without a common test the best-supported pupils win: exams put pupils on an equal footing. She grants they check memory too often, so not « parfaitement » the understanding; stress management is the researcher's criticism; and she says reasoning « ne se télécharge pas », not that exams stop pupils searching online.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "8f68c6df9c31",
   "text": "« la billetterie fermera exceptionnellement à 20 h ce soir. Après cette heure, les billets resteront en vente aux distributrices automatiques ». Parking stays free for monthly pass holders, and bikes go in the last car.",
   "kind": "exact",
@@ -1391,6 +1671,13 @@
  {
   "id": "1ab858ad1c84",
   "text": "« La diversité n'est pas un décor, c'est une façon de travailler » : what counts is who is promoted, consulted and kept. The author doesn't scorn the photos, and recruiting widely helps only if the rest changes too.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "d3d1418b2e22",
+  "text": "« la frontière n'est pas un mur, c'est une couture : elle sépare, mais elle tient ensemble »: a place that separates and also joins. He doesn't want borders torn down (« elles protègent, elles organisent »); the line between « nous » and « eux » is the image he questions; and he says borders aren't useless.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1424,6 +1711,13 @@
   "ctx": []
  },
  {
+  "id": "765b060001e5",
+  "text": "« la peur de redevenir débutants, de ne plus être ceux qui savent »: the fear of losing their standing as the one who knows. Money is what people assume, but « c'est rarement ça »; finding an apprenticeship isn't mentioned; and the young apprentices are just who they'll work beside, not the obstacle.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "6dddf44ec797",
   "text": "« la plupart disent souhaiter deux enfants ou plus, mais en ont moins » : « Ce n'est donc pas le désir d'enfant qui a disparu. » Contraception « ne suffit plus » to explain the fall.",
   "kind": "exact",
@@ -1447,6 +1741,13 @@
  {
   "id": "330729dd6eb1",
   "text": "« la raison principale est économique. Avec la hausse des loyers, quitter le nid familial représente un coût énorme ». Lack of ambition is the cliché the studies contradict; student debt comes on top (« À cela s'ajoutent »), and a breakup brings only some back.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "792ea601c287",
+  "text": "« la rue principale sera fermée aux voitures pendant les trois jours »: one street will be for pedestrians. The shows stay free, the festival is still at the end of August, and the garage sale is still on.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1480,6 +1781,20 @@
   "ctx": []
  },
  {
+  "id": "0cba948e4a7a",
+  "text": "« Le danger, c'est de confier cet arbitrage aux moteurs de recherche eux-mêmes, qui ont tout intérêt à dire oui »: search engines aren't good judges. She finds the word censorship « excessif »; the politician erasing a conviction is the case she objects to; and the teenager's photo is the case she approves of.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "ac9491b317a0",
+  "text": "« le départ de dix heures est retardé de trente minutes. Le traversier partira donc à dix heures trente ». 10 a.m. was the planned time; 9.30 and 11.30 are never said.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "0a5d4129ff8d",
   "text": "« Le droit existe sur papier, mais il est impossible à faire respecter », hence a public register. The law already requires the previous rent in the lease, and honest owners « n'ont rien à craindre ».",
   "kind": "exact",
@@ -1503,6 +1818,20 @@
  {
   "id": "c23a61ce012d",
   "text": "« Le livre que vous avez commandé est arrivé. Nous le gardons pour vous » means she can come and get it. Saturday is how long they'll keep it, not when it arrives; the shop is closed on Monday only; and the order was already made.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "99e3b182e677",
+  "text": "« Le livre que vous avez réservé… est arrivé. Il vous attend au comptoir des prêts »: it's ready to collect. Nothing says the card has expired; five days is how long the book is kept for her, not when to return it, and not a closure.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "e63eaf1fdfe5",
+  "text": "« Le loisir, qui devait nous libérer de la performance, en est devenu une nouvelle scène »: free time has become a new obligation. She says « Je ne regrette pas ces conquêtes, au contraire »; she never asks for more work at weekends; and she presents free time as a conquest, not as something that was always a privilege.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1543,6 +1872,13 @@
   "ctx": []
  },
  {
+  "id": "eb8e7a46e50a",
+  "text": "« Le musée fermera ses portes dans quinze minutes. Merci de vous diriger vers la sortie » tells visitors to leave the galleries soon. 6 p.m. is when the shop closes, the shop stays open, and entry is free tomorrow, not today.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "b3e35d956b41",
   "text": "« le nombre de voyageurs baisse de près de 30 % pendant les vacances ». Weekend work in the autumn would have taken eight months, and the shuttles stop at midnight.",
   "kind": "exact",
@@ -1552,6 +1888,20 @@
  {
   "id": "77b95d2dc46c",
   "text": "« Le plus difficile n'a pas été de cuisiner, mais de comprendre les règles d'hygiène et d'obtenir les bons permis. » People liked her food from the start, and an adviser helped with the business plan.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "05e2d5868192",
+  "text": "« Le plus dur n'a pas été la recette. C'était de faire venir les gens jusqu'à la porte »: making her restaurant known. She never changed her recipes for local tastes; the bank only doubted her idea; and the market is where she gave free tastings, not where she shopped.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "8e39ee20673b",
+  "text": "« Le plus dur, c'était la méthode… on ne me demande pas ce que je sais, mais ce que j'en pense »: adapting to another way of studying. She expected the cold to be hard, « pas du tout »; learning by heart is how she studied before; and the professors' accent isn't mentioned.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1585,6 +1935,13 @@
   "ctx": []
  },
  {
+  "id": "c7ab3e1cb657",
+  "text": "« Le progrès n'est pas une pente. C'est un chantier »: vaccines, paid holidays and schooling for all were « voulus, discutés, souvent arrachés ». Automatic progress and inevitable decline are the two stories he warns against, and nothing he says predicts worse lives for future generations.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "df4d107c2610",
   "text": "« le rayon des soldes a déménagé. Il ne se trouve plus au premier étage, mais au deuxième. »",
   "kind": "exact",
@@ -1606,8 +1963,29 @@
   "ctx": []
  },
  {
+  "id": "dc988da59052",
+  "text": "« le sentiment de vivre à côté des autres… ce n'est pas qu'ils manquent de sommeil ; c'est qu'ils manquent de moments partagés »: being cut off from family and social life. She grants fatigue is real but says something else comes up in every interview; lack of sleep is what she sets aside; and she says no night bonus could make up for it, not that bonuses are too low.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "1b50867f541f",
+  "text": "« Le service vise surtout les travailleurs de nuit, qui devaient jusqu'ici prendre un taxi ». The cégep is one of the stops, not the main target; taxis are what night workers used before; and the airport isn't on the route.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "e01a1d10858f",
   "text": "« le service… ne fermera pas en novembre. Une partie des stations restera ouverte tout l'hiver ». November is when it used to close, five dollars is the price increase, not the price, and the winter stations are near the metro.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "17b6a69698c8",
+  "text": "« le slogan est sympathique, mais… le système, lui, punit »: school penalises the mistakes it claims to welcome. Her target is the gap between the slogan and the marks, not the slogan itself; she explicitly doesn't propose removing marks; and the careful pupil takes no risks at all, not too many.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1718,6 +2096,13 @@
   "ctx": []
  },
  {
+  "id": "a41f6b2c9d0f",
+  "text": "« les inscriptions se font désormais uniquement en ligne »: from now on you sign up online. The cooking class doesn't change; yoga moves from Monday to Tuesday at the same time, not later; and signing up at the front desk is exactly what stops.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "3a805cd9a9ed",
   "text": "« les ménages modestes… sont souvent les premiers à souffrir ». Fixed-rate borrowers are partly advantaged.",
   "kind": "exact",
@@ -1739,6 +2124,13 @@
   "ctx": []
  },
  {
+  "id": "b6819c541cd0",
+  "text": "« les ordures… ne seront plus ramassées chaque semaine, mais toutes les deux semaines »: the bins are emptied less often. The brown bin is still collected every week, rubbish only every two weeks, and bags left beside the bins won't be taken.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "020158d0c466",
   "text": "« les ouvriers peuvent arriver plus tard, vers dix heures, et faire les travaux les plus bruyants l'après-midi ». The work doesn't stop; night is when she works, not when the builders will; and seven o'clock is the problem she complains about.",
   "kind": "exact",
@@ -1746,8 +2138,22 @@
   "ctx": []
  },
  {
+  "id": "20383088e985",
+  "text": "« les producteurs s'installeront dans le stationnement de l'aréna, et non plus sur la place de l'église »: it moves somewhere else. The hours stay the same, it's still on Saturday, and leaving the church square is exactly what changes.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "369ff738192f",
   "text": "« Les textes qui accompagnent les œuvres sont rares », so visitors learn almost nothing about the history behind the pictures. The critic loves the photographs and the music.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "4e65eca95028",
+  "text": "« Les vrais blocages arrivent quand on découvre les vestiges par surprise… le problème, c'est l'archéologie qu'on n'a pas voulu prévoir »: plan the digs ahead and most delays disappear. She understands the developers' irritation without saying they're right; she says most digs last only a few weeks; and she never suggests stopping building.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1776,6 +2182,13 @@
  {
   "id": "5595d64a0159",
   "text": "« merci d'arriver 15 minutes plus tôt avec votre carte de résident permanent ». The books are handed out in class, and his level (3) is already set.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "62d2a1b605e4",
+  "text": "« Merci d'arriver dix minutes en avance » means coming a little before the appointment. It's already confirmed, so there's no call to make; he's asked to bring his insurance card, not to pay for insurance; and the ten minutes come before 2 p.m., not after.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1837,6 +2250,13 @@
   "ctx": []
  },
  {
+  "id": "e565104bef2c",
+  "text": "« Mon conseil est presque choquant : faites moins… Un parent reposé vaut mieux qu'un parent parfait »: lower the bar they set themselves. More activities and zero screens are part of the pressure he describes; and spending more time with the children isn't his advice.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "f4b5dd848182",
   "text": "« Mon problème, c'est la livraison… On aurait pu au moins garder une zone de livraison. » He says terraces make the street lively, the restaurant owners' delight is the journalist's remark, and he says it isn't about money.",
   "kind": "exact",
@@ -1881,6 +2301,13 @@
  {
   "id": "fd1cbd9ab238",
   "text": "« Non-fumeurs seulement. Petits animaux acceptés. » There's no parking space (only street parking with a permit), and the flat is free on 1 July, not in May.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "a6db32349ae5",
+  "text": "« nos clients nous choisissent d'abord parce qu'on est plus rapides… la vitesse, c'est notre argument commercial ». Ecology is his pride, not why clients come; prices aren't mentioned; and the vans stop at the warehouse outside the centre.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1956,8 +2383,36 @@
   "ctx": []
  },
  {
+  "id": "b06b3cf4b76f",
+  "text": "« on en parle uniquement comme d'un coût… La vraie question n'est pas de savoir combien ils coûtent, mais comment on leur fait une place »: seniors are only seen as a cost. She doesn't say pensions are underestimated; she stresses retirees' good health rather than doubting it; and birth rates aren't mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "008cb3197d84",
   "text": "« on leur demande aussi l'anglais à l'embauche… ce double standard contredit le message officiel selon lequel le français suffit pour réussir au Québec »",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "5ce60a41f812",
+  "text": "« on loue une voiture ? … Alors je conduirai » — « D'accord »: they'll rent a car. Ten hours is the bus journey they want to avoid; he has no licence, so she drives; and there's no train.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "9397f38c10d9",
+  "text": "« on n'a jamais prêté autant de livres ! Les gens viennent pour une perceuse… et repartent avec un roman »: the new services bring people, and readers, in. Going back to books only is what some users want; she understands their question without agreeing; and she praises a place you can enter « sans rien acheter », the opposite of charging for entry.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "0c28b29d9f86",
+  "text": "« On n'a pas renoncé à la mise en scène ; on a simplement changé de décor. L'imperfection est devenue un nouveau filtre »: staging in another form. He answers « Pas si vite » to the idea of progress; looking perfect was the fashion ten years ago; and the « natural » look is itself a filter.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1998,6 +2453,13 @@
   "ctx": []
  },
  {
+  "id": "2c4506778431",
+  "text": "« on prend le plus proche »: the four-and-a-half on Saint-Denis, the smaller one. The yard comes with the bigger flat in Rosemont, and the rent is « presque le même », so neither is cheaper.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "bfc286c1baa7",
   "text": "« On regrette cependant que l'autrice veuille trop en dire » : long monologues explain « ce que le spectateur avait déjà compris ». The actors are « remarquables », and the humour keeps the drama from getting heavy.",
   "kind": "exact",
@@ -2033,6 +2495,13 @@
   "ctx": []
  },
  {
+  "id": "76fb049a2226",
+  "text": "« On se retrouve où » asks where to meet: « Devant la bibliothèque, ça te va ? ». B says when, C reuses « cours » to name the class, and D says who with.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "09951e73d908",
   "text": "« on sera de retour à 23 h 30, promis ». Midnight was the first plan, changed because Julien starts work at 7 h on Sunday.",
   "kind": "exact",
@@ -2054,6 +2523,13 @@
   "ctx": []
  },
  {
+  "id": "bbf934cdfda8",
+  "text": "« Parfois, on finit par jeter nous-mêmes… Le gaspillage a simplement changé d'adresse »: the waste has moved from the shops to the charities. She grants the law « a changé beaucoup de choses »; her complaint is about products close to their date, not how much is given; and nothing suggests volunteers turn fresh food away.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "e76ef0320b3a",
   "text": "« partira du quai numéro cinq, et non du quai numéro deux, comme indiqué sur les écrans ». It's platform two that is closed, and the delay is the 17 h 40 train's.",
   "kind": "exact",
@@ -2061,8 +2537,22 @@
   "ctx": []
  },
  {
+  "id": "6c1181c13805",
+  "text": "« pas à jeun : prenez-le pendant le petit-déjeuner »: with food. Taking it before eating is what she warns against; he must go on even without fever (« jusqu'au bout »); and a stomach ache is what may happen on an empty stomach, not a reason to change medicine.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "f334a77e59a9",
   "text": "« pas de café ni d'autres boissons chaudes, et pas de nourriture ». Water and photos through the window are allowed, and questions are for the stops.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "f0b58e29db04",
+  "text": "« pensez à régler le four, la voiture et les réveils »: set some devices by hand. They'll sleep an hour more, so there's no need to go to bed earlier; they're asked to check the batteries, not buy a detector; and phones change by themselves.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2117,8 +2607,22 @@
   "ctx": []
  },
  {
+  "id": "8ede5988a9f2",
+  "text": "« pour parler une langue, il faut d'abord avoir envie de dire quelque chose »: wanting to communicate comes before grammar. His grammar lessons « ne marchait pas »; cooking was only the topic of one evening, and now the learners choose; and they were bored by his lessons, not by the library.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "9360fd8006a7",
   "text": "« pourquoi ne pas venir souper chez moi avec Antoine ? » : the children go to bed at 19 h 30. Otherwise they can move it to the next weekend; nothing is cancelled.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "c9cf8d234782",
+  "text": "« Pourquoi pas un bon pour un cours de kayak ? … — Excellente idée ! »: an activity on the water. He already has too many books; the card goes with the present, it isn't the present; and Vancouver is where he's moving, with no plane ticket mentioned.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2154,6 +2658,13 @@
  {
   "id": "7aa3ef24200b",
   "text": "« quand le prix de l'énergie grimpe brutalement et que les entreprises répercutent cette hausse sur leurs clients ». It's demand growing faster than production, not the reverse.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "b74be39e6860",
+  "text": "« quand les premiers clients achètent le pain que j'ai fait de mes mains, je sais pourquoi je suis là »: seeing what his work produces. Getting up at four is the hard part; everyone at school pushed him towards university; and he left law after a year.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2250,8 +2761,29 @@
   "ctx": []
  },
  {
+  "id": "704f774e299c",
+  "text": "« Si on abaisse l'âge du vote sans former les jeunes, on n'aura changé que la loi »: the right only makes sense with civic education. He never calls young people immature; he grants the climate argument « est fort »; and he cites Austria as evidence, not as a mistake.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "425498a7aec0",
   "text": "« si on vous propose un vélo d'occasion très bon marché, sans facture, même en très bon état, il a peut-être été volé ».",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "f45cd0bd3da7",
+  "text": "« si vous finissez le rapport mensuel d'ici jeudi, je vous libère dès midi vendredi »: she can leave at noon on Friday. He refuses the whole day because of the software delivery; the report is due by Thursday, not after; and Québec is where the wedding is, not where she'd work.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "99410b460351",
+  "text": "« Si vous ne le payez pas, quelqu'un d'autre le paie… ne plus croire que ce qui est gratuit ne coûte rien »: free delivery is an illusion. He explicitly doesn't ask you to stop buying online; badly paid couriers are one hidden cost, not his main point; and shops raise their prices, they don't lower them.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2266,6 +2798,20 @@
  {
   "id": "9a5b2ee9da22",
   "text": "« Si vous ne pouvez pas venir samedi, votre cours sera remboursé. » Thursday's class is cancelled.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "508e813c78bc",
+  "text": "« sont priés de se rendre à la porte quarante-deux, et non à la porte douze »: they must go to another gate. Boarding starts in twenty minutes, not now; gate 12 is the wrong one; and the flight doesn't change.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "4b4cbb3317fa",
+  "text": "« Sur ce point, je vous l'accorde : sans plus de bus, la gratuité ne servirait à rien »: free transit only makes sense with a bigger network. The income-based fare is the economist's proposal, which she doesn't take up; he says free transit attracts pedestrians and cyclists, not drivers; and she still defends free transit.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2292,8 +2838,22 @@
   "ctx": []
  },
  {
+  "id": "d53aa8c73ca6",
+  "text": "« Tu as fini…? » asks whether the report is done: « Presque, il me reste la conclusion ». B reuses « demain » to say where the speaker works, C reuses « rapport » to talk about an old one, and D talks about buying something.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "ab2a6a503af0",
   "text": "« tu voudrais que je garde les enfants, c'est ça ? » « Exactement. » She says straight away that Sunday's supper is still on.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "7f1d63fc3478",
+  "text": "« Un algorithme qui ne se trompe jamais sur mes goûts m'empêche surtout d'en avoir de nouveaux »: it locks him into the tastes he already has. It never gets his tastes wrong; the Scandinavian thrillers are only his example; and the bookseller and the friend are what he misses, not what the platforms have replaced.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2327,6 +2887,13 @@
   "ctx": []
  },
  {
+  "id": "446defb90c0d",
+  "text": "« Un emploi fait venir les gens. C'est l'accueil qui les fait rester », with a village sponsor for every family. The jobs were already there and bring people in; the French classes and housing are part of the welcome, but he stresses the sponsors (« et surtout »); and no reduced rent is mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "720bac831df3",
   "text": "« Un immense merci à toutes celles et à tous ceux qui sont venus samedi » : the work is already done, so it's a thank-you, not an invitation.",
   "kind": "exact",
@@ -2348,6 +2915,27 @@
   "ctx": []
  },
  {
+  "id": "6e87330c1884",
+  "text": "« un oui ne veut pas toujours dire oui… on ne parle pas de la mort de la même façon partout »: she takes cultural differences into account. Speed isn't her argument; medical vocabulary isn't mentioned; and the doctor gives the diagnosis, she doesn't replace him.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "a87347e0b8b0",
+  "text": "« un panneau explicatif sous la plaque, ou mieux, que les habitants décident après un vrai débat public »: explain the names and let citizens debate them. She distrusts both quick renaming and keeping the plaque « tel quel, sans un mot »; and she wants residents, not historians, to decide.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "b027f748227a",
+  "text": "« Un technicien peut passer jeudi entre huit heures et midi », and her husband will be home to let him in. Restarting the modem is what she has already done; she'll be at work, not waiting for the technician there; and the agent sends someone because of a fault on the line, so it isn't fixed remotely.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "6b3c5c3cfc8c",
   "text": "« Un véhicule d'assistance suit le groupe, et vous pouvez y monter à tout moment si vous êtes fatigué. » Stages are 40 to 60 km, the electric bike costs 150 $ extra, and the bags travel from one stage to the next.",
   "kind": "exact",
@@ -2362,6 +2950,13 @@
   "ctx": []
  },
  {
+  "id": "fe90b45c6b1e",
+  "text": "« Une infirmière praticienne ou un pharmacien pourraient le faire. Chacun devrait faire ce que lui seul sait faire »: share the work better among health professionals. More doctors are already being trained, too slowly to help; the paperwork he means is his own, not the pharmacists'; and he never talks about nurses' training.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "db2711dbca41",
   "text": "« une partie de notre esprit reste accrochée à la première ». The lost seconds are the cost of each switch; tiredness and distractions come up later.",
   "kind": "exact",
@@ -2369,8 +2964,29 @@
   "ctx": []
  },
  {
+  "id": "3ee80cb79705",
+  "text": "« une session en présentiel, le samedi matin… On s'inscrit ensemble ? — … d'accord »: the in-person course on Saturday. Online on Thursday is what she rejects; they do sign up; and the library is where the course takes place, not where they'd study alone.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "46ed1c9307c8",
   "text": "« Une taxe bien conçue, dont le produit servirait à construire ou à rénover des logements pour les résidents permanents… rétablirait un équilibre ». The writer admits the owners do pay local taxes.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "84020d6ba9e2",
+  "text": "« une voisine m'a emmenée faire du patin le dimanche : sortir… ça m'a sauvée ». The coat only kept her warm, and she never says she bought it in Dakar; staying in and the long dark evenings are what was hard (« la nuit qui tombe à seize heures »).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "d8cef5684102",
+  "text": "« Utilisé seul, c'est un problème. Vérifié par un humain, ça peut faire gagner du temps »: useful if a person checks it. He says it only reproduces our habits « en plus rapide », not better; he worries about the use, not the tool, so he doesn't call for a ban; and his example shows it favouring men of thirty, not young women.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2404,6 +3020,13 @@
   "ctx": []
  },
  {
+  "id": "2c5f6773dfa3",
+  "text": "« Votre bail fera l'affaire »: her lease. Her passport is already accepted (« c'est parfait »); she has no bill in her name yet, which is why the lease will do instead; and the photo ID is the passport.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "a2f07a2a67b5",
   "text": "« votre carte de résident permanent… une preuve d'adresse, par exemple un bail ou une facture d'électricité ». The bill is only an example of proof of address.",
   "kind": "exact",
@@ -2413,6 +3036,13 @@
  {
   "id": "a87da4383754",
   "text": "« Votre sécurité vaut bien deux changements par année » : on ice, braking can take almost twice as long with all-season tyres. Some all-season tyres carry the required symbol, so they aren't all forbidden.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "e3fa256faafb",
+  "text": "« vous devez confirmer votre intérêt avant le quinze novembre, par courriel »: write to the centre before mid-November. January is when a place might open, with no guarantee; the next family is who gets the place if they don't answer; and nothing is said about paying.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2434,6 +3064,13 @@
  {
   "id": "d189c01eee6a",
   "text": "« Vous parlez couramment français et anglais ». Experience is only « un atout », working from home comes after six months, and the training is paid (« avec salaire »).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "f7482ec32604",
+  "text": "« Vous pouvez passer la chercher aujourd'hui jusqu'à dix-huit heures »: she should go and get her car. The garage is closed tomorrow; the brakes have already been changed; and the car is already at the garage.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -6341,6 +6978,13 @@
   ]
  },
  {
+  "id": "5c664af23f7b",
+  "text": "A man and a woman shake hands across an office desk, as people do when they first meet: « Enchantée, je suis votre nouvelle collègue ». « Bonne nuit » is for the evening (A), the floor isn't wet (B), and nobody is eating (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "0cc1bd76fbe7",
   "text": "A masculine country starting with a vowel takes en: en Iran.",
   "kind": "exact",
@@ -6854,6 +7498,13 @@
   "ctx": [
    "<p>À revoir cette semaine · due this week: <b>…</b></p>… …"
   ]
+ },
+ {
+  "id": "1817a62e0c31",
+  "text": "A rota where each picks tasks, swapped every month, and the bathroom in turns: they'll share the chores more fairly. Washing up is what she always does now, and nothing says Max takes it over; nobody mentions hiring help; and the bins still have to go out.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
  },
  {
   "id": "e524b6e4c626",
@@ -8739,6 +9390,13 @@
   "text": "An official plan, not a rumour: the futur, seront annoncés.",
   "kind": "exact",
   "where": "content:drill",
+  "ctx": []
+ },
+ {
+  "id": "c715c820424b",
+  "text": "An old woman she doesn't recognise still knows her childhood name, one nobody had used for twenty years: the bond with the village is still there. She feels out of place but never regrets coming; the old woman does remember her; and she prepared phrases in Fon, with a Paris accent, so she hasn't forgotten the language.",
+  "kind": "exact",
+  "where": "content:comp",
   "ctx": []
  },
  {
@@ -16084,6 +16742,13 @@
   ]
  },
  {
+  "id": "b409d6eee554",
+  "text": "France has an agreement with Québec, so « l'échange est simple : pas d'examen ». Both tests are only for countries without an agreement; nobody has to stop driving, just exchange the licence; and six months is how long the foreign licence is valid, not an extension.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "44389f6a466e",
   "text": "French",
   "kind": "exact",
@@ -17033,6 +17698,13 @@
  {
   "id": "e583ca1c6972",
   "text": "He still grumbles at every notification, but after his son's illness, « je ne le quitterai jamais »: the group proved useful.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "c445bd9232b7",
+  "text": "He thinks of cutting out the height marks but puts the knife away, and leaves the door open « comme on laisse un livre à la page où quelqu'un d'autre reprendra la lecture »: he accepts that the house will go on with other lives. He accepted the price « sans discuter »; the knife hints he might take the marks, but he doesn't; and he nods at the couple's plans.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -19519,6 +20191,13 @@
   "text": "Lexique",
   "kind": "exact",
   "where": "rubric",
+  "ctx": []
+ },
+ {
+  "id": "490149fdb7dc",
+  "text": "Light food, smaller portions, one treat and play time all aim at the same thing: getting the cat to lose weight. They'll weigh him again in a month, with no operation; she keeps one treat a day, not none; and five a day is what he eats now.",
+  "kind": "exact",
+  "where": "content:comp",
   "ctx": []
  },
  {
@@ -23916,6 +24595,13 @@
   "text": "One CE set (four short documents, one question each), no timer.",
   "kind": "exact",
   "where": "plan",
+  "ctx": []
+ },
+ {
+  "id": "fa7089b48a8a",
+  "text": "One child kicks a ball towards a goal where the other is waiting: « Les enfants jouent au ballon ». They aren't doing homework (A), there's no lake (B), and they aren't eating (C).",
+  "kind": "exact",
+  "where": "content:comp",
   "ctx": []
  },
  {
@@ -29881,6 +30567,13 @@
   "ctx": []
  },
  {
+  "id": "46382efee506",
+  "text": "She puts on boots she had never worn and goes out « comme on entre dans une maison qui n'est pas encore tout à fait la sienne »: she's slowly making this new life her own. Her « oui » to her mother is absent-minded, and coming home for the summer isn't moving back; she goes down « sans se presser », not afraid; and she goes out while the snow is still falling.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "7b4225200270",
   "text": "She thanks him for « la lettre de recommandation » and tells him « je suis acceptée au programme ». She starts in January, not September.",
   "kind": "exact",
@@ -29899,6 +30592,13 @@
   "text": "She works hard, so elle is the subject.",
   "kind": "exact",
   "where": "content:drill",
+  "ctx": []
+ },
+ {
+  "id": "d2e110dd036f",
+  "text": "She's sitting on a park bench with an open book, in the sun: « Elle lit sur un banc, au soleil ». It isn't raining and she isn't running (A), she isn't writing or in an office (B), and she isn't in bed (D).",
+  "kind": "exact",
+  "where": "content:comp",
   "ctx": []
  },
  {
@@ -32289,6 +32989,13 @@
   "ctx": []
  },
  {
+  "id": "9f2048a81811",
+  "text": "The alarm clock is ringing on the bedside table while the man is still asleep: « Le réveil sonne, mais il dort encore ». He isn't in the shower (A), his eyes are closed and there's no book (C), and he isn't in the kitchen (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "d8e465506ea4",
   "text": "The article implied young adults stay home « par confort » or « par paresse » ; she answers with her real reasons (saving for a down payment, company for her widowed mother) and asks readers to stop judging this choice.",
   "kind": "exact",
@@ -32488,6 +33195,27 @@
   ]
  },
  {
+  "id": "c4f91045f0ae",
+  "text": "The column is ironic: a « passionnante » meeting to prepare a meeting about a meeting, decisions she has only heard of (« on m'en a parlé »), and a rule that useless meetings must at least produce a report. She means many meetings achieve nothing. Calling them productive is the irony; she mockingly asks for more reports, not fewer; and more people would only make it worse.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "bc6287c85eb4",
+  "text": "The column is ironic: an app that needs an account, notifications and a subscription, « statistiques de sérénité », a ranking, and « jamais été aussi stressé d'être calme ». Relaxing has become another performance. He mocks the app rather than praising it; the daily reminders are what stress him; and his grandmother's silence by the river is the contrast.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "b34d5aa70c0a",
+  "text": "The column is ironic: he « congratulates » us on apps that plan our planning, while his neighbour, gardening, mending bikes and reading, looks happy. « Il ne sait pas qu'il perd son temps » means the opposite: chasing efficiency makes us miss what matters. He mocks the apps, the neighbour needs no organising, and the articles only make him feel guilty.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "18d47f549ad0",
   "text": "The concession word is même si (or bien que + subjonctif).",
   "kind": "exact",
@@ -32556,6 +33284,13 @@
   "ctx": [
    "the correction, written as it should be in a sentence"
   ]
+ },
+ {
+  "id": "aa7d7b4dcbb8",
+  "text": "The customer asks whether paying by card is possible: « Bien sûr, le terminal est juste ici ». A reuses « carte » to mean the menu, B gives the price, and C talks about a ticket office's hours.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
  },
  {
   "id": "9a0f1db009fd",
@@ -32928,8 +33663,29 @@
   "ctx": []
  },
  {
+  "id": "d6b52dc5e6ac",
+  "text": "The man in a tuque is gliding on skis with poles, in the snow: « Il fait du ski de fond ». There's no bike (A), no lake (B), and no rink or hockey stick (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "51bbf07b827a",
   "text": "The man in an apron is stirring a steaming pot on the stove, which fits what he'd say: « Le repas est presque prêt ! ». There's no sink or dishes (B), no newspaper (C), and he's cooking at home, not at a restaurant (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "4e120ebec223",
+  "text": "The man is holding a dog on a lead: « Il promène son chien ». It's a dog, not a cat, and he isn't feeding it (A); there's no bike or child (C), and no car (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "022b3c3ae0e2",
+  "text": "The man is pushing a trolley full of groceries past the shelves: « Il fait les courses au supermarché ». He isn't cooking (B), there's no platform or train (C), and no car or garage (D).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -33296,6 +34052,13 @@
   "ctx": []
  },
  {
+  "id": "bb4b21dde8bc",
+  "text": "The question asks for help (« vous pourriez m'aider »): « Bien sûr, donnez-la-moi ». A talks about the suitcase's weight, C about the speaker's own holiday, and D reuses « valise » without answering.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "f6d8cc51623b",
   "text": "The question asks the price (« combien coûte ») of the ticket: « Quarante-deux dollars, aller simple ». B gives the platform, C reuses « billet », and D reuses « Québec » to give the travel time.",
   "kind": "exact",
@@ -33305,6 +34068,20 @@
  {
   "id": "d87cbb5e88e7",
   "text": "The question asks what time (« à quelle heure ») the pool closes: « À dix-huit heures, je crois ». A says where it is, C reuses « dimanche » to talk about the price, and D reuses « ferme » with a yes.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "3b21c92718b1",
+  "text": "The question asks where (« où ») to top up the card: « Aux machines, à l'entrée de la station ». A reuses « métro » to give how often trains come, B reuses « carte » to say where the speaker's own card is, and D gives a price.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "b767bcd7b40b",
+  "text": "The question asks whether there's a pharmacy nearby: « Oui, au coin de la rue, à gauche ». A says when the speaker takes a medicine, B talks about a doctor, and D says the speaker isn't ill.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -33809,6 +34586,13 @@
   "ctx": []
  },
  {
+  "id": "f899cffe9d33",
+  "text": "The waiter asks which dessert (« comme dessert ») the customer wants: « Une tarte aux pommes, s'il vous plaît ». A asks for a table, which comes before the meal; C gives the price of the lunch menu; and D answers a question about booking.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "02e0cc1783c6",
   "text": "The weather in the background: neigeait. Leaving is the event: avons quitté.",
   "kind": "exact",
@@ -33848,6 +34632,34 @@
   "ctx": [
    "· the whole plan is done"
   ]
+ },
+ {
+  "id": "4fea12235163",
+  "text": "The woman in a helmet is riding a bike: « Elle fait du vélo avec un casque ». There's no car (A), she isn't walking and there's no snow (B), and there's no bakery (C).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "0494a5378286",
+  "text": "The woman is painting a wall with a roller, next to a ladder, so she might warn: « Attention, la peinture est fraîche ! ». Nobody is setting off by car (A), there's no table or meal (B), and no station (C).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "5f3158ebed12",
+  "text": "The woman is pouring water from a watering can onto the flowers: « Elle arrose les fleurs du jardin ». She isn't at a market (B), there are no dishes (C), and there's no pool (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "be815f2846f9",
+  "text": "The woman stands in front of a market stall with a bag, reaching for the apples: « Elle achète des pommes au marché ». She's the customer, not the seller (A), it's a stall, not an orchard (C), and she isn't baking (D).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
  },
  {
   "id": "cfb75ddbfda1",
@@ -35773,6 +36585,13 @@
   "text": "Two owners (ma sœur et son mari): leur voiture, not sa.",
   "kind": "exact",
   "where": "content:hunt",
+  "ctx": []
+ },
+ {
+  "id": "b0b55c45fec5",
+  "text": "Two people sit on a blanket with a basket, by a lake with a canoe: « Ils pique-niquent au bord du lac ». They're outdoors, not washing up at home (B), there's no bus or town (C), and no tent (D).",
+  "kind": "exact",
+  "where": "content:comp",
   "ctx": []
  },
  {
