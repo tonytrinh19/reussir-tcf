@@ -529,6 +529,1453 @@
    "Q": "fr-fr-tutor-5"
   }
  },
+ "co-exam-2-01": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "9b42adc57984",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 18.9,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-podcaster-6"
+  }
+ },
+ "co-exam-2-02": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "be36bcf6faf8",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 18.2,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-podcaster-11"
+  }
+ },
+ "co-exam-2-03": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "6a56c50c86ac",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 17.4,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-tutor-7"
+  }
+ },
+ "co-exam-2-04": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "04f650ec8241",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 19.6,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-podcaster-1"
+  }
+ },
+ "co-exam-2-05": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "c4f2c2870196",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 21.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-concierge-4"
+  }
+ },
+ "co-exam-2-06": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d5059def0b3a",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 18.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-4",
+   "B": "fr-fr-tutor-4"
+  }
+ },
+ "co-exam-2-07": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d934c1543de3",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 16.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-training-4",
+   "B": "fr-fr-advisor-12"
+  }
+ },
+ "co-exam-2-08": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "61bddbb99fbd",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 26.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-csagent-3",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-09": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e04d1f302e78",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 26.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-10": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "6a388155b43d",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 23.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-5",
+   "B": "fr-fr-podcaster-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-11": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e09e7229f284",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 26.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-12": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "43b2e6763b02",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 27.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-tutor-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-13": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "a2af574feb45",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 31.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-14": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "cf89f4324209",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 25.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-6",
+   "B": "fr-fr-podcaster-11",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-15": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "8b65970206b2",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 31.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-16": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e22d36854756",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 27.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-12",
+   "B": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-17": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "760b4f9547be",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 26.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-2",
+   "B": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-18": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e92cf1e8dfc6",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 28.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-5",
+   "B": "fr-fr-advisor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-19": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "be5d3e916de0",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 34.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-20": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "a6d1cf851aeb",
+  "pace": "Speak at a natural pace.",
+  "seconds": 29.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-8",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-21": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "cbdf2e42a5a7",
+  "pace": "Speak at a natural pace.",
+  "seconds": 34.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-22": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "cef180965cc3",
+  "pace": "Speak at a natural pace.",
+  "seconds": 30.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-23": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "5dd4fa9fd134",
+  "pace": "Speak at a natural pace.",
+  "seconds": 30.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-7",
+   "B": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-24": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ec0e3495b26e",
+  "pace": "Speak at a natural pace.",
+  "seconds": 29.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-4",
+   "B": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-25": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "68189bd12bf2",
+  "pace": "Speak at a natural pace.",
+  "seconds": 34.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-training-4",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-26": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "15b34ee18e88",
+  "pace": "Speak at a natural pace.",
+  "seconds": 32.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-27": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "8a0337cb2571",
+  "pace": "Speak at a natural pace.",
+  "seconds": 30.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-csagent-3",
+   "B": "fr-fr-advisor-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-28": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e1acb3c79ef2",
+  "pace": "Speak at a natural pace.",
+  "seconds": 31.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-6",
+   "B": "fr-fr-podcaster-5",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-29": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "71916fb9f69f",
+  "pace": "Speak at a natural pace.",
+  "seconds": 30.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-tutor-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-30": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "af0533db63ca",
+  "pace": "Speak at a natural pace.",
+  "seconds": 44.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-31": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "68cac0bd0d85",
+  "pace": "Speak at a natural pace.",
+  "seconds": 37.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-32": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d625d07ec046",
+  "pace": "Speak at a natural pace.",
+  "seconds": 39.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-1",
+   "B": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-33": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "c40fb4dfb062",
+  "pace": "Speak at a natural pace.",
+  "seconds": 42.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-7",
+   "B": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-34": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "5e9c4019a14a",
+  "pace": "Speak at a natural pace.",
+  "seconds": 35.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-11",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-35": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ed3b4e3d53d3",
+  "pace": "Speak at a natural pace.",
+  "seconds": 42.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-csagent-3",
+   "B": "fr-fr-advisor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-36": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "6c237c9f1927",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 49.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-37": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "213548a137b9",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 57.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-38": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ca9793ae8103",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 43.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-12",
+   "B": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-2-39": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "284e67759c74",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 53.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-01": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "3ffa17503908",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 19.6,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-podcaster-5"
+  }
+ },
+ "co-exam-3-02": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e937c97947bf",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 20.8,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-tutor-6"
+  }
+ },
+ "co-exam-3-03": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "a11c9f08306f",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 18.8,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-csagent-3"
+  }
+ },
+ "co-exam-3-04": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "85bf79b223c1",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 16.3,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-podcaster-2"
+  }
+ },
+ "co-exam-3-05": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ec0b2a88bef7",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 19.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-9",
+   "B": "fr-fr-podcaster-8"
+  }
+ },
+ "co-exam-3-06": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "b7dadd251825",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 18.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-7",
+   "B": "fr-fr-podcaster-1"
+  }
+ },
+ "co-exam-3-07": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d957e960bb9e",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 16.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-podcaster-6"
+  }
+ },
+ "co-exam-3-08": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "7ff93d9205a0",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 19.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-09": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "a40881dadce0",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 24.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-10": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ceb8a89e7fbe",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 23.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-2",
+   "B": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-11": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "21d5ffe83f9d",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 28.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-12": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "c2a1b19173be",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 27.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-5",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-13": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "b654c202e153",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 29.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-4",
+   "B": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-14": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e880185daec0",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 33.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-15": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "82d2c4fd68fa",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 28.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-16": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "4fbf0bfa03a6",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 28.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-4",
+   "B": "fr-fr-training-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-17": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "54176b5c540f",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 29.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-12",
+   "B": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-18": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "624206e142b3",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 24.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-csagent-3",
+   "B": "fr-fr-tutor-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-19": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "848b82dcd3ca",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 29.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-20": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "0545d5a6dc81",
+  "pace": "Speak at a natural pace.",
+  "seconds": 34.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-podcaster-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-21": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "b60e428934c8",
+  "pace": "Speak at a natural pace.",
+  "seconds": 35.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-6",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-22": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "f05d219d357b",
+  "pace": "Speak at a natural pace.",
+  "seconds": 33.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-23": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d3e50dad74b8",
+  "pace": "Speak at a natural pace.",
+  "seconds": 36.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-12",
+   "B": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-24": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "684c88e5d6ad",
+  "pace": "Speak at a natural pace.",
+  "seconds": 32.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-4",
+   "B": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-25": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "0edbf7723208",
+  "pace": "Speak at a natural pace.",
+  "seconds": 31.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-7",
+   "B": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-26": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "76ae295c6526",
+  "pace": "Speak at a natural pace.",
+  "seconds": 32.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-training-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-27": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d0fda100bea6",
+  "pace": "Speak at a natural pace.",
+  "seconds": 36.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-28": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "13b2b011239d",
+  "pace": "Speak at a natural pace.",
+  "seconds": 35.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-csagent-3",
+   "B": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-29": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ecc56a3ab257",
+  "pace": "Speak at a natural pace.",
+  "seconds": 33.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-6",
+   "B": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-30": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "790ae27d91f0",
+  "pace": "Speak at a natural pace.",
+  "seconds": 48.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-31": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "41f07a8ae280",
+  "pace": "Speak at a natural pace.",
+  "seconds": 45.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-5",
+   "B": "fr-fr-advisor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-32": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d3004d4433ee",
+  "pace": "Speak at a natural pace.",
+  "seconds": 42.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-2",
+   "B": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-33": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "873b312a9155",
+  "pace": "Speak at a natural pace.",
+  "seconds": 43.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-34": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "24855994d971",
+  "pace": "Speak at a natural pace.",
+  "seconds": 45.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-2",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-35": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "0e274319cbd3",
+  "pace": "Speak at a natural pace.",
+  "seconds": 51.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-36": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "2280abf7d638",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 53.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-37": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "7fb8bf29e6ef",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 56.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-38": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "3e8b78a01eb9",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 45.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-podcaster-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-3-39": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e3c4ff3e5599",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 53.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-01": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d05afd9d0c81",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 20.7,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-advisor-4"
+  }
+ },
+ "co-exam-4-02": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "a51016bb27fa",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 17.9,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-advisor-12"
+  }
+ },
+ "co-exam-4-03": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "5064872b87df",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 17.4,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-podcaster-9"
+  }
+ },
+ "co-exam-4-04": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "899c90dfdfe6",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A1, and leave a short pause after each sentence.",
+  "seconds": 17.5,
+  "via": "vertex",
+  "voices": {
+   "N": "fr-fr-training-4"
+  }
+ },
+ "co-exam-4-05": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "c6b57feedb5c",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 18.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-4",
+   "B": "fr-fr-csagent-3"
+  }
+ },
+ "co-exam-4-06": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "6d4ce4ceb0b9",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 17.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-tutor-7"
+  }
+ },
+ "co-exam-4-07": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "6551a5f0ab5d",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 20.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-12",
+   "B": "fr-fr-podcaster-5"
+  }
+ },
+ "co-exam-4-08": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "122375760d1c",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 22.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-09": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "07b6341856bc",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 25.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-10": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "137c717edf50",
+  "pace": "Speak slowly and clearly, as for a learner of French at level A2.",
+  "seconds": 22.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-advisor-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-11": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "dc9262099992",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 30.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-9",
+   "B": "fr-fr-podcaster-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-12": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "493078eeddb7",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 26.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-13": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "5e5be75ff1de",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 26.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-1",
+   "B": "fr-fr-podcaster-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-14": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "18d7c11bc141",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 30.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-15": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "71d34f19a811",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 29.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-5",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-16": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "4114f0f06695",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 25.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-4",
+   "B": "fr-fr-csagent-3",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-17": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "b360c0aa9a04",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 29.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-18": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "879c7eeae59b",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 25.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-6",
+   "B": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-19": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "929ec0c81946",
+  "pace": "Speak slowly and clearly, as for a learner of French at level B1, and leave a short pause after each sentence.",
+  "seconds": 35.4,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-20": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "b333498b300d",
+  "pace": "Speak at a natural pace.",
+  "seconds": 33.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-7",
+   "B": "fr-fr-podcaster-11",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-21": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "afaffb7a564c",
+  "pace": "Speak at a natural pace.",
+  "seconds": 33.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-9",
+   "B": "fr-fr-podcaster-5",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-22": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "7d07faa076e7",
+  "pace": "Speak at a natural pace.",
+  "seconds": 35.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-23": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "0a0d9349e19b",
+  "pace": "Speak at a natural pace.",
+  "seconds": 33.0,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-4",
+   "B": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-24": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "1185e4e6f1fa",
+  "pace": "Speak at a natural pace.",
+  "seconds": 36.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-csagent-3",
+   "B": "fr-fr-advisor-2",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-25": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "bb94001d1f37",
+  "pace": "Speak at a natural pace.",
+  "seconds": 30.8,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-podcaster-8",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-26": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "52b13f42d697",
+  "pace": "Speak at a natural pace.",
+  "seconds": 36.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-training-4",
+   "B": "fr-fr-concierge-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-27": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "2124a89cb084",
+  "pace": "Speak at a natural pace.",
+  "seconds": 31.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-28": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "7f9b7d34552f",
+  "pace": "Speak at a natural pace.",
+  "seconds": 37.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "B": "fr-fr-podcaster-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-29": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "ed2698d5bec3",
+  "pace": "Speak at a natural pace.",
+  "seconds": 33.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-4",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-30": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d4874c0df1c2",
+  "pace": "Speak at a natural pace.",
+  "seconds": 36.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-1",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-31": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "927eeab07d1c",
+  "pace": "Speak at a natural pace.",
+  "seconds": 42.7,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-6",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-32": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "f0ee3760db85",
+  "pace": "Speak at a natural pace.",
+  "seconds": 39.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-11",
+   "B": "fr-fr-concierge-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-33": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "e8afb303ae83",
+  "pace": "Speak at a natural pace.",
+  "seconds": 44.2,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-2",
+   "B": "fr-fr-advisor-12",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-34": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "3cb724cc962b",
+  "pace": "Speak at a natural pace.",
+  "seconds": 40.3,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-35": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "435a1143b1ee",
+  "pace": "Speak at a natural pace.",
+  "seconds": 41.6,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-9",
+   "B": "fr-fr-tutor-7",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-36": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "957310a987fb",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 48.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-37": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "bba7072ce032",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 52.5,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-tutor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-38": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "d27ddba0685d",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 43.9,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-podcaster-8",
+   "B": "fr-fr-advisor-9",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
+ "co-exam-4-39": {
+  "date": "2026-10-18",
+  "engine": "gemini",
+  "hash": "6453e001836c",
+  "pace": "Speak at a natural, fluent pace.",
+  "seconds": 50.1,
+  "via": "vertex",
+  "voices": {
+   "A": "fr-fr-advisor-4",
+   "Q": "fr-fr-tutor-5"
+  }
+ },
  "co-famille-b1": {
   "date": "2026-10-05",
   "engine": "gemini",

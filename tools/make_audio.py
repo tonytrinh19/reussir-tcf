@@ -27,12 +27,17 @@ Usage: python3 tools/make_audio.py               record new or changed sets and 
        python3 tools/make_audio.py co-sante-b2   re-record one set (or exam item, co-exam-1-07) with Microsoft
        python3 tools/make_audio.py --gemini      record Gemini takes (sets, then exam items) until the daily limit (or just the ids named)
        python3 tools/make_audio.py --use-gemini  put the ready Gemini takes on the site (all, or set ids)
+       python3 tools/make_audio.py --vertex      record with the same Gemini model on Google Cloud (Vertex AI), paid from
+                                                 a Cloud project with no daily limit, straight onto the site: everything
+                                                 not on Gemini yet, or the ids named (needs gcloud auth application-default
+                                                 login, and GOOGLE_CLOUD_PROJECT or a gcloud default project)
        python3 tools/make_audio.py --status      show each set's and exam item's recording and the script targets
        python3 tools/make_audio.py --word-counts each script's spoken word count, as JSON (for check_co.js)
 """
 import array
 import asyncio
 import base64
+import concurrent.futures
 import datetime
 import difflib
 import hashlib
@@ -558,16 +563,24 @@ def to_pcm(raw, mime):
         return decode(src)
 
 
+def turns(s):
+    """Each line Gemini reads in the item's own request, with its delivery note: the scene, the speaker's
+    note and the level's pace (and, for a spoken option, the pause after it); the speaker when there are two."""
+    cast, who = s["cast"], doc_speakers(s)
+    out = []
+    for line in doc_lines(s):
+        spoken_options = s.get("kind") in ("pic", "reply") and re.match(r"[ABCD]\. ", line["text"])
+        meta = {"style": " ".join([cast["scene"], cast[line["speaker"]]["style"], pace_of(s)]) + (OPTION_NOTE if spoken_options else "")}
+        if len(who) > 1:
+            meta["speaker"] = line["speaker"]
+        out.append((tts_text(line["text"]), meta))
+    return out
+
+
 def gemini_request(s):
     """One request for the whole set: each line is a turn with its speaker's delivery note."""
     cast, who = s["cast"], doc_speakers(s)
-    content = []
-    for line in doc_lines(s):
-        spoken_options = s.get("kind") in ("pic", "reply") and re.match(r"[ABCD]\. ", line["text"])
-        meta = {"type": "speech_metadata", "style": " ".join([cast["scene"], cast[line["speaker"]]["style"], pace_of(s)]) + (OPTION_NOTE if spoken_options else "")}
-        if len(who) > 1:
-            meta["speaker"] = line["speaker"]
-        content.append({"type": "text", "text": tts_text(line["text"]), "annotations": [meta]})
+    content = [{"type": "text", "text": text, "annotations": [dict(type="speech_metadata", **meta)]} for text, meta in turns(s)]
     if len(who) > 1:
         config = {"mode": "conversational", "speakers": [{"speaker": sp, "voice": cast[sp]["gemini"]} for sp in who]}
     else:
@@ -723,12 +736,13 @@ def run_narrator(chunk, st, key):
     print("narrator               %d questions  ready (%s)" % (len(qs), voice), flush=True)
 
 
-def compose(s, speech):
-    """An exam item's recording: its document, a pause and the narrator's question, each at the same loudness;
-    or just the document when the item has no question. Sets are their speech alone."""
+def compose(s, speech, clip=None):
+    """An exam item's recording: its document, a pause and the narrator's question (the cached clip unless one
+    is given), each at the same loudness; or just the document when the item has no question. Sets are their
+    speech alone."""
     if "exam" not in s or question_of(s) is None:
         return speech
-    return level(speech) + silence(QUESTION_GAP) + level(load_clip(s))
+    return level(speech) + silence(QUESTION_GAP) + level(load_clip(s) if clip is None else clip)
 
 
 def take_path(s, h=None):
@@ -1030,6 +1044,167 @@ def use_gemini(sets, ids):  # sets here are sets and exam items
     print("Put %d Gemini recording%s on the site" % (used, "" if used == 1 else "s"))
 
 
+# ---- Gemini on Google Cloud (Vertex AI): the same model and voices as --gemini, paid from a Cloud project
+# (and its credits) instead of the free tier, so there's no daily limit. The user chose it on 2026-10-18 for the
+# CO Examens blancs 2-4. Recordings go on the site at once and count as Gemini ones in recordings.json, so the
+# nightly --gemini run leaves them alone.
+
+VERTEX_URL = "https://aiplatform.googleapis.com/v1/projects/%s/locations/global/publishers/google/models/%s:generateContent"
+VERTEX_WORKERS = 3  # requests at once
+# Every narrator question recorded on Vertex is read alone in its request, by the same voice with this same
+# instruction, so the narrator sounds the same on every question (the user asked for that on 2026-10-18).
+VERTEX_NARRATOR_NOTE = " Read the question once, at a calm, even pace, in the same neutral tone as every other question."
+# A 50 ms stretch this many times louder than the speech's median, and at least this loud, is a glitch: the take is
+# recorded again. (Vertex's WAV ends with a C2PA block, which once played as a burst 7-8 times the speech when it
+# was read as audio; at 5 times, lively C2 delivery was turned down too.)
+BURST_RATIO, BURST_MIN = 7.0, 10000
+
+
+class Vertex:
+    """A Google Cloud project and a gcloud access token, renewed every 40 minutes, never printed."""
+
+    def __init__(self):
+        self.gcloud = shutil.which("gcloud") or next((p for p in ("/opt/homebrew/bin/gcloud", "/usr/local/bin/gcloud") if os.path.exists(p)), None)
+        if not self.gcloud:
+            sys.exit("--vertex needs the Google Cloud CLI (gcloud), signed in with: gcloud auth application-default login")
+        self.project = os.environ.get("GOOGLE_CLOUD_PROJECT", "").strip() or self.gcloud_out("config", "get-value", "project")
+        if not self.project:
+            sys.exit("--vertex needs a Google Cloud project: set GOOGLE_CLOUD_PROJECT, or run: gcloud config set project <id>")
+        self.token, self.at, self.lock = "", 0.0, threading.Lock()
+
+    def gcloud_out(self, *args):
+        r = subprocess.run([self.gcloud, *args], capture_output=True, text=True)
+        return r.stdout.strip() if r.returncode == 0 else ""
+
+    def headers(self):
+        with self.lock:
+            if not self.token or time.time() - self.at > 40 * 60:
+                self.token = self.gcloud_out("auth", "application-default", "print-access-token")
+                if not self.token:
+                    sys.exit("No Google Cloud sign-in: run gcloud auth application-default login")
+                self.at = time.time()
+            return {"Authorization": "Bearer " + self.token, "x-goog-user-project": self.project, "Content-Type": "application/json"}
+
+    def speak(self, parts, speech, what):
+        """One request, retried on rate limits, server errors, dropped connections and timeouts; its audio as PCM."""
+        body = json.dumps({"contents": [{"role": "user", "parts": parts}],
+                           "generationConfig": {"responseModalities": ["AUDIO"], "speechConfig": speech}}).encode()
+        url = VERTEX_URL % (self.project, GEMINI_TTS)
+        for attempt in range(TRIES):
+            start, wait = time.time(), 15 * 2 ** attempt
+            try:
+                r = json.loads(fetch(urllib.request.Request(url, data=body, method="POST", headers=self.headers()), REQUEST_TIMEOUT))
+                audio = [p["inlineData"] for c in r.get("candidates", [])[:1] for p in c.get("content", {}).get("parts", []) if "inlineData" in p]
+                if not audio:
+                    raise RuntimeError("%s: no audio in Vertex AI's answer: %s" % (what, json.dumps(r)[:300]))
+                # to_pcm reads only the WAV's data chunk, so the C2PA block after it is left out.
+                return b"".join(to_pcm(base64.b64decode(a["data"]), a.get("mimeType")) for a in audio)
+            except urllib.error.HTTPError as e:
+                msg = e.read().decode("utf-8", "replace")
+                if e.code == 401:
+                    self.token = ""
+                elif e.code not in (429, 500, 502, 503, 504):
+                    raise RuntimeError("%s: Vertex AI error %s: %s" % (what, e.code, msg[:300]))
+                problem = "error %s" % e.code
+            except (urllib.error.URLError, http.client.HTTPException, OSError) as e:
+                problem = "%s (%s)" % (type(e).__name__, str(getattr(e, "reason", e))[:80] or "connection lost")
+            if attempt == TRIES - 1:
+                raise Busy("%s: %s, %d tries" % (what, problem, TRIES))
+            print("    %s: attempt %d of %d failed after %.0f s: %s. Retrying in %.0f s." % (what, attempt + 1, TRIES, time.time() - start, problem, wait), flush=True)
+            nap(wait)
+
+
+def burst_problem(pcm):
+    """A stretch far louder than the speech around it (a glitch), as a problem to retry; empty when the take is fine."""
+    a, w = array.array("h", pcm), int(SR * 0.05)
+    rms = [math.sqrt(sum(x * x for x in a[i:i + w]) / w) for i in range(0, len(a) - w + 1, w)]
+    speech = sorted(r for r in rms if r > 300)
+    if not speech:
+        return "no speech"
+    med, top = speech[len(speech) // 2], speech[-1]
+    if top <= BURST_MIN or top <= BURST_RATIO * med:
+        return ""
+    return "a burst %.0f× louder than the speech, at %.1f s" % (top / med, rms.index(top) * 0.05)
+
+
+def trim_silence(pcm, pad=CLIP_PAD):
+    """The clip without the silence around it (below SPLIT_DB), keeping `pad` seconds, as split_clips does."""
+    a, frame = array.array("h", pcm), int(SR * 0.02)
+    on = [i for i in range(0, len(a) - frame + 1, frame)
+          if 20 * math.log10(max(1e-9, math.sqrt(sum(x * x for x in a[i:i + frame]) / frame) / 32768)) > SPLIT_DB]
+    if not on:
+        return pcm
+    lo, hi = max(0, on[0] - int(SR * pad)), min(len(a), on[-1] + frame + int(SR * pad))
+    return a[lo:hi].tobytes()
+
+
+def vertex_item(s, vx):
+    """Records one set or exam item on Vertex and puts it on the site; returns its recordings.json entry, its
+    seconds and a note. A take that's too short or has a burst is recorded once more before giving up."""
+    cast, who = s["cast"], doc_speakers(s)
+    parts = [{"text": text, "speechMetadata": meta} for text, meta in turns(s)]
+    speech = ({"multiSpeakerVoiceConfig": {"speakerVoiceConfigs": [{"speaker": sp, "voiceConfig": {"voice": cast[sp]["gemini"]}} for sp in who]}}
+              if len(who) > 1 else {"voiceConfig": {"voice": cast[who[0]]["gemini"]}})
+    q = question_of(s) if "exam" in s else None
+    problem = ""
+    for attempt in range(2):
+        doc = vx.speak(parts, speech, s["id"])
+        clip = None
+        if q:
+            nar = cast["Q"]
+            clip = trim_silence(vx.speak([{"text": tts_text(q), "speechMetadata": {"style": nar["style"] + VERTEX_NARRATOR_NOTE}}],
+                                         {"voiceConfig": {"voice": nar["gemini"]}}, s["id"] + " question"))
+        whole = compose(s, doc, clip)
+        sec = (len(whole) / 2 + int(SR * (LEAD_IN + TAIL))) / SR
+        # Judged on the whole item, both parts levelled: a 2-second question alone, with one stressed syllable
+        # against its few quiet frames, looked like a burst.
+        problem = burst_problem(whole) or length_problem(sec, s)
+        if not problem:
+            break
+        print("%-22s %s  take %d NOT KEPT (%s)%s" % (s["id"], clock(sec), attempt + 1, problem, ", recording it again" if attempt == 0 else ""), flush=True)
+    if problem:
+        return None, sec, problem
+    os.makedirs(os.path.dirname(out_path(s)), exist_ok=True)
+    encode(silence(LEAD_IN) + whole + silence(TAIL), out_path(s))
+    entry = {"engine": "gemini", "via": "vertex", "voices": {sp: cast[sp]["gemini"] for sp in speakers(s)}, "hash": content_hash(s),
+             "seconds": round(sec, 1), "pace": pace_of(s), "date": today()}
+    return entry, sec, length_note(sec, s)
+
+
+def run_vertex(sets, items, only):
+    """Records with Gemini on Vertex AI: the ids named (again, even if already on Gemini), or else every set and
+    exam item not on the site with Gemini for its current script."""
+    vx = Vertex()
+    manifest = load_json(MANIFEST, {})
+    todo = [s for s in sets + items if s["id"] in only] if only else [s for s in sets + items if not on_site_gemini(manifest, s)]
+    print("Vertex AI (%s, project %s): %d to record, %d at a time" % (GEMINI_TTS, vx.project, len(todo), VERTEX_WORKERS), flush=True)
+    done, failed, long, total = 0, [], [], 0.0
+    with concurrent.futures.ThreadPoolExecutor(VERTEX_WORKERS) as pool:
+        jobs = {pool.submit(vertex_item, s, vx): s for s in todo}
+        for job in concurrent.futures.as_completed(jobs):
+            s = jobs[job]
+            try:
+                entry, sec, note = job.result()
+            except (Busy, RuntimeError) as e:
+                failed.append(s["id"])
+                print("%-22s FAILED: %s" % (s["id"], str(e)[:300]), flush=True)
+                continue
+            if not entry:
+                failed.append(s["id"])
+                print("%-22s FAILED twice: %s" % (s["id"], note), flush=True)
+                continue
+            manifest[s["id"]] = entry
+            save_json(MANIFEST, manifest)  # after each, so an interrupted run keeps what's done
+            done, total = done + 1, total + sec
+            if note:
+                long.append("%s (%s)" % (s["id"], note))
+            print("%-22s %s  on the site (%s)%s" % (s["id"], clock(sec), ", ".join(entry["voices"].values()), ("  NOTE: " + note) if note else ""), flush=True)
+    exam_targets(load_status(), items, manifest)
+    print("Recorded %d (%s of audio)%s" % (done, clock(total), "; failed: " + ", ".join(sorted(failed)) if failed else ""))
+    if long:
+        print("Kept, but more than %d%% over their level's length, rewrite later: %s" % (round(LENGTH_TOLERANCE * 100), ", ".join(sorted(long))))
+
+
 # ---- the audit: every Gemini recording on the site transcribed once and compared with its script
 
 def transcript_file(path, key):
@@ -1185,7 +1360,7 @@ def main():
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
     sets = load_sets()
     items = load_exam()
-    known = {"--force", "--gemini", "--use-gemini", "--status", "--word-counts", "--audit"}
+    known = {"--force", "--gemini", "--use-gemini", "--vertex", "--status", "--word-counts", "--audit"}
     if flags - known:  # a mistyped flag (--help included) used to start a Microsoft recording
         sys.exit("Unknown option: %s. Options: %s" % (", ".join(sorted(flags - known)), ", ".join(sorted(known))))
     unknown = [a for a in args if a not in {s["id"] for s in sets + items}]
@@ -1201,6 +1376,8 @@ def main():
         run_gemini(sets, items, set(args))
     elif "--use-gemini" in flags:
         use_gemini(sets + items, set(args))
+    elif "--vertex" in flags:
+        run_vertex(sets, items, set(args))
     else:
         run_microsoft(sets, items, "--force" in flags, set(args))
 
