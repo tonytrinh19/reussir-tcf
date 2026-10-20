@@ -563,13 +563,6 @@
   "ctx": []
  },
  {
-  "id": "db9093ec1cdc",
-  "text": "« à force de traquer scientifiquement la moindre seconde de sommeil pour flatter les exigences de rentabilité, nous avons réussi le tour de force d’industrialiser notre nuit jusqu'à l’épuisement »: the attempt to optimize rest creates exhaustion. He does not say employees reject these tools (« Le rejet par les travailleurs... »), but rather that they internalize the anxiety; the corporate appraisal is only a metaphor (« comme une évaluation trimestrielle »), not a literal claim about workplace reviews (« L'évaluation continue des salariés... »); and the devices' technical accuracy is not questioned (« L'inefficacité des capteurs numériques... »), but rather the obsession with their metrics.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "d912a23d7af8",
   "text": "« À l'intérieur, c'est complet, mais je peux vous installer sur la terrasse » — « Parfait ». Inside is full; they keep the same restaurant; and a table for four was the first booking, before they became six.",
   "kind": "exact",
@@ -1018,13 +1011,6 @@
   "ctx": []
  },
  {
-  "id": "4e1801bdd7ca",
-  "text": "« cette technicisation forcenée confisque la souveraineté populaire : elle transmue des choix de valeurs fondamentaux en impératifs logistiques présentés comme indiscutables » and « toute contestation idéologique est d'emblée délégitimée »: reducing policy debates to administrative management removes genuine moral choices from public deliberation. The reference to « dysfonctionnement technique » is what the speaker criticizes public problems being reduced to, not an actual increase in technical errors. « Loin de pacifier durablement les tensions civiques par la rigueur scientifique » explains why technocracy is flawed, not that the primary problem is scientific experts failing to settle disputes. The mention of « usager » and « calibrage algorithmique » does not mean users actively rebel against tools; in fact, the speaker laments that citizens are reduced to passive recipients whose dissent is dismissed.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "fac3a9f452ae",
   "text": "« cette vitalité culturelle inattendue m'a vraiment impressionnée »: she was pleasantly surprised by the lively cultural and community scene. The distractor « cours sur le campus universitaire » repeats words from the recording but refers to the only place where she already expected to hear French; « bilinguisme fédéral » is described as merely theoretical in daily life; and host families are never mentioned in the recording.",
   "kind": "exact",
@@ -1214,6 +1200,13 @@
   "ctx": []
  },
  {
+  "id": "774d2fb3f050",
+  "text": "« Durant ce court rendez-vous, ce geste simple apporte à ces personnes une vraie considération humaine et le sentiment précieux d'exister »: what he feels he truly provides is human recognition and dignity. « Une présentation physique soignée pour un travail » is conceded as a side benefit (« Certes, cela améliore la présentation physique avant une entrevue pour un travail »), not the primary goal; « Une réponse durable aux besoins de propreté » is what others assume it is about (« certains pensent surtout aux questions de propreté »), which he explicitly contrasts with his actual aim; and medical care (« soins de santé ») is never mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "b6e2fde54cfa",
   "text": "« Elle a surtout l'honnêteté, rare dans ce genre de livre, de dire souvent : « On ne sait pas. » » The book has « Sans une seule équation » and some repetition, and it refuses false certainty.",
   "kind": "exact",
@@ -1279,6 +1272,13 @@
  {
   "id": "ba6d65a216b0",
   "text": "« en faire notre seule stratégie, c'est parier sur une vitesse qu'aucune économie n'a jamais atteinte ». She explicitly says it isn't a decoy (« je ne dis pas que… un leurre »), that some countries did cut emissions, and moving production abroad is what hides emissions, not a solution.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "8dc3f08dd806",
+  "text": "« en raison de la réfection complète de la chaussée »: the market is moved because of road paving work, rephrased as « travaux sur la voirie ». The music festival takes place on Sunday in the riverside park, not at the square; the arena parking lot is merely the temporary relocation venue, not being inaugurated; and the parking lot itself is not being repaved.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -1858,13 +1858,6 @@
   "ctx": []
  },
  {
-  "id": "ae03e8d4048c",
-  "text": "« la présence dans la rue n'est désormais tolérée qu'à condition d'être monétisée » and « l'espace commun cesse d'être un bien inconditionnellement partagé pour devenir une ressource marchande »: staying in public space is now subordinated to paying. Sanitary reasons are mentioned as an urbanist pretext (« de prétendus impératifs sécuritaires ou sanitaires »), not a neglected concern; terraces are expanding at the expense of benches, not lacking; and uncomfortable benches stem from a commercial and hostile design, not aesthetic goals.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "a4e705b65528",
   "text": "« la question n'a rien d'une insulte… Ce qui me pèse, c'est sa répétition, et surtout ce qu'elle suppose » : that she is « d'abord… quelqu'un d'ailleurs ». She says it's usually asked « avec gentillesse », and she'd rather people asked about her job first.",
   "kind": "exact",
@@ -1916,6 +1909,20 @@
  {
   "id": "32e3b48de719",
   "text": "« laissez votre voiture à la maison : les trains de banlieue seront plus fréquents, et le métro restera ouvert plus tard ». Monday 5 a.m. is when the closure ends, Friday 8 p.m. when it starts, and the metro stays open later on Saturday.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "bb5a62d3513d",
+  "text": "« le bénéfice le plus inattendu concerne ma créativité : côtoyer chaque jour des gens venus d'autres horizons renouvelle totalement mes propositions visuelles » shows that the unexpected perk is the creative stimulation she gains from her environment. « préserver ma vie privée » and « limiter mes dépenses » were her initial conscious goals (« je cherchais d'abord à… »), not unexpected discoveries. Developing a local client base is never mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "f80e75d3ff0d",
+  "text": "« Le citoyen se retrouve ainsi dépossédé de sa prérogative fondamentale : arbitrer souverainement entre des visions du monde incompatibles »: the speaker warns that framing political questions as purely technical optimization removes value-based deliberation from citizens' hands. The distractor on civic apathy is contradicted by her assertion that civic debate does not collapse because citizens disengage (« ne s'effondre pas sous les assauts de l'ignorance populaire »); the distractor on partisan ideology reflects what administrators claim to avoid (« neutralité face aux passions partisanes ») rather than her critique; and voter incompetence is explicitly dismissed as the root cause of the democratic crisis.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -2537,13 +2544,6 @@
   "ctx": []
  },
  {
-  "id": "d20364d772e1",
-  "text": "« Nous prions les nageurs du grand bassin de sortir de l'eau »: they must clear the swimming area they are currently using. « Le cours d'aquagym va commencer » explains why the pool is cleared, not an invitation to participate; « rejoindre les vestiaires » is merely an alternative to moving to the small pool, not an urgent requirement; and « continuer votre séance » refers to finishing their own swim elsewhere, not waiting for a class to end.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "6c50d78ee8a8",
   "text": "« Nous vous offrons une formation rémunérée de six semaines ». Candidates must work every other weekend.",
   "kind": "exact",
@@ -2838,6 +2838,13 @@
   "ctx": []
  },
  {
+  "id": "f3bb0f46c803",
+  "text": "« Prenons plutôt cette plante ! » indicates their final choice, rephrased as « Un végétal pour son intérieur ». « le vin » and « le livre » are discarded at the start (« on oublie le vin et le livre ? »), while « des verres » are already being provided by Thomas's sister (« sa sœur apporte des verres »).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "08d64df4da6e",
   "text": "« Prenons plutôt la séance de vingt et une heures. — D'accord. » 7 p.m. was the first idea, 6:30 p.m. is when work ends, and 8 p.m. is never mentioned.",
   "kind": "exact",
@@ -2903,13 +2910,6 @@
  {
   "id": "5c4f5f909ee5",
   "text": "« Réservez en ligne avant vendredi et économisez 10 % ». Helmets are already included, and nothing is cheaper before opening time.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "ac1a5cf4d262",
-  "text": "« rétablit une véritable intimité sensible avec la matière et son inscription sociale... au profit d'une mémoire collective réactivée »: used goods reconnect the buyer to the material's lived history and human traces. The speaker states that buying second-hand challenges rather than imitates the system of « grandes surfaces »; she expressly dismisses the idea of a « nostalgie décorative passagère » at the beginning; and she notes that « la pure rentabilité monétaire s'efface », directly contradicting the goal of maximizing monetary profit.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -3197,13 +3197,6 @@
  {
   "id": "3ee80cb79705",
   "text": "« une session en présentiel, le samedi matin… On s'inscrit ensemble ? — … d'accord »: the in-person course on Saturday. Online on Thursday is what she rejects; they do sign up; and the library is where the course takes place, not where they'd study alone.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "6ecec5c046c8",
-  "text": "« une surprise formidable m'attendait : en fréquentant régulièrement ces tiers-lieux, j'ai naturellement engagé la conversation avec d'autres travailleurs autonomes, ce qui m'a apporté des collaborations inespérées et de vrais contrats »: she gained unexpected business opportunities and contracts. « réduire mes dépenses fixes » was her deliberate initial goal, not an unexpected benefit; « perdre du temps en trajets » was an initial apprehension she had, not time gained; and learning design software is never mentioned.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -5447,6 +5440,15 @@
   "where": "app",
   "ctx": [
    "<button>…Réduire · close</button>"
+  ]
+ },
+ {
+  "id": "6b823a1e390b",
+  "text": "{0}Resume the exam",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<button>…Resume the exam</button>"
   ]
  },
  {
@@ -9080,13 +9082,6 @@
   ]
  },
  {
-  "id": "1afdfce8b8e8",
-  "text": "Alain explains the postponement by stating that « les projecteurs principaux viennent de tomber en panne », which corresponds to an issue with the lighting system. The referee is confirmed present (« L'arbitre est bien disponible »), the field is in great shape (« l'état de la pelouse reste impeccable »), and the technician did not refuse to intervene, but rather scheduled his work for late afternoon (« le technicien interviendra seulement en fin d'après-midi »).",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "d87c448044de",
   "text": "all",
   "kind": "exact",
@@ -11206,8 +11201,8 @@
   ]
  },
  {
-  "id": "0717464df4b6",
-  "text": "Both speakers reach consensus on « un échéancier graduel » and « une mise en œuvre échelonnée qui sécurise les investissements tout en maintenant une cible contraignante », matching the phased calendar option. The voluntary approach is explicitly ruled out as having failed (« le volontariat d'entreprise a largement démontré ses limites »); an immediate shift to match European standards is rejected as too disruptive (« décréter des exigences rigides du jour au lendemain », « un électrochoc aveugle »); and abandoning legal requirements altogether is dismissed because both agree to keep a mandatory target (« une cible contraignante »).",
+  "id": "50132eeee7d1",
+  "text": "Both speakers reach common ground when speaker A suggests « établir des paliers réglementaires étalés dans le temps » and speaker B explicitly concedes « Là-dessus, nous pouvons nous rejoindre. Si cette trajectoire par étapes permet d'étaler les coûts [...] l'adhésion des entreprises deviendra tout à fait envisageable »: an implementation through progressive stages. Strict immediate requirements (« imposer des exigences uniformes dès maintenant ») were rejected by B as harmful to SMEs; relying only on fiscal incentives (« des incitations fiscales ») was turned down by A (« Les incitations seules ne suffisent plus »); and a permanent exemption for small businesses is never proposed, only time to adapt.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -19376,13 +19371,6 @@
   "ctx": []
  },
  {
-  "id": "360fed2ef9f7",
-  "text": "Joseph's long, silent gaze at the machines without a sigh (« immobile, le regard obstinément fixé sur les lamelles d'acier assoupies, sans laisser échapper le moindre soupir ») after folding his leather apron conveys deep, understated devotion to his lifelong craft. The text states that he did not oppose or complain about the buyers (« Joseph ne protesta pas »), ruling out anger at their redevelopment plan. The river sounds were merely drowned out by the machinery during working years, not the subject of his longing. His lingering, solemn posture reflects profound loss rather than relief at stopping work.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "4b0e5452f21e",
   "text": "Jouaient was going on; a commencé breaks in.",
   "kind": "exact",
@@ -19982,6 +19970,13 @@
   "ctx": [
    "Latest round …/… · ……"
   ]
+ },
+ {
+  "id": "0035fbfb082c",
+  "text": "Laurent explains the schedule change by saying « L'équipe adverse a des soucis de transport avec son car habituel »: travel trouble for the visiting team. The referee's injury is brought up to say he has recovered (« bien remis de sa blessure »); field issues are explicitly ruled out (« et non pas un problème de terrain »); and the players are mentioned only so Marc can inform them of the new time (« prévenir vos joueurs »).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
  },
  {
   "id": "dc7193cecf50",
@@ -28204,6 +28199,13 @@
   "ctx": []
  },
  {
+  "id": "bdfa02d9c4c8",
+  "text": "Rachid states: « Mon but, c'est d'offrir un outil vocal autonome pour que chaque adulte apprenne à déchiffrer en toute discrétion, sans dépendre du réseau ni craindre le regard des autres. », meaning adults can learn to read privately without embarrassment. « Remplacer les cours du soir par un forfait mobile » borrows verbatim terms from his anecdotes about his mother and low-income immigrants, but combines them nonsensically. « Financer du matériel informatique pour les écoles défavorisées » introduces school funding, an idea never raised in the audio. « Distribuer un outil vocal gratuit aux familles immigrantes » misconstrues his target audience and falsely claims the software is being handed out free to families.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "01e49a5d019b",
   "text": "range and control of grammar",
   "kind": "exact",
@@ -29134,7 +29136,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>Resume the exam</button>"
+   "<button>Resume the exam</button>",
+   "<button>…Resume the exam</button>"
   ]
  },
  {
@@ -32890,13 +32893,6 @@
   "ctx": []
  },
  {
-  "id": "049c2bfac922",
-  "text": "Tariq states his main goal clearly: « Ce que je veux avant tout, c'est donner la possibilité aux gens peu scolarisés de s'entraîner seuls et à leur rythme, sans contrainte technique », which corresponds to enabling adults to learn on their own. The option about replacing traditional adult courses is explicitly refuted (« Mon intention n'est absolument pas de remplacer les cours traditionnels pour adultes »); installing Internet kiosks is completely unmentioned and contrary to his offline approach; and making money through specialized centres is also rejected (« ni de faire fortune auprès des centres spécialisés »).",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "7bb0ddf9221c",
   "text": "Task",
   "kind": "exact",
@@ -33416,15 +33412,15 @@
   "ctx": []
  },
  {
-  "id": "d64d42029e1a",
-  "text": "The agent announces that boarding will exceptionally take place « devant le bureau d'information », which corresponds to « Au point d'accueil ». The « quai numéro trois » is closed due to construction work (« en raison de travaux au quai numéro trois »); passengers are explicitly instructed not to stay in the waiting room (« ne restez pas dans la salle d'attente »); and the ticket counters (« guichets ») are simply mentioned as a nearby landmark (« à côté des guichets »), not the boarding location.",
+  "id": "e3867090a8fb",
+  "text": "The agent explains that because of roadworks at the station, the car has been moved to rue des Carmes and instructs: « Vous devez la récupérer directement là-bas avec votre carte d'accès », meaning the user must pick it up at this other location. « Inutile de modifier votre réservation en ligne » clarifies that changing the reservation online is not needed; the station (« gare ») is mentioned as the usual parking spot that is currently blocked, not a place to drop off an access card; and paying parking fees is never mentioned.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
  },
  {
-  "id": "e3867090a8fb",
-  "text": "The agent explains that because of roadworks at the station, the car has been moved to rue des Carmes and instructs: « Vous devez la récupérer directement là-bas avec votre carte d'accès », meaning the user must pick it up at this other location. « Inutile de modifier votre réservation en ligne » clarifies that changing the reservation online is not needed; the station (« gare ») is mentioned as the usual parking spot that is currently blocked, not a place to drop off an access card; and paying parking fees is never mentioned.",
+  "id": "14f50159e42d",
+  "text": "The agent instructs passengers to head to the ticket office: « rejoignez plutôt la billetterie », which matches « Près des guichets de vente. » Platform 4 (« quai numéro quatre ») and the parking lot stop (« arrêt du stationnement ») are ruled out (« oubliez »), and the roadwork (« travaux ») is the cause of the relocation, not the meeting point.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -33514,13 +33510,6 @@
   "ctx": []
  },
  {
-  "id": "d443a7dda4b2",
-  "text": "The attendant states that before going on the ice, parents must « faire valider l'équipement de leur enfant à l'accueil », which means having their gear checked at the counter. The other options are incorrect: « patinage libre » is the ongoing activity, not a booking to make; the helmet is stated to be mandatory (« port du casque est désormais obligatoire »), but there is no instruction to rent one; and accessing the ice (« accéder à la glace ») requires an equipment check, not paying an entrance fee.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "a32aa5cee3a6",
   "text": "The author « semble croire qu'il faut choisir entre les deux », kindness or demands, while the best teachers « combinent les deux ». The critic finds his starting point « juste, et bien documenté ».",
   "kind": "exact",
@@ -33564,6 +33553,13 @@
   "text": "The background of a scene: the imparfait.",
   "kind": "exact",
   "where": "content:drill",
+  "ctx": []
+ },
+ {
+  "id": "3564c1e9f5dd",
+  "text": "The baker states « vous pourrez donc la récupérer dès quinze heures cet après-midi », meaning from 3 p.m. this afternoon. « ce matin à dix heures comme prévu » was the initial time that had to be postponed due to the fruit glaze; 19 h is the shop's closing time (« boutique ferme à dix-neuf heures »), not when the order becomes ready; and picking it up tomorrow morning is never mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
   "ctx": []
  },
  {
@@ -33626,13 +33622,6 @@
   ]
  },
  {
-  "id": "5bc0743ec276",
-  "text": "The care coordinator explains that the staff notices above all « une plus grande coopération lors de l'administration des traitements », meaning patients accept their medical care much better. Stimulating olfactory memory (« réveiller la mémoire grâce aux ateliers olfactifs ») was only the initial goal, not the main outcome observed; sleep disorders are never mentioned; and physical fatigue remains present in the evening (« la fatigue physique reste présente en soirée ») rather than diminishing.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "066d93ac7399",
   "text": "The cause came first: plus-que-parfait, with ne… pas around avait.",
   "kind": "exact",
@@ -33691,13 +33680,6 @@
  {
   "id": "d3f090050182",
   "text": "The chronicle explains that the real trap lies in the psychological mechanism: « ces applications désamorcent le signal d'alarme émotionnel lié à la dépense... l'effacement délibéré de cette hésitation naturelle anesthésie notre perception de l'endettement ». The issue of penalty fees (« l'opacité des frais de retard ») and targeting vulnerable groups (« le ciblage agressif des jeunes ménages ») are mentioned only as external criticisms raised by regulators, which the speaker contrasts with what she considers the core, subtle trap. High interest rates are not what the speaker points to, as she emphasizes that users feel like they are getting a great deal rather than entering traditional borrowing.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "d1c1281c48a0",
-  "text": "The chronicle explains that the relocation is « uniquement dû à la réfection complète du pavé de la place », which rephrases as « des travaux sur la chaussée ». Bad weather (« la pluie annoncée ») is explicitly dismissed as not being the cause (« Ne craignez pas la pluie... »); the music festival (« festival de musique ») is simply happening nearby in the park, not taking over the square; and the arena (« près de l'aréna municipale ») is the temporary destination for the market itself, not the venue of another event.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -33797,6 +33779,13 @@
   "ctx": []
  },
  {
+  "id": "8eeece6216e4",
+  "text": "The columnist emphasizes that « à force de traquer chaque phase agitée pour satisfaire les statistiques, on fabrique des insomnies par excès de zèle » and ironically concludes: « Formidable réussite que de stresser pour tenter de bien dormir et rester productif ! ». The other options refer to elements in the text used for other purposes: gadgets claim to protect from « surmenage », but technical failure is not the paradox highlighted; metrics are checked « pour satisfaire les statistiques », but employee refusal to share them is never discussed; and « café du matin » is simply a temporal marker, not a criticized habit.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "bea618b105f5",
   "text": "The columnist explains that consumers hand over valuable behavioral insights in exchange for tiny perks (« cette gratuité de façade dissimule un troc asymétrique », « Ces profils de consommation valent une petite fortune », « les remises accordées ne forment que le modeste salaire »): loyalty perks disguise an advantageous acquisition of personal data. She never claims that grocery stores raise prices to finance reward programs; she notes that cards register « préférences alimentaires », not that they alter or dictate food choices; and calling discounts a « modeste salaire » illustrates the uneven exchange of privacy, not that discounts have shrunk over time.",
   "kind": "exact",
@@ -33804,15 +33793,15 @@
   "ctx": []
  },
  {
-  "id": "c5c57a2017cc",
-  "text": "The columnist mockingly targets the way smart appliances monitor our private life (« policer notre intimité », « dépossession insidieuse de notre libre arbitre »), showing the intrusion of technology into personal decisions. The price is never discussed; food waste is only cited as a pretext (« Sous prétexte d'éradiquer le gaspillage »), not an operational failure he evaluates; and the dietary advice is depicted as moralizing and intrusive, not medically harmful.",
+  "id": "9de4ffd7c794",
+  "text": "The columnist mockingly celebrates the « remarquable tour de force managérial » of turning customers into « employé docile et strictement bénévole » while pretending it is an empowering technological advance (« la modernité marchande », « privilège insigne », « progrès indiscutable »). Technical glitches (« hurle à l'erreur ») are only brought up to ridicule the chore forced onto customers, not to lament slow checkout queues. He notes customers receive no discount (« sans jamais accorder le moindre rabais »), not that prices are continuously rising. Finally, replacing staff (« économiser le salaire d'une caissière ») illustrates the business's one-sided savings, rather than expressing concern over job losses.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
  },
  {
-  "id": "b65bb524f524",
-  "text": "The columnist sarcastically praises the self-checkouts as a « coup de génie commercial » because businesses « faire accomplir un travail manuel non rémunéré par le consommateur tout en supprimant du personnel, sans concéder le moindre rabais », showing that customers are doing unpaid labor disguised as progress. The elimination of waiting (« élimine l'attente ») is what marketing promises, not what he denounces as persisting; the machine errors (« la machine hurle qu'un article inconnu encombre le plateau ») are just comic color; and unloading pallets at dawn (« décharger les palettes à l'aube ») is a hyperbolic future demand made on customers, not an actual task imposed on staff.",
+  "id": "c5c57a2017cc",
+  "text": "The columnist mockingly targets the way smart appliances monitor our private life (« policer notre intimité », « dépossession insidieuse de notre libre arbitre »), showing the intrusion of technology into personal decisions. The price is never discussed; food waste is only cited as a pretext (« Sous prétexte d'éradiquer le gaspillage »), not an operational failure he evaluates; and the dietary advice is depicted as moralizing and intrusive, not medically harmful.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -33892,6 +33881,13 @@
  {
   "id": "4b40ddb27238",
   "text": "The coordinator asks participants to bring a damaged piece: « Venez simplement avec un petit objet en bois à restaurer, comme une chaise ou un cadre abîmé », which corresponds to « Un élément en bois à remettre en état ». Tools are expressly unnecessary (« Inutile d'apporter vos outils personnels »), paint is already provided (« ou de la peinture : tout le matériel est prêté sur place »), and proof of residence is never mentioned.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "e9bf7c2508e1",
+  "text": "The coordinator emphasizes that « des patients d'ordinaire très renfermés viennent spontanément dialoguer avec nous », showing that previously isolated patients are initiating contact and communication with staff. « des dégradations sur les végétaux » reflects an initial fear held by the team before the project began (« Nous craignions au départ »), not the primary positive outcome observed. Medication reductions are completely unmentioned. Maintenance of the plants is not described as being carried out autonomously by patients; they merely gather and talk around the planter boxes.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -34167,15 +34163,8 @@
   "ctx": []
  },
  {
-  "id": "b37de2c6fb52",
-  "text": "The employee states « venez le chercher avant midi », which corresponds to going before the middle of the day. The other options are explicitly refuted or changed: paying online is dismissed (« Inutile de payer en ligne »), calling back is unnecessary (« ou de rappeler »), and 5 p.m. is the usual closing time that is cancelled today (« au lieu de dix-sept heures »).",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "a2209b809700",
-  "text": "The engineer explains that facing extreme northern conditions forced him to adapt: « j'ai compris qu'il fallait faire preuve d'humilité [...] Cette rigueur climatique m'a appris à douter sainement de mes acquis et à ajuster constamment nos protocoles », which means questioning his technical knowledge. The option about imposing rigid protocols contradicts what he said (« plutôt que d'imposer des modèles rigides »). Conserving well-established standards refers to his former practice in Morocco (« des normes bien rodées ») that he had to move away from. Relying on habitual calculations is specifically rejected because conditions « déjouent les calculs habituels de résistance des sols ».",
+  "id": "3263e4451289",
+  "text": "The engineer explains that the northern climate compelled him to show humility and flexibility (« Cet hiver boréal m'a forcé à faire preuve d'une grande humilité [...] il faut constamment réviser ses plans et composer avec le terrain »), matching « Une grande capacité d'adaptation et de modestie ». The other options use words from the recording in contradictory or past roles: « L'application scrupuleuse des calculs théoriques » is what he initially thought he would do before facing the climate (« je pensais appliquer scrupuleusement les calculs théoriques »); « La volonté ferme de dominer la nature boréale » directly opposes what he learned (« on ne domine jamais la nature en Abitibi »); and « Le maintien rigide de ses certitudes techniques » contradicts his realization that theoretical certainty had to be abandoned (« mes certitudes se sont vite effondrées »).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -34230,13 +34219,6 @@
   "ctx": [
    "The French side needs some text."
   ]
- },
- {
-  "id": "71dc588b2078",
-  "text": "The friends agree on « Prenons plutôt un jeu de société, c'est convivial ! », which is rephrased as « Un jeu pour s'amuser ensemble. ». « Une plante » was rejected because « son balcon est trop petit »; « Un gâteau » was dismissed because someone else is already bringing it (« Lucie s'occupe déjà du dessert »); and « Une bouteille de vin » was suggested but dropped in favor of the game.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
  },
  {
   "id": "8971f66443c6",
@@ -34411,13 +34393,6 @@
   "ctx": []
  },
  {
-  "id": "5d3e633c51c5",
-  "text": "The hairdresser explains that the true value of the haircut is « le sentiment d'exister à nouveau dans le regard des autres », meaning restoring a sense of self-worth and dignity. Finding « un emploi stable » and taking advantage of an « abri temporaire contre le froid » are presented as what people initially assume the service is for, while « une question de propreté » is explicitly qualified as not being the core purpose.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "22163abf3d0b",
   "text": "The headmistress explains that « les ouvriers ont été confrontés à un éblouissement extrême en plein soleil », which required special sunglasses and slowed down work, answering that it caused visual discomfort for the workers. The other options come from discarded concerns: she confirms « le budget a été respecté » (budget was kept, not exceeded), « les odeurs de peinture sont restées négligeables » (paint smells were negligible, not strong or toxic), and mentions « les classes sous combles » only to say they successfully lowered the temperature by four degrees rather than suffering excessive heat.",
   "kind": "exact",
@@ -34425,15 +34400,15 @@
   "ctx": []
  },
  {
-  "id": "d9115f9ca9cb",
-  "text": "The historian concedes: « Vous marquez un point crucial : le bilan carbone lié au gros œuvre milite effectivement contre la mise à bas totale de ces ensembles », which means retaining the existing structural framework is environmentally advantageous. The aesthetic value is rejected from the start (« décriés pour leur laideur »), the financial cost was argued to be worse than rebuilding (« rénover coûte plus cher »), and urban integration is described as an insurmountable challenge (« un défi quasi insurmontable »).",
+  "id": "7af1bb1c7782",
+  "text": "The historian argues that « La légitimité morale et juridique des peuples spoliés doit prévaloir sur nos seuls impératifs muséaux » and calls for recognizing their full sovereignty over their heritage. The option about material preservation reflects the curator's view (« défis criants de conservation »), which the historian rejects as paternalistic (« Cet argument technique a bon dos ! »). The option about an immediate, unexamined return of all collections contradicts his clarification (« Il ne s'agit pas de délester aveuglément des galeries entières »). The option about museums remaining universal keepers echoes the curator's point (« vocation universelle », « histoire mondiale partagée »), which the historian explicitly refutes.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
  },
  {
-  "id": "06409709dee9",
-  "text": "The historian insists that returning the items is a moral imperative that requires « reconnaître aux communautés d'origine leur souveraineté sans condition », and he criticizes the fact of « subordonner leur retour à nos propres critères de conservation ». The option advocating long-term loans reflects the curator's view (« prêts de longue durée »), which he explicitly rejects as a way to avoid questioning illicit sovereignty; the loss of cultural exchange for local audiences is the curator's counter-argument, dismissed by the historian (« La curiosité du public ne saurait légitimer la possession d'objets pillés »); and prioritizing material conservation standards is specifically denounced by the historian as maintaining « une tutelle paternaliste sous un vernis scientifique ».",
+  "id": "d9115f9ca9cb",
+  "text": "The historian concedes: « Vous marquez un point crucial : le bilan carbone lié au gros œuvre milite effectivement contre la mise à bas totale de ces ensembles », which means retaining the existing structural framework is environmentally advantageous. The aesthetic value is rejected from the start (« décriés pour leur laideur »), the financial cost was argued to be worse than rebuilding (« rénover coûte plus cher »), and urban integration is described as an insurmountable challenge (« un défi quasi insurmontable »).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -34541,6 +34516,13 @@
   "ctx": [
    "The last 12, newest first"
   ]
+ },
+ {
+  "id": "de9044e9f5a4",
+  "text": "The lecturer explains that the connected pedestrian « privatise le territoire commun en y important sa bulle domestique », which means private domestic intimacy now intrudes into and reshapes shared public space. The physical degradation of squares is explicitly dismissed when she notes that this habit « ne détruit pas les lieux publics au sens matériel ». Democratic revitalization is contradicted by « n'enrichit nullement le débat démocratique ». The exposure to others' gazes (« confrontation directe au regard d'autrui ») describes the past norm before mobile screens, not the contemporary shift.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
  },
  {
   "id": "ed37ab99b988",
@@ -34696,8 +34678,15 @@
   "ctx": []
  },
  {
-  "id": "201823d177f8",
-  "text": "The narrator reflects that despite having followed the written recipe to the letter (« La recette est scrupuleusement respectée »), the dish feels lifeless without his late wife's personal touch (« la magie s'est évaporée avec elle »), suggesting that reproducing her cooking cannot bring back her presence. The vague measurements (« une pincée généreuse ») do not ruin the dish, so the imprecise notes are not the cause of failure. His trembling hands are mentioned, but he does not lack culinary competence; rather, her unique touch cannot be captured by any book. Finally, the flavours do not revive his memories intact; he tastes the food and finds that it remains « désespérément muet ».",
+  "id": "8245f43b8cd4",
+  "text": "The narrator concludes by stating that Émile « ne proféra aucun mot amer, caressant ce levier immobile comme on salue un camarade disparu », which reveals a quiet, restrained grief towards his printing machine, viewed as a deceased colleague. Bitterness is refuted because he « ne proféra aucun mot amer », despite refusing to celebrate modern technology. Reliving the vibrant past refers to the historical routine (« avaient rythmé le réveil du bourg ouvrier »), not his final gesture. Relief from physical hardship reflects the reaction of his former colleagues who « avaient jadis célébré la venue des ordinateurs pour soulager le dos des ouvriers », an attitude he explicitly did not share.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "e061b6729dba",
+  "text": "The narrator concludes that « En voulant copier fidèlement ses gestes, j’ai seulement mesuré l’inutilité de la technique face au deuil », meaning that technical cooking skill cannot bring back his late wife or heal his grief. « Le narrateur a manqué de rigueur dans sa recette » contradicts his « soin scrupuleux » and « précision de chimiste ». « Ce plat manquait d’épices pour égaler le souvenir » misattributes an emotional void (« sans âme ») to an ingredient deficit. « Les notes de Claudette étaient impossibles à suivre » is wrong because he succeeded in executing them (« bien exécuté »), even though she wrote with poetic approximation rather than mathematical precision.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -34721,13 +34710,6 @@
  {
   "id": "15a3b585837f",
   "text": "The nephew keeps his smartphone « pour les urgences » because he needs it to park, take the bus and bank: « renoncer à ses services, presque plus ». The writer says the question isn't only willpower.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "9bbb41307d12",
-  "text": "The neurobiologist explains that « Cette rupture circadienne entraîne un coût sanitaire différé qui efface le bénéfice financier initial », meaning the financial advantage is cancelled out by public health consequences. The other options are incorrect: he states that « le rendement lumineux au watt est indéniable », not declining; municipal authorities do not refuse the technology, but rather are tempted to « suréclairer »; and the blue light disrupts sleep by inhibiting melatonin, rather than being harmless.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -34797,8 +34779,8 @@
   "ctx": []
  },
  {
-  "id": "7386fe617348",
-  "text": "The paramedic explains that his main challenge was « d'accepter que leur attachement affectif dicte leur façon de réagir » and that he had to abandon his usual detachment to value their closeness, which means taking into account their emotional sensitivity. Option B repeats « enseigner » and « gestes techniques », but the speaker specifically says that was not his main challenge (« n'a pas été de leur enseigner les gestes techniques »). Option C suggests imposing emotional distance, which repeats « distance émotionnelle », but this describes his former urban habit that he had to renounce (« renoncer à ma froideur habituelle »). Option D introduces stress and lowered standards, topics never mentioned in the testimonial.",
+  "id": "9540b691d758",
+  "text": "The paramedic explains that he had to adapt his mindset: « Il m'a fallu apprendre à composer avec leur attachement affectif, au lieu de vouloir l'effacer », which means taking their emotional closeness into account rather than suppressing it. « Exiger une neutralité rigoureuse » is what he realized he could not do (« je ne devais pas exiger une froide neutralité »). « Maintenir la distance professionnelle habituelle » was his former urban habit in Montréal, which did not fit the northern context. « Négocier de nouveaux financements » is never mentioned in the testimonial.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -34874,13 +34856,6 @@
   "ctx": []
  },
  {
-  "id": "84f132f7f41c",
-  "text": "The pastry chef states that « Elle ne sera donc prête qu'à partir de 16 h 30 », which corresponds to late afternoon (« En fin d'après-midi »). « À l'heure prévue à midi » is incorrect because noon was only the original plan (« initialement prévue pour midi ») before the delay. « Après la fermeture à 19 h » is wrong because the shop closes at 19:00 (« notre boutique ferme à 19 h ») and pick-up must happen before closing. « Dès le début d'après-midi » is incorrect because the cake is not ready in the early afternoon, only from 16:30.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "f72433317177",
   "text": "The pediatrician states that in the recovery room, children who had a clown visit « réclament nettement moins d'antalgiques de secours », showing a concrete reduction in postoperative pain medication needs. The duration of hospitalization is explicitly not necessarily shorter (« Leur séjour hospitalier n'est pas forcément raccourci »). Unwanted medication effects are only reduced, not completely eliminated (« limiter les effets secondaires »). Wound healing is never mentioned in the discussion.",
   "kind": "exact",
@@ -34902,15 +34877,15 @@
   "ctx": []
  },
  {
-  "id": "e24727b45b5c",
-  "text": "The philosopher argues that automating grading destroys the dialogic nature of reading: « on dissout la relation herméneutique : l'étudiant n'écrit plus pour interpeller une conscience capable d'accueillir une intuition singulière » and condemns « l'annihilation du dialogue intellectuel », emphasizing that feedback lacks « altérité authentique ». Impartiality (« grille critériée rigoureusement identique ») is praised by the theorist but dismissed as a mere technical decoy (« un leurre technique ») by the philosopher. Spotting factual and stylistic mistakes (« repérage des maladresses stylistiques ou des contresens factuels ») is conceded by the philosopher as something the software successfully does, not what it destroys. Rapid feedback (« rétroaction personnalisée, détaillée et instantanée ») is an advantage put forward by the theorist, not a casualty identified by the philosopher.",
+  "id": "dec9596559b6",
+  "text": "The philosopher concludes that grading is « un dialogue silencieux avec une pensée qui se cherche » and that handing this over to algorithms destroys « la confrontation vivante entre deux esprits », meaning it strips away the vital intersubjective and relational dimension of critical work. « Elle applique des critères arbitraires au détriment d'une équité globale » is wrong because speaker B defends the tools for ensuring « une véritable équité de traitement », and speaker A questions the depth of this equity rather than alleging arbitrary scoring. « Elle s'appuie sur des corpus documentaires trop restreints pour être fiables » is contradicted by speaker A's concession that the tools are « calibré sur d'immenses corpus ». « Elle accentue la fatigue intellectuelle des enseignants lors des notations » contradicts speaker B, who argues that software relieves instructors of « l'épuisement des nuits de notation ».",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
  },
  {
-  "id": "33775b7ee2d4",
-  "text": "The philosopher delivers her ultimate blow to utilitarian reasoning when she asserts: « votre modèle postule tacitement que chaque atteinte au vivant peut être compensée ou monnayée », meaning utilitarian law treats environmental damage as a mere negotiable, monetizable balance sheet item. The option about complex doctrinal categories is what the jurist attacks (« sans recourir à des fictions doctrinales complexes »), not the philosopher's critique. The option about refusing to quantify pollution misattributes the jurist's statement that current law already regulates and measures industrial activity (« réguler rigoureusement les activités industrielles »). The option about ignoring economic benefits refers to the jurist's own criterion (« l'intérêt général »), which the philosopher criticizes rather than laments.",
+  "id": "213ce8d40a53",
+  "text": "The philosopher counters the utilitarian framework by explaining that recognizing the river as an autonomous entity means « l’inviolabilité fondamentale interdit désormais toute compensation marchande », meaning ecological integrity cannot be bought off or compensated financially. The claim that public use protects water balance echoes speaker A's remark on « usages collectifs » but does not reflect B's argument. The lack of reciprocal duties is speaker A's legal objection (« ne peut assumer aucune obligation juridique réciproque »), not the philosopher's point. The effectiveness of fines is speaker A's initial defense (« lourdes amendes dissuasives »), which speaker B explicitly attacks as legitimizing predation.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35081,8 +35056,8 @@
   "ctx": []
  },
  {
-  "id": "c01bc36b4a2d",
-  "text": "The psychologist explicitly defines what heals: « Ce qui soigne véritablement l'esprit blessé, ce n'est pas l'introspection silencieuse en cabinet, mais cette validation publique de la perte, portée par tout le groupe. », which corresponds to collective recognition of the grief. « Une introspection silencieuse dans le cadre médical » directly borrows words from the recording but is what the speaker rejects (« ce n'est pas... »). « Le maintien d'un rituel de recueillement solitaire » contradicts his insistence on communal sharing over solitude. Repatriation of the body (« Le rapatriement systématique... ») is never mentioned.",
+  "id": "00ab2a56a5e4",
+  "text": "The psychologist stresses that the key healing mechanism is collective: « le véritable moteur de la guérison demeure le rassemblement avec la communauté. Se retrouver autour de rituels partagés permet d'extérioriser la peine ». Medical treatment (« traitement médical ») is mentioned only as a temporary initial reflex to calm anxiety, not the core healing driver; repatriating the deceased is never mentioned; and isolation (« isolement ») is explicitly identified as an obstacle to avoid (« au lieu de s'enfermer dans l'isolement »).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35188,8 +35163,8 @@
   "ctx": []
  },
  {
-  "id": "f4b74f83cd72",
-  "text": "The receptionist asks the patient to complete « en ligne le formulaire médical envoyé par courriel » before the appointment, which corresponds to « Le questionnaire sur sa santé ». « Le formulaire d'assurance » is incorrect because the patient only needs to show their insurance card in person (« carte d'assurance sur place »). « La preuve de paiement direct » is incorrect because the clinic provides the receipt to the patient (« nous vous remettrons votre reçu de paiement »). « Le dossier complet d'indemnisation » is not mentioned.",
+  "id": "af25df6eba99",
+  "text": "The receptionist asks to « remplir le questionnaire de santé reçu par courriel », which corresponds to « Le formulaire médical ». « La demande de rendez-vous » is already accepted (« Votre demande de rendez-vous est acceptée »), « L'attestation de paiement » refers to verifying payment (« vérifier le paiement ») rather than filling a form, and « La carte d'assurance » must be brought in person (« Apportez votre carte »).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35227,6 +35202,13 @@
  {
   "id": "984fb3dc093a",
   "text": "The researcher concludes that bilingual signage « opère surtout une euphémisation des rapports de domination historique » and serves to « contenir les frictions identitaires en leur offrant un exutoire décoratif », meaning visual bilingualism conceals and defuses power asymmetries. The idea that signage accurately reflects demographics is explicitly rejected (« Loin d'être un simple miroir démographique »); the claim that it crowns minority demands is contradicted by the fact that it actually « neutralise la portée subversive des revendications acadiennes »; and the idea that it strengthens social cohesion is dismissed as an « harmonie de façade » and an « illusion tenace ».",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "35b2477e3e03",
+  "text": "The researcher explains that while the reduction in energy consumption is real (« l'efficacité est indéniable »), the evaluation is partial because it overlooks the biological impact of blue-enriched light (« elle isole l'aspect financier en négligeant le préjudice physiologique »), making the correct answer « Son bénéfice budgétaire est contrebalancé par son lourd coût physiologique. ». The idea that savings are overestimated (« surestimée ») is contradicted by « la consommation diminue fortement »; the claim that blue light cancels the bill savings confuses biological harm with financial cost; and the researcher calls for broader criteria rather than an outright rejection (« renoncer totalement ») of LED lighting.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35413,15 +35395,15 @@
   "ctx": []
  },
  {
-  "id": "d5827b4c2ea4",
-  "text": "The scientist warns that large corporations « risquent de raser des forêts pour faire tourner leurs fours géants » if input sourcing is not regulated, meaning the primary danger is clearing woodlands to feed production. « les agriculteurs sont prêts à adopter ce charbon végétal » directly contradicts the claim that farmers would refuse it. The cost of technological patents is never mentioned in the interview. Moisture retention issues contradict both the journalist's premise and the scientist's statement that « Les résultats sur l'humidité sont probants ».",
+  "id": "2cb5872101b5",
+  "text": "The scientist warns that scaling up could lead to « abattre des arbres pour trouver la matière première » if production is not strictly restricted to local agricultural waste: he fears deforestation. The second option is a trap reusing words from the dialogue, but Dr. Diop explicitly states that « les coûts restent abordables ». The third option introduces chemical toxicity, which is never mentioned. The fourth option is contradicted by both speakers, who note that « vos recherches confirment bien » and « L'efficacité agronomique est prouvée ».",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
  },
  {
-  "id": "b922b785da4a",
-  "text": "The secretary asks: « Merci de confirmer votre présence par courriel. », meaning the student must confirm his attendance by email. \"Se rendre au local 204 dès mardi matin\" was the initial schedule that got cancelled (« initialement prévu mardi au local 204 »). \"Demander à changer la date de son test\" is incorrect because the school already rescheduled it, not the student. \"Téléphoner au secrétariat de l'école\" is wrong because although the call is from « le secrétariat de l'école », the student is asked to reply by email, not by phone.",
+  "id": "f3fb860a1103",
+  "text": "The secretary asks the student: « Merci d'indiquer par courriel si vous venez », which means they must confirm their attendance in writing. « Demander une autre date d'examen » is wrong because the date has already been set for Thursday. « Se présenter au local dès mardi » refers to the initial plan that was cancelled (« prévu ce mardi est reporté »). « Appeler pour changer de niveau » mentions a phone call and course level, but the caller asks for an email about attendance, not a call about proficiency level.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35525,6 +35507,13 @@
   "ctx": []
  },
  {
+  "id": "b1e768509545",
+  "text": "The speaker announces that swimmers in the main pool must leave the water right away: « les personnes présentes dans le grand bassin doivent quitter l'eau dès maintenant », which means « Sortir immédiatement du bassin ». The « cours d'aquagym » and its « début » are mentioned as the reason for the clearance, not an invitation to register (« S'inscrire au cours d'aquagym ») or stay put waiting (« Attendre le début de l'activité »). Changing lanes (« Changer de couloir de nage ») is not mentioned at all.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "32b2029c67f1",
   "text": "The speaker argues that « le visiteur doit faire un effort d'interprétation » in front of an authentic painting, whereas these shows « court-circuite le temps du regard » and « prémâche le ressenti », meaning they spare the viewer from critical engagement. The claim that they fail to draw beginners contradicts « capable de séduire un public intimidé » and « impressionne les foules ». The criticism is not about flawed technology, since the speaker concedes that « la prouesse technique impressionne ». Finally, the risk of physical damage to canvases is never mentioned; canvases are merely contrasted with the digital projections.",
   "kind": "exact",
@@ -35539,8 +35528,8 @@
   "ctx": []
  },
  {
-  "id": "d08a21120e87",
-  "text": "The speaker argues that passersby now move through the city while remaining within their personal digital cocoon (« chacun prolonge sa sphère intime connectée », « La frontière entre le dehors partagé et le chez-soi s'est ainsi dissoute »). She rejects the idea of a physical abandonment of public space (« Les usagers restent bien présents », refuting « délaissement physique complet »), notes that serendipitous interaction is disappearing rather than reviving (« L'agora physique n'est plus ce lieu de confrontation fortuite »), and does not discuss public transport.",
+  "id": "00032b557711",
+  "text": "The speaker argues that second-hand items connect consumers back to human experience: « réinscrit l'article dans une généalogie humaine, où la patine raconte une trajectoire sociale singulière » and « réhumanisant notre rapport matériel au monde ». Avoiding excess consumption (« contourner la surconsommation ») and getting a financial bargain (« réaliser une bonne affaire économique ») are explicitly introduced with « ne cherche pas seulement à », showing they are not the central thesis. Replicating abstract retail value contradicts her point, as second-hand goods break that illusion (« désamorce ainsi l'illusion d'une valeur marchande abstraite »).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35623,8 +35612,22 @@
   "ctx": []
  },
  {
+  "id": "d414b0aa30ef",
+  "text": "The speaker concludes that eliminating chance hallway encounters creates deep isolation: « la disparition de toute interaction fortuite nourrit une détresse silencieuse ». Regarding the wrong options: direct frictions are actually eradicated, not multiplied (« supprimant ces frottements imprévus »); building security is highlighted positively by developers (« le sommet de la sécurité ») rather than undermined; and the automated systems do not suffer from reduced efficiency (« réduisent toute friction matérielle »), as the flaw lies in their human cost rather than technical performance.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "53a211d3c151",
   "text": "The speaker concludes that removing threshold spaces has destroyed informal civility and created neighborhoods « sans frictions bienveillantes, où le voisin devient une simple silhouette anonyme »: casual, spontaneous neighborly ties are lost. The other options quote details that serve different rhetorical roles: « un sentiment exacerbé d'insécurité » is cited as a psychological motive for fortifying entrances, not the civic consequence; « maximiser la rentabilité foncière » is an economic driver of land development; and « réduire les nuisances » is a personal benefit conceded earlier in the talk.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "e671dc16781e",
+  "text": "The speaker concludes that the central issue is political: « en confisquant les lieux de repos gratuits, on subordonne désormais le simple fait de s'asseoir à l'obligation de payer une consommation », which equates sitting in public space to a commercial purchase. The deterioration of furniture (« dégradation supposée ») is an official pretext dismissed by the speaker, not her complaint; pedestrian attitudes are mentioned by some as a rejection of lingering (« flânerie »), not a rejection of street furniture; and commercial terraces are defended by others for their profitability, not criticized for lacking it.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35644,22 +35647,15 @@
   "ctx": []
  },
  {
-  "id": "3152f47889b7",
-  "text": "The speaker concludes that urban peace in industrial cities came not from stopping machines, « mais à la régularité d'un fond sonore auquel l'oreille pouvait s'accoutumer » where noise was accepted « dès lors qu'il demeurait stable et prévisible »: a predictable and steady auditory environment. Halting industrial activity is refuted when he states that calm was never « synonyme d'inertie » nor did it depend on « l'extinction des machines »; a total lack of decibels is our contemporary assumption (« Nous avons aujourd'hui coutume de concevoir le silence citadin comme une simple absence de décibels ») which his historical analysis refutes; and moving away from factories is explicitly denied because citizens « ne cherchaient pas à fuir le tumulte des fabriques ».",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "d1e7ac60caaa",
-  "text": "The speaker concludes that, deprived of informal neighbourly encounters (« occasions fortuites d'interaction », « rituels spontanés »), occupants end up developing « une profonde détresse affective et un isolement psychologique insidieux », which matches the emergence of individual distress due to the lack of impromptu exchanges. The option regarding privacy is wrong because promoters praise and preserve it (« intimité jalousement préservée ») rather than seeing it degrade. Biometric access is an amenity working as intended, not experiencing technical breakdowns (« défaillance »). Finally, automated parcel lockers are part of the daily friction-free routine that attracts buyers (« séduit »), not something residents refuse to use.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
   "id": "fccfbb9026f8",
   "text": "The speaker contrasts the green marketing rhetoric with deliberate hardware choices: « Sous un vernis écologique séduisant, le matériel demeure sciemment conçu comme un bloc indémontable » and « on glorifie l'économie circulaire dans les vitrines tout en verrouillant hermétiquement la matière dans les usines », which matches the opposition between ecological branding and the physical impossibility of accessing components. Data center carbon neutrality and packaging without plastic are cited together as green claims, not in tension with one another. Soldered microprocessors and adhesive resin are mentioned as technical barriers to repair, not in terms of financial cost versus component sales. Recycled aluminium and fragile glass screens are mentioned in passing, but their juxtaposition is not the underlying paradox discussed.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "203489918e8a",
+  "text": "The speaker explains that urban calm was understood through « la constance prévisible des sons quotidiens » and « une régularité familière : le ronronnement continu d'un atelier constituait un repère rassurant ». Total noise suppression (« disparition totale du bruit ») is explicitly called an obsession of modern urban planners; an abrupt stop in factory activity (« interruption soudaine de ce vacarme ») caused anxiety rather than calm; and physical distancing from workshops is never proposed as the historical definition.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35672,8 +35668,22 @@
   "ctx": []
  },
  {
+  "id": "ba9f884b315c",
+  "text": "The speaker explicitly states that before skating, parents must check their child's helmet: « avant de patiner, vérifiez que votre enfant a bien attaché son casque ». Renting skates (« les patins se louent à l'accueil ») is an option available at the desk, not an obligation. Gloves are only recommended (« Les gants sont conseillés »), not compulsory. Going to the reception desk (« à l'accueil ») is only mentioned as the location for skate rentals.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
   "id": "5646893166d3",
   "text": "The speaker explicitly states what fulfills her most now: « ce qui me comble réellement aujourd'hui, c'est de voir les habitants échanger dans le hall après chaque projection. Ce lieu a recréé un lien social précieux [...] C'est cette dimension humaine et collective qui donne enfin un sens à mon quotidien », which corresponds to « Le tissage de liens humains entre les spectateurs ». « Le calme obtenu grâce à un rythme moins effréné » was her initial reason for leaving Paris (« je cherchais surtout le calme et un rythme de vie moins effréné »), not her current primary satisfaction. « La sélection très exigeante de films d'art et d'essai » is something she cares about (« programmer des films d'art et d'essai me tient à cœur »), but it is not what she values most. Finally, « L'aide financière accordée par les élus locaux » is never mentioned; she only notes that financial profitability remains an ongoing daily concern (« la rentabilité financière reste un souci quotidien »).",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "17ec41cd7188",
+  "text": "The speaker indicates that the shop closes early on Saturday at noon and tells her « Venez le chercher avant la fermeture ! », meaning she must pick it up before noon. « Rappeler pour fixer l'horaire » is incorrect because the schedule is already announced, with no callback requested. « Attendre le début de semaine » is wrong because the item is ready immediately. « Confirmer la retouche voulue » is contradicted by « votre manteau est prêt ».",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35693,8 +35703,8 @@
   "ctx": []
  },
  {
-  "id": "5e431c15b4f2",
-  "text": "The speaker warns that data-driven governance does not eliminate ideology but merely conceals political choices: « cette ferveur technocratique ne supprime nullement l'idéologie ; elle ne fait que dissimuler des choix de société éminemment politiques derrière un masque d'infaillibilité scientifique », which corresponds to masking value judgments behind false neutrality. He explicitly concedes that the models do work technically to « optimiser l'allocation budgétaire ou de cartographier avec précision les besoins des usagers », ruling out technical inefficacy or bad allocation. Finally, he notes that « aucun gestionnaire sérieux ne songerait à balayer » these tools, so managers do not refuse quantitative metrics.",
+  "id": "c1833d786ad6",
+  "text": "The speaker warns that an obsession with metrics creates a dangerous blind spot: « ce qui échappe au calculable, comme la détresse sociale ou le sentiment d'aliénation citoyenne, finit par être purement ignoré dans l'élaboration des politiques » and « on ne résout pas la complexité, on l'ampute » (intangible human and social realities are sidelined). The other options distort concessions or claims: optimizing expenditure is an acknowledged benefit (« personne ne conteste l'utilité des indicateurs de performance pour optimiser les budgets »); partisan squabbles are what algorithms superficially promise to quell, not what technocracy causes; and public administrations blindly adopt, rather than systematically reject, technocratic tools (« nos administrations succombent à une dérive »).",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -35802,15 +35812,8 @@
   "ctx": []
  },
  {
-  "id": "cebfadb206f5",
-  "text": "The text describes the protagonist closing the case « comme on scelle une sépulture » with the poignant realisation that his craft has been rendered « dérisoire », suggesting a quiet mourning for the lost dignity of his life's work (« Le deuil intime de la noblesse de son savoir-faire »). The wrong options misattribute his reaction: « Une vive exaspération » is contradicted by « refusant d’accuser l’époque »; « Le mépris affiché » is contradicted by his gentle gesture (« referma doucement ») rather than open disdain; and « La fierté tenace d'avoir surpassé... » is wrong because quartz possesses an « infaillible » accuracy that mechanisation cannot rival.",
-  "kind": "exact",
-  "where": "content:comp",
-  "ctx": []
- },
- {
-  "id": "c367e266c227",
-  "text": "The text states that Clara feels « un pincement inattendu, une sorte de deuil anticipé » and is « redoutant secrètement de se sentir à nouveau étrangère dans son propre quotidien citadin », showing she fears feeling alienated when returning home. The option about urban comfort is contradicted by « sans la moindre hâte de plier bagage » despite « la promesse du confort urbain ». The physical hardship (« échines courbées », « paumes calleuses ») is acknowledged, but she views it as part of an existence where « chaque geste faisait sens », not with bitter regret. The party of the other workers (« Les autres saisonniers célèbrent déjà ») is merely distant background noise to her contemplation, not something she wishes she had joined.",
+  "id": "cdd67988cbce",
+  "text": "The text explains that Paul feels no anger or bitterness, but rather « l'infinie lassitude de réparer des objets morts, qui n'attendaient désormais plus rien de lui », replacing his past dialogue with « un rouage complice », which points to a quiet disenchantment over losing a living connection to his craft. The other options are contradicted by the text: he explicitly felt « aucune hostilité envers cette innovation prompte à séduire la jeunesse » and « ni même l’amertume d’un savoir-faire soudain disqualifié », while the mention of human error refers to what the boss claims quartz avoids, not any anxiety Paul feels about manual work.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
@@ -36059,6 +36062,13 @@
  {
   "id": "f8e9e75565d4",
   "text": "The young volunteer « autrement », and « ce sont nos façons de faire qui ne leur conviennent plus ». The total number of volunteers is stable.",
+  "kind": "exact",
+  "where": "content:comp",
+  "ctx": []
+ },
+ {
+  "id": "8d9209fadab2",
+  "text": "The young woman stalls outside (« feignait de refaire ses lacets pour retarder le moment ») because going home now feels like a painful break from a simple life she unexpectedly came to love (« prenait soudain la forme pénible d'une rupture, lui arrachant une vie simple où elle s’était, sans le vouloir, profondément attachée »). « La hâte fébrile » contradicts her reluctance to pack, which is instead what her celebrating roommates feel (« fêtant leur délivrance »); « l'amertume » refers to her past complaints during the work (« avait pourtant maudit chaque aube »), not her present mood; and her solitude on the porch is self-imposed to delay leaving, not a sign of being ostracised by her peers.",
   "kind": "exact",
   "where": "content:comp",
   "ctx": []

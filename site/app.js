@@ -4216,6 +4216,15 @@
     const what = skill === "co" ? "The full listening test: 39 questions in about 35 minutes, from A1 to C2, each recording heard once" : "The full reading test: 39 questions in 60 minutes, from A1 to C2";
     return `<section class="panel flat row between"><div class="stack tight"><p class="h3 with-ico">${ico("exam")}Examen blanc</p><p class="small muted">${what}, with an estimated score and NCLC level.${last ? ` Last one, ${shortDate(last.date)}: ≈${last.est}, NCLC ${nclcLabel(nclcOf(skill, last.est))}${retakeIds().has(last.id) ? " (a retake, not counted)" : ""}.` : ""}</p></div>${paused ? `<button class="btn primary" data-act="ip-resume" data-id="${X.ip}">Resume the exam</button>` : `<a class="btn ${running ? "primary" : ""}" href="#${X.home}">${running ? "Back to the exam" : "Go to the exam"}</a>`}</section>`;
   }
+  // While a set is in progress its card steps aside, so the exam stays one tap away beside the tabs.
+  function examLink(skill) {
+    const X = XSPEC[skill];
+    if (!X.spec || !X.bank().length) return "";
+    const running = examRunning() && skillOf(ui.cx) === skill;
+    const paused = !running && ipGet(X.ip);
+    const what = skill === "co" ? "The full listening test: 39 questions in about 35 minutes, from A1 to C2, each recording heard once" : "The full reading test: 39 questions in 60 minutes, from A1 to C2";
+    return paused ? `<button class="btn sm" data-act="ip-resume" data-id="${X.ip}" title="${what}" data-m="pop" data-k="exl-${skill}">${ico("exam")}Resume the exam</button>` : `<a class="btn sm${running ? " primary" : ""}" href="#${X.home}" title="${what}" data-m="pop" data-k="exl-${skill}">${ico("exam")}${running ? "Back to the exam" : "Examen blanc"}</a>`;
+  }
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
   function examView(skill) {
     const X = XSPEC[skill], spec = X.spec;
@@ -6435,8 +6444,7 @@
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       return `<div class="wrap">
         ${head}
-        ${tabs}
-        ${set && !submitted && Object.keys(ans || {}).length ? "" : examCta(skill)}
+        ${set && !submitted && Object.keys(ans || {}).length ? `<div class="row between tab-row">${tabs}${examLink(skill)}</div>` : tabs + examCta(skill)}
         ${controls}
         <div class="stack">${reviewNote}${fallback}${timerRow}${material}${qs}</div>
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
