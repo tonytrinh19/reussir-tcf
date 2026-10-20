@@ -11,6 +11,9 @@
                                              daily quotas run out; the fr-content-gemini routine runs this daily at 8 AM
     python3 tools/translate_fr.py --content --dry 20   try 20 on a lite model and print them, saving nothing
     --only RE (with --content) only the material whose English, kind or sheet id matches RE; --max N batches at most
+    --vertex  the same models on Google Cloud (Vertex AI), paid from a Cloud project instead of the free tier, with no
+              daily quota (needs gcloud auth application-default login, and GOOGLE_CLOUD_PROJECT or a gcloud default
+              project); e.g. python3 tools/translate_fr.py --content --vertex
 
 It reads tools/fr-strings.json (from `node tools/i18n_extract.js`) and keeps every translation in
 tools/fr-cache.json, keyed by the English, so a run only sends phrases that are new or changed. An entry edited by
@@ -21,6 +24,8 @@ import os
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import re
+import shutil
+import subprocess
 import sys
 import time
 import urllib.error
@@ -45,6 +50,14 @@ BATCH = 60
 # accurately), one batch at a time, and a sheet on its own.
 CONTENT_MODELS = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.7-flash", "gemini-3.6-flash"]
 CONTENT_BATCH = 40
+# --vertex: the same models on Google Cloud (Vertex AI), paid from a Cloud project and its credits, with no daily
+# quota, so the batches go six at a time, 20 phrases each. Vertex has no "-latest" aliases. The user chose it on 2026-10-19 to
+# finish the learning material in one run; make_audio.py --vertex records the exams the same way.
+VERTEX_URL = "https://aiplatform.googleapis.com/v1/projects/%s/locations/global/publishers/google/models/%s:generateContent"
+VERTEX_SKIP = {"gemini-flash-latest", "gemini-flash-lite-latest"}
+VERTEX_WORKERS = 6
+VERTEX_BATCH = 20  # gemini-3.8-flash on Vertex often took over 5 minutes to answer 40 at once
+VERTEX = {}  # project, gcloud, token and when it was taken, once --vertex is given
 
 RULES = """You translate the interface of a website that prepares an adult learner (B1, aiming for B2) for the TCF Canada, the French test IRCC accepts. The learner has switched on full immersion: every button, heading, instruction, hint and message must now be in natural, concise French, the way a French app would say it.
 
@@ -108,6 +121,29 @@ class DailyLimit(Exception):
     pass
 
 
+def vertex_setup():
+    """--vertex: the Google Cloud project and the gcloud sign-in (gcloud auth application-default login)."""
+    gcloud = shutil.which("gcloud") or next((p for p in ("/opt/homebrew/bin/gcloud", "/usr/local/bin/gcloud") if os.path.exists(p)), None)
+    if not gcloud:
+        sys.exit("--vertex needs the Google Cloud CLI (gcloud), signed in with: gcloud auth application-default login")
+    run = lambda *a: (lambda r: r.stdout.strip() if r.returncode == 0 else "")(subprocess.run([gcloud, *a], capture_output=True, text=True))
+    project = os.environ.get("GOOGLE_CLOUD_PROJECT", "").strip() or run("config", "get-value", "project")
+    if not project:
+        sys.exit("--vertex needs a Google Cloud project: set GOOGLE_CLOUD_PROJECT, or run: gcloud config set project <id>")
+    VERTEX.update(project=project, run=run, token="", at=0.0, lock=threading.Lock())
+
+
+def vertex_headers():
+    """A gcloud access token, renewed every 40 minutes (and after a 401), never printed."""
+    with VERTEX["lock"]:
+        if not VERTEX["token"] or time.time() - VERTEX["at"] > 40 * 60:
+            VERTEX["token"] = VERTEX["run"]("auth", "application-default", "print-access-token")
+            if not VERTEX["token"]:
+                sys.exit("No Google Cloud sign-in: run gcloud auth application-default login")
+            VERTEX["at"] = time.time()
+        return {"Authorization": "Bearer " + VERTEX["token"], "x-goog-user-project": VERTEX["project"], "Content-Type": "application/json"}
+
+
 def ask(items, key, rules=None, models=None):
     body = {
         "systemInstruction": {"parts": [{"text": rules or RULES}]},
@@ -117,11 +153,14 @@ def ask(items, key, rules=None, models=None):
     data = json.dumps(body).encode()
     busy = 0
     for attempt in range(10):
-        live = [m for m in (models or MODELS) if m not in SPENT]
+        live = [m for m in (models or MODELS) if m not in SPENT and not (VERTEX and m in VERTEX_SKIP)]
         if not live:
             raise DailyLimit("every model has used its daily quota")
         model = live[min(busy // 2, len(live) - 1)]
-        req = urllib.request.Request(API % model, data=data, method="POST", headers={"x-goog-api-key": key, "Content-Type": "application/json"})
+        if VERTEX:
+            req = urllib.request.Request(VERTEX_URL % (VERTEX["project"], model), data=data, method="POST", headers=vertex_headers())
+        else:
+            req = urllib.request.Request(API % model, data=data, method="POST", headers={"x-goog-api-key": key, "Content-Type": "application/json"})
         wait = min(60, 10 * 2 ** (attempt % 3))
         try:
             with urllib.request.urlopen(req, timeout=300) as r:
@@ -133,6 +172,9 @@ def ask(items, key, rules=None, models=None):
             if e.code == 429 and ("PerDay" in msg or "per day" in msg.lower()):
                 SPENT.add(model)
                 print("  %s has used its daily quota: on to the next model" % model, flush=True)
+                continue
+            if e.code == 401 and VERTEX:
+                VERTEX["token"] = ""
                 continue
             if e.code not in (429, 500, 502, 503, 504):
                 raise RuntimeError("Gemini API error %s: %s" % (e.code, msg[:300]))
@@ -316,8 +358,13 @@ def main():
         return
     if "--write" in sys.argv or not todo:
         write(strings, cache)
+        if content and not ct_todo:  # so the fr-content-gemini routine sees there's nothing left
+            print("Learning material: %d of %d in French" % (len(ct_all), len(ct_all)))
+            print("ALL READY: the learning material is in French")
         return
-    key = api_key()
+    if "--vertex" in sys.argv:
+        vertex_setup()
+    key = "" if VERTEX else api_key()
     if content:
         translate_content(todo, cache, key)
         write(strings, cache)
@@ -388,18 +435,22 @@ def translate_content(todo, cache, key):
     model has used its daily quota (the next night carries on)."""
     sheets = [u for u in todo if u["kind"] == "fiche"]
     rest = [u for u in todo if u["kind"] != "fiche"]
-    batches = [rest[n:n + CONTENT_BATCH] for n in range(0, len(rest), CONTENT_BATCH)]
+    size = VERTEX_BATCH if VERTEX else CONTENT_BATCH
+    batches = [rest[n:n + size] for n in range(0, len(rest), size)]
     if "--max" in sys.argv:
         batches = batches[:int(sys.argv[sys.argv.index("--max") + 1])]
         sheets = sheets[:1]
-    print("Learning material: %d phrases in %d requests, and %d sheets" % (len(rest), len(batches), len(sheets)), flush=True)
-    try:
-        for i, batch in enumerate(batches):
-            try:
-                answer = as_map(ask([{"id": u["id"], "text": u["text"]} for u in batch], key, CONTENT_RULES, CONTENT_MODELS), batch)
-            except RuntimeError as e:
-                print("  a batch of %d is left for the next run: %s" % (len(batch), e), flush=True)
-                continue
+    print("Learning material: %d phrases in %d requests, and %d sheets%s" % (len(rest), len(batches), len(sheets),
+          " (Vertex AI, %d at a time)" % VERTEX_WORKERS if VERTEX else ""), flush=True)
+    lock = threading.Lock()
+
+    def run(i, batch):
+        try:
+            answer = as_map(ask([{"id": u["id"], "text": u["text"]} for u in batch], key, CONTENT_RULES, CONTENT_MODELS), batch)
+        except RuntimeError as e:
+            print("  a batch of %d is left for the next run: %s" % (len(batch), e), flush=True)
+            return
+        with lock:
             kept = 0
             for u in batch:
                 fr = answer.get(u["id"])
@@ -411,12 +462,14 @@ def translate_content(todo, cache, key):
                     kept += 1
             save(cache)
             print("  batch %d / %d: %d kept" % (i + 1, len(batches), kept), flush=True)
-        for u in sheets:
-            try:
-                fr = ask_sheet(u["text"], key, CONTENT_MODELS)
-            except RuntimeError as e:
-                print("  sheet %s is left for the next run: %s" % (u["fiche"], e), flush=True)
-                continue
+
+    def run_sheet(u):
+        try:
+            fr = ask_sheet(u["text"], key, CONTENT_MODELS)
+        except RuntimeError as e:
+            print("  sheet %s is left for the next run: %s" % (u["fiche"], e), flush=True)
+            return
+        with lock:
             why = fiche_problem(u["text"], fr)
             if why:
                 print("  sheet %s not kept: %s" % (u["fiche"], why))
@@ -424,6 +477,16 @@ def translate_content(todo, cache, key):
                 cache[u["text"]] = fr
                 save(cache)
                 print("  sheet %s kept" % u["fiche"], flush=True)
+
+    jobs = [(run, (i, b)) for i, b in enumerate(batches)] + [(run_sheet, (u,)) for u in sheets]
+    try:
+        if VERTEX:  # no daily quota to pace: several at once
+            with ThreadPoolExecutor(VERTEX_WORKERS) as pool:
+                for f in [pool.submit(fn, *args) for fn, args in jobs]:
+                    f.result()
+        else:  # the free tier: one at a time, in order, until the daily quotas run out
+            for fn, args in jobs:
+                fn(*args)
     except DailyLimit as e:
         print("Stopped at Gemini's daily limit: the rest goes on the next run. (%s)" % e)
 
