@@ -282,13 +282,19 @@
       - Each has at least two vocabulary-in-context questions at B2–C1 and two purpose questions at A2–B1 (`check_ce.js` holds `v: 2` exams to that), and no document title repeats one from another exam or the practice sets.
     - The coach presents the next built-in exam not done yet on a CE exam block.
     - Every item is original writing. Never copy or lightly reword items from TCF prep sites or past papers; the user asked for that once (formation-tcfcanada.com's série 2), and Examen blanc 2 was written from scratch instead.
-  - `exam-co.js`: the built-in CO practice exams, Examens blancs 1 to 4 (`co-exam-1` … `co-exam-4`). The user asked for the first on 2026-10-05, matching the real TCF Canada as closely as possible and checked against outside sources.
+  - `exam-co.js`: the built-in CO practice exams, Examens blancs 1 to 9 (`co-exam-1` … `co-exam-9`). The user asked for the first on 2026-10-05, matching the real TCF Canada as closely as possible and checked against outside sources.
     - **Exams 2–4** were written on 2026-10-18, when the user asked for three more. They follow the same blocks, kinds and rules as exam 1, item for item:
       - Each has its own four drawings (`ART`): exam 2 a shopping trolley, a park bench, a dog on a lead and a football game; exam 3 a cyclist, a ringing alarm clock, watering flowers and a handshake; exam 4 cross-country skiing, a lakeside picnic, painting a wall and an apple stall.
       - Their spoken words follow exam 1's averages by level, so each runs about 31 minutes with its pauses.
       - No topic repeats one from another exam or the 31 listening sets, and no document question repeats word for word.
       - About 70% are everyday topics (housing, work, health, studies, settling in), the rest AI, mental health, climate and diversity. They're set in Québec and elsewhere in Canada, France, Belgium and Switzerland, with speakers from Senegal, Côte d'Ivoire, Haiti and Cameroon.
       - The coach presents the next exam not done yet (`examStep`).
+    - **Exams 5–9** (2026-10-19, when the user asked for five more and to save effort) were drafted by Gemini, not Claude, with `tools/write_co_exams.py` (the user's rule: bulk text goes to Gemini). They sit in their own block of `exam-co.js` (`ART_MORE` and `T.COMP.coExams.push(…)`), which the tool's `write` replaces.
+      - **Original writing:** the user suggested taking items from TCF prep sites to save effort, but they're copyrighted, so nothing was copied.
+      - **Topics:** a topic plan came first. Repeats of older exams and sets, and among the new ones, were replaced by hand in the plan before any item was drafted.
+      - **The drawings:** Gemini drew them too. Each was rendered and looked at; one unclear one (the ferry) was redrawn.
+      - **A spot check** of about 30 items (A2 to C2) found the French natural; one clumsy option (5-39) was redrafted.
+      - Each runs about 31½ minutes with its pauses.
     - **The real test's format,** confirmed then:
       - **From the official Manuel du candidat** (FEI, version D, 2022: pp. 18 and 32–33, sample items pp. 48–51, answer key p. 56): 39 questions in 35 minutes, 4 options with one right answer, rising difficulty. Each recording plays once, and the question is asked after it. On computer, the questions and answers are on the same screen.
       - **The four kinds of item in its samples:**
@@ -376,6 +382,17 @@
     - **Sign-in:** `gcloud auth application-default login` (a short-lived token, never printed), and the project from `GOOGLE_CLOUD_PROJECT` or gcloud's default project; the user's is project 639736280778. The API key in `GOOGLE_TTS_API_KEY` is refused by Vertex. `--vertex` records everything not on Gemini yet, or the ids named, again.
   - Gemini reads its key from `~/.config/gemini/api_key`, which the user saves; never type or print the key. Microsoft needs `python3 -m pip install --user edge-tts`. Both need node and macOS `afconvert`.
   - After editing `comp-co.js` or `exam-co.js`, run `node tools/check_co.js`, then `python3 tools/make_audio.py`. A change to a written option doesn't need a new recording; a change to anything spoken does.
+- `tools/write_co_exams.py`: drafts more CO Examens blancs with Gemini on Vertex AI (`gemini-3.8-flash`), signed in with gcloud like `make_audio.py --vertex`.
+  - **Steps:** `plan A B` (a topic, setting and speakers for each of the 39 items, avoiding every topic already used), `items` (one request per item, six at a time), `drawings`, `check` (every draft through the current checks; failures dropped to draft again), `redo ID…` and `write` (into `exam-co.js` between its markers).
+  - **The checks,** matching `check_co.js` item by item:
+    - the spoken words for the level and kind (so each exam runs about 31 minutes);
+    - one or two speakers as planned, each given a Paris Gemini voice of their gender;
+    - four distinct options, with the right one's length in an assigned role (7 longest, 7 shortest, 18 neither per exam);
+    - for B1–B2, its overlap with the recording's words in an assigned role: never the most, and the fewest in only 5 of 19. Told only to reword, Gemini first made the right answer the one with the fewest heard words 90% of the time;
+    - every « » quotation in an explanation is the recording's words exactly (a « […] » cut allowed).
+  - A failed draft goes back to Gemini with the reason, up to four times.
+  - **Drafts** are kept outside the repo, in `~/Library/Application Support/tcf-reussir/exam-drafts/`.
+  - **Then:** `check_co.js`, and `make_audio.py --vertex` records them.
 - `tools/check_co.js`: checks the listening sets: structure, 6 questions, the cast, script length and option lengths. It also checks that every set has an up-to-date recording of 1:45 to 4 minutes and that no audio file is left over. A set not yet on Gemini that is under its word target is listed for rewriting but doesn't fail the check, so a small change in the learned pace never blocks the nightly push.
   - It also checks each CO exam:
     - 39 items, with the level blocks and kinds of `coExam`;
@@ -400,7 +417,7 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `ts-fsrs.js`, `theme.js`, `fr.js`, `i18n.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-*/*.mp4` (one folder per CO exam) as supporting files. Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `ts-fsrs.js`, `theme.js`, `fr.js`, `i18n.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-*/*.mp4` (one folder per CO exam) as supporting files. A publish sends at most 255 files and 64 MB, so send only what changed (files left out stay). Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
   - Delete a branch once its pull request is merged (the user asked on 2026-10-10). Cloud sessions can't delete branches on GitHub, so the repo's "Automatically delete head branches" setting does it, or the user deletes them.
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress, fiches, mistakes.
