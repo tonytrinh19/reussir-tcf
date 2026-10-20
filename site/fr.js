@@ -5315,6 +5315,10 @@ window.TCF.FR = {
 "{0}Réduire"
 ],
 [
+"{0}Resume the exam",
+"{0}Reprendre l'examen"
+],
+[
 "{0}Save to your cards",
 "{0}Ajouter aux cartes"
 ],
