@@ -2544,72 +2544,139 @@
       return AC;
     } catch (_) { return null; }
   }
-  const audioPrime = () => { if (soundOn()) audioCtx(true); };
+  const audioPrime = () => { if (!soundOn()) return; toneUnlock(); if (AC || Object.keys(toneClip).length < Object.keys(TONE_LEN).length) audioCtx(true); };
   // Touch screens only allow sound from the end of a tap, so the lift wakes it too.
   ["pointerdown", "pointerup", "touchend", "keydown"].forEach((ev) => document.addEventListener(ev, audioPrime, { capture: true, passive: true }));
   try { navigator.mediaDevices.addEventListener("devicechange", () => { acUsed = 0; }); } catch (_) {}
-  function tone(kind, delay) {
-    if (!soundOn()) return;
+  // Each sound's recipe, drawn on an audio context from time t0.
+  function toneRecipe(ac, kind, t0) {
+    const note = (f, at, dur, peak, type, to) => {
+      const o = ac.createOscillator(), gn = ac.createGain();
+      o.type = type || "sine";
+      o.frequency.setValueAtTime(f, at);
+      if (to) o.frequency.exponentialRampToValueAtTime(to, at + dur);
+      gn.gain.setValueAtTime(0.0001, at);
+      gn.gain.exponentialRampToValueAtTime(peak, at + 0.012);
+      gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      o.connect(gn);
+      gn.connect(ac.destination);
+      o.start(at);
+      o.stop(at + dur + 0.02);
+    };
+    // A bell: the strike and a quieter, higher partial, both ringing on.
+    const strike = (f, at, dur, peak) => { note(f, at, dur, peak); note(f * 2.76, at, dur * 0.45, peak * 0.28); };
+    // A stopwatch's click: a few milliseconds of filtered noise.
+    const click = (at, peak, hz) => {
+      const n = Math.floor(ac.sampleRate * 0.012), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+      const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), gn = ac.createGain();
+      src.buffer = buf;
+      bp.type = "bandpass";
+      bp.frequency.value = hz || 3200;
+      bp.Q.value = 1.2;
+      gn.gain.value = peak;
+      src.connect(bp);
+      bp.connect(gn);
+      gn.connect(ac.destination);
+      src.start(at);
+    };
+    if (kind === "pass") { note(880, t0, 0.2, 0.1); note(1318.5, t0 + 0.07, 0.26, 0.07); }
+    else if (kind === "again") note(240, t0, 0.2, 0.11, "triangle", 170);
+    else if (kind === "leaf") note(1760, t0 + 0.14, 0.34, 0.06);
+    else if (kind === "thunk") {
+      // A low thud, with a brush of paper as the stamp meets the page.
+      note(150, t0, 0.22, 0.15, "triangle", 62);
+      const n = Math.floor(ac.sampleRate * 0.06), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+      const src = ac.createBufferSource(), lp = ac.createBiquadFilter(), gn = ac.createGain();
+      src.buffer = buf;
+      lp.type = "lowpass";
+      lp.frequency.value = 1400;
+      gn.gain.value = 0.12;
+      src.connect(lp);
+      lp.connect(gn);
+      gn.connect(ac.destination);
+      src.start(t0);
+    } else if (kind === "bell") { strike(1046.5, t0, 1.3, 0.085); strike(1046.5, t0 + 0.42, 1.6, 0.075); }
+    else if (kind === "low") strike(523.25, t0, 1.4, 0.08);
+    else if (kind === "start") { click(t0, 0.3); note(659.25, t0 + 0.03, 0.14, 0.07); note(987.77, t0 + 0.11, 0.2, 0.065); }
+    else if (kind === "pause") { click(t0, 0.25); note(880, t0 + 0.03, 0.14, 0.06); note(587.33, t0 + 0.11, 0.22, 0.055); }
+    else if (kind === "stop") { click(t0, 0.28); click(t0 + 0.07, 0.22); note(392, t0 + 0.1, 0.32, 0.07, "triangle"); }
+    else if (kind === "tick") { click(t0, 0.2, 3600); note(2093, t0, 0.03, 0.012); }
+    else if (kind === "tock") { click(t0, 0.17, 2400); note(1568, t0, 0.03, 0.01); }
+    else if (kind === "beep") note(1000, t0, 0.22, 0.07);
+  }
+  // Each sound is also rendered once into a short clip (an offline context, which needs no click) and played by a
+  // plain audio player, as the recordings are: on claude.ai the page's live Web Audio can stay silent while its
+  // players are heard. A few players are woken by the first click or key, like the exam's, so a stamp or a clock
+  // can sound later by itself; the live context is the fallback until the clips are ready.
+  const SILENT = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+  const TONE_LEN = { pass: 0.36, again: 0.24, leaf: 0.5, thunk: 0.27, bell: 2.05, low: 1.43, start: 0.34, pause: 0.36, stop: 0.45, tick: 0.05, tock: 0.05, beep: 0.25 };
+  const toneClip = {};
+  // A clip as a WAV file in a data: address (16-bit mono), which the page may play.
+  function wavURI(d, sr) {
+    const n = d.length, v = new DataView(new ArrayBuffer(44 + n * 2));
+    const tag = (o, t) => { for (let i = 0; i < 4; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    tag(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); tag(8, "WAVE"); tag(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true);
+    v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); tag(36, "data"); v.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i])) * 32767, true);
+    const u = new Uint8Array(v.buffer);
+    let bin = "";
+    for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    return "data:audio/wav;base64," + btoa(bin);
+  }
+  function toneRender() {
+    const Off = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Off) return;
+    const sr = 22050;
+    Object.keys(TONE_LEN).forEach((kind) => {
+      try {
+        const oac = new Off(1, Math.ceil(sr * (TONE_LEN[kind] + 0.03)), sr);
+        const done = (buf) => { if (buf && !toneClip[kind]) toneClip[kind] = wavURI(buf.getChannelData(0), sr); };
+        oac.oncomplete = (e) => done(e.renderedBuffer);
+        toneRecipe(oac, kind, 0.005);
+        const p = oac.startRendering();
+        if (p && p.then) p.then(done, () => {});
+      } catch (_) {}
+    });
+  }
+  toneRender();
+  // Each player is woken once (`ok`): Safari on iPhone allows a player only after it has played inside a tap. A play
+  // carries a token (`tok`), so the end of one that a newer sound replaced changes nothing.
+  const tonePool = [];
+  let toneNext = 0;
+  function tonePlayOn(a, src, failed) {
+    const t = (a.tok = (a.tok || 0) + 1);
+    const end = (ok) => { if (a.tok !== t) return false; a.busy = false; if (ok) a.ok = true; return true; };
+    a.busy = true;
+    try {
+      a.src = src;
+      const p = a.play();
+      if (p && p.then) p.then(() => end(true), () => { if (end(false) && failed) failed(); });
+      else end(true);
+    } catch (_) { if (end(false) && failed) failed(); }
+  }
+  function toneUnlock() {
+    try {
+      while (tonePool.length < 3) tonePool.push(new Audio());
+      tonePool.forEach((a) => { if (!a.ok && !a.busy) tonePlayOn(a, SILENT); });
+    } catch (_) {}
+  }
+  function liveTone(kind) {
     const ac = audioCtx();
     if (!ac) return;
-    try {
-      const t0 = ac.currentTime + 0.01 + (delay || 0);
-      const note = (f, at, dur, peak, type, to) => {
-        const o = ac.createOscillator(), gn = ac.createGain();
-        o.type = type || "sine";
-        o.frequency.setValueAtTime(f, at);
-        if (to) o.frequency.exponentialRampToValueAtTime(to, at + dur);
-        gn.gain.setValueAtTime(0.0001, at);
-        gn.gain.exponentialRampToValueAtTime(peak, at + 0.012);
-        gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-        o.connect(gn);
-        gn.connect(ac.destination);
-        o.start(at);
-        o.stop(at + dur + 0.02);
-      };
-      // A bell: the strike and a quieter, higher partial, both ringing on.
-      const strike = (f, at, dur, peak) => { note(f, at, dur, peak); note(f * 2.76, at, dur * 0.45, peak * 0.28); };
-      // A stopwatch's click: a few milliseconds of filtered noise.
-      const click = (at, peak, hz) => {
-        const n = Math.floor(ac.sampleRate * 0.012), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
-        const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), gn = ac.createGain();
-        src.buffer = buf;
-        bp.type = "bandpass";
-        bp.frequency.value = hz || 3200;
-        bp.Q.value = 1.2;
-        gn.gain.value = peak;
-        src.connect(bp);
-        bp.connect(gn);
-        gn.connect(ac.destination);
-        src.start(at);
-      };
-      if (kind === "pass") { note(880, t0, 0.2, 0.1); note(1318.5, t0 + 0.07, 0.26, 0.07); }
-      else if (kind === "again") note(240, t0, 0.2, 0.11, "triangle", 170);
-      else if (kind === "leaf") note(1760, t0 + 0.14, 0.34, 0.06);
-      else if (kind === "thunk") {
-        // A low thud, with a brush of paper as the stamp meets the page.
-        note(150, t0, 0.22, 0.15, "triangle", 62);
-        const n = Math.floor(ac.sampleRate * 0.06), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
-        const src = ac.createBufferSource(), lp = ac.createBiquadFilter(), gn = ac.createGain();
-        src.buffer = buf;
-        lp.type = "lowpass";
-        lp.frequency.value = 1400;
-        gn.gain.value = 0.12;
-        src.connect(lp);
-        lp.connect(gn);
-        gn.connect(ac.destination);
-        src.start(t0);
-      } else if (kind === "bell") { strike(1046.5, t0, 1.3, 0.085); strike(1046.5, t0 + 0.42, 1.6, 0.075); }
-      else if (kind === "low") strike(523.25, t0, 1.4, 0.08);
-      else if (kind === "start") { click(t0, 0.3); note(659.25, t0 + 0.03, 0.14, 0.07); note(987.77, t0 + 0.11, 0.2, 0.065); }
-      else if (kind === "pause") { click(t0, 0.25); note(880, t0 + 0.03, 0.14, 0.06); note(587.33, t0 + 0.11, 0.22, 0.055); }
-      else if (kind === "stop") { click(t0, 0.28); click(t0 + 0.07, 0.22); note(392, t0 + 0.1, 0.32, 0.07, "triangle"); }
-      else if (kind === "tick") { click(t0, 0.2, 3600); note(2093, t0, 0.03, 0.012); }
-      else if (kind === "tock") { click(t0, 0.17, 2400); note(1568, t0, 0.03, 0.01); }
-      else if (kind === "beep") note(1000, t0, 0.22, 0.07);
-    } catch (_) {}
+    try { toneRecipe(ac, kind, ac.currentTime + 0.01); } catch (_) {}
+  }
+  function tone(kind, delay) {
+    if (!soundOn()) return;
+    if (delay) { setTimeout(() => tone(kind), delay * 1000); return; }
+    const uri = toneClip[kind];
+    if (!uri || !tonePool.length) { liveTone(kind); return; }
+    // A free player first, so one sound doesn't cut another short.
+    const ok = tonePool.filter((x) => x.ok), free = ok.filter((x) => x.paused || x.ended);
+    const list = free.length ? free : ok.length ? ok : tonePool;
+    tonePlayOn(list[toneNext++ % list.length], uri, () => liveTone(kind));
   }
   function soundToggle() {
     const on = !soundOn();
@@ -3988,7 +4055,6 @@
   // or not: no going back and no going faster. The clock on screen is the item's (the 35 minutes still run behind
   // it, and the schedule fits inside them). Pause stops the clock, the countdown and the recording together;
   // leaving the page or the tab pauses too, and a refresh brings the exam back paused.
-  const SILENT = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
   let coxAudio = null, coxSrc = "", coxTick = 0, coxToken = 0;
   const coxReadSecs = (it) => (it.kind === "reply" ? TC.coExam.read.reply : TC.coExam.read[it.level]);
   const coxFresh = (it) => ({ phase: "read", left: coxReadSecs(it), pos: 0, paused: false });
