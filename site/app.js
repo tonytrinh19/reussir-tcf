@@ -2522,19 +2522,32 @@
   // from a click or a key, so the first one on the page wakes the audio up, and later sounds (a stamp, the clock)
   // can then play by themselves. The sound button in a card session's header or by a clock (or M in a session)
   // turns them all off on this device (tcf-sound, like the theme).
-  let AC = null;
+  // One audio context can go quiet for good and still say "running": after the computer sleeps, or when the speakers
+  // or headphones change, it may keep playing to a device that's gone. So a click or key after a few quiet minutes, or
+  // after the devices changed, starts a new one (closing the old), and one that's "suspended" (before the first click)
+  // or "interrupted" (Safari, after a call, another app's sound or a tab in the background) is woken up.
+  let AC = null, acUsed = 0;
+  const AC_FRESH = 3 * 60 * 1000;
   const soundOn = () => lsGet("tcf-sound", "on") !== "off";
-  function audioCtx() {
+  function audioCtx(gesture) {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
-      AC = AC || new Ctx();
-      if (AC.state === "suspended") AC.resume();
+      const now = Date.now();
+      if (AC && (AC.state === "closed" || (gesture && now - acUsed > AC_FRESH))) {
+        if (AC.state !== "closed") { try { const p = AC.close(); if (p && p.catch) p.catch(() => {}); } catch (_) {} }
+        AC = null;
+      }
+      if (!AC) AC = new Ctx();
+      if (AC.state !== "running") { const p = AC.resume(); if (p && p.catch) p.catch(() => {}); }
+      acUsed = now;
       return AC;
     } catch (_) { return null; }
   }
-  const audioPrime = () => { if (soundOn()) audioCtx(); };
-  ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, audioPrime, { capture: true, passive: true }));
+  const audioPrime = () => { if (soundOn()) audioCtx(true); };
+  // Touch screens only allow sound from the end of a tap, so the lift wakes it too.
+  ["pointerdown", "pointerup", "touchend", "keydown"].forEach((ev) => document.addEventListener(ev, audioPrime, { capture: true, passive: true }));
+  try { navigator.mediaDevices.addEventListener("devicechange", () => { acUsed = 0; }); } catch (_) {}
   function tone(kind, delay) {
     if (!soundOn()) return;
     const ac = audioCtx();
