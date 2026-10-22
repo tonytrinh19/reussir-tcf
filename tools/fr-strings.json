@@ -244,16 +244,6 @@
   ]
  },
  {
-  "id": "80e5f1fa2846",
-  "text": "· answers hidden",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
-  ]
- },
- {
   "id": "f07aff55ed91",
   "text": "· built-in set",
   "kind": "exact",
@@ -4444,7 +4434,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -9882,17 +9872,6 @@
   "ctx": []
  },
  {
-  "id": "e8545ae0ad71",
-  "text": "answers hidden",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<span>answers hidden</span>",
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
-  ]
- },
- {
   "id": "e2c75ab2fe4e",
   "text": "Answers stay hidden until you hand in, and a blank counts as wrong.",
   "kind": "exact",
@@ -12200,7 +12179,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>Check my answers</button><button>Score only</button>"
+   "<button>Check my answers</button>"
   ]
  },
  {
@@ -12244,15 +12223,6 @@
   "where": "app",
   "ctx": [
    "Check with Claude"
-  ]
- },
- {
-  "id": "b4b3972145ca",
-  "text": "Check your answers but see only your score, so you can try the set again without spoilers",
-  "kind": "exact",
-  "where": "attr:title",
-  "ctx": [
-   "<button>Check my answers</button><button>Score only</button>"
   ]
  },
  {
@@ -13460,7 +13430,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -15935,8 +15905,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<h2>Every question</h2><button>Hide the answers</button> <p>In exam order. Open one to see …, your answer, the right one and why.</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -18115,8 +18084,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2><button>Hide the answers</button> <p>In exam order. Open one to see …, your answer, the right one and why.</p> …",
-   "…<button>Try this set again</button><button>Hide the answers</button>…"
+   "<button>Hide the answers</button>"
   ]
  },
  {
@@ -18783,12 +18751,21 @@
   ]
  },
  {
+  "id": "914094e8e381",
+  "text": "In exam order, with the ones you missed marked. Open one to see {0}. The right answers stay hidden until you show them.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "In exam order, with the ones you missed marked. Open one to see …. The right answers stay hidden until you show them."
+  ]
+ },
+ {
   "id": "8276516e8c66",
   "text": "In exam order. Open one to see {0}, your answer, the right one and why.",
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2><button>Hide the answers</button> <p>In exam order. Open one to see …, your answer, the right one and why.</p> …"
+   "In exam order. Open one to see …, your answer, the right one and why."
   ]
  },
  {
@@ -20526,7 +20503,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …",
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …",
    "…",
    "Date Task Words Level …"
   ]
@@ -23693,15 +23670,6 @@
   "ctx": []
  },
  {
-  "id": "1c1ef247eaab",
-  "text": "No peeking! The answers will wait for you.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "No peeking! The answers will wait for you."
-  ]
- },
- {
   "id": "390a49eefbfb",
   "text": "No practice exam",
   "kind": "exact",
@@ -24539,7 +24507,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -26780,7 +26748,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -30341,15 +30309,6 @@
   ]
  },
  {
-  "id": "c36d785571e3",
-  "text": "Score only",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<button>Check my answers</button><button>Score only</button>"
-  ]
- },
- {
   "id": "493ae31f9604",
   "text": "Scores and NCLC",
   "kind": "exact",
@@ -31096,8 +31055,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
+   "<button>Show the answers</button>"
   ]
  },
  {
@@ -34070,6 +34028,15 @@
   ]
  },
  {
+  "id": "693f2f4e9226",
+  "text": "the document, the question and your answer",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "the document, the question and your answer"
+  ]
+ },
+ {
   "id": "9055b0c13b09",
   "text": "The documents didn't come back complete. Try again.",
   "kind": "exact",
@@ -35063,6 +35030,15 @@
   "ctx": []
  },
  {
+  "id": "a3868e82dc66",
+  "text": "the question and your answer, with the recording to play again",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "the question and your answer, with the recording to play again"
+  ]
+ },
+ {
   "id": "de34de8fadb4",
   "text": "The question asks about the departure frequency of the airport shuttle (« Tous les combien part... ? »). Only D answers how often it runs with « Il en passe une toutes les demi-heures. ». A gives the fare (« Le billet coûte... »), B gives the bus stop location (« L'arrêt se trouve... »), and C gives the travel time (« Le trajet dure... »).",
   "kind": "exact",
@@ -35240,6 +35216,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "cc59ed831aa1",
+  "text": "The right answers stay hidden until you show them, so you can think again about the ones you missed.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>The right answers stay hidden until you show them, so you can think again about the ones you missed.</p>"
+  ]
  },
  {
   "id": "7e51eb894b16",
@@ -37782,8 +37767,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…",
-   "…<button>Try this set again</button><button>Hide the answers</button>…"
+   "…<button>Try this set again</button>……"
   ]
  },
  {
@@ -39282,15 +39266,6 @@
   "ctx": []
  },
  {
-  "id": "b6435d0f9268",
-  "text": "Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>"
-  ]
- },
- {
   "id": "e5c7e6b0803d",
   "text": "Which sounds more natural?",
   "kind": "exact",
@@ -40294,15 +40269,6 @@
   "where": "attr:aria-label",
   "ctx": [
    "…"
-  ]
- },
- {
-  "id": "84dd30494189",
-  "text": "Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
   ]
  },
  {
