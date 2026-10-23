@@ -1987,13 +1987,45 @@
     if (!h || h.saved) return;
     const items = h.cards.map((c, ci) => {
       const found = c.k < 0 || !!h.found[c.k], p = h.pick[ci];
-      return { kind: "choice", mk: c.mk, q: c.q, options: c.options, a: [c.options[0]], why: str(c.why), given: found && p != null ? c.options[p] : "", ok: found && p === 0, found };
+      return { kind: "choice", mk: c.mk, q: c.q, options: c.options, a: [c.options[0]], why: str(c.why), given: found && p != null ? c.options[p] : "", ok: found && p === 0, found, k: c.k, wrong: c.wrong, cat: c.cat || "" };
     });
     const id = uid();
     h.saved = id;
     activeTick(h);
-    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", secs: Math.round(h.secs || 0), items });
+    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", secs: Math.round(h.secs || 0), items, picks: h.picks.slice(), ...(h.pr ? { para: { text: h.pr.text, wrong: h.pr.mistakes.map((x) => x[0]) } } : {}) });
     autoTick("grammar.mine.errors", { min: (h.secs || 0) / 60 });
+  }
+  // A finished text round as it was when you finished it, to look at again from the history: the text with your
+  // marks and corrections, and the cards. A round keeps its text (`para`) since 2026-10-22; an older one is rebuilt
+  // from the draft as it's prepared now, with the mistakes of the round that are still in it, the others coming
+  // after it like « Hors texte » cards. Null when there's no text to show.
+  function mineRebuild(d) {
+    if (!d || d.topic !== "mine" || d.src !== "text" || !d.text) return null;
+    const items = arr(d.items), src = mineSources().find((s) => s.ref === d.text);
+    let pr, ks;
+    if (d.para && d.para.text) {
+      ks = items.map((it) => (Number.isInteger(it.k) ? it.k : -1));
+      pr = { text: d.para.text, mistakes: arr(d.para.wrong).map((w, k) => { const it = items[ks.indexOf(k)] || {}; return [w, [arr(it.a)[0] || ""], it.cat, it.why, it.mk, []]; }) };
+    } else {
+      const cur = src && mineTextFor(src, new Map(mineAll().map((m) => [m.key, m])));
+      if (!cur) return null;
+      const kOf = new Map(cur.mistakes.map((m, k) => [norm(m[4]), k]));
+      const was = items.map((it) => (kOf.has(norm(it.mk)) ? kOf.get(norm(it.mk)) : -1));
+      const keep = [...new Set(was.filter((k) => k >= 0))].sort((a, b) => a - b);
+      if (!keep.length) return null;
+      // The mistakes the round didn't have go back to their corrected form, and the others are numbered again.
+      const at = new Map(keep.map((k, j) => [k, j]));
+      pr = { text: cur.text.replace(/\{(\d+)\}/g, (_, k) => (at.has(Number(k)) ? `{${at.get(Number(k))}}` : cur.mistakes[Number(k)][1][0])), mistakes: keep.map((k) => cur.mistakes[k]) };
+      ks = was.map((k) => (k < 0 ? -1 : at.get(k)));
+    }
+    if (!pr.mistakes.length || pr.mistakes.some((m) => !m[1][0])) return null;
+    Object.assign(pr, { id: d.text, ref: d.text, title: src ? src.title : str(d.name).replace(/^Your mistakes · /, ""), sujet: src ? src.sujet : "", corrected: pr.text.replace(/\{(\d+)\}/g, (_, k) => pr.mistakes[Number(k)][1][0]) });
+    const cats = new Map(mineAll().map((m) => [m.key, m.cat]));
+    const cards = items.map((it, ci) => ({ k: ks[ci], mk: it.mk, wrong: ks[ci] >= 0 ? pr.mistakes[ks[ci]][0] : it.wrong || it.mk, q: it.q, options: arr(it.options), why: it.why, cat: it.cat || cats.get(norm(it.mk)) || "", found: !!it.found, order: arr(it.options).map((_, i) => i) }));
+    const pick = {};
+    items.forEach((it, ci) => { const p = arr(it.options).indexOf(it.given); if (it.found && it.given && p >= 0) pick[ci] = p; });
+    const found = pr.mistakes.map((_, k) => { const ci = ks.indexOf(k); return ci >= 0 && !!items[ci].found; });
+    return { pr, cards, picks: arr(d.picks).slice(), found, extra: d.extra || 0, pick, saved: d.id, done: true, at: d.ts || 0, secs: d.secs || 0, lastT: Date.now(), review: { date: d.date, score: d.score, total: d.total } };
   }
 
   function drillsFor(topic, set) {
@@ -5303,6 +5335,8 @@
     </div>`;
   }
   const MINE_STATE = { missed: ["Missed last time", "bad"], new: ["New", "info"], once: ["Right once", ""], fixed: ["Fixed", "ok"] };
+  // Over a text opened again from the history: which attempt it is.
+  const textReviewNote = (rv, picksLost) => `<p class="notice small">You're looking at your attempt from ${shortDate(rv.date)} (${rv.score}/${rv.total}).${picksLost ? " The words you marked that were fine weren't kept back then." : ""}</p>`;
   function grammarMine() {
     const all = mineAll();
     const ms = all.filter((m) => m.kind === "error" || m.kind === "pending"), tips = all.filter((m) => m.kind === "style"), skips = all.filter((m) => m.kind === "skip");
@@ -5393,10 +5427,13 @@
         <div class="row">${cur == null ? `<button class="btn primary" data-act="mh-results">See results <span class="kbd">Enter</span></button>` : `<span class="small muted">Pick an option, or press 1–${h.cards[cur].order.length}.</span>`}<button class="btn ghost sm" data-act="mh-close" title="${cur == null ? "Your text is saved" : "This text isn't kept until every card is answered"}">Close</button></div>
       </section>`;
     }
-    const rows = h.cards.map((c, ci) => ({ c, found: c.k < 0 || !!h.found[c.k], p: h.pick[ci] })).map((x) => Object.assign(x, { ok: x.found && x.p === 0 }));
+    // A card off the text is found by being there, unless it's a mistake of an older round no longer in its text.
+    const rows = h.cards.map((c, ci) => ({ c, found: c.k < 0 ? c.found !== false : !!h.found[c.k], p: h.pick[ci] })).map((x) => Object.assign(x, { ok: x.found && x.p === 0 }));
     const caught = rows.filter((x) => x.ok).length, misses = rows.filter((x) => !x.ok), perfect = !misses.length && !h.extra;
     const next = !!mineNextText(all);
+    const rv = h.review;
     return `<section class="panel drill mh" id="drill-area" data-m="pop" data-k="mhdone-${key}">${head}
+      ${rv ? textReviewNote(rv, h.extra && !h.picks.length) : ""}
       <div class="row mh-score"><span class="scorebig"><span data-tween="mhs-${key}" data-tw="count" data-to="${caught}">${caught}</span>/${rows.length}</span><span class="muted">caught: found and fixed${pr ? ` · found ${found} of ${n}` : ""}${extra ? ` · ${extra}` : ""}</span></div>
       ${greet(...remyScore("mine", caught, rows.length, { key }), "sm")}
       ${pr ? mhText(pr, h, key) : ""}
@@ -5407,7 +5444,7 @@
         </li>`).join("")}</ul></div>` : ""}
       ${perfect ? `<p class="pen-ok mh-perfect" data-m="burst" data-k="mhperfect-${key}">Sans faute !</p>` : ""}
       ${pr ? `<details class="fold"><summary>The corrected text</summary><div class="pr-text" lang="fr"><p>${typo(pr.corrected).replace(/\n+/g, "</p><p>")}</p></div></details>` : ""}
-      <div class="row">${retryBtn("mine", "errors", "btn primary")}${next ? `<button class="btn" data-act="mh-start">Next text</button>` : ""}<button class="btn ghost" data-act="mh-close">Close</button></div>
+      <div class="row">${rv ? "" : retryBtn("mine", "errors", "btn primary")}${next ? `<button class="btn${rv ? " primary" : ""}" data-act="mh-start">Next text</button>` : ""}<button class="btn ghost" data-act="mh-close">Close</button></div>
     </section>`;
   }
   // Your text in a round: words to tap while you look for the mistakes; then the ones found in blue ink and the
@@ -5547,8 +5584,8 @@
     const pool = PR.filter((p) => p.level === level);
     return pool.find((p) => !last.has(p.id)) || pool.slice().sort((a, b) => last.get(a.id) - last.get(b.id))[0] || null;
   }
-  function huntStart() {
-    const pr = huntNext(huntLevel());
+  function huntStart(again) {
+    const pr = again || huntNext(huntLevel());
     if (!pr) return;
     ui.hunt = { id: pr.id, picks: [], found: null, extra: 0, fixes: {}, verdicts: null, secs: 0, lastT: Date.now() };
     render(true);
@@ -5580,9 +5617,19 @@
     h.verdicts = pr.mistakes.map(([, a], k) => (h.found[k] ? checkAnswer({ a }, str(h.fixes[k])) : "missed"));
     activeTick(h, 300);
     const items = pr.mistakes.map(([wrong, a, , why], k) => ({ kind: "type", src: `« ${wrong} »`, q: prSentence(pr, k), a, why: (h.found[k] ? "" : "Not spotted. ") + why, given: h.found[k] ? str(h.fixes[k]) : "", ok: h.verdicts[k] === "ok" }));
-    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", secs: Math.round(h.secs || 0), items });
+    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", secs: Math.round(h.secs || 0), items, picks: h.picks.slice() });
     autoTick("grammar.hunt", { min: (h.secs || 0) / 60 });
     render(true);
+  }
+  // A finished text as it was when you checked it, to look at again from the history: the mistakes you found and
+  // missed, your corrections and, since 2026-10-22, the fine words you marked. Null when the text has changed since.
+  function huntRebuild(d) {
+    const pr = d && d.topic === "hunt" && PR.find((x) => x.id === d.text), items = arr(d && d.items);
+    if (!pr || items.length !== pr.mistakes.length || items.some((it, k) => it.src && it.src !== `« ${pr.mistakes[k][0]} »`)) return null;
+    const fixes = {};
+    const found = items.map((it, k) => { const f = !!str(it.given).trim(); if (f) fixes[k] = str(it.given); return f; });
+    const verdicts = items.map((it, k) => { if (!found[k]) return "missed"; if (it.ok) return "ok"; const v = checkAnswer({ a: pr.mistakes[k][1] }, fixes[k]); return v === "ok" ? "bad" : v; });
+    return { id: pr.id, picks: arr(d.picks).slice(), found, extra: d.extra || 0, fixes, verdicts, secs: d.secs || 0, lastT: Date.now(), review: { id: d.id, date: d.date, score: d.score, total: d.total } };
   }
   function grammarHunt() {
     const lvl = huntLevel(), h = ui.hunt, pr = h && PR.find((x) => x.id === h.id);
@@ -5620,9 +5667,12 @@
     }
     const caught = h.verdicts.filter((v) => v === "ok").length;
     const LABEL = { ok: ["Caught", "ok"], accent: ["Check the accents", "bad"], bad: ["Not quite", "bad"], missed: ["Not spotted", "bad"] };
+    // Opened again from the history: that attempt, with a way to try the text again.
+    const rv = h.review, rk = rv ? rv.id : `${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}`;
     return `<section class="panel drill" id="drill-area">${head}
+      ${rv ? textReviewNote(rv, h.extra && !h.picks.length) : ""}
       <div class="row"><span class="scorebig"><span data-tween="hunt-${pr.id}" data-tw="count" data-to="${caught}">${caught}</span>/${n}</span><span class="muted">caught: found and corrected · found ${fk.length} of ${n}${extra ? ` · ${extra}` : ""}</span></div>
-      ${greet(...remyScore("hunt", caught, n, { flawed: !!h.extra, key: `${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}` }), "sm")}
+      ${greet(...remyScore("hunt", caught, n, { flawed: !!h.extra, key: rk }), "sm")}
       ${prText(pr, h)}
       <ul class="misses">${pr.mistakes.map(([wrong, a, cat, why], k) => `<li>
         <p class="row" style="gap:6px"><span class="pr-n">${k + 1}</span><span class="pill ${LABEL[h.verdicts[k]][1]}">${LABEL[h.verdicts[k]][0]}</span><span class="pill">${esc(CAT[catOf(cat)])}</span></p>
@@ -5631,9 +5681,9 @@
         ${a.length > 1 ? `<p class="small muted">Also accepted: ${a.slice(1).map(esc).join(" · ")}</p>` : ""}
         <p class="small muted">${typo(why)}</p>
       </li>`).join("")}</ul>
-      ${caught === n && !h.extra ? `<p class="pen-ok" data-m="burst" data-k="hunt-${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}">Sans faute !</p>` : ""}
+      ${caught === n && !h.extra ? `<p class="pen-ok" data-m="burst" data-k="hunt-${rk}">Sans faute !</p>` : ""}
       <details class="fold"><summary>The corrected text</summary>${prCorrected(pr)}</details>
-      <div class="row"><button class="btn primary" data-act="pr-start">Next text</button><button class="btn ghost" data-act="pr-close">Close</button></div>
+      <div class="row">${rv ? `<button class="btn primary" data-act="pr-again" data-id="${esc(pr.id)}">Try this text again</button><button class="btn" data-act="pr-start">Next text</button>` : `<button class="btn primary" data-act="pr-start">Next text</button>`}<button class="btn ghost" data-act="pr-close">Close</button></div>
     </section>`;
   }
 
@@ -6647,7 +6697,10 @@
         <p>${it.ok ? `<span class="pen-ok">${esc(it.given)}</span>${it.overturned ? ` <span class="small muted">· accepted by Claude</span>` : ""}` : `<span class="pen-wrong">${esc(it.given || "—")}</span> <span class="pen-right">${esc(arr(it.a)[0] || "")}</span>`}</p>
         ${it.why ? `<p class="small muted">${typo(it.why)}</p>` : ""}
       </li>`;
+    // A text (Find the mistakes, Your mistakes) can be seen again whole, as you left it.
+    const whole = (d.topic === "hunt" && huntRebuild(d)) || (d.topic === "mine" && mineRebuild(d)) ? `<div class="row"><button class="btn sm" data-act="h-text" data-id="${esc(d.id)}">${ico("read")}See the whole text</button><span class="small muted">with your marks and corrections, as you left it</span></div>` : "";
     return `<div class="stack tight">
+      ${whole}
       ${items.length ? "" : `<p class="small muted">This round is from before whole rounds were saved, so only the questions you missed are here.</p>`}
       <ul class="misses">${qs.map(li).join("")}</ul>
       ${retriesOf(d).map((r, i, all) => `<p class="small">${all.length > 1 ? `Retry ${i + 1}` : "Retried the misses"}: ${r.score}/${r.total}.</p>${arr(r.items).length ? `<ul class="misses">${arr(r.items).map(li).join("")}</ul>` : ""}`).join("")}
@@ -7573,6 +7626,15 @@
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
+    // A Find the mistakes or Your mistakes text, opened on its page as you left it.
+    "h-text": (el) => {
+      const d = S.drills.get(el.dataset.id);
+      const h = d && (d.topic === "hunt" ? huntRebuild(d) : mineRebuild(d));
+      if (!h) { toast("This text has changed since, so it can't be shown as it was."); return; }
+      if (d.topic === "hunt") ui.hunt = h; else { ui.mh = h; if (ui.drill && ui.drill.topic === "mine") ui.drill = null; }
+      goTo(d.topic === "hunt" ? "#grammar.hunt" : "#grammar.mine");
+      requestAnimationFrame(() => { const a = document.getElementById("drill-area"); if (a) a.scrollIntoView({ block: "start" }); });
+    },
     "rep-open": (el) => { ui.rep.open = ui.rep.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "rep-close": () => { ui.rep.open = null; render(true); },
     // Reading and listening attempts open on the Compréhension page, which already shows a set with your answers.
@@ -7612,7 +7674,8 @@
     "mine-prep-stop": minePrepStop,
     "mine-hide": (el) => { saveSettings({ mineHidden: [...new Set(arr(settings().mineHidden).concat(el.dataset.k))] }); toast("Hidden: it won't come up in Your mistakes again."); },
     "mine-unhide": () => { saveSettings({ mineHidden: [] }); toast("Your hidden mistakes are back."); },
-    "pr-start": huntStart,
+    "pr-start": () => huntStart(),
+    "pr-again": (el) => huntStart(PR.find((x) => x.id === el.dataset.id)),
     "pr-tok": (el) => huntTap(Number(el.dataset.i)),
     "pr-check": huntCheck,
     "pr-finish": huntFinish,

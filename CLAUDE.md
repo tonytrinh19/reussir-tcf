@@ -252,7 +252,7 @@
         - Keys 1–4 pick.
         - The text is saved when the last card is answered.
       - **Scoring:** a mistake is caught when it's found and fixed, as in Find the mistakes. It's fixed after it's caught twice in a row.
-        - Rounds are saved in `drills` with topic `mine`, set `errors`, `src: "text"`, `text` (the draft's ref) and `found`/`extra`. Every item is a choice with `mk` and `found`.
+        - Rounds are saved in `drills` with topic `mine`, set `errors`, `src: "text"`, `text` (the draft's ref) and `found`/`extra`. Every item is a choice with `mk` and `found`. Since 2026-10-22 a round also keeps its text (`para`: `text` with the `{k}` marks and each mistake's `wrong`), the words you marked (`picks`, token indices) and, on each item, its place in the text (`k`, -1 off the text), `wrong` and `cat`, so it can be seen again whole (below).
         - Retry today's misses asks the missed ones again as choices in their sentence: the correction, your version and 2 near-misses (`mineChoice`).
       - **Style tips** (`kind: "style"`) are practised apart: « Conseils de style », up to 10 questions of « Which sounds more natural? » (the drill engine, set `style`).
         - They're kept out of the mistake counts (the tile, the dashboard) and never fixed.
@@ -260,7 +260,13 @@
       - **The typed exercise it replaced:** its rounds (`drills`, topic `mine`, set `errors`, without `src: "text"`) and its unfinished round (`inprogress` `drill--mine--errors`) stay in the database untouched, but the site no longer reads them (`retired` in `list()` and `ipGet()`). The user asked for its progress to go.
     - **Find the mistakes** (`#grammar.hunt`) gives a text from `proofread.js`: the first not done at the level (the coach's ladder: B2 once the last 3 B1 texts average 75% caught; switchable), or else the one done longest ago.
       - The learner taps the words that look wrong, then types a correction for each mistake found. A mistake is caught when it's both found and corrected.
-      - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine). A text in progress isn't an unfinished attempt, since it takes a few minutes, but a refresh keeps it.
+      - A finished text is saved in `drills` with topic `hunt`, set `main`, `text` (its id), `found` and `extra` (words marked that were fine), and since 2026-10-22 `picks` (the words you marked, as token indices). A text in progress isn't an unfinished attempt, since it takes a few minutes, but a refresh keeps it.
+    - **Seeing a text again whole** (the user asked on 2026-10-22 to review the whole exercise, not just the errors): the review of a Find the mistakes or Your mistakes text in the history (« Review » on their pages, Progrès → Historique, Évolution) has « See the whole text », which opens it on its page as it was when finished: your marks, the corrections, the cards or the list of mistakes, and the corrected text, under « You're looking at your attempt from … ».
+      - **How it's rebuilt:** from the round (`huntRebuild`, `mineRebuild`), and it survives a refresh.
+      - **Find the mistakes:** each mistake found or not and your correction come from the items, so every round can be shown. The fine words you marked come from `picks`, and rounds from before it say they weren't kept.
+      - **Your mistakes:** a round from before `para` is rebuilt from its draft as it's prepared now, matching its mistakes by their wording. Those no longer in the text come after it, like « Hors texte » cards.
+      - **What you can do from it:** « Try this text again » (Find the mistakes) or « Next text », and Close.
+      - **The other exercises:** drill rounds, the mixed review, retries and style tips are one sentence a question, so their review stays as it is. Reading and listening sets, practice exams and writing already open whole.
     - **Save to cards:** selecting a word or phrase (up to 12 words) anywhere on a page, outside text boxes, shows a "Save to cards" button under it. The user asked for this on 2026-10-05, to keep words met in a reading text for review.
       - The button opens a panel (outside `#view`, kept in `ui.grab` across a refresh). It's filled in with the words, the sentence they're in as the example, and where they were (the page, then the document's title). Speaker names in transcripts (`.who`) are left out.
       - The meaning can be typed, or filled in by Claude: the dictionary form, the meaning in that sentence and a short note. It can also be left for later.
