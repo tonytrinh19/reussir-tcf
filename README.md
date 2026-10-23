@@ -14,7 +14,7 @@ npm start
 
 Then open http://localhost:4173.
 
-Your progress is saved in `data/tcf.sqlite`, separately from the claude.ai version of the site.
+Your progress is saved in `data/tcf.sqlite`, separately from the claude.ai version of the site. To bring your claude.ai progress here, download a backup in Progrès → Sauvegarde on claude.ai, then import it in the same place here.
 
 ## Options
 

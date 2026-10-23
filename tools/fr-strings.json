@@ -145,6 +145,15 @@
   ]
  },
  {
+  "id": "f1fced4c5f91",
+  "text": ": confirm the download claude.ai asks about",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   ": confirm the download claude.ai asks about"
+  ]
+ },
+ {
   "id": "29ae06516060",
   "text": ". Make it next week's extra focus.",
   "kind": "exact",
@@ -4511,6 +4520,15 @@
   ]
  },
  {
+  "id": "744457596917",
+  "text": "{0} of {1} records couldn't be saved, so your progress here is partly the file's.{2} Check your connection, then import the file again.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… of … records couldn't be saved, so your progress here is partly the file's.… Check your connection, then import the file again. <button>Import again</button><button>Reload the page</button>"
+  ]
+ },
+ {
   "id": "cd20b12a3b51",
   "text": "{0} of {1} reviews",
   "kind": "pattern",
@@ -4905,6 +4923,15 @@
   "where": "app",
   "ctx": [
    "… until day …, then …."
+  ]
+ },
+ {
+  "id": "7c3dc346a773",
+  "text": "{0} Without it, what's here now can't be brought back after the import.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… … Without it, what's here now can't be brought back after the import. <button>Try the backup again</button><button>Replace without a backup</button><button>Cancel</button>"
   ]
  },
  {
@@ -5370,6 +5397,24 @@
   ]
  },
  {
+  "id": "7cdf6117113b",
+  "text": "{0}Importer",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
+  "id": "c78d162453f7",
+  "text": "{0}Importer · Import a backup",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
   "id": "313fc96a447f",
   "text": "{0}Lecture",
   "kind": "pattern",
@@ -5466,6 +5511,15 @@
   "where": "app",
   "ctx": [
    "…<button>……</button>… <button>…Stop</button> <span>… / …</span>"
+  ]
+ },
+ {
+  "id": "a3896e93c787",
+  "text": "{0}Télécharger · Download a backup",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
   ]
  },
  {
@@ -6541,6 +6595,15 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "419bb0ea6385",
+  "text": "A backup from claude.ai or from the local site. Its progress replaces what's here.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
  },
  {
   "id": "1f30db4a8846",
@@ -10791,11 +10854,47 @@
   ]
  },
  {
+  "id": "d131e00c1249",
+  "text": "Back up or move your progress →",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "……… <summary><span></span>…</summary> … …<a>Back up or move your progress →</a> <button></button><button></button>"
+  ]
+ },
+ {
   "id": "20d064fa5289",
   "text": "Background: imparfait.",
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "89121dc99c7d",
+  "text": "backup",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+  ]
+ },
+ {
+  "id": "55d0a707e2e5",
+  "text": "Backup saved:",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Backup saved: …"
+  ]
+ },
+ {
+  "id": "8cb80dceef86",
+  "text": "Backup saved: {0}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Backup saved: …"
+  ]
  },
  {
   "id": "3c8a9485b59c",
@@ -11572,6 +11671,15 @@
   ]
  },
  {
+  "id": "1b5955ea61f4",
+  "text": "Card schedules",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Card schedules"
+  ]
+ },
+ {
   "id": "5d3a2c56aebd",
   "text": "card{0} learned by then",
   "kind": "pattern",
@@ -12278,6 +12386,15 @@
   ]
  },
  {
+  "id": "5c5e31f4b2b2",
+  "text": "Choose a backup file",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Choose a backup file"
+  ]
+ },
+ {
   "id": "a37bdb52bce0",
   "text": "Choose at any time{0}. When this question's time runs out, the next one starts by itself, as on the real test.",
   "kind": "pattern",
@@ -12548,6 +12665,15 @@
   "where": "app",
   "ctx": [
    "Claude: your answer works too. Counted as correct."
+  ]
+ },
+ {
+  "id": "2e8002048d9e",
+  "text": "claude.ai asks you to confirm the download.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>claude.ai asks you to confirm the download.</span>"
   ]
  },
  {
@@ -13145,6 +13271,15 @@
   "where": "app",
   "ctx": [
    "<button>Confirm</button><button>Cancel</button>"
+  ]
+ },
+ {
+  "id": "aa09b691db47",
+  "text": "confirm the download claude.ai asks about",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   ": confirm the download claude.ai asks about"
   ]
  },
  {
@@ -13798,6 +13933,15 @@
   "where": "app",
   "ctx": [
    "… days at …, but less than a week apart: try again next week"
+  ]
+ },
+ {
+  "id": "95b39122c147",
+  "text": "Days of the plan",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Days of the plan"
   ]
  },
  {
@@ -14701,6 +14845,24 @@
   "ctx": []
  },
  {
+  "id": "8e1e83e0b094",
+  "text": "Download a backup",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
+  "id": "459ef877b6d8",
+  "text": "Downloads aren't available here, so the backup was copied: paste it into a file named reussir-tcf.json.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Downloads aren't available here, so the backup was copied: paste it into a file named reussir-tcf.json."
+  ]
+ },
+ {
   "id": "a497073ec572",
   "text": "Dress rehearsal (optional)",
   "kind": "exact",
@@ -14732,6 +14894,15 @@
   "where": "app",
   "ctx": [
    "drill rounds"
+  ]
+ },
+ {
+  "id": "3e560d0cdd89",
+  "text": "Drill rounds and texts",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Drill rounds and texts"
   ]
  },
  {
@@ -15482,6 +15653,15 @@
   ]
  },
  {
+  "id": "74c23215e35d",
+  "text": "Error log",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Error log"
+  ]
+ },
+ {
   "id": "5d8ad0d040c9",
   "text": "Error log + listen-back notes",
   "kind": "exact",
@@ -15744,6 +15924,15 @@
   "ctx": []
  },
  {
+  "id": "d515e268d87f",
+  "text": "Every attempt, card schedule, day and setting becomes the file's, and a backup of what's here is downloaded first.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <b>This replaces all your progress here.</b> Every attempt, card schedule, day and setting becomes the file's, and a backup of what's here is downloaded first. <button>Replace my progress here</button>…<button>Cancel</button>"
+  ]
+ },
+ {
   "id": "3b69511536e3",
   "text": "Every B1 listening set at 5 of 6 or better",
   "kind": "exact",
@@ -15915,6 +16104,15 @@
   "where": "app",
   "ctx": [
    "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
+  ]
+ },
+ {
+  "id": "58cd1f8e0a6b",
+  "text": "Every record",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "What Here … … Every record … …"
   ]
  },
  {
@@ -16730,6 +16928,15 @@
   ]
  },
  {
+  "id": "a87d27b554ee",
+  "text": "First, a backup of your progress here{0}…",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "…<p>First, a backup of your progress here……</p>"
+  ]
+ },
+ {
   "id": "6393d81f6803",
   "text": "Five grammar topics mastered",
   "kind": "exact",
@@ -17131,6 +17338,15 @@
   "ctx": []
  },
  {
+  "id": "f1b1d1cc19e2",
+  "text": "from a browser's own copy",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "from a browser's own copy"
+  ]
+ },
+ {
   "id": "f68646ab79e8",
   "text": "from Claude",
   "kind": "exact",
@@ -17138,6 +17354,24 @@
   "ctx": [
    "<span>from Claude</span>",
    "· from Claude"
+  ]
+ },
+ {
+  "id": "e0d8cedd38e8",
+  "text": "from claude.ai",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "from claude.ai"
+  ]
+ },
+ {
+  "id": "414d66bac8ea",
+  "text": "from the local site",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "from the local site"
   ]
  },
  {
@@ -18030,6 +18264,15 @@
   "ctx": []
  },
  {
+  "id": "ecbcb0e424c4",
+  "text": "Here",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "What Here … … Every record … …"
+  ]
+ },
+ {
   "id": "01a80f1c51fd",
   "text": "Here the direct object (des photos) comes after the verb: no agreement.",
   "kind": "exact",
@@ -18134,7 +18377,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -18143,7 +18386,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -18197,7 +18440,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>…Devoirs · Homework</h2> … <button>Add</button> …"
+   "<h2>…Devoirs · Homework</h2> … <button>Add</button> …",
+   "Homework"
   ]
  },
  {
@@ -18389,6 +18633,24 @@
   "where": "app",
   "ctx": [
    "I concede the other side before pivoting (Certes… mais)"
+  ]
+ },
+ {
+  "id": "a689aa284ea8",
+  "text": "Ici",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
+  "id": "4a75ab6b23bd",
+  "text": "Ici · What's here",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
   ]
  },
  {
@@ -18655,6 +18917,51 @@
   "ctx": []
  },
  {
+  "id": "16a4ff6908cd",
+  "text": "Import a backup",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
+  "id": "88b5b42f13f4",
+  "text": "Import again",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… of … records couldn't be saved, so your progress here is partly the file's.… Check your connection, then import the file again. <button>Import again</button><button>Reload the page</button>"
+  ]
+ },
+ {
+  "id": "ae470a1f7ee2",
+  "text": "Imported {0} records. {1}Your charts, history and exercises are the file's now.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Imported … records. …Your charts, history and exercises are the file's now.<button>OK</button>"
+  ]
+ },
+ {
+  "id": "a8e24f1d8532",
+  "text": "Importer · Import a backup",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
+  "id": "90ab5ed3bb3e",
+  "text": "Importing",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Importing <b>… of …</b> records…</p> <i></i> <p>Keep this page open until it starts again by itself.</p>"
+  ]
+ },
+ {
   "id": "f79c9a5b9ece",
   "text": "Improved version",
   "kind": "exact",
@@ -18853,6 +19160,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "3974385a4472",
+  "text": "In the file",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "In the file"
+  ]
  },
  {
   "id": "8056ef0bc4dd",
@@ -19473,6 +19789,15 @@
   "where": "app",
   "ctx": [
    "Keep these two"
+  ]
+ },
+ {
+  "id": "6ad3068f1ce8",
+  "text": "Keep this page open until it starts again by itself.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Importing <b>… of …</b> records…</p> <i></i> <p>Keep this page open until it starts again by itself.</p>"
   ]
  },
  {
@@ -24575,6 +24900,15 @@
   ]
  },
  {
+  "id": "c9119d9fb7d4",
+  "text": "of {0} records couldn't be saved, so your progress here is partly the file's.{1} Check your connection, then import the file again.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… of … records couldn't be saved, so your progress here is partly the file's.… Check your connection, then import the file again. <button>Import again</button><button>Reload the page</button>"
+  ]
+ },
+ {
   "id": "dae2c069b272",
   "text": "of {0} reviews",
   "kind": "pattern",
@@ -24798,6 +25132,24 @@
   "ctx": []
  },
  {
+  "id": "9ce3bd4224c8",
+  "text": "OK",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Imported … records. …Your charts, history and exercises are the file's now.<button>OK</button>"
+  ]
+ },
+ {
+  "id": "8504ba4e91f3",
+  "text": "Old speaking attempts",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Old speaking attempts"
+  ]
+ },
+ {
   "id": "db3d405b1067",
   "text": "on",
   "kind": "exact",
@@ -24988,6 +25340,15 @@
   "kind": "exact",
   "where": "content:hunt",
   "ctx": []
+ },
+ {
+  "id": "d3865a1f595d",
+  "text": "One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude.ai.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
  },
  {
   "id": "ae7acb0171fb",
@@ -25608,7 +25969,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -25841,6 +26202,15 @@
   "where": "app",
   "ctx": [
    "Part of the plan"
+  ]
+ },
+ {
+  "id": "a3b6af4897c7",
+  "text": "Part of this file isn't in the shape of a backup, so it can't be imported.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Part of this file isn't in the shape of a backup, so it can't be imported."
   ]
  },
  {
@@ -27359,7 +27729,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -28302,6 +28672,15 @@
   ]
  },
  {
+  "id": "21522e52bc5d",
+  "text": "Reading, listening and exams",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Reading, listening and exams"
+  ]
+ },
+ {
   "id": "75c0533730ca",
   "text": "ready",
   "kind": "exact",
@@ -28454,6 +28833,15 @@
   "where": "attr:aria-label",
   "ctx": [
    "…<button>……</button>… <button>…Stop</button> <span>… / …</span>"
+  ]
+ },
+ {
+  "id": "da4b07a11ce8",
+  "text": "records…",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Importing <b>… of …</b> records…</p> <i></i> <p>Keep this page open until it starts again by itself.</p>"
   ]
  },
  {
@@ -28640,6 +29028,15 @@
   ]
  },
  {
+  "id": "a38c5d50bd59",
+  "text": "Reload the page",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… of … records couldn't be saved, so your progress here is partly the file's.… Check your connection, then import the file again. <button>Import again</button><button>Reload the page</button>"
+  ]
+ },
+ {
   "id": "e963907dac5c",
   "text": "Remove",
   "kind": "exact",
@@ -28764,6 +29161,24 @@
   "where": "app",
   "ctx": [
    "Répartition · the split"
+  ]
+ },
+ {
+  "id": "9d30286e76a3",
+  "text": "Replace my progress here",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <b>This replaces all your progress here.</b> Every attempt, card schedule, day and setting becomes the file's, and a backup of what's here is downloaded first. <button>Replace my progress here</button>…<button>Cancel</button>"
+  ]
+ },
+ {
+  "id": "750d3c2bbe05",
+  "text": "Replace without a backup",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … Without it, what's here now can't be brought back after the import. <button>Try the backup again</button><button>Replace without a backup</button><button>Cancel</button>"
   ]
  },
  {
@@ -29314,6 +29729,15 @@
   "where": "app",
   "ctx": [
    "· retrying today's misses"
+  ]
+ },
+ {
+  "id": "778b9b401102",
+  "text": "reussir-tcf-{0}-{1}.json",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "reussir-tcf-…-….json"
   ]
  },
  {
@@ -29979,6 +30403,15 @@
   ]
  },
  {
+  "id": "2306f5e8796a",
+  "text": "Sauvegarde",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+  ]
+ },
+ {
   "id": "efc007a393f6",
   "text": "Save",
   "kind": "exact",
@@ -30315,6 +30748,15 @@
   "where": "app",
   "ctx": [
    "Score logged."
+  ]
+ },
+ {
+  "id": "b2bba0a18772",
+  "text": "Scores and mocks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Scores and mocks"
   ]
  },
  {
@@ -30860,6 +31302,15 @@
   ]
  },
  {
+  "id": "5341acffa98e",
+  "text": "Settings, stamps and phase",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Settings, stamps and phase"
+  ]
+ },
+ {
   "id": "2dc956778d8e",
   "text": "Seul or seulement, sûr or sur, leur or leurs",
   "kind": "exact",
@@ -31012,6 +31463,15 @@
   "where": "app",
   "ctx": [
    "Sheet saved. It's on your desk."
+  ]
+ },
+ {
+  "id": "8ae84ea7d11f",
+  "text": "Sheets and notes",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Sheets and notes"
   ]
  },
  {
@@ -33065,6 +33525,15 @@
   "ctx": []
  },
  {
+  "id": "25fb06e2c1af",
+  "text": "Télécharger · Download a backup",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
+  ]
+ },
+ {
   "id": "64ec667f6580",
   "text": "Téléphoner à quelqu'un: indirect object, no agreement.",
   "kind": "exact",
@@ -33530,6 +33999,33 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "fd91c303a285",
+  "text": "The backup couldn't be saved here.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The backup couldn't be saved here."
+  ]
+ },
+ {
+  "id": "3acb7504dc24",
+  "text": "The backup of what was here is in your downloads.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The backup of what was here is in your downloads."
+  ]
+ },
+ {
+  "id": "9090f165564e",
+  "text": "The backup of your progress here wasn't saved.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The backup of your progress here wasn't saved."
+  ]
  },
  {
   "id": "3564c1e9f5dd",
@@ -36283,12 +36779,48 @@
   "ctx": []
  },
  {
+  "id": "02d6aefe594a",
+  "text": "They're your progress from claude.ai.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "They're your progress from claude.ai."
+  ]
+ },
+ {
+  "id": "77d21a37c2e3",
+  "text": "They're your progress from the local site.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "They're your progress from the local site."
+  ]
+ },
+ {
   "id": "76b94e91318f",
   "text": "Thirty days in a row",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "Thirty days in a row"
+  ]
+ },
+ {
+  "id": "5d656acf60bc",
+  "text": "This backup is empty.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "This backup is empty."
+  ]
+ },
+ {
+  "id": "a1cac7d8d6b7",
+  "text": "this browser",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "this browser"
   ]
  },
  {
@@ -36337,6 +36869,15 @@
   ]
  },
  {
+  "id": "eb7ed7c4de27",
+  "text": "this computer",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "this computer"
+  ]
+ },
+ {
   "id": "6e9a8f58d7b9",
   "text": "This exam needs the latest version of the page. Reload it to load the exam.",
   "kind": "exact",
@@ -36361,6 +36902,24 @@
   "where": "app",
   "ctx": [
    "This exam's text wasn't saved, so it can't be reviewed."
+  ]
+ },
+ {
+  "id": "e37447142415",
+  "text": "This file couldn't be read.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "This file couldn't be read."
+  ]
+ },
+ {
+  "id": "4f70280b3dbd",
+  "text": "This file isn't a Réussir le TCF backup.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "This file isn't a Réussir le TCF backup."
   ]
  },
  {
@@ -36406,6 +36965,15 @@
   "where": "attr:title",
   "ctx": [
    "<span>…</span><button>…</button> <i></i>"
+  ]
+ },
+ {
+  "id": "ca03596d19eb",
+  "text": "This replaces all your progress here.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <b>This replaces all your progress here.</b> Every attempt, card schedule, day and setting becomes the file's, and a backup of what's here is downloaded first. <button>Replace my progress here</button>…<button>Cancel</button>"
   ]
  },
  {
@@ -37798,6 +38366,15 @@
   ]
  },
  {
+  "id": "24773ee06e70",
+  "text": "Try the backup again",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … Without it, what's here now can't be brought back after the import. <button>Try the backup again</button><button>Replace without a backup</button><button>Cancel</button>"
+  ]
+ },
+ {
   "id": "f9a0d2aab878",
   "text": "Try this set again",
   "kind": "exact",
@@ -38423,6 +39000,15 @@
   ]
  },
  {
+  "id": "10f566e916d4",
+  "text": "Unfinished attempts",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Unfinished attempts"
+  ]
+ },
+ {
   "id": "c9d84013ab4c",
   "text": "Unlike the real test, the pictures are drawings, and the recordings use Microsoft's voices for now: mostly from France, with a few from Québec, as on the real test.",
   "kind": "exact",
@@ -38840,7 +39426,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -39045,6 +39631,15 @@
   ]
  },
  {
+  "id": "97211a888812",
+  "text": "What",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "What Here … … Every record … …"
+  ]
+ },
+ {
   "id": "a381bcaef87e",
   "text": "What goes wrong, and the fix, in one sentence",
   "kind": "exact",
@@ -39181,6 +39776,15 @@
   "where": "app",
   "ctx": [
    "what you'd recall"
+  ]
+ },
+ {
+  "id": "c26d70330eb1",
+  "text": "What's here",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … <p>…Télécharger · Download a backup</p> <p>One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude"
   ]
  },
  {
@@ -39566,6 +40170,15 @@
   ]
  },
  {
+  "id": "bae6cddfaf76",
+  "text": "Without it, what's here now can't be brought back after the import.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … Without it, what's here now can't be brought back after the import. <button>Try the backup again</button><button>Replace without a backup</button><button>Cancel</button>"
+  ]
+ },
+ {
   "id": "ed2bbe4dbf4e",
   "text": "word choice",
   "kind": "exact",
@@ -39790,6 +40403,15 @@
   "where": "app",
   "ctx": [
    "Write your text first: there's nothing to evaluate yet."
+  ]
+ },
+ {
+  "id": "2dabb8334b6c",
+  "text": "Writing",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Writing"
   ]
  },
  {
@@ -40678,6 +41300,15 @@
   ]
  },
  {
+  "id": "c529324e20c0",
+  "text": "Your mistakes, prepared",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your mistakes, prepared"
+  ]
+ },
+ {
   "id": "6ea6157d9359",
   "text": "your most frequent mistake",
   "kind": "exact",
@@ -40714,6 +41345,15 @@
   ]
  },
  {
+  "id": "cce5b3dead70",
+  "text": "Your own and edited cards",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your own and edited cards"
+  ]
+ },
+ {
   "id": "a845c2368fc0",
   "text": "Your own revision sheet",
   "kind": "exact",
@@ -40738,6 +41378,51 @@
   "where": "app",
   "ctx": [
    "Your own texts with your mistakes put back: find them, then pick the fix."
+  ]
+ },
+ {
+  "id": "4f6f4cbcfd31",
+  "text": "Your progress here couldn't be saved to a file first.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your progress here couldn't be saved to a file first."
+  ]
+ },
+ {
+  "id": "a5af3bc94e78",
+  "text": "Your progress here is saved in this browser only.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your progress here is saved in this browser only."
+  ]
+ },
+ {
+  "id": "53ff94fc9643",
+  "text": "Your progress here is saved on claude.ai, with your account.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your progress here is saved on claude.ai, with your account."
+  ]
+ },
+ {
+  "id": "74e4a003ce4b",
+  "text": "Your progress here is saved on this computer, in the local database (data/tcf.sqlite).",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your progress here is saved on this computer, in the local database (data/tcf.sqlite)."
+  ]
+ },
+ {
+  "id": "dd31796c09e2",
+  "text": "Your progress is still loading.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your progress is still loading."
   ]
  },
  {

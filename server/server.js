@@ -15,6 +15,8 @@ const ROOT = path.resolve(__dirname, "..", "site");
 const PORT = Number(process.env.PORT) || 4173;
 const HOST = process.env.HOST || "127.0.0.1";
 const MAX_BODY = 5 * 1024 * 1024;
+// A whole backup, imported in one request.
+const MAX_BACKUP = 200 * 1024 * 1024;
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -36,13 +38,14 @@ function send(res, status, body, headers) {
 }
 const json = (res, status, obj) => send(res, status, JSON.stringify(obj), { "Content-Type": "application/json; charset=utf-8" });
 
-function readBody(req) {
+function readBody(req, max) {
+  max = max || MAX_BODY;
   return new Promise((resolve, reject) => {
     const chunks = [];
     let size = 0;
     req.on("data", (c) => {
       size += c.length;
-      if (size > MAX_BODY) { reject(Object.assign(new Error("Body too large"), { status: 413 })); req.destroy(); return; }
+      if (size > max) { reject(Object.assign(new Error("Body too large"), { status: 413 })); req.destroy(); return; }
       chunks.push(c);
     });
     req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
@@ -51,12 +54,18 @@ function readBody(req) {
 }
 
 // /api/data                 GET    → { settings: { id: doc, … }, days: { … }, … }
+//                           PUT    → replace everything with a body of that shape (a backup imported)
 // /api/data/:coll/:id       PUT    → replace one document (JSON body)
 // /api/data/:coll/:id       DELETE → remove one document
 async function api(req, res, parts) {
   if (parts.length === 0) {
-    if (req.method !== "GET") return json(res, 405, { error: "method_not_allowed" });
-    return json(res, 200, db.all());
+    if (req.method === "GET") return json(res, 200, db.all());
+    if (req.method !== "PUT") return json(res, 405, { error: "method_not_allowed" });
+    let data;
+    try { data = JSON.parse(await readBody(req, MAX_BACKUP)); } catch (e) { return json(res, e.status || 400, { error: e.status ? "too_large" : "bad_json" }); }
+    if (!data || typeof data !== "object" || Array.isArray(data) || !Object.keys(data).some((c) => COLLS.includes(c))) return json(res, 400, { error: "bad_backup" });
+    for (const docs of Object.values(data)) if (!docs || typeof docs !== "object" || Array.isArray(docs) || Object.values(docs).some((d) => !d || typeof d !== "object" || Array.isArray(d))) return json(res, 400, { error: "bad_backup" });
+    return json(res, 200, { ok: true, n: db.replace(data) });
   }
   if (parts.length !== 2) return json(res, 404, { error: "not_found" });
   const [coll, id] = parts;
