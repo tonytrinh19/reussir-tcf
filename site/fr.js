@@ -3538,6 +3538,7 @@ window.TCF.FR = {
 "Your own revision sheet": "Ta propre fiche de révision",
 "Your own text with your mistakes back in it: find them, then pick the fix": "Ton propre texte avec tes erreurs réinsérées : repère-les, puis choisis la correction",
 "Your own texts with your mistakes put back: find them, then pick the fix.": "Tes propres textes avec tes erreurs réinsérées : repère-les, puis choisis la correction.",
+"Your progress is still loading.": "Ta progression est encore en cours de chargement.",
 "Your reaction or opinion + justification": "Ta réaction ou opinion + justification",
 "Your score on each drill round. Every round draws different questions from its set.": "Ton score à chaque tour d'exercice. Chaque tour tire des questions différentes dans sa série.",
 "Your score on each listening and reading set. Sets differ in difficulty, so read the trend over several sets.": "Ton score à chaque série d'écoute et de lecture. Les séries varient en difficulté, observe la tendance sur plusieurs séries.",

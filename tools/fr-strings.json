@@ -41465,6 +41465,15 @@
   ]
  },
  {
+  "id": "dd31796c09e2",
+  "text": "Your progress is still loading.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your progress is still loading."
+  ]
+ },
+ {
   "id": "9cff32c51675",
   "text": "Your quickest set: {0} s a question (exam pace: {1} s)",
   "kind": "pattern",
