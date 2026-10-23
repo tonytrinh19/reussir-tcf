@@ -907,24 +907,24 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .sheet h3 { font: 600 19px/1.3 var(--f-text); }
 .sheet .fr { font-size: 16.5px; line-height: 1.65; white-space: pre-line; }
 .qs { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; counter-reset: q; }
-.qs > li { display: grid; gap: 8px; counter-increment: q; }
+.qs > li { position: relative; display: grid; gap: 8px; counter-increment: q; }
 .qs > li > p.q { font-weight: 700; }
 .qs > li > p.q::before { content: counter(q) ". "; color: var(--ink-3); }
 /* reading sets: a document above each question */
 .qs.ce-items { gap: 32px; }
 .qs.ce-items > li { gap: 10px; }
-/* A set or exam checked with its answers hidden, so trying it again isn't spoiled: the score, Rémy with his eyes
-   shut, and the way back to the answers. */
-.ans-hid .h3 { display: flex; align-items: center; gap: 8px; }
-.ans-hid .h3 .ico { width: 22px; height: 22px; color: var(--ink); }
-.ans-hid .h3 small { font-weight: 600; }
-.ans-hid > .row > p { flex: 1 1 260px; margin: 0; }
+/* A checked set: a question you missed gets a red margin rule and the red pen's « ✗ raté » (also while the right
+   answers are hidden, when that's all it says). */
+.qs > li.q-miss::before { content: ""; position: absolute; left: -10px; top: 2px; bottom: 2px; width: 2.5px; border-radius: 2px; background: var(--red); }
+.q-mark { margin-left: 6px; font: 400 14px/1 var(--f-hand); color: var(--red); white-space: nowrap; }
 .opts { display: grid; gap: 7px; }
 .opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 13px; border: 1.5px solid var(--rule); border-radius: var(--r); cursor: pointer; font-family: var(--f-text); font-size: 16px; background: var(--surface); transition: border-color var(--dur-fast), background-color var(--dur-fast), transform var(--dur-fast) var(--ease); -webkit-tap-highlight-color: transparent; }
 .opt:hover { border-color: var(--rule-2); }
 .opt input { margin-top: 4px; accent-color: var(--accent); }
 .opt.ok { border-color: var(--green); background: var(--green-soft); }
 .opt.bad { border-color: var(--red); background: var(--red-soft); }
+/* the exam's results with the answers hidden: your pick, in the blue of a selected option */
+.opt.picked { border-color: var(--accent); background: var(--accent-soft); }
 .player { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .player .btn { gap: 7px; }
 .player .btn.primary { min-width: 7.5em; }

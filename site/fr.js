@@ -733,7 +733,6 @@ window.TCF.FR = {
 "Check the error log against the original error list: which items are genuinely resolved?": "Vérifie le journal des erreurs par rapport à la liste d'origine : quels éléments sont vraiment résolus ?",
 "Check the ranges: CO and CE go to 699, EE and EO to 20.": "Vérifie les échelles : la CO et la CE vont jusqu'à 699, l'EE et l'EO jusqu'à 20.",
 "Check with Claude": "Vérifier avec Claude",
-"Check your answers but see only your score, so you can try the set again without spoilers": "Vérifie tes réponses tout en ne voyant que ton score, pour pouvoir refaire la série sans voir les solutions",
 "Check-in": "",
 "Check: recall it": "Vérification : rappelle-toi",
 "Check: you said you knew it": "Vérification : tu as dit que tu le savais",
@@ -1866,7 +1865,6 @@ window.TCF.FR = {
 "No new cards left in this theme. Build more with Claude, or pick another theme.": "Plus de nouvelles cartes dans ce thème. Crée-en d'autres avec Claude ou choisis un autre thème.",
 "No new grammar. Every grammar block re-drills what the week's mocks surfaced, plus Your mistakes. CO mocks: the CO Examen blanc, then TV5MONDE's and RFI's TCF practice (log those scores on the CO page). Easy listening and reading stay outside your study time.": "Pas de nouvelle grammaire. Chaque module de grammaire révise ce qui est ressorti des examens blancs de la semaine, ainsi que Mes erreurs. Examens blancs de CO : l'examen blanc de CO, puis les entraînements TCF de TV5MONDE et de RFI (consigne tes scores sur la page CO). L'écoute et la lecture plaisir restent en dehors de ton temps d'étude.",
 "No passive with the person as subject of dire, demander, donner: use on": "Pas de passif avec la personne comme sujet de dire, demander, donner : utilise on",
-"No peeking! The answers will wait for you.": "Pas de triche ! Les réponses t'attendent.",
 "No practice exam": "Aucun examen blanc",
 "No practice exam yet": "Pas encore d'examen blanc",
 "No practice exam yet.": "Pas encore d'examen blanc.",
@@ -2528,7 +2526,6 @@ window.TCF.FR = {
 "Score /20": "Score /20",
 "Score bands:": "Niveaux de score :",
 "Score logged.": "Score enregistré.",
-"Score only": "Notes uniquement",
 "Scores and NCLC": "Scores et NCLC",
 "Scores saved.": "Scores enregistrés.",
 "Se + en + sont + the participle: ils s'en sont occupés.": "Se + en + sont + le participe : ils s'en sont occupés.",
@@ -2575,6 +2572,7 @@ window.TCF.FR = {
 "Sections of this sheet": "Sections de cette fiche",
 "See results": "Voir les résultats",
 "See the stamp": "Voir le cachet",
+"See the whole text": "Voir le texte complet",
 "Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.": "Voir un mot dans de vraies phrases permet de le retenir. Claude en écrit deux pour chaque carte, dans des situations du TCF Canada ; vérifie-les, puis enregistre.",
 "Selon la police… serait: not confirmed.": "Selon la police… serait : pas confirmé.",
 "Semaine · Week": "Semaine",
@@ -3054,6 +3052,7 @@ window.TCF.FR = {
 "The result of a si + imparfait condition.": "Le résultat d'une condition avec si + imparfait.",
 "The result of si + imparfait": "Le résultat de si + imparfait",
 "The result of si + imparfait.": "Le résultat de si + imparfait.",
+"The right answers stay hidden until you show them, so you can think again about the ones you missed.": "Les bonnes réponses restent masquées jusqu'à ce que tu les affiches, pour te laisser réfléchir à tes erreurs.",
 "The right form of the subjonctif": "La bonne forme du subjonctif",
 "The right preposition after a verb or adjective": "La bonne préposition après un verbe ou un adjectif",
 "The right tense and mood of être": "Le bon temps et le bon mode d'être",
@@ -3113,6 +3112,7 @@ window.TCF.FR = {
 "The woman is painting a wall with a roller, next to a ladder, so she might warn: « Attention, la peinture est fraîche ! ». Nobody is setting off by car (A), there's no table or meal (B), and no station (C).": "La femme peint un mur avec un rouleau, à côté d'une échelle, elle pourrait donc prévenir : « Attention, la peinture est fraîche ! ». Personne ne part en voiture (A), il n'y a ni table ni repas (B), et pas de gare (C).",
 "The woman is pouring water from a watering can onto the flowers: « Elle arrose les fleurs du jardin ». She isn't at a market (B), there are no dishes (C), and there's no pool (D).": "La femme verse de l'eau avec un arrosoir sur les fleurs : « Elle arrose les fleurs du jardin ». Elle n'est pas au marché (B), il n'y a pas de vaisselle (C), et il n'y a pas de piscine (D).",
 "The woman stands in front of a market stall with a bag, reaching for the apples: « Elle achète des pommes au marché ». She's the customer, not the seller (A), it's a stall, not an orchard (C), and she isn't baking (D).": "La femme est debout devant un étal de marché avec un sac, et tend la main vers les pommes : « Elle achète des pommes au marché ». Elle est la cliente, pas la vendeuse (A), c'est un étal, pas un verger (C), et elle ne cuisine pas de gâteau (D).",
+"The words you marked that were fine weren't kept back then.": "Les mots corrects que tu avais sélectionnés n'ont pas été conservés.",
 "The writer grants the phone its uses (« Certes… ») but argues that idle moments let the mind wander and find ideas: « Ce n'est pas du temps perdu. » Children get bored less, not more, and « Je ne propose pas de jeter nos téléphones ».": "L'auteur reconnaît l'utilité du téléphone (« Certes… »), mais soutient que les moments d'inactivité permettent à l'esprit de vagabonder et de trouver des idées : « Ce n'est pas du temps perdu. » Les enfants s'ennuient moins, et non plus, et « Je ne propose pas de jeter nos téléphones ».",
 "The writer laughs at her own three-day menu that nobody took seconds of, and at the fries everyone cheered. She doesn't scold the guests.": "L'auteure rit de son propre menu préparé en trois jours dont personne ne s'est resservi, et des frites que tout le monde a applaudies. Elle ne réprimande pas les invités.",
 "The writer laughs at the endless debate over a light bulb, then ends warmly: « On se sourit dans l'escalier… l'immeuble, lui, a un peu changé ».": "L'auteur rit du débat sans fin au sujet d'une ampoule, puis termine chaleureusement : « On se sourit dans l'escalier… l'immeuble, lui, a un peu changé ».",
@@ -3158,6 +3158,7 @@ window.TCF.FR = {
 "This set has since been replaced, so it can't be opened again.": "Ce thème a été remplacé depuis, il ne peut donc plus être ouvert.",
 "This set is mastered: a round keeps it fresh.": "Ce thème est maîtrisé : un tour permet de le garder bien en tête.",
 "This set's text wasn't saved, so it can't be opened again.": "Le texte de ce thème n'a pas été enregistré, il ne peut donc plus être ouvert.",
+"This text has changed since, so it can't be shown as it was.": "Ce texte a été modifié depuis et ne peut plus être affiché tel quel.",
 "This text isn't kept until every card is answered": "Ce texte n'est conservé que lorsque toutes les cartes ont reçu une réponse",
 "This usually takes 10–40 seconds. It stays here if you switch back to this theme later.": "Cela prend généralement entre 10 et 40 secondes. Le texte restera ici si tu reviens sur ce thème plus tard.",
 "This week": "Cette semaine",
@@ -3282,6 +3283,7 @@ window.TCF.FR = {
 "Traversait for what was going on, a glissé for what happened.": "« Traversait » pour ce qui était en train de se passer, « a glissé » pour l'événement ponctuel.",
 "Try": "Essayer",
 "Try this set again": "Refaire cette série",
+"Try this text again": "Refaire ce texte",
 "Tu as atteint l'objectif. Bien joué !": "Tu as atteint l'objectif. Bien joué !",
 "Tu is the subject, so the object is ce que.": "« Tu » est le sujet, donc le complément d'objet est « ce que ».",
 "Tuesday": "Mardi",
@@ -3463,7 +3465,6 @@ window.TCF.FR = {
 "Which category is still weakest? That's next week's extra focus.": "Quelle catégorie reste la plus faible ? Ce sera l'objectif prioritaire de la semaine prochaine.",
 "Which is correct here?": "Qu'est-ce qui est correct ici ?",
 "Which past tense?": "Quel temps du passé ?",
-"Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.": "Les questions réussies et les bonnes réponses restent cachées jusqu'à ce que tu les affiches, afin de ne pas gâcher un nouvel essai.",
 "Which sounds more natural?": "Laquelle sonne le plus naturel ?",
 "Which topic is still weakest? Give it next week's extra round.": "Quel thème reste le plus faible ? Prévois une série supplémentaire la semaine prochaine.",
 "Which use is it?": "De quel emploi s'agit-il ?",
@@ -3556,7 +3557,6 @@ window.TCF.FR = {
 "Young · a gap under 21 days": "Récente · un écart de moins de 21 jours",
 "Your #1 flagged systematic error. It touches nearly every past-tense sentence you write.": "Ton erreur systématique signalée n° 1. Elle touche presque chaque phrase au passé que tu écris.",
 "Your answer": "Ta réponse",
-"Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.": "Tes réponses et les bonnes réponses restent cachées jusqu'à ce que tu les affiches, pour ne pas gâcher un nouvel essai de cette série.",
 "Your answers so far are kept": "Tes réponses actuelles sont conservées",
 "Your cards": "Mes cartes",
 "Your cards by the gap to their next review": "Tes cartes classées par délai avant la prochaine révision",
@@ -3616,7 +3616,6 @@ window.TCF.FR = {
 "another try": "autre essai",
 "answer": "Réponse",
 "answered": "répondues",
-"answers hidden": "réponses masquées",
 "any everyday or social topic typical of the TCF Canada (work, housing, services, health, environment, technology, culture, settling in Canada)": "tout sujet quotidien ou social typique du TCF Canada (travail, logement, services, santé, environnement, technologie, culture, installation au Canada)",
 "are due": "sont à revoir",
 "at a glance": "en un coup d'œil",
@@ -3872,11 +3871,13 @@ window.TCF.FR = {
 "the big goals": "les grands objectifs",
 "the correction, written as it should be in a sentence": "la correction, rédigée telle qu'elle doit apparaître dans une phrase",
 "the document": "le document",
+"the document, the question and your answer": "le document, la question et ta réponse",
 "the little extras": "les petits extras",
 "the meaning in this sentence": "le sens dans cette phrase",
 "the mixed review, most-missed first": "la révision mixte, erreurs les plus fréquentes en premier",
 "the next 14 days": "",
 "the ones that slip": "",
+"the question and your answer, with the recording to play again": "la question et ta réponse, avec l'enregistrement à réécouter",
 "the question, with no ___ gap": "la question, sans espace ___",
 "the ring is a topic's latest first round, the tick its target": "l'anneau indique le dernier premier tour du thème, la coche l'objectif",
 "the ring is your latest first round, the tick its target": "l'anneau indique ton dernier premier tour, la coche l'objectif",
@@ -3916,6 +3917,7 @@ window.TCF.FR = {
 "when time ran out": "quand le temps s'est écoulé",
 "where each skill stands": "le niveau de chaque compétence",
 "with an estimated score and NCLC level.": "avec une estimation du score et du niveau NCLC.",
+"with your marks and corrections, as you left it": "avec tes annotations et corrections, tel que tu l'as laissé",
 "word choice": "choix des mots",
 "words": "mots",
 "work permit": "permis de travail",
@@ -4302,7 +4304,6 @@ window.TCF.FR = {
 "· What's holding you back": "",
 "· accepted by Claude": "· accepté par Claude",
 "· another try": "· autre tentative",
-"· answers hidden": "",
 "· built-in set": "· série intégrée",
 "· counts toward mastery": "· compte pour la maîtrise",
 "· first try": "· première tentative",
@@ -5403,6 +5404,10 @@ window.TCF.FR = {
 "{0}Ajouter aux cartes"
 ],
 [
+"{0}See the whole text",
+"{0}Voir le texte complet"
+],
+[
 "{0}Stop",
 "{0}Arrêter"
 ],
@@ -5969,6 +5974,10 @@ window.TCF.FR = {
 [
 "in all · {0} in the last 3 weeks",
 "en tout · {0} ces 3 dernières semaines"
+],
+[
+"In exam order, with the ones you missed marked. Open one to see {0}. The right answers stay hidden until you show them.",
+"Dans l'ordre de l'examen, avec tes erreurs indiquées. Ouvres-en une pour voir {0}. Les bonnes réponses restent masquées jusqu'à ce que tu les affiches."
 ],
 [
 "In exam order. Open one to see {0}, your answer, the right one and why.",
@@ -6919,8 +6928,16 @@ window.TCF.FR = {
 "Tu as écrit : {0}"
 ],
 [
+"You're looking at your attempt from {0} ({1}/{2}).",
+"Tu consultes ton essai du {0} ({1}/{2})."
+],
+[
 "You're looking at your attempt from {0} ({1}/{2}). “Try this set again” starts a new one.",
 "Tu consultes ta tentative du {0} ({1}/{2}). « Recommencer cette série » en lance une nouvelle."
+],
+[
+"You're looking at your attempt from {0} ({1}/{2}).{3}",
+"Tu consultes ton essai du {0} ({1}/{2}).{3}"
 ],
 [
 "You're moving up to B2 in {0}!",

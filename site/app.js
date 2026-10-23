@@ -1987,13 +1987,45 @@
     if (!h || h.saved) return;
     const items = h.cards.map((c, ci) => {
       const found = c.k < 0 || !!h.found[c.k], p = h.pick[ci];
-      return { kind: "choice", mk: c.mk, q: c.q, options: c.options, a: [c.options[0]], why: str(c.why), given: found && p != null ? c.options[p] : "", ok: found && p === 0, found };
+      return { kind: "choice", mk: c.mk, q: c.q, options: c.options, a: [c.options[0]], why: str(c.why), given: found && p != null ? c.options[p] : "", ok: found && p === 0, found, k: c.k, wrong: c.wrong, cat: c.cat || "" };
     });
     const id = uid();
     h.saved = id;
     activeTick(h);
-    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", secs: Math.round(h.secs || 0), items });
+    put("drills", id, { topic: "mine", set: "errors", name: `Your mistakes · ${h.pr ? h.pr.title : "Hors texte"}`, text: h.pr ? h.pr.ref : "", date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: items.filter((x) => x.found).length, extra: h.extra, src: "text", secs: Math.round(h.secs || 0), items, picks: h.picks.slice(), ...(h.pr ? { para: { text: h.pr.text, wrong: h.pr.mistakes.map((x) => x[0]) } } : {}) });
     autoTick("grammar.mine.errors", { min: (h.secs || 0) / 60 });
+  }
+  // A finished text round as it was when you finished it, to look at again from the history: the text with your
+  // marks and corrections, and the cards. A round keeps its text (`para`) since 2026-10-22; an older one is rebuilt
+  // from the draft as it's prepared now, with the mistakes of the round that are still in it, the others coming
+  // after it like « Hors texte » cards. Null when there's no text to show.
+  function mineRebuild(d) {
+    if (!d || d.topic !== "mine" || d.src !== "text" || !d.text) return null;
+    const items = arr(d.items), src = mineSources().find((s) => s.ref === d.text);
+    let pr, ks;
+    if (d.para && d.para.text) {
+      ks = items.map((it) => (Number.isInteger(it.k) ? it.k : -1));
+      pr = { text: d.para.text, mistakes: arr(d.para.wrong).map((w, k) => { const it = items[ks.indexOf(k)] || {}; return [w, [arr(it.a)[0] || ""], it.cat, it.why, it.mk, []]; }) };
+    } else {
+      const cur = src && mineTextFor(src, new Map(mineAll().map((m) => [m.key, m])));
+      if (!cur) return null;
+      const kOf = new Map(cur.mistakes.map((m, k) => [norm(m[4]), k]));
+      const was = items.map((it) => (kOf.has(norm(it.mk)) ? kOf.get(norm(it.mk)) : -1));
+      const keep = [...new Set(was.filter((k) => k >= 0))].sort((a, b) => a - b);
+      if (!keep.length) return null;
+      // The mistakes the round didn't have go back to their corrected form, and the others are numbered again.
+      const at = new Map(keep.map((k, j) => [k, j]));
+      pr = { text: cur.text.replace(/\{(\d+)\}/g, (_, k) => (at.has(Number(k)) ? `{${at.get(Number(k))}}` : cur.mistakes[Number(k)][1][0])), mistakes: keep.map((k) => cur.mistakes[k]) };
+      ks = was.map((k) => (k < 0 ? -1 : at.get(k)));
+    }
+    if (!pr.mistakes.length || pr.mistakes.some((m) => !m[1][0])) return null;
+    Object.assign(pr, { id: d.text, ref: d.text, title: src ? src.title : str(d.name).replace(/^Your mistakes · /, ""), sujet: src ? src.sujet : "", corrected: pr.text.replace(/\{(\d+)\}/g, (_, k) => pr.mistakes[Number(k)][1][0]) });
+    const cats = new Map(mineAll().map((m) => [m.key, m.cat]));
+    const cards = items.map((it, ci) => ({ k: ks[ci], mk: it.mk, wrong: ks[ci] >= 0 ? pr.mistakes[ks[ci]][0] : it.wrong || it.mk, q: it.q, options: arr(it.options), why: it.why, cat: it.cat || cats.get(norm(it.mk)) || "", found: !!it.found, order: arr(it.options).map((_, i) => i) }));
+    const pick = {};
+    items.forEach((it, ci) => { const p = arr(it.options).indexOf(it.given); if (it.found && it.given && p >= 0) pick[ci] = p; });
+    const found = pr.mistakes.map((_, k) => { const ci = ks.indexOf(k); return ci >= 0 && !!items[ci].found; });
+    return { pr, cards, picks: arr(d.picks).slice(), found, extra: d.extra || 0, pick, saved: d.id, done: true, at: d.ts || 0, secs: d.secs || 0, lastT: Date.now(), review: { date: d.date, score: d.score, total: d.total } };
   }
 
   function drillsFor(topic, set) {
@@ -2522,81 +2554,161 @@
   // from a click or a key, so the first one on the page wakes the audio up, and later sounds (a stamp, the clock)
   // can then play by themselves. The sound button in a card session's header or by a clock (or M in a session)
   // turns them all off on this device (tcf-sound, like the theme).
-  let AC = null;
+  // One audio context can go quiet for good and still say "running": after the computer sleeps, or when the speakers
+  // or headphones change, it may keep playing to a device that's gone. So a click or key after a few quiet minutes, or
+  // after the devices changed, starts a new one (closing the old), and one that's "suspended" (before the first click)
+  // or "interrupted" (Safari, after a call, another app's sound or a tab in the background) is woken up.
+  let AC = null, acUsed = 0;
+  const AC_FRESH = 3 * 60 * 1000;
   const soundOn = () => lsGet("tcf-sound", "on") !== "off";
-  function audioCtx() {
+  function audioCtx(gesture) {
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
-      AC = AC || new Ctx();
-      if (AC.state === "suspended") AC.resume();
+      const now = Date.now();
+      if (AC && (AC.state === "closed" || (gesture && now - acUsed > AC_FRESH))) {
+        if (AC.state !== "closed") { try { const p = AC.close(); if (p && p.catch) p.catch(() => {}); } catch (_) {} }
+        AC = null;
+      }
+      if (!AC) AC = new Ctx();
+      if (AC.state !== "running") { const p = AC.resume(); if (p && p.catch) p.catch(() => {}); }
+      acUsed = now;
       return AC;
     } catch (_) { return null; }
   }
-  const audioPrime = () => { if (soundOn()) audioCtx(); };
-  ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, audioPrime, { capture: true, passive: true }));
-  function tone(kind, delay) {
-    if (!soundOn()) return;
+  const audioPrime = () => { if (!soundOn()) return; toneUnlock(); if (AC || Object.keys(toneClip).length < Object.keys(TONE_LEN).length) audioCtx(true); };
+  // Touch screens only allow sound from the end of a tap, so the lift wakes it too.
+  ["pointerdown", "pointerup", "touchend", "keydown"].forEach((ev) => document.addEventListener(ev, audioPrime, { capture: true, passive: true }));
+  try { navigator.mediaDevices.addEventListener("devicechange", () => { acUsed = 0; }); } catch (_) {}
+  // Each sound's recipe, drawn on an audio context from time t0.
+  function toneRecipe(ac, kind, t0) {
+    const note = (f, at, dur, peak, type, to) => {
+      const o = ac.createOscillator(), gn = ac.createGain();
+      o.type = type || "sine";
+      o.frequency.setValueAtTime(f, at);
+      if (to) o.frequency.exponentialRampToValueAtTime(to, at + dur);
+      gn.gain.setValueAtTime(0.0001, at);
+      gn.gain.exponentialRampToValueAtTime(peak, at + 0.012);
+      gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      o.connect(gn);
+      gn.connect(ac.destination);
+      o.start(at);
+      o.stop(at + dur + 0.02);
+    };
+    // A bell: the strike and a quieter, higher partial, both ringing on.
+    const strike = (f, at, dur, peak) => { note(f, at, dur, peak); note(f * 2.76, at, dur * 0.45, peak * 0.28); };
+    // A stopwatch's click: a few milliseconds of filtered noise.
+    const click = (at, peak, hz) => {
+      const n = Math.floor(ac.sampleRate * 0.012), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+      const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), gn = ac.createGain();
+      src.buffer = buf;
+      bp.type = "bandpass";
+      bp.frequency.value = hz || 3200;
+      bp.Q.value = 1.2;
+      gn.gain.value = peak;
+      src.connect(bp);
+      bp.connect(gn);
+      gn.connect(ac.destination);
+      src.start(at);
+    };
+    if (kind === "pass") { note(880, t0, 0.2, 0.1); note(1318.5, t0 + 0.07, 0.26, 0.07); }
+    else if (kind === "again") note(240, t0, 0.2, 0.11, "triangle", 170);
+    else if (kind === "leaf") note(1760, t0 + 0.14, 0.34, 0.06);
+    else if (kind === "thunk") {
+      // A low thud, with a brush of paper as the stamp meets the page.
+      note(150, t0, 0.22, 0.15, "triangle", 62);
+      const n = Math.floor(ac.sampleRate * 0.06), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+      const src = ac.createBufferSource(), lp = ac.createBiquadFilter(), gn = ac.createGain();
+      src.buffer = buf;
+      lp.type = "lowpass";
+      lp.frequency.value = 1400;
+      gn.gain.value = 0.12;
+      src.connect(lp);
+      lp.connect(gn);
+      gn.connect(ac.destination);
+      src.start(t0);
+    } else if (kind === "bell") { strike(1046.5, t0, 1.3, 0.085); strike(1046.5, t0 + 0.42, 1.6, 0.075); }
+    else if (kind === "low") strike(523.25, t0, 1.4, 0.08);
+    else if (kind === "start") { click(t0, 0.3); note(659.25, t0 + 0.03, 0.14, 0.07); note(987.77, t0 + 0.11, 0.2, 0.065); }
+    else if (kind === "pause") { click(t0, 0.25); note(880, t0 + 0.03, 0.14, 0.06); note(587.33, t0 + 0.11, 0.22, 0.055); }
+    else if (kind === "stop") { click(t0, 0.28); click(t0 + 0.07, 0.22); note(392, t0 + 0.1, 0.32, 0.07, "triangle"); }
+    else if (kind === "tick") { click(t0, 0.2, 3600); note(2093, t0, 0.03, 0.012); }
+    else if (kind === "tock") { click(t0, 0.17, 2400); note(1568, t0, 0.03, 0.01); }
+    else if (kind === "beep") note(1000, t0, 0.22, 0.07);
+  }
+  // Each sound is also rendered once into a short clip (an offline context, which needs no click) and played by a
+  // plain audio player, as the recordings are: on claude.ai the page's live Web Audio can stay silent while its
+  // players are heard. A few players are woken by the first click or key, like the exam's, so a stamp or a clock
+  // can sound later by itself; the live context is the fallback until the clips are ready.
+  const SILENT = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+  const TONE_LEN = { pass: 0.36, again: 0.24, leaf: 0.5, thunk: 0.27, bell: 2.05, low: 1.43, start: 0.34, pause: 0.36, stop: 0.45, tick: 0.05, tock: 0.05, beep: 0.25 };
+  const toneClip = {};
+  // A clip as a WAV file in a data: address (16-bit mono), which the page may play.
+  function wavURI(d, sr) {
+    const n = d.length, v = new DataView(new ArrayBuffer(44 + n * 2));
+    const tag = (o, t) => { for (let i = 0; i < 4; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    tag(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); tag(8, "WAVE"); tag(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, sr, true);
+    v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); tag(36, "data"); v.setUint32(40, n * 2, true);
+    for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i])) * 32767, true);
+    const u = new Uint8Array(v.buffer);
+    let bin = "";
+    for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    return "data:audio/wav;base64," + btoa(bin);
+  }
+  function toneRender() {
+    const Off = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!Off) return;
+    const sr = 22050;
+    Object.keys(TONE_LEN).forEach((kind) => {
+      try {
+        const oac = new Off(1, Math.ceil(sr * (TONE_LEN[kind] + 0.03)), sr);
+        const done = (buf) => { if (buf && !toneClip[kind]) toneClip[kind] = wavURI(buf.getChannelData(0), sr); };
+        oac.oncomplete = (e) => done(e.renderedBuffer);
+        toneRecipe(oac, kind, 0.005);
+        const p = oac.startRendering();
+        if (p && p.then) p.then(done, () => {});
+      } catch (_) {}
+    });
+  }
+  toneRender();
+  // Each player is woken once (`ok`): Safari on iPhone allows a player only after it has played inside a tap. A play
+  // carries a token (`tok`), so the end of one that a newer sound replaced changes nothing.
+  const tonePool = [];
+  let toneNext = 0;
+  function tonePlayOn(a, src, failed) {
+    const t = (a.tok = (a.tok || 0) + 1);
+    const end = (ok) => { if (a.tok !== t) return false; a.busy = false; if (ok) a.ok = true; return true; };
+    a.busy = true;
+    try {
+      a.src = src;
+      const p = a.play();
+      if (p && p.then) p.then(() => end(true), () => { if (end(false) && failed) failed(); });
+      else end(true);
+    } catch (_) { if (end(false) && failed) failed(); }
+  }
+  function toneUnlock() {
+    try {
+      while (tonePool.length < 3) tonePool.push(new Audio());
+      tonePool.forEach((a) => { if (!a.ok && !a.busy) tonePlayOn(a, SILENT); });
+    } catch (_) {}
+  }
+  function liveTone(kind) {
     const ac = audioCtx();
     if (!ac) return;
-    try {
-      const t0 = ac.currentTime + 0.01 + (delay || 0);
-      const note = (f, at, dur, peak, type, to) => {
-        const o = ac.createOscillator(), gn = ac.createGain();
-        o.type = type || "sine";
-        o.frequency.setValueAtTime(f, at);
-        if (to) o.frequency.exponentialRampToValueAtTime(to, at + dur);
-        gn.gain.setValueAtTime(0.0001, at);
-        gn.gain.exponentialRampToValueAtTime(peak, at + 0.012);
-        gn.gain.exponentialRampToValueAtTime(0.0001, at + dur);
-        o.connect(gn);
-        gn.connect(ac.destination);
-        o.start(at);
-        o.stop(at + dur + 0.02);
-      };
-      // A bell: the strike and a quieter, higher partial, both ringing on.
-      const strike = (f, at, dur, peak) => { note(f, at, dur, peak); note(f * 2.76, at, dur * 0.45, peak * 0.28); };
-      // A stopwatch's click: a few milliseconds of filtered noise.
-      const click = (at, peak, hz) => {
-        const n = Math.floor(ac.sampleRate * 0.012), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
-        const src = ac.createBufferSource(), bp = ac.createBiquadFilter(), gn = ac.createGain();
-        src.buffer = buf;
-        bp.type = "bandpass";
-        bp.frequency.value = hz || 3200;
-        bp.Q.value = 1.2;
-        gn.gain.value = peak;
-        src.connect(bp);
-        bp.connect(gn);
-        gn.connect(ac.destination);
-        src.start(at);
-      };
-      if (kind === "pass") { note(880, t0, 0.2, 0.1); note(1318.5, t0 + 0.07, 0.26, 0.07); }
-      else if (kind === "again") note(240, t0, 0.2, 0.11, "triangle", 170);
-      else if (kind === "leaf") note(1760, t0 + 0.14, 0.34, 0.06);
-      else if (kind === "thunk") {
-        // A low thud, with a brush of paper as the stamp meets the page.
-        note(150, t0, 0.22, 0.15, "triangle", 62);
-        const n = Math.floor(ac.sampleRate * 0.06), buf = ac.createBuffer(1, n, ac.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
-        const src = ac.createBufferSource(), lp = ac.createBiquadFilter(), gn = ac.createGain();
-        src.buffer = buf;
-        lp.type = "lowpass";
-        lp.frequency.value = 1400;
-        gn.gain.value = 0.12;
-        src.connect(lp);
-        lp.connect(gn);
-        gn.connect(ac.destination);
-        src.start(t0);
-      } else if (kind === "bell") { strike(1046.5, t0, 1.3, 0.085); strike(1046.5, t0 + 0.42, 1.6, 0.075); }
-      else if (kind === "low") strike(523.25, t0, 1.4, 0.08);
-      else if (kind === "start") { click(t0, 0.3); note(659.25, t0 + 0.03, 0.14, 0.07); note(987.77, t0 + 0.11, 0.2, 0.065); }
-      else if (kind === "pause") { click(t0, 0.25); note(880, t0 + 0.03, 0.14, 0.06); note(587.33, t0 + 0.11, 0.22, 0.055); }
-      else if (kind === "stop") { click(t0, 0.28); click(t0 + 0.07, 0.22); note(392, t0 + 0.1, 0.32, 0.07, "triangle"); }
-      else if (kind === "tick") { click(t0, 0.2, 3600); note(2093, t0, 0.03, 0.012); }
-      else if (kind === "tock") { click(t0, 0.17, 2400); note(1568, t0, 0.03, 0.01); }
-      else if (kind === "beep") note(1000, t0, 0.22, 0.07);
-    } catch (_) {}
+    try { toneRecipe(ac, kind, ac.currentTime + 0.01); } catch (_) {}
+  }
+  function tone(kind, delay) {
+    if (!soundOn()) return;
+    if (delay) { setTimeout(() => tone(kind), delay * 1000); return; }
+    const uri = toneClip[kind];
+    if (!uri || !tonePool.length) { liveTone(kind); return; }
+    // A free player first, so one sound doesn't cut another short.
+    const ok = tonePool.filter((x) => x.ok), free = ok.filter((x) => x.paused || x.ended);
+    const list = free.length ? free : ok.length ? ok : tonePool;
+    tonePlayOn(list[toneNext++ % list.length], uri, () => liveTone(kind));
   }
   function soundToggle() {
     const on = !soundOn();
@@ -3610,17 +3722,18 @@
     } else ui.c.failed[key] = true;
     render(true);
   }
-  // Answers you chose to keep hidden after checking, by set or exam id (settings.main.ansHidden), so that trying
-  // it again isn't spoiled by a glance: "Score only" checks a set without showing them, and Hide or Show switches
-  // them on a checked set or exam. Before your progress has loaded, a checked set's answers stay hidden too.
-  const ansHidden = (id) => !loaded || !!(id && (settings().ansHidden || {})[id]);
+  // A checked set's or exam's right answers stay hidden until you show them, so you can think again about the
+  // ones you missed and trying it again isn't spoiled: the score and your misses show, the right answers and the
+  // explanations wait. Shown ones are kept by set or exam id (settings.main.ansShown) until the next check. Before
+  // your progress has loaded, they stay hidden too.
+  const ansHidden = (id) => !loaded || !(id && (settings().ansShown || {})[id]);
   function ansHide(id, hide) {
-    if (!id || !loaded || !!(settings().ansHidden || {})[id] === !!hide) return;
-    const m = Object.assign({}, settings().ansHidden || {});
-    if (hide) m[id] = true; else delete m[id];
-    saveSettings({ ansHidden: m });
+    if (!id || !loaded || !(settings().ansShown || {})[id] === !!hide) return;
+    const m = Object.assign({}, settings().ansShown || {});
+    if (hide) delete m[id]; else m[id] = true;
+    saveSettings({ ansShown: m });
   }
-  function compSubmit(skill, hide) {
+  function compSubmit(skill) {
     const set = ui.c.set[skill];
     if (!set) return;
     const ans = ui.c.ans[skill];
@@ -3647,9 +3760,9 @@
     ui.c.open[doc.theme ? `${skill}:t:${doc.theme}` : `${skill}:g:mixed`] = true;
     ui.c.open[`${skill}:s:${doc.setId}`] = true;
     autoTick("comp." + skill);
-    ansHide(set.id, !!hide);
-    // The transcript opens with the answers, since the explanations quote it.
-    if (skill === "co") ui.c.script = !hide;
+    // Every check starts with the right answers hidden, and the transcript closed with them.
+    ansHide(set.id, true);
+    if (skill === "co") ui.c.script = false;
     render(true);
   }
   // Shows or hides a checked set's answers (and, for listening, the transcript with them).
@@ -3728,8 +3841,7 @@
     const gaps = a.gaps || {};
     const hasAns = !!qs && Array.isArray(a.answers);
     const missed = hasAns ? qs.map((q, i) => (a.answers[i] === q.answer ? -1 : i)).filter((i) => i >= 0) : Object.keys(gaps).map(Number);
-    // While the set's answers are hidden, the misses aren't marked either: they'd give away where to look.
-    const tags = ansHidden(a.setId) ? `<span class="small muted">answers hidden</span>` : missed.map((i) => `<span class="miss">Q${i + 1} ✗${gaps[i] ? " · " + (gaps[i] === "vocab" ? "vocabulary" : "comprehension") : ""}</span>`).join("");
+    const tags = missed.map((i) => `<span class="miss">Q${i + 1} ✗${gaps[i] ? " · " + (gaps[i] === "vocab" ? "vocabulary" : "comprehension") : ""}</span>`).join("");
     return `<div class="h-att"><span class="num">${shortDate(a.date)}</span>${scorePill(a)}${mins(a.secs) ? `<span class="small muted">${mins(a.secs)}</span>` : ""}${a.timed ? `<span class="pill info">timed</span>` : ""}${tags}${hasAns ? `<button class="btn ghost sm" data-act="c-review" data-skill="${skill}" data-id="${esc(a.id)}">Review</button>` : ""}</div>`;
   }
   // A set: started and not finished yet (with Resume), or its attempts, newest first.
@@ -3908,6 +4020,7 @@
     ui.c.open[`${skill}:g:exams`] = true;
     ui.c.open[`${skill}:x:${cx.exam.id}`] = true;
     autoTick(X.home);
+    ansHide(cx.exam.id, true); // its right answers wait until you show them, like a set's
     toast(reason === "time" ? "Time's up: your exam was handed in, and its estimated score added to Progress."
       : reason === "end" ? "That was the last question. The estimated score is also in Progress → Scores and NCLC."
       : "Handed in. The estimated score is also in Progress → Scores and NCLC.");
@@ -3975,7 +4088,6 @@
   // or not: no going back and no going faster. The clock on screen is the item's (the 35 minutes still run behind
   // it, and the schedule fits inside them). Pause stops the clock, the countdown and the recording together;
   // leaving the page or the tab pauses too, and a refresh brings the exam back paused.
-  const SILENT = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
   let coxAudio = null, coxSrc = "", coxTick = 0, coxToken = 0;
   const coxReadSecs = (it) => (it.kind === "reply" ? TC.coExam.read.reply : TC.coExam.read[it.level]);
   const coxFresh = (it) => ({ phase: "read", left: coxReadSecs(it), pos: 0, paused: false });
@@ -4161,21 +4273,27 @@
       </section>
       <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
   }
+  // An item's mark in the results: ✓, ✗ or blank. While the answers are hidden only the misses are marked.
+  const xMark = (ok, a, hid) => (ok ? (hid ? "" : ` · <span class="ok-t">✓</span>`) : ` · <span class="miss">${a == null ? "blank" : "✗"}</span>`);
+  // An item's options in the results: the right one and yours, or while the answers are hidden only yours, in the
+  // blue of a selected option.
+  const xOpt = (k, it, a, hid, label) => `<div class="opt ${hid ? (k === a ? "picked" : "") : k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${label}</span></div>`;
   // One item in the results: the drawing or the situation, the transcript, the options with the right one and
-  // yours, why, and the recording to play again.
-  function coxReviewItem(it, j, a) {
+  // yours, why, and the recording to play again. While the answers are hidden: the drawing (without the
+  // description, which would give the answer away), the question, your pick and the recording.
+  function coxReviewItem(it, j, a, hid) {
     const ok = a === it.answer;
     const lettered = it.kind !== "doc";
-    const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => `<div class="opt ${k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${lettered ? `<b>${"ABCD"[k]}.</b> ` : ""}${typo(it.options[k])}</span></div>`).join("");
+    const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => xOpt(k, it, a, hid, `${lettered ? `<b>${"ABCD"[k]}.</b> ` : ""}${typo(it.options[k])}`)).join("");
     const said = it.lines.filter((l) => l.speaker !== "Q");
     const multi = new Set(said.map((l) => l.speaker)).size > 1;
     const title = it.kind === "pic" ? "Image" : it.kind === "reply" ? "Question et réponses" : esc(it.type || "Document");
-    return `<details class="fold"><summary>${j + 1} · ${esc(it.level)} · <span class="${ok ? "ok-t" : "miss"}">${ok ? "✓" : a == null ? "blank" : "✗"}</span> · ${title}</summary><div class="stack tight" style="margin-top:10px">
-      ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, it.alt)}</figure><p class="small muted fr">${typo(it.alt)}</p>` : ""}
-      ${it.kind === "doc" ? `<p class="small muted fr" style="font-style:italic">${typo(it.situation)}</p><div class="transcript">${said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div>` : ""}
+    return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(ok, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px">
+      ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, hid ? "" : it.alt)}</figure>${hid ? "" : `<p class="small muted fr">${typo(it.alt)}</p>`}` : ""}
+      ${it.kind === "doc" && !hid ? `<p class="small muted fr" style="font-style:italic">${typo(it.situation)}</p><div class="transcript">${said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div>` : ""}
       ${it.kind !== "pic" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
       <div class="opts">${opts}</div>
-      ${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}
+      ${it.why && !hid ? `<p class="small">${typo(it.why)}</p>` : ""}
       ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
     </div></details>`;
   }
@@ -4254,14 +4372,13 @@
     if (cx && cx.done) {
       const r = cx.result, retake = retakeIds().has(cx.attemptId);
       const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
-      // The questions with their answers, unless you've hidden them for this exam.
+      // Every question with your answer. The right ones and why wait until you show them (ansHidden).
       const xhid = ansHidden(cx.exam.id);
-      const review = xhid ? "" : cx.exam.items.map((it, j) => {
+      const review = cx.exam.items.map((it, j) => {
         const a = cx.ans[j];
-        if (skill === "co") return coxReviewItem(it, j, a);
-        const ok = a === it.answer;
-        const opts = it.order.map((k) => `<div class="opt ${k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${typo(it.options[k])}</span></div>`).join("");
-        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)} · <span class="${ok ? "ok-t" : "miss"}">${ok ? "✓" : a == null ? "blank" : "✗"}</span> · ${typo(it.title || it.type)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
+        if (skill === "co") return coxReviewItem(it, j, a, xhid);
+        const opts = it.order.map((k) => xOpt(k, it, a, xhid, typo(it.options[k]))).join("");
+        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, xhid)} · ${typo(it.title || it.type)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why && !xhid ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
       }).join("");
       // What to do next, right from the results: the built-in exams not done yet, a retake, a new one from Claude, or the list.
       const doneIds = new Set(compAttempts(skill).filter((a) => a.kind === "exam").map((a) => a.setId));
@@ -4280,13 +4397,9 @@
           <div class="row">${next}</div>
           ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
-        ${xhid ? `<section class="sec"><h2 class="h2">Every question</h2><div class="panel stack ans-hid" data-m="pop" data-k="xhid-${esc(cx.exam.id)}-${esc(r.date)}">
-          <p class="h3">${ico("eye")}Réponses cachées <small class="muted">· answers hidden</small></p>
-          <p class="small muted">Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p>
-          ${greet("cafe", "Pas de coup d'œil ! Les réponses t'attendent.", "No peeking! The answers will wait for you.", "sm")}
-          <div class="row"><button class="btn" data-act="x-show">Show the answers</button></div>
-        </div></section>`
-          : `<section class="sec"><div class="sec-head"><h2 class="h2">Every question</h2><button class="btn ghost sm" data-act="x-hide">Hide the answers</button></div><p class="small muted">In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.</p><div class="stack tight">${review}</div></section>`}`;
+        <section class="sec"><div class="sec-head"><h2 class="h2">Every question</h2>${xhid ? `<button class="btn primary sm" data-act="x-show">Show the answers</button>` : `<button class="btn ghost sm" data-act="x-hide">Hide the answers</button>`}</div>
+          <p class="small muted">${xhid ? `In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.` : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
+          <div class="stack tight">${review}</div></section>`;
     }
     const exams = compAttempts(skill).filter((a) => a.kind === "exam"), retakes = retakeIds();
     // One row per built-in exam, so each note sits by its own exam. The ones not done yet are the primary choice.
@@ -5222,6 +5335,8 @@
     </div>`;
   }
   const MINE_STATE = { missed: ["Missed last time", "bad"], new: ["New", "info"], once: ["Right once", ""], fixed: ["Fixed", "ok"] };
+  // Over a text opened again from the history: which attempt it is.
+  const textReviewNote = (rv, picksLost) => `<p class="notice small">You're looking at your attempt from ${shortDate(rv.date)} (${rv.score}/${rv.total}).${picksLost ? " The words you marked that were fine weren't kept back then." : ""}</p>`;
   function grammarMine() {
     const all = mineAll();
     const ms = all.filter((m) => m.kind === "error" || m.kind === "pending"), tips = all.filter((m) => m.kind === "style"), skips = all.filter((m) => m.kind === "skip");
@@ -5312,10 +5427,13 @@
         <div class="row">${cur == null ? `<button class="btn primary" data-act="mh-results">See results <span class="kbd">Enter</span></button>` : `<span class="small muted">Pick an option, or press 1–${h.cards[cur].order.length}.</span>`}<button class="btn ghost sm" data-act="mh-close" title="${cur == null ? "Your text is saved" : "This text isn't kept until every card is answered"}">Close</button></div>
       </section>`;
     }
-    const rows = h.cards.map((c, ci) => ({ c, found: c.k < 0 || !!h.found[c.k], p: h.pick[ci] })).map((x) => Object.assign(x, { ok: x.found && x.p === 0 }));
+    // A card off the text is found by being there, unless it's a mistake of an older round no longer in its text.
+    const rows = h.cards.map((c, ci) => ({ c, found: c.k < 0 ? c.found !== false : !!h.found[c.k], p: h.pick[ci] })).map((x) => Object.assign(x, { ok: x.found && x.p === 0 }));
     const caught = rows.filter((x) => x.ok).length, misses = rows.filter((x) => !x.ok), perfect = !misses.length && !h.extra;
     const next = !!mineNextText(all);
+    const rv = h.review;
     return `<section class="panel drill mh" id="drill-area" data-m="pop" data-k="mhdone-${key}">${head}
+      ${rv ? textReviewNote(rv, h.extra && !h.picks.length) : ""}
       <div class="row mh-score"><span class="scorebig"><span data-tween="mhs-${key}" data-tw="count" data-to="${caught}">${caught}</span>/${rows.length}</span><span class="muted">caught: found and fixed${pr ? ` · found ${found} of ${n}` : ""}${extra ? ` · ${extra}` : ""}</span></div>
       ${greet(...remyScore("mine", caught, rows.length, { key }), "sm")}
       ${pr ? mhText(pr, h, key) : ""}
@@ -5326,7 +5444,7 @@
         </li>`).join("")}</ul></div>` : ""}
       ${perfect ? `<p class="pen-ok mh-perfect" data-m="burst" data-k="mhperfect-${key}">Sans faute !</p>` : ""}
       ${pr ? `<details class="fold"><summary>The corrected text</summary><div class="pr-text" lang="fr"><p>${typo(pr.corrected).replace(/\n+/g, "</p><p>")}</p></div></details>` : ""}
-      <div class="row">${retryBtn("mine", "errors", "btn primary")}${next ? `<button class="btn" data-act="mh-start">Next text</button>` : ""}<button class="btn ghost" data-act="mh-close">Close</button></div>
+      <div class="row">${rv ? "" : retryBtn("mine", "errors", "btn primary")}${next ? `<button class="btn${rv ? " primary" : ""}" data-act="mh-start">Next text</button>` : ""}<button class="btn ghost" data-act="mh-close">Close</button></div>
     </section>`;
   }
   // Your text in a round: words to tap while you look for the mistakes; then the ones found in blue ink and the
@@ -5466,8 +5584,8 @@
     const pool = PR.filter((p) => p.level === level);
     return pool.find((p) => !last.has(p.id)) || pool.slice().sort((a, b) => last.get(a.id) - last.get(b.id))[0] || null;
   }
-  function huntStart() {
-    const pr = huntNext(huntLevel());
+  function huntStart(again) {
+    const pr = again || huntNext(huntLevel());
     if (!pr) return;
     ui.hunt = { id: pr.id, picks: [], found: null, extra: 0, fixes: {}, verdicts: null, secs: 0, lastT: Date.now() };
     render(true);
@@ -5499,9 +5617,19 @@
     h.verdicts = pr.mistakes.map(([, a], k) => (h.found[k] ? checkAnswer({ a }, str(h.fixes[k])) : "missed"));
     activeTick(h, 300);
     const items = pr.mistakes.map(([wrong, a, , why], k) => ({ kind: "type", src: `« ${wrong} »`, q: prSentence(pr, k), a, why: (h.found[k] ? "" : "Not spotted. ") + why, given: h.found[k] ? str(h.fixes[k]) : "", ok: h.verdicts[k] === "ok" }));
-    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", secs: Math.round(h.secs || 0), items });
+    put("drills", uid(), { topic: "hunt", set: "main", name: pr.title, text: pr.id, level: pr.level, date: todayStr(), ts: Date.now(), score: items.filter((x) => x.ok).length, total: items.length, found: h.found.filter(Boolean).length, extra: h.extra, src: "bank", secs: Math.round(h.secs || 0), items, picks: h.picks.slice() });
     autoTick("grammar.hunt", { min: (h.secs || 0) / 60 });
     render(true);
+  }
+  // A finished text as it was when you checked it, to look at again from the history: the mistakes you found and
+  // missed, your corrections and, since 2026-10-22, the fine words you marked. Null when the text has changed since.
+  function huntRebuild(d) {
+    const pr = d && d.topic === "hunt" && PR.find((x) => x.id === d.text), items = arr(d && d.items);
+    if (!pr || items.length !== pr.mistakes.length || items.some((it, k) => it.src && it.src !== `« ${pr.mistakes[k][0]} »`)) return null;
+    const fixes = {};
+    const found = items.map((it, k) => { const f = !!str(it.given).trim(); if (f) fixes[k] = str(it.given); return f; });
+    const verdicts = items.map((it, k) => { if (!found[k]) return "missed"; if (it.ok) return "ok"; const v = checkAnswer({ a: pr.mistakes[k][1] }, fixes[k]); return v === "ok" ? "bad" : v; });
+    return { id: pr.id, picks: arr(d.picks).slice(), found, extra: d.extra || 0, fixes, verdicts, secs: d.secs || 0, lastT: Date.now(), review: { id: d.id, date: d.date, score: d.score, total: d.total } };
   }
   function grammarHunt() {
     const lvl = huntLevel(), h = ui.hunt, pr = h && PR.find((x) => x.id === h.id);
@@ -5539,9 +5667,12 @@
     }
     const caught = h.verdicts.filter((v) => v === "ok").length;
     const LABEL = { ok: ["Caught", "ok"], accent: ["Check the accents", "bad"], bad: ["Not quite", "bad"], missed: ["Not spotted", "bad"] };
+    // Opened again from the history: that attempt, with a way to try the text again.
+    const rv = h.review, rk = rv ? rv.id : `${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}`;
     return `<section class="panel drill" id="drill-area">${head}
+      ${rv ? textReviewNote(rv, h.extra && !h.picks.length) : ""}
       <div class="row"><span class="scorebig"><span data-tween="hunt-${pr.id}" data-tw="count" data-to="${caught}">${caught}</span>/${n}</span><span class="muted">caught: found and corrected · found ${fk.length} of ${n}${extra ? ` · ${extra}` : ""}</span></div>
-      ${greet(...remyScore("hunt", caught, n, { flawed: !!h.extra, key: `${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}` }), "sm")}
+      ${greet(...remyScore("hunt", caught, n, { flawed: !!h.extra, key: rk }), "sm")}
       ${prText(pr, h)}
       <ul class="misses">${pr.mistakes.map(([wrong, a, cat, why], k) => `<li>
         <p class="row" style="gap:6px"><span class="pr-n">${k + 1}</span><span class="pill ${LABEL[h.verdicts[k]][1]}">${LABEL[h.verdicts[k]][0]}</span><span class="pill">${esc(CAT[catOf(cat)])}</span></p>
@@ -5550,9 +5681,9 @@
         ${a.length > 1 ? `<p class="small muted">Also accepted: ${a.slice(1).map(esc).join(" · ")}</p>` : ""}
         <p class="small muted">${typo(why)}</p>
       </li>`).join("")}</ul>
-      ${caught === n && !h.extra ? `<p class="pen-ok" data-m="burst" data-k="hunt-${pr.id}-${list("drills").filter((d) => d.topic === "hunt").length}">Sans faute !</p>` : ""}
+      ${caught === n && !h.extra ? `<p class="pen-ok" data-m="burst" data-k="hunt-${rk}">Sans faute !</p>` : ""}
       <details class="fold"><summary>The corrected text</summary>${prCorrected(pr)}</details>
-      <div class="row"><button class="btn primary" data-act="pr-start">Next text</button><button class="btn ghost" data-act="pr-close">Close</button></div>
+      <div class="row">${rv ? `<button class="btn primary" data-act="pr-again" data-id="${esc(pr.id)}">Try this text again</button><button class="btn" data-act="pr-start">Next text</button>` : `<button class="btn primary" data-act="pr-start">Next text</button>`}<button class="btn ghost" data-act="pr-close">Close</button></div>
     </section>`;
   }
 
@@ -6419,27 +6550,24 @@
       const mineP = cePace(sl), myClock = Math.round(PACE_STEPS[mineP.k][0] * per * nq);
       const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Your clock: ${fmtClock(myClock)}, ${mineP.label}. Exam pace for ${nq} ${esc(sl)} questions is ${fmtClock(per * nq)}.</span>${timerUI("comp.ce", "Lecture CE", steps.concat([[1200, "20:00"]]), myClock)}</div>` : "";
       const docOf = (q, i) => (q.doc ? `<article class="sheet"><p class="eyebrow">Document ${i + 1}${q.doc.type ? ` · ${esc(q.doc.type)}` : ""}</p>${q.doc.title ? `<h3>${typo(q.doc.title)}</h3>` : ""}<p class="fr">${typo(q.doc.text)}</p></article>` : "");
-      // Checked with the answers hidden (Score only, or Hide): just the score, so trying the set again isn't spoiled.
+      // A checked set starts with its right answers hidden (ansHidden): the score, every question with your pick, and
+      // the ones you missed marked in red pen. The right answers, the explanations and the gap tags come with Show.
       const hid = !!set && submitted && ansHidden(set.id);
       const nq2 = set ? set.questions.length : 0;
       const scoreBig = set && submitted ? `<span class="scorebig"${score === nq2 ? ` data-m="burst" data-k="cperf-${esc(set.id)}-${esc(ui.c.saved[skill] || "")}"` : ""}><span data-tween="cs-${esc(set.id)}" data-tw="count" data-to="${score}">${score}</span>/${nq2}</span>` : "";
       const trend = set && skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : "";
-      const qs = !set ? "" : hid ? `<section class="panel stack ans-hid" data-m="pop" data-k="chid-${esc(set.id)}-${esc(ui.c.saved[skill] || "")}">
-          <p class="h3">${ico("eye")}Réponses cachées <small class="muted">· answers hidden</small></p>
-          <div class="row">${scoreBig}<p class="small muted">Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p></div>
-          ${greet("cafe", "Pas de coup d'œil ! Les réponses t'attendent.", "No peeking! The answers will wait for you.", "sm")}
-          <div class="row"><button class="btn primary" data-act="c-reset" data-skill="${skill}">Try this set again</button><button class="btn" data-act="c-show" data-skill="${skill}">Show the answers</button>${trend}</div>
-        </section>` : `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
+      const qs = !set ? "" : `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
-        return `<li${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}</p><div class="opts">${q.order.map((k) => {
-          const st = submitted ? (k === q.answer ? "ok" : ans[i] === k ? "bad" : "") : "";
+        return `<li${miss ? ` class="q-miss"` : ""}${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}${miss ? ` <span class="q-mark"><span aria-hidden="true">✗</span> raté</span>` : ""}</p><div class="opts">${q.order.map((k) => {
+          const st = submitted && !hid ? (k === q.answer ? "ok" : ans[i] === k ? "bad" : "") : "";
           return `<label class="opt ${st}"><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
         }).join("")}</div>
-        ${submitted && q.why ? `<p class="small">${typo(q.why)}</p>` : ""}
-        ${miss ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
+        ${submitted && !hid && q.why ? `<p class="small">${typo(q.why)}</p>` : ""}
+        ${miss && !hid ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button><button class="btn ghost" data-act="c-hide" data-skill="${skill}">Hide the answers</button>${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button><button class="btn ghost" data-act="c-submit-hid" data-skill="${skill}" title="Check your answers but see only your score, so you can try the set again without spoilers">Score only</button>`}</div>
+        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${hid ? `<button class="btn primary" data-act="c-show" data-skill="${skill}">Show the answers</button>` : `<button class="btn ghost" data-act="c-hide" data-skill="${skill}">Hide the answers</button>`}${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>
+        ${hid ? `<p class="small muted">The right answers stay hidden until you show them, so you can think again about the ones you missed.</p>` : ""}
         ${submitted ? greet(...remyScore(skill, score, nq2, { key: `${set.id}-${ui.c.saved[skill] || ""}`, inClock: savedDoc && savedDoc.timed && savedDoc.clock ? savedDoc.secs <= savedDoc.clock : null }), "sm") : ""}`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       return `<div class="wrap">
@@ -6569,7 +6697,10 @@
         <p>${it.ok ? `<span class="pen-ok">${esc(it.given)}</span>${it.overturned ? ` <span class="small muted">· accepted by Claude</span>` : ""}` : `<span class="pen-wrong">${esc(it.given || "—")}</span> <span class="pen-right">${esc(arr(it.a)[0] || "")}</span>`}</p>
         ${it.why ? `<p class="small muted">${typo(it.why)}</p>` : ""}
       </li>`;
+    // A text (Find the mistakes, Your mistakes) can be seen again whole, as you left it.
+    const whole = (d.topic === "hunt" && huntRebuild(d)) || (d.topic === "mine" && mineRebuild(d)) ? `<div class="row"><button class="btn sm" data-act="h-text" data-id="${esc(d.id)}">${ico("read")}See the whole text</button><span class="small muted">with your marks and corrections, as you left it</span></div>` : "";
     return `<div class="stack tight">
+      ${whole}
       ${items.length ? "" : `<p class="small muted">This round is from before whole rounds were saved, so only the questions you missed are here.</p>`}
       <ul class="misses">${qs.map(li).join("")}</ul>
       ${retriesOf(d).map((r, i, all) => `<p class="small">${all.length > 1 ? `Retry ${i + 1}` : "Retried the misses"}: ${r.score}/${r.total}.</p>${arr(r.items).length ? `<ul class="misses">${arr(r.items).map(li).join("")}</ul>` : ""}`).join("")}
@@ -7495,6 +7626,15 @@
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
+    // A Find the mistakes or Your mistakes text, opened on its page as you left it.
+    "h-text": (el) => {
+      const d = S.drills.get(el.dataset.id);
+      const h = d && (d.topic === "hunt" ? huntRebuild(d) : mineRebuild(d));
+      if (!h) { toast("This text has changed since, so it can't be shown as it was."); return; }
+      if (d.topic === "hunt") ui.hunt = h; else { ui.mh = h; if (ui.drill && ui.drill.topic === "mine") ui.drill = null; }
+      goTo(d.topic === "hunt" ? "#grammar.hunt" : "#grammar.mine");
+      requestAnimationFrame(() => { const a = document.getElementById("drill-area"); if (a) a.scrollIntoView({ block: "start" }); });
+    },
     "rep-open": (el) => { ui.rep.open = ui.rep.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "rep-close": () => { ui.rep.open = null; render(true); },
     // Reading and listening attempts open on the Compréhension page, which already shows a set with your answers.
@@ -7534,7 +7674,8 @@
     "mine-prep-stop": minePrepStop,
     "mine-hide": (el) => { saveSettings({ mineHidden: [...new Set(arr(settings().mineHidden).concat(el.dataset.k))] }); toast("Hidden: it won't come up in Your mistakes again."); },
     "mine-unhide": () => { saveSettings({ mineHidden: [] }); toast("Your hidden mistakes are back."); },
-    "pr-start": huntStart,
+    "pr-start": () => huntStart(),
+    "pr-again": (el) => huntStart(PR.find((x) => x.id === el.dataset.id)),
     "pr-tok": (el) => huntTap(Number(el.dataset.i)),
     "pr-check": huntCheck,
     "pr-finish": huntFinish,
@@ -7667,7 +7808,6 @@
     },
     "c-new": (el) => { const sk = el.dataset.skill; const key = compKey(sk); delete ui.c.cache[key]; delete ui.c.failed[key]; compReset(sk); ui.c.set[sk] = null; compGenerate(sk); },
     "c-submit": (el) => compSubmit(el.dataset.skill),
-    "c-submit-hid": (el) => compSubmit(el.dataset.skill, true),
     "c-hide": (el) => compAnsToggle(el.dataset.skill, false),
     "c-show": (el) => compAnsToggle(el.dataset.skill, true),
     "c-reset": (el) => { const sk = el.dataset.skill; compReset(sk); if (ui.c.set[sk]) prepSet(ui.c.set[sk]); render(true); },

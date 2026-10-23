@@ -244,16 +244,6 @@
   ]
  },
  {
-  "id": "80e5f1fa2846",
-  "text": "· answers hidden",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
-  ]
- },
- {
   "id": "f07aff55ed91",
   "text": "· built-in set",
   "kind": "exact",
@@ -4444,7 +4434,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -5458,6 +5448,15 @@
   "where": "app",
   "ctx": [
    "<p>…Save to your cards</p><button>×</button>"
+  ]
+ },
+ {
+  "id": "c9c046366409",
+  "text": "{0}See the whole text",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<button>…See the whole text</button><span>with your marks and corrections, as you left it</span>"
   ]
  },
  {
@@ -9882,17 +9881,6 @@
   "ctx": []
  },
  {
-  "id": "e8545ae0ad71",
-  "text": "answers hidden",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<span>answers hidden</span>",
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
-  ]
- },
- {
   "id": "e2c75ab2fe4e",
   "text": "Answers stay hidden until you hand in, and a blank counts as wrong.",
   "kind": "exact",
@@ -11882,7 +11870,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -11891,7 +11879,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -11900,7 +11888,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -11909,7 +11897,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
   ]
  },
  {
@@ -11918,7 +11906,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
   ]
  },
  {
@@ -12200,7 +12188,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>Check my answers</button><button>Score only</button>"
+   "<button>Check my answers</button>"
   ]
  },
  {
@@ -12244,15 +12232,6 @@
   "where": "app",
   "ctx": [
    "Check with Claude"
-  ]
- },
- {
-  "id": "b4b3972145ca",
-  "text": "Check your answers but see only your score, so you can try the set again without spoilers",
-  "kind": "exact",
-  "where": "attr:title",
-  "ctx": [
-   "<button>Check my answers</button><button>Score only</button>"
   ]
  },
  {
@@ -13460,7 +13439,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -15935,8 +15914,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<h2>Every question</h2><button>Hide the answers</button> <p>In exam order. Open one to see …, your answer, the right one and why.</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -17009,7 +16987,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -18115,8 +18093,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2><button>Hide the answers</button> <p>In exam order. Open one to see …, your answer, the right one and why.</p> …",
-   "…<button>Try this set again</button><button>Hide the answers</button>…"
+   "<button>Hide the answers</button>"
   ]
  },
  {
@@ -18783,12 +18760,21 @@
   ]
  },
  {
+  "id": "914094e8e381",
+  "text": "In exam order, with the ones you missed marked. Open one to see {0}. The right answers stay hidden until you show them.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "In exam order, with the ones you missed marked. Open one to see …. The right answers stay hidden until you show them."
+  ]
+ },
+ {
   "id": "8276516e8c66",
   "text": "In exam order. Open one to see {0}, your answer, the right one and why.",
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2><button>Hide the answers</button> <p>In exam order. Open one to see …, your answer, the right one and why.</p> …"
+   "In exam order. Open one to see …, your answer, the right one and why."
   ]
  },
  {
@@ -20526,7 +20512,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …",
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …",
    "…",
    "Date Task Words Level …"
   ]
@@ -23172,7 +23158,7 @@
   "where": "app",
   "ctx": [
    "<button>Next text</button>",
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "<button>Try this text again</button><button>Next text</button>"
   ]
  },
  {
@@ -23691,15 +23677,6 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
- },
- {
-  "id": "1c1ef247eaab",
-  "text": "No peeking! The answers will wait for you.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "No peeking! The answers will wait for you."
-  ]
  },
  {
   "id": "390a49eefbfb",
@@ -24539,7 +24516,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -26780,7 +26757,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
   ]
  },
  {
@@ -30341,15 +30318,6 @@
   ]
  },
  {
-  "id": "c36d785571e3",
-  "text": "Score only",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<button>Check my answers</button><button>Score only</button>"
-  ]
- },
- {
   "id": "493ae31f9604",
   "text": "Scores and NCLC",
   "kind": "exact",
@@ -30690,6 +30658,15 @@
   "where": "app",
   "ctx": [
    "…<span><b>Journée terminée !</b></span><a>See the stamp</a>…"
+  ]
+ },
+ {
+  "id": "0aafeb5b5150",
+  "text": "See the whole text",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>…See the whole text</button><span>with your marks and corrections, as you left it</span>"
   ]
  },
  {
@@ -31096,8 +31073,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>",
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
+   "<button>Show the answers</button>"
   ]
  },
  {
@@ -33955,7 +33931,7 @@
   "where": "app",
   "ctx": [
    "<summary>The corrected text</summary> <p>…</p>",
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -34067,6 +34043,15 @@
   "where": "app",
   "ctx": [
    "the document"
+  ]
+ },
+ {
+  "id": "693f2f4e9226",
+  "text": "the document, the question and your answer",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "the document, the question and your answer"
   ]
  },
  {
@@ -35063,6 +35048,15 @@
   "ctx": []
  },
  {
+  "id": "a3868e82dc66",
+  "text": "the question and your answer, with the recording to play again",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "the question and your answer, with the recording to play again"
+  ]
+ },
+ {
   "id": "de34de8fadb4",
   "text": "The question asks about the departure frequency of the airport shuttle (« Tous les combien part... ? »). Only D answers how often it runs with « Il en passe une toutes les demi-heures. ». A gives the fare (« Le billet coûte... »), B gives the bus stop location (« L'arrêt se trouve... »), and C gives the travel time (« Le trajet dure... »).",
   "kind": "exact",
@@ -35240,6 +35234,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "cc59ed831aa1",
+  "text": "The right answers stay hidden until you show them, so you can think again about the ones you missed.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>The right answers stay hidden until you show them, so you can think again about the ones you missed.</p>"
+  ]
  },
  {
   "id": "7e51eb894b16",
@@ -36023,6 +36026,15 @@
   "ctx": []
  },
  {
+  "id": "4359b70e154a",
+  "text": "The words you marked that were fine weren't kept back then.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The words you marked that were fine weren't kept back then."
+  ]
+ },
+ {
   "id": "cfb75ddbfda1",
   "text": "The writer grants the phone its uses (« Certes… ») but argues that idle moments let the mind wander and find ideas: « Ce n'est pas du temps perdu. » Children get bored less, not more, and « Je ne propose pas de jeter nos téléphones ».",
   "kind": "exact",
@@ -36448,6 +36460,15 @@
   "where": "app",
   "ctx": [
    "… <p>This text has … mistakes. Tap each word that looks wrong (tap it again to unmark it), then check.</p> … <button>Check · … marked</button><button>Close</button>"
+  ]
+ },
+ {
+  "id": "b5b63e2f58a5",
+  "text": "This text has changed since, so it can't be shown as it was.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "This text has changed since, so it can't be shown as it was."
   ]
  },
  {
@@ -37782,8 +37803,16 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…",
-   "…<button>Try this set again</button><button>Hide the answers</button>…"
+   "…<button>Try this set again</button>……"
+  ]
+ },
+ {
+  "id": "9fc581f71e0e",
+  "text": "Try this text again",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>Try this text again</button><button>Next text</button>"
   ]
  },
  {
@@ -39282,15 +39311,6 @@
   "ctx": []
  },
  {
-  "id": "b6435d0f9268",
-  "text": "Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<h2>Every question</h2> <p>…Réponses cachées <small>· answers hidden</small></p> <p>Which questions you got right, and the right answers, stay hidden until you show them, so a retake isn't spoiled.</p> … <button>Show the answers</button>"
-  ]
- },
- {
   "id": "e5c7e6b0803d",
   "text": "Which sounds more natural?",
   "kind": "exact",
@@ -39535,6 +39555,15 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "fad439ce6f6e",
+  "text": "with your marks and corrections, as you left it",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>…See the whole text</button><span>with your marks and corrections, as you left it</span>"
+  ]
  },
  {
   "id": "ed2bbe4dbf4e",
@@ -40122,12 +40151,30 @@
   ]
  },
  {
+  "id": "716c2b0aac78",
+  "text": "You're looking at your attempt from {0} ({1}/{2}).",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>You're looking at your attempt from … (…/…).…</p>"
+  ]
+ },
+ {
   "id": "fad4e75a30d6",
   "text": "You're looking at your attempt from {0} ({1}/{2}). “Try this set again” starts a new one.",
   "kind": "pattern",
   "where": "app",
   "ctx": [
    "<p>You're looking at your attempt from … (…/…). “Try this set again” starts a new one.</p>"
+  ]
+ },
+ {
+  "id": "ac6872a014f5",
+  "text": "You're looking at your attempt from {0} ({1}/{2}).{3}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>You're looking at your attempt from … (…/…).…</p>"
   ]
  },
  {
@@ -40294,15 +40341,6 @@
   "where": "attr:aria-label",
   "ctx": [
    "…"
-  ]
- },
- {
-  "id": "84dd30494189",
-  "text": "Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<p>…Réponses cachées <small>· answers hidden</small></p> …<p>Your answers and the right ones stay hidden until you show them, so trying this set again isn't spoiled.</p> … <button>Try this set again</button><button>Show the answers</button>…"
   ]
  },
  {
