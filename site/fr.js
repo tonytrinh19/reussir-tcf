@@ -3553,7 +3553,7 @@ window.TCF.FR = {
 "Your progress here is saved in this browser only.": "Tes progrès sont enregistrés dans ce navigateur uniquement.",
 "Your progress here is saved on claude.ai, with your account.": "Tes progrès sont enregistrés sur claude.ai, avec ton compte.",
 "Your progress here is saved on this computer, in the local database (data/tcf.sqlite).": "Tes progrès sont enregistrés sur cet ordinateur, dans la base de données locale (data/tcf.sqlite).",
-"Your progress is still loading.": "Tes progrès sont en cours de chargement.",
+"Your progress is still loading.": "Ta progression est encore en cours de chargement.",
 "Your reaction or opinion + justification": "Ta réaction ou opinion + justification",
 "Your score on each drill round. Every round draws different questions from its set.": "Ton score à chaque tour d'exercice. Chaque tour tire des questions différentes dans sa série.",
 "Your score on each listening and reading set. Sets differ in difficulty, so read the trend over several sets.": "Ton score à chaque série d'écoute et de lecture. Les séries varient en difficulté, observe la tendance sur plusieurs séries.",
