@@ -5451,6 +5451,15 @@
   ]
  },
  {
+  "id": "c9c046366409",
+  "text": "{0}See the whole text",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<button>…See the whole text</button><span>with your marks and corrections, as you left it</span>"
+  ]
+ },
+ {
   "id": "b0fa96c500ab",
   "text": "{0}Stop",
   "kind": "pattern",
@@ -11861,7 +11870,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -11870,7 +11879,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -11879,7 +11888,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -11888,7 +11897,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
   ]
  },
  {
@@ -11897,7 +11906,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and fixed……</span> … … … … … ……<button>Close</button>"
   ]
  },
  {
@@ -16978,7 +16987,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -23149,7 +23158,7 @@
   "where": "app",
   "ctx": [
    "<button>Next text</button>",
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "<button>Try this text again</button><button>Next text</button>"
   ]
  },
  {
@@ -30652,6 +30661,15 @@
   ]
  },
  {
+  "id": "0aafeb5b5150",
+  "text": "See the whole text",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>…See the whole text</button><span>with your marks and corrections, as you left it</span>"
+  ]
+ },
+ {
   "id": "10d1b6be7df1",
   "text": "Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.",
   "kind": "exact",
@@ -33913,7 +33931,7 @@
   "where": "app",
   "ctx": [
    "<summary>The corrected text</summary> <p>…</p>",
-   "… <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… <button>Next text</button><button>Close</button>"
+   "… … <span><span>…</span>/…</span><span>caught: found and corrected · found … of ……</span> … … … … <summary>The corrected text</summary>… …<button>Close</button>"
   ]
  },
  {
@@ -36008,6 +36026,15 @@
   "ctx": []
  },
  {
+  "id": "4359b70e154a",
+  "text": "The words you marked that were fine weren't kept back then.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The words you marked that were fine weren't kept back then."
+  ]
+ },
+ {
   "id": "cfb75ddbfda1",
   "text": "The writer grants the phone its uses (« Certes… ») but argues that idle moments let the mind wander and find ideas: « Ce n'est pas du temps perdu. » Children get bored less, not more, and « Je ne propose pas de jeter nos téléphones ».",
   "kind": "exact",
@@ -36433,6 +36460,15 @@
   "where": "app",
   "ctx": [
    "… <p>This text has … mistakes. Tap each word that looks wrong (tap it again to unmark it), then check.</p> … <button>Check · … marked</button><button>Close</button>"
+  ]
+ },
+ {
+  "id": "b5b63e2f58a5",
+  "text": "This text has changed since, so it can't be shown as it was.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "This text has changed since, so it can't be shown as it was."
   ]
  },
  {
@@ -37768,6 +37804,15 @@
   "where": "app",
   "ctx": [
    "…<button>Try this set again</button>……"
+  ]
+ },
+ {
+  "id": "9fc581f71e0e",
+  "text": "Try this text again",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>Try this text again</button><button>Next text</button>"
   ]
  },
  {
@@ -39512,6 +39557,15 @@
   "ctx": []
  },
  {
+  "id": "fad439ce6f6e",
+  "text": "with your marks and corrections, as you left it",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>…See the whole text</button><span>with your marks and corrections, as you left it</span>"
+  ]
+ },
+ {
   "id": "ed2bbe4dbf4e",
   "text": "word choice",
   "kind": "exact",
@@ -40097,12 +40151,30 @@
   ]
  },
  {
+  "id": "716c2b0aac78",
+  "text": "You're looking at your attempt from {0} ({1}/{2}).",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>You're looking at your attempt from … (…/…).…</p>"
+  ]
+ },
+ {
   "id": "fad4e75a30d6",
   "text": "You're looking at your attempt from {0} ({1}/{2}). “Try this set again” starts a new one.",
   "kind": "pattern",
   "where": "app",
   "ctx": [
    "<p>You're looking at your attempt from … (…/…). “Try this set again” starts a new one.</p>"
+  ]
+ },
+ {
+  "id": "ac6872a014f5",
+  "text": "You're looking at your attempt from {0} ({1}/{2}).{3}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>You're looking at your attempt from … (…/…).…</p>"
   ]
  },
  {
