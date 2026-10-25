@@ -467,6 +467,7 @@
     const r = timerRemaining();
     // The practice exam is handed in at 0:00, as on the real test, with the bell.
     if (timer.running && r <= 0 && ui.cx && !ui.cx.done && timer.home === XSPEC[skillOf(ui.cx)].home) { timerRing("bell"); examSubmit("time"); return; }
+    if (timer.running && r <= 0 && eeRunning() && timer.home === EE_HOME) { timerRing("bell"); eeHandIn("time"); return; }
     const cap = timerCap(), capMin = Math.round(cap / 60);
     if (timer.running && r <= -cap) {
       timerPause();
@@ -922,6 +923,14 @@
   // A writing task: a prompt you haven't written yet (or your draft), with the task's exam clock set, not started.
   function writingStep(b, key, date) {
     const task = b[5].split(".")[1], did = didOf(wentOf(date, key));
+    // The Examen blanc EE: Start opens its page, where its own Start runs the 60-minute clock.
+    if (task === "mock") {
+      const last = eeMocks()[0];
+      const off = last ? EE_TASKS.filter((t) => { const w = last.tasks[t], W = T.WRITING[t]; return !w || w.words < W.min || w.words > W.max; }).length : 0;
+      const line2 = !last ? "Then Claude corrects all three, and the mock gets a score out of 20." : last.score != null ? `Last mock, ${shortDate(last.date)}: ${last.score}/20${off ? `, ${off} task${off > 1 ? "s" : ""} outside the word range` : ""}.` : `Last mock, ${shortDate(last.date)}: not corrected yet.`;
+      const min = typeof did.write === "number" ? did.write + 10 : EE_MIN + 10;
+      return { go: EE_HOME, line1: did.write ? "Done: read the three corrections." : "All three tasks on one 60:00 clock, as on the real test.", line2, chips: [chip("3 tâches · 60 min")], parts: [{ kind: "write", tok: EE_HOME, exact: true, done: !!did.write, min }], min, launch: () => goTo("#" + EE_HOME) };
+    }
     if (!T.WRITING[task]) {
       // Rewrite from memory: this week's best-scored correction (or the latest one).
       const mon = mondayOf(date), ws = list("writing").filter((x) => x.fb).sort((a, b2) => (b2.ts || 0) - (a.ts || 0));
@@ -3233,21 +3242,26 @@
     if (task === "t3") { const t3 = o.tache3 || {}; fb.tache3 = { compared_both: !!t3.compared_both, opinion_after_comparison: !!t3.opinion_after_comparison, notes: str(t3.notes) }; }
     return fb;
   }
+  // The correction request for one text: the TCF Canada rules, criteria and score bands, the task and its subject,
+  // the learner, the text, and the JSON to send back. The writing page and the Examen blanc EE both send it.
+  function wCorrectPrompt(task, p, text) {
+    const W = T.WRITING[task], words = countWords(text);
+    const docs = task === "t3" && p.docs ? `\nDOCUMENT 1 (${p.docs[0].who}): ${p.docs[0].text}\nDOCUMENT 2 (${p.docs[1].who}): ${p.docs[1].text}` : "";
+    const ps = paragraphs(text);
+    const parts = task === "t3" ? `\nLearner's part 1 (first paragraph): ${ps[0] ? countWords(ps[0]) : 0} words (TCF Canada: 40–60). Part 2 (everything after it): ${ps.slice(1).reduce((n, x) => n + countWords(x), 0)} words (TCF Canada: 80–120).` : "";
+    const t3 = task === "t3" ? `"tache3": {"compared_both": true or false (part 1 presents and compares BOTH documents' viewpoints), "opinion_after_comparison": true or false (the learner's own position comes in part 2, after the comparison), "notes": "one sentence"}, ` : "";
+    const critNames = TC.ee.criteria.map(([n]) => n);
+    return `You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct the learner's text and grade it strictly the way the TCF Canada does, using the TCF Canada rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.\n\n${EE_RUBRIC}\n\nTASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. Learner's word count (anything between two spaces): ${words}.${parts}\nPROMPT: ${p.q}${docs}\n\n${profile()}\n\nLEARNER'S TEXT:\n"""\n${text}\n"""\n\nGrade this task on the TCF Canada 0–20 scale. If the word count is outside the range, the text is off-topic or the instructions are ignored, cap the score accordingly (it can be A1 non atteint). List every grammar, spelling, agreement and word-choice error, most important first (max 25). Quote "wrong" exactly as it appears in the text, just enough to locate it. Error categories (use the id): ${Object.keys(CAT).join(", ")}.\nReply with only JSON:\n{"score20": integer from 0 to 20 for this task on the TCF Canada scale, "level": "A1 | A2 | B1 | B2 | C1 | C2 (the level that score corresponds to)", "summary": "2–3 sentences in ${replyLang()}", "criteria": [{"name": "one of: ${critNames.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in ${replyLang()}"}] (one entry per criterion, in that order), "compliance": {"on_topic": true or false, "length_ok": true or false, "register_ok": true or false, "notes": "one sentence"}, ${t3}"errors": [{"wrong": "...", "right": "...", "category": "...", "why": "short ${replyLang()} explanation"}], "corrected_text": "the full corrected text, keeping the learner's ideas and paragraph breaks", "upgrades": [{"from": "a B1 phrase from the text", "to": "a B2 alternative"}], "strengths": ["up to 3"], "homework": ["1–3 short, concrete follow-up tasks for tomorrow"]}`;
+  }
   async function writingCorrect() {
-    const task = ui.w.task, W = T.WRITING[task];
+    const task = ui.w.task;
     const text = ui.w.text[task] || "";
     const words = countWords(text);
     if (words < 20) { toast("Write at least a few sentences first."); return; }
     // The clock stops as you hand the text in, so Claude's time doesn't count as writing time.
     const clockWas = timerFinish("writing." + task);
     const p = wPrompt(task);
-    const docs = task === "t3" && p.docs ? `\nDOCUMENT 1 (${p.docs[0].who}): ${p.docs[0].text}\nDOCUMENT 2 (${p.docs[1].who}): ${p.docs[1].text}` : "";
-    const ps = paragraphs(text);
-    const parts = task === "t3" ? `\nLearner's part 1 (first paragraph): ${ps[0] ? countWords(ps[0]) : 0} words (TCF Canada: 40–60). Part 2 (everything after it): ${ps.slice(1).reduce((n, x) => n + countWords(x), 0)} words (TCF Canada: 80–120).` : "";
-    const t3 = task === "t3" ? `"tache3": {"compared_both": true or false (part 1 presents and compares BOTH documents' viewpoints), "opinion_after_comparison": true or false (the learner's own position comes in part 2, after the comparison), "notes": "one sentence"}, ` : "";
-    const critNames = TC.ee.criteria.map(([n]) => n);
-    const prompt = `You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct the learner's text and grade it strictly the way the TCF Canada does, using the TCF Canada rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.\n\n${EE_RUBRIC}\n\nTASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. Learner's word count (anything between two spaces): ${words}.${parts}\nPROMPT: ${p.q}${docs}\n\n${profile()}\n\nLEARNER'S TEXT:\n"""\n${text}\n"""\n\nGrade this task on the TCF Canada 0–20 scale. If the word count is outside the range, the text is off-topic or the instructions are ignored, cap the score accordingly (it can be A1 non atteint). List every grammar, spelling, agreement and word-choice error, most important first (max 25). Quote "wrong" exactly as it appears in the text, just enough to locate it. Error categories (use the id): ${Object.keys(CAT).join(", ")}.\nReply with only JSON:\n{"score20": integer from 0 to 20 for this task on the TCF Canada scale, "level": "A1 | A2 | B1 | B2 | C1 | C2 (the level that score corresponds to)", "summary": "2–3 sentences in ${replyLang()}", "criteria": [{"name": "one of: ${critNames.join(" | ")}", "level": "A1 | A2 | B1 | B2 | C1 | C2", "comment": "one sentence in ${replyLang()}"}] (one entry per criterion, in that order), "compliance": {"on_topic": true or false, "length_ok": true or false, "register_ok": true or false, "notes": "one sentence"}, ${t3}"errors": [{"wrong": "...", "right": "...", "category": "...", "why": "short ${replyLang()} explanation"}], "corrected_text": "the full corrected text, keeping the learner's ideas and paragraph breaks", "upgrades": [{"from": "a B1 phrase from the text", "to": "a B2 alternative"}], "strengths": ["up to 3"], "homework": ["1–3 short, concrete follow-up tasks for tomorrow"]}`;
-    const out = await ask("w-correct", prompt);
+    const out = await ask("w-correct", wCorrectPrompt(task, p, text));
     if (!out) { timerUnfinish("writing." + task, clockWas); render(true); return; }
     const fb = cleanFb(out, task);
     const id = uid();
@@ -4453,6 +4467,20 @@
       const ok = list("writing").some((w) => w.task === "t3" && w.fb && w.fb.tache3 && w.fb.tache3.compared_both && w.fb.tache3.opinion_after_comparison && w.words >= 120 && w.words <= 180);
       return { ok, note: ok ? "Done" : "Needs a corrected Tâche 3 that passes both structure checks and the word count" };
     }
+    // eemock:b2: an Examen blanc EE with two of its three tasks at B2 (10/20) or better.
+    // eemock:3: your last 3 Examens blancs EE each with all three tasks inside their word ranges and Tâche 3's
+    // part 1 comparing both documents.
+    if (kind === "eemock") {
+      const ms = eeMocks();
+      if (a === "b2") {
+        const best = Math.max(0, ...ms.map((m) => m.scores.filter((v) => v != null && v >= 10).length));
+        return { ok: best >= 2, note: !ms.length ? "No Examen blanc EE yet" : best >= 2 ? "Done" : `Best so far: ${best} of 3 tasks at B2` };
+      }
+      const full = (m) => EE_TASKS.every((t) => { const w = m.tasks[t], W = T.WRITING[t]; return w && w.words >= W.min && w.words <= W.max; }) && !!(m.tasks.t3 && m.tasks.t3.fb && m.tasks.t3.fb.tache3 && m.tasks.t3.fb.tache3.compared_both);
+      let run = 0;
+      for (const m of ms) { if (!full(m)) break; run++; }
+      return { ok: run >= 3, note: !ms.length ? "No Examen blanc EE yet" : `${Math.min(run, 3)} of 3 in a row so far` };
+    }
     // comp:<level>:<share>[:timed]: your first try at each of the last 3 sets at that level, in CO and in CE
     // (with "timed", CE only counts sets done on the clock). A retake mostly shows what you remember of the set.
     if (kind === "comp") {
@@ -4530,7 +4558,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
-  const TAB_UI = ["bento", "day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp"];
+  const TAB_UI = ["bento", "day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -6355,8 +6383,273 @@
     t2: [["opinion", "My opinion is woven in, not a neutral recount"], ["goal", "The conclusion ties back to the task's objective"]],
     t3: [["both", "Paragraph 1 states BOTH documents' positions"], ["order", "My opinion comes after the comparison"], ["concede", "I concede the other side before pivoting (Certes… mais)"]],
   };
+  /* =============== Examen blanc EE =============== */
+  // The three writing tasks on one 60-minute clock, as on the real test (the user asked on 2026-10-23; the plan's
+  // « Full timed Écrite mock » blocks open it): a prompt each you haven't written yet, free movement between the
+  // tasks, no spellcheck, and the exam handed in at 0:00. Each task is saved as an ordinary writing text with
+  // `mock` ({ id, min, up }), so the history, Your mistakes and the writing estimate take them like any other, and
+  // Claude corrects the three when you hand in. The mock's score is the mean of the three tasks' scores, a blank task
+  // counting 0: an estimate, since FEI doesn't publish how it combines them.
+  const EE_HOME = "writing.mock", EE_IP = "writing--mock", EE_MIN = 60, EE_TASKS = ["t1", "t2", "t3"];
+  // A task's prompt: the first you haven't written yet, or else the one written longest ago.
+  function eePrompt(task) {
+    const W = T.WRITING[task], lastAt = new Map();
+    list("writing").filter((x) => x.task === task).forEach((x) => lastAt.set(x.prompt, Math.max(lastAt.get(x.prompt) || 0, x.ts || 0)));
+    const ps = W.prompts.map((p) => (typeof p === "string" ? { q: p } : p));
+    const p = ps.find((x) => !lastAt.has(x.q)) || ps.slice().sort((a, b) => lastAt.get(a.q) - lastAt.get(b.q))[0];
+    return { q: p.q, en: p.en || "", docs: p.docs || null };
+  }
+  const eeRunning = () => !!ui.ee && !ui.ee.done;
+  const eeWords = (e) => EE_TASKS.reduce((n, t) => n + countWords(str(e.texts[t])), 0);
+  // Your minutes on each task: the time on the clock while it was the one on screen.
+  function eeTally() {
+    const e = ui.ee;
+    if (!e || e.done) return;
+    const now = Date.now();
+    if (timer.home === EE_HOME && timer.running) e.spent[e.task] = (e.spent[e.task] || 0) + Math.max(0, now - (e.at || now)) / 1000;
+    e.at = now;
+  }
+  // The mock is kept from its start, as the listening exam is: the clock runs from there.
+  function eeKeep(delay) {
+    const e = ui.ee;
+    if (!e || e.done) return;
+    const left = timer.home === EE_HOME ? Math.max(0, Math.round(timerRemaining())) : null;
+    ipSave(EE_IP, { kind: "eemock", title: "Examen blanc EE", route: EE_HOME, mockId: e.id, prompts: e.prompts, texts: e.texts, task: e.task, spent: e.spent, left }, delay);
+  }
+  function eeStart() {
+    if (eeRunning()) { goTo("#" + EE_HOME); return; }
+    // The first draw with your progress loaded checks unfinished attempts against the tab's copy; it comes first, so
+    // a mock started now isn't taken for one carried on elsewhere.
+    if (!loaded) { toast("Your progress is still loading."); return; }
+    if (!hydrated) render(true);
+    // One clock serves every page, so a practice exam already running keeps it.
+    if (examRunning()) { toast("A practice exam is running: hand it in or pause it first."); return; }
+    if (ipGet(EE_IP)) { ipResume(EE_IP); return; }
+    ui.ee = { id: uid(), prompts: Object.fromEntries(EE_TASKS.map((t) => [t, eePrompt(t)])), texts: { t1: "", t2: "", t3: "" }, task: "t1", spent: { t1: 0, t2: 0, t3: 0 }, at: Date.now(), done: false };
+    timerSet(EE_MIN * 60, "Examen blanc EE", EE_HOME);
+    tone("start");
+    timerStart();
+    eeKeep();
+    goTo("#" + EE_HOME);
+    window.scrollTo(0, 0);
+  }
+  function eeResume(ip) {
+    if (eeRunning() && ui.ee.id === ip.mockId) { goTo("#" + EE_HOME); return; }
+    if (examRunning()) { toast("A practice exam is running: hand it in or pause it first."); return; }
+    ui.ee = { id: ip.mockId || uid(), prompts: clone(ip.prompts), texts: Object.assign({ t1: "", t2: "", t3: "" }, clone(ip.texts)), task: EE_TASKS.includes(ip.task) ? ip.task : "t1", spent: Object.assign({ t1: 0, t2: 0, t3: 0 }, clone(ip.spent)), at: Date.now(), done: false };
+    timerSet(EE_MIN * 60, "Examen blanc EE", EE_HOME);
+    if (ip.left != null) timer.left = Math.min(EE_MIN * 60, Math.max(0, Number(ip.left)));
+    tone("start");
+    timerStart();
+    goTo("#" + EE_HOME);
+    window.scrollTo(0, 0);
+  }
+  function eeSwitch(task) {
+    const e = ui.ee;
+    if (!e || e.done || !EE_TASKS.includes(task) || task === e.task) return;
+    eeTally();
+    e.task = task;
+    e.confirm = false;
+    eeKeep();
+    render(true);
+    const el = document.getElementById("ee-text");
+    if (el) el.focus({ preventScroll: true });
+  }
+  // What's off before handing in: a task left blank, or outside its word range.
+  function eeIssues(e) {
+    return EE_TASKS.map((t) => { const W = T.WRITING[t], n = countWords(str(e.texts[t])); return !n ? `${W.name} is blank` : n < W.min || n > W.max ? `${W.name} has ${n} words (${W.min}–${W.max})` : ""; }).filter(Boolean);
+  }
+  // Hands the three texts in: each one written is saved as a writing text of the mock, then Claude corrects them.
+  function eeHandIn(reason) {
+    const e = ui.ee;
+    if (!e || e.done) return;
+    const el = document.getElementById("ee-text");
+    if (el) e.texts[e.task] = el.value;
+    if (!eeWords(e)) {
+      if (reason !== "time") { toast("Write something first: there's nothing to hand in yet."); return; }
+    } else if (reason !== "time" && !e.confirm && eeIssues(e).length) { e.confirm = true; render(true); return; }
+    eeTally();
+    const used = timer.home === EE_HOME ? Math.round(timer.total - timerRemaining()) : 0;
+    const min = Math.max(1, Math.min(EE_MIN, Math.round(used / 60))), up = reason === "time";
+    timerSet(0, "", ""); // stops the clock and takes it off the sidebar
+    const ts = Date.now();
+    EE_TASKS.forEach((t, k) => {
+      const text = str(e.texts[t]);
+      if (!text.trim()) return;
+      const p = e.prompts[t];
+      put("writing", uid(), { task: t, date: todayStr(), ts: ts + k, prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: Math.max(1, Math.round((e.spent[t] || 0) / 60)), fb: null, mock: { id: e.id, min, up } });
+    });
+    ipDrop(EE_IP);
+    Object.assign(e, { done: true, confirm: false, view: null });
+    autoTick(EE_HOME, { min });
+    toast(up ? "Time's up: your three texts were handed in." : "Handed in.");
+    render(true);
+    window.scrollTo(0, 0);
+    if (claudeOn() && eeWords(e)) eeCorrect(e.id);
+  }
+  function eeQuit() {
+    ipDrop(EE_IP);
+    if (timer.home === EE_HOME) timerSet(0, "", "");
+    ui.ee = null;
+    toast("The mock was discarded.");
+    render(true);
+  }
+  // Every mock, newest first, with its three texts (a blank task has none) and its score once all are corrected.
+  function eeMocks() {
+    const by = new Map();
+    list("writing").forEach((w) => {
+      const m = w.mock;
+      if (!m || !m.id) return;
+      const x = by.get(m.id) || { id: m.id, date: w.date, ts: w.ts || 0, min: m.min, up: !!m.up, tasks: {} };
+      x.tasks[w.task] = w;
+      by.set(m.id, x);
+    });
+    return [...by.values()].map((x) => {
+      const scores = EE_TASKS.map((t) => { const w = x.tasks[t]; return !w ? 0 : w.fb && w.fb.score20 != null && !isNaN(w.fb.score20) ? Number(w.fb.score20) : null; });
+      return Object.assign(x, { scores, score: scores.every((v) => v != null) ? Math.round(scores.reduce((a, b) => a + b, 0) / 3) : null });
+    }).sort((a, b) => b.ts - a.ts);
+  }
+  // Claude corrects the mock's texts, one after another, each like a text on the writing page. Once all three are,
+  // the mock's score goes into the score log, as a practice exam's does (a copy: the tasks' own scores already count).
+  async function eeCorrect(mockId) {
+    if (ui.eeBusy) return;
+    const m0 = eeMocks().find((x) => x.id === mockId);
+    if (!m0) return;
+    ui.eeBusy = mockId;
+    render(true);
+    for (const t of EE_TASKS) {
+      const w = eeMocks().find((x) => x.id === mockId).tasks[t];
+      if (!w || w.fb) continue;
+      const out = await ask("ee-correct", wCorrectPrompt(t, { q: w.prompt, docs: w.docs }, w.text));
+      if (!out) break; // ask() has said why
+      const cur = S.writing.get(w.id);
+      if (!cur) continue;
+      put("writing", w.id, Object.assign({}, cur, { fb: cleanFb(out, t) }));
+      minePrepSoon("w-" + w.id);
+      render(true);
+    }
+    ui.eeBusy = null;
+    const m = eeMocks().find((x) => x.id === mockId);
+    if (m && m.score != null && !list("mocks").some((x) => x.compId === "ee-" + mockId)) put("mocks", uid(), { date: m.date, ts: Date.now(), label: "Examen blanc EE (site estimate)", ee: m.score, compId: "ee-" + mockId });
+    render(true);
+  }
+  // The three texts for another AI, when Claude can't correct them (or on the local site): one prompt with the
+  // rules, the three tasks and subjects, your texts, and the overall score to give.
+  function eeCopyPrompt(m) {
+    const parts = EE_TASKS.map((t, k) => {
+      const W = T.WRITING[t], w = m.tasks[t];
+      const docs = t === "t3" && w && w.docs ? w.docs.map((d, j) => `\nDOCUMENT ${j + 1} (${d.who}) :\n${d.text}`).join("") : "";
+      return `TÂCHE ${k + 1}: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words.${w ? ` My word count: ${w.words}.` : ""}\nSUBJECT:\n${w ? w.prompt : "(not written)"}${docs}\nMY TEXT:\n"""\n${w ? str(w.text).trim() : "(blank)"}\n"""`;
+    });
+    return [
+      "You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. I wrote a full Expression écrite mock: the three tasks in one 60-minute sitting. Correct each text and grade it strictly the way the TCF Canada does, using the rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.",
+      `${EE_RUBRIC}\nSCORE BANDS: ${TC.bands}`,
+      ...parts,
+      `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.${watchBrief(true)}`,
+      `Reply in ${replyLang()} with, for each task: a score out of 20 on the TCF Canada scale (a blank task, or one outside its word range, capped as the TCF Canada would), a level and one sentence for each criterion (${TC.ee.criteria.map(([n]) => n).join(", ")}), every mistake as wrong → right (why), and the text corrected. For Tâche 3, whether part 1 compares both documents and my own position comes only in part 2. Then my overall Expression écrite score out of 20 and its NCLC level, and the three things to work on first.`,
+    ].join("\n\n");
+  }
+  async function eeCopy(mockId) {
+    const m = eeMocks().find((x) => x.id === mockId);
+    if (!m) return;
+    const text = eeCopyPrompt(m);
+    if (await copyText(text)) { ui.eeCopyOut = null; toast("Copied: the TCF Canada rules and your three texts. Paste it into any AI chat."); render(true); return; }
+    ui.eeCopyOut = { id: mockId, text };
+    render(true);
+    const el = document.getElementById("ee-copy-out");
+    if (el) { el.focus(); el.select(); }
+  }
+  // The word meters under the editor and the counts on the task buttons, painted in place as you type.
+  function eeMeters() {
+    const e = ui.ee;
+    if (!e || e.done) return;
+    const W = T.WRITING[e.task], text = str(e.texts[e.task]);
+    const el = document.getElementById("ee-meter");
+    if (el) { const m = meterHTML(countWords(text), W.min, W.max, "Words"); el.className = "meter " + m.cls; el.innerHTML = m.html; }
+    const pe = document.getElementById("ee-paras");
+    if (pe && W.paras) {
+      const ps = paragraphs(text), counts = [ps[0] ? countWords(ps[0]) : 0, ps.slice(1).reduce((n, x) => n + countWords(x), 0)];
+      pe.innerHTML = W.paras.map((P, k) => { const mm = meterHTML(counts[k] || 0, P.min, P.max, P.label); return `<div class="meter ${mm.cls}">${mm.html}</div>`; }).join("");
+    }
+    EE_TASKS.forEach((t) => {
+      const Wt = T.WRITING[t], n = countWords(str(e.texts[t]));
+      document.querySelectorAll(`[data-ee-n="${t}"]`).forEach((b) => { b.textContent = `${n} mots`; b.className = `ee-n ${!n ? "" : n < Wt.min ? "under" : n > Wt.max ? "over" : "in"}`; });
+    });
+  }
+  // A score out of 20's level, on the bands TC.bands gives (B1 6–9, B2 10–13, C1 14–15, C1–C2 16–20).
+  const eeCefr = (v) => (v >= 16 ? "C1–C2" : v >= 14 ? "C1" : v >= 10 ? "B2" : v >= 6 ? "B1" : "A1–A2");
+  const eeState = (n, W) => (!n ? "" : n < W.min ? "under" : n > W.max ? "over" : "in");
+  function eeView() {
+    const e = ui.ee;
+    if (eeRunning()) return eeRun(e);
+    const m = e && e.done && eeMocks().find((x) => x.id === e.id);
+    return m ? eeResult(m, e) : eeIntro();
+  }
+  function eeIntro() {
+    const ip = ipGet(EE_IP), mocks = eeMocks();
+    const plan = EE_TASKS.map((t) => { const W = T.WRITING[t]; return `<li><b>${esc(W.name)}</b> · ${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} min</li>`; }).join("");
+    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">not corrected</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
+    return `<section class="panel stack" data-spot>
+        <p class="h3 with-ico">${ico("exam")}Examen blanc · Expression écrite</p>
+        <p class="small">The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p>
+        <ul class="small ee-plan">${plan}</ul>
+        <p class="small muted">Each task gets a prompt you haven't written yet. ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
+        ${ip ? `<div class="notice"><b>You have an unfinished mock:</b> ${esc(ipProgress(ip))}.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${EE_IP}">Resume the mock</button>${discardBtn(EE_IP)}</div></div>` : `<div class="row"><button class="btn primary" data-act="ee-start">Start the exam · 60:00</button></div>`}
+      </section>
+      <section class="sec"><div class="sec-head"><h2 class="h2">Tes examens blancs · Your mocks</h2><span class="small muted">${mocks.length ? `${mocks.length} so far, newest first` : ""}</span></div>
+        ${mocks.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th>${EE_TASKS.map((t) => `<th class="n">${esc(T.WRITING[t].name)}</th>`).join("")}<th class="n">Score</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="small muted">Your mocks collect here, with each task's words and score.</p>`}
+      </section>`;
+  }
+  function eeRun(e) {
+    const W = T.WRITING[e.task], p = e.prompts[e.task], text = str(e.texts[e.task]);
+    const mine = timer.home === EE_HOME;
+    const clock = `<div class="timer"><span class="clock" ${mine ? "data-timer" : ""}>${mine ? fmtClock(timerRemaining()) : "—"}</span>${mine ? `<button class="btn sm" data-act="timer-toggle" data-home="${EE_HOME}" data-sec="${EE_MIN * 60}" data-label="Examen blanc EE" data-timer-btn>${timer.running ? "Pause" : "Resume"}</button>` : ""}</div>`;
+    const tabs = `<div class="ee-tabs" role="group" aria-label="The three tasks">${EE_TASKS.map((t) => { const Wt = T.WRITING[t], n = countWords(str(e.texts[t])); return `<button data-act="ee-task" data-t="${t}" aria-pressed="${t === e.task}"><b>${esc(Wt.name)}</b><span class="ee-n ${eeState(n, Wt)}" data-ee-n="${t}">${n} mots</span></button>`; }).join("")}</div>`;
+    const docs = e.task === "t3" && p.docs ? `<div class="docs">${p.docs.map((d, k) => `<div class="doc"><p class="eyebrow">Document ${k + 1}</p><p class="fr">${typo(d.text)}</p><p class="who">${esc(d.who)}</p></div>`).join("")}</div>` : "";
+    const issues = e.confirm ? eeIssues(e) : [];
+    return `<div class="row between"><p class="h3 with-ico">${ico("exam")}Examen blanc EE</p>${clock}</div>
+      ${tabs}
+      <section class="panel prompt-card" data-m="slide" data-k="ee-${esc(e.id)}-${e.task}">
+        <span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} of the 60 min</span>
+        <p class="fr">${typo(p.q)}</p>
+        ${p.en ? `<p class="small muted en-gloss">${esc(p.en)}</p>` : ""}
+        ${docs}
+      </section>
+      <section class="panel editor">
+        <div class="ed-bar"><div class="meter" id="ee-meter"></div></div>
+        <textarea id="ee-text" class="seyes" data-input="ee-text" spellcheck="false" autocomplete="off" autocorrect="off" lang="fr" placeholder="Écrivez ici…" aria-label="Your text for ${esc(W.name)}">${esc(text)}</textarea>
+        ${W.paras ? `<div class="paras" id="ee-paras"></div>` : ""}
+      </section>
+      ${accentBar()}
+      ${issues.length ? `<div class="notice warn">${issues.map((x) => esc(x)).join(" · ")}. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ee-hand-in" data-force="1">Hand in anyway</button><button class="btn sm" data-act="ee-keep">Keep writing</button></div></div>` : ""}
+      <div class="row between"><button class="btn primary" data-act="ee-hand-in">Hand in</button>${ui.confirm === "ee-quit" ? `<span class="row"><span class="small">Quit and lose these texts?</span><button class="btn sm danger" data-act="ee-quit">Quit the mock</button><button class="btn sm ghost" data-act="confirm-cancel">Keep going</button></span>` : `<button class="btn ghost sm" data-act="confirm" data-key="ee-quit">Quit without saving</button>`}</div>`;
+  }
+  function eeResult(m, e) {
+    const busy = ui.eeBusy === m.id, open = EE_TASKS.some((t) => m.tasks[t] && !m.tasks[t].fb);
+    const view = e.view && S.writing.get(e.view);
+    const cards = EE_TASKS.map((t, k) => {
+      const W = T.WRITING[t], w = m.tasks[t];
+      if (!w) return `<div class="panel flat stack tight ee-task"><p class="eyebrow">${esc(W.name)}</p><p class="small"><span class="pill bad">Blank</span> counts 0</p></div>`;
+      const st = w.fb ? (w.fb.score20 != null ? `<b class="ee-score">${w.fb.score20}<small>/20</small></b> <span class="pill">${esc(w.fb.level || "")}</span>` : `<span class="pill">${esc(w.fb.level || "Corrected")}</span>`) : busy ? `<span class="small muted thinking">Claude is correcting</span>` : `<span class="small muted">Not corrected</span>`;
+      return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div><button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
+    }).join("");
+    const nc = m.score != null ? nclcOf("ee", m.score) : null;
+    return `<section class="panel stack" data-m="pop" data-k="eer-${esc(m.id)}">
+        <p class="eyebrow">Examen blanc · Expression écrite · ${shortDate(m.date)}${m.up ? " · handed in when time ran out" : ""}</p>
+        <div class="row"><span class="scorebig">${m.score != null ? `<span data-tween="ees-${esc(m.id)}" data-tw="count" data-to="${m.score}">${m.score}</span>/20` : "…/20"}</span>${m.score != null ? `${nclcTag(m.score, "ee")}<span class="pill">${eeCefr(m.score)}</span>` : ""}</div>
+        <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : claudeOn() ? "Not corrected yet." : "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI."}</p>
+        ${m.score != null ? greet(...remyScore("exam", m.score, 20, { nclc: nc || 0, key: m.id }), "sm") : ""}
+        <div class="ee-tasks">${cards}</div>
+        <div class="row">${open && !busy ? claudeBtn("ee-correct", "ee-correct", "Correct with Claude", `data-id="${esc(m.id)}"`, "btn primary") : ""}<button class="btn" data-act="ee-copy" data-id="${esc(m.id)}">Copy for another AI</button><button class="btn" data-act="ee-new">Start another mock</button><button class="btn ghost" data-act="ee-close">All your mocks</button></div>
+        ${ui.eeCopyOut && ui.eeCopyOut.id === m.id ? `<div class="stack tight"><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).</p><textarea id="ee-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.eeCopyOut.text)}</textarea></div>` : ""}
+      </section>
+      ${view ? writingFb(e.view, view, "ee-view-close") : ""}`;
+  }
+
   VIEWS.writing = {
     render(args) {
+      const tabsOf = (cur) => `<nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === cur}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}<a href="#writing.mock" role="tab" aria-selected="${cur === "mock"}">${ico("exam")}Examen blanc<small>3 tâches · 60 min</small></a></nav>`;
+      if (args[0] === "mock") return `<div class="wrap${eeRunning() ? " focus" : ""}">${eeRunning() ? "" : `<header class="stack tight"><h1 class="title">Expression écrite</h1></header>${tabsOf("mock")}`}<div class="stack">${eeView()}</div></div>`;
       if (args[0] && T.WRITING[args[0]]) ui.w.task = args[0];
       const task = ui.w.task, W = T.WRITING[task];
       const p = wPrompt(task);
@@ -6379,7 +6672,7 @@
       })}</div>` : "";
       return `<div class="wrap">
         <header class="stack tight"><h1 class="title">Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
-        <nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === task}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}</nav>
+        ${tabsOf(task)}
         ${fxTabs("writing." + task)}
         <section class="panel prompt-card">
           <div class="row between"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] && !ui.w.gen[task].kept ? " · from Claude" : ""}</span>
@@ -6417,13 +6710,13 @@
           ${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Task</th><th>Words</th><th>Level</th><th></th></tr></thead><tbody>${hist.map((w) => {
             const WW = T.WRITING[w.task] || W;
             const ok = w.words >= WW.min && w.words <= WW.max;
-            return `<tr><td class="n">${shortDate(w.date)}</td><td>${esc(WW.name)}</td><td class="n"><span class="tag7 ${ok ? "ok" : "no"}">${w.words}</span></td><td>${w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${esc(w.fb.level)}` : w.fb && w.fb.level ? esc(w.fb.level) : `<span class="muted small">not corrected</span>`}</td>
+            return `<tr><td class="n">${shortDate(w.date)}</td><td>${esc(WW.name)}${w.mock ? ` <span class="pill info">examen blanc</span>` : ""}</td><td class="n"><span class="tag7 ${ok ? "ok" : "no"}">${w.words}</span></td><td>${w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${esc(w.fb.level)}` : w.fb && w.fb.level ? esc(w.fb.level) : `<span class="muted small">not corrected</span>`}</td>
               <td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn ghost sm" data-act="w-open" data-id="${esc(w.id)}">${ui.w.viewing === w.id ? "Showing" : "Open"}</button>${confirmBtn("w-del-" + w.id, "Delete this entry", "w-del", `data-id="${esc(w.id)}"`)}</span></td></tr>`;
           }).join("")}</tbody></table></div>` : `<p class="small muted">Corrected and saved drafts collect here, with their word counts.</p>`}
         </section>
       </div>`;
     },
-    after() { updateMeters(); },
+    after(args) { if (args[0] === "mock") eeMeters(); else updateMeters(); },
   };
   // What Rémy says over a correction: how many mistakes to fix, and the category most of them are in.
   function remyMarks(errs) {
@@ -6598,9 +6891,9 @@
   /* =============== history =============== */
   // Only two kinds of entry: unfinished attempts (the inprogress records) and finished ones (drill rounds,
   // production checks, reading and listening sets, practice exams, writing tasks).
-  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit" };
+  const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit", eemock: "Écrit" };
   const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"]];
-  const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind);
+  const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind === "eemock" ? "writing" : kind);
   const clip = (s, n) => { const t = str(s).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
   function whenOf(ts) {
     if (!ts) return "";
@@ -6613,6 +6906,7 @@
     if (ip.kind === "comp") return `${Object.keys(ip.answers || {}).length} of ${ip.total || "?"} answered${ip.plays ? ` · played ${ip.plays}×` : ""}`;
     if (ip.kind === "exam") return `${Object.keys(ip.ans || {}).length} of ${ip.total} answered${ip.left != null ? ` · ${Math.ceil(ip.left / 60)} min left` : ""}`;
     if (ip.kind === "writing" || ip.kind === "prod") return `${countWords(str(ip.text))} words`;
+    if (ip.kind === "eemock") return `${EE_TASKS.reduce((n, t) => n + countWords(str((ip.texts || {})[t])), 0)} words in 3 tasks${ip.left != null ? ` · ${Math.ceil(ip.left / 60)} min left` : ""}`;
     return "";
   }
   function ipResume(id) {
@@ -6622,6 +6916,7 @@
     if (ip.kind === "prod") { ui.prod[ip.topic] = { text: str(ip.text) }; goTo("#" + ip.route); return; }
     if (ip.kind === "comp") { if (compLoad(ip.skill, ip.setId, ip)) { goTo("#comp." + ip.skill); window.scrollTo(0, 0); } return; }
     if (ip.kind === "exam") { examResume(ip); return; }
+    if (ip.kind === "eemock") { eeResume(ip); return; }
     if (ip.kind === "writing") { writingRestore(ip.task); ui.w.task = ip.task; goTo("#writing." + ip.task); }
   }
   function ipDiscard(id) {
@@ -6634,6 +6929,7 @@
       if (ip.kind === "comp") { const set = ui.c.set[ip.skill]; if (set && set.id === ip.setId && !ui.c.submitted[ip.skill]) compReset(ip.skill); }
       if (ip.kind === "exam" && examRunning() && skillOf(ui.cx) === skillOf(ip)) { if (skillOf(ip) === "co") coxStop(); ui.cx = null; timerSet(0, "", ""); }
       if (ip.kind === "writing") { ui.w.text[ip.task] = ""; ui.w.checks[ip.task] = {}; }
+      if (ip.kind === "eemock" && eeRunning()) { ui.ee = null; if (timer.home === EE_HOME) timerSet(0, "", ""); }
     }
     toast("Discarded.");
     render(true);
@@ -6666,6 +6962,7 @@
         if (!set || !set.id || ui.c.submitted[sk]) return;
         if (newer(compIpId(sk, set.id))) compRestore(sk); else compKeep(sk);
       });
+      if (eeRunning()) { if (newer(EE_IP)) { ui.ee = null; if (timer.home === EE_HOME) timerSet(0, "", ""); } else eeKeep(); }
       if (ui.cx && !ui.cx.done) {
         // An exam carried on elsewhere is picked up from there, with its own clock.
         const X = XSPEC[skillOf(ui.cx)];
@@ -7976,7 +8273,26 @@
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },
     "w-close": () => { ui.w.viewing = null; render(true); },
     "w-del": (el) => { if (ui.w.viewing === el.dataset.id) ui.w.viewing = null; ui.confirm = ""; remove("writing", el.dataset.id); },
-    "timer-toggle": (el) => { timerAct(el, "toggle"); if (el.dataset.home === "comp.ce.exam") examKeep(); },
+    // The Examen blanc EE (#writing.mock).
+    "ee-start": eeStart,
+    "ee-new": () => { ui.ee = null; eeStart(); },
+    "ee-task": (el) => eeSwitch(el.dataset.t),
+    "ee-hand-in": (el) => { if (el.dataset.force && ui.ee) ui.ee.confirm = true; eeHandIn(); },
+    "ee-keep": () => { if (ui.ee) ui.ee.confirm = false; render(true); },
+    "ee-quit": () => { ui.confirm = ""; eeQuit(); },
+    "ee-correct": (el) => eeCorrect(el.dataset.id || (ui.ee && ui.ee.id)),
+    "ee-copy": (el) => eeCopy(el.dataset.id),
+    "ee-open": (el) => { ui.ee = { id: el.dataset.id, done: true, view: null }; render(true); window.scrollTo(0, 0); },
+    "ee-close": () => { ui.ee = null; ui.eeCopyOut = null; render(true); },
+    "ee-view": (el) => { if (ui.ee) ui.ee.view = ui.ee.view === el.dataset.id ? null : el.dataset.id; render(true); const f = document.getElementById("w-fb"); if (f && ui.ee && ui.ee.view) f.scrollIntoView({ block: "start", behavior: "smooth" }); },
+    "ee-view-close": () => { if (ui.ee) ui.ee.view = null; render(true); },
+    "timer-toggle": (el) => {
+      // The mock's minutes per task count only while its clock runs.
+      if (el.dataset.home === EE_HOME) eeTally();
+      timerAct(el, "toggle");
+      if (el.dataset.home === "comp.ce.exam") examKeep();
+      if (el.dataset.home === EE_HOME) { eeTally(); eeKeep(); }
+    },
     "timer-reset": (el) => timerAct(el, "reset"),
     "timer-preset": (el) => timerAct(el, "preset"),
     "free-done": (el) => {
@@ -8110,6 +8426,7 @@
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
     "pr-fix": (el) => { if (ui.hunt) ui.hunt.fixes[el.dataset.k] = el.value; },
     "w-text": onWText,
+    "ee-text": (el) => { if (!eeRunning()) return; ui.ee.texts[ui.ee.task] = el.value; eeMeters(); eeKeep(1500); },
     "fx-q": (el) => { ui.fx.q = el.value; fxFilter(true); },
     "fx-note": (el) => { ui.fx.note = el.value; },
     "fx-f": (el) => { const d = ui.fx.edit; if (!d) return; d[el.dataset.k] = el.value; if (el.dataset.k !== "topic" && !fxPrevT) fxPrevT = setTimeout(fxPreview, 120); },

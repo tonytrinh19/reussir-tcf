@@ -37,6 +37,15 @@
   "ctx": []
  },
  {
+  "id": "a6a7aae64041",
+  "text": "–{0} · {1} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>"
+  ]
+ },
+ {
   "id": "1540e49b2a7e",
   "text": "–{0} mots",
   "kind": "pattern",
@@ -61,6 +70,15 @@
   "where": "app",
   "ctx": [
    ", … of them new"
+  ]
+ },
+ {
+  "id": "b6e504df0e58",
+  "text": ", {0} task{1} outside the word range",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   ", … task… outside the word range"
   ]
  },
  {
@@ -169,6 +187,24 @@
   "where": "app",
   "ctx": [
    "… <p>You found <b>… of …</b>…. Now correct the ones you found. The ones you missed are in red; their corrections come after.</p> … … … <button>Check my corrections</button>"
+  ]
+ },
+ {
+  "id": "9535f0b6ae1e",
+  "text": ". On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
+  ]
+ },
+ {
+  "id": "07027a3c7533",
+  "text": "· {0} · {1}–{2} words · about {3} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<li><b>…</b> · … · …–… words · about … min</li>"
   ]
  },
  {
@@ -313,6 +349,15 @@
   "where": "app",
   "ctx": [
    "· from Claude"
+  ]
+ },
+ {
+  "id": "0cbaf0bddd4b",
+  "text": "· handed in when time ran out",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "· handed in when time ran out"
   ]
  },
  {
@@ -3342,6 +3387,15 @@
   ]
  },
  {
+  "id": "fcf8190dfedb",
+  "text": "(not written)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "(not written)"
+  ]
+ },
+ {
   "id": "81c521978548",
   "text": "(pointer: fine)",
   "kind": "exact",
@@ -3456,6 +3510,24 @@
   "where": "app",
   "ctx": [
    "…/20… … · … · … words"
+  ]
+ },
+ {
+  "id": "f29759bbf699",
+  "text": "{0} · {1}–{2} words · about {3} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<li><b>…</b> · … · …–… words · about … min</li>"
+  ]
+ },
+ {
+  "id": "fe0394b9494e",
+  "text": "{0} · {1}–{2} words · about {3} of the 60 min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -4048,6 +4120,15 @@
   ]
  },
  {
+  "id": "04d2947db7f0",
+  "text": "{0} has {1} words ({2}–{3})",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… has … words (…–…)"
+  ]
+ },
+ {
   "id": "c023baf79d58",
   "text": "{0} has no new cards left, so {1}.",
   "kind": "pattern",
@@ -4118,6 +4199,15 @@
   "ctx": [
    "… in the last 3 weeks",
    "… … in all · … in the last 3 weeks e.g. … → …"
+  ]
+ },
+ {
+  "id": "f1a049d94bc3",
+  "text": "{0} is blank",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… is blank"
   ]
  },
  {
@@ -4193,7 +4283,7 @@
   "ctx": [
    "… min",
    "…<span><small>…</small><b>…</b><span>… min</span></span><button>Start</button>…",
-   "… · … min"
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>"
   ]
  },
  {
@@ -4212,6 +4302,15 @@
   "where": "app",
   "ctx": [
    "· … min left"
+  ]
+ },
+ {
+  "id": "1431b8486424",
+  "text": "{0} min of the 60 used. {1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -4358,6 +4457,16 @@
   "where": "app",
   "ctx": [
    "… most recent"
+  ]
+ },
+ {
+  "id": "ae531ed96426",
+  "text": "{0} mots",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… mots",
+   "<button><b>…</b><span>… mots</span></button>"
   ]
  },
  {
@@ -4610,6 +4719,15 @@
   ]
  },
  {
+  "id": "f07697bafa8d",
+  "text": "{0} of 3 in a row so far",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… of 3 in a row so far"
+  ]
+ },
+ {
   "id": "a978e4e350e3",
   "text": "{0} of 3 milestones passed",
   "kind": "pattern",
@@ -4845,6 +4963,15 @@
   ]
  },
  {
+  "id": "d1e5bad2e922",
+  "text": "{0} so far, newest first",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… so far, newest first"
+  ]
+ },
+ {
   "id": "52ebeba7142c",
   "text": "{0} starter sheet{1} hidden ·",
   "kind": "pattern",
@@ -4878,6 +5005,15 @@
   "where": "app",
   "ctx": [
    "<p>… style tip… to practise.</p>"
+  ]
+ },
+ {
+  "id": "d4c8fa0e9b11",
+  "text": "{0} task{1} outside the word range",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   ", … task… outside the word range"
   ]
  },
  {
@@ -4949,9 +5085,18 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>",
    "…/20… … · … · … words",
-   "… <span>… words</span><span>Not corrected</span> <p>…</p>",
-   "… words"
+   "… <span>… words</span><span>Not corrected</span> <p>…</p>"
+  ]
+ },
+ {
+  "id": "097703551942",
+  "text": "{0} words in 3 tasks{1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… words in 3 tasks…"
   ]
  },
  {
@@ -5018,6 +5163,15 @@
   ]
  },
  {
+  "id": "85c44430c26e",
+  "text": "{0}–{1} · {2} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>"
+  ]
+ },
+ {
   "id": "ba416e94d49e",
   "text": "{0}–{1} mots",
   "kind": "pattern",
@@ -5033,7 +5187,17 @@
   "where": "app",
   "ctx": [
    "…–… words",
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "<li><b>…</b> · … · …–… words · about … min</li>",
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+  ]
+ },
+ {
+  "id": "a9a045a060fe",
+  "text": "{0}–{1} words · about {2} of the 60 min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -5196,6 +5360,15 @@
   "where": "app",
   "ctx": [
    "… <p>You found <b>… of …</b>…. Now correct the ones you found. The ones you missed are in red; their corrections come after.</p> … … … <button>Check my corrections</button>"
+  ]
+ },
+ {
+  "id": "6985231d2784",
+  "text": "{0}. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
   ]
  },
  {
@@ -5375,7 +5548,17 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc</p><p>…, with an estimated score and NCLC level.…</p> …"
+   "<p>…Examen blanc</p><p>…, with an estimated score and NCLC level.…</p> …",
+   "…<a>…Examen blanc<small>3 tâches · 60 min</small></a>"
+  ]
+ },
+ {
+  "id": "7628a9ac1412",
+  "text": "{0}Examen blanc EE",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -7645,6 +7828,15 @@
   "ctx": []
  },
  {
+  "id": "10ff6d51c44d",
+  "text": "A practice exam is running: hand it in or pause it first.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "A practice exam is running: hand it in or pause it first."
+  ]
+ },
+ {
   "id": "035d431c502c",
   "text": "A practice exam with every question answered in time",
   "kind": "exact",
@@ -8224,6 +8416,24 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "aebe40c4bc4f",
+  "text": "about {0} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<li><b>…</b> · … · …–… words · about … min</li>"
+  ]
+ },
+ {
+  "id": "4221c73c7989",
+  "text": "about {0} of the 60 min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+  ]
  },
  {
   "id": "4e9f55f67002",
@@ -9267,6 +9477,15 @@
   ]
  },
  {
+  "id": "93543e62deea",
+  "text": "All three tasks on one 60:00 clock, as on the real test.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "All three tasks on one 60:00 clock, as on the real test."
+  ]
+ },
+ {
   "id": "ff1db2c6c49b",
   "text": "All three tasks on the real 60-minute clock.",
   "kind": "exact",
@@ -9307,6 +9526,15 @@
   "where": "app",
   "ctx": [
    "<summary>All your mistakes · …</summary> …"
+  ]
+ },
+ {
+  "id": "918ded58cffd",
+  "text": "All your mocks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -11096,6 +11324,15 @@
   ]
  },
  {
+  "id": "eff3ff17e276",
+  "text": "Best so far: {0} of 3 tasks at B2",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Best so far: … of 3 tasks at B2"
+  ]
+ },
+ {
   "id": "353ce9e05eba",
   "text": "between {0} and",
   "kind": "pattern",
@@ -11163,6 +11400,24 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "6184d6847d59",
+  "text": "blank",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>blank</span>"
+  ]
+ },
+ {
+  "id": "276c9361fff1",
+  "text": "Blank",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>…</p><p><span>Blank</span> counts 0</p>"
+  ]
  },
  {
   "id": "e380f8c5452c",
@@ -12524,6 +12779,24 @@
   ]
  },
  {
+  "id": "ab9c3ae9d8ee",
+  "text": "Claude is correcting",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Claude is correcting</span>"
+  ]
+ },
+ {
+  "id": "1db838a19466",
+  "text": "Claude is correcting your texts, one after another.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Claude is correcting your texts, one after another."
+  ]
+ },
+ {
   "id": "ac5c399fe0fe",
   "text": "Claude is preparing your texts",
   "kind": "exact",
@@ -13535,6 +13808,15 @@
   ]
  },
  {
+  "id": "f6c5a00aec1a",
+  "text": "Copied: the TCF Canada rules and your three texts. Paste it into any AI chat.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Copied: the TCF Canada rules and your three texts. Paste it into any AI chat."
+  ]
+ },
+ {
   "id": "18805a4f6a9c",
   "text": "Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction",
   "kind": "exact",
@@ -13549,6 +13831,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
    "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
   ]
  },
@@ -13623,6 +13906,15 @@
   ]
  },
  {
+  "id": "aef01063892e",
+  "text": "Corrected",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Corrected"
+  ]
+ },
+ {
   "id": "02584f9be83d",
   "text": "Corrected and saved drafts collect here, with their word counts.",
   "kind": "exact",
@@ -13677,6 +13969,24 @@
   ]
  },
  {
+  "id": "088d0e5c6d39",
+  "text": "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."
+  ]
+ },
+ {
+  "id": "7c2172ec8cc0",
+  "text": "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI."
+  ]
+ },
+ {
   "id": "46ed1bc9f956",
   "text": "Correctly combine 8/10 sentence pairs.",
   "kind": "exact",
@@ -13715,6 +14025,15 @@
   "where": "app",
   "ctx": [
    "Couldn't save that change. Check your connection and try again."
+  ]
+ },
+ {
+  "id": "38431f586ee2",
+  "text": "counts 0",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>…</p><p><span>Blank</span> counts 0</p>"
   ]
  },
  {
@@ -13865,9 +14184,9 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "Date … Score …",
    "Date Task Words Level …",
-   "Date Section Attempt Result … …",
-   "Date"
+   "Date Section Attempt Result … …"
   ]
  },
  {
@@ -14685,6 +15004,15 @@
   ]
  },
  {
+  "id": "6fa52a26b3e1",
+  "text": "Done: read the three corrections.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Done: read the three corrections."
+  ]
+ },
+ {
   "id": "f76c8c761d00",
   "text": "Done: read your correction.",
   "kind": "exact",
@@ -15073,6 +15401,24 @@
   "where": "app",
   "ctx": [
    "Each skill on the NCLC scale, against the NCLC 7 ring"
+  ]
+ },
+ {
+  "id": "3391591952d9",
+  "text": "Each task gets a prompt you haven't written yet.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+  ]
+ },
+ {
+  "id": "de399a9bdb63",
+  "text": "Each task gets a prompt you haven't written yet. {0}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
   ]
  },
  {
@@ -16244,6 +16590,15 @@
   ]
  },
  {
+  "id": "4d91c0bb2d2a",
+  "text": "examen blanc",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>examen blanc</span>"
+  ]
+ },
+ {
   "id": "4d48308d2dd5",
   "text": "Examen blanc",
   "kind": "exact",
@@ -16304,6 +16659,25 @@
   "where": "app",
   "ctx": [
    "Examen blanc CO"
+  ]
+ },
+ {
+  "id": "5ea95981f678",
+  "text": "Examen blanc EE",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Examen blanc EE",
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+  ]
+ },
+ {
+  "id": "3f90aa78832f",
+  "text": "Examen blanc EE (site estimate)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Examen blanc EE (site estimate)"
   ]
  },
  {
@@ -17988,7 +18362,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
+   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -17997,7 +18372,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… question… still blank and will count as wrong. <button>Hand in anyway</button><button>Keep going</button>"
+   "… question… still blank and will count as wrong. <button>Hand in anyway</button><button>Keep going</button>",
+   "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
   ]
  },
  {
@@ -18010,12 +18386,30 @@
   ]
  },
  {
+  "id": "a45dc3a1d459",
+  "text": "handed in when time ran out",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "· handed in when time ran out"
+  ]
+ },
+ {
   "id": "b22130ef8805",
   "text": "Handed in: go over the questions you missed.",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "Handed in: go over the questions you missed."
+  ]
+ },
+ {
+  "id": "7350303fb04f",
+  "text": "Handed in.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Handed in."
   ]
  },
  {
@@ -18064,6 +18458,15 @@
   "where": "app",
   "ctx": [
    "has"
+  ]
+ },
+ {
+  "id": "228b0a900bde",
+  "text": "has {0} words ({1}–{2})",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… has … words (…–…)"
   ]
  },
  {
@@ -19383,6 +19786,15 @@
   ]
  },
  {
+  "id": "68d954ff8fd9",
+  "text": "is blank",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… is blank"
+  ]
+ },
+ {
   "id": "21cf4b1e3655",
   "text": "is mastered, so the slot goes to {0}{1}.",
   "kind": "pattern",
@@ -19744,7 +20156,8 @@
   "where": "app",
   "ctx": [
    "<span>Quit and lose these answers?</span><button>Quit the exam</button><button>Keep going</button>",
-   "… question… still blank and will count as wrong. <button>Hand in anyway</button><button>Keep going</button>"
+   "… question… still blank and will count as wrong. <button>Hand in anyway</button><button>Keep going</button>",
+   "<span><span>Quit and lose these texts?</span><button>Quit the mock</button><button>Keep going</button></span>"
   ]
  },
  {
@@ -19798,6 +20211,15 @@
   "where": "app",
   "ctx": [
    "<p>Importing <b>… of …</b> records…</p> <i></i> <p>Keep this page open until it starts again by itself.</p>"
+  ]
+ },
+ {
+  "id": "832a800d5194",
+  "text": "Keep writing",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
   ]
  },
  {
@@ -20113,6 +20535,24 @@
   "where": "app",
   "ctx": [
    "Section Attempt Last change …"
+  ]
+ },
+ {
+  "id": "1df9c4e2bd85",
+  "text": "Last mock, {0}: {1}/20{2}.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Last mock, …: …/20…."
+  ]
+ },
+ {
+  "id": "90dc55d3334a",
+  "text": "Last mock, {0}: not corrected yet.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Last mock, …: not corrected yet."
   ]
  },
  {
@@ -21955,6 +22395,15 @@
   ]
  },
  {
+  "id": "1818a0c11f78",
+  "text": "min of the 60 used.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+  ]
+ },
+ {
   "id": "fc6ca37db5bd",
   "text": "min on the clock",
   "kind": "exact",
@@ -22424,6 +22873,16 @@
   ]
  },
  {
+  "id": "b22322a40b27",
+  "text": "mots",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… mots",
+   "<button><b>…</b><span>… mots</span></button>"
+  ]
+ },
+ {
   "id": "a6e5fa506335",
   "text": "Moussa explains that customer loyalty came from « les séances de dégustation offertes le samedi qui ont créé un lien durable », which is rephrased as « L'organisation régulière d'essais gratuits ». Lowering prices (« réduit mes tarifs ») was tried first but failed (« sans grand résultat »). Online videos (« vidéos sur les réseaux sociaux ») were not the primary driver (« bien plus que nos vidéos »), and takeaway sales (« vente de pâtisseries à emporter ») are never discussed.",
   "kind": "exact",
@@ -22516,7 +22975,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "MY TEXT: \"\"\" … \"\"\""
+   "MY TEXT: \"\"\" … \"\"\"",
+   "TÂCHE …: …, …. … Required length: …–… words.… SUBJECT: …… MY TEXT: \"\"\" … \"\"\""
   ]
  },
  {
@@ -22526,6 +22986,15 @@
   "where": "app",
   "ctx": [
    "My whole text corrected, keeping my ideas and paragraph breaks."
+  ]
+ },
+ {
+  "id": "3f6b40d6ee5a",
+  "text": "My word count: {0}.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "My word count: …."
   ]
  },
  {
@@ -23720,6 +24189,15 @@
   "ctx": []
  },
  {
+  "id": "5942b6fe2e3e",
+  "text": "No Examen blanc EE yet",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "No Examen blanc EE yet"
+  ]
+ },
+ {
   "id": "3d9e00a97b33",
   "text": "No examples came back. Try again.",
   "kind": "exact",
@@ -24249,7 +24727,17 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<span>Not corrected</span>",
    "… <span>… words</span><span>Not corrected</span> <p>…</p>"
+  ]
+ },
+ {
+  "id": "ea2188cad987",
+  "text": "Not corrected yet.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Not corrected yet."
   ]
  },
  {
@@ -24978,6 +25466,15 @@
   "where": "app",
   "ctx": [
    "… of 20 reviews"
+  ]
+ },
+ {
+  "id": "b506eb3a529a",
+  "text": "of 3 in a row so far",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… of 3 in a row so far"
   ]
  },
  {
@@ -27797,6 +28294,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
+   "<p>This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).</p> …",
    "<p>Copy this into another AI</p><p>This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p> … <button>Close</button>"
   ]
  },
@@ -28500,12 +28998,30 @@
   ]
  },
  {
+  "id": "92dbf3752069",
+  "text": "Quit and lose these texts?",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span><span>Quit and lose these texts?</span><button>Quit the mock</button><button>Keep going</button></span>"
+  ]
+ },
+ {
   "id": "052a7e60dbc0",
   "text": "Quit the exam",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "<span>Quit and lose these answers?</span><button>Quit the exam</button><button>Keep going</button>"
+  ]
+ },
+ {
+  "id": "f17163f3e01e",
+  "text": "Quit the mock",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span><span>Quit and lose these texts?</span><button>Quit the mock</button><button>Keep going</button></span>"
   ]
  },
  {
@@ -29530,6 +30046,15 @@
   "ctx": [
    "<button>Resume the exam</button>",
    "<button>…Resume the exam</button>"
+  ]
+ },
+ {
+  "id": "46a6b53df544",
+  "text": "Resume the mock",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<b>You have an unfinished mock:</b> …. <button>Resume the mock</button>…"
   ]
  },
  {
@@ -30701,6 +31226,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "Date … Score …",
    "<p>…</p> <p>… Log your scores here to keep them with the rest.</p> … <p>Log a score from elsewhere</p> Score Out of Source <button>Log … score at …</button>",
    "Score"
   ]
@@ -31094,12 +31620,30 @@
   ]
  },
  {
+  "id": "916963a339a3",
+  "text": "See the correction",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "See the correction"
+  ]
+ },
+ {
   "id": "d878441126b4",
   "text": "See the stamp",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "…<span><b>Journée terminée !</b></span><a>See the stamp</a>…"
+  ]
+ },
+ {
+  "id": "51527a42e320",
+  "text": "See the text",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "See the text"
   ]
  },
  {
@@ -32182,6 +32726,15 @@
   ]
  },
  {
+  "id": "d2eb1d45e165",
+  "text": "so far, newest first",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… so far, newest first"
+  ]
+ },
+ {
   "id": "e14abbc0e2fc",
   "text": "Sofia asks to work four days instead of five during her eight-month course (« Serait-il possible de travailler quatre jours au lieu de cinq »), accepting a lower salary. The Saturday is once a month, offered in exchange.",
   "kind": "exact",
@@ -32485,6 +33038,15 @@
   ]
  },
  {
+  "id": "73ffa496d942",
+  "text": "Start another mock",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+  ]
+ },
+ {
   "id": "fe539367476a",
   "text": "Start it now",
   "kind": "exact",
@@ -32545,6 +33107,24 @@
   "where": "app",
   "ctx": [
    "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+  ]
+ },
+ {
+  "id": "e7b04d2dd915",
+  "text": "Start the exam",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>Start the exam · 60:00</button>"
+  ]
+ },
+ {
+  "id": "d7871ad051fc",
+  "text": "Start the exam · 60:00",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>Start the exam · 60:00</button>"
   ]
  },
  {
@@ -33099,6 +33679,24 @@
   "where": "app",
   "ctx": [
    "Tableau"
+  ]
+ },
+ {
+  "id": "30ea35cc453f",
+  "text": "TÂCHE {0}: {1}, {2}. {3} Required length: {4}–{5} words.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "TÂCHE …: …, …. … Required length: …–… words.… SUBJECT: …… MY TEXT: \"\"\" … \"\"\""
+  ]
+ },
+ {
+  "id": "cc10e77d53e7",
+  "text": "TÂCHE {0}: {1}, {2}. {3} Required length: {4}–{5} words.{6}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "TÂCHE …: …, …. … Required length: …–… words.… SUBJECT: …… MY TEXT: \"\"\" … \"\"\""
   ]
  },
  {
@@ -33662,6 +34260,15 @@
   "where": "app",
   "ctx": [
    "Tes erreurs · Your mistakes"
+  ]
+ },
+ {
+  "id": "265e85936274",
+  "text": "Tes examens blancs · Your mocks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
   ]
  },
  {
@@ -35138,6 +35745,15 @@
   ]
  },
  {
+  "id": "1792288d5676",
+  "text": "The mock was discarded.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The mock was discarded."
+  ]
+ },
+ {
   "id": "b09cf545e30e",
   "text": "The mother argues that « l'improvisation va l'aider à vaincre sa timidité », which means building his self-confidence. The other options refer to the choral singing: « poser sa voix » is mentioned as an advantage of singing, « le samedi matin » is when choir rehearsals happen, and « coûte moins cher » describes the lower price of the choir.",
   "kind": "exact",
@@ -35901,6 +36517,15 @@
   "ctx": []
  },
  {
+  "id": "edbb17de5478",
+  "text": "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them."
+  ]
+ },
+ {
   "id": "f3fb860a1103",
   "text": "The secretary asks the student: « Merci d'indiquer par courriel si vous venez », which means they must confirm their attendance in writing. « Demander une autre date d'examen » is wrong because the date has already been set for Thursday. « Se présenter au local dès mardi » refers to the initial plan that was cancelled (« prévu ce mardi est reporté »). « Appeler pour changer de niveau » mentions a phone call and course level, but the caller asks for an email about attendance, not a call about proficiency level.",
   "kind": "exact",
@@ -36339,6 +36964,24 @@
   "ctx": []
  },
  {
+  "id": "c3d4aabaf9d7",
+  "text": "The three tasks",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "…"
+  ]
+ },
+ {
+  "id": "b5fb8953a9dd",
+  "text": "The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+  ]
+ },
+ {
   "id": "ea16be1d93fb",
   "text": "The train comes twice in the morning with a full car park, and the bike path « s'arrête au milieu du pont » : his cheerful tone is ironic, and he's stuck with the car.",
   "kind": "exact",
@@ -36623,6 +37266,15 @@
   ]
  },
  {
+  "id": "d03e336e091b",
+  "text": "Then Claude corrects all three, and the mock gets a score out of 20.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Then Claude corrects all three, and the mock gets a score out of 20."
+  ]
+ },
+ {
   "id": "16b6e695ce02",
   "text": "Then compare: are the corrected forms in it?",
   "kind": "exact",
@@ -36848,6 +37500,15 @@
   "where": "app",
   "ctx": [
    "<p>Copy this into another AI</p><p>This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p> … <button>Close</button>"
+  ]
+ },
+ {
+  "id": "6babddee5a47",
+  "text": "This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).</p> …"
   ]
  },
  {
@@ -37277,6 +37938,15 @@
   "where": "app",
   "ctx": [
    "Time's up: your exam was handed in, and its estimated score added to Progress."
+  ]
+ },
+ {
+  "id": "f9139631a4de",
+  "text": "Time's up: your three texts were handed in.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Time's up: your three texts were handed in."
   ]
  },
  {
@@ -39813,6 +40483,15 @@
   ]
  },
  {
+  "id": "e4208a527ad6",
+  "text": "When you hand in, Claude corrects all three, and the mock's score is the mean of the three.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "When you hand in, Claude corrects all three, and the mock's score is the mean of the three."
+  ]
+ },
+ {
   "id": "78471267158a",
   "text": "where each skill stands",
   "kind": "exact",
@@ -40236,9 +40915,9 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>",
    "… <span>… words</span><span>Not corrected</span> <p>…</p>",
-   "… words",
-   "<span>… words…</span>"
+   "… words"
   ]
  },
  {
@@ -40249,6 +40928,15 @@
   "ctx": [
    "Words",
    "Date Task Words Level …"
+  ]
+ },
+ {
+  "id": "94e0bcb2dfbf",
+  "text": "words in 3 tasks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… words in 3 tasks…"
   ]
  },
  {
@@ -40367,6 +41055,15 @@
   "where": "app",
   "ctx": [
    "… … Write one TCF Canada Compréhension orale item set at CEFR …. Theme: …. Write the script of a realistic recording of a kind the TCF Canada uses (…) that lasts 2 to 4 minutes when read aloud: … words of natural spoken French, with at most two speakers, label"
+  ]
+ },
+ {
+  "id": "347cf556bc16",
+  "text": "Write something first: there's nothing to hand in yet.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Write something first: there's nothing to hand in yet."
   ]
  },
  {
@@ -40709,6 +41406,15 @@
   "where": "app",
   "ctx": [
    "<b>You have an unfinished exam:</b> …, …. Pick it up where you stopped, or discard it to start another. <button>Resume</button>…"
+  ]
+ },
+ {
+  "id": "93e81822a95d",
+  "text": "You have an unfinished mock:",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<b>You have an unfinished mock:</b> …. <button>Resume the mock</button>…"
   ]
  },
  {
@@ -41309,6 +42015,24 @@
   ]
  },
  {
+  "id": "5bec7282b2dd",
+  "text": "Your mocks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+  ]
+ },
+ {
+  "id": "ca2b14d9615a",
+  "text": "Your mocks collect here, with each task's words and score.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Your mocks collect here, with each task's words and score.</p>"
+  ]
+ },
+ {
   "id": "6ea6157d9359",
   "text": "your most frequent mistake",
   "kind": "exact",
@@ -41511,6 +42235,24 @@
   "where": "app",
   "ctx": [
    "Your text « … » · … mistakes to find, then fix."
+  ]
+ },
+ {
+  "id": "85f15725b853",
+  "text": "Your text for",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+  ]
+ },
+ {
+  "id": "186cadf65edd",
+  "text": "Your text for {0}",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
   ]
  },
  {
