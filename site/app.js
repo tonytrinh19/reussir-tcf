@@ -7923,18 +7923,6 @@
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
-    "ee-start": eeStart,
-    "ee-new": () => { ui.ee = null; eeStart(); },
-    "ee-task": (el) => eeSwitch(el.dataset.t),
-    "ee-hand-in": (el) => { if (el.dataset.force && ui.ee) ui.ee.confirm = true; eeHandIn(); },
-    "ee-keep": () => { if (ui.ee) ui.ee.confirm = false; render(true); },
-    "ee-quit": () => { ui.confirm = ""; eeQuit(); },
-    "ee-correct": (el) => eeCorrect(el.dataset.id || (ui.ee && ui.ee.id)),
-    "ee-copy": (el) => eeCopy(el.dataset.id),
-    "ee-open": (el) => { ui.ee = { id: el.dataset.id, done: true, view: null }; render(true); window.scrollTo(0, 0); },
-    "ee-close": () => { ui.ee = null; ui.eeCopyOut = null; render(true); },
-    "ee-view": (el) => { if (ui.ee) ui.ee.view = ui.ee.view === el.dataset.id ? null : el.dataset.id; render(true); const f = document.getElementById("w-fb"); if (f && ui.ee && ui.ee.view) f.scrollIntoView({ block: "start", behavior: "smooth" }); },
-    "ee-view-close": () => { if (ui.ee) ui.ee.view = null; render(true); },
     // A Find the mistakes or Your mistakes text, opened on its page as you left it.
     "h-text": (el) => {
       const d = S.drills.get(el.dataset.id);
@@ -8092,6 +8080,19 @@
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },
     "w-close": () => { ui.w.viewing = null; render(true); },
     "w-del": (el) => { if (ui.w.viewing === el.dataset.id) ui.w.viewing = null; ui.confirm = ""; remove("writing", el.dataset.id); },
+    // The Examen blanc EE (#writing.mock).
+    "ee-start": eeStart,
+    "ee-new": () => { ui.ee = null; eeStart(); },
+    "ee-task": (el) => eeSwitch(el.dataset.t),
+    "ee-hand-in": (el) => { if (el.dataset.force && ui.ee) ui.ee.confirm = true; eeHandIn(); },
+    "ee-keep": () => { if (ui.ee) ui.ee.confirm = false; render(true); },
+    "ee-quit": () => { ui.confirm = ""; eeQuit(); },
+    "ee-correct": (el) => eeCorrect(el.dataset.id || (ui.ee && ui.ee.id)),
+    "ee-copy": (el) => eeCopy(el.dataset.id),
+    "ee-open": (el) => { ui.ee = { id: el.dataset.id, done: true, view: null }; render(true); window.scrollTo(0, 0); },
+    "ee-close": () => { ui.ee = null; ui.eeCopyOut = null; render(true); },
+    "ee-view": (el) => { if (ui.ee) ui.ee.view = ui.ee.view === el.dataset.id ? null : el.dataset.id; render(true); const f = document.getElementById("w-fb"); if (f && ui.ee && ui.ee.view) f.scrollIntoView({ block: "start", behavior: "smooth" }); },
+    "ee-view-close": () => { if (ui.ee) ui.ee.view = null; render(true); },
     "timer-toggle": (el) => {
       // The mock's minutes per task count only while its clock runs.
       if (el.dataset.home === EE_HOME) eeTally();
