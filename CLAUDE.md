@@ -267,6 +267,16 @@
       - **Your mistakes:** a round from before `para` is rebuilt from its draft as it's prepared now, matching its mistakes by their wording. Those no longer in the text come after it, like « Hors texte » cards.
       - **What you can do from it:** « Try this text again » (Find the mistakes) or « Next text », and Close.
       - **The other exercises:** drill rounds, the mixed review, retries and style tips are one sentence a question, so their review stays as it is. Reading and listening sets, practice exams and writing already open whole.
+    - **Sauvegarde · backup** (`#progress.backup`, a tab of Progrès, and a link in the sidebar's save status): the user asked on 2026-10-23 to bring their claude.ai progress into the local site, with everything working (charts, history, exercises).
+      - **The file** (`bkFile`) is every collection exactly as it's saved, old records the site no longer reads included: `{ app: "reussir-tcf", v: 1, from: "claude.ai" | "this computer" | "this browser", at, counts, data: { coll: { id: doc } } }`, named `reussir-tcf-claude-<date>.json` or `reussir-tcf-local-<date>.json`.
+      - **Download a backup:** on claude.ai through the `downloads` capability, which asks you to confirm the save. If it isn't available, the backup is copied for pasting into a file instead. Locally it's an ordinary download.
+      - **Importing a backup replaces** the progress already there (the user's choice over merging), so the copy matches exactly.
+        - **Checks first:** `bkParse` reads the backup shape or the bare `{ coll: { id: doc } }` shape. A file that isn't JSON, isn't the site's, has a malformed record or is empty is turned away with the reason.
+        - **What it shows:** each kind of record, here and in the file, with the file's origin and date.
+        - **Then it downloads a backup of what's here.** If that's declined, it asks before going on without one.
+        - **How it writes:** the local server replaces everything in one transaction (`PUT /api/data`). The browser-only copy is written whole. On claude.ai it's one write a record, four at a time, each tried four times. If some still fail, it says how many, so you can import again.
+        - **While it writes,** `importing` holds every other `put`, `remove` and redraw, so nothing half-imported is saved over.
+        - **Afterwards** the page starts again, without the old tab state, on Sauvegarde with « Imported N records ».
     - **Save to cards:** selecting a word or phrase (up to 12 words) anywhere on a page, outside text boxes, shows a "Save to cards" button under it. The user asked for this on 2026-10-05, to keep words met in a reading text for review.
       - The button opens a panel (outside `#view`, kept in `ui.grab` across a refresh). It's filled in with the words, the sentence they're in as the example, and where they were (the page, then the document's title). Speaker names in transcripts (`.who`) are left out.
       - The meaning can be typed, or filled in by Claude: the dictionary form, the meaning in that sentence and a short note. It can also be left for later.
@@ -364,8 +374,8 @@
 - `server/`: runs the site locally on the user's Mac, with progress in SQLite. No npm dependencies; it needs Node 22.13+ for the built-in `node:sqlite`.
   - `npm start` serves `site/` at http://localhost:4173 and keeps progress in `data/tcf.sqlite` (git-ignored; `TCF_DB` and `PORT` override).
   - `db.js`: one `docs` table (`coll`, `id`, `data` JSON, `updated`), using the same collections as the claude.ai page.
-  - `server.js`: `GET /api/data` returns every collection; `PUT`/`DELETE /api/data/<coll>/<id>` write one document. Audio is served with byte ranges so Safari can play and seek it.
-  - `npm run import -- file.json` merges an export (`{coll: {id: doc}}`) into the database. A claude.ai export can be made with ArtifactData.
+  - `server.js`: `GET /api/data` returns every collection; `PUT /api/data` replaces everything with a body of that shape (a backup imported on the site, up to 200 MB, in one transaction: `db.replace`); `PUT`/`DELETE /api/data/<coll>/<id>` write one document. Audio is served with byte ranges so Safari can play and seek it.
+  - `npm run import -- file.json` merges a backup from Progrès → Sauvegarde, or a bare export (`{coll: {id: doc}}`), into the database; `npm run import -- --replace file.json` replaces everything, as the site's import does. A claude.ai export can also be made with ArtifactData.
   - `app.js` picks its store at boot: the claude.ai `db` when `window.claude` exists, then this server, then the browser's localStorage. On first run with an empty database, it copies over whatever that browser had in localStorage.
   - The local site and the claude.ai page keep separate progress. Claude features (corrections, extra sets, "Suggest 3") only work on claude.ai.
 - `tools/make_audio.py` (+ `tools/export_co.js`): records the listening sets, and the CO exams' items into `site/audio/<exam id>/NN.mp4`. `tools/recordings.json` notes which voices made each file, from which version of the script.
@@ -434,7 +444,7 @@
 
 ## Publishing
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
-- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `ts-fsrs.js`, `theme.js`, `fr.js`, `i18n.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-*/*.mp4` (one folder per CO exam) as supporting files. A publish sends at most 255 files and 64 MB, so send only what changed (files left out stay). Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress) and `sample` (Claude features).
+- Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `ts-fsrs.js`, `theme.js`, `fr.js`, `i18n.js`, `app.js`, `icon.svg`, `icon-180.png` and every `audio/*.mp4` and `audio/co-exam-*/*.mp4` (one folder per CO exam) as supporting files. A publish sends at most 255 files and 64 MB, so send only what changed (files left out stay). Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress), `sample` (Claude features) and `downloads` (Progrès → Sauvegarde's download, added 2026-10-23): a publish that passes `capabilities` must restate all three, as `{ db: {}, sample: {}, downloads: true }`.
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).
   - Delete a branch once its pull request is merged (the user asked on 2026-10-10). Cloud sessions can't delete branches on GitHub, so the repo's "Automatically delete head branches" setting does it, or the user deletes them.
 - Progress lives in the artifact's database, not in these files. Collections: settings, days, drills, srs, cards, writing, errors, homework, speaking, comp, mocks, inprogress, fiches, mistakes.

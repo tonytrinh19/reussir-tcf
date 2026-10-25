@@ -138,6 +138,8 @@
   // Every collection has arrived (loaded can also be set by the 6 s fallback, with some still on their way), and a
   // count of the changes to your progress, so the stamps are only worked out again after something changed.
   let allIn = false, dataRev = 0;
+  // A backup being imported (see backup): nothing else writes or redraws until the page starts again on it.
+  let importing = false;
   const pendingOps = [];
   const chains = new Map();
 
@@ -155,6 +157,7 @@
     });
   }
   function put(coll, id, data) {
+    if (importing) return Promise.resolve();
     S[coll].set(id, data);
     dataRev++;
     scheduleRender();
@@ -163,6 +166,7 @@
     return run(op);
   }
   function remove(coll, id) {
+    if (importing) return Promise.resolve();
     S[coll].delete(id);
     dataRev++;
     scheduleRender();
@@ -4638,7 +4642,7 @@
   const hk = (s) => { let h = 0; for (const ch of String(s)) h = (Math.imul(h, 31) + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
   let pendingRender = false, raf = 0, pointerDown = false, holdH = false;
   function scheduleRender() {
-    if (raf) return;
+    if (raf || importing) return;
     raf = requestAnimationFrame(() => { raf = 0; render(false); });
   }
   function isTyping(el) {
@@ -4708,7 +4712,7 @@
     // Where your progress is saved, on one line; that and whether Claude is ready open with a tap.
     const saved = backend.kind === "db" ? "Saved on claude.ai" : backend.kind === "server" ? "Saved on this computer" : backend.kind === "local" ? "Saved in this browser only" : "Loading your progress…";
     const dot = backend.kind === "local" ? "warn" : backend.kind === "loading" ? "" : "on";
-    footEl.innerHTML = `${miniPass()}${tm}${streakFoot(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}</div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button><button type="button" class="theme-btn fr-btn" data-act="lang" data-lang-btn></button>`;
+    footEl.innerHTML = `${miniPass()}${tm}${streakFoot(streak())}<details class="status" ${foldAttr("foot-status")}><summary><span class="status-dot ${dot}"></span>${saved}</summary><div><div>${store}</div>${cl ? `<div>${cl}</div>` : ""}<a class="small" href="#progress.backup">Back up or move your progress →</a></div></details><button type="button" class="theme-btn" data-act="theme" data-theme-btn></button><button type="button" class="theme-btn fr-btn" data-act="lang" data-lang-btn></button>`;
     paintTheme();
     paintLang();
   }
@@ -7798,12 +7802,195 @@
     };
   }
 
+  /* =============== backup =============== */
+  // Your whole progress as one file, to keep, or to move between the claude.ai page and the local site (the user asked
+  // on 2026-10-23 to bring their claude.ai progress to the local site). It's every collection exactly as it's saved,
+  // old records the site no longer reads included, so the copy you import has the same charts, history, stamps and
+  // card schedules. Importing replaces what's here (the user's choice), after downloading a backup of it.
+  const BK_APP = "reussir-tcf", BK_V = 1;
+  const BK_NAMES = { settings: "Settings, stamps and phase", days: "Days of the plan", drills: "Drill rounds and texts", srs: "Card schedules", cards: "Your own and edited cards", writing: "Writing", errors: "Error log", homework: "Homework", speaking: "Old speaking attempts", comp: "Reading, listening and exams", mocks: "Scores and mocks", inprogress: "Unfinished attempts", fiches: "Sheets and notes", mistakes: "Your mistakes, prepared" };
+  const bkWhere = () => (backend.kind === "db" ? "claude.ai" : backend.kind === "server" ? "this computer" : "this browser");
+  const bkCounts = (data) => Object.fromEntries(COLLS.map((c) => [c, Object.keys((data && data[c]) || {}).length]));
+  const bkTotal = (counts) => COLLS.reduce((t, c) => t + (counts[c] || 0), 0);
+  function bkFile() {
+    const data = {};
+    for (const c of COLLS) data[c] = Object.fromEntries(S[c]);
+    return { app: BK_APP, v: BK_V, from: bkWhere(), at: new Date().toISOString(), counts: bkCounts(data), data };
+  }
+  // Where a file came from, as the page says it (whole phrases, so « Pense en français » can follow them).
+  const BK_FROM = { "claude.ai": "from claude.ai", "this computer": "from the local site", "this browser": "from a browser's own copy" };
+  const bkName = (b) => `reussir-tcf-${b.from === "claude.ai" ? "claude" : "local"}-${todayStr()}.json`;
+  // Saves the file: through claude.ai's download, which asks you to confirm, or as an ordinary download locally.
+  // Rejects with { code } when it isn't saved (declined on claude.ai, or downloads not available there).
+  async function bkSave(b) {
+    const blob = new Blob([JSON.stringify(b)], { type: "application/json" }), filename = bkName(b);
+    if (backend.kind === "db") {
+      const dl = await window.claude.use("downloads").catch(() => null);
+      if (!dl) throw { code: "unavailable" };
+      await dl.save({ filename, data: blob });
+      return filename;
+    }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    return filename;
+  }
+  // A backup file, checked: the site's collections, each a set of documents. A bare export in the shape /api/data
+  // and `npm run import` use ({ settings: {…}, days: {…} }) is read too.
+  function bkParse(text) {
+    let o;
+    try { o = JSON.parse(text); } catch (_) { return { error: "This file isn't a backup: it isn't valid JSON." }; }
+    const data = o && o.app === BK_APP ? o.data : o;
+    const keys = data && typeof data === "object" && !Array.isArray(data) ? Object.keys(data) : [];
+    if (!keys.some((c) => COLLS.includes(c))) return { error: "This file isn't a Réussir le TCF backup." };
+    const clean = {};
+    for (const c of COLLS) {
+      const docs = data[c] || {};
+      if (typeof docs !== "object" || Array.isArray(docs)) return { error: "Part of this file isn't in the shape of a backup, so it can't be imported." };
+      clean[c] = {};
+      for (const [id, d] of Object.entries(docs)) {
+        if (!id || id.length > 300 || !d || typeof d !== "object" || Array.isArray(d)) return { error: "Part of this file isn't in the shape of a backup, so it can't be imported." };
+        clean[c][id] = d;
+      }
+    }
+    const counts = bkCounts(clean);
+    if (!bkTotal(counts)) return { error: "This backup is empty." };
+    return { data: clean, counts, from: o.app === BK_APP ? str(o.from) : "", at: o.app === BK_APP ? str(o.at) : "" };
+  }
+  // The file chosen to import, kept out of ui since it can be large.
+  let bkPicked = null;
+  const bkWhen = (at) => { const d = at ? new Date(at) : null; return d && !isNaN(d) ? `${shortDate(ymd(d))} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` : ""; };
+  function bkPick(file) {
+    if (!file) return;
+    file.text().then((text) => {
+      const p = bkParse(text);
+      bkPicked = p.error ? null : p;
+      ui.bk = p.error ? { step: "bad", error: p.error, name: file.name } : { step: "picked", name: file.name };
+      render(true);
+    }, () => { bkPicked = null; ui.bk = { step: "bad", error: "This file couldn't be read.", name: file.name }; render(true); });
+  }
+  async function bkExport() {
+    if (!allIn) { toast("Your progress is still loading."); return; }
+    try { const name = await bkSave(bkFile()); toast(`Backup saved: ${name}`); }
+    catch (e) {
+      if (e && e.code === "declined") return;
+      // claude.ai without downloads: copy it instead, to paste into a file.
+      if (await copyText(JSON.stringify(bkFile()))) toast("Downloads aren't available here, so the backup was copied: paste it into a file named reussir-tcf.json.");
+      else toast("The backup couldn't be saved here.");
+    }
+  }
+  // Replaces your progress here with the file's: first a backup of what's here (unless you said to go without),
+  // then every record of the file written and every record not in it removed, then the page starts again on it.
+  // Nothing else writes meanwhile (put and remove wait), so a half-imported state is never saved over.
+  async function bkImport(noBackup) {
+    const f = bkPicked;
+    if (!f || importing || !allIn) return;
+    if (!noBackup) {
+      ui.bk = Object.assign({}, ui.bk, { step: "saving" });
+      render(true);
+      try { await bkSave(bkFile()); }
+      catch (e) { ui.bk = Object.assign({}, ui.bk, { step: "nobackup", code: (e && e.code) || "" }); render(true); return; }
+      ui.bk.backedUp = true;
+    }
+    const ops = [];
+    for (const c of COLLS) {
+      for (const [id, d] of Object.entries(f.data[c])) ops.push(["set", c, id, d]);
+      for (const id of S[c].keys()) if (!(id in f.data[c])) ops.push(["del", c, id]);
+    }
+    importing = true;
+    ui.bk = Object.assign({}, ui.bk, { step: "running", done: 0, total: ops.length });
+    render(true);
+    let failed = 0;
+    try {
+      if (backend.kind === "server") {
+        // The local server replaces everything in one transaction.
+        const r = await fetch("/api/data", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(f.data) });
+        if (!r.ok) failed = ops.length;
+      } else if (backend.kind === "local") {
+        localStorage.setItem(LS_KEY, JSON.stringify(f.data));
+      } else {
+        // claude.ai: one write a record, a few at a time, each tried four times (1, 2 and 4 s apart) before it counts as failed.
+        let next = 0;
+        const one = async ([kind, c, id, d]) => {
+          for (let t = 0; t < 4; t++) {
+            try { await (kind === "set" ? backend.set(c, id, d) : backend.del(c, id)); return; }
+            catch (_) { if (t < 3) await new Promise((res) => setTimeout(res, 1000 * 2 ** t)); }
+          }
+          failed++;
+        };
+        const worker = async () => { while (next < ops.length) { await one(ops[next++]); ui.bk.done++; bkPaint(); } };
+        await Promise.all([0, 1, 2, 3].map(worker));
+      }
+    } catch (e) { console.warn(e); failed = failed || ops.length; }
+    if (failed) {
+      importing = false;
+      ui.bk = Object.assign({}, ui.bk, { step: "failed", failed });
+      render(true);
+      return;
+    }
+    // Start again on the imported progress, back on this page, with nothing of the old session carried over.
+    try {
+      sessionStorage.removeItem(TAB_KEY);
+      sessionStorage.setItem("tcf-reussir-imported", JSON.stringify({ n: bkTotal(f.counts), from: f.from, at: f.at }));
+    } catch (_) {}
+    location.reload();
+  }
+  // The import's progress, painted in place: the page isn't redrawn while it writes.
+  function bkPaint() {
+    const b = ui.bk;
+    if (!b || b.step !== "running") return;
+    const w = b.total ? Math.round((b.done / b.total) * 100) : 100;
+    document.querySelectorAll("[data-bk-bar]").forEach((el) => { el.style.width = w + "%"; });
+    document.querySelectorAll("[data-bk-n]").forEach((el) => { el.textContent = `${b.done} of ${b.total}`; });
+  }
+  function backupView(head, tabs) {
+    const here = bkCounts(Object.fromEntries(COLLS.map((c) => [c, Object.fromEntries(S[c])])));
+    const b = ui.bk || {}, f = b.step && b.step !== "bad" ? bkPicked : null;
+    let done = null;
+    try { done = JSON.parse(sessionStorage.getItem("tcf-reussir-imported") || "null"); } catch (_) {}
+    const whereLine = backend.kind === "db" ? "Your progress here is saved on claude.ai, with your account." : backend.kind === "server" ? "Your progress here is saved on this computer, in the local database (data/tcf.sqlite)." : "Your progress here is saved in this browser only.";
+    const rows = COLLS.filter((c) => here[c] || (f && f.counts[c])).map((c) => `<tr><td>${esc(BK_NAMES[c])}</td><td class="n">${here[c]}</td>${f ? `<td class="n">${f.counts[c]}</td>` : ""}</tr>`).join("");
+    const table = `<div class="table-wrap"><table class="deck bk-table"><thead><tr><th>What</th><th class="n">Here</th>${f ? `<th class="n">In the file</th>` : ""}</tr></thead><tbody>${rows}<tr class="bk-sum"><td>Every record</td><td class="n">${bkTotal(here)}</td>${f ? `<td class="n">${bkTotal(f.counts)}</td>` : ""}</tr></tbody></table></div>`;
+    const choose = `<label class="btn${f ? "" : " primary"} bk-choose">Choose a backup file<input type="file" accept="application/json,.json" data-change="bk-file" hidden></label>`;
+    const fromLine = f ? `<p><b>${esc(b.name)}</b>${BK_FROM[f.from] || f.at ? ` <span class="small muted">· ${[BK_FROM[f.from] || "", bkWhen(f.at)].filter(Boolean).join(" · ")}</span>` : ""}</p>` : "";
+    let imp;
+    if (b.step === "running") imp = `<p>Importing <b data-bk-n>${b.done} of ${b.total}</b> records…</p><div class="bar bk-bar"><i data-bk-bar style="width:${b.total ? Math.round((b.done / b.total) * 100) : 0}%"></i></div><p class="small muted">Keep this page open until it starts again by itself.</p>`;
+    else if (b.step === "saving") imp = `${fromLine}<p class="small">First, a backup of your progress here${backend.kind === "db" ? ": confirm the download claude.ai asks about" : ""}…</p>`;
+    else if (b.step === "nobackup") imp = `${fromLine}<div class="notice warn small">${b.code === "declined" ? "The backup of your progress here wasn't saved." : "Your progress here couldn't be saved to a file first."} Without it, what's here now can't be brought back after the import.</div><div class="row"><button class="btn primary" data-act="bk-import">Try the backup again</button><button class="btn danger" data-act="bk-import-anyway">Replace without a backup</button><button class="btn ghost" data-act="bk-cancel">Cancel</button></div>`;
+    else if (b.step === "failed") imp = `<div class="notice warn small">${b.failed} of ${b.total} records couldn't be saved, so your progress here is partly the file's.${b.backedUp ? " The backup of what was here is in your downloads." : ""} Check your connection, then import the file again.</div><div class="row"><button class="btn primary" data-act="bk-import-anyway">Import again</button><button class="btn ghost" data-act="bk-reload">Reload the page</button></div>`;
+    else if (f) imp = `${fromLine}<div class="notice warn small"><b>This replaces all your progress here.</b> Every attempt, card schedule, day and setting becomes the file's, and a backup of what's here is downloaded first.</div><div class="row"><button class="btn danger" data-act="bk-import">Replace my progress here</button>${choose}<button class="btn ghost" data-act="bk-cancel">Cancel</button></div>`;
+    else imp = `${b.step === "bad" ? `<div class="notice warn small"><b>${esc(b.name)}</b>: ${esc(b.error)}</div>` : ""}<div class="row">${choose}</div>`;
+    return `<div class="wrap">
+      ${head}
+      ${tabs}
+      ${done ? `<div class="notice small" data-m="pop" data-k="bk-done">Imported ${done.n} records. ${done.from === "claude.ai" ? "They're your progress from claude.ai. " : done.from === "this computer" ? "They're your progress from the local site. " : ""}Your charts, history and exercises are the file's now.<button class="btn ghost sm" data-act="bk-done-ok">OK</button></div>` : ""}
+      <div class="grid2 bk">
+        <section class="panel stack" data-spot>
+          <p class="h3 with-ico">${ico("backup")}Télécharger · Download a backup</p>
+          <p class="small muted">One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude.ai.</p>
+          <div class="row"><button class="btn primary" data-act="bk-export" ${allIn ? "" : "disabled"}>Download a backup</button>${backend.kind === "db" ? `<span class="small muted">claude.ai asks you to confirm the download.</span>` : ""}</div>
+        </section>
+        <section class="panel stack" data-spot>
+          <p class="h3 with-ico">${ico("restore")}Importer · Import a backup</p>
+          <p class="small muted">A backup from claude.ai or from the local site. Its progress replaces what's here.</p>
+          ${imp}
+        </section>
+      </div>
+      <section class="sec"><div class="sec-head"><h2 class="h2">Ici · What's here</h2><span class="small muted">${esc(whereLine)}</span></div>${table}</section>
+    </div>`;
+  }
+
   VIEWS.progress = {
     render(args) {
       const head = `<header class="stack tight"><h1 class="title">Progrès</h1>${fold("intro-progress", "Comment ça marche · How it works", `<p class="small muted">Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</p>`)}</header>`;
-      const tab = args[0] === "history" || args[0] === "report" ? args[0] : "";
-      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a></nav>`;
+      const tab = ["history", "report", "backup"].includes(args[0]) ? args[0] : "";
+      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a><a href="#progress.backup" role="tab" aria-selected="${tab === "backup"}">Sauvegarde<small>backup</small></a></nav>`;
       if (tab === "history") return historyView(head, tabs);
+      if (tab === "backup") return backupView(head, tabs);
       if (tab === "report") return reportView(head, tabs);
       const s = settings();
       const P = T.PHASES[s.phase - 1];
@@ -7923,6 +8110,12 @@
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
+    "bk-export": bkExport,
+    "bk-import": () => bkImport(false),
+    "bk-import-anyway": () => bkImport(true),
+    "bk-cancel": () => { bkPicked = null; ui.bk = null; render(true); },
+    "bk-reload": () => location.reload(),
+    "bk-done-ok": () => { try { sessionStorage.removeItem("tcf-reussir-imported"); } catch (_) {} render(true); },
     // A Find the mistakes or Your mistakes text, opened on its page as you left it.
     "h-text": (el) => {
       const d = S.drills.get(el.dataset.id);
@@ -8214,6 +8407,7 @@
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
     "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); compKeep(ui.c.skill); },
     // Updates the navigator in place rather than re-rendering, so the chosen option keeps focus.
+    "bk-file": (el) => { bkPick(el.files && el.files[0]); el.value = ""; },
     "x-ans": (el) => {
       const cx = ui.cx;
       if (!cx || cx.done) return;

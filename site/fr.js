@@ -106,6 +106,7 @@ window.TCF.FR = {
 "90 % PARTOUT ★": "90 % PARTOUT ★",
 "90 % partout": "90 % partout",
 "90%+ on the checklist drill.": "90 % et plus à l'exercice de liste de vérification.",
+": confirm the download claude.ai asks about": ": confirme le téléchargement demandé par claude.ai",
 "<!-- Brand kit shapes (from the \"Réussir le TCF Brand Kit\" design): the maple leaf, the é tile's clip, the stamp ring and ink texture, and the icons. Pages use them with": "<!-- Formes du kit de marque (issues du design « Réussir le TCF Brand Kit ») : feuille d'érable, coin é, cercle tampon, texture d'encre et icônes. Utilisées par les pages avec",
 "= Phrase — English": "= Phrase — Traduction",
 "A B1 reading set at exam pace (4 questions in 6 minutes) with 3/4 or better": "Une série de lecture B1 au rythme de l'examen (4 questions en 6 minutes) avec un score de 3/4 ou plus",
@@ -116,6 +117,7 @@ window.TCF.FR = {
 "A Tâche 3 draft that compares both documents before the opinion, within 120–180 words, in one sitting": "Un brouillon de tâche 3 qui compare les deux documents avant de donner son avis, en 120 à 180 mots, rédigé d'une seule traite",
 "A agrees on Italian food with « Va pour les spécialités de pâtes ! ». The « restaurant indien » and « cafétéria » were initial suggestions quickly dropped, and the « brasserie lyonnaise » is unavailable because « La brasserie est complète ».": "A accepte la cuisine italienne avec « Va pour les spécialités de pâtes ! ». Le « restaurant indien » et la « cafétéria » étaient des suggestions initiales vite abandonnées, et la « brasserie lyonnaise » n'est pas disponible parce que « La brasserie est complète ».",
 "A agrees with B's recommendation: « Va pour des raquettes », confirming they choose snowshoes. « Des skis de fond pour la piste » refers to A's initial suggestion, which is postponed because the trails are icy (« on essaiera le ski la fin de semaine prochaine »); « Des patins adaptés à la glace » plays on the fact that conditions are « très glacées », but skating is not what they rent; and « Un traîneau pour glisser » is an unmentioned winter activity.": "A accepte la recommandation de B : « Va pour des raquettes », ce qui confirme qu'ils choisissent des raquettes à neige. « Des skis de fond pour la piste » renvoie à la suggestion initiale de A, qui est reportée parce que les pistes sont verglacées (« on essaiera le ski la fin de semaine prochaine ») ; « Des patins adaptés à la glace » joue sur le fait que les conditions sont « très glacées », mais ce n'est pas du patin qu'ils louent ; et « Un traîneau pour glisser » est une activité hivernale non mentionnée.",
+"A backup from claude.ai or from the local site. Its progress replaces what's here.": "Une sauvegarde depuis claude.ai ou depuis le site local. Sa progression remplace celle d'ici.",
 "A bad result: à cause de (or en raison de).": "Un résultat négatif : à cause de (ou en raison de).",
 "A bad result: à cause de + a noun.": "Un résultat négatif : à cause de + nom.",
 "A bad result: à cause des.": "Un résultat négatif : à cause des.",
@@ -598,7 +600,9 @@ window.TCF.FR = {
 "Back to the original.": "Retour à l'original.",
 "Back to the sheet": "Retour à la feuille",
 "Back to today": "Revenir à aujourd'hui",
+"Back up or move your progress →": "Sauvegarder ou déplacer ta progression →",
 "Background: imparfait.": "Arrière-plan : imparfait.",
+"Backup saved:": "Sauvegarde enregistrée :",
 "Baseline on file: one CO sample and one CE sample": "Référence enregistrée : un échantillon de CO et un échantillon de CE",
 "Basic imperative forms.": "Formes de base de l'impératif.",
 "Basic passé composé and imparfait.": "Passé composé et imparfait de base.",
@@ -684,6 +688,7 @@ window.TCF.FR = {
 "Card added. It shows up under New cards for its theme.": "Carte ajoutée. Elle apparaît sous les nouvelles cartes de son thème.",
 "Card deleted.": "Carte supprimée.",
 "Card saved.": "Carte enregistrée.",
+"Card schedules": "Programmation des cartes",
 "Cards + 10–15 new: consumerism & crime": "Cartes + 10–15 nouvelles : consumérisme et criminalité",
 "Cards + 10–15 new: education & health": "Cartes + 10–15 nouvelles : éducation et santé",
 "Cards + 10–15 new: environment & climate": "Cartes + 10–15 nouvelles : environnement et climat",
@@ -751,6 +756,7 @@ window.TCF.FR = {
 "Check: you said you knew it": "Vérification : tu as dit que tu le savais",
 "Checklist": "Checklist",
 "Chin up! Reread the rule, then retry the misses.": "Courage ! Relis la règle, puis réessaie les ratées.",
+"Choose a backup file": "Choisir un fichier de sauvegarde",
 "Choose what you'd enjoy in English too. Twenty minutes you look forward to beat an hour you put off.": "Choisis ce qui te ferait plaisir en anglais aussi. Vingt minutes qui te font envie valent mieux qu'une heure repoussée.",
 "Cinq examens": "Cinq examens",
 "Classes move to the library and run from 18 h 15 to 20 h 45 instead of 18 h 30 to 21 h: a new place and new times, but the same length. « Les jours de cours et les enseignants ne changent pas. »": "Les cours sont déplacés à la bibliothèque et ont lieu de 18 h 15 à 20 h 45 au lieu de 18 h 30 à 21 h : un nouveau lieu et de nouveaux horaires, mais la même durée. « Les jours de cours et les enseignants ne changent pas. »",
@@ -898,6 +904,7 @@ window.TCF.FR = {
 "Date": "Date",
 "Day": "Jour",
 "Day done! Day one of a streak.": "Jour validé ! Premier jour d'une série.",
+"Days of the plan": "Jours du programme",
 "Days with anything done": "Jours avec activité",
 "De + the infinitive, with its se: de s'asseoir.": "De + infinitif, avec son se : de s'asseoir.",
 "De instead of par for feelings and states": "De à la place de par pour les sentiments et les états",
@@ -985,8 +992,11 @@ window.TCF.FR = {
 "Doubt or a negated opinion → subjonctif": "Doute ou opinion à la forme négative → subjonctif",
 "Doubt or a negated opinion → subjonctif; certainty, opinion or hope → indicatif": "Doute ou opinion à la forme négative → subjonctif ; certitude, opinion ou espoir → indicatif",
 "Doubt takes the subjonctif.": "Le doute demande le subjonctif.",
+"Download a backup": "Télécharger une sauvegarde",
+"Downloads aren't available here, so the backup was copied: paste it into a file named reussir-tcf.json.": "Les téléchargements ne sont pas disponibles ici, la sauvegarde a donc été copiée : colle-la dans un fichier nommé reussir-tcf.json.",
 "Dress rehearsal (optional)": "Répétition générale (optionnel)",
 "Drill": "Exercice",
+"Drill rounds and texts": "Tours d'exercices et textes",
 "Drilled once at 6/10, weakest on anteriority that isn't flagged by an explicit “before”.": "Entraîné une fois à 6/10, plus faible sur l'antériorité sans « avant » explicite.",
 "Drivers give up their cars when the bus « passe souvent, arrive à l'heure » : he prefers « un service excellent et payant », with reduced fares for low incomes, to « un service gratuit et médiocre ».": "Les automobilistes abandonnent leur voiture quand le bus « passe souvent, arrive à l'heure » : il préfère « un service excellent et payant », avec des tarifs réduits pour les faibles revenus, à « un service gratuit et médiocre ».",
 "Drop the inversion and the -t-: pourquoi elle pleure.": "Supprime l'inversion et le -t- : pourquoi elle pleure.",
@@ -1065,6 +1075,7 @@ window.TCF.FR = {
 "Enter at least one score.": "Entre au moins un score.",
 "Envoyer: que tu envoies, but nous envoyions.": "Envoyer : que tu envoies, mais nous envoyions.",
 "Envoyer: the stem enverr-.": "Envoyer : le radical enverr-.",
+"Error log": "Journal des erreurs",
 "Error log + listen-back notes": "Journal des erreurs + notes d'écoute",
 "Errors are the critics' point, but « Le risque le plus sérieux est pourtant ailleurs » : « ils apprendront à écrire pour elle », and « ce qui est mesuré finit par remplacer ce qu'on voulait mesurer ».": "Les erreurs sont l'argument des critiques, mais « Le risque le plus sérieux est pourtant ailleurs » : « ils apprendront à écrire pour elle », et « ce qui est mesuré finit par remplacer ce qu'on voulait mesurer ».",
 "Esc": "Échap",
@@ -1085,6 +1096,7 @@ window.TCF.FR = {
 "Every B2 listening set at 5 of 6 or better": "Chaque série CO B2 à 5 sur 6 ou mieux",
 "Every B2 reading set at 3 of 4 or better": "Chaque série CE B2 à 3 sur 4 ou mieux",
 "Every B2 text of Find the mistakes done": "Tous les textes B2 de Relecture terminés",
+"Every attempt, card schedule, day and setting becomes the file's, and a backup of what's here is downloaded first.": "Chaque tentative, planning de cartes, jour et paramètre deviennent ceux du fichier, et une sauvegarde de tes données actuelles est d'abord téléchargée.",
 "Every built-in exam done: Claude writes you a new one.": "Tous les examens intégrés faits : Claude t'en écrit un nouveau.",
 "Every built-in exam done: a retake is practice, and its score won't count.": "Tous les examens intégrés faits : une nouvelle tentative est un entraînement, et son score ne comptera pas.",
 "Every day from Monday to Saturday": "Tous les jours du lundi au samedi",
@@ -1097,6 +1109,7 @@ window.TCF.FR = {
 "Every mistake of a text found and fixed, nothing else marked": "Toutes les fautes d'un texte trouvées et corrigées, rien d'autre signalé",
 "Every mistake so far, with how many in the last 3 weeks": "Toutes les erreurs jusqu'à présent, avec leur nombre au cours des 3 dernières semaines",
 "Every question": "Chaque question",
+"Every record": "Tous les enregistrements",
 "Every rule is about caution: keep confidential data out, reread (« l'IA peut inventer des chiffres »), check the company's rules. The tools do save time when used well.": "Toutes les règles appellent à la prudence : ne pas inclure de données confidentielles, relire (« l'IA peut inventer des chiffres »), vérifier les règles de l'entreprise. Ces outils font bien gagner du temps quand ils sont bien utilisés.",
 "Every set of one topic at 90% or more": "Toutes les séries d'un point de grammaire à 90 % ou plus",
 "Every skill with a score is at NCLC 7 or above.": "Chaque compétence notée est au NCLC 7 ou plus.",
@@ -1306,6 +1319,7 @@ window.TCF.FR = {
 "Her boss asked her opinion, colleagues used the boss's first name and nobody stayed after 17 h, unlike in Morocco, « où tout passait par la hiérarchie ». Her ideas « l'intéressaient vraiment ».": "Sa patronne lui demandait son avis, ses collègues utilisaient le prénom de la patronne et personne ne restait après 17 h, contrairement au Maroc, « où tout passait par la hiérarchie ». Ses idées « l'intéressaient vraiment ».",
 "Her changing hospital shifts clash with the garden's rules, so she asks « Est-ce que certains d'entre vous partagent leur parcelle avec un voisin ? Est-ce que c'est permis ? » She already has a plot.": "Ses horaires variables à l'hôpital ne s'accordent pas avec le règlement du jardin, alors elle demande : « Est-ce que certains d'entre vous partagent leur parcelle avec un voisin ? Est-ce que c'est permis ? » Elle a déjà une parcelle.",
 "Her state explains the event: elle était fatiguée.": "Son état explique l'événement : « elle était fatiguée ».",
+"Here": "Ici",
 "Here the direct object (des photos) comes after the verb: no agreement.": "Ici, le COD (des photos) est placé après le verbe : pas d'accord.",
 "Heure has a mute h: à l'heure.": "Heure a un h muet : à l'heure.",
 "Hidden. You can bring it back from the foot of Fiches.": "Masqué. Tu peux le restaurer au bas des fiches.",
@@ -1340,6 +1354,8 @@ window.TCF.FR = {
 "I already know this": "Je sais déjà",
 "I am reading, so je is the subject: en lisant…, j'ai remarqué.": "C'est moi qui lis, donc je est le sujet : en lisant…, j'ai remarqué.",
 "I concede the other side before pivoting (Certes… mais)": "Je concède le point de vue adverse avant de nuancer (Certes… mais)",
+"Ici": "Ici",
+"Ici · What's here": "Ici",
 "If only positive studies are published, « un traitement testé vingt fois peut sembler efficace » because of the one lucky result, and other teams redo old experiments: « une science qui cache ses échecs finit par se tromper sur ses réussites ».": "Si seulement les études positives sont publiées, « un traitement testé vingt fois peut sembler efficace » en raison du seul résultat chanceux, et d'autres équipes refont d'anciennes expériences : « une science qui cache ses échecs finit par se tromper sur ses réussites ».",
 "Il / elle est + a bare profession (no article).": "Il / elle est + profession seule (sans article).",
 "Il / elle est + an adjective about a specific person.": "Il / elle est + adjectif qualifiant une personne précise.",
@@ -1376,6 +1392,10 @@ window.TCF.FR = {
 "Imperative → de + infinitive; moi → lui.": "Impératif → de + infinitif ; moi → lui.",
 "Imperatives and embedded questions checked": "Impératifs et questions indirectes vérifiés",
 "Impersonal, formal register that suits Tâche 3 writing.": "Registre impersonnel et formel qui convient à la Tâche 3 de l'EE.",
+"Import a backup": "Importer une sauvegarde",
+"Import again": "Réimporter",
+"Importer · Import a backup": "Importer",
+"Importing": "Importation",
 "Improved version": "Version améliorée",
 "In 60–100 words: Le télétravail va-t-il remplacer le bureau ? State your position, concede the other side with bien que / alors que / certes… mais, then pivot back to your view.": "En 60 à 100 mots : Le télétravail va-t-il remplacer le bureau ? Prends position, concède l'autre point de vue avec bien que / alors que / certes… mais, puis reviens à ton avis.",
 "In English": "En anglais",
@@ -1385,6 +1405,7 @@ window.TCF.FR = {
 "In se rendre compte, compte is the direct object, so rendu never agrees.": "Dans se rendre compte, compte est le COD, donc rendu ne s'accorde jamais.",
 "In the drawing, a customer is sitting at an optician's table looking at their reflection in a vanity mirror while trying on frames, matching « Ces lunettes me vont bien ? ». A is wrong because the setting is not a restaurant (« Une table pour deux personnes »). B is wrong because the customer is at an optician, not trying on clothing in an apparel shop (« essayer cette chemise »). D is wrong because the scene is not a bakery (« du pain frais »).": "Sur le dessin, un client est assis à la table d'un opticien et regarde son reflet dans un miroir en essayant des montures, ce qui correspond à « Ces lunettes me vont bien ? ». A est incorrect car le lieu n'est pas un restaurant (« Une table pour deux personnes »). B est incorrect car le client est chez l'opticien, pas en train d'essayer un vêtement dans une boutique (« essayer cette chemise »). D est incorrect car la scène ne se passe pas dans une boulangerie (« du pain frais »).",
 "In the drawing, the mechanic is leaning over the open hood inspecting the engine, which corresponds to « Il regarde dans le moteur ouvert. ». Statement A is ruled out because he is standing by the car rather than driving; statement B is ruled out because he is not washing any windows; statement C is ruled out because he is already working on the vehicle rather than shopping for tools in a store.": "Sur le dessin, le mécanicien est penché sur le capot ouvert et inspecte le moteur, ce qui correspond à « Il regarde dans le moteur ouvert. ». L'affirmation A est éliminée car il se tient près de la voiture au lieu de conduire ; l'affirmation B est éliminée car il ne lave aucune vitre ; l'affirmation C est éliminée car il travaille déjà sur le véhicule au lieu d'acheter des outils dans un magasin.",
+"In the file": "Dans le fichier",
 "In the imperative, -er verbs drop the s of the tu form: n'en parle à personne.": "À l'impératif, les verbes en -er perdent le s de la forme tu : n'en parle à personne.",
 "In the negative": "À la forme négative",
 "In the negative, the pronoun goes back before the verb: ne m'appelle pas.": "À la forme négative, le pronom repasse devant le verbe : ne m'appelle pas.",
@@ -1460,6 +1481,7 @@ window.TCF.FR = {
 "Keep my edits": "Garder mes modifications",
 "Keep the reflexive pronoun": "Garder le pronom réfléchi",
 "Keep these two": "Garder ces deux-là",
+"Keep this page open until it starts again by itself.": "Garde cette page ouverte jusqu'à ce qu'elle redémarre toute seule.",
 "Keep writing": "Continuer à écrire",
 "Kept: change them if you like": "Retenues : modifie-les si tu veux",
 "Kind": "Type",
@@ -1965,6 +1987,7 @@ window.TCF.FR = {
 "Nouvelle fiche": "Nouvelle fiche",
 "Now pick the right version of each one.": "Choisis maintenant la bonne version de chacune.",
 "Néanmoins is a connector, with no que.": "Néanmoins est un connecteur, sans que.",
+"OK": "OK",
 "OREILLE FINE ★": "OREILLE FINE ★",
 "Objectif NCLC 7": "Objectif NCLC 7",
 "Objectif atteint ! Bravo.": "Objectif atteint ! Bravo.",
@@ -1973,6 +1996,7 @@ window.TCF.FR = {
 "Official practice": "Pratique officielle",
 "Official practice and scores from elsewhere": "Pratique officielle et résultats externes",
 "Offrir À quelqu'un: on m'a offert.": "Offrir À quelqu'un : on m'a offert.",
+"Old speaking attempts": "Anciennes tentatives d'EO",
 "On = sur, with no accent.": "On = sur, sans accent.",
 "On or se + verb, often better than a passive": "On ou se + verbe, souvent préférables au passif",
 "On progresse. Un coup d'œil aux corrections ?": "On progresse. Un coup d'œil aux corrections ?",
@@ -1989,6 +2013,7 @@ window.TCF.FR = {
 "One completed action: the passé composé.": "Une action achevée : le passé composé.",
 "One completed event after another: passé composé.": "Des événements achevés qui se succèdent : passé composé.",
 "One completed event in the story: passé composé, a réussi.": "Un événement achevé dans le récit : passé composé, a réussi.",
+"One file with all your progress: every attempt and its answers, your writing and corrections, card schedules, days, stamps, sheets and settings. Keep it safe, or import it into the local site or back into claude.ai.": "Un fichier avec toute ta progression : chaque tentative et ses réponses, tes rédactions et corrections, le planning des cartes, les jours, tampons, fiches et réglages. Garde-le en lieu sûr, ou importe-le sur le site local ou dans claude.ai.",
 "One full timed mock of whichever skill is currently weakest. Log the score in Progrès → Scores.": "Un examen blanc complet chronométré de la compétence qui est actuellement la plus faible. Note le score dans Progrès → Scores.",
 "One gropes for a fallen blanket half-asleep, for comfort: the silence first found « hostile » became « Une trêve », and he misses it even in Haiti. He still loves the noise of home (« que j'aime toujours »).": "On cherche à tâtons une couverture tombée à moitié endormi, pour se réconforter : le silence d'abord jugé « hostile » est devenu « Une trêve », et il lui manque même en Haïti. Il aime toujours le bruit de son pays (« que j'aime toujours »).",
 "One line worth remembering. ↵ to pin it.": "Une ligne à retenir. ↵ pour l'épingler.",
@@ -2086,6 +2111,7 @@ window.TCF.FR = {
 "Part 1 ·": "Partie 1 ·",
 "Part 2": "Partie 2",
 "Part of the plan": "Partie du plan",
+"Part of this file isn't in the shape of a backup, so it can't be imported.": "Une partie de ce fichier n'est pas au format d'une sauvegarde, il ne peut donc pas être importé.",
 "Participants must be 18 to 35, and « Les personnes qui souffrent d'insomnie ou qui travaillent de nuit ne peuvent malheureusement pas participer ».": "Les participants doivent avoir de 18 à 35 ans, et « Les personnes qui souffrent d'insomnie ou qui travaillent de nuit ne peuvent malheureusement pas participer ».",
 "Participe passé composé (ayant + participle) for an earlier action.": "Participe passé composé (ayant + participe) pour une action antérieure.",
 "Participe présent or adjectif verbal": "Participe présent ou adjectif verbal",
@@ -2357,6 +2383,7 @@ window.TCF.FR = {
 "Reading set at exam pace": "Série de lecture au rythme de l'examen",
 "Reading sets": "Séries de lecture",
 "Reading speed": "Vitesse de lecture",
+"Reading, listening and exams": "CE, CO et examens",
 "Ready for B2 in listening or reading": "Tu passes au B2 en CO ou en CE",
 "Real recordings: official practice": "Vrais enregistrements : entraînement officiel",
 "Real voices at exam speed. Past papers aren't published, so the closest thing is practice written by the test's own designers at France Éducation International and its partners.": "De vraies voix au rythme de l'examen. Les anciens sujets ne sont pas publiés, le plus proche reste donc l'entraînement conçu par les concepteurs du test eux-mêmes à France Éducation International et ses partenaires.",
@@ -2387,12 +2414,15 @@ window.TCF.FR = {
 "Relecture B1": "Relecture B1",
 "Relecture B2": "Relecture B2",
 "Relire, ça s'apprend. On s'entraîne, ça vient !": "Relire, ça s'apprend. On s'entraîne, ça vient !",
+"Reload the page": "Recharger la page",
 "Remove": "Supprimer",
 "Remove this note": "Supprimer cette note",
 "Rendu never agrees, even when Sophie is speaking.": "Rendu ne s'accorde jamais, même quand Sophie parle.",
 "Rendu stays invariable; the plus-que-parfait shows it came before reading the contract.": "Rendu reste invariable ; le plus-que-parfait montre que cela s'est passé avant de lire le contrat.",
 "Renewing before 1 July keeps the old price: « Si vous renouvelez avant cette date, vous payez encore l'ancien tarif. »": "Renouveler avant le 1er juillet permet de conserver l'ancien prix : « Si vous renouvelez avant cette date, vous payez encore l'ancien tarif. »",
 "Rents rose 5 % on average, but units that change tenants went up « de 18 % en moyenne » : people who move pay much more. The tenants' groups warn against celebrating.": "Les loyers ont augmenté de 5 % en moyenne, mais les logements qui changent de locataire ont augmenté « de 18 % en moyenne » : les personnes qui déménagent paient beaucoup plus cher. Les associations de locataires mettent en garde contre tout enthousiasme prématuré.",
+"Replace my progress here": "Remplacer ma progression ici",
+"Replace without a backup": "Remplacer sans sauvegarde",
 "Replaced by the Examen blanc": "Remplacé par l'examen blanc",
 "Replay": "Réécouter",
 "Report the question above: type the missing words, shifting the tenses if needed.": "Rapporte la question ci-dessus : écris les mots manquants en modifiant les temps si nécessaire.",
@@ -2526,6 +2556,7 @@ window.TCF.FR = {
 "Sans toi = si tu n'étais pas là: a hypothesis.": "Sans toi = si tu n'étais pas là : une hypothèse.",
 "Saturday": "Samedi",
 "Saturday capstone: for each, one sentence naming exactly what goes wrong and the fix. If you can't write it in one sentence, that item needs another week.": "Point final du samedi : pour chacun, une phrase nommant précisément ce qui ne va pas et la correction. Si tu ne peux pas l'écrire en une phrase, cet élément demande une semaine de plus.",
+"Sauvegarde": "Sauvegarde",
 "Save": "Enregistrer",
 "Save all": "Tout enregistrer",
 "Save failed": "Échec de l'enregistrement",
@@ -2557,6 +2588,7 @@ window.TCF.FR = {
 "Score bands:": "Niveaux de score :",
 "Score logged.": "Score enregistré.",
 "Scores and NCLC": "Scores et NCLC",
+"Scores and mocks": "Scores et examens blancs",
 "Scores saved.": "Scores enregistrés.",
 "Se + en + sont + the participle: ils s'en sont occupés.": "Se + en + sont + le participe : ils s'en sont occupés.",
 "Se + en + the auxiliary: il s'en est rendu compte.": "Se + en + l'auxiliaire : il s'en est rendu compte.",
@@ -2613,6 +2645,7 @@ window.TCF.FR = {
 "Sentence with the gap:": "Phrase à trou :",
 "Session complete": "Session terminée",
 "Set": "Série",
+"Settings, stamps and phase": "Réglages, tampons et phase",
 "Seul or seulement, sûr or sur, leur or leurs": "Seul ou seulement, sûr ou sur, leur ou leurs",
 "Seven days in a row": "Sept jours d'affilée",
 "Several owners (mes parents): leurs, not ses.": "Plusieurs possesseurs (mes parents) : leurs, pas ses.",
@@ -2634,6 +2667,7 @@ window.TCF.FR = {
 "Sheet deleted.": "Fiche supprimée.",
 "Sheet saved.": "Fiche enregistrée.",
 "Sheet saved. It's on your desk.": "Fiche enregistrée. Elle est sur ton bureau.",
+"Sheets and notes": "Fiches et notes",
 "Short videos sorted by level, up to B2.": "Vidéos courtes classées par niveau, jusqu'au B2.",
 "Show": "Afficher",
 "Show answer": "Afficher la réponse",
@@ -2905,6 +2939,9 @@ window.TCF.FR = {
 "The author grants that they meet « une demande réelle » (« C'est vrai. Mais… »), then argues that they make « disparaître tout ce qui, autour de l'achat, faisait vivre le quartier ». They don't sell less.": "L'auteur reconnaît qu'ils répondent à « une demande réelle » (« C'est vrai. Mais… »), puis soutient qu'ils font « disparaître tout ce qui, autour de l'achat, faisait vivre le quartier ». Ils ne vendent pas moins.",
 "The author « semble croire qu'il faut choisir entre les deux », kindness or demands, while the best teachers « combinent les deux ». The critic finds his starting point « juste, et bien documenté ».": "L'auteur « semble croire qu'il faut choisir entre les deux », la bienveillance ou l'exigence, alors que les meilleurs enseignants « combinent les deux ». Le critique trouve son point de départ « juste, et bien documenté ».",
 "The background of a scene: the imparfait.": "L'arrière-plan d'une scène : l'imparfait.",
+"The backup couldn't be saved here.": "La sauvegarde n'a pas pu être enregistrée ici.",
+"The backup of what was here is in your downloads.": "La sauvegarde de ce qui était ici se trouve dans tes téléchargements.",
+"The backup of your progress here wasn't saved.": "La sauvegarde de ta progression ici n'a pas été enregistrée.",
 "The baker states « vous pourrez donc la récupérer dès quinze heures cet après-midi », meaning from 3 p.m. this afternoon. « ce matin à dix heures comme prévu » was the initial time that had to be postponed due to the fruit glaze; 19 h is the shop's closing time (« boutique ferme à dix-neuf heures »), not when the order becomes ready; and picking it up tomorrow morning is never mentioned.": "Le boulanger déclare : « vous pourrez donc la récupérer dès quinze heures cet après-midi », c'est-à-dire à partir de 15 h cet après-midi. « ce matin à dix heures comme prévu » était l'horaire initial qui a dû être reporté à cause du nappage aux fruits ; 19 h est l'heure de fermeture de la boutique (« boutique ferme à dix-neuf heures »), pas le moment où la commande est prête ; et la récupérer demain matin n'est jamais mentionné.",
 "The ban brings real benefits, « Mais il serait naïf de croire que le problème est réglé » : « Interdire est un premier pas. Éduquer est le seul qui compte vraiment. »": "L'interdiction apporte de vrais avantages, « Mais il serait naïf de croire que le problème est réglé » : « Interdire est un premier pas. Éduquer est le seul qui compte vraiment. »",
 "The biologist clearly states their primary goal: « Notre priorité absolue consiste à cartographier les corridors de déplacement nocturnes des chauves-souris en ville », which is restated as identifying their travel routes. Evaluating noise pollution (« mesurer la pollution sonore le long de la rivière ») and counting bats (« dénombrer chaque individu ») are explicitly rejected as misconceptions (« mais non »). Keeping bats away from inhabited areas is never mentioned.": "La biologiste formule clairement leur objectif prioritaire : « Notre priorité absolue consiste à cartographier les corridors de déplacement nocturnes des chauves-souris en ville », ce qui est reformulé par l'identification de leurs voies de déplacement. Évaluer la pollution sonore (« mesurer la pollution sonore le long de la rivière ») et compter les chauves-souris (« dénombrer chaque individu ») sont explicitement rejetés comme des idées fausses (« mais non »). Éloigner les chauves-souris des zones habitées n'est jamais mentionné.",
@@ -3255,7 +3292,10 @@ window.TCF.FR = {
 "They want a non-smoker who keeps weekday evenings quiet, and « Les animaux ne sont malheureusement pas acceptés ». Studying engineering isn't required, and they share meals only once or twice a week.": "Ils cherchent un non-fumeur qui reste calme les soirs de semaine, et « Les animaux ne sont malheureusement pas acceptés ». Étudier l'ingénierie n'est pas obligatoire, et ils ne partagent les repas qu'une ou deux fois par semaine.",
 "They want toilets « propres, accessibles en fauteuil roulant, ouvertes toute l'année », and say shopkeepers can't play that role. They reject luxury explicitly.": "Ils veulent des toilettes « propres, accessibles en fauteuil roulant, ouvertes toute l'année », et disent que les commerçants ne peuvent pas jouer ce rôle. Ils rejettent explicitement le luxe.",
 "They went to bed well before: plus-que-parfait with être, agreeing with les enfants.": "Ils se sont couchés bien avant : plus-que-parfait avec être, accordé avec les enfants.",
+"They're your progress from claude.ai.": "C'est ta progression de claude.ai.",
+"They're your progress from the local site.": "C'est ta progression du site local.",
 "Thirty days in a row": "Trente jours d'affilée",
+"This backup is empty.": "Cette sauvegarde est vide.",
 "This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.": "Ce navigateur ne peut pas lire le texte à haute voix. Utilise la transcription comme exercice de lecture, ainsi que les enregistrements officiels ci-dessous.",
 "This browser can't read text aloud. Use the transcript instead.": "Ce navigateur ne peut pas lire le texte à haute voix. Utilise la transcription à la place.",
 "This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.": "Ce navigateur n'a pas permis de copier la page. Le texte est sélectionné ci-dessous : appuie sur Ctrl+C (⌘C sur Mac), ou sélectionne-le tout d'abord.",
@@ -3265,10 +3305,13 @@ window.TCF.FR = {
 "This exam needs the latest version of the page. Reload it to load the exam.": "Cet examen nécessite la dernière version de la page. Recharge-la pour charger l'examen.",
 "This exam's text wasn't saved, so it can't be picked up again.": "Le texte de cet examen n'a pas été sauvegardé, impossible de le reprendre.",
 "This exam's text wasn't saved, so it can't be reviewed.": "Le texte de cet examen n'a pas été sauvegardé, impossible de le réviser.",
+"This file couldn't be read.": "Impossible de lire ce fichier.",
+"This file isn't a Réussir le TCF backup.": "Ce fichier n'est pas une sauvegarde de Réussir le TCF.",
 "This first check sets when the card comes back. Again also brings it back in this session.": "Ce premier choix détermine quand la carte revient. « À revoir » la ramène aussi dans cette session.",
 "This miss was a…": "Cette erreur était une…",
 "This page lost access to its saved data. Reload to reconnect.": "Cette page a perdu l'accès à ses données enregistrées. Recharge la page pour te reconnecter.",
 "This question's time: reading, the recording and the answer. The next one starts by itself when it runs out.": "Temps pour cette question : lecture, enregistrement et réponse. La suivante démarre automatiquement une fois le temps écoulé.",
+"This replaces all your progress here.": "Ceci remplace toute ta progression ici.",
 "This round is from before whole rounds were saved, so only the questions you missed are here.": "Ce tour date d'avant l'enregistrement des tours complets, seules les questions ratées s'y trouvent donc.",
 "This sentence is already one of its examples.": "Cette phrase fait déjà partie de ses exemples.",
 "This set has since been replaced, so it can't be opened again.": "Ce thème a été remplacé depuis, il ne peut donc plus être ouvert.",
@@ -3399,6 +3442,7 @@ window.TCF.FR = {
 "Travellers « sincèrement préoccupés par l'environnement » fly to far-off places and so « contribuent ainsi au réchauffement qui menace ce qu'ils viennent voir ». Bookings in Churchill are full, not falling.": "Des voyageurs « sincèrement préoccupés par l'environnement » prennent l'avion vers des destinations lointaines et ainsi « contribuent ainsi au réchauffement qui menace ce qu'ils viennent voir ». Les réservations à Churchill sont complètes, elles ne diminuent pas.",
 "Traversait for what was going on, a glissé for what happened.": "« Traversait » pour ce qui était en train de se passer, « a glissé » pour l'événement ponctuel.",
 "Try": "Essayer",
+"Try the backup again": "Réessayer la sauvegarde",
 "Try this set again": "Refaire cette série",
 "Try this text again": "Refaire ce texte",
 "Tu as atteint l'objectif. Bien joué !": "Tu as atteint l'objectif. Bien joué !",
@@ -3464,6 +3508,7 @@ window.TCF.FR = {
 "Tâche 3 on the clock": "Tâche 3 minutée",
 "Tâche 3 starts by reporting what two documents say, and that is reported speech.": "La tâche 3 commence par rapporter ce que disent deux documents, et c'est du discours rapporté.",
 "Tâche 3: skipped the comparison of the two documents twice; word count once over 180 and once under 120": "Tâche 3 : comparaison des deux documents oubliée deux fois ; longueur une fois au-dessus de 180 et une fois sous 120 mots",
+"Télécharger · Download a backup": "Télécharger",
 "Téléphoner À quelqu'un: indirect object, no agreement.": "Téléphoner À quelqu'un : objet indirect, pas d'accord.",
 "Téléphoner À quelqu'un: leur, which never takes an s.": "Téléphoner À quelqu'un : leur, qui ne prend jamais d's.",
 "Téléphoner À quelqu'un: no agreement. The imparfait also works for a habit.": "Téléphoner À quelqu'un : pas d'accord. L'imparfait fonctionne aussi pour une habitude.",
@@ -3489,6 +3534,7 @@ window.TCF.FR = {
 "Une personne; les gens is always plural.": "« Une personne » ; « les gens » est toujours au pluriel.",
 "Une voiture électrique is the direct object, after the verb: acheté stays as it is.": "« Une voiture électrique » est le COD, placé après le verbe : « acheté » reste invariable.",
 "Unfinished": "Inachevé",
+"Unfinished attempts": "Tentatives non terminées",
 "Unlike the real test, the pictures are drawings, and the recordings use Microsoft's voices for now: mostly from France, with a few from Québec, as on the real test.": "Contrairement au vrai test, les illustrations sont des dessins et les enregistrements utilisent pour l'instant les voix de Microsoft : principalement de France, avec quelques voix du Québec, comme au vrai test.",
 "Untimed reading set": "Série de lecture sans chrono",
 "Up next": "Prochaine étape",
@@ -3555,6 +3601,7 @@ window.TCF.FR = {
 "Weeks 9–14": "Semaines 9 à 14",
 "Well heard! You've got the ear for it.": "Bien écouté ! Tu as l'oreille fine.",
 "Well read! The traps didn't catch you.": "Bien lu ! Tu as évité tous les pièges.",
+"What": "Données",
 "What goes wrong, and the fix, in one sentence": "Ce qui cloche et la correction, en une phrase",
 "What happened, 2–3 sentences": "Ce qui s'est passé, 2–3 phrases",
 "What is the conditionnel doing in this sentence? Pick its use.": "Quelle est la fonction du conditionnel dans cette phrase ? Choisis son emploi.",
@@ -3570,6 +3617,7 @@ window.TCF.FR = {
 "What you saved from the site: select a word or phrase on any page": "Ce que tu as sauvegardé du site : sélectionne un mot ou une expression sur n'importe quelle page",
 "What you wrote": "Ce que tu as écrit",
 "What you wrote was already correct French; Claude's version sounds more natural. They're practised apart (« Which sounds more natural? ») and never counted as mistakes.": "Ce que tu as écrit était déjà du français correct ; la version de Claude sonne plus naturelle. Elles sont travaillées à part (« Laquelle sonne le plus naturel ? ») et ne sont jamais comptées comme des fautes.",
+"What's here": "Contenu actuel",
 "What's holding you back": "",
 "When the subject is the thing to understand: adjective + à + infinitive.": "Quand le sujet est la chose à comprendre : adjectif + à + infinitif.",
 "When you hand in, Claude corrects all three, and the mock's score is the mean of the three.": "Quand tu soumets ton travail, Claude corrige les trois et la note de l'examen blanc est la moyenne des trois.",
@@ -3617,6 +3665,7 @@ window.TCF.FR = {
 "With the infinitive, ne pas both go before it: de ne pas toucher.": "Avec l'infinitif, ne pas se placent tous les deux devant : de ne pas toucher.",
 "With two pronouns, me comes before les: me les envoyer.": "Avec deux pronoms, me se place avant les : me les envoyer.",
 "With y or en": "Avec y ou en",
+"Without it, what's here now can't be brought back after the import.": "Sans elle, impossible de récupérer le contenu actuel après l'importation.",
 "Word choice": "Choix des mots",
 "Word counts on all three tasks; comparison present in Tâche 3.": "Nombre de mots respecté pour les trois tâches ; comparaison présente dans la Tâche 3.",
 "Word-count discipline (TCF Canada):": "Discipline sur le nombre de mots (TCF Canada) :",
@@ -3632,6 +3681,7 @@ window.TCF.FR = {
 "Write your answer first.": "Écris ta réponse d'abord.",
 "Write your first sheet: a rule you keep forgetting, a table to remember.": "Rédige ta première fiche : une règle que tu oublies souvent, un tableau à retenir.",
 "Write your text first: there's nothing to evaluate yet.": "Écris ton texte d'abord : il n'y a encore rien à évaluer.",
+"Writing": "Expression écrite",
 "Writing (EE)": "Expression écrite (EE)",
 "Wrong fix": "Correction erronée",
 "Y after the verb, with a hyphen.": "Y après le verbe, avec un trait d'union.",
@@ -3694,12 +3744,18 @@ window.TCF.FR = {
 "Your mistakes": "Mes erreurs",
 "Your mistakes come here once Claude corrects your writing.": "Tes erreurs arrivent ici dès que Claude corrige ton écrit.",
 "Your mistakes · Conseils de style": "Mes erreurs · Conseils de style",
+"Your mistakes, prepared": "Mes erreurs, préparées",
 "Your mocks": "Tes examens blancs",
 "Your mocks collect here, with each task's words and score.": "Tes examens blancs s'affichent ici, avec le nombre de mots et la note de chaque tâche.",
 "Your original": "Ton texte original",
+"Your own and edited cards": "Tes cartes personnelles et modifiées",
 "Your own revision sheet": "Ta propre fiche de révision",
 "Your own text with your mistakes back in it: find them, then pick the fix": "Ton propre texte avec tes erreurs réinsérées : repère-les, puis choisis la correction",
 "Your own texts with your mistakes put back: find them, then pick the fix.": "Tes propres textes avec tes erreurs réinsérées : repère-les, puis choisis la correction.",
+"Your progress here couldn't be saved to a file first.": "Impossible de sauvegarder tes progrès dans un fichier au préalable.",
+"Your progress here is saved in this browser only.": "Tes progrès sont enregistrés dans ce navigateur uniquement.",
+"Your progress here is saved on claude.ai, with your account.": "Tes progrès sont enregistrés sur claude.ai, avec ton compte.",
+"Your progress here is saved on this computer, in the local database (data/tcf.sqlite).": "Tes progrès sont enregistrés sur cet ordinateur, dans la base de données locale (data/tcf.sqlite).",
 "Your progress is still loading.": "Ta progression est encore en cours de chargement.",
 "Your reaction or opinion + justification": "Ta réaction ou opinion + justification",
 "Your score on each drill round. Every round draws different questions from its set.": "Ton score à chaque tour d'exercice. Chaque tour tire des questions différentes dans sa série.",
@@ -3748,6 +3804,7 @@ window.TCF.FR = {
 "attempt": "tentative",
 "back": "Retour",
 "back soon": "bientôt de retour",
+"backup": "",
 "below NCLC 4": "en dessous du NCLC 4",
 "blank": "vierge",
 "block": "bloc",
@@ -3769,12 +3826,14 @@ window.TCF.FR = {
 "caught: found and corrected": "repérées : trouvées et corrigées",
 "caught: found and fixed": "repérées : trouvées et corrigées",
 "cible NCLC 7": "cible NCLC 7",
+"claude.ai asks you to confirm the download.": "claude.ai te demande de confirmer le téléchargement.",
 "clear, logical progression of ideas, paragraphing, varied and accurate connectors, thematic development": "progression claire et logique des idées, découpage en paragraphes, connecteurs variés et précis, développement thématique",
 "clock": "chronomètre",
 "close": "",
 "colours a word like slot 2 of the chain above it": "colorie un mot comme l'emplacement 2 de la chaîne ci-dessus",
 "comp.free.": "comp. gratuite",
 "conditionnel used instead of subjonctif after afin que / avant que": "conditionnel employé au lieu du subjonctif après afin que / avant que",
+"confirm the download claude.ai asks about": "confirme le téléchargement demandé par claude.ai",
 "correction": "correction",
 "counts 0": "vaut 0",
 "counts toward mastery": "compte pour la maîtrise",
@@ -3819,6 +3878,9 @@ window.TCF.FR = {
 "for B2": "pour le B2",
 "from": "de",
 "from Claude": "de Claude",
+"from a browser's own copy": "depuis la copie propre au navigateur",
+"from claude.ai": "depuis claude.ai",
+"from the local site": "depuis le site local",
 "from where the recording stopped": "là où l'enregistrement s'est arrêté",
 "g:exams": "g:exams",
 "g:logged": "g:logged",
@@ -3958,6 +4020,7 @@ window.TCF.FR = {
 "reading pace": "",
 "reading sets": "",
 "ready": "prêt",
+"records…": "enregistrements…",
 "register and conventions suited to the situation and the recipient (tu or vous, greetings, sign-offs)": "niveau de langue et conventions adaptés à la situation et au destinataire (tu ou vous, formules de salutation et de politesse)",
 "relaxed pace": "rythme détendu",
 "rest day": "jour de repos",
@@ -4023,6 +4086,8 @@ window.TCF.FR = {
 "the writing blocks' second line": "la deuxième ligne des blocs d'écriture",
 "then": "Ensuite",
 "then retried": ", puis repris",
+"this browser": "ce navigateur",
+"this computer": "cet ordinateur",
 "this phase": "cette phase",
 "this week": "cette semaine",
 "time ran out": "temps écoulé",
@@ -5193,6 +5258,10 @@ window.TCF.FR = {
 "{0} sur {1} validés"
 ],
 [
+"{0} of {1} records couldn't be saved, so your progress here is partly the file's.{2} Check your connection, then import the file again.",
+"{0} entrées sur {1} n'ont pas pu être enregistrées : ta progression ici vient donc en partie du fichier.{2} Vérifie ta connexion, puis importe à nouveau le fichier."
+],
+[
 "{0} of {1} reviews",
 "{0} sur {1} révisions"
 ],
@@ -5379,6 +5448,10 @@ window.TCF.FR = {
 [
 "{0} until day {1}, then {2}.",
 "{0} jusqu'au jour {1}, puis {2}."
+],
+[
+"{0} Without it, what's here now can't be brought back after the import.",
+"{0} Sans elle, ce qui est ici ne pourra pas être récupéré après l'importation."
 ],
 [
 "{0} word{1} marked that {2} fine",
@@ -5605,6 +5678,14 @@ window.TCF.FR = {
 "{0}Examens blancs"
 ],
 [
+"{0}Importer",
+"{0}Importer"
+],
+[
+"{0}Importer · Import a backup",
+"{0}Importer"
+],
+[
 "{0}Lecture",
 "{0}Lecture"
 ],
@@ -5647,6 +5728,10 @@ window.TCF.FR = {
 [
 "{0}Stop",
 "{0}Arrêter"
+],
+[
+"{0}Télécharger · Download a backup",
+"{0}Télécharger"
 ],
 [
 "/ {0} · {1} correct",
@@ -5855,6 +5940,10 @@ window.TCF.FR = {
 [
 "B2 texts at {0} caught{1}.",
 "Textes B2 à {0} trouvées{1}."
+],
+[
+"Backup saved: {0}",
+"Sauvegarde enregistrée : {0}"
 ],
 [
 "band{0} to go",
@@ -6169,6 +6258,10 @@ window.TCF.FR = {
 "première tentative corrigée ({0}) → dernière ({1})"
 ],
 [
+"First, a backup of your progress here{0}…",
+"D'abord, une sauvegarde de ta progression ici{0}…"
+],
+[
 "Fixed once caught twice in a row · {0} of {1} so far.",
 "Corrigé une fois, revu deux fois de suite · {0} sur {1} jusqu'ici."
 ],
@@ -6219,6 +6312,10 @@ window.TCF.FR = {
 [
 "History · {0} of {1} done ↓",
 "Historique · {0} sur {1} faits ↓"
+],
+[
+"Imported {0} records. {1}Your charts, history and exercises are the file's now.",
+"{0} entrées importées. {1}Tes graphiques, ton historique et tes exercices sont désormais ceux du fichier."
 ],
 [
 "in {0}",
@@ -6541,6 +6638,10 @@ window.TCF.FR = {
 "sur {0} validés"
 ],
 [
+"of {0} records couldn't be saved, so your progress here is partly the file's.{1} Check your connection, then import the file again.",
+"sur {0} n'ont pas pu être enregistrées : ta progression ici vient donc en partie du fichier.{1} Vérifie ta connexion, puis importe à nouveau le fichier."
+],
+[
 "of {0} reviews",
 "sur {0} révisions"
 ],
@@ -6807,6 +6908,10 @@ window.TCF.FR = {
 [
 "Retry today's {0}",
 "Reprendre les {0} d'aujourd'hui"
+],
+[
+"reussir-tcf-{0}-{1}.json",
+"reussir-tcf-{0}-{1}.json"
 ],
 [
 "Reviews ask English → French and move the schedule. French → English practice takes {0} card{1}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.",

@@ -63,6 +63,20 @@ function openDb(file) {
       } catch (e) { db.exec("ROLLBACK"); throw e; }
       return n;
     },
+    // Replaces everything with { coll: { id: doc } }, in one transaction (a backup imported on the site).
+    replace(byColl) {
+      let n = 0;
+      db.exec("BEGIN");
+      try {
+        db.exec("DELETE FROM docs");
+        for (const [coll, docs] of Object.entries(byColl || {})) {
+          if (!COLLS.includes(coll)) continue;
+          for (const [id, data] of Object.entries(docs || {})) { this.set(coll, id, data); n++; }
+        }
+        db.exec("COMMIT");
+      } catch (e) { db.exec("ROLLBACK"); throw e; }
+      return n;
+    },
     close() { db.close(); },
   };
 }
