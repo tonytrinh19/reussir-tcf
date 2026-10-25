@@ -195,7 +195,7 @@ window.TCF = (function () {
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["ee", 60, "Full timed Écrite mock", "All three tasks on the real 60-minute clock.", "Word counts on all three tasks; comparison present in Tâche 3.", "writing.t1"],
+          ["ee", 60, "Full timed Écrite mock", "All three tasks on the real 60-minute clock.", "Word counts on all three tasks; comparison present in Tâche 3.", "writing.mock"],
           ["bil", 15, "Review the corrections", "", "", "progress.errors"],
           ["ce", 20, "Easy reading", "Outside your study time.", "", "comp.free.ce"],
         ],
@@ -230,7 +230,7 @@ window.TCF = (function () {
         ],
         [
           ["voc", 10, "Review only", "", "", "vocab.review"],
-          ["ee", 60, "Full timed Écrite mock", "Three tasks, 60 minutes.", "", "writing.t1"],
+          ["ee", 60, "Full timed Écrite mock", "Three tasks, 60 minutes.", "", "writing.mock"],
           ["bil", 30, "Same-day review", "", "", "progress.scores"],
           ["co", 20, "Easy listening", "Outside your study time.", "", "comp.free.co"],
         ],
@@ -663,13 +663,13 @@ window.TCF = (function () {
     ],
     3: [
       { id: "p3-mood", text: "12/15+ on the mixed subjonctif / indicatif / conditionnel drill", auto: "drill:subjonctif:contraste:0.8" },
-      { id: "p3-mock", text: "A full Écrite mock rated B2 on 2 of 3 tasks" },
+      { id: "p3-mock", text: "A full Écrite mock rated B2 on 2 of 3 tasks", auto: "eemock:b2" },
       { id: "p3-t3", text: "An Orale Tâche 3 sustaining 3+ minutes of on-topic argued speech" },
       { id: "p3-coce", text: "CO and CE sets averaging 70%+ at B2, on your first try, with CE on the clock", auto: "comp:B2:0.7:timed" },
       { id: "p3-cex", text: "A CE practice exam with all 39 questions answered inside 60 minutes", auto: "examFull:ce" },
     ],
     4: [
-      { id: "p4-ee", text: "3 consecutive full Écrite mocks with correct word counts on all 3 tasks and the Tâche 3 comparison present" },
+      { id: "p4-ee", text: "3 consecutive full Écrite mocks with correct word counts on all 3 tasks and the Tâche 3 comparison present", auto: "eemock:3" },
       { id: "p4-eo", text: "2 consecutive full Orale mocks completed in full at real time" },
       { id: "p4-coce", text: "CO and CE mocks in the NCLC 7 band (458+ / 453+) at least twice each", auto: "mocks:coce2" },
     ],
