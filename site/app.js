@@ -28,7 +28,7 @@
   const DAYS_SHORT = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."];
   const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
   const MONTHS_SHORT = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
-  const frDate = (s) => { const d = parse(s); const n = d.getDate(); return `${DAYS[dow(s)]} ${n === 1 ? "1er" : n} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+  const frDate = (s) => { const d = parse(s); const n = d.getDate(); return `${n === 1 ? "1er" : n} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
   const shortDate = (s) => { if (!s) return ""; const d = parse(s); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   const shuffle = (a) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
@@ -3052,7 +3052,7 @@
       </li>`;
     }).join("");
     return `<section class="panel stack">
-      <div class="row between"><p class="h3">À chercher · ${ws.length} saved without a meaning</p><span class="row">${claudeBtn("wt-fill", "wt-fill", "Fill them in with Claude", "", "btn sm")}${filled ? `<button class="btn sm primary" data-act="wt-save-all">Save the ${filled} with a meaning</button>` : ""}</span></div>
+      <div class="row between"><h2 class="h3">À chercher · ${ws.length} saved without a meaning</h2><span class="row">${claudeBtn("wt-fill", "wt-fill", "Fill them in with Claude", "", "btn sm")}${filled ? `<button class="btn sm primary" data-act="wt-save-all">Save the ${filled} with a meaning</button>` : ""}</span></div>
       <p class="small muted">They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p>
       <ul class="wait-list">${rows}</ul>
     </section>`;
@@ -3115,7 +3115,7 @@
         <div class="row"><button class="btn sm" data-act="exf-save" data-id="${esc(c.id)}">Save</button><button class="btn ghost sm" data-act="exf-skip" data-id="${esc(c.id)}">Not now</button></div>
       </li>`).join("");
     return `<section class="panel stack">
-      <div class="row between"><p class="h3">Exemples · ${ws.length} of your cards ${ws.length === 1 ? "has" : "have"} fewer than 2</p><span class="row">${ready.length < ws.length ? claudeBtn("ex-fill", "ex-fill", "Write them with Claude", "", "btn sm") : ""}${ready.length > 1 ? `<button class="btn sm primary" data-act="exf-save-all">Save all ${ready.length}</button>` : ""}</span></div>
+      <div class="row between"><h2 class="h3">Exemples · ${ws.length} of your cards ${ws.length === 1 ? "has" : "have"} fewer than 2</h2><span class="row">${ready.length < ws.length ? claudeBtn("ex-fill", "ex-fill", "Write them with Claude", "", "btn sm") : ""}${ready.length > 1 ? `<button class="btn sm primary" data-act="exf-save-all">Save all ${ready.length}</button>` : ""}</span></div>
       <p class="small muted">Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p>
       ${rows ? `<ul class="wait-list">${rows}</ul>` : ""}
     </section>`;
@@ -4798,12 +4798,12 @@
       const chips = [0, 1, 2, 3, 4, 5, 6].map((k) => {
         const d = addDays(mon, k), st = dayStats(d);
         const dot = !st || st.n === 0 ? "" : st.n >= st.total ? "full" : "part";
-        return `<button class="daychip ${d === t ? "is-today" : ""}" data-act="day" data-date="${d}" aria-pressed="${d === sel}"><span>${DAYS_SHORT[k]}</span><b>${parse(d).getDate()}</b><i class="${dot}"></i></button>`;
+        return `<button class="daychip ${d === t ? "is-today" : ""}" data-act="day" data-date="${d}" ${d === t ? 'aria-current="date"' : ""} aria-pressed="${d === sel}"><span>${DAYS_SHORT[k]}</span><b>${parse(d).getDate()}</b><i class="${dot}"></i></button>`;
       }).join("");
       const plan = planFor(s.phase, sel);
       const doc = S.days.get(sel);
       const done = (doc && doc.done) || {};
-      let body, rm = null, ring = "";
+      let body, rm = null;
       if (!plan) {
         body = `<div class="panel stack"><h2 class="h2">Repos</h2><p class="lede">Sunday is a rest day in every phase. If you want something light, review your due cards or reread this week's corrections, but it isn't on the plan.</p><div class="row"><a class="btn" href="#vocab">Due cards</a><a class="btn" href="#progress.errors">This week's errors</a></div></div>`;
       } else {
@@ -4816,23 +4816,38 @@
         const pnote = T.PLAN[s.phase].note;
         const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i)]);
         if (sel === t) rm = remyToday(plan, doneN, mins - doneMin);
-        ring = dayRing(sel, doneN, plan.length, doneMin, mins);
-        body = `<div class="stack">
+        const progress = dayComplete(sel) ? tbStamp(sel) : dayRing(sel, doneN, plan.length, doneMin, mins);
+        body = `<section class="day-plan stack" aria-labelledby="plan-title">
+          <div class="plan-heading"><h2 class="h2" id="plan-title" lang="fr">Au programme</h2>${progress}</div>
           <ol class="blocks">${plan.map((b, i) => todayBlock(b, i, sel, s.phase, done, i === next, steps && steps[i])).join("")}</ol>
           ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p></details>` : ""}
-        </div>`;
+        </section>`;
       }
       if (!plan && sel === t) rm = remyToday(null);
-      const side = dayComplete(sel) ? tbStamp(sel) : ring;
-      return `<div class="wrap">
-        <header class="cahier-head seyes">
-          <div class="head-main">
-            <p class="date-hand">${frDate(sel)}</p>
-            <div class="meta"><b>Phase ${s.phase} · ${esc(P.name)}</b><span>Semaine ${weekNo()}</span><span>${esc(P.weeks)}</span>${sel !== t ? `<button class="btn ghost sm" data-act="day" data-date="${t}">Back to today</button>` : ""}</div>
+      return `<div class="wrap today-wrap">
+        <header class="week-notebook">
+          <div class="cahier-head">
+            <svg class="cover-flight" viewBox="0 0 360 135" aria-hidden="true" focusable="false">
+              <defs><path id="postcard-route" pathLength="1" d="M10 106C64 115 108 95 137 64S132 24 119 42C94 76 186 110 250 58Q291 23 344 17"/></defs>
+              <use href="#postcard-route" class="flight-guide"/>
+              <use href="#postcard-route" class="flight-ink"/>
+              <g class="mail-plane" transform="translate(10 106) rotate(45)"><use href="#i-plane" x="-9" y="-9" width="18" height="18"/></g>
+            </svg>
+            <div class="head-main">
+              <div class="date-context" lang="fr"><span>${DAYS[dow(sel)]}</span><span>Semaine ${weekNo()}</span></div>
+              <h1 class="notebook-date" lang="fr"><time datetime="${sel}">${frDate(sel)}</time></h1>
+              <div class="meta"><b>Phase ${s.phase} · ${esc(P.name)}</b><span>${esc(P.weeks)}</span>${sel !== t ? `<button class="btn ghost sm" data-act="day" data-date="${t}">Back to today</button>` : ""}</div>
+            </div>
+            <div class="postcard-place" data-m="postcard" data-k="montreal-cover">
+              <figure class="cover-postcard">
+                <img src="montreal-postcard.png" width="840" height="560" alt="">
+                <figcaption lang="fr">Montréal<svg viewBox="0 0 24 26" aria-hidden="true"><use href="#leaf" width="24" height="26"/></svg></figcaption>
+              </figure>
+            </div>
+            ${rm ? greet(rm[0], rm[1], rm[2]) : ""}
           </div>
-          ${side || rm ? `<div class="head-side">${side}${rm ? greet(rm[0], rm[1], rm[2]) : ""}</div>` : ""}
+          <div class="daychips" role="group" aria-label="This week">${chips}</div>
         </header>
-        <div class="daychips" role="group" aria-label="This week">${chips}</div>
         <div class="grid-side">
           ${body}
           <aside class="side">${expressionCard()}${continueCard()}${sel === t ? watchCard() + blockersCard() : ""}${homeworkCard()}${streakCard()}</aside>
@@ -4870,7 +4885,7 @@
       const open = foldOpen(fk, isNext);
       const top = `${skChip(b[0])}<h3>${esc(st.title || b[2])}${tag}</h3>${stamp}<span class="min"><span><span data-tween="bm-${sel}-${key}" data-tw="count" data-to="${min}">${min}</span>&#8201;min</span><span class="chev" aria-hidden="true"></span></span><p class="coach-l1">${typo(st.line1)}</p>`;
       const more = `<div class="block-more"${open ? ` data-m="rise" data-k="${fk}"` : ""}>${st.line2 ? `<p class="coach-l2">${typo(st.line2)}</p>` : ""}${chips}${st.adapted ? `<p class="adapt-why">${typo(st.adapted)}</p>` : ""}</div>`;
-      return `<li class="${cls}" data-m="rise" data-k="b-${sel}-${key}">${tick}
+      return `<li class="${cls}" data-m="paper" data-k="b-${sel}-${key}">${tick}
         <details class="block-main" ${foldAttr(fk, isNext)}><summary class="block-top">${top}</summary>${more}</details>
         <button class="btn ${isNext ? "primary" : isDone ? "ghost sm" : "sm"}" data-act="plan-start" data-i="${i}">${isDone ? "Open" : "Start"}</button>
       </li>`;
@@ -4881,13 +4896,13 @@
       ? `<details class="block-main" ${foldAttr(fk, isNext)}><summary class="block-top">${top}</summary>
           <div class="block-more"${open ? ` data-m="rise" data-k="${fk}"` : ""}>${b[3] ? `<p class="detail">${typo(b[3])}</p>` : ""}${b[4] ? `<p class="check"><span>Check</span>${typo(b[4])}</p>` : ""}</div></details>`
       : `<div class="block-main"><div class="block-top">${top}</div></div>`;
-    return `<li class="${cls}" data-m="rise" data-k="b-${sel}-${key}">
+    return `<li class="${cls}" data-m="paper" data-k="b-${sel}-${key}">
       ${tick}
       ${main}
       <a class="btn ${isNext ? "primary" : isDone ? "ghost sm" : "sm"}" href="#${b[5]}">Start</a>
     </li>`;
   }
-  // The day's ring in the notebook header: the blocks ticked out of the plan, and the minutes still to go.
+  // The day's ring beside the plan title: the blocks ticked out of the plan, and the minutes still to go.
   function dayRing(sel, n, total, doneMin, mins) {
     const p = total ? Math.round((n / total) * 100) : 0, C = 113.1;
     return `<div class="day-ring" role="img" aria-label="${n} of ${total} blocks done, ${doneMin} of ${mins} minutes">
@@ -4907,7 +4922,7 @@
     // Claude's suggestions live only on the page until you add the ones you want.
     const sug = arr(ui.hwSug);
     const suggestions = sug.length ? `<div class="stack tight"><p class="small muted">Claude's suggestions. Nothing is saved unless you add it.</p><ul class="hw">${sug.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(h.text)}${h.go ? `<small><a href="#${esc(h.go)}">Open</a></small>` : ""}</span><button class="btn sm" data-act="hw-sug-add" data-i="${i}">Add</button></li>`).join("")}</ul><div><button class="btn ghost sm" data-act="hw-sug-clear">Dismiss</button></div></div>` : "";
-    return `<section class="panel stack tight" data-spot>
+    return `<section data-m="paper" data-k="today-homework" class="panel stack tight" data-spot>
       <div class="row between"><h2 class="h3 with-ico">${ico("homework")}Devoirs · Homework</h2></div>
       ${items}
       <div class="row"><input type="text" id="hw-new" data-input="form" data-k="hw" value="${formVal("hw")}" placeholder="Add a task…" style="flex:1"><button class="btn sm" data-act="hw-add">Add</button></div>
@@ -4938,7 +4953,7 @@
     const best = longestStreak();
     const rec = best < 2 ? "" : n >= best ? `<p class="small sc-rec on" data-m="pop" data-k="rec-${n}">${leafSvg("leaf-ico t" + t)}<b>Record run: ${n} days in a row!</b></p>`
       : `<p class="small sc-rec">${leafSvg("leaf-ico t" + tierOf(best))}Record: ${best} days · ${best - n} more to equal it.</p>`;
-    return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${rec}
+    return `<section data-m="paper" data-k="today-streak" class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${leafSvg("leaf-ico t" + t)}Régularité</h2>${streakPill(n) || `<span class="pill">No streak yet</span>`}</div>${rec}
       <div class="mini-week"><p class="small muted">Cette semaine · <b>${hm(wk.done)}</b> of about ${hm(wk.plan)}</p>${wk.html}</div>${heatmap(8)}
       <details class="fold-x" ${foldAttr("streak-how")}><summary>Comment ça marche · How it works</summary><p class="small muted">${esc(next)}A day counts once every block in its plan is ticked. Sundays don't break a streak.</p></details></section>`;
   }
@@ -4981,7 +4996,7 @@
           ${r.have != null ? `<span class="cm-bar" title="${esc(r.label2 || "")}"><i data-tween="blk-${k}-${hk(r.label)}" data-tw="width" data-to="${Math.round(Math.min(1, r.have) * 100)}" style="width:${Math.round(Math.min(1, r.have) * 100)}%"></i></span>` : ""}
           <a class="blk-fix" href="#${esc(r.go)}">→ ${esc(r.fix)}</a></span></li>`).join("")}</ul>`
       : `<p class="small muted">Nothing stands out right now. Your corrections, drills and sets will show here what's holding you back.</p>`;
-    return `<section class="panel stack tight" data-spot><h2 class="h3 with-ico">${ico("target")}Ce qui te freine<small class="muted"> · What's holding you back</small></h2>${body}${untagged ? `<p class="small muted">Tag your reading and listening misses (vocabulary or comprehension gap) so the plan can pick the words you need: ${untagged} set${untagged > 1 ? "s" : ""} untagged lately.</p>` : ""}</section>`;
+    return `<section data-m="paper" data-k="today-blockers" class="panel stack tight" data-spot><h2 class="h3 with-ico">${ico("target")}Ce qui te freine<small class="muted"> · What's holding you back</small></h2>${body}${untagged ? `<p class="small muted">Tag your reading and listening misses (vocabulary or comprehension gap) so the plan can pick the words you need: ${untagged} set${untagged > 1 ? "s" : ""} untagged lately.</p>` : ""}</section>`;
   }
   /* =============== À surveiller: the two mistakes you watch for in a week's writing =============== */
   // Picked on Friday's « Plan next week » block (#progress.week) for the week ahead (the user asked for this on
@@ -5091,7 +5106,7 @@
   function watchCard() {
     const w = watchNow();
     if (!w) return "";
-    return `<section class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${ico("eye")}À surveiller<small class="muted"> · this week</small></h2><a class="small" href="#progress.week">Change</a></div>${watchRows(w, mondayOf(todayStr()))}</section>`;
+    return `<section data-m="paper" data-k="today-watch" class="panel stack tight" data-spot><div class="row between"><h2 class="h3 with-ico">${ico("eye")}À surveiller<small class="muted"> · this week</small></h2><a class="small" href="#progress.week">Change</a></div>${watchRows(w, mondayOf(todayStr()))}</section>`;
   }
   function watchStrip() {
     const w = watchNow();
@@ -5147,7 +5162,7 @@
   function grammarIndex() {
     const s = settings();
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
+      <header class="stack tight"><h1 class="title chapter-title chapter-grammar"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-grammar">${ico("grammar")}</span>Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
       ${practiceRows()}
       <ol class="topics" data-m="chart" data-k="topics-list">${T.TOPICS.map((tp) => {
         const m = topicMastery(tp);
@@ -5894,7 +5909,7 @@
     const own = fs.filter((f) => f.mine).length;
     return `<div class="wrap fx-home">
       <header class="fx-head">
-        <div class="stack tight"><h1 class="title">Fiches</h1><p class="fx-hand" lang="fr">fiches de révision</p></div>
+        <div class="stack tight"><h1 class="title chapter-title chapter-fiches"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-fiches">${ico("fiches")}</span>Fiches</h1><p class="fx-hand" lang="fr">fiches de révision</p></div>
         <span class="row"><span class="small muted num">${fs.length} fiches${own ? ` · ${own} à toi` : ""}</span><a class="btn primary" href="#fiches.new">${ico("writing")}Nouvelle fiche</a></span>
       </header>
       <section class="fx-board" aria-label="Pense-bête">
@@ -6179,12 +6194,10 @@
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
     }).join("");
     return `<div class="wrap">
-      <header class="stack tight"><h1 class="title">Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A soft tone marks each grade; the sound button in a session (or M) turns it off. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
-      ${waitPanel()}
-      ${exPanel()}
+      <header class="stack tight"><h1 class="title chapter-title chapter-vocab"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-vocab">${ico("vocab")}</span>Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A soft tone marks each grade; the sound button in a session (or M) turns it off. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
       <div class="grid2 v-home">
         <section class="panel stack" data-spot>
-          <div class="row between"><p class="h3">Review</p><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
+          <div class="row between"><h2 class="h3">Review</h2><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
           ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
           <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button>${learned ? `<button class="btn ghost" data-act="v-start" data-mode="practice">Practise French → English</button>` : ""}</div>
           ${learned ? `<p class="small muted">Reviews ask English → French and move the schedule. French → English practice takes ${Math.min(learned, PRACTICE_N)} card${Math.min(learned, PRACTICE_N) === 1 ? "" : "s"}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.</p>` : ""}
@@ -6192,17 +6205,19 @@
           <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
         </section>
         <section class="panel stack" data-spot>
-          <p class="h3">New cards</p>
+          <h2 class="h3">New cards</h2>
           <label class="field">Theme<select id="v-theme" data-change="v-theme">${opts}</select></label>
           <div class="row"><div class="seg" role="group" aria-label="How many">${[10, 15].map((n) => `<button data-act="v-count" data-n="${n}" aria-pressed="${ui.vCount === n}">${n}</button>`).join("")}</div>
           <button class="btn primary" data-act="v-start" data-mode="new" ${left ? "" : "disabled"}>Learn ${Math.min(left, ui.vCount)} new</button></div>
           ${left ? "" : `<p class="small muted">No new cards left in this theme. ${claudeBtn("build-" + theme, "v-build", "Build 20 more with Claude", `data-theme="${theme}"`, "btn ghost sm")}</p>`}
         </section>
       </div>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
+      ${waitPanel()}
+      ${exPanel()}
+      <section data-m="paper" data-k="vocab-deck" class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
         ${fold("deck", `Voir les ${T.VOCAB.length} thèmes · Show the deck`, `<div class="table-wrap"><table class="deck"><thead><tr><th>Theme</th><th>Learned</th><th>Mastered</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`)}
       </section>
-      <section class="panel stack">${fold("add-card", "Ajouter une carte · Add your own card", `<div class="stack">
+      <section data-m="paper" data-k="vocab-add" class="panel stack">${fold("add-card", "Ajouter une carte · Add your own card", `<div class="stack">
         <div class="grid2">
           <label class="field">French<input type="text" id="card-fr" data-input="form" data-k="card-fr" value="${formVal("card-fr")}" lang="fr" placeholder="s'engager à faire qqch"></label>
           <label class="field">English<input type="text" id="card-en" data-input="form" data-k="card-en" value="${formVal("card-en")}" placeholder="to commit to doing something"></label>
@@ -6649,7 +6664,7 @@
   VIEWS.writing = {
     render(args) {
       const tabsOf = (cur) => `<nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === cur}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}<a href="#writing.mock" role="tab" aria-selected="${cur === "mock"}">${ico("exam")}Examen blanc<small>3 tâches · 60 min</small></a></nav>`;
-      if (args[0] === "mock") return `<div class="wrap${eeRunning() ? " focus" : ""}">${eeRunning() ? "" : `<header class="stack tight"><h1 class="title">Expression écrite</h1></header>${tabsOf("mock")}`}<div class="stack">${eeView()}</div></div>`;
+      if (args[0] === "mock") return `<div class="wrap${eeRunning() ? " focus" : ""}">${eeRunning() ? "" : `<header class="stack tight"><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-writing">${ico("writing")}</span>Expression écrite</h1></header>${tabsOf("mock")}`}<div class="stack">${eeView()}</div></div>`;
       if (args[0] && T.WRITING[args[0]]) ui.w.task = args[0];
       const task = ui.w.task, W = T.WRITING[task];
       const p = wPrompt(task);
@@ -6671,7 +6686,7 @@
         xs: [{ x: 0, label: shortDate(scored[0].date) }, { x: 1, label: shortDate(scored[ns - 1].date) }],
       })}</div>` : "";
       return `<div class="wrap">
-        <header class="stack tight"><h1 class="title">Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
+        <header class="stack tight"><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-writing">${ico("writing")}</span>Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
         ${tabsOf(task)}
         ${fxTabs("writing." + task)}
         <section class="panel prompt-card">
@@ -6786,7 +6801,7 @@
       if (args[0] === "free") return freeView(args[1] === "ce" ? "ce" : "co");
       if (args[0] === "co" || args[0] === "ce") ui.c.skill = args[0];
       const skill = ui.c.skill;
-      const head = `<header class="stack tight"><h1 class="title">Compréhension</h1>${fold("intro-comp", "Comment ça marche · How it works", `<p class="small muted">TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</p>`)}</header>`;
+      const head = `<header class="stack tight"><h1 class="title chapter-title chapter-comp"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-comp">${ico("comp")}</span>Compréhension</h1>${fold("intro-comp", "Comment ça marche · How it works", `<p class="small muted">TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</p>`)}</header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
       if (args[1] === "exam") { const running = !!ui.cx && skillOf(ui.cx) === skill && !ui.cx.done; return `<div class="wrap${running ? " focus" : ""}">${running ? "" : head + tabs}<div class="stack">${examView(skill)}</div></div>`; }
       ensureCompSet(skill);
@@ -7055,7 +7070,7 @@
   function continueCard() {
     const ips = unfinished();
     if (!ips.length) return "";
-    return `<section class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
+    return `<section data-m="paper" data-k="today-continue" class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
   }
 
   /* =============== progress report (Progrès → Évolution) =============== */
@@ -7986,7 +8001,7 @@
 
   VIEWS.progress = {
     render(args) {
-      const head = `<header class="stack tight"><h1 class="title">Progrès</h1>${fold("intro-progress", "Comment ça marche · How it works", `<p class="small muted">Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</p>`)}</header>`;
+      const head = `<header class="stack tight"><h1 class="title chapter-title chapter-progress"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-progress">${ico("progress")}</span>Progrès</h1>${fold("intro-progress", "Comment ça marche · How it works", `<p class="small muted">Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</p>`)}</header>`;
       const tab = ["history", "report", "backup"].includes(args[0]) ? args[0] : "";
       const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a><a href="#progress.backup" role="tab" aria-selected="${tab === "backup"}">Sauvegarde<small>backup</small></a></nav>`;
       if (tab === "history") return historyView(head, tabs);
