@@ -28,6 +28,17 @@
 
   const KINDS = {
     rise: (el, i) => el.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: Math.min(i, 8) * 40, easing: EASE, fill: "backwards" }),
+    // A postcard is dealt onto the cover. Its inner frame follows the scroll independently.
+    postcard: (el) => el.animate([
+      { opacity: .65, transform: "translate(10px, -12px) rotate(7deg)" },
+      { opacity: 1, transform: "translate(-1px, 2px) rotate(-1deg)", offset: .75 },
+      { opacity: 1, transform: "none" }
+    ], { duration: 680, easing: EASE }),
+    // A page that is waiting below the fold stays legible and keyboard accessible.
+    paper: (el) => el.animate([
+      { opacity: .72, transform: "translateY(25px) rotate(-1deg)" },
+      { opacity: 1, transform: "none" }
+    ], { duration: 530, easing: EASE }),
     pop: (el) => el.animate([{ opacity: 0, transform: "scale(.92)" }, { opacity: 1, transform: "scale(1.03)", offset: 0.6 }, { opacity: 1, transform: "none" }], { duration: 340, easing: EASE }),
     slide: (el) => el.animate([{ opacity: 0, transform: "translateX(16px)" }, { opacity: 1, transform: "none" }], { duration: 240, easing: EASE }),
     shake: (el) => el.animate([{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(5px)" }, { transform: "translateX(-3px)" }, { transform: "translateX(2px)" }, { transform: "none" }], { duration: 380, easing: "ease-out" }),
@@ -69,7 +80,7 @@
     },
   };
   // These are part of a page's entrance, so they also play when the page opens.
-  const ENTRANCE = new Set(["press", "fly", "draw", "deal", "chart", "pin", "ink", "slots", "rows"]);
+  const ENTRANCE = new Set(["postcard", "paper", "press", "fly", "draw", "deal", "chart", "pin", "ink", "slots", "rows"]);
   // These wait until they're on screen: there's no point drawing a chart nobody sees.
   const LATER = ENTRANCE;
 
@@ -118,6 +129,23 @@
   const tweens = new Map(); // data-tween key → the value it showed last
   let lastPage = null, lastReady = false;
 
+  // The plane and the drawn stroke share one SVG path so the nose follows its tangent at any screen size.
+  // The cover is replaced on redraw. Cache that copy, and only resample while its scroll position changes.
+  let coverFlight = null;
+  function drawFlight() {
+    if (!coverFlight) return;
+    const f = coverFlight;
+    const t = still() ? .28 : .28 + .72 * Math.min(1, Math.max(0, window.scrollY / 280));
+    if (t === f.last) return;
+    f.last = t;
+    const at = t * f.length;
+    const point = f.route.getPointAtLength(at);
+    const before = f.route.getPointAtLength(at - 1);
+    const angle = Math.atan2(point.y - before.y, point.x - before.x) * 180 / Math.PI + 45;
+    f.plane.setAttribute("transform", `translate(${point.x} ${point.y}) rotate(${angle})`);
+    f.ink.style.strokeDashoffset = String(1 - t);
+  }
+
   function onRender(e) {
     const d = (e && e.detail) || {};
     const view = document.getElementById("view");
@@ -126,6 +154,9 @@
     const entering = d.page !== lastPage || (!!d.ready && !lastReady);
     lastPage = d.page;
     lastReady = !!d.ready;
+    const route = view.querySelector("#postcard-route");
+    coverFlight = route ? { route, length: route.getTotalLength(), plane: view.querySelector(".mail-plane"), ink: view.querySelector(".flight-ink") } : null;
+    safe(drawFlight);
     safe(() => setClock(view));
     safe(() => placePill(entering));
     safe(() => spy(true));
@@ -134,7 +165,7 @@
     view.querySelectorAll("[data-m][data-k]").forEach((el) => {
       const k = el.getAttribute("data-m") + "|" + el.getAttribute("data-k");
       now.add(k);
-      if (!seen.has(k)) fresh.push(el);
+      if (entering || !seen.has(k)) fresh.push(el);
       else if (waitKeys.has(k)) again.push(el);
     });
     seen = now;
@@ -264,7 +295,7 @@
     const step = (t) => {
       if (!el.isConnected) return;
       const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-      if (k >= 1) { el.textContent = text; return; }
+      if (still() || k >= 1) { el.textContent = text; return; }
       el.textContent = String(Math.round(from + (to - from) * e));
       requestAnimationFrame(step);
     };
@@ -388,7 +419,7 @@
       if (l < nav.scrollLeft + 8 || r > nav.scrollLeft + nav.clientWidth - 8) nav.scrollTo({ left: Math.max(0, l - 24), behavior: jump ? "auto" : "smooth" });
     }
   }
-  window.addEventListener("scroll", () => { if (!spyRaf) spyRaf = requestAnimationFrame(() => { spyRaf = 0; safe(() => spy(false)); }); }, { passive: true });
+  window.addEventListener("scroll", () => { if (!spyRaf) spyRaf = requestAnimationFrame(() => { spyRaf = 0; safe(drawFlight); safe(() => spy(false)); }); }, { passive: true });
 
   /* ---------- the overview's cards under a mouse ---------- */
   // A soft light follows the pointer across a card (--sx, --sy), and a tile tilts toward it.
@@ -632,6 +663,17 @@
     const once = () => { if (!ran) { ran = true; update(); } };
     try { transition(once, dir); } catch (e) { console.warn("motion:", e); once(); }
   } });
+  if (mq && mq.addEventListener) mq.addEventListener("change", () => {
+    safe(drawFlight);
+    if (!mq.matches) return;
+    // Release the pending counts as well: their callbacks restore the exact text supplied by the page.
+    waiting.forEach((w) => safe(w.start));
+    forget();
+    const view = document.getElementById("view");
+    if (view && view.getAnimations) view.getAnimations({ subtree: true }).forEach((a) => {
+      if (a.constructor.name === "Animation") safe(() => a.finish());
+    });
+  });
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
   document.addEventListener("tcf:grade", (e) => safe(() => gradeFx(e.detail)));
   document.addEventListener("tcf:ring", () => safe(ring));
