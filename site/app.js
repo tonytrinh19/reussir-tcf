@@ -3513,7 +3513,7 @@
     const off = a ? "" : `disabled title="${ui.c.set.co && !ui.c.set.co.audio ? "The browser voice can't skip" : "Press Play first"}"`;
     const skip = (d, ic, txt, name) => `<button class="btn skip" data-act="c-skip" data-d="${d}" aria-label="${name}" ${off}>${ic}${txt}</button>`;
     return `<div class="player" role="group" aria-label="Recording">
-      ${skip(-5, ICON_BACK, "−5 s", "5 seconds back")}<button class="btn primary" data-act="${act}">${icon}${label}</button>${skip(5, ICON_FWD, "+5 s", "5 seconds forward")}
+      ${skip(-5, ICON_BACK, "−5 s", "5 seconds back")}<button class="btn primary" id="c-playback" data-act="${act}">${icon}${label}</button>${skip(5, ICON_FWD, "+5 s", "5 seconds forward")}
       <button class="btn" data-act="c-stop" ${st === "playing" || st === "paused" ? "" : "disabled"}>${ICON_STOP}Stop</button>
       <div class="seek"><input type="range" min="0" max="${dur.toFixed(1)}" step="0.1" value="${cur.toFixed(1)}" data-input="c-seek" data-change="c-seek" data-player-seek aria-label="Position in the recording" ${dur ? "" : "disabled"}><span class="num small" data-player-time>${fmtClock(cur)} / ${dur ? fmtClock(dur) : "–:––"}</span></div>
     </div>`;
@@ -6843,20 +6843,27 @@
       // Offer "another built-in set" only when there is one to switch to at this level (and topic).
       const matching = samplesFor(skill).filter((x) => x.level === lvl && (!th || arr(x.themes).includes(th))).length;
       const nextBtn = !th || matching > 1 ? `<button class="btn" data-act="c-next" data-skill="${skill}" ${loading ? "disabled" : ""}>Another built-in set</button>` : "";
-      const controls = `<div class="row">
+      const controls = `<details class="comp-picker" ${foldAttr("comp-picker")}>
+        <summary><span>Choose a set</span><span class="chev" aria-hidden="true"></span></summary>
+        <div class="row">
         <div class="seg" role="group" aria-label="Level">${["B1", "B2"].map((l) => `<button data-act="c-level" data-l="${l}" aria-pressed="${lvl === l}">${l}</button>`).join("")}</div>
         <select id="c-theme" data-change="c-theme" aria-label="Topic"><option value="">Any topic</option>${COMP_TOPICS.map((t2) => `<option value="${t2.id}" ${th === t2.id ? "selected" : ""}>${esc(t2.label)}</option>`).join("")}</select>
         ${nextBtn}${newBtn}
         <button class="btn ghost" data-act="c-hist-jump">History · ${doneN} of ${samplesFor(skill).length} done ↓</button>
-      </div>`;
+        </div></details>`;
       const tagLine = (kind) => `${kind} · ${esc((set && set.level) || lvl)}${set && set.theme ? " · " + esc(themeLabel(set.theme)) : ""}${set && set.src === "sample" ? " · built-in set" : " · from Claude"}`;
       let material;
       if (loading) {
         material = `<article class="sheet"><p class="eyebrow">${skill === "co" ? "Enregistrement" : "Document"} · ${esc(lvl)}${th ? " · " + esc(themeLabel(th)) : ""}</p><h3 class="thinking">Claude is writing a new ${skill === "co" ? "listening" : "reading"} set${th ? " on " + esc(themeLabel(th)) : ""}</h3><p class="small muted">This usually takes 10–40 seconds. It stays here if you switch back to this theme later.</p></article>`;
       } else if (skill === "ce") {
-        material = set.text
-          ? `<article class="sheet"><p class="eyebrow">${tagLine(esc(set.type || "Document"))}</p><h3>${typo(set.title)}</h3><p class="fr">${typo(set.text)}</p></article>`
-          : `<div class="stack tight"><p class="eyebrow">${tagLine(esc(set.type || "Documents"))}</p><p class="h3">${typo(set.title)}</p><p class="small muted">As on the test, each document has one question. Read it, then answer.</p></div>`;
+        material = `<article class="ce-edition">
+          <header class="ce-mast">
+            <p class="eyebrow">${tagLine(esc(set.type || (set.text ? "Document" : "Documents")))}</p>
+            ${set.title ? `<h2 lang="fr">${typo(set.title)}</h2>` : ""}
+            <span class="ce-newspaper" aria-hidden="true"></span>
+          </header>
+          ${set.text ? `<p class="fr ce-copy" lang="fr">${typo(set.text)}</p>` : `<p class="ce-edition-foot">As on the test, each document has one question. Read it, then answer.</p>`}
+        </article>`;
       } else {
         const va = bestVoice();
         const recorded = !!set.audio;
@@ -6864,15 +6871,16 @@
         const weak = !recorded && (!va || voiceScore(va) < 30);
         const multi = new Set(set.lines.map((l) => l.speaker)).size > 1;
         const listen = canPlay && !submitted ? greet("ecoute", "Écoute bien : les réponses viennent dans l'ordre des questions.", "Listen closely: the answers come in the same order as the questions.", "sm") : "";
-        // The controls get their own strip, which stays on screen while you scroll down to the questions.
-        // One button shows and hides the transcript, in the same place. Without a voice the transcript is the set, so it stays.
-        material = `<article class="sheet"><p class="eyebrow">${tagLine("Enregistrement")}</p><h3>${typo(set.title)}</h3>${set.context ? `<p class="fr" style="font-style:italic">${typo(set.context)}</p>` : ""}${listen}
-          ${canPlay ? `<p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
-            ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
-          : `<p class="notice warn small">This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.</p>`}
+        // Keep the transport alongside the questions so it stays sticky for the full practice set.
+        material = `<article class="co-jacket"${ui.c.player === "playing" ? " data-playing" : ""}>
+          <div class="co-jacket-copy"><p class="eyebrow">${tagLine("Enregistrement")}</p><h2 lang="fr">${typo(set.title)}</h2>${set.context ? `<p class="fr" lang="fr">${typo(set.context)}</p>` : ""}</div>
+          <div class="co-tape" aria-hidden="true"><span class="co-window"><i class="co-hub"></i><i class="co-hub"></i></span></div>
         </article>
-        ${canPlay ? `<div class="player-dock">${playerHTML()}</div>` : ""}
-        ${canPlay ? `<div><button class="btn ghost sm" id="c-script" data-act="c-script" aria-expanded="${!!ui.c.script}">${ui.c.script ? "Hide" : "Show"} the transcript</button></div>` : ""}
+        ${canPlay ? `<div class="player-dock co-transport">${playerHTML()}</div>
+          <div class="co-listen-note">${listen}<button class="btn ghost sm" id="c-script" data-act="c-script" aria-expanded="${!!ui.c.script}">${ui.c.script ? "Hide" : "Show"} the transcript</button></div>
+          <p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
+          ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
+          : `<p class="notice warn small">This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.</p>`}
         ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
@@ -6883,7 +6891,10 @@
       const steps = PACE_STEPS.slice().reverse().map(([m, name]) => [Math.round(m * per * nq), `${fmtClock(Math.round(m * per * nq))} · ${name}`]);
       const mineP = cePace(sl), myClock = Math.round(PACE_STEPS[mineP.k][0] * per * nq);
       const timerRow = skill === "ce" && set ? `<div class="row between"><span class="small muted">Your clock: ${fmtClock(myClock)}, ${mineP.label}. Exam pace for ${nq} ${esc(sl)} questions is ${fmtClock(per * nq)}.</span>${timerUI("comp.ce", "Lecture CE", steps.concat([[1200, "20:00"]]), myClock)}</div>` : "";
-      const docOf = (q, i) => (q.doc ? `<article class="sheet"><p class="eyebrow">Document ${i + 1}${q.doc.type ? ` · ${esc(q.doc.type)}` : ""}</p>${q.doc.title ? `<h3>${typo(q.doc.title)}</h3>` : ""}<p class="fr">${typo(q.doc.text)}</p></article>` : "");
+      const docOf = (q, i) => (q.doc ? `<article class="ce-document">
+        <header class="ce-document-meta"><p class="eyebrow">Document ${i + 1}</p>${q.doc.type ? `<span class="ce-kind" lang="fr">${esc(q.doc.type)}</span>` : ""}</header>
+        ${q.doc.title ? `<h3 lang="fr">${typo(q.doc.title)}</h3>` : ""}<p class="fr ce-copy" lang="fr">${typo(q.doc.text)}</p>
+      </article>` : "");
       // A checked set starts with its right answers hidden (ansHidden): the score, every question with your pick, and
       // the ones you missed marked in red pen. The right answers, the explanations and the gap tags come with Show.
       const hid = !!set && submitted && ansHidden(set.id);
@@ -6904,11 +6915,15 @@
         ${hid ? `<p class="small muted">The right answers stay hidden until you show them, so you can think again about the ones you missed.</p>` : ""}
         ${submitted ? greet(...remyScore(skill, score, nq2, { key: `${set.id}-${ui.c.saved[skill] || ""}`, inClock: savedDoc && savedDoc.timed && savedDoc.clock ? savedDoc.secs <= savedDoc.clock : null }), "sm") : ""}`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
-      return `<div class="wrap">
+      const inProgress = set && !submitted && Object.keys(ans || {}).length > 0;
+      return `<div class="wrap comp-studio comp-${skill}">
         ${head}
-        ${set && !submitted && Object.keys(ans || {}).length ? `<div class="row between tab-row">${tabs}${examLink(skill)}</div>` : tabs + examCta(skill)}
-        ${controls}
-        <div class="stack">${reviewNote}${fallback}${timerRow}${material}${qs}</div>
+        <div class="comp-toolbar">
+          <div class="comp-nav tab-row">${tabs}${examLink(skill)}</div>
+          ${controls}
+        </div>
+        <div class="stack comp-practice">${reviewNote}${fallback}${material}${timerRow}${qs}</div>
+        ${inProgress ? "" : examCta(skill)}
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
             <p class="small muted">${skill === "co" ? "Real voices at exam speed. Past papers aren't published, so the closest thing is practice written by the test's own designers at France Éducation International and its partners." : "Practice questions written by the test's designers and France Éducation International."} Log your scores here to keep them with the rest.</p>

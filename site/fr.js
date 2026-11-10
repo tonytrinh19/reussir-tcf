@@ -757,6 +757,7 @@ window.TCF.FR = {
 "Checklist": "Checklist",
 "Chin up! Reread the rule, then retry the misses.": "Courage ! Relis la règle, puis réessaie les ratées.",
 "Choose a backup file": "Choisir un fichier de sauvegarde",
+"Choose a set": "Choisir la série",
 "Choose what you'd enjoy in English too. Twenty minutes you look forward to beat an hour you put off.": "Choisis ce qui te ferait plaisir en anglais aussi. Vingt minutes qui te font envie valent mieux qu'une heure repoussée.",
 "Cinq examens": "Cinq examens",
 "Classes move to the library and run from 18 h 15 to 20 h 45 instead of 18 h 30 to 21 h: a new place and new times, but the same length. « Les jours de cours et les enseignants ne changent pas. »": "Les cours sont déplacés à la bibliothèque et ont lieu de 18 h 15 à 20 h 45 au lieu de 18 h 30 à 21 h : un nouveau lieu et de nouveaux horaires, mais la même durée. « Les jours de cours et les enseignants ne changent pas. »",
