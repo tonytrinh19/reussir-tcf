@@ -5161,21 +5161,24 @@
   }
   function grammarIndex() {
     const s = settings();
-    return `<div class="wrap">
+    return `<div class="wrap grammar-library">
       <header class="stack tight"><h1 class="title chapter-title chapter-grammar"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-grammar">${ico("grammar")}</span>Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
       ${practiceRows()}
-      <ol class="topics" data-m="chart" data-k="topics-list">${T.TOPICS.map((tp) => {
-        const m = topicMastery(tp);
+      <section class="topic-library" aria-labelledby="grammar-topics-title">
+        <h2 id="grammar-topics-title">grammar topics</h2>
+        <ol class="topics" data-m="chart" data-k="topics-list">${T.TOPICS.map((tp) => {
+        const m = topicMastery(tp), inPhase = tp.phase === s.phase;
         const last = drillsFor(tp.id).filter((d) => d.set !== "prod" && d.total).slice(-1)[0];
         const p = tp.criterion.pct || null, v = last ? last.score / last.total : null;
         // The latest round as a ring, green once it reaches the target the tick marks.
         const ring = last ? CH.ring(v, { size: 34, stroke: 4, color: m.ok || (p && v >= p - 1e-9) ? "var(--green)" : "var(--accent)", target: p, text: String(Math.round(v * 100)), tip: `Latest round ${last.score}/${last.total} · ${shortDate(last.date)}${p ? `\nTarget ${Math.round(p * 100)} % on the day's first round` : ""}` }) : "";
-        return `<li><a href="#grammar.${tp.id}">
+        return `<li${inPhase ? ' class="phase-focus"' : ""}><a href="#grammar.${tp.id}">
           <span class="n">${tp.n}</span>
           <span class="t"><b>${esc(tp.title)}</b><small class="en-gloss">${esc(tp.en)}</small></span>
-          <span class="meta">${tp.phase === s.phase ? `<span class="pill info">Phase ${tp.phase}</span>` : ""}${ring}${statusPill(m)}</span>
+          <span class="meta">${inPhase ? `<span class="pill info">Phase ${tp.phase}</span>` : ""}${ring}${statusPill(m)}</span>
         </a></li>`;
       }).join("")}</ol>
+      </section>
       ${fold("low-priority", "Low priority: don't spend production time here", `<ul class="hw">${T.LOW_PRIORITY.map(([a, b]) => `<li style="grid-template-columns:minmax(0,1fr)"><span><b>${esc(a)}</b> · <span class="muted">${esc(b)}</span></span></li>`).join("")}</ul>`)}
     </div>`;
   }
@@ -5374,11 +5377,11 @@
   // The ways to practise across topics, as three tiles above the topic list.
   function practiceRows() {
     const ms = mineStatus(), todo = ms.filter((m) => m.state !== "fixed").length;
-    const tile = (href, icon, title, note, primary) => `<a class="tile-card${primary ? " primary" : ""}" href="${href}" data-spot><span class="tile-ico">${ico(icon)}</span><b>${title}</b><span class="small muted">${note}</span><span class="tile-go" aria-hidden="true">→</span></a>`;
+    const tile = (href, icon, title, note, variant) => `<a class="tile-card ${variant}" href="${href}" data-spot><span class="tile-ico">${ico(icon)}</span><b>${title}</b><span class="small muted">${note}</span><span class="tile-go" aria-hidden="true">→</span></a>`;
     return `<div class="tiles">
-      ${tile("#grammar.mixed", "grammar", "Mixed review", "15 items from the topics you've drilled, the most missed first.", true)}
-      ${tile("#grammar.mine", "errors", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, back in your own texts: find them, then pick the fix.` : "Your own texts with your mistakes put back: find them, then pick the fix.")}
-      ${tile("#grammar.hunt", "bilan", "Find the mistakes", "Proofread a short text: tap the mistakes, then correct them.")}
+      ${tile("#grammar.mixed", "grammar", "Mixed review", "15 items from the topics you've drilled, the most missed first.", "primary")}
+      ${tile("#grammar.mine", "errors", "Your mistakes", ms.length ? `${todo} of your ${ms.length} mistakes to practise, back in your own texts: find them, then pick the fix.` : "Your own texts with your mistakes put back: find them, then pick the fix.", "mistakes-mode")}
+      ${tile("#grammar.hunt", "bilan", "Find the mistakes", "Proofread a short text: tap the mistakes, then correct them.", "hunt")}
     </div>`;
   }
   const MINE_STATE = { missed: ["Missed last time", "bad"], new: ["New", "info"], once: ["Right once", ""], fixed: ["Fixed", "ok"] };
@@ -6181,7 +6184,11 @@
     const theme = ui.vTheme && THEME[ui.vTheme] ? ui.vTheme : (args[0] === "new" && THEME[args[1]] ? args[1] : defaultTheme());
     const phaseThemes = T.PHASES[s.phase - 1].vocab;
     const opts = T.VOCAB.slice().sort((a, b) => (phaseThemes.includes(b.id) ? 1 : 0) - (phaseThemes.includes(a.id) ? 1 : 0))
-      .map((th) => { const left = themeCards(th.id, cards).filter(isNew).length; return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${phaseThemes.includes(th.id) ? "★ " : ""}${esc(th.label)} · ${left} new</option>`; }).join("");
+      .map((th) => {
+        const left = themeCards(th.id, cards).filter(isNew).length;
+        const label = `${phaseThemes.includes(th.id) ? "★ " : ""}${th.label} · ${left} new`;
+        return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${esc(immersion() && I18N ? I18N.tr(label) : label)}</option>`;
+      }).join("");
     const left = themeCards(theme, cards).filter(isNew).length;
     const rows = T.VOCAB.map((th) => {
       const cs = themeCards(th.id, cards);
@@ -6193,25 +6200,31 @@
         <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
       </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
     }).join("");
-    return `<div class="wrap">
-      <header class="stack tight"><h1 class="title chapter-title chapter-vocab"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-vocab">${ico("vocab")}</span>Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A soft tone marks each grade; the sound button in a session (or M) turns it off. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>`)}</header>
-      <div class="grid2 v-home">
-        <section class="panel stack" data-spot>
-          <div class="row between"><h2 class="h3">Review</h2><span class="pill ${due.length ? "warn" : "ok"}">${due.length} due${pri ? ` · ${pri} priority` : ""}</span></div>
-          ${due.length ? `<p class="small muted">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
-          <div class="row"><button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button>${learned ? `<button class="btn ghost" data-act="v-start" data-mode="practice">Practise French → English</button>` : ""}</div>
-          ${learned ? `<p class="small muted">Reviews ask English → French and move the schedule. French → English practice takes ${Math.min(learned, PRACTICE_N)} card${Math.min(learned, PRACTICE_N) === 1 ? "" : "s"}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.</p>` : ""}
-          ${srs.length ? `<div class="v-week"><p class="small muted">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></p>${week.html}</div>${stageChart(srs, "v-stages", true)}` : ""}
-          <p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>
-        </section>
-        <section class="panel stack" data-spot>
-          <h2 class="h3">New cards</h2>
-          <label class="field">Theme<select id="v-theme" data-change="v-theme">${opts}</select></label>
-          <div class="row"><div class="seg" role="group" aria-label="How many">${[10, 15].map((n) => `<button data-act="v-count" data-n="${n}" aria-pressed="${ui.vCount === n}">${n}</button>`).join("")}</div>
-          <button class="btn primary" data-act="v-start" data-mode="new" ${left ? "" : "disabled"}>Learn ${Math.min(left, ui.vCount)} new</button></div>
-          ${left ? "" : `<p class="small muted">No new cards left in this theme. ${claudeBtn("build-" + theme, "v-build", "Build 20 more with Claude", `data-theme="${theme}"`, "btn ghost sm")}</p>`}
-        </section>
+    const deckFan = `<span class="deck-fan" aria-hidden="true"><i></i><i></i><i><svg viewBox="0 0 24 26"><use href="#leaf" width="24" height="26"/></svg></i></span>`;
+    const review = `<section class="deck-launch${due.length ? " featured" : ""}" aria-labelledby="review-title">
+      <div class="deck-launch-head"><h2 id="review-title">Review</h2>${due.length ? deckFan : ico("vocab", "deck-mode-icon")}</div>
+      <span class="deck-due">${due.length} due${pri ? ` · ${pri} priority` : ""}</span>
+      ${due.length ? `<p class="deck-instruction">Recall each card cold before you flip it. No peeking.</p>` : greet("cafe", "Rien à réviser pour l'instant. À demain !", "Nothing due right now. Come back tomorrow.", "sm")}
+      <div class="deck-actions">
+        <button class="btn primary" data-act="v-start" data-mode="review" ${due.length ? "" : "disabled"}>Start review${due.length ? ` (${due.length})` : ""}</button>
+        ${learned ? `<button class="btn ghost" data-act="v-start" data-mode="practice">Practise French → English</button>` : ""}
       </div>
+    </section>`;
+    const fresh = `<section class="deck-launch${due.length ? "" : " featured"}" aria-labelledby="new-title">
+      <div class="deck-launch-head"><h2 id="new-title">New cards</h2>${due.length ? ico("fiches", "deck-mode-icon") : deckFan}</div>
+      <label class="field">Theme<select id="v-theme" data-change="v-theme">${opts}</select></label>
+      <div class="deck-actions"><div class="seg" role="group" aria-label="How many">${[10, 15].map((n) => `<button data-act="v-count" data-n="${n}" aria-pressed="${ui.vCount === n}">${n}</button>`).join("")}</div>
+        <button class="btn primary" data-act="v-start" data-mode="new" ${left ? "" : "disabled"}>Learn ${Math.min(left, ui.vCount)} new</button>
+      </div>
+      ${left ? "" : `<p class="small muted">No new cards left in this theme. ${claudeBtn("build-" + theme, "v-build", "Build 20 more with Claude", `data-theme="${theme}"`, "btn ghost sm")}</p>`}
+    </section>`;
+    return `<div class="wrap">
+      <header class="stack tight"><h1 class="title chapter-title chapter-vocab"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-vocab">${ico("vocab")}</span>Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A soft tone marks each grade; the sound button in a session (or M) turns it off. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>${learned ? `<p class="small muted">Reviews ask English → French and move the schedule. French → English practice takes ${Math.min(learned, PRACTICE_N)} card${Math.min(learned, PRACTICE_N) === 1 ? "" : "s"}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.</p>` : ""}`)}</header>
+      <div class="v-home">${due.length ? review + fresh : fresh + review}</div>
+      ${srs.length ? `<section class="deck-stats" data-m="paper" data-k="vocab-week">
+        <div class="v-week"><h2 class="h3">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></h2>${week.html}</div>
+        <div class="deck-intervals"><h2 class="h3">Your cards</h2>${stageChart(srs, "v-stages", true)}<p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p></div>
+      </section>` : `<p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>`}
       ${waitPanel()}
       ${exPanel()}
       <section data-m="paper" data-k="vocab-deck" class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
@@ -6282,16 +6295,25 @@
         : "Already scheduled today: Again brings it back in this session, the others finish it.";
     }
     const label = v.mode === "new" ? "Learning new cards" : v.mode === "practice" ? "Practice · French → English" : "Review";
-    return `<div class="wrap">
-      <div class="row between"><span class="eyebrow">${label} · ${done} / ${v.total} done</span><span class="row"><button class="btn ghost sm v-sound" data-act="v-sound" aria-pressed="${soundOn()}" title="${soundOn() ? "Turn the grading tones off" : "Turn the grading tones on"}">${ico(soundOn() ? "sound" : "mute")}${soundOn() ? "Sound" : "Muted"} <span class="kbd">M</span></button><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
-      ${vocabBar(v, pct, v.i + todo)}
+    return `<div class="wrap v-session">
+      <header class="v-toolbar">
+        <div class="row between"><h1>${label} · ${done} / ${v.total} done</h1><span class="row v-tools"><button class="btn ghost sm v-sound" data-act="v-sound" aria-pressed="${soundOn()}" title="${soundOn() ? "Turn the grading tones off" : "Turn the grading tones on"}">${ico(soundOn() ? "sound" : "mute")}${soundOn() ? "Sound" : "Muted"} <span class="kbd">M</span></button><button class="btn ghost sm" data-act="v-edit" ${v.edit ? "disabled" : ""}>Edit card <span class="kbd">E</span></button><button class="btn ghost sm" data-act="v-quit">End session</button></span></div>
+        ${vocabBar(v, pct, v.i + todo)}
+      </header>
       <section class="panel flash" data-m="slide" data-k="vc-${esc(id)}-${v.i}">
-        <p class="eyebrow">${th ? esc(th.label) : ""}${st && st.pri && v.mode === "review" ? " · priority" : ""}</p>
-        ${tag ? `<div class="row"><span class="pill ${tag[0]}" data-m="pop" data-k="vt-${esc(id)}-${v.i}">${tag[1]}</span></div>` : ""}
-        ${v.edit ? vocabEditForm(id) : `${front}
-        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : `<p class="muted small">${frFirst ? "Say what it means before you flip." : "Say it out loud before you flip."}</p>`}
-        ${hint ? `<p class="small muted">${hint}</p>` : ""}
-        <div class="row">${buttons}</div>`}
+        <div class="flash-head">
+          <p class="flash-tab">${ico("vocab")}${th ? esc(th.label) : ""}${st && st.pri && v.mode === "review" ? " · priority" : ""}</p>
+          ${tag ? `<span class="pill ${tag[0]}" data-m="pop" data-k="vt-${esc(id)}-${v.i}">${tag[1]}</span>` : ""}
+        </div>
+        ${v.edit ? vocabEditForm(id) : `<div class="flash-face">
+          <div class="flash-question">${front}</div>
+        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : ""}
+        </div>
+        <div class="flash-actions">
+          ${!v.shown ? `<p class="muted small">${frFirst ? "Say what it means before you flip." : "Say it out loud before you flip."}</p>` : ""}
+          ${hint ? `<p class="small muted">${hint}</p>` : ""}
+          <div class="row">${buttons}</div>
+        </div>`}
       </section>
     </div>`;
   }
@@ -6311,7 +6333,7 @@
     const restore = !(DECK.has(id) && S.cards.has(id)) ? "" : ui.confirm === "ve-restore"
       ? `<button class="btn danger" data-act="v-edit-restore">Restore the original</button><button class="btn ghost" data-act="confirm-cancel">Keep my edits</button>`
       : `<button class="btn ghost" data-act="confirm" data-key="ve-restore">Restore the original</button>`;
-    return `<div class="stack" style="text-align:left">
+    return `<div class="stack flash-edit">
       <div class="grid2">
         <div class="stack tight"><p class="eyebrow">French side</p>
           <label class="field">French<input type="text" id="ve-fr" data-input="form" data-k="ve-fr" value="${f("fr")}" lang="fr" autocomplete="off"></label>
