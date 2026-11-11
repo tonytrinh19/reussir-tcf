@@ -26,6 +26,7 @@ const TYPES = {
   ".mp4": "video/mp4",
   ".m4a": "audio/mp4",
   ".svg": "image/svg+xml",
+  ".jpg": "image/jpeg",
   ".png": "image/png",
   ".ico": "image/x-icon",
 };
