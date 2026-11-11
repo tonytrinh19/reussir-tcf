@@ -6683,17 +6683,57 @@
       ${view ? writingFb(e.view, view, "ee-view-close") : ""}`;
   }
 
+  const filmDialog = document.getElementById("writing-film");
+  const writingFilm = filmDialog?.querySelector("video");
+  function openWritingFilm() {
+    const failed = !!writingFilm.error;
+    if (!writingFilm.hasAttribute("src") || failed) {
+      filmDialog.querySelector(".film-error").hidden = true;
+      writingFilm.src = "media/writing-tasks.mp4";
+    }
+    filmDialog.dataset.route = location.hash;
+    filmDialog.showModal();
+    if (writingFilm.ended) writingFilm.currentTime = 0;
+    writingFilm.play().catch(() => {}); // Native controls remain available if playback needs a second gesture.
+  }
+  writingFilm?.addEventListener("error", () => {
+    filmDialog.querySelector(".film-error").hidden = false;
+    filmDialog.querySelector("details").open = true;
+  });
+  filmDialog?.addEventListener("close", () => {
+    writingFilm.pause();
+    if (location.hash === filmDialog.dataset.route) document.getElementById("w-film-open")?.focus({ preventScroll: true });
+  });
+
+  function writingCover() {
+    return `<header class="atelier-cover">
+      <img src="media/writing-desk.jpg" width="1500" height="750" alt="" class="atelier-photo" decoding="async">
+      <div class="atelier-cover-copy">
+        <h1 lang="fr">Expression <em>écrite</em></h1>
+        ${writingFilm ? `<button type="button" class="atelier-film-open" id="w-film-open" data-act="w-film" aria-haspopup="dialog" aria-controls="writing-film">
+          <span class="atelier-play" aria-hidden="true">${ICON_PLAY}</span><span lang="fr">Les trois tâches en vidéo</span>
+        </button>` : ""}
+      </div>
+    </header>`;
+  }
   VIEWS.writing = {
     render(args) {
-      const tabsOf = (cur) => `<nav class="tabs" role="tablist">${["t1", "t2", "t3"].map((k) => `<a href="#writing.${k}" role="tab" aria-selected="${k === cur}">${T.WRITING[k].name}<small>${T.WRITING[k].min}–${T.WRITING[k].max} mots</small></a>`).join("")}<a href="#writing.mock" role="tab" aria-selected="${cur === "mock"}">${ico("exam")}Examen blanc<small>3 tâches · 60 min</small></a></nav>`;
-      if (args[0] === "mock") return `<div class="wrap${eeRunning() ? " focus" : ""}">${eeRunning() ? "" : `<header class="stack tight"><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-writing">${ico("writing")}</span>Expression écrite</h1></header>${tabsOf("mock")}`}<div class="stack">${eeView()}</div></div>`;
+      const tabsOf = (cur) => `<nav class="atelier-tabs" role="tablist" aria-label="Expression écrite">${EE_TASKS.map((k) => {
+        const W = T.WRITING[k], icon = { t1: "envelope", t2: "writing", t3: "papers" }[k];
+        return `<a href="#writing.${k}" role="tab" aria-selected="${k === cur}">${ico(icon)}<span>${W.name}</span><small>${W.min}–${W.max} mots</small></a>`;
+      }).join("")}<a href="#writing.mock" role="tab" aria-selected="${cur === "mock"}">${ico("exam")}<span>Examen blanc</span><small>3 tâches · 60 min</small></a></nav>`;
+      if (args[0] === "mock") {
+        if (eeRunning()) return `<div class="wrap focus"><div class="stack">${eeView()}</div></div>`;
+        const header = ui.ee && ui.ee.done ? `<header><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true">${ico("writing")}</span>Expression écrite</h1></header>` : writingCover();
+        return `<div class="wrap atelier-page">${header}${tabsOf("mock")}<div class="stack">${eeView()}</div></div>`;
+      }
       if (args[0] && T.WRITING[args[0]]) ui.w.task = args[0];
       const task = ui.w.task, W = T.WRITING[task];
       const p = wPrompt(task);
       const text = ui.w.text[task] || "";
       const s = settings();
       const presets = s.phase >= 3 ? [[W.exam * 60, `${W.exam} min exam`], [35 * 60, "35 min"], [60 * 60, "60 min mock"]] : [[35 * 60, "35 min practice"], [W.exam * 60, `${W.exam} min exam`], [60 * 60, "60 min mock"]];
-      const docs = task === "t3" && p.docs ? `<div class="docs">${p.docs.map((d, k) => `<div class="doc"><p class="eyebrow">Document ${k + 1}</p><p class="fr">${typo(d.text)}</p><p class="who">${esc(d.who)}</p></div>`).join("")}</div>` : "";
+      const docs = task === "t3" && p.docs ? `<div class="docs">${p.docs.map((d, k) => `<article class="doc"><p class="eyebrow brief-source-title">Document ${k + 1}</p><p class="fr" lang="fr">${typo(d.text)}</p><p class="who">${esc(d.who)}</p></article>`).join("")}</div>` : "";
       const checks = W_CHECKS.all.concat(W_CHECKS[task]);
       const ch = ui.w.checks[task];
       const viewing = ui.w.viewing && S.writing.get(ui.w.viewing);
@@ -6707,29 +6747,29 @@
         end: { x: 1, y: Number(scored[ns - 1].fb.score20), label: `${scored[ns - 1].fb.score20}/20` },
         xs: [{ x: 0, label: shortDate(scored[0].date) }, { x: 1, label: shortDate(scored[ns - 1].date) }],
       })}</div>` : "";
-      return `<div class="wrap">
-        <header class="stack tight"><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-writing">${ico("writing")}</span>Expression écrite</h1>${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}</header>
+      return `<div class="wrap atelier-page">
+        ${writingCover()}
         ${tabsOf(task)}
-        ${fxTabs("writing." + task)}
-        <section class="panel prompt-card">
-          <div class="row between"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] && !ui.w.gen[task].kept ? " · from Claude" : ""}</span>
+        <div class="atelier-tools">${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}${fxTabs("writing." + task)}</div>
+        <section class="panel prompt-card writing-brief">
+          <div class="brief-head"><span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words${ui.w.gen[task] && !ui.w.gen[task].kept ? " · from Claude" : ""}</span>
             <span class="row"><button class="btn sm" data-act="w-next">Another prompt</button>${claudeBtn("w-gen", "w-gen", "New prompt from Claude", "", "btn sm")}</span></div>
           ${ui.confirm === "w-switch-w-next" || ui.confirm === "w-switch-w-gen" ? `<div class="notice warn small">A new prompt would leave your draft answering the wrong question, so the draft would be discarded.<div class="row" style="margin-top:8px"><button class="btn sm danger" data-act="${ui.confirm.slice(9)}">Discard the draft and switch</button><button class="btn sm ghost" data-act="confirm-cancel">Keep my draft</button></div></div>` : ""}
-          <p class="fr">${typo(p.q)}</p>
+          <p class="fr brief-prompt" lang="fr">${typo(p.q)}</p>
           ${p.en ? `<p class="small muted en-gloss">${esc(p.en)}</p>` : ""}
           ${docs}
+          <details class="fold brief-outline"><summary>Structure and template</summary>
+            <div class="stack tight">
+              <p class="small">${esc(W.expected)}</p>
+              <ol class="small">${W.structure.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
+              <p class="fr small brief-example" lang="fr">${typo(W.template)}</p>
+              ${task === "t3" ? `<p class="small"><b>Word-count discipline (TCF Canada):</b> Partie 1 is 40–60 words and Partie 2 is 80–120, for 120–180 in total. In your template, Partie 2 is the opinion paragraph (60–90) plus a short conclusion (20–30). Count as you write, not only at the end: the meters under the page track both parts.</p>` : ""}
+              <div><button class="btn sm" data-act="w-skeleton">Insert the skeleton</button></div>
+            </div>
+          </details>
         </section>
-        <details class="fold"><summary>Structure and template</summary>
-          <div class="stack tight" style="margin-top:10px">
-            <p class="small">${esc(W.expected)}</p>
-            <ol class="small" style="margin:0;padding-left:20px">${W.structure.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>
-            <p class="fr small">${typo(W.template)}</p>
-            ${task === "t3" ? `<p class="small"><b>Word-count discipline (TCF Canada):</b> Partie 1 is 40–60 words and Partie 2 is 80–120, for 120–180 in total. In your template, Partie 2 is the opinion paragraph (60–90) plus a short conclusion (20–30). Count as you write, not only at the end: the meters under the page track both parts.</p>` : ""}
-            <div><button class="btn sm" data-act="w-skeleton">Insert the skeleton</button></div>
-          </div>
-        </details>
         ${watchStrip()}
-        <section class="panel editor">
+        <section class="panel editor writing-editor">
           <div class="ed-bar"><div class="meter" id="w-meter"></div>${timerUI("writing." + task, W.name + " écrit", presets)}</div>
           <textarea id="w-text" class="seyes" data-input="w-text" spellcheck="false" autocomplete="off" autocorrect="off" lang="fr" placeholder="Écrivez ici…" aria-label="Your text">${esc(text)}</textarea>
           ${task === "t3" ? `<div class="paras" id="w-paras"></div>` : ""}
@@ -8306,6 +8346,7 @@
       toast("Card added. It shows up under New cards for its theme.");
       render(true);
     },
+    "w-film": openWritingFilm,
     "w-next": () => { if (wDraftGuard("w-next")) return; const t = ui.w.task; ui.w.gen[t] = null; ui.w.idx[t]++; render(true); },
     "w-gen": () => { if (wDraftGuard("w-gen")) return; render(true); writingGenPrompt(); },
     "w-skeleton": () => {
@@ -8617,6 +8658,7 @@
   const NAV_ORDER = ["today", "grammar", "vocab", "fiches", "writing", "comp", "progress"];
   const pageDir = (a, b) => (a.view === b.view ? "up" : NAV_ORDER.indexOf(b.view) > NAV_ORDER.indexOf(a.view) ? "fwd" : "back");
   window.addEventListener("hashchange", () => {
+    if (filmDialog?.open) filmDialog.close();
     const r = parseRoute(location.hash);
     if (examRunning() && skillOf(ui.cx) === "co" && !(r.view === "comp" && r.args[0] === "co" && r.args[1] === "exam")) coxPause(true);
     const same = r.view === route.view && r.args.join(".") === route.args.join(".");

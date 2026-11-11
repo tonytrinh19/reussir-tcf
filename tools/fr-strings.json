@@ -51,7 +51,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<a>…<small>…–… mots</small></a>"
+   "<a>…<span>…</span><small>…–… mots</small></a>"
   ]
  },
  {
@@ -3455,7 +3455,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
+   "<h1>… · … / … done</h1><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>………</p> … …"
   ]
  },
  {
@@ -3536,7 +3536,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -3691,7 +3691,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
+   "<h1>… · … / … done</h1><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>………</p> … …"
   ]
  },
  {
@@ -3918,7 +3918,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>",
+   "<p>… cards learned · … in the deck</p>"
   ]
  },
  {
@@ -3927,7 +3928,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>",
+   "<p>… cards learned · … in the deck</p>"
   ]
  },
  {
@@ -4053,7 +4055,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>Review</h2>… <span>… due…</span> … <button>Start review…</button> …"
   ]
  },
  {
@@ -4098,7 +4100,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -4188,7 +4190,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>",
+   "<p>… cards learned · … in the deck</p>"
   ]
  },
  {
@@ -4579,7 +4582,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… Any topic … …… <button>History · … of … done ↓</button>"
+   "<summary><span>Choose a set</span><span></span></summary> … Any topic … …… <button>History · … of … done ↓</button>"
   ]
  },
  {
@@ -4787,7 +4790,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>Exemples · … of your cards … fewer than 2</p><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …"
+   "<h2>Exemples · … of your cards … fewer than 2</h2><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …"
   ]
  },
  {
@@ -4877,7 +4880,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>À chercher · … saved without a meaning</p><span>……</span> <p>They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p> …"
+   "<h2>À chercher · … saved without a meaning</h2><span>……</span> <p>They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p> …"
   ]
  },
  {
@@ -5040,7 +5043,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<button>… the transcript</button>"
+   "… …<button>… the transcript</button> <p>…</p> …"
   ]
  },
  {
@@ -5177,7 +5180,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<a>…<small>…–… mots</small></a>"
+   "<a>…<span>…</span><small>…–… mots</small></a>"
   ]
  },
  {
@@ -5206,7 +5209,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -5548,8 +5551,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc</p><p>…, with an estimated score and NCLC level.…</p> …",
-   "…<a>…Examen blanc<small>3 tâches · 60 min</small></a>"
+   "<p>…Examen blanc</p><p>…, with an estimated score and NCLC level.…</p> …"
   ]
  },
  {
@@ -5630,7 +5632,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -6875,7 +6877,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>À chercher · … saved without a meaning</p><span>……</span> <p>They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p> …"
+   "<h2>À chercher · … saved without a meaning</h2><span>……</span> <p>They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p> …"
   ]
  },
  {
@@ -8004,7 +8006,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>À revoir cette semaine · due this week: <b>…</b></p>… …"
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>"
   ]
  },
  {
@@ -10118,7 +10120,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -10223,7 +10225,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… Any topic … …… <button>History · … of … done ↓</button>"
+   "<summary><span>Choose a set</span><span></span></summary> … Any topic … …… <button>History · … of … done ↓</button>"
   ]
  },
  {
@@ -10352,7 +10354,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…</p><p>…</p><p>As on the test, each document has one question. Read it, then answer.</p>"
+   "<p>As on the test, each document has one question. Read it, then answer.</p>"
   ]
  },
  {
@@ -12114,7 +12116,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>",
+   "<p>… cards learned · … in the deck</p>"
   ]
  },
  {
@@ -12650,6 +12653,15 @@
   ]
  },
  {
+  "id": "e30ec070d0ca",
+  "text": "Choose a set",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>Choose a set</span><span></span></summary> … Any topic … …… <button>History · … of … done ↓</button>"
+  ]
+ },
+ {
   "id": "a37bdb52bce0",
   "text": "Choose at any time{0}. When this question's time runs out, the next one starts by itself, as on the real test.",
   "kind": "pattern",
@@ -13113,6 +13125,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "close",
    "<button>…Réduire · close</button>"
   ]
  },
@@ -13212,7 +13225,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> … …"
   ]
  },
  {
@@ -13421,6 +13434,13 @@
   "text": "Comparer deux documents + opinion",
   "kind": "exact",
   "where": "writing",
+  "ctx": []
+ },
+ {
+  "id": "27e1558f94e0",
+  "text": "Comparez deux points de vue.",
+  "kind": "exact",
+  "where": "index.html",
   "ctx": []
  },
  {
@@ -13822,7 +13842,7 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -13832,7 +13852,7 @@
   "where": "app",
   "ctx": [
    "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -14336,7 +14356,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> … …"
   ]
  },
  {
@@ -14816,7 +14836,7 @@
   "ctx": [
    "Document",
    "<p>Document …</p><p>…</p><p>…</p>",
-   "<p>Document ……</p>…<p>…</p>"
+   "<p>Document …</p>… …<p>…</p>"
   ]
  },
  {
@@ -14825,7 +14845,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>Document …</p><p>…</p><p>…</p>"
+   "<p>Document …</p><p>…</p><p>…</p>",
+   "<p>Document …</p>… …<p>…</p>"
   ]
  },
  {
@@ -14835,15 +14856,6 @@
   "where": "app",
   "ctx": [
    "DOCUMENT … (…) : …"
-  ]
- },
- {
-  "id": "4b0264661b7e",
-  "text": "Document {0}{1}",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<p>Document ……</p>…<p>…</p>"
   ]
  },
  {
@@ -15291,7 +15303,7 @@
   "where": "app",
   "ctx": [
    "… due",
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>Review</h2>… <span>… due…</span> … <button>Start review…</button> …"
   ]
  },
  {
@@ -15325,7 +15337,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>À revoir cette semaine · due this week: <b>…</b></p>… …"
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>"
   ]
  },
  {
@@ -15593,7 +15605,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
+   "<h1>… · … / … done</h1><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>………</p> … …"
   ]
  },
  {
@@ -15876,7 +15888,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>… · … / … done</span><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>……</p> … …"
+   "<h1>… · … / … done</h1><span><button>…… <span>M</span></button><button>Edit card <span>E</span></button><button>End session</button></span> … <p>………</p> … …"
   ]
  },
  {
@@ -16814,7 +16826,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Exemples · … of your cards … fewer than 2</p><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …",
+   "<h2>Exemples · … of your cards … fewer than 2</h2><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …",
    "Exemples · Examples"
   ]
  },
@@ -16824,7 +16836,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>Exemples · … of your cards … fewer than 2</p><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …"
+   "<h2>Exemples · … of your cards … fewer than 2</h2><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …"
   ]
  },
  {
@@ -16878,6 +16890,15 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "97b695b9b9cf",
+  "text": "Expression",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h1>Expression <em>écrite</em></h1> …"
+  ]
  },
  {
   "id": "64ec1aeca7a2",
@@ -17027,6 +17048,13 @@
   "ctx": []
  },
  {
+  "id": "5ab4ec640d65",
+  "text": "Fermer",
+  "kind": "exact",
+  "where": "index.html",
+  "ctx": []
+ },
+ {
   "id": "8110373de255",
   "text": "fiche",
   "kind": "exact",
@@ -17050,7 +17078,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -17059,7 +17087,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<",
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N",
    "Fiches"
   ]
  },
@@ -17159,7 +17187,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -17228,7 +17256,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -18182,7 +18210,7 @@
   "where": "app",
   "ctx": [
    "Grammaire",
-   "<h1>Grammaire</h1>… … … …",
+   "<h1><span>…</span>Grammaire</h1>… … <h2>grammar topics</h2> … …",
    "Grammaire · …"
   ]
  },
@@ -18208,6 +18236,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<h1><span>…</span>Grammaire</h1>… … <h2>grammar topics</h2> … …",
    "grammar topics"
   ]
  },
@@ -18809,7 +18838,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… Any topic … …… <button>History · … of … done ↓</button>"
+   "<summary><span>Choose a set</span><span></span></summary> … Any topic … …… <button>History · … of … done ↓</button>"
   ]
  },
  {
@@ -18912,7 +18941,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …"
   ]
  },
  {
@@ -19701,7 +19730,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -20867,7 +20896,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …"
   ]
  },
  {
@@ -23813,7 +23842,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …"
   ]
  },
  {
@@ -24559,7 +24588,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -25225,7 +25254,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<",
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N",
    "Nouvelle fiche"
   ]
  },
@@ -25867,7 +25896,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -27205,7 +27234,7 @@
   "where": "app",
   "ctx": [
    "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>",
-   "<p>…</p> <b>Phase … · …</b><span>Semaine …</span><span>…</span>… … … … ……………",
+   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… Montréal … … … ……………",
    "<span>Phase …</span>"
   ]
  },
@@ -27216,7 +27245,7 @@
   "where": "app",
   "ctx": [
    "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>",
-   "<p>…</p> <b>Phase … · …</b><span>Semaine …</span><span>…</span>… … … … ……………",
+   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… Montréal … … … ……………",
    "… of … criteria met Phase … · …"
   ]
  },
@@ -31554,7 +31583,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<h1>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>Nouvelle fiche<"
+   "<h1><span>…</span>Fiches</h1><p>fiches de révision</p> <span><span>… fiches…</span><a>…Nouvelle fiche</a></span> <p>Pense-bête</p><span>One line worth remembering. ↵ to pin it.</span> … <i></i> … … … … … <p>No sheet matches. Try another word, or write it: <a>N"
   ]
  },
  {
@@ -31661,7 +31690,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Exemples · … of your cards … fewer than 2</p><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …"
+   "<h2>Exemples · … of your cards … fewer than 2</h2><span>……</span> <p>Seeing a word in real sentences is what makes it stick. Claude writes two for each card, in TCF Canada situations; check them, then save.</p> …"
   ]
  },
  {
@@ -33097,7 +33126,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>Review</h2>… <span>… due…</span> … <button>Start review…</button> …"
   ]
  },
  {
@@ -33106,7 +33135,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h2>Review</h2>… <span>… due…</span> … <button>Start review…</button> …"
   ]
  },
  {
@@ -33353,7 +33382,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
@@ -37008,7 +37037,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>… the transcript</button>"
+   "… …<button>… the transcript</button> <p>…</p> …"
   ]
  },
  {
@@ -37251,9 +37280,9 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …",
    "Theme Learned Mastered …",
-   "French English Example (optional) Theme … <button>Add card</button>",
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "French English Example (optional) Theme … <button>Add card</button>"
   ]
  },
  {
@@ -37406,7 +37435,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>À chercher · … saved without a meaning</p><span>……</span> <p>They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p> …"
+   "<h2>À chercher · … saved without a meaning</h2><span>……</span> <p>They stay out of your reviews until they have a meaning. Once you save one, it comes up in your reviews from tomorrow.</p> …"
   ]
  },
  {
@@ -37735,7 +37764,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<p>…</p> <b>Phase … · …</b><span>Semaine …</span><span>…</span>… … … … ……………"
+   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… Montréal … … … ……………"
   ]
  },
  {
@@ -38780,7 +38809,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "… Any topic … …… <button>History · … of … done ↓</button>",
+   "<summary><span>Choose a set</span><span></span></summary> … Any topic … …… <button>History · … of … done ↓</button>",
    "Topic"
   ]
  },
@@ -39913,7 +39942,7 @@
   "where": "app",
   "ctx": [
    "Vocabulaire",
-   "<h1>Vocabulaire</h1>… … … <p>Review</p><span>… due…</span> … <button>Start review…</button>… … … <p>… cards learned · … in the deck</p> <p>New cards</p> Theme … … <button>Learn … new</button> … <h2>Deck by theme</h2><span>Collocations and connectors are worth "
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> … …"
   ]
  },
  {
@@ -41723,6 +41752,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<h2>À revoir cette semaine · due this week: <b>…</b></h2>… <h2>Your cards</h2>…<p>… cards learned · … in the deck</p>",
    "Your cards"
   ]
  },
@@ -42216,7 +42246,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<h1>Expression écrite</h1>… … … <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another "
+   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
  {
