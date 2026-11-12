@@ -3032,7 +3032,7 @@
     };
     return exLines(c.ex).map((l) => {
       const [fr, en] = exSplit(l);
-      return `<span class="ex-l"><span class="ex-fr" lang="fr">${bold(fr)}</span>${en ? `<span class="ex-en">${esc(en)}</span>` : ""}</span>`;
+      return `<span class="ex-l" translate="no"><span class="ex-fr" lang="fr">${bold(fr)}</span>${en ? `<span class="ex-en" lang="en">${esc(en)}</span>` : ""}</span>`;
     }).join("");
   }
 
@@ -6165,14 +6165,79 @@
     const state = st ? (st.pri ? "priority" : st.stage >= 5 ? "mastered" : "due " + shortDate(st.due)) : c.en ? "new" : "needs a meaning";
     const notes = [c.frNote, c.enNote].map((n) => str(n).trim()).filter(Boolean);
     const rc = srsRecall(st), sd = st && Math.max(1, Math.round(st.s || 0));
-    return `<li><details class="peek" ${foldAttr("peek-" + c.id)}><summary><span class="peek-fr">${typo(c.fr)}${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="muted small">${state}</span></summary>
+    return `<li><details class="peek" ${foldAttr("peek-" + c.id)}><summary><span class="peek-fr"><span lang="fr" translate="no">${typo(c.fr)}</span>${c.src ? `<small class="muted"> · ${esc(c.src)}</small>` : ""}</span><span class="muted small">${state}</span></summary>
       <div class="peek-body">
-        <p class="peek-en">${esc(c.en || "")}</p>
-        ${notes.length ? `<p class="small muted">${notes.map(esc).join("<br>")}</p>` : ""}
+        <p class="peek-en" lang="en" translate="no">${esc(c.en || "")}</p>
+        ${notes.length ? `<p class="small muted" translate="no">${notes.map(esc).join("<br>")}</p>` : ""}
         ${rc != null ? `<p class="small muted num">Mémoire · Memory: ${Math.round(rc * 100)}% chance of recall today · stability ${sd} day${sd === 1 ? "" : "s"} · difficulty ${st.d.toFixed(1)}/10</p>` : ""}
         ${c.ex ? `<p class="ex-list">${exHTML(c)}</p>` : `<p class="small muted">No examples yet.</p>`}
         ${DECK.has(c.id) ? "" : `<div class="row">${confirmBtn("card-del-" + c.id, "Delete this card", "card-del", `data-id="${esc(c.id)}"`)}</div>`}
       </div></details></li>`;
+  }
+  function cardMaker(theme) {
+    const deck = THEME[ui.form["card-th"]] || THEME[theme];
+    const fr = str(ui.form["card-fr"]).trim(), en = str(ui.form["card-en"]).trim(), ex = str(ui.form["card-ex"]).trim();
+    return `<details class="card-maker" ${foldAttr("add-card", fr || en || ex)} data-m="paper" data-k="vocab-add">
+      <summary class="maker-summary"><span class="maker-mark" aria-hidden="true">${ico("fiches")}</span><span class="maker-title">Add a card</span><span class="maker-chevron" aria-hidden="true"></span></summary>
+      <div class="maker-body">
+        <form id="card-maker-form" class="maker-form" novalidate>
+          <div><label class="field">French word or phrase<input type="text" id="card-fr" data-input="card-draft" value="${formVal("card-fr")}" lang="fr" placeholder="prendre son temps" required></label>
+            <p class="maker-error" id="card-fr-error" hidden>Enter a French word or phrase.</p></div>
+          <div><label class="field">English meaning<input type="text" id="card-en" data-input="card-draft" value="${formVal("card-en")}" lang="en" placeholder="to take one’s time" required></label>
+            <p class="maker-error" id="card-en-error" hidden>Enter the English meaning.</p></div>
+          <label class="field">Example (optional)<input type="text" id="card-ex" data-input="card-draft" value="${formVal("card-ex")}" lang="fr" placeholder="Je prends mon temps."></label>
+          <label class="field">Theme<select id="card-th" data-change="card-draft">${T.VOCAB.map((th) => `<option value="${th.id}"${deck.id === th.id ? " selected" : ""}>${esc(th.label)}</option>`).join("")}</select></label>
+          <div class="maker-actions"><button type="submit" class="btn primary">Add card</button></div>
+        </form>
+        <aside class="maker-preview" aria-labelledby="maker-preview-title"><h3 id="maker-preview-title" class="maker-preview-label">Preview</h3>
+          <div class="maker-card"><span class="maker-deck" id="preview-card-th" lang="fr" translate="no">${esc(deck.label)}</span>
+            <p class="maker-front${fr ? "" : " is-placeholder"}"><span class="maker-hint">French side</span><span id="preview-card-fr" lang="fr" translate="no">${esc(fr)}</span></p>
+            <p class="maker-back${en ? "" : " is-placeholder"}"><span class="maker-hint">English side</span><span id="preview-card-en" lang="en" translate="no">${esc(en)}</span></p>
+            <p class="maker-example" id="preview-card-ex" lang="fr" translate="no">${esc(ex)}</p>
+          </div>
+        </aside>
+      </div>
+    </details>`;
+  }
+
+  function updateCardDraft(el) {
+    ui.form[el.id] = el.value;
+    const text = el.value.trim();
+    const preview = document.getElementById("preview-" + el.id);
+    preview.textContent = el.id === "card-th" ? THEME[el.value].label : text;
+    if (el.required) {
+      preview.parentElement.classList.toggle("is-placeholder", !text);
+      if (text) {
+        el.removeAttribute("aria-invalid");
+        el.removeAttribute("aria-describedby");
+        document.getElementById(el.id + "-error").hidden = true;
+      }
+    }
+  }
+
+  function saveCardDraft(form) {
+    const front = form.elements.namedItem("card-fr"), back = form.elements.namedItem("card-en");
+    const missing = [front, back].filter((field) => !field.value.trim());
+    if (missing.length) {
+      for (const field of missing) {
+        field.setAttribute("aria-invalid", "true");
+        field.setAttribute("aria-describedby", field.id + "-error");
+        document.getElementById(field.id + "-error").hidden = false;
+      }
+      missing[0].focus();
+      return;
+    }
+    const deck = THEME[form.elements.namedItem("card-th").value];
+    put("cards", "c-" + uid(), {
+      fr: front.value.trim(), en: back.value.trim(), ex: form.elements.namedItem("card-ex").value.trim(),
+      theme: deck.id, created: todayStr(), by: "you",
+    });
+    ui.form["card-fr"] = ui.form["card-en"] = ui.form["card-ex"] = "";
+    ui.form["card-th"] = deck.id;
+    FOLD["add-card"] = true;
+    toast(`Card added to ${deck.label}.`);
+    render(true);
+    document.getElementById("card-fr").focus({ preventScroll: true });
   }
   function vocabHome(args) {
     const s = settings();
@@ -6221,6 +6286,7 @@
     return `<div class="wrap">
       <header class="stack tight"><h1 class="title chapter-title chapter-vocab"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-vocab">${ico("vocab")}</span>Vocabulaire</h1>${fold("intro-vocab", "Comment ça marche · How it works", `<p class="small muted">Spaced repetition with FSRS, the scheduler Anki offers. Each card has a memory state: how long it holds (its stability) and how hard it is for you (its difficulty). After you recall it, grade it Again, Hard, Good or Easy, and it comes back when your chance of remembering it falls to 90%, never more than 30 days away; each button shows when that would be. Again also brings it back later in the session, and makes it count as harder. A soft tone marks each grade; the sound button in a session (or M) turns it off. A new card is shown with its answer, then checked in the session, and your first check's grade sets when it comes back: Again tomorrow, Hard in 2 days, Good in 3, Easy in about a week. Reviews ask English → French, the direction you need for writing; French → English is practice and doesn't change the schedule. To save a word or phrase from any page, select it, then press “Save to cards”.</p>${learned ? `<p class="small muted">Reviews ask English → French and move the schedule. French → English practice takes ${Math.min(learned, PRACTICE_N)} card${Math.min(learned, PRACTICE_N) === 1 ? "" : "s"}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.</p>` : ""}`)}</header>
       <div class="v-home">${due.length ? review + fresh : fresh + review}</div>
+      ${cardMaker(theme)}
       ${srs.length ? `<section class="deck-stats" data-m="paper" data-k="vocab-week">
         <div class="v-week"><h2 class="h3">À revoir cette semaine · due this week: <b>${week.n.reduce((a, b) => a + b, 0)}</b></h2>${week.html}</div>
         <div class="deck-intervals"><h2 class="h3">Your cards</h2>${stageChart(srs, "v-stages", true)}<p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p></div>
@@ -6230,15 +6296,6 @@
       <section data-m="paper" data-k="vocab-deck" class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
         ${fold("deck", `Voir les ${T.VOCAB.length} thèmes · Show the deck`, `<div class="table-wrap"><table class="deck"><thead><tr><th>Theme</th><th>Learned</th><th>Mastered</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`)}
       </section>
-      <section data-m="paper" data-k="vocab-add" class="panel stack">${fold("add-card", "Ajouter une carte · Add your own card", `<div class="stack">
-        <div class="grid2">
-          <label class="field">French<input type="text" id="card-fr" data-input="form" data-k="card-fr" value="${formVal("card-fr")}" lang="fr" placeholder="s'engager à faire qqch"></label>
-          <label class="field">English<input type="text" id="card-en" data-input="form" data-k="card-en" value="${formVal("card-en")}" placeholder="to commit to doing something"></label>
-          <label class="field">Example (optional)<input type="text" id="card-ex" data-input="form" data-k="card-ex" value="${formVal("card-ex")}" lang="fr"></label>
-          <label class="field">Theme<select id="card-th" data-change="form" data-k="card-th">${T.VOCAB.map((th) => `<option value="${th.id}" ${(ui.form["card-th"] || theme) === th.id ? "selected" : ""}>${esc(th.label)}</option>`).join("")}</select></label>
-        </div>
-        <div class="row"><button class="btn" data-act="v-add">Add card</button></div>
-      </div>`)}</section>
     </div>`;
   }
   // What a step is, over the card: a check of a new card, or a card back after a miss.
@@ -6321,8 +6378,8 @@
   function cardSide(c, lang) {
     const note = str(lang === "fr" ? c.frNote : c.enNote).trim();
     const lines = note ? note.split("\n").map((l) => (lang === "fr" ? typo(l) : esc(l))).join("<br>") : "";
-    return lang === "fr" ? `<p class="answer">${typo(c.fr)}</p>${lines ? `<p class="note fr">${lines}</p>` : ""}`
-      : `<p class="prompt">${esc(c.en)}</p>${lines ? `<p class="note">${lines}</p>` : ""}`;
+    return lang === "fr" ? `<p class="answer" lang="fr" translate="no">${typo(c.fr)}</p>${lines ? `<p class="note fr" lang="fr" translate="no">${lines}</p>` : ""}`
+      : `<p class="prompt" lang="en" translate="no">${esc(c.en)}</p>${lines ? `<p class="note" lang="en" translate="no">${lines}</p>` : ""}`;
   }
   // Editing a card in the middle of a session. The card keeps its id, so its review progress stays; a
   // built-in or Anki card is saved to your cards under that same id, and can go back to the original.
@@ -8337,15 +8394,6 @@
       render(true);
     },
     "wt-del": (el) => cardDelete(el.dataset.id),
-    "v-add": () => {
-      const fr = str(ui.form["card-fr"]).trim(), en = str(ui.form["card-en"]).trim();
-      if (!fr || !en) { toast("Fill in both the French and the English."); return; }
-      const th = ui.form["card-th"] || (document.getElementById("card-th") || {}).value || "quotidien";
-      put("cards", "c-" + uid(), { fr, en, ex: str(ui.form["card-ex"]).trim(), theme: th, created: todayStr(), by: "you" });
-      ui.form["card-fr"] = ui.form["card-en"] = ui.form["card-ex"] = "";
-      toast("Card added. It shows up under New cards for its theme.");
-      render(true);
-    },
     "w-film": openWritingFilm,
     "w-next": () => { if (wDraftGuard("w-next")) return; const t = ui.w.task; ui.w.gen[t] = null; ui.w.idx[t]++; render(true); },
     "w-gen": () => { if (wDraftGuard("w-gen")) return; render(true); writingGenPrompt(); },
@@ -8482,6 +8530,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "card-draft": updateCardDraft,
     "c-seek": () => coSeekDone(),
     "fx-for": (el) => { if (ui.fx.edit) ui.fx.edit.for = el.value; },
     tick: (el) => {
@@ -8515,6 +8564,7 @@
     },
   };
   const INPUTS = {
+    "card-draft": updateCardDraft,
     "c-seek": (el) => coSeek(Number(el.value) || 0),
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
     "pr-fix": (el) => { if (ui.hunt) ui.hunt.fixes[el.dataset.k] = el.value; },
@@ -8559,6 +8609,11 @@
   // A fold remembers only what you did with it, so it's noted on the click (before it opens or closes), not on
   // "toggle", which also fires for folds a redraw draws open.
   document.addEventListener("click", (e) => { const s = e.target.closest && e.target.closest("summary"), d = s && s.parentElement; if (d && d.dataset && d.dataset.fold) FOLD[d.dataset.fold] = !d.open; }, true);
+  document.addEventListener("submit", (e) => {
+    if (e.target.id !== "card-maker-form") return;
+    e.preventDefault();
+    saveCardDraft(e.target);
+  });
   document.addEventListener("change", (e) => {
     const el = e.target;
     const fn = el.dataset && CHANGES[el.dataset.change];
