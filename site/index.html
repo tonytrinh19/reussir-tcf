@@ -1211,6 +1211,104 @@ details.fold[open] > summary::before { content: "– "; }
 @keyframes atelier-desk-pan { from { transform: translateY(-2%) scale(1.015); } to { transform: translateY(7%) scale(1.08); } }
 @keyframes atelier-pen-line { from { transform: scaleX(.72); } to { transform: scaleX(1.65); } }
 
+/* The manual card creator unfolds into a writing area and its ruled card. */
+.card-maker {
+  --maker-petrol: #1c4042;
+  --maker-stock: #fff7e8;
+  --maker-sheet-rule: #ded7c8;
+  --maker-margin: #d6a39b;
+  --maker-brass: #76571e;
+  --maker-copy: #273e3c;
+  --maker-secondary: #605b4e;
+  min-width: 0; container-type: inline-size;
+  border: 1px solid var(--rule-2); border-radius: var(--r-card);
+  color: var(--ink); background: var(--surface); box-shadow: var(--shadow);
+}
+:root.dark .card-maker {
+  --maker-stock: #332f28; --maker-sheet-rule: #49443b; --maker-margin: #8b6860;
+  --maker-brass: #e9c98a; --maker-copy: #faf0db; --maker-secondary: #d0c7b5;
+}
+.maker-summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center;
+  gap: clamp(12px, 2vw, 19px); min-height: 74px; padding: 15px clamp(14px, 3vw, 27px);
+  border-radius: inherit; list-style: none; cursor: pointer;
+  background: linear-gradient(106deg, var(--maker-petrol) 45%, #2a5550); color: #fff4dc;
+}
+.maker-summary::-webkit-details-marker { display: none; }
+.card-maker[open] > .maker-summary { border-radius: var(--r-card) var(--r-card) 0 0; }
+.maker-summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.maker-mark {
+  display: grid; place-items: center; width: 39px; height: 37px; border: 1px solid #bb9c64;
+  border-radius: 4px 7px 4px 4px; background: #fae8bf; color: #244748;
+  box-shadow: -3px 3px 0 #305156, -4px 4px 0 #c0a878;
+}
+.maker-mark .ico { width: 24px; height: 24px; --pen: #8d5b27; }
+.maker-title { font: 600 clamp(21px, 3vw, 29px)/1.15 var(--f-text); letter-spacing: -.025em; overflow-wrap: anywhere; }
+.maker-chevron { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #acbfb1; border-radius: 50%; }
+.maker-chevron::after { content: ""; width: 7px; height: 7px; border: solid currentColor; border-width: 0 1.6px 1.6px 0; transform: translateY(-2px) rotate(45deg); }
+.card-maker[open] .maker-chevron::after { transform: translateY(2px) rotate(225deg); }
+
+.maker-body {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); align-items: start;
+  gap: clamp(20px, 3.5vw, 38px); padding: clamp(16px, 3vw, 30px);
+}
+.maker-form { display: grid; gap: 14px; min-width: 0; }
+.maker-form .field, .maker-preview { min-width: 0; }
+.maker-form :is(input, textarea, select) { width: 100%; max-width: 100%; min-height: 44px; }
+.maker-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.maker-actions .btn { min-height: 44px; white-space: normal; }
+.maker-actions .btn.primary { --lip: #123232; background: #245653; border-color: #245653; color: #fff7e6; }
+:root.dark .maker-actions .btn.primary { --lip: #486b62; background: #a9d5c2; border-color: #a9d5c2; color: #163934; }
+
+.maker-preview {
+  padding: 15px clamp(14px, 2vw, 21px) 22px;
+  border: 1px solid var(--rule); border-radius: var(--r);
+  background: radial-gradient(circle, var(--rule-2) .8px, transparent 1px) 2px 2px / 9px 9px, var(--hover);
+}
+.maker-preview-label { margin: 0 0 13px; color: var(--ink-2); font: 800 12px/1.4 var(--f-ui); }
+.maker-card {
+  min-width: 0; min-height: 166px; padding: 14px 15px 16px 23px; margin: 0 2px;
+  border: 1px solid var(--maker-sheet-rule); border-radius: 3px 7px 4px 3px; color: var(--maker-copy);
+  background: linear-gradient(90deg, transparent 0 12px, var(--maker-margin) 12px 13px, transparent 13px),
+    repeating-linear-gradient(0deg, var(--maker-sheet-rule) 0 1px, transparent 1px 25px), var(--maker-stock);
+  box-shadow: 2px 3px 0 -1px var(--maker-stock), 2px 4px 0 var(--rule-2), 0 6px 10px #1b241e13;
+  overflow-wrap: anywhere;
+}
+.maker-deck {
+  display: inline-block; max-width: 100%; padding: 2px 8px; margin-bottom: 12px;
+  border: 1px solid color-mix(in srgb, var(--maker-brass) 42%, var(--maker-stock)); border-radius: 4px;
+  color: var(--maker-brass); background: var(--maker-stock); font: 800 12px/1.35 var(--f-ui);
+}
+.maker-card .maker-front { margin: 0 0 5px; font: 600 clamp(21px, 2.8vw, 29px)/1.2 var(--f-text); letter-spacing: -.025em; }
+.maker-card .maker-back { margin: 0; font: 600 16px/1.45 var(--f-ui); }
+.maker-card .maker-example { margin: 10px 0 0; font: italic 400 16px/1.45 var(--f-text); }
+.maker-card .maker-example:empty { display: none; }
+.maker-card .is-placeholder { color: var(--maker-secondary); }
+.maker-card :is(.maker-front, .maker-back):not(.is-placeholder) .maker-hint,
+.maker-error[hidden] { display: none; }
+.maker-form .maker-error { margin: 0; color: var(--red); font: 700 13px/1.4 var(--f-ui); }
+.maker-form input[aria-invalid="true"] { border-color: var(--red); }
+
+@container (max-width: 590px) {
+  .maker-body { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+}
+@media (max-width: 480px) {
+  .maker-summary { min-height: 65px; }
+  .maker-mark { width: 32px; height: 32px; }
+  .maker-chevron { width: 26px; height: 26px; }
+  .maker-form :is(input, textarea, select) { font-size: 16px; }
+  .maker-actions .btn { width: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .maker-chevron::after { transition: transform .2s var(--ease); }
+  .maker-mark { transition: transform .2s var(--ease); }
+  .card-maker[open] .maker-card { animation: maker-deal .26s var(--ease) both; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .maker-summary:hover .maker-mark { transform: rotate(-4deg); }
+}
+@keyframes maker-deal { from { transform: translateY(4px) rotate(-1deg); } to { transform: none; } }
+
 /* ---------- writing ---------- */
 /* the Examen blanc EE: the three tasks as tabs with their word counts, then the three corrected tasks side by side */
 .ee-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 4px; border-radius: var(--r); background: var(--sunk); }

@@ -8540,6 +8540,15 @@
   ]
  },
  {
+  "id": "5e8cce6827d0",
+  "text": "Add a card",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+  ]
+ },
+ {
   "id": "cc5575a3e495",
   "text": "Add a task…",
   "kind": "exact",
@@ -8554,7 +8563,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "French English Example (optional) Theme … <button>Add card</button>"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -8582,15 +8591,6 @@
   "where": "app",
   "ctx": [
    "What you wrote Correct form Category … Note (optional) <button>Add to the log</button>"
-  ]
- },
- {
-  "id": "93b911f0372f",
-  "text": "Add your own card",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Ajouter une carte · Add your own card"
   ]
  },
  {
@@ -9335,15 +9335,6 @@
   "where": "app",
   "ctx": [
    "Ajouter un score · Log a mock or real test"
-  ]
- },
- {
-  "id": "6fab229b7655",
-  "text": "Ajouter une carte · Add your own card",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Ajouter une carte · Add your own card"
   ]
  },
  {
@@ -11901,12 +11892,12 @@
   "ctx": []
  },
  {
-  "id": "796a263bd7f3",
-  "text": "Card added. It shows up under New cards for its theme.",
-  "kind": "exact",
+  "id": "dd4b0a8682b1",
+  "text": "Card added to {0}.",
+  "kind": "pattern",
   "where": "app",
   "ctx": [
-   "Card added. It shows up under New cards for its theme."
+   "Card added to …."
   ]
  },
  {
@@ -13225,7 +13216,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1><span>…</span>Vocabulaire</h1>… … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> … …"
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> …"
   ]
  },
  {
@@ -14356,7 +14347,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1><span>…</span>Vocabulaire</h1>… … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> … …"
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> …"
   ]
  },
  {
@@ -15907,8 +15898,16 @@
   "where": "app",
   "ctx": [
    "English",
-   "French English Example (optional) Theme … <button>Add card</button>",
    "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
+  ]
+ },
+ {
+  "id": "a8e1dc3c5e25",
+  "text": "English meaning",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -15917,6 +15916,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s",
    "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
   ]
  },
@@ -15951,6 +15951,15 @@
   ]
  },
  {
+  "id": "c4bfe9b2d4be",
+  "text": "Enter a French word or phrase.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+  ]
+ },
+ {
   "id": "ff0095b29524",
   "text": "Enter a score and a total, with the score no higher than the total.",
   "kind": "exact",
@@ -15966,6 +15975,15 @@
   "where": "app",
   "ctx": [
    "Enter at least one score."
+  ]
+ },
+ {
+  "id": "a128cf3ac09c",
+  "text": "Enter the English meaning.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -16754,7 +16772,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "French English Example (optional) Theme … <button>Add card</button>"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -17125,15 +17143,6 @@
   "where": "app",
   "ctx": [
    "Fifty hours of study ticked"
-  ]
- },
- {
-  "id": "3ca282871fdc",
-  "text": "Fill in both the French and the English.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Fill in both the French and the English."
   ]
  },
  {
@@ -17638,7 +17647,6 @@
   "where": "app",
   "ctx": [
    "French",
-   "French English Example (optional) Theme … <button>Add card</button>",
    "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
   ]
  },
@@ -17682,7 +17690,17 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s",
    "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
+  ]
+ },
+ {
+  "id": "bfc3ef1976e2",
+  "text": "French word or phrase",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -20047,6 +20065,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "35e627d34ab5",
+  "text": "Je prends mon temps.",
+  "kind": "exact",
+  "where": "attr:placeholder",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+  ]
  },
  {
   "id": "3efe125e6b7b",
@@ -28063,6 +28090,15 @@
   ]
  },
  {
+  "id": "a8d5916e9428",
+  "text": "prendre son temps",
+  "kind": "exact",
+  "where": "attr:placeholder",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+  ]
+ },
+ {
   "id": "428dd78e7a0a",
   "text": "Prendre une décision, not faire (a calque of make a decision).",
   "kind": "exact",
@@ -28169,7 +28205,8 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<a>← …</a><span>…</span> Titre <span>In English <span>· optional</span></span> <span>Kind</span> … <span>Linked page <span>· optional: that page shows a tab to this sheet</span></span> None … … La fiche … … … <button>Save <span>⌘↵</span></button><a>Cancel <spa"
+   "<a>← …</a><span>…</span> Titre <span>In English <span>· optional</span></span> <span>Kind</span> … <span>Linked page <span>· optional: that page shows a tab to this sheet</span></span> None … … La fiche … … … <button>Save <span>⌘↵</span></button><a>Cancel <spa",
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -37280,9 +37317,9 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s",
    "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …",
-   "Theme Learned Mastered …",
-   "French English Example (optional) Theme … <button>Add card</button>"
+   "Theme Learned Mastered …"
   ]
  },
  {
@@ -38081,15 +38118,6 @@
   "ctx": []
  },
  {
-  "id": "8fadc8dd1904",
-  "text": "to commit to doing something",
-  "kind": "exact",
-  "where": "attr:placeholder",
-  "ctx": [
-   "French English Example (optional) Theme … <button>Add card</button>"
-  ]
- },
- {
   "id": "d274d630c402",
   "text": "To earn: 100 cards reviewed",
   "kind": "exact",
@@ -38706,6 +38734,15 @@
   "where": "app",
   "ctx": [
    "<p><b>… … to prepare.</b> Claude reads each corrected text once, puts your mistakes back in it and writes the options, so every question has exactly one right answer.…</p> <button>Prepare … with Claude</button>"
+  ]
+ },
+ {
+  "id": "cf79ed472dea",
+  "text": "to take one’s time",
+  "kind": "exact",
+  "where": "attr:placeholder",
+  "ctx": [
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
   ]
  },
  {
@@ -39942,7 +39979,7 @@
   "where": "app",
   "ctx": [
    "Vocabulaire",
-   "<h1><span>…</span>Vocabulaire</h1>… … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> … …"
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> …"
   ]
  },
  {
