@@ -6185,7 +6185,7 @@
             <p class="maker-error" id="card-fr-error" hidden>Enter a French word or phrase.</p></div>
           <div><label class="field">English meaning<input type="text" id="card-en" data-input="card-draft" value="${formVal("card-en")}" lang="en" placeholder="to take one’s time" required></label>
             <p class="maker-error" id="card-en-error" hidden>Enter the English meaning.</p></div>
-          <label class="field">Example (optional)<input type="text" id="card-ex" data-input="card-draft" value="${formVal("card-ex")}" lang="fr" placeholder="Je prends mon temps."></label>
+          <label class="field">Example (optional)<textarea id="card-ex" data-input="card-draft" rows="3" lang="fr" placeholder="Je prends mon temps.">${formVal("card-ex")}</textarea></label>
           <label class="field">Theme<select id="card-th" data-change="card-draft">${T.VOCAB.map((th) => `<option value="${th.id}"${deck.id === th.id ? " selected" : ""}>${esc(th.label)}</option>`).join("")}</select></label>
           <div class="maker-actions"><button type="submit" class="btn primary">Add card</button></div>
         </form>
