@@ -8545,7 +8545,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -8563,7 +8563,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -11096,7 +11096,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -11764,6 +11764,15 @@
   "where": "app",
   "ctx": [
    "Cacher"
+  ]
+ },
+ {
+  "id": "4c83736b7403",
+  "text": "Calendrier",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -13440,6 +13449,15 @@
   "kind": "exact",
   "where": "production",
   "ctx": []
+ },
+ {
+  "id": "e392a45b99f1",
+  "text": "Completed plan blocks",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Completed plan blocks"
+  ]
  },
  {
   "id": "0748d4bb854a",
@@ -15907,7 +15925,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -15916,7 +15934,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s",
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<",
    "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
   ]
  },
@@ -15956,7 +15974,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -15983,7 +16001,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -16772,7 +16790,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -16882,6 +16900,15 @@
   "where": "app",
   "ctx": [
    "You are a French teacher checking a B1→B2 learner's production exercise. Exercise: … Pass criterion: …. … Learner's answer: \"\"\" … \"\"\" Reply with only JSON: {\"pass\": true or false, \"comment\": \"2–3 sentences in … on whether the criterion is met and why\", \"errors"
+  ]
+ },
+ {
+  "id": "4dc503dafcf2",
+  "text": "Exercises",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Exercises"
   ]
  },
  {
@@ -17690,7 +17717,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s",
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<",
    "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
   ]
  },
@@ -17700,7 +17727,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -18827,7 +18854,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -18836,7 +18863,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -20072,7 +20099,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -23993,6 +24020,15 @@
   "ctx": []
  },
  {
+  "id": "8abf7cf1d0b3",
+  "text": "Next month",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+  ]
+ },
+ {
   "id": "f4fdb2e4d88d",
   "text": "next text",
   "kind": "exact",
@@ -24562,6 +24598,15 @@
   "where": "app",
   "ctx": [
    "No practice exam yet."
+  ]
+ },
+ {
+  "id": "3f82a1072ec1",
+  "text": "No saved activity for this date.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>No saved activity for this date.</p>"
   ]
  },
  {
@@ -26139,6 +26184,15 @@
   ]
  },
  {
+  "id": "b7685dbc6e2e",
+  "text": "Open the study calendar",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… <p>The last 12 weeks, a square a day: the darker, the more of the day's plan was done.</p><a>Open the study calendar</a>"
+  ]
+ },
+ {
   "id": "d7bfc5bbfbe2",
   "text": "open the tile for the whole collection",
   "kind": "exact",
@@ -26522,7 +26576,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -28095,7 +28149,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -28206,7 +28260,16 @@
   "where": "attr:aria-label",
   "ctx": [
    "<a>← …</a><span>…</span> Titre <span>In English <span>· optional</span></span> <span>Kind</span> … <span>Linked page <span>· optional: that page shows a tab to this sheet</span></span> None … … La fiche … … … <button>Save <span>⌘↵</span></button><a>Cancel <spa",
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
+  ]
+ },
+ {
+  "id": "46a299215300",
+  "text": "Previous month",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
   ]
  },
  {
@@ -28292,7 +28355,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -30265,7 +30328,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "Retry …"
+   "Retry …",
+   "<span>Retry</span> ·"
   ]
  },
  {
@@ -30999,7 +31063,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {
@@ -31090,6 +31154,16 @@
   "where": "app",
   "ctx": [
    "Saved …. They come up in your reviews from tomorrow.…"
+  ]
+ },
+ {
+  "id": "d6b70d86d62d",
+  "text": "Saved activity",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Saved activity</span>",
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
   ]
  },
  {
@@ -33458,6 +33532,15 @@
   "ctx": []
  },
  {
+  "id": "fe81ab3fbea2",
+  "text": "study calendar",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+  ]
+ },
+ {
   "id": "da0dd4657912",
   "text": "study permit",
   "kind": "exact",
@@ -35659,7 +35742,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>The last 12 weeks, a square a day: the darker, the more of the day's plan was done.</p>"
+   "… <p>The last 12 weeks, a square a day: the darker, the more of the day's plan was done.</p><a>Open the study calendar</a>"
   ]
  },
  {
@@ -37317,7 +37400,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s",
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<",
    "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …",
    "Theme Learned Mastered …"
   ]
@@ -38742,7 +38825,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) Theme … <button>Add card</button> <h3>Preview</h3> <span>…</s"
+   "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<"
   ]
  },
  {
@@ -38769,7 +38852,8 @@
   "where": "app",
   "ctx": [
    "<span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span> <small>Départ · From</small><b>B1</b><span>Where you started</span> … <small>Arrivée · To</small><b>NCLC 7</b><span>All four skills</span> Phase … · … Semaine · Week … sur … Porte · Gate …",
-   "Today"
+   "Today",
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
   ]
  },
  {
@@ -39986,8 +40070,10 @@
   "id": "4eb924c066d1",
   "text": "Vocabulary cards",
   "kind": "exact",
-  "where": "attr:title",
-  "ctx": []
+  "where": "app",
+  "ctx": [
+   "Vocabulary cards"
+  ]
  },
  {
   "id": "e659fa6421d3",
@@ -40162,7 +40248,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>Vue d'ensemble<small>overview</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+   "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
   ]
  },
  {

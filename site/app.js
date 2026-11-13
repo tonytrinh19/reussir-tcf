@@ -360,6 +360,7 @@
       viewing: null,
       copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
     },
+    calendarDay: null,
     hist: { filter: "all", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
@@ -2405,6 +2406,15 @@
     const last = o.last || (o.due ? addDays(o.due, -o.ivl) : o.learned) || todayStr();
     return { due: dayDate(o.due || last), stability: o.ivl, difficulty: d, elapsed_days: 0, scheduled_days: o.ivl, learning_steps: 0, reps: Math.max(1, o.reps || 0), lapses: o.lapses || 0, state: FS.State.Review, last_review: dayDate(last) };
   }
+  // Keep study dates independently of the scheduler's rolling grade log. Older cards can still
+  // contribute the dates retained by their grades and their last recorded reverse practice.
+  function cardStudyDates(st) {
+    const dates = new Set(arr(st?.studyDates));
+    for (const grade of arr(st?.log)) if (Array.isArray(grade) && grade[0]) dates.add(grade[0]);
+    if (st?.last) dates.add(st.last);
+    if (st?.rec) dates.add(st.rec);
+    return dates;
+  }
   // The schedule to save after a grade: FSRS's new card as the site keeps it, with the grade added to the card's
   // history (log, its last 100 grades, so FSRS could one day be tuned to you). A copy; the SM-2 fields go.
   function srsDoc(prev, c, g, t, log) {
@@ -2420,7 +2430,7 @@
     if (srsMissing()) return;
     const t = todayStr(), now = dayDate(t), prev = S.srs.get(id);
     const { card } = FSR.next(srsCard(prev, now), now, g);
-    put("srs", id, srsDoc(prev, card, g, t, arr(prev && prev.log).concat([[t, g]])));
+    put("srs", id, { ...srsDoc(prev, card, g, t, arr(prev && prev.log).concat([[t, g]])), studyDates: [...cardStudyDates(prev).add(t)] });
   }
   // A new card's first rating, from an empty card: Good when it's shown, so ending a session early loses nothing
   // (not in its history, since you haven't recalled it yet), then the grade of its first check.
@@ -2428,7 +2438,7 @@
     if (srsMissing()) return;
     const t = todayStr(), now = dayDate(t);
     const { card } = FSR.next(FS.createEmptyCard(now), now, g);
-    put("srs", id, srsDoc({ learned: t }, card, g, t, shown ? [] : [[t, g]]));
+    put("srs", id, { ...srsDoc({ learned: t }, card, g, t, shown ? [] : [[t, g]]), studyDates: [...cardStudyDates(S.srs.get(id)).add(t)] });
   }
   // A card saved from a page joins the reviews tomorrow, still new: its first review is its first rating.
   function srsLearn(id) {
@@ -2448,11 +2458,11 @@
     const now = dayDate(todayStr());
     return FSR.get_retrievability(srsCard(st, now), now, false);
   }
-  // French → English practice only keeps the day a card was last practised (rec), so the next practice starts
+  // French → English practice uses the most recent practice day (rec), so the next practice starts
   // with the cards practised longest ago. Its schedule stays as it was.
   function srsPractised(id, t) {
     const st = S.srs.get(id);
-    if (st && st.rec !== t) put("srs", id, Object.assign({}, st, { rec: t }));
+    if (st && st.rec !== t) put("srs", id, Object.assign({}, st, { rec: t, studyDates: [...cardStudyDates(st).add(t)] }));
   }
 
   // A session is a queue of steps, each { id, k }:
@@ -4558,7 +4568,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
-  const TAB_UI = ["bento", "day", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
+  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -7179,6 +7189,87 @@
     if (x.kind === "exam") return XSPEC[skillOf(x.doc)].bank().some((e) => e.id === x.doc.setId) || x.doc.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(x.id)}">Open</button>` : "";
     return `<button class="btn ghost sm" data-act="h-open" data-id="${esc(x.id)}">${ui.hist.open === x.id ? "Close" : "Open"}</button>`;
   }
+  // Group the month's saved evidence. A repeated grade for one card on the same day is one studied card.
+  function calendarActivity(month) {
+    const days = new Map();
+    function day(date) {
+      if (typeof date !== "string" || !date.startsWith(month + "-")) return null;
+      if (!days.has(date)) days.set(date, { attempts: [], cards: [], blocks: [] });
+      return days.get(date);
+    }
+    for (const x of finishedAttempts()) {
+      day(x.date)?.attempts.push(x);
+      if (x.kind === "drill") {
+        for (const r of retriesOf(x.doc)) {
+          day(r.date)?.attempts.push({ ...x, kind: "retry", result: `${r.score}/${r.total}`, ts: r.ts || 0 });
+        }
+      }
+    }
+    const cards = allCards();
+    for (const [id, st] of S.srs) {
+      const c = cards.get(id);
+      if (!c || !st) continue;
+      for (const date of cardStudyDates(st)) day(date)?.cards.push(c);
+    }
+    for (const [date, doc] of S.days) {
+      if (!date.startsWith(month) || !doc.done) continue;
+      const phase = doc.phase || settings().phase;
+      const plan = planFor(phase, date) || [];
+      plan.forEach((block, i) => {
+        if (doc.done[blockKey(phase, i)]) day(date).blocks.push(block[2]);
+      });
+    }
+    return days;
+  }
+
+  function calendarAttempt(x) {
+    if (x.kind === "writing") {
+      return `<li><details ${foldAttr("cal-writing-" + x.id)}><summary><b>${typo(x.title)}</b></summary>
+        ${str(x.doc.prompt).length > 80 ? `<p class="small muted" lang="fr" translate="no">${typo(x.doc.prompt)}</p>` : ""}
+        <p class="cal-essay" lang="fr" translate="no">${esc(x.doc.text)}</p></details></li>`;
+    }
+    const open = x.kind === "comp" || x.kind === "exam" ? historyOpenBtn(x)
+      : `<button class="btn ghost sm" data-act="h-show" data-id="${esc(x.id)}">Open</button>`;
+    return `<li class="cal-attempt"><div><b>${typo(x.title)}</b><small>${x.kind === "retry" ? "<span>Retry</span> · " : ""}${x.kind === "drill" ? scorePill(x.doc) : esc(x.result)}</small></div>${open}</li>`;
+  }
+
+  function calendarDay(date, data) {
+    const group = (name, icon, items) => items.length ? `<section class="cal-group"><h3>${ico(icon)}${name}<small>${items.length}</small></h3><ul>${items.join("")}</ul></section>` : "";
+    let groups = "";
+    if (data) {
+      const attempts = data.attempts.sort((a, b) => b.ts - a.ts);
+      groups = group("Écrit", "writing", attempts.filter((x) => x.kind === "writing").map(calendarAttempt))
+        + group("Exercises", "grammar", attempts.filter((x) => x.kind !== "writing").map(calendarAttempt))
+        + group("Vocabulary cards", "vocab", data.cards.map((c) => `<li><b lang="fr" translate="no">${typo(c.fr)}</b><small lang="en" translate="no">${esc(c.en)}</small></li>`))
+        + group("Completed plan blocks", "today", data.blocks.map((label) => `<li>${esc(label)}</li>`));
+    }
+    return `<section class="cal-journal" aria-labelledby="cal-date"><header><small lang="fr">${DAYS[dow(date)]}</small><h2 id="cal-date" lang="fr" tabindex="-1">${frDate(date)}</h2></header>
+      ${groups || '<p class="cal-empty">No saved activity for this date.</p>'}</section>`;
+  }
+
+  function calendarView(head, tabs) {
+    const today = todayStr();
+    const selected = /^\d{4}-\d{2}-\d{2}$/.test(ui.calendarDay) && ui.calendarDay <= today && ymd(parse(ui.calendarDay)) === ui.calendarDay ? ui.calendarDay : today;
+    const first = selected.slice(0, 7) + "-01", start = parse(first);
+    const days = calendarActivity(first.slice(0, 7));
+    const monthDays = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < dow(first); i++) cells.push('<span aria-hidden="true"></span>');
+    for (let n = 1; n <= monthDays; n++) {
+      const date = first.slice(0, 8) + pad(n), active = days.has(date);
+      cells.push(`<button type="button" id="cal-${date}" class="cal-cell${active ? " has-work" : ""}" data-act="cal-day" data-date="${date}" aria-pressed="${date === selected}"${date === today ? ' aria-current="date"' : ""}${date > today ? " disabled" : ""}>
+        <span aria-hidden="true">${n}</span><span class="sr">${frDate(date)}</span>${active ? '<span class="sr">Saved activity</span>' : ""}</button>`);
+    }
+    const previous = addDays(first, -1), next = addDays(first, monthDays);
+    return `<div class="wrap">${head}${tabs}<div class="study-calendar">
+      <section class="cal-month" aria-labelledby="cal-month-title"><header><h2 id="cal-month-title" lang="fr">${MONTHS[start.getMonth()]} ${start.getFullYear()}</h2>
+        <div class="cal-nav"><button id="cal-prev" class="btn sm" data-act="cal-day" data-date="${previous}" aria-label="Previous month">‹</button>
+          <button id="cal-next" class="btn sm" data-act="cal-day" data-date="${next}" aria-label="Next month"${next > today ? " disabled" : ""}>›</button></div></header>
+        <div class="cal-grid">${DAYS_SHORT.map((name) => `<span class="cal-weekday" aria-hidden="true">${name}</span>`).join("")}${cells.join("")}</div>
+        <footer><span class="cal-key">Saved activity</span><button id="cal-today" class="btn ghost sm" data-act="cal-day" data-date="${today}">Today</button></footer>
+      </section>${calendarDay(selected, days.get(selected))}</div></div>`;
+  }
+
   function historyView(head, tabs) {
     const f = ui.hist.filter;
     const pick = (x) => f === "all" || sectionOf(x.kind) === f;
@@ -7902,7 +7993,7 @@
       time: {
         icon: "timer", title: "Activité", en: "study time",
         face: tileHero(`${leafSvg("leaf-ico t" + tierOf(D.streak))}${D.streak} jour${D.streak === 1 ? "" : "s"}`, `${D.streak ? "in a row" : "no streak right now"} · best ${D.best} · ≈ ${hm(D.week)} this week`)
-          + `<div class="since-heat" data-m="chart" data-k="heat">${heatmap(12)}</div><p class="small muted">The last 12 weeks, a square a day: the darker, the more of the day's plan was done.</p>`,
+          + `<div class="since-heat" data-m="chart" data-k="heat">${heatmap(12)}</div><p class="small muted">The last 12 weeks, a square a day: the darker, the more of the day's plan was done.</p><a href="#progress.calendar">Open the study calendar</a>`,
         more: () => (timeD = timeD || timeMore(D, stats)).side,
         wide: () => (timeD = timeD || timeMore(D, stats)).wide,
       },
@@ -8136,8 +8227,9 @@
   VIEWS.progress = {
     render(args) {
       const head = `<header class="stack tight"><h1 class="title chapter-title chapter-progress"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-progress">${ico("progress")}</span>Progrès</h1>${fold("intro-progress", "Comment ça marche · How it works", `<p class="small muted">Advance on the exit criteria, not on the calendar. If a phase runs long, that tells you where the real bottleneck is.</p>`)}</header>`;
-      const tab = ["history", "report", "backup"].includes(args[0]) ? args[0] : "";
-      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a><a href="#progress.backup" role="tab" aria-selected="${tab === "backup"}">Sauvegarde<small>backup</small></a></nav>`;
+      const tab = ["history", "report", "backup", "calendar"].includes(args[0]) ? args[0] : "";
+      const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.calendar" role="tab" aria-selected="${tab === "calendar"}">Calendrier<small>study calendar</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a><a href="#progress.backup" role="tab" aria-selected="${tab === "backup"}">Sauvegarde<small>backup</small></a></nav>`;
+      if (tab === "calendar") return calendarView(head, tabs);
       if (tab === "history") return historyView(head, tabs);
       if (tab === "backup") return backupView(head, tabs);
       if (tab === "report") return reportView(head, tabs);
@@ -8255,6 +8347,18 @@
       if (moveFocus && btn) btn.focus({ preventScroll: true });
     },
     "ip-discard": (el) => ipDiscard(el.dataset.id),
+    "cal-day": (el) => {
+      ui.calendarDay = el.dataset.date;
+      render(true);
+      const next = document.getElementById(el.id);
+      const journal = document.querySelector(".cal-journal"), month = document.querySelector(".cal-month");
+      if (el.classList.contains("cal-cell") && journal.offsetTop >= month.offsetTop + month.offsetHeight) {
+        document.getElementById("cal-date").focus({ preventScroll: true });
+        journal.scrollIntoView({ block: "start" });
+      } else if (!next || next.disabled) {
+        document.getElementById("cal-" + ui.calendarDay)?.focus({ preventScroll: true });
+      }
+    },
     "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; render(true); },
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
