@@ -1717,6 +1717,58 @@ audio.cox-audio { width: 100%; max-width: 420px; height: 36px; }
 .links a { font-weight: 700; }
 
 /* ---------- progress ---------- */
+.study-calendar {
+  display: grid; grid-template-columns: minmax(280px, .95fr) minmax(0, 1.2fr);
+  align-items: start; gap: clamp(15px, 2.5vw, 28px);
+}
+.cal-month, .cal-journal {
+  min-width: 0; border: 1px solid var(--rule); border-radius: var(--r-card);
+  background: var(--surface); box-shadow: var(--shadow-sm);
+}
+.cal-month > header, .cal-month footer, .cal-group h3, .cal-attempt, .cal-nav { display: flex; align-items: center; gap: 8px; }
+.cal-month > header {
+  justify-content: space-between; padding: 16px clamp(12px, 2vw, 23px);
+  border-radius: var(--r-card) var(--r-card) 0 0; background: linear-gradient(110deg, #24455a, #315967); color: #fff7e4;
+}
+.cal-month h2, .cal-journal h2 { margin: 0; font: 600 clamp(21px, 2.8vw, 29px)/1.2 var(--f-text); }
+.cal-month > header .btn { color: var(--ink); background: var(--surface); }
+.cal-month h2::first-letter, .cal-journal header small::first-letter { text-transform: uppercase; }
+.cal-nav .btn { min-width: 38px; min-height: 38px; padding: 0 8px; font: 600 24px/1 var(--f-ui); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; padding: 12px 8px 6px; }
+.cal-weekday { padding: 3px 0 6px; color: var(--ink-2); text-align: center; font: 700 12px var(--f-ui); }
+.cal-cell {
+  position: relative; min-width: 0; min-height: 44px; border-radius: 9px; border: 1px solid transparent;
+  color: var(--ink); background: transparent; cursor: pointer; font: 650 16px var(--f-ui); font-variant-numeric: tabular-nums;
+}
+.cal-cell:disabled { color: var(--ink-3); opacity: .55; cursor: default; }
+.cal-cell:enabled:hover, .cal-cell.has-work { background: var(--accent-soft); }
+.cal-cell[aria-current="date"] { border-color: var(--accent); }
+.cal-cell[aria-pressed="true"], .cal-cell[aria-pressed="true"]:hover { background: var(--accent); color: var(--accent-ink); }
+.cal-cell.has-work::after, .cal-key::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.cal-cell.has-work::after { position: absolute; bottom: 4px; left: calc(50% - 2.5px); }
+.cal-month footer { justify-content: space-between; padding: 8px 15px; border-top: 1px solid var(--rule); }
+.cal-key { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); }
+.cal-journal { scroll-margin-top: calc(var(--rail-h, 0px) + 10px); padding: clamp(16px, 2.5vw, 28px); overflow-wrap: anywhere; }
+.cal-journal header { padding-bottom: 14px; border-bottom: 2px solid var(--rule-2); }
+.cal-journal header small { display: block; margin-bottom: 3px; font-weight: 700; color: var(--ink-2); }
+.cal-group h3 { margin: 20px 0 5px; font-size: 16px; }
+.cal-group h3 .ico { width: 19px; height: 19px; color: var(--accent); }
+.cal-group h3 small { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.cal-group ul { list-style: none; padding: 0; margin: 0; }
+.cal-group li { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.cal-group li:last-child { border-bottom: 0; }
+.cal-group li small { display: block; color: var(--ink-2); }
+.cal-group summary { cursor: pointer; color: var(--accent); }
+.cal-attempt { justify-content: space-between; }
+.cal-essay { white-space: pre-wrap; font-family: var(--f-text); }
+.cal-empty { margin: 18px 0 0; color: var(--ink-2); }
+@media (max-width: 730px), (min-width: 881px) and (max-width: 1040px) {
+  .study-calendar { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cal-cell { transition: background-color .15s ease; }
+}
+
 .criteria { list-style: none; margin: 0; padding: 0; display: grid; }
 .criteria li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--rule); }
 .criteria .mark { font: 800 16px/1.2 var(--f-ui); }
