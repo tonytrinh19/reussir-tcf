@@ -1211,6 +1211,76 @@ details.fold[open] > summary::before { content: "– "; }
 @keyframes atelier-desk-pan { from { transform: translateY(-2%) scale(1.015); } to { transform: translateY(7%) scale(1.08); } }
 @keyframes atelier-pen-line { from { transform: scaleX(.72); } to { transform: scaleX(1.65); } }
 
+/* Vocabulary theme library */
+.theme-library {
+  overflow: clip; container-type: inline-size; border: 1px solid var(--rule-2);
+  border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow);
+}
+.library-cover {
+  position: relative; isolation: isolate; display: flex; align-items: center; justify-content: space-between;
+  min-height: 104px; padding: 22px clamp(16px, 4%, 35px); gap: 14px; overflow: hidden;
+  list-style: none; cursor: pointer; color: #fff3d5;
+  background: repeating-linear-gradient(92deg, transparent 0 3px, #ffffff06 3px 4px), linear-gradient(112deg, #183b36, #30534b 76%, #33564d);
+}
+.library-cover::-webkit-details-marker { display: none; }
+.library-cover:focus-visible { outline: 3px solid #ffe8aa; outline-offset: -5px; }
+.library-cover-title { position: relative; z-index: 1; max-width: 70%; margin: 0; font: 600 clamp(26px, 3.7vw, 41px)/1.08 var(--f-text); letter-spacing: -.035em; }
+.library-toggle { display: grid; place-content: center; width: 32px; height: 32px; border: 1px solid #d4dac17a; border-radius: 50%; flex: none; }
+.library-toggle::after { content: ""; display: block; width: 8px; height: 8px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: translateY(-2px) rotate(45deg); }
+.theme-library[open] .library-toggle::after { transform: translateY(2px) rotate(225deg); }
+.library-art { position: absolute; right: 14%; bottom: -18px; width: 135px; height: 93px; pointer-events: none; }
+.library-art i { position: absolute; inset: 0; background: #b97255; border: 1px solid #3a4740; border-radius: 4px 8px 4px 4px; transform-origin: 50% 95%; transform: rotate(-21deg); }
+.library-art i:nth-child(2) { background: #d6af70; transform: rotate(-7deg); }
+.library-art i:last-child { display: grid; justify-items: end; align-items: start; padding: 10px; color: #876e48; transform: rotate(9deg);
+  background: linear-gradient(90deg, transparent 15px, #c18976 15px 16px, transparent 16px), repeating-linear-gradient(0deg,#eadfc8 0 1px,#f8eed9 1px 13px); }
+.library-art .ico { width: 22px; height: 22px; --pen: currentColor; }
+.library-layout { display: grid; grid-template-columns: minmax(170px, 28%) minmax(0, 1fr); }
+.library-nav { padding: 18px 9px 16px; border-right: 1px solid var(--rule); background: color-mix(in srgb, var(--paper) 70%, var(--surface)); }
+.library-index-title { margin: 0 7px 8px; padding: 0 0 9px; display: flex; justify-content: space-between; align-items: center; color: var(--ink-2); border-bottom: 1px solid var(--rule-2); font-weight: 800; }
+.library-index-title span, .library-index small { font-size: 12px; font-variant-numeric: tabular-nums; }
+.library-index { display: grid; max-height: 515px; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: thin; }
+.library-index button { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 11px; min-height: 39px; width: 100%; text-align: left; background: none; border: 0; border-inline-start: 3px solid transparent; border-radius: 5px; font: 700 14px/1.3 var(--f-ui); cursor: pointer; }
+.library-index button:hover { background: var(--hover); }
+.library-index button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.library-index button:focus-visible { outline-offset: -3px; }
+.library-picker.field { display: none; }
+.library-collection { padding: clamp(17px, 3.5%, 34px); min-width: 0; }
+.library-heading { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between; }
+.library-heading h3 { margin: 0; font: 600 clamp(22px, 3vw, 31px)/1.15 var(--f-text); letter-spacing: -.025em; }
+.library-heading p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+.library-phase { color: var(--green); font-size: 12px; font-weight: 800; }
+.library-metrics { display: flex; flex-wrap: wrap; gap: 14px 25px; margin: 17px 0 8px; padding: 11px 0; border-block: 1px solid var(--rule-2); }
+.library-metrics div { display: flex; align-items: baseline; gap: 5px; }
+.library-metrics dt { color: var(--ink-2); font-size: 13px; }
+.library-metrics dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
+.library-collection .cards-list { columns: auto; margin: 0; }
+.library-collection .peek > summary { align-items: center; justify-content: start; padding: 10px 2px; min-height: 44px; }
+.library-collection .peek-fr { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 17px; }
+.library-collection .peek > summary::after {
+  content: ""; flex: none; width: 10px; height: 10px; color: var(--accent);
+  background: linear-gradient(currentColor 0 0) center / 100% 1.5px no-repeat, linear-gradient(currentColor 0 0) center / 1.5px 100% no-repeat;
+}
+.library-collection .peek[open] > summary::after { background-size: 100% 1.5px, 0 0; }
+.library-collection .peek-body { margin-bottom: 10px; border-color: var(--accent); overflow-wrap: anywhere; }
+.library-tip { margin: 14px 0 0; }
+.library-collection > .btn { margin: 12px 8px 0 0; }
+@container (max-width: 620px) {
+  .library-layout { grid-template-columns: minmax(0, 1fr); }
+  .library-nav { display: none; }
+  .library-picker.field { display: grid; padding: 12px 16px; background: var(--paper); border-bottom: 1px solid var(--rule); }
+  .library-picker select { width: 100%; min-height: 44px; font-size: 16px; }
+  .library-cover { min-height: 80px; }
+  .library-art { width: 78px; height: 60px; right: 19%; bottom: -22px; }
+  .library-cover-title { max-width: 61%; }
+}
+@container (max-width: 335px) {
+  .library-art { width: 49px; height: 48px; right: 18%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .library-art i:last-child { transition: transform .25s var(--ease); }
+  .library-cover:hover .library-art i:last-child { transform: translateY(-4px) rotate(12deg); }
+}
+
 /* The manual card creator unfolds into a writing area and its ruled card. */
 .card-maker {
   --maker-petrol: #1c4042;
