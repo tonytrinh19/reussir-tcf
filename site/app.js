@@ -338,6 +338,7 @@
 
   /* =============== UI state =============== */
   const dayIndex = daysBetween("2026-01-01", todayStr());
+  const LIBRARY_PAGE = 12;
   const ui = {
     bento: null, // the overview's open tile
     watchPick: null, // the two mistakes being picked for a week (À surveiller), before they're kept
@@ -350,6 +351,8 @@
     prod: {},
     vocab: null,
     vTheme: "",
+    libraryTheme: "",
+    libraryLimit: LIBRARY_PAGE,
     vCount: 10,
     w: {
       task: "t1",
@@ -4568,7 +4571,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
-  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
+  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "libraryTheme", "libraryLimit", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -6161,12 +6164,18 @@
   }
 
   /* =============== view: vocab =============== */
+  let libraryScroll = 0;
   VIEWS.vocab = {
     render(args) {
+      libraryScroll = document.querySelector(".library-index")?.scrollTop || 0;
       const tok = args.join(".");
       if (args[0] === "new" && THEME[args[1]] && ui.applied !== tok) { ui.vTheme = args[1]; ui.applied = tok; }
       if (ui.vocab) return ui.vocab.finished ? vocabDone() : vocabCard();
       return vocabHome(args);
+    },
+    after() {
+      const index = document.querySelector(".library-index");
+      if (index) index.scrollTop = libraryScroll;
     },
   };
   // One card in Deck by theme: tap it to see its meaning, notes and examples without starting a review.
@@ -6249,6 +6258,43 @@
     render(true);
     document.getElementById("card-fr").focus({ preventScroll: true });
   }
+  function themeLibrary(cards, phaseThemes, defaultId) {
+    const theme = THEME[ui.libraryTheme] || THEME[defaultId];
+    const collections = new Map(T.VOCAB.map((t) => [t.id, []]));
+    for (const card of cards.values()) collections.get(card.theme)?.push(card);
+    const deck = collections.get(theme.id);
+    const learned = deck.filter((c) => S.srs.has(c.id)).length;
+    const mastered = deck.filter((c) => S.srs.get(c.id)?.stage >= 5).length;
+    const limit = ui.libraryLimit;
+    const index = T.VOCAB.map((t) => `<button type="button" id="library-theme-${t.id}" data-act="library-theme" data-theme="${t.id}" aria-pressed="${t === theme}" aria-controls="library-collection"><span lang="fr">${esc(t.label)}</span><small>${collections.get(t.id).length}</small></button>`).join("");
+    const options = T.VOCAB.map((t) => `<option value="${t.id}"${t === theme ? " selected" : ""}>${esc(t.label)} · ${collections.get(t.id).length}</option>`).join("");
+    const build = theme.own ? "" : claudeBtn("build-" + theme.id, "v-build", deck.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${theme.id}"`, "btn sm");
+    return `<details class="theme-library" ${foldAttr("deck", true)} data-m="paper" data-k="vocab-deck">
+      <summary class="library-cover"><span class="library-cover-title" role="heading" aria-level="2">Deck by theme</span><span class="library-art" aria-hidden="true"><i></i><i></i><i>${ico("vocab")}</i></span><span class="library-toggle" aria-hidden="true"></span></summary>
+      <div class="library-layout">
+        <div class="library-nav" role="group" aria-labelledby="library-index-title">
+          <p id="library-index-title" class="library-index-title">Themes <span>${T.VOCAB.length}</span></p>
+          <div class="library-index">${index}</div>
+        </div>
+        <label class="library-picker field">Theme<select id="library-picker" data-change="library-theme">${options}</select></label>
+        <section id="library-collection" class="library-collection" aria-labelledby="library-name">
+          <header class="library-heading"><div><h3 id="library-name" lang="fr">${esc(theme.label)}</h3><p class="en-gloss" lang="en">${esc(theme.en)}</p></div>
+            ${phaseThemes.includes(theme.id) ? '<span class="library-phase">this phase</span>' : ""}</header>
+          <dl class="library-metrics"><div><dt>Cards</dt><dd>${deck.length}</dd></div><div><dt>Learned</dt><dd>${learned}</dd></div><div><dt>Mastered cards</dt><dd>${mastered}</dd></div></dl>
+          ${deck.length ? `<ul class="cards-list">${deck.slice(0, limit).map(cardPeek).join("")}</ul>` : '<p class="small muted">No cards in this theme yet.</p>'}
+          ${deck.length > limit ? '<button id="library-more" class="btn sm" data-act="library-more">Show more cards</button>' : ""}
+          ${build}
+          <p class="library-tip small muted">Collocations and connectors are worth more than isolated nouns.</p>
+        </section>
+      </div>
+    </details>`;
+  }
+  function selectLibraryTheme(el) {
+    ui.libraryTheme = el.dataset.theme || el.value;
+    ui.libraryLimit = LIBRARY_PAGE;
+    render(true);
+  }
+
   function vocabHome(args) {
     const s = settings();
     const cards = allCards();
@@ -6265,16 +6311,6 @@
         return `<option value="${th.id}" ${th.id === theme ? "selected" : ""}>${esc(immersion() && I18N ? I18N.tr(label) : label)}</option>`;
       }).join("");
     const left = themeCards(theme, cards).filter(isNew).length;
-    const rows = T.VOCAB.map((th) => {
-      const cs = themeCards(th.id, cards);
-      const lr = cs.filter((c) => S.srs.has(c.id)).length;
-      const ms = cs.filter((c) => (S.srs.get(c.id) || {}).stage >= 5).length;
-      return `<tr>
-        <td><b class="fr">${esc(th.label)}</b><br><span class="small muted en-gloss">${esc(th.en)}${phaseThemes.includes(th.id) ? " · this phase" : ""}</span></td>
-        <td class="n">${lr} / ${cs.length}</td><td class="n">${ms}</td>
-        <td>${th.own ? "" : claudeBtn("build-" + th.id, "v-build", cs.length < 10 ? "Build this theme" : "+20 with Claude", `data-theme="${th.id}"`, "btn sm")}</td>
-      </tr><tr><td colspan="4" style="padding-top:0"><details class="fold"><summary class="small">${cs.length} cards</summary><ul class="cards-list">${cs.map(cardPeek).join("")}</ul></details></td></tr>`;
-    }).join("");
     const deckFan = `<span class="deck-fan" aria-hidden="true"><i></i><i></i><i><svg viewBox="0 0 24 26"><use href="#leaf" width="24" height="26"/></svg></i></span>`;
     const review = `<section class="deck-launch${due.length ? " featured" : ""}" aria-labelledby="review-title">
       <div class="deck-launch-head"><h2 id="review-title">Review</h2>${due.length ? deckFan : ico("vocab", "deck-mode-icon")}</div>
@@ -6303,9 +6339,7 @@
       </section>` : `<p class="small muted num">${learned} cards learned · ${cards.size} in the deck</p>`}
       ${waitPanel()}
       ${exPanel()}
-      <section data-m="paper" data-k="vocab-deck" class="sec"><div class="sec-head"><h2 class="h2">Deck by theme</h2><span class="small muted">Collocations and connectors are worth more than isolated nouns.</span></div>
-        ${fold("deck", `Voir les ${T.VOCAB.length} thèmes · Show the deck`, `<div class="table-wrap"><table class="deck"><thead><tr><th>Theme</th><th>Learned</th><th>Mastered</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`)}
-      </section>
+      ${themeLibrary(cards, phaseThemes, theme)}
     </div>`;
   }
   // What a step is, over the card: a check of a new card, or a card back after a miss.
@@ -8446,6 +8480,13 @@
       render(true);
     },
     "v-close": () => { ui.vocab = null; render(true); },
+    "library-theme": selectLibraryTheme,
+    "library-more": () => {
+      const offset = ui.libraryLimit;
+      ui.libraryLimit += LIBRARY_PAGE;
+      render(true);
+      document.querySelectorAll(".library-collection .peek > summary")[offset]?.focus();
+    },
     "v-count": (el) => { ui.vCount = Number(el.dataset.n); render(true); },
     "v-build": (el) => vocabBuild(el.dataset.theme),
     "card-del": (el) => cardDelete(el.dataset.id),
@@ -8634,6 +8675,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "library-theme": selectLibraryTheme,
     "card-draft": updateCardDraft,
     "c-seek": () => coSeekDone(),
     "fx-for": (el) => { if (ui.fx.edit) ui.fx.edit.for = el.value; },
