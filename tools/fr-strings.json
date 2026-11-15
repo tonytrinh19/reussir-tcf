@@ -3895,15 +3895,6 @@
   ]
  },
  {
-  "id": "4b2e608f2980",
-  "text": "{0} cards",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<b>…</b> <span>……</span> … / … … … <summary>… cards</summary> …"
-  ]
- },
- {
   "id": "470d7831541f",
   "text": "{0} cards due: new cards wait until fewer than {1} are due.",
   "kind": "pattern",
@@ -11960,8 +11951,16 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "cards",
-   "<b>…</b> <span>……</span> … / … … … <summary>… cards</summary> …"
+   "cards"
+  ]
+ },
+ {
+  "id": "0f830bc25e52",
+  "text": "Cards",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns"
   ]
  },
  {
@@ -13225,7 +13224,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1><span>…</span>Vocabulaire</h1>… … … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> …"
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns"
   ]
  },
  {
@@ -14365,7 +14364,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1><span>…</span>Vocabulaire</h1>… … … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> …"
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns"
   ]
  },
  {
@@ -20986,7 +20985,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "Theme Learned Mastered …"
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns"
   ]
  },
  {
@@ -22115,8 +22114,8 @@
   "where": "app",
   "ctx": [
    "<span>Mastered</span>",
-   "Theme Learned Mastered …",
-   "Mastered"
+   "Mastered",
+   "Mastered · 21 days or more"
   ]
  },
  {
@@ -22153,6 +22152,15 @@
   "where": "app",
   "ctx": [
    "Mastered at … on … days a week apart (…/…)."
+  ]
+ },
+ {
+  "id": "f9be73ed0af8",
+  "text": "Mastered cards",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns"
   ]
  },
  {
@@ -24195,6 +24203,15 @@
   "where": "app",
   "ctx": [
    "No card missed twice yet."
+  ]
+ },
+ {
+  "id": "c5c3dc2426ff",
+  "text": "No cards in this theme yet.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>No cards in this theme yet.</p>"
   ]
  },
  {
@@ -32212,21 +32229,21 @@
   ]
  },
  {
+  "id": "5d4443d2a803",
+  "text": "Show more cards",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<button>Show more cards</button>"
+  ]
+ },
+ {
   "id": "440b620ec390",
   "text": "Show the answers",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "<button>Show the answers</button>"
-  ]
- },
- {
-  "id": "3fc9198b84df",
-  "text": "Show the deck",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Voir les … thèmes · Show the deck"
   ]
  },
  {
@@ -37401,8 +37418,17 @@
   "where": "app",
   "ctx": [
    "<summary><span>…</span><span>Add a card</span><span></span></summary> French word or phrase <p>Enter a French word or phrase.</p> English meaning <p>Enter the English meaning.</p> Example (optional) … Theme … <button>Add card</button> <h3>Preview</h3> <span>…<",
-   "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …",
-   "Theme Learned Mastered …"
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns",
+   "<h2>New cards</h2>… Theme … … <button>Learn … new</button> …"
+  ]
+ },
+ {
+  "id": "94d5186ba3ec",
+  "text": "Themes",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>Deck by theme</span><span><i></i><i></i><i>…</i></span><span></span></summary> <p>Themes <span>…</span></p> … Theme … <h3>…</h3><p>…</p> … Cards … Learned … Mastered cards … … … … <p>Collocations and connectors are worth more than isolated nouns"
   ]
  },
  {
@@ -37765,7 +37791,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "· this phase"
+   "· this phase",
+   "<span>this phase</span>"
   ]
  },
  {
@@ -40063,7 +40090,7 @@
   "where": "app",
   "ctx": [
    "Vocabulaire",
-   "<h1><span>…</span>Vocabulaire</h1>… … … … … … <h2>Deck by theme</h2><span>Collocations and connectors are worth more than isolated nouns.</span> …"
+   "<h1><span>…</span>Vocabulaire</h1>… … … … … … …"
   ]
  },
  {
@@ -40100,15 +40127,6 @@
   "where": "app",
   "ctx": [
    "Voice: the browser's default."
-  ]
- },
- {
-  "id": "76488417bd14",
-  "text": "Voir les {0} thèmes · Show the deck",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "Voir les … thèmes · Show the deck"
   ]
  },
  {
