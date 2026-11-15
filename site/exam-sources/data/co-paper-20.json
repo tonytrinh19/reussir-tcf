@@ -1,0 +1,916 @@
+[
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Regardez l'image 1.\nA. Cours vite, le train arrive.\nB. Descends vite de ton vélo.\nC. Entre vite dans la voiture.\nD. Monte vite dans le bus."
+      }
+    ],
+    "secs": 31.51,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-20-1.jpg",
+    "alt": "Illustration de la question 1",
+    "audio": "exam-sources/audio/0e46f1c5a1068343c7b61d74.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 209,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Vous pouvez fermer la porte, s'il vous plaît?\nA. Bien sûr.\nB. C'est vrai.\nC. Très souvent.\nD. Merci bien."
+      }
+    ],
+    "secs": 30.08,
+    "page": 1,
+    "audio": "exam-sources/audio/e8d1d008e7a8f730b402b885.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 209,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Qu'est-ce que tu fais cet après-midi?\n- Je m'occupe de ma nièce.\n- Super. Est-ce que tu vas la chercher à l'école?\nA. Non, c'est la fille de mon frère.\nB. Bien sûr, elle est en vacances.\nC. Oui. Et après, nous irons au parc.\nD. Peut-être. Elle sait lire et écrire."
+      }
+    ],
+    "secs": 40.8,
+    "page": 1,
+    "audio": "exam-sources/audio/70cd63f173c0481f180db7c7.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 209,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [],
+    "secs": 0,
+    "page": 2
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Il est 19h. Si on veut arriver au cinéma avant le début du film et trouver une place dans la\nsalle, il faut partir maintenant.\nPartir maintenant? Mais regarde, il pleut!\nA. Oui, mais la salle est sombre.\nB. Oui, mais le cinéma est près d'ici.\nC. Oui, mais le film se passe en plein air.\nD. Oui, mais les places sont chères."
+      }
+    ],
+    "secs": 47.32,
+    "page": 2,
+    "audio": "exam-sources/audio/4e369a08e152e384ccd7f3d5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 209,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Oh, des skis! C'est un super cadeau!\n- Comment vous avez eu l'idée?\nA. On a demandé à ton frère.\nB. On a fait ton gâteau préféré.\nC. On a invité tes amis et ta famille.\nD. On a réservé une salle."
+      }
+    ],
+    "secs": 37.04,
+    "page": 2,
+    "audio": "exam-sources/audio/293213ec6fd2a2e5a4a205e5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 209,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Si tu veux, je t'emmène à la piscine cet après-midi. Qu'est-ce que tu en penses?\nA. J'ai cassé ma raquette.\nB. J'ai oublié mon ballon.\nC. J'ai perdu mon maillot.\nD. J'ai trouvé mes chaussures."
+      }
+    ],
+    "secs": 32.37,
+    "page": 2,
+    "audio": "exam-sources/audio/e17e305b043c13b032cff346.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 209,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour, madame.\n- Bonjour. Je cherche un cadeau pour mon fils. C'est son anniversaire.\n- Très bien. Il a quel âge? Et qu'est-ce qu'il aime?\n- Il va avoir 19 ans demain. Il est étudiant en histoire. Il adore la poésie, les romans policiers et\nhistoriques, bien sûr.\nQu'est-ce que le vendeur peut proposer à cette cliente?"
+      }
+    ],
+    "secs": 37.51,
+    "page": 2,
+    "audio": "exam-sources/audio/187fdc1a90ac5684ee3821ea.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 210,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Lapublication desoncven ligne",
+      "Unremplacement dans sonentreprise",
+      "Une formationgratuite à l’université",
+      "Une rencontreavec sonpatron"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Salut Faustine, ça va?\n- Ça va, mais je cherche toujours un job après les cours pour gagner un peu d'argent.\n- Ah mince! Moi, je livre des courses à domicile deux soirs par semaine.\n- Je pourrais parler avec mon chef. Je crois qu'il veut recruter quelqu'un. Viens avec moi ce\nsoir et je te le présenterai.\n- Oui, merci Nourdine, ce serait super.\n- Et j'ai vu que la fac organisait un forum pour l'emploi cette semaine. Ça peut être utile aussi.\n- Parfait, je vais y aller.\nQue propose Nourdine à Faustine?"
+      }
+    ],
+    "secs": 49.93,
+    "page": 2,
+    "audio": "exam-sources/audio/4ad96a48e55d2c3447faa832.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 210,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Lacommunication avecses clients",
+      "Larecherche d’unnouveau travail",
+      "L’achat d’un nouveautéléphone fixe",
+      "L’utilisationdeson ordinateur portable"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Léo, comment ça va depuis que tu es dans ta nouvelle maison?\n— Ça va, ça va, mais je n'ai pas encore Internet.\n— Mince, alors.\n— Et est-ce que ton téléphone fixe marche, au moins?\n— Oui, mais je n'en ai pas vraiment besoin.\n— Je viens de m'acheter un ordinateur tout neuf, mais sans Internet.\n— Je ne peux pas travailler et contacter mes clients.\n— Je comprends. Tu as vu quelqu'un pour arranger ça?\nQu'est-ce qui est difficile pour Léo?"
+      }
+    ],
+    "secs": 51.23,
+    "page": 3,
+    "audio": "exam-sources/audio/77d5bebb071abdaf21721153.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 3,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ellea oubliéunobjet important",
+      "Ellea ratéson buscematin",
+      "Elledoit s’absenter dubureau",
+      "Elleest en retard àune réunion"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "● Allô, Paul, tu peux m'aider? Qu'est-ce qui t'arrive, Lydie? J'ai laissé mes clés de\nvoiture dans la salle de conférence et elle est occupée jusqu'à 20h. Je peux te\nramener si tu veux.\n● Oh, merci, ça m'arrange. Je dois être chez moi à 18h30. Demain, je viendrai en\ntransport.\nQuel est le problème de Lydie?"
+      }
+    ],
+    "secs": 37.43,
+    "page": 3,
+    "audio": "exam-sources/audio/de7ded5da97eaf3fc0cb42ae.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 104,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’apprendre unelangue",
+      "D’arreterses études.",
+      "De partir àl’étranger",
+      "De rencontrerdu monde"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Mathieu, j'aurais besoin d'un conseil.\nEst-ce que tu penses que je devrais aller aux Etats-Unis pour finir mon master?\n- C'est très personnel comme décision.\nEst-ce que tu crois que ce sera une bonne opportunité pour ta carrière?\n- Oui, d'après mes profs, si j'y vais, j'aurai un meilleur niveau d'anglais\net je pourrai plus facilement obtenir un poste dans une entreprise bilingue.\n- Alors fais-le, et en plus tu feras de nouvelles connaissances.\nQue conseille Mathieu à son ami?"
+      }
+    ],
+    "secs": 45.78,
+    "page": 3,
+    "audio": "exam-sources/audio/0bc4bfb49b2ddaa088c73459.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 211,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ladatededépart",
+      "Laduréededépart",
+      "Lasituation del’hôtel.",
+      "Leprix duséjour"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour, je voudrais réserver un séjour au Seychelles.\n- Alors, j'ai plusieurs formules de voyage à vous proposer.\nJ'ai notamment quelque chose de très intéressant. Un combiné avion plus hôtel 4 étoiles, sur\nl'île principale, à 1300 euros la semaine, départ entre le 10 et le 15 décembre.\n- C'est au-dessus de mes moyens. Corriez-vous d'autres à me proposer?\n- J'ai aussi des hôtels de catégorie inférieure.\n- Oui, je préférerais.\nQu'est-ce qui pose problème aux clients?"
+      }
+    ],
+    "secs": 46.8,
+    "page": 3,
+    "audio": "exam-sources/audio/9210232b8ff2a74c1d37d3a7.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 211,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’interetpour lecinéma",
+      "Lesactivitésdeloisirs",
+      "Leshabitudes de transport",
+      "L’utilisationdes médias"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "● Bonjour madame. Auriez-vous quelques minutes pour répondre à un sondage ?\n● Rapidement, oui.\n● Parfait. Suivez-vous l'actualité ?\n● Oui, un peu. Mais je n'ai pas toujours le temps.\n● Vous lisez les journaux ?\n● Un peu, dans le métro. Mais je regarde plutôt les informations à la télévision.\n● Et sur Internet ?\n● Oui, parfois des amis postent des actualités sur les réseaux sociaux.\n● J'aime ce qui parle des grands réalisateurs de films, des acteurs. Parce que je suis\nactrice, vous savez.\n● Très bien, merci madame. Vos réponses nous seront très utiles.\nQuel est le thème du sondage ?"
+      }
+    ],
+    "secs": 56.32,
+    "page": 3,
+    "audio": "exam-sources/audio/4e48ba220c6fd3a526d3ce66.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 256,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Larépartition des horaires",
+      "Lecontact avecles élèves.",
+      "Lesactivitéspédagogiques",
+      "L’organisation des leçons"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Je m'appelle Pascal. Ça fait 4 ans que je travaille dans une école maternelle.\nJe suis chargée d'aider les enseignants dans la classe. Alors, le plus dans le métier\npour moi, c'est les relations avec les enseignants et les enfants. Ça, on a vraiment\nbeaucoup de chance à ce niveau-là.\nSurtout avec les enfants. Les côtés négatifs du métier... Je dirais peut-être les journées\nun peu longues dans le bruit, parce que les enfants sont quand même en général\nbruyants. M\nQu'a-t-il aussi Pascal dans son métier ?"
+      }
+    ],
+    "secs": 55.95,
+    "page": 4,
+    "audio": "exam-sources/audio/a499f681639e45f9c7b73f70.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 189,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pourl’inviter aurestaurant",
+      "Pourle remplacer desonaccueil",
+      "Pourlui conseiller unlogement.",
+      "Pourlui donnerdes informations"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Allô? Salut, c'est Rachida.\n- Salut, petite sœur.\n- Je t'appelle pour qu'on s'organise. Tu te souviens qu'on sera déjà parti quand vous arriverez?\n- C'est vrai, j'avais complètement oublié. Comment on fait pour les clés?\n- Je les laisserai chez la voisine d'en face. On vous a préparé des draps, des serviettes\net le frigo est plein. Nous vous avons aussi laissé une liste d'activités à faire ici et des\nadresses pour sortir dîner.\n- Merci beaucoup. Je te dois combien?\n- Rien, tu plaisantes. C'est normal, tu es mon frère.\nPourquoi Rachida appelle-t-elle son frère?"
+      }
+    ],
+    "secs": 54.26,
+    "page": 4,
+    "audio": "exam-sources/audio/e6262ccb53568d503b3d3eb3.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 212,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’histoire est compliquée",
+      "Lamusique est ennuyeuse",
+      "Leréalisateur est mauvais",
+      "Lesacteurs sont inconnus"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Alors, comment as-tu trouvé le film?\n- Assez moyen. Les acteurs jouaient bien, mais je n'ai pas réussi à croire à ce scénario.\n- C'est mon avis aussi. J'ai eu du mal à suivre l'histoire. En revanche, j'ai apprécié la musique\net la façon de filmer. En effet, le réalisateur a du talent. On continue cette discussion dans un\ncafé?\n- Avec plaisir.\nQu'est-ce que ses deux amis reprochent au film?"
+      }
+    ],
+    "secs": 46.56,
+    "page": 4,
+    "audio": "exam-sources/audio/2d98304374898755ff81b72a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 212,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pourconfirmer unrendez-vous",
+      "Pourdemander un entretien",
+      "Pourproposer unservice",
+      "Poursignaler unretard"
+    ],
+    "answer": 2,
+    "lines": [],
+    "secs": 0,
+    "page": 4
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Lerecrutement sefonde sur l’expérience",
+      "Lessalairesà l’embauchesont trèsélevés",
+      "L’évolution professionnelle est trèslente",
+      "L’obtention d’unpremier emploi est aisée"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On dit souvent qu'à Londres, on peut changer de job quasiment comme de chemise. Est-ce que\nc'est toujours vrai ?\nIl est toujours facile de passer d'un job à l'autre. Le diplôme a beaucoup moins d'importance.\nOn va surtout regarder les postes que vous avez déjà occupés. On va aussi tenir compte de\nvos motivations.\nC'est vrai qu'on vous donne aussi la possibilité d'augmenter assez, enfin, comment dire, de\nfranchir les étapes beaucoup plus rapidement.\nOn retrouve assez régulièrement des personnes vers 22, 23 ans et déjà managers, tandis qu'en\nFrance, c'est quand même un petit peu plus compliqué.\nQue dit cette intervenante au sujet du travail à Londres ?"
+      }
+    ],
+    "secs": 61.61,
+    "page": 4,
+    "audio": "exam-sources/audio/ad1d4698ff16528a07fbd823.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 48,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle veut faireduvélo",
+      "Elleahorreur du volley",
+      "Elletrouvele vent très fort",
+      "Ellesesent fatiguée"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Vous venez, on va faire un volet, et après on ira nager ! Tu viens, Véros ? Mais, ce n'est pas possible par ce temps ! Vous avez vu se vend ? Vous n'attrapez jamais le ballon ? Ne sais pas, ce n'est pas grave ! Allez, viens ! Tu adore ça ! Non, allez-y s'y s'en moi, j'aime mieux aller me bénier. Qu'est-ce qu'il en va ? Pour quelle raison, la fille refuse-t-elle de jouer au volet ?"
+      }
+    ],
+    "secs": 48.16,
+    "page": 5,
+    "audio": "exam-sources/audio/ac491bad09393d95f52f528a.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’unprojet devoyage",
+      "D’unchangement detravail",
+      "D’unfutur déménagement",
+      "D’unesortie aucinéma"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "● Salut, ça va ?\n● Ça va, mais mon petit ami est parti pour trois mois pour réaliser un documentaire\nsur la Gaspésie, une région assez sauvage du Québec.\n● Ah oui, je connais. Quelle chance ! J'adorerais y retourner.\n● Et tu vas y aller aussi ?\n● J'aimerais bien, mais j'ai des missions prévues prochainement. Mais bon, je vois\nmon patron demain, je lui demanderai si je peux prendre des vacances.\n● Bonne chance ! Tu m'écriras pour me raconter ton expérience là-bas.\n● Et préviens-moi quand le film sortira.\nDe quoi parlent ces personnes ?"
+      }
+    ],
+    "secs": 53.42,
+    "page": 5,
+    "audio": "exam-sources/audio/2db91fd71ed215f75c6c6668.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 119,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Leur public est endiminution",
+      "Leur salaire est insuffisant",
+      "Leur savoirest peu transmis",
+      "Leur talent est défavorisé"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les compositeurs ont un autre métier, c'est-à-dire qu'ils sont chef d'orchestre, directeur de\nconservatoire, enseignant, chercheur, directeur artistique parfois parce que leur métier de\ncompositeur ne leur permet pas de pouvoir avoir suffisamment de rémunération pour vivre\ncorrectement.\nJe pense qu'il doit y avoir à peu près que 2 ou 3% de compositeurs aujourd'hui qui vivent\nréellement de leur musique, c'est vraiment très très peu.\nQuelle difficulté les créateurs de musique rencontrent-ils ?"
+      }
+    ],
+    "secs": 48.68,
+    "page": 5,
+    "audio": "exam-sources/audio/25a7b0a0956533f7a9cba2ac.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 223,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’écologie",
+      "Lapuissance",
+      "Lasécurité",
+      "Leséquipements"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Oui, différent modèle de véhicule sans conducteur a essayé dans les rues de Las Vegas la semaine dernière. Pour le moment il s'agit seulement d'expérimentation, on attend une réglementation, le secteur s'intéresse à ce que l'on fera dans ces voitures quand elles conduiront vraiment toute seule, persuadées que c'est l'intérieur de la voiture et les services proposés qui feront la différence de main, bien plus que le moteur, plusieurs concepts d'habitacle futuristes étaient présentés sur salon, des voitures avec des des écrans partout intégrés dans les vitres en faisant toute la largeur du tableau de bord, des véhicules qui se personnalisent rond en fonction de leur passager. Qu'est-ce qu'il y en va de 3 sur qu'elle aspect travaille et concepteur des voitures autonomes ?"
+      }
+    ],
+    "secs": 54.96,
+    "page": 5,
+    "audio": "exam-sources/audio/7d5d7fbed3c113d03c674ca9.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "ila réponduà une demande deses patients",
+      "Ilconsacreson tempsà sonnouveau métier",
+      "Ils’est remisen questionsuite àun échec",
+      "Ilveut évitertoutepublicitépersonnelle"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Psychologue, vous animez une émission télévisée.\nComment faites-vous pour jongler entre vos consultations et vos émissions ?\nJ'ai suspendu mes consultations privées dans un souci éthique.\nJe ne veux pas utiliser cette émission comme fond de commerce, comme une manière de\nrabattre de la clientèle.\nJe suis un thérapeute ordinaire et je ne veux pas donner l'image de quelqu'un qui va plus vite\nque les autres.\nPour quelle raison ce psychologue a-t-il interrompu ses consultations ?"
+      }
+    ],
+    "secs": 49.02,
+    "page": 5,
+    "audio": "exam-sources/audio/31cbbb35baf730b3ca76af11.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 39,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Augmenterlenombredes surfaces exploitables",
+      "Développer la production des fruitset des légumes",
+      "Diffuser des procédés enaccordavecla nature",
+      "Introduire la planification denouvelles espèces"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Souvent, on les surnommes les médecins de la Terre, l'eau des Lidia Bourguignon, osculte les soldes et tantes de leur rendre la santé, quand les méthodes agraciles de la agriculture intensive en fortement abîmées les terres cultivables, au point parfois d'enfer disparaît tout de trace de vie. En Grachimi, qui est bestecide, ne sont pas les amis de ce complot scientifique. L'eau des Lidia Bourguignon, invite les paysans à mieux connaître leur champ ou leur vie, Elle est travaillée autrement sans pour autant sacrifier les rendements à une bonne vie à l'environnement. De cette révolution verte qu'ils défendent, dépend selon eux la qualité de l'offre, en fait au consommateur ainsi que la survie des agriculteurs et des terres cultives. Question 25. Quelle est l'objectif de ces deux scientifiques ?"
+      }
+    ],
+    "secs": 61.3,
+    "page": 5,
+    "audio": "exam-sources/audio/c5b204d3e5e413669f237130.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "De lapréparation desvacances",
+      "Des révisions d’unexamen",
+      "D’unanniversairesurpris",
+      "D’unprojet devisites culturelles"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Tu viens à l'anniversaire de Bertrand samedi ? Je ne sais pas encore. J'ai un examen\nlundi prochain.\n● Tu es prête ?\n● Plus ou moins. Mes cousins de Toulouse sont venus passer une partie des\nvacances à la maison. Et j'ai dû leur faire visiter les monuments et les musées de\nParis.\n● Tu as pu travailler un peu ?\n● Oui, mais je dois encore étudier les maths."
+      }
+    ],
+    "secs": 43.28,
+    "page": 6,
+    "audio": "exam-sources/audio/6eca16f70727aeb2ffae1204.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 108,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Revendre des livresd’occasionauprèsdes finissants",
+      "Rencontrerles étudiantsnouvellement inscrits",
+      "Serendreà une ventedelivresuniversitairesd’occasionà la faculté",
+      "Aller acheterdes livrespour réviser avecson amiavantleurs examens"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "T'as vu l'effiche dans l'ole d'Université ? Swiken, les Finns s'organisent une bourse au livre sur les programmes qui ont étudié ? On y va ? Tu sais ce genre de ventes ne m'intéressent pas parce que les manuels changent tous les uns, surtout en économie, il faut se tenir au courant de tout. Non, on voit-y toute seule. Ah, tu me déçois ? On va rencontrer des étudiants qui ont déjà travaillé sur notre futur programme. Si vous c'est important, pouvoir discuter sur ce que l'on va rencontrer l'en prochain, le pur seuse, les profs, les diplômes. Allez, viens ! Non, j'ai pas envie. Je dois reformer court pour mes partiels. Qu'est-ce qui ont 27 ? Que souhaite la jeune fille ?"
+      }
+    ],
+    "secs": 52.69,
+    "page": 6,
+    "audio": "exam-sources/audio/8a0639e181f2ab437c85c96c.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elleest sortie enboitedenuit",
+      "Ellea dinéavec sa famille",
+      "Elleest restéetouteseule",
+      "Ellea vuunmauvaisfilm"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Salut Marie, alors finalement, qu'est-ce que tu as fait samedi soir ?\n- Ben, j'avais pas le moral. J'étais invitée chez ma sœur, je n'y suis pas allée. Il y a des amis qui\nm'ont appelée pour aller danser au dernier moment, j'ai pas eu envie.\n- Tu as fait quoi alors ?\n- Finalement, j'ai voulu aller au cinéma. La séance était annulée pour raisons techniques, alors\nje suis rentrée, je me suis couchée.\n- Si j'avais su, je serais venu te chercher. On est allé jouer au bowling, on a passé une super\nsoirée.\nComment la jeune fille a-t-elle passé sa soirée ?"
+      }
+    ],
+    "secs": 45.52,
+    "page": 6,
+    "audio": "exam-sources/audio/c5beda0b14725f6808f37255.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 50,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Une ascensionprofessionnelle accompagnéederevenus confortables.",
+      "Une nomination à unpremier poste valorisant auseindel’entreprise",
+      "Une opportunité demultiplier les contratsdans différentesentreprises",
+      "Une reconnaissance rapide deleurs supérieurssur les résultats obtenus"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Quels sont les objectifs de carrière des étudiants ?\nVous savez, hommes et femmes aspirent à utiliser salaire et promotion non seulement\npour pouvoir utiliser une entreprise comme un nom sur un CV, mais aussi pour obtenir\nun réel accélérateur de carrière.\nPlus simplement, ce qui attire hommes et femmes, c’est d’envisager de pouvoir gagner\nbeaucoup plus.\nLes kilos euros de leur premier salaire ne sauraient donc être un frein à leur entrée\ndans une société, tant que ces jeunes diplômés peuvent se projeter dans une globalité\nliant augmentation salariale et promotion interne rapide.\nQue désirent les jeunes en commençant leur carrière ?"
+      }
+    ],
+    "secs": 59.66,
+    "page": 6,
+    "audio": "exam-sources/audio/9d2c0f68864fc769d03d5a34.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 247,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Adopterun mode deviecollectif responsable",
+      "Construire unréseau d’assainissement deseaux",
+      "Fairela promotiondelogements écologiques",
+      "Mener une politique d’aménagement desvilles"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Si demain vous viviez dans une oasis, je ne vous parle pas d'un lac avec des petits\npalmiers au milieu du désert, mais d'une communauté, une petite communauté en\nFrance, en ville ou à la campagne, où vos voisins seraient comme vous, décidés à vivre\nde façon plus écolo. C'est ça les oasis. Il y a plus de 500 petits groupes aujourd'hui, des\nfamilles, qui vivent côte à côte, mais aussi ensemble.\nEt c'est peut-être avant-gardiste. Prenez par exemple en Nouvelle-Éloire les Coamons\ndu Plessis. 28 familles, soit 60 personnes, qui vivent dans des bâtiments bioclimatiques,\ndont le chauffage, pour faire simple, ne pollue pas.\nQui, toutes, ont renoncé à se brancher au tout-allez-vous. Leurs eaux grises sont\ntraitées dans des bassins plantés de roseaux qui dépolluent. C'est parfaitement légal et\nça marche.\nQue recherchent les habitants de ces oasis ?"
+      }
+    ],
+    "secs": 59.87,
+    "page": 6,
+    "audio": "exam-sources/audio/7df30c3adf2e6a5253b76266.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 122,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’unappel àprojets imaginaires",
+      "D’unexamen defins d’études",
+      "D’unexamen defins d’études",
+      "D’une rénovation d’un monument"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "De quoi traite ce reportage ?\nLa vieille dame de fer dans tous ses états, ou comment les jeunes, sans complexe, se sont\nmesurés à cette forme unique qu'est la Tour Eiffel.\nPour ce concours organisé par la Fondation Eiffel, adressée aux élèves des écoles\nd'architecture, la consigne était de rêver.\nConcevoir un édifice de très grande hauteur sur le champ de Mars à Paris, à distance, à coller,\nou à la place de la Tour Eiffel.\nTrois étudiants suppriment donc carrément la Tour.\nÀ la place, ils y construisent un aéroport vertical, ou creusent un puits de lumière avec de\nvastes plateaux.\nD'autres choisissent de la rendre habitable en comblant ses vides par des baies de couleurs ou\nla dot d'un jardin suspendu."
+      }
+    ],
+    "secs": 69.49,
+    "page": 6,
+    "audio": "exam-sources/audio/16666b10e41ffa67ea80bcbf.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 169,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elleest dans l’innovationconstante",
+      "Elleest tournée vers l’exotisme",
+      "Ellefait la part belle àla tradition",
+      "Ellenécessite un service très rapide"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On y mange très bien, mais c'est impossible d'y manger la même chose quatre ans plus\ntard. Comme à Québec, la gastronomie est très tendance.\nQu'est-ce qui se passe aujourd'hui ? Qu'est-ce qui se passera demain ? Mais qu'est-ce\nqui s'est passé hier ? On ne veut plus rien savoir. Qu'est-ce qu'un restaurateur doit faire\nsi sa cuisine n'est pas tendance, mais tout aussi bonne ? À Toronto, il doit la changer.\nC'est différent à Québec.\nJ'ai l'impression qu'à Toronto, la capitale des affaires, on gère tout au dépens des\nvaleurs sûres.\nQue constate ce journaliste sur la gastronomie à Toronto ?"
+      }
+    ],
+    "secs": 58.82,
+    "page": 7,
+    "audio": "exam-sources/audio/50776c2854a6bb0820c71302.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 111,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Donner des conseilsdepréparation",
+      "Éviter defaireattendre les acheteurs",
+      "Faireconnaitredes aliments oubliés",
+      "Respecterlegout des consommateurs"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Il y a certains légumes qui sont moins bien connus que d'autres. Oui, la courge, entre autres,\nc'est quelque chose qui… Vraiment, les gens la regardent avec un point d'interrogation.\nQu'est-ce que je vais faire avec ça ?\nDonc, il faut être imaginatif comme producteur pour tenter les gens de le cuisiner.\nPuis, on comprend que le thym est tellement précieux. Les gens n'ont pas le thym, donc il faut\nessayer de leur trouver des trucs."
+      }
+    ],
+    "secs": 45.91,
+    "page": 7,
+    "audio": "exam-sources/audio/42714028558ffff29c4d9dee.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 29,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ellecréedes discriminations",
+      "Elleenrichit lesrapports",
+      "Elleest utile pour le droit",
+      "Ellevarieselonles contextes"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Que doit faire cette personne pour vendre ses légumes ?\nMais c'est important la langue que l'on parle aujourd'hui, en 2018, alors qu'on a des traducteurs sur\ntous les téléphones. Oui, c'est important parce que la langue véhicule autre chose : elle véhicule une\nmanière de regarder le monde, des solidarités. Des gens qui ont fait leurs études en France et se\nsont imprégnés des systèmes, par exemple juridiques français, n'ont pas la même façon de\nraisonner et vont créer avec nous un espace très important. Et puis la francophonie, ce n'est pas\nseulement la France : les membres de l'OIF viennent de nombreux horizons et continents."
+      }
+    ],
+    "secs": 61.41,
+    "page": 7,
+    "audio": "exam-sources/audio/58a1141c5cdc9723cd5032ee.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 216,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Laqualitécroissantedes résultats",
+      "Lesaménagementshydrauliques",
+      "L’expérience deses collègues",
+      "L’importation depieds devigne"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Depuis quelques années, des vignerons ont investi des sommes importantes au Québec pour\nse lancer dans une nouvelle culture, comme Daniel Desmoulins qui a ouvert le vignoble L'Ange\ngardien en face du fleuve Saint-Laurent. Faire du vin au Québec, c'est un challenge.\nJe ne serais peut-être pas parti là-dessus il y a vingt ans, mais je trouvais que les produits\nétaient de mieux en mieux et c'est pour ça qu'il y a dix ans, avec ma femme, on a dit « on va se\nlancer ».\nDans le vin, je pense que l'on a des produits extrêmement intéressants parce qu'il y a un petit\npeu d'acidité. Puis il y a toujours le vin de glace, on a la température pour ça. On cueille le raisin\nfin décembre, début janvier."
+      }
+    ],
+    "secs": 64.61,
+    "page": 7,
+    "audio": "exam-sources/audio/4ee32684443b49f1b678e561.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 29,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "De voiliersdestinésà des particuliers",
+      "De navirespour la marine marchande",
+      "De paquebots adaptés autourisme demasse",
+      "De bateaux depêchetraditionnels"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Alors, un chantier de construction naval ici est porté. Pour l'export, principalement, la politique s'enégalasse depuis quelques années avec le changement de gouvernement favorise l'appendation d'investisseurs étrangers. Dans le sens où elle nous permet d'exporter et d'importer Ortax Ordoin. Donc, nos bateaux sont évidemment des bateaux de présence et d'un clientel étal étranger. Donc, on travaille uniquement sur l'exportation. Qu'est-ce que vous construisez comme bateau ? un catamaran de 12 mètres, dessiné par Eric Lourge, enfin en collaboration avec les étudiants du IVR pour un coup de français qui partira voyager dans un an et demi à faire un tour du monde avec. ... ..."
+      }
+    ],
+    "secs": 57.88,
+    "page": 7,
+    "audio": "exam-sources/audio/76c3b4be0d2815e5365e6626.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Une diminutiondela longueur desentretiens",
+      "Une meilleurediffusion des offresd’emploi",
+      "Une plus grande équitéentreles candidats",
+      "Une protectionaccruedes donnéespersonnelles"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Dans mon cabinet de recrutement, Internet est devenu un outil indispensable, non seulement\npour repérer des candidats potentiels sur la toile, mais également pour la phase d'entretien.\nGrâce au logiciel de visioconférence, les cadres ne doivent plus se déplacer et parfois faire des\ncentaines de kilomètres pour s'entendre dire, après 10 minutes d'entretien, qu'ils n'ont pas le\nprofil.\nDe plus, l'utilisation de tel logiciel offre un autre avantage considérable. Il réduit les\ndiscriminations. Comme l'entretien peut être enregistré aussi bien par le candidat que par le\nrecruteur, cela évite les questions déplacées.\nEnfin, les enregistrements peuvent être visionnés autant de fois qu'on le souhaite ou encore être\ntransmis à nos clients pour plus de transparence et de professionnalisme.\nSelon cette personne, qu'est-ce que l'utilisation d'Internet apporte au processus de recrutement ?"
+      }
+    ],
+    "secs": 80.08,
+    "page": 8,
+    "audio": "exam-sources/audio/33a4a463ff8a8fb07ecc8a76.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 92,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Devenir plus attrayantes aux yeux des étrangères",
+      "Diminuer lenombre d’inscritsd’origine française",
+      "Diversifier les nationalitésauseindechaque cursus",
+      "Intégrer depréférence des étudiantsanglophones"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les grandes écoles accueillent plus de 36 000 étudiants étrangers, soit 17% de leurs effectifs. Ce chiffre est en progression avec une hausse très importante en provenance de deux régions du monde. La première, c'est la zone asie pacifique. La deuxième région d'origine, c'est le magrèbe. La conférence des grandes écoles fait quelques propositions pour que la France soit plus attractive. Elle propose par exemple la possibilité d'enseigner en anglais, mais là, on se haute à la loi tout bon, de défense de la langue française, autre idée que le niveau de français de l'étranger ne soit plus une cause d'inadmissibilité dans une école, mais que l'on exige plutôt à un niveau minimum de français en fin de cursus. Question 38. Que souhaite les grandes écoles ?"
+      }
+    ],
+    "secs": 60.23,
+    "page": 8,
+    "audio": "exam-sources/audio/1547228b6cfc4b65795e8c1d.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Lesbâtiments restauréssont en nombreinsuffisant",
+      "Lescitésréaménagéessont surtout résidentielles",
+      "Lesmunicipalitésprivilégient lesprojets couteux",
+      "Lesréhabilitations ont une portéelimitée."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "La rénovation urbaine est aujourd'hui plébiscitée par les élus locaux et les habitants des\nbanlieues, mais ce programme a aussi eu des effets pervers selon Renaud Epstein, il est\nsociologue spécialiste des politiques urbaines.\nLa mobilisation de milliards d'euros pour changer le bâti et changer l'urbanisme s'est faite au\ndépens d'autres domaines d'intervention dans ces mêmes quartiers.\nParfois on a pu rebâtir des écoles, mais ça ne change pas nécessairement les moyens qui sont\nmis à disposition de ces écoles pour réaliser leurs missions.\nIl y en va de même pour les équipements sociaux, culturels dans ces quartiers.\nEst-ce que l'enjeu ne devrait pas être plutôt d'améliorer la qualité de service dans ces quartiers\n?\nQuelle réserve le sociologue Renaud Epstein émet-il ?"
+      }
+    ],
+    "secs": 64.35,
+    "page": 8,
+    "audio": "exam-sources/audio/87e49a829270cd3fe00a4466.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 52,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  }
+]

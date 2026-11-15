@@ -1,0 +1,934 @@
+[
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez les quatre propositions, choisissez celle qui correspond à l'image. Regardez l'image 1. A. C'est pantalon, me va. B. Je mets quel cravate ? C. Oui, ma chemise. T? Tu m, c'est pule."
+      }
+    ],
+    "secs": 41.63,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-15-1.jpg",
+    "alt": "Illustration de la question 1",
+    "audio": "exam-sources/audio/11bbaca6d3d81a70632acb1c.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez l'extrait sonore et les 4 propositions. Choisissez la bonne réponse.\nSalut Elsa, tu viens prendre un café avec moi ?\nA. D'accord, bonne soirée.\nB. Merci, au revoir.\nC. Oui, avec plaisir.\nD. Très bien, à demain."
+      }
+    ],
+    "secs": 47.95,
+    "page": 1,
+    "audio": "exam-sources/audio/273db4dac624338fc39e1751.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 150,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour monsieur, je suis perdu.\nOù est le restaurant des 3 bornes ?\nBonjour, oui, je vais bien.\nB. C'est très facile, c'est...\nC. Donnez-moi le plat du jour.\nD. C'est très bon."
+      }
+    ],
+    "secs": 45.47,
+    "page": 1,
+    "audio": "exam-sources/audio/98ed549621ec73cf9dc9ff91.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 150,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Vous avez choisi ?\nNon, qu'est-ce que vous me conseillez ?\nA. C'est au fond, à droite.\nB. Le poisson est très bon.\nC. Nous allons fermer.\nD. Vous pouvez réserver."
+      }
+    ],
+    "secs": 40.2,
+    "page": 1,
+    "audio": "exam-sources/audio/5661400831d0a6b28ed5c42b.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 150,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'est-ce qu'il y en a ? Je filme vraiment ennuyeux. On s'en va ? A. Attends, ça vient juste de commencer. Mais c'est vrai, j'aime bien cette salle. C'est d'accord ? Approchons-nous de l'écran ? T'es ? Non. Les acteurs sont peu connus."
+      }
+    ],
+    "secs": 43.36,
+    "page": 1,
+    "audio": "exam-sources/audio/7898d434f337c33c9d7370c2.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Allô, Simon, ça te dirait d'aller au cinéma ? Les places sont à 4 euros tout le week-end.\nOui, est-ce que ça coûte cher ?\nB. Oui, on part mercredi ?\nC. Oui, tu as vu son dernier film ?\nD. Oui, qu'est-ce qu'on va voir ?"
+      }
+    ],
+    "secs": 45.08,
+    "page": 1,
+    "audio": "exam-sources/audio/bc487c78b0611c46fc5aa260.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 150,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "À quelle heure as-tu rendez-vous ?\nA. À tout de suite.\nB. C'est très rapide.\nC. Dans une demi-heure.\nD. Il est déjà tard."
+      }
+    ],
+    "secs": 34.67,
+    "page": 1,
+    "audio": "exam-sources/audio/8291b97d27822930880c24fd.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 151,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour, c'est ici pour visiter l'appartement ?\nNon, monsieur, ce n'est pas ici.\nPardon, j'ai déménagé.\nB. Pardon, j'ai fait une erreur.\nC. Pardon, j'ai perdu les clés.\nD. Pardon, je vais revenir demain."
+      }
+    ],
+    "secs": 43.25,
+    "page": 2,
+    "audio": "exam-sources/audio/adeeed5d5c216b02b1d64e7a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 151,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Allo bonjour, est-ce que je peux parler à Cesline, s’il-vous-plait ?\nA. C'est de la part de qui ?\nB. Elle a un numéro de téléphone ?\nC. Je suis bien au 01-42-35-80-96 ?\nD. Vous voulez laisser un message ?"
+      }
+    ],
+    "secs": 46.56,
+    "page": 2,
+    "audio": "exam-sources/audio/6e80fa43b0c77d488a7cfc1d.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 75,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Chérie, demain soir je vais chez le médecin à 18h30.\nTu peux passer au collège chercher Salba ?\nA. Oui c’est juste\nB. Oui elle va partir\nC. J’y serai\nD. Tu as raison."
+      }
+    ],
+    "secs": 41.03,
+    "page": 2,
+    "audio": "exam-sources/audio/ad3179715acd2cfc34e23c18.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 219,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Diner au restaurant",
+      "Faire des courses",
+      "Travailler tard",
+      "Voir une exposition"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez le document sonore et la question.\nChoisissez la bonne réponse.\n- Tu voudrais aller à l’exposition mardi au musée d’Orsay demain soir ?\n- Quelle bonne idée. Mais après le travail, je voulais aller en ville pour faire des courses.\n- Tu ne peux pas aller faire jeudi ?\n- Mais si. Alors d’accord pour l’exposition et après on dînera chez moi.\nQue vont faire ces amis le mercredi soir ?"
+      }
+    ],
+    "secs": 49.43,
+    "page": 2,
+    "audio": "exam-sources/audio/046ae75a3dae2e54109105f4.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 220,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Dans la poubelle",
+      "Aux archives",
+      "Dans le tiroir",
+      "Sur le bureau"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Sophie, je ne trouve pas le dossier Sanovi.\nJe l'ai posé sur votre bureau. Où sur mon bureau ? Près de l'écran de votre ordinateur,\nsur la pile de papier. Ah, zut ! J'ai jeté tous les papiers qui traînaient.\nAttendez, je vais regarder. Tenez, il n'est pas perdu. La femme de ménage n'est pas\nencore passée.\nOù, Sophie, trouve-t-elle le dossier Sanovi ?"
+      }
+    ],
+    "secs": 48.23,
+    "page": 2,
+    "audio": "exam-sources/audio/ee9dc9d3901124dad9e42f74.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 118,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il y a un service internet",
+      "Le placement est libre",
+      "On y propose des repas",
+      "Son personnel est bilingue"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Soyez les bienvenus dans notre bus à destination de Paris Bercy. Nous ferons une pause à midi\npour vous permettre de vous restaurer. Je vous rappelle que vous pouvez connecter vos\nappareils sur notre réseau tout au long du trajet. Un agent passera parmi vous pour vérifier vos\nbillets et votre numéro de siège. Je vous invite à l'informer si vous voulez en changer et à lui\nposer vos questions. Merci d'avoir choisi notre compagnie et bon voyage.\nQuel est la particularité de ce bus?"
+      }
+    ],
+    "secs": 55.98,
+    "page": 2,
+    "audio": "exam-sources/audio/f4d56f23042fb3171f3421b4.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 220,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La création d’un réseau de médiateurs",
+      "Le financement nécessaire aux médiateurs",
+      "Le partage d’expériences entre médiateurs",
+      "Le rôle des médiateurs en milieu scolaire"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Votre association, Génération Médiateur, réunit en cette fin de semaine près de 150 jeunes\nmédiateurs à la Grande Arche de la Défense.\nIls sont collégiens, lycéens ou étudiants.\nMais qu'est-ce qu'un médiateur ? À quoi sert-il dans un collège-lycée ?\nC'est un jeune qui a suivi une formation particulière.\nIl est ensuite au service de ses camarades dans son établissement.\nIl peut intervenir si ses camarades le lui demandent ou bien il propose lui-même son aide quand\nil y a des copains qui sont en conflit, qui connaissent une rivalité.\nSouvent, le médiateur va pouvoir intervenir avant que le conflit ne se mette à dégénérer et à se\ntransformer en violence.\nQuel est le sujet de cette interview ?"
+      }
+    ],
+    "secs": 71.47,
+    "page": 2,
+    "audio": "exam-sources/audio/d91c69d8fa1427254affe2ab.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 152,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle aime être en altitude",
+      "Elle désire accompagner un ami",
+      "Elle fait confiance à son guide",
+      "Elle veut prendre des risques"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "– Audrey, nous allons grimper samedi prochain sur le site du Vert. Vous venez ?\n– Ah non, je n'ai jamais fait d'escalade et j'ai peur du vide.\n– Rassurez-vous, tout est sécurisé. Il n'y a vraiment aucun risque. En plus, je serai là pour vous\nguider.\n– D'accord, mais si j'ai peur, vous me ferez descendre.\n– Entendu.\nPourquoi Audrey accepte-t-elle de faire de l'escalade ?"
+      }
+    ],
+    "secs": 50.45,
+    "page": 2,
+    "audio": "exam-sources/audio/8dc05fd3e673bf8d9bdddd52.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 86,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Parce qu’elle déteste ce mode de nourriture",
+      "Parce qu’elle veut commencer un régime",
+      "Parce qu’elle veut manger plus équilibré",
+      "Parce qu’il n’y a pas assez de choix"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Salut Annie, tu manges à la cantine aujourd'hui ?\nNon, je n'y vais plus.\nVraiment ? Mais pourquoi ?\nEn fait, on nous sert des frites chaque semaine.\nNon pas que ça me déplaît, au contraire, j'aime plutôt ça.\nMais j'aimerais vraiment qu'ils nous proposent une alimentation plus variée.\nOn a plusieurs choix d'entrée, de dessert, et ça c'est pas mal, mais c'est le plat principal.\nSi on n'a pas de frites, on a du riz ou des pâtes.\nJe voudrais éviter de manger trop gras.\nJe ne suis pas complexée par mon poids, mais il faut faire attention.\nRien qu'en mangeant à la cantine, j'ai pris deux kilos depuis le début de l'année.\nPourquoi Annie refuse-t-elle d'aller à la cantine ?"
+      }
+    ],
+    "secs": 77.29,
+    "page": 2,
+    "audio": "exam-sources/audio/2cac94075e99c339e50ce23a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 153,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elles ont moins tendance à faire carrière",
+      "Elles osent moins discuter leur contrat",
+      "Elles préparent moins leurs entretiens",
+      "Elles travaillent moins à temps complet"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On a beaucoup parlé des inégalités salariales entre les femmes et les hommes.\nUn élément d'explication à ces différences, Philippe, les femmes négocieraient moins leur\nsalaire ?\nAlors oui, ça n'est qu'un élément, mais il mérite d'être pris en compte dès le début à\nl'embauche.\nOu bien au cours de leur carrière, les femmes sont en effet moins portées sur la négociation, la\ndéfense de leurs intérêts, à en croire le cabinet KPMG et l'école de commerce nantaise\nAudencia.\nAinsi, dès l'entretien d'embauche, seules 34% des femmes osent négocier leur salaire, alors\nque 41% des hommes n'hésitent pas à le faire.\n7 points de différence, un écart qui se réduit un peu au fil du temps, mais qui subsiste plus tard\ndans la carrière."
+      }
+    ],
+    "secs": 66.78,
+    "page": 3,
+    "audio": "exam-sources/audio/08051c3b80953f2236a8f8b5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 153,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle est originaire de Lille",
+      "Elle propose des visites guidées",
+      "Elle recherche un hôtel",
+      "Elle s’intéresse à la gastronomie"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour, j'aimerais découvrir la ville de Lille.\nVous pouvez participer à nos promenades guidées avec des thèmes comme nature,\narchitecture...\nOui, très bonne idée !\nLa promenade gastronomie demain matin, c'est possible ?\nOui, rendez-vous à 10h devant la mairie.\nParfait, c'est près de mon hôtel.\nA demain !"
+      }
+    ],
+    "secs": 44.35,
+    "page": 3,
+    "audio": "exam-sources/audio/f7512ac92ae028a7c643530a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 153,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La décoration des pièces",
+      "Le confort du logement",
+      "Le voyage en voiture",
+      "Les activités en place"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Alors Julie, ce week-end à la montagne, c'était comment ?\nOuf ! On est partis samedi matin très tôt, on est arrivé à destination après 6h de route, et on a\ndû chercher la maison pendant une demi-heure.\nMais cette maison, elle était sympa au moins ?\nBof, elle était trop petite. Le chauffage ne marchait pas bien et on a mal dormi.\nMais les paysages étaient magnifiques, on a fait de grandes promenades avant de rentrer."
+      }
+    ],
+    "secs": 58.46,
+    "page": 3,
+    "audio": "exam-sources/audio/bcb1b6dc48fd8b65600086c5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 154,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Dun projet de recrutement",
+      "D’une campagne d’action sociale",
+      "D’une formation professionnelle",
+      "D’une opération publicitaire"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Le Grand Angle nous emmène ce matin à bord d'un bus transformé en salon de beauté.\nIl sillonne actuellement les communes rurales et les quartiers défavorisés de l'île de France et\nde l'Oise.\nIl offre des soins gratuits aux femmes isolées ou en situation de précarité.\nReportage de Yann Galic à la Ferté-Soujouard en Seine-et-Marne.\nFemme de ménage et mère de 5 enfants, Brigitte, n'est pas une habituée des salons de beauté,\nfaute de temps et de moyens.\nMais aujourd'hui, elle va pouvoir prendre soin d'elle pendant une heure, confortablement\ninstallée devant un grand miroir entouré de lumières tamisées.\nOn a appris à se masser au niveau du visage, à le nettoyer, à faire un gommage, juste à\nprendre soin de notre peau.\nC'est la première fois que je m'occupe de moi parce qu'entre le ménage et les enfants, on n'a\npas trop le temps.\nDe quoi traite le reportage de Yann Galic ?"
+      }
+    ],
+    "secs": 71.76,
+    "page": 3,
+    "audio": "exam-sources/audio/401db802f0e771278469049d.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 154,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La circulation routière est coupée",
+      "La commande s’est perdue",
+      "Le transporteur est en grève",
+      "Les marchandises ont été volées"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "— Allô, bonjour. Je suis Madame Leroy. J'ai passé une commande de vêtements par téléphone\nil y a dix jours avec une livraison à domicile. Et pourtant, rien n'est arrivé pour l'instant.\n— Donnez-moi votre numéro client Blanche Maison, s'il vous plaît. Je vais vérifier.\n— En effet, la livraison n'a pas été faite. La neige a interrompu le trafic. Le transporteur ne\npourra vous livrer que demain.\nPourquoi y a-t-il un retard de livraison ?"
+      }
+    ],
+    "secs": 55.43,
+    "page": 3,
+    "audio": "exam-sources/audio/f7b97978b635515accccc06b.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 16,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La diffusion d’une langue qui exprime les nuances des sentiments",
+      "La multiplication des actions pour la défense des droits de l’homme",
+      "La promotion d’un moyen d’échanges entre les différentes nationalités",
+      "La reconnaissance d’un patrimoine culturel unique par sa richesse"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Sylvie, qu'est-ce qui vous plaît plus particulièrement dans votre travail ?\n— En tant que responsable multimédia, je suis également conceptrice de formation en ligne,\nformatrice de formateur et enseignante de français langue étrangère.\nC'est ce dernier point qui m'attire. Un de mes centres d'intérêt en français langue étrangère\nconcerne le développement d'une politique linguistique en faveur du français comme langue de\ncommunication, et pas seulement comme symbole d'une certaine culture et du pays des droits\nde l'homme ou comme langue de l'amour.\n— J'essaie de montrer que l'apprentissage des langues est une passerelle entre les peuples et\nles cultures.\nQuel objectif Sylvie poursuit-elle en enseignant le français langue étrangère ?"
+      }
+    ],
+    "secs": 74.03,
+    "page": 3,
+    "audio": "exam-sources/audio/9311ff4340aae6a93b09c179.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 6,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A un poste de responsabilité du village",
+      "A un temps de loisir plus étendu",
+      "A place spéciale dans l’histoire",
+      "A une plus grosse part de nourriture"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Le sport aurait commencé d'après les anthropologues, d'après les historiens, d'après les\narchéologues, quand la chasse est devenue un sport.\nC'est-à-dire qu'on a cessé de chasser pour se nourrir et chasser pour le loisir, chasser pour le\nsymbolique.\nLe meilleur chasseur, c'est celui qui va devenir le chef du village.\nCelui qui rapporte le plus de têtes d'animaux, c'est le plus fort physiquement, donc il s'impose\nsymboliquement.\nDonc le lien entre la chasse et la guerre est direct.\nParce que si on fait encore un autre lien, celui qui est un bon chasseur va être un bon guerrier.\nD'après cet intervenant, à quoi peut prétendre le meilleur chasseur d'une communauté ?"
+      }
+    ],
+    "secs": 62.03,
+    "page": 3,
+    "audio": "exam-sources/audio/0f8634bf4c9fd482eef66617.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 155,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pour afficher notre niveau de vie",
+      "Pour affirmer notre personnalité",
+      "Pour améliorer notre quotidien",
+      "Pour imiter notre entourage"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Pourquoi accumulons-nous des objets ? Avant tout, l'objet, en fait, nous signale. L'objet,\nc'est un peu nous. Je suis ce que j'ai, je suis ce que je porte, je suis ce que je possède.\nEt, en fait, l'objet, via le regard d'autrui sur notre objet, nous permet de nous construire\nune identité. Qui on est, notre intérêt. Tout ça passe, effectivement, par la médiation des\nobjets, que ce soit les vêtements, que ce soit une voiture, que ce soit un vélo, que ce\nsoit un lieu de résidence, des chaussures ou je ne sais quoi.\nDonc l'objet est très important.\nSelon l'intervenante, pourquoi accumulons-nous des objets ?"
+      }
+    ],
+    "secs": 58.01,
+    "page": 4,
+    "audio": "exam-sources/audio/013259438242304dc125978f.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 179,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle construit des maisons pour les personnes âgées",
+      "Elle organise des évènements rassemblant les générations",
+      "Elle permet à des jeunes d’habiter chez des personnes âgées",
+      "Elle valorise les professions d’assistance aux personnes âgées"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Que propose l'association présentée ?\nD'un côté, certaines personnes âgées ont de la place chez elles et besoin d'aide dans leur\nquotidien.\nD'un autre côté, certains jeunes ont du temps libre et cherchent à se loger.\nAlors, on en reste là ou on trouve une solution ?\nL'association Delors, à Rennes, favorise la cohabitation entre personnes âgées et jeunes\ndéfavorisés.\nSi vous voulez soutenir ce type de solution, rendez-vous sur fondationdefrance.org."
+      }
+    ],
+    "secs": 54.31,
+    "page": 4,
+    "audio": "exam-sources/audio/f32b27bb32a0b518d9c8abac.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 168,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’entretien des liens d’amitiés à distance",
+      "La comparaison de moyens de mobilité",
+      "La sociabilité à l’ère du numérique",
+      "Les échanges dans les transports"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "C'est une nouvelle technologie, la présence d'Internet a en effet certains sur une redéfinition de la relation des personnes à Ottawa, comment la vie de tous les jours se structurent. Prenons un exemple, on est dans le métro, on est dans l'autobus, on peut être à la même place, on partage le même trajet pendant 30 minutes et on a aucune connaissance de qui autour de nous, on a aucune conscience de ce qui se passe, on peut être complètement hypnotisé par ce petit outil technologique qui est le téléphone ou la tablette, etc., on peut être beaucoup plus connecté avec quelqu'un qui a 10 000 kilomètres de nous en présence physique que quelqu'un qui a essayé à côté de nous sur le siège juste à côté. Qu'est-ce qui on vingt-six ? Sur quoi porte les réflexions de la personne interviewée ?"
+      }
+    ],
+    "secs": 71.21,
+    "page": 4,
+    "audio": "exam-sources/audio/23b0ae45d4f18311a418a725.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’établir un diagnostic en ligne",
+      "D’éviter des pertes de temps",
+      "De réduire les frais de santé",
+      "De vérifier la qualité des soins"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Ces sites interlètes ont touché et pour tout le monde. Oui, grâce à eux, finis les longues minutes d'attente au bout du fil sur un air de musique classique, finis aussi les secretariats médicaux unjuaniables, désormais il est possible de prendre rendez-vous en un clic à n'importe quelle heure du jour et de la nuit, chez son dentiste, son océopat et même à l'hôpital, la révolution est en marche et tout le monde semble égagier. Qu'est-ce qu'il y a? Que permettent les sites internet dont parlent le document?"
+      }
+    ],
+    "secs": 48.76,
+    "page": 4,
+    "audio": "exam-sources/audio/b943a902e95ddf6a6e151949.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La répartition des tâches dans le service",
+      "La répartition des tâches dans le service",
+      "La répartition des tâches dans le service",
+      "Les désaccords entre employeur et employés"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Quel est l'objet de la discussion ?\nJe pense que le chef de département a raison. Il faudrait modifier la façon dont nous\nfonctionnons et redéfinir clairement les missions de chacun.\nOui, je suis d'accord. D'autant que nous avons eu des incompréhensions entre nous ces\nderniers temps.\nD'après moi, elles sont directement liées au fait que personne ne sait précisément où\ncommence son rôle, et surtout où il s'arrête dans le projet.\nTout à fait d'accord. Moi-même, je suis un peu perdu.\nSi tout le monde essaie de tout faire, on ne sera jamais d'accord au sein de ce service.\nSans compter que ça ne nous fait pas gagner de temps.\nBien. Alors, mettons ça à l'ordre de la réunion d'équipe de demain ?"
+      }
+    ],
+    "secs": 71.42,
+    "page": 4,
+    "audio": "exam-sources/audio/4a85dca0f88b035da61f6203.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 168,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’absence de formation sur l’élaboration d’un budget",
+      "L’absence de formation sur l’élaboration d’un budget",
+      "Le manque de cours d’économie à l’Université",
+      "Le peu d’informations des banques sur les crédits"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Apprendre à gérer son argent n'est pas une priorité éducative alors que l'argent nous\naccompagne toute notre vie. Construire un budget, ça s'apprend, mais trop souvent le\nsujet est considéré tabou par les adultes, donc pas question d'en parler avec les\nenfants.\nDans la sphère de l'école, aucune séance de travail n'est dédiée à cette question.\nPourtant, chacun est concerné dans sa vie professionnelle et personnelle par les\nprincipales notions que sont les coûts, les crédits, les prêts, les taux d'intérêt,\nl'endettement, l'économie à l'échelle de l'individu. Voilà un domaine qui touche chaque\nFrançais sans que jamais celui-ci y soit vraiment initié.\nQue dénonce cette journaliste ?"
+      }
+    ],
+    "secs": 63.75,
+    "page": 4,
+    "audio": "exam-sources/audio/bf384d430f21157b74a5eb93.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 133,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il a besoin d’être perfectionné",
+      "Il fonctionne pour les romans",
+      "Il peut adapter la ponctuation",
+      "Il sert aux spécialistes du métier"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Dis, comment tu fais pour réussir ton anglais toi ?\nSurtout l'oral. J'ai beau apprendre des centaines de mots, faire des exercices, j'avance pas.\nMoi j'ai un truc.\nPour l'oral, pas de livres, pas de cassettes.\nLe garçon qui a la chambre à côté de la mienne est anglais.\nAlors on s'invite pour le café deux soirs par semaine et on parle moitié en anglais, moitié en\nfrançais.\nAh mais c'est bien ça ! Et je pourrais venir aussi.\nD'accord.\nMais tu viens avec une copine.\nÀ quatre, c'est plus amusant.\nComment s'y prend l'étudiant pour réviser l'anglais ?"
+      }
+    ],
+    "secs": 59.84,
+    "page": 4,
+    "audio": "exam-sources/audio/3f070a0b51b454f268945145.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 157,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "De l’activité économique",
+      "De l’activité économique",
+      "De pistes cyclables",
+      "De pistes cyclables"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "A 6000 km de la J-Pour, la capitale du Rajasthan, deux jeunes françaises proposaient l'autoriste de visiter à Bicyclettes, cette ville grouillante de 6 millions d'habitants dans le nord-ouest de l'un. Ici, c'est pour le plaisir compédal, il faut se lever aux horors, pour profiter de la ville, avant qu'elle ne soit engluée dans des empoutés à je m'enstrait les honneurs et aux félicions de copines. Un séparable depuis l'enfance, elles ont créé, il y a 7 ans, leur touravelle au J-Pour. On le fait très tôt le matin, donc à partir du 6h45, donc là le trafic est très faible et ça nous permet également de découvrir une ville qui s'évêde. On entre dans les maisons, pour un petit déjeuner dans une famille indienne avec des vaches d'emplois. On va vraiment dans des lieux inédits où les gens diraient jamais seuls. Qu'est-ce qui en 31 ? De quoi parle cette émission sur Jaipour ? C'est la première fois que j'ai dit qu'il y a un peu d'hôpital, mais c'est la première fois que j'ai dit que j'ai dit qu'il y a un peu d'hôpital."
+      }
+    ],
+    "secs": 69.39,
+    "page": 4,
+    "audio": "exam-sources/audio/8252b0323c6c60ca333211e4.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "De côtoyer des coutumes différentes",
+      "De mettre le monde à la portée de tout budget",
+      "De partager une aventure avec les siens",
+      "De participer à l’essor économique d’un endroit"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Dans l'idée de tourisme, dans l'idée de voyage et dans cette idée de voyage, la corème l'idée, qui est parait intéressante, qui est la notion de d'exploration, de découvert d'autres cultures, de découvert d'autres normes, et finalement aussi d'émancipation par rapport aux normes qui sont celles de notre quotidien et dont on s'aperçoit qu'elle peut avoir un caractère relative. Lorsqu'on s'aperçoit que d'autres gens ailleurs, dit votre monde. Question 32. Que permet le tourisme selon cet intervenant?"
+      }
+    ],
+    "secs": 53.74,
+    "page": 5,
+    "audio": "exam-sources/audio/da532a6c5ff7f29219ede155.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ils consomment plus que la jeune génération",
+      "Ils dépensent beaucoup pour la santé",
+      "Ils profitent peu des effets de la croissance",
+      "Ils sont à l’origine de créations d’emplois"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les plus de 60 ans, ils sont près d'un milliard sur la planète. 15 millions en France et ce nombre\na vocation à grossir. Aujourd'hui, les seniors, c'est 23% de la population française.\nBientôt, ce sera 30% des seniors qui voyagent, qui consomment, qui s'équipent. Des seniors\ndont la santé vacille aussi et qui entrent dans la dépendance. Un marché juteux pour les\nentreprises et un formidable gisement de croissance et d'emplois qui n'a pas échappé à Michel\nDelonney, la ministre déléguée aux personnes âgées.\nDans le secteur de l'aide à domicile, on considère qu'il faut 220 000 emplois de plus d'ici 2020.\nIncroyable ! Aucun autre ministère ne peut proposer autant de champs de croissance."
+      }
+    ],
+    "secs": 71.27,
+    "page": 5,
+    "audio": "exam-sources/audio/cd36291be8401c0ab78238ad.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 158,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’alimentation fournie aux élevages est de mauvaise qualité",
+      "L’existence d’industries piscicoles nuit à la variété des espèces",
+      "La filière aquacole fragilise l’équilibre alimentaire mondial",
+      "Les pêcheurs pillent les fonds marins pour soutenir la concurrence"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Selon ce comité d'experts, c'est une stratégie qui ne fait que davantage\nmettre en opposition les pays en voie de développement et les pays développés.\nIls estiment que la consommation de poissons d'élevage dans les pays riches ne fait\nqu'aggraver la situation dans les autres pays, puisqu'il faut avoir recours aux réserves\nde poissons des pays en développement pour produire les ressources qu'on consacre à\nl'élevage industriel. L'aquaculture, qui nous donne donc des saumons et autres choses,\nest une grande consommatrice de farine de poisson. Or, la farine de poisson est\nobtenue en broyant des poissons tout à fait consommables, des harins, des macros,\ndes anchois, et ainsi de suite.\nOn détruit du poisson consommable, du poisson bon marché, pour en faire du poisson\ncher, qui est vendu dans les pays occidentaux.\nSelon l'intervenant, pourquoi l'aquaculture pose-t-elle problème ?"
+      }
+    ],
+    "secs": 74.86,
+    "page": 5,
+    "audio": "exam-sources/audio/1f705333adcd73d83a330a9a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 124,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Etablir des priorités s’avère être très difficile",
+      "Grâce au numérique les gains de temps sont importants",
+      "Il n’y a pas de limite à la quantité d’informations traites",
+      "La communication en ligne est addictive"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Si vous voulez vraiment voir quelles sont vos priorités dans une journée, vous verrez que vous\nn'en avez pas 10 ou 20. Ce qui est vraiment important, ça se compte sur les doigts d'une main.\nEt à ce moment-là, vous pouvez mettre en place des temps longs, une heure pour faire ceci,\nune demi-heure pour faire cela. Et à la fin, vous y arrivez.\nLe problème, c'est que le flux d'informations aujourd'hui est tel, avec tous ces outils de\ncommunication numérique, qu'on est submergé de vingtaines, trentaines d'informations parmi\nlesquelles on perd un petit peu le sens de la priorité.\nQu'explique la personne interviewée ?"
+      }
+    ],
+    "secs": 53.58,
+    "page": 5,
+    "audio": "exam-sources/audio/718af944409443483723a691.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 159,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pour faire connaître leurs services",
+      "Pour rechercher des collaborateurs",
+      "Pour s’informer sur la concurrence",
+      "Pour vendre leurs produits en ligne"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Recruter grâce aux réseaux sociaux, ce n'est plus une tendance émergente, mais bien un\nmouvement de fond selon l'Insee. Et ça annonce, Philippe, de nouvelles façons d'embaucher.\nOui, en quatre ans, la part des entreprises qui utilisent les médias sociaux a plus que doublé.\nLes entreprises sont donc de plus en plus présentes sur la toile. Et celles qui y sont, s'en\nservent de plus en plus pour recruter. C'est le cas de 44% d'entre elles.\nDans quel but les entreprises utilisent-elles les nouveaux médias ?"
+      }
+    ],
+    "secs": 53.74,
+    "page": 5,
+    "audio": "exam-sources/audio/25f06cda56173bcfb50f04e5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 160,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Comme un prétexte pour éviter de traiter les questions significatives",
+      "Comme une occasion de commenter ce qui ne va pas dans notre société",
+      "Comme un moyen de sensibiliser le public aux problèmes des individus",
+      "Comme une façon de distraire les individus de leurs petits soucis quotidiens"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les faits divers sont bien des faits, des événements, des choses qui arrivent. Mais pourquoi\ndiables sont-ils divers, ces faits ?\nOn peut les trouver monotones, toujours des meurtres, des accidents, des catastrophes, des\nséquestrations, et j'en passe. Des images choc, en tout cas, de ce qui ne va pas dans notre\nsociété.\nEn effet, alors qu'il arrive cent mille choses heureuses et agréables, l'information s'attache à\nl'horrible et à l'imprévu.\nLes faits divers racontent l'horreur qui atteint quelques individus, mais qui masquent les\nmaladies d'une société tout entière.\nÀ leur donner tant d'importance sans les commenter, les médias contournent gaillardement les\nproblèmes majeurs collectifs, qui, eux, ne sont pas divers.\nÀ se demander si ces catastrophes si diverses ne sont pas mises en avant sans qu'on en tire\naucune leçon, pour faire diversion, non pas pour divertir au sens de récréer, mais pour\ndétourner de ce qui est plus général et plus important, les problèmes qui concernent des\nmillions d'humains, mais qui paraissent, en effet, plus lointains."
+      }
+    ],
+    "secs": 87.38,
+    "page": 5,
+    "audio": "exam-sources/audio/72ee6c5de223bb5cb7b0e331.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 160,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle déplore le manque de structures pour accueillir et réunir les jeunes",
+      "Elle désapprouve la disparition d’endroits consacrés aux pratiques culturelles",
+      "Elle estime insuffisantes les tentatives des cinémas de mélanger les publics",
+      "Elle regrette le désintérêt des publics pour les espaces et les échanges culturels"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les pratiques culturelles sont clivées, et malheureusement, aujourd'hui, même au niveau de la\njeunesse, qui pourrait être fédérée par le phénomène générationnel, les pratiques culturelles\nsont très, très séparées.\nJe regrette qu'il n'y ait pas plus de lieux qui permettent aux jeunes de se retrouver sur des\nterrains festifs.\nC'est vrai que ce sont des moments de se retrouver, de vivre ensemble, sans être dans une\nposture d'affrontement. Et ça, ça manque.\nEffectivement, il y a les salles de cinéma, même dans les multiplexes, on voit que selon les\nfilms, les publics ne sont pas les mêmes.\nCela permet à des gens de se retrouver, mais ce sont des gens souvent qui ont des pratiques\nséparées."
+      }
+    ],
+    "secs": 63.81,
+    "page": 5,
+    "audio": "exam-sources/audio/697100a084a9ae777378b82e.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 160,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il concevait des histoires originales",
+      "Il participait au journal de l’école",
+      "Il récupérait des albums d’occasion",
+      "Il s’amusait à illustrer ses cours"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Enfant, à Beyrouth, c'était compliqué d'obtenir des BD.\nRapidement, vous avez compris que vous ne pourriez pas vous procurer tout ce que vous\nsouhaitiez lire et qu'il fallait vous créer vos propres personnages et votre imaginaire.\nOui, ça c'est plus une question d'argent, d'argent de poche.\nC'est là que ça bascule ou pas ?\nOui, c'est-à-dire que je me dis que le meilleur moyen d'augmenter ma collection de bandes\ndessinées, c'est d'en fabriquer moi-même.\nJe prenais des papiers de cahiers scolaires, cadriers, puis je graphais ça.\nÀ la fin, je faisais une couverture spécialement pour et hop, j'avais un volume de plus dans ma\ncollection sans avoir dépensé un centime."
+      }
+    ],
+    "secs": 64.67,
+    "page": 5,
+    "audio": "exam-sources/audio/7aaaf0c5872fbdf7e1c8645a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 158,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  }
+]

@@ -217,6 +217,15 @@
   ]
  },
  {
+  "id": "89bf934531c0",
+  "text": "· {0} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "· … min"
+  ]
+ },
+ {
   "id": "2e5059dd13aa",
   "text": "· {0} min left",
   "kind": "pattern",
@@ -4277,7 +4286,7 @@
   "ctx": [
    "… min",
    "…<span><small>…</small><b>…</b><span>… min</span></span><button>Start</button>…",
-   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>"
+   "· … min"
   ]
  },
  {
@@ -4546,7 +4555,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -4628,7 +4637,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>…</h2> <p>… of … papers completed</p> … Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -10090,6 +10099,13 @@
   ]
  },
  {
+  "id": "88b91f0bd615",
+  "text": "Annales",
+  "kind": "exact",
+  "where": "attr:title",
+  "ctx": []
+ },
+ {
   "id": "b6cc59f3a869",
   "text": "Annoncés agrees with les gagnants; été never agrees.",
   "kind": "exact",
@@ -12666,7 +12682,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>…</h2> <p>… of … papers completed</p> … Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -13903,7 +13919,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -16514,7 +16530,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -16680,7 +16696,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · …</p> … <p>…</p> … … … …"
+   "… <p>Examen blanc · …</p> … <p>…</p> … … … … …"
   ]
  },
  {
@@ -21377,7 +21393,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …",
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …",
    "…",
    "Date Task Words Level …"
   ]
@@ -21495,6 +21511,15 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": []
+ },
+ {
+  "id": "1048b19f9743",
+  "text": "Listening exam papers",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Listening exam papers"
+  ]
  },
  {
   "id": "f413fa086098",
@@ -25465,7 +25490,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -25529,7 +25554,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>…</h2> <p>… of … papers completed</p> … Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -27796,7 +27821,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> …"
+   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -29006,6 +29031,15 @@
   ]
  },
  {
+  "id": "62fc322b3bd2",
+  "text": "Question {0}",
+  "kind": "pattern",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<button>…</button>"
+  ]
+ },
+ {
   "id": "c8460944c102",
   "text": "Question {0} of",
   "kind": "pattern",
@@ -29325,7 +29359,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+   "Reading exam papers"
   ]
  },
  {
@@ -33344,7 +33378,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>…</h2> <p>… of … papers completed</p> … Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -36521,6 +36555,15 @@
   "ctx": []
  },
  {
+  "id": "c6fe3515e5cb",
+  "text": "The recording could not load. Resume to try again.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The recording could not load. Resume to try again."
+  ]
+ },
+ {
   "id": "e58424dc71c0",
   "text": "The recording starts in",
   "kind": "exact",
@@ -39227,6 +39270,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "<summary>… · …… · …</summary> … … <summary>Transcription</summary>… … … … … … …",
    "<p>Transcription</p> …"
   ]
  },

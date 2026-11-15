@@ -3,3 +3,6 @@ __pycache__/
 data/
 node_modules/
 claude-ai-progress-*.json
+
+# Imported exam questions are content; the root data directory remains private.
+!site/exam-sources/data/

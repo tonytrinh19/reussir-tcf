@@ -5492,5 +5492,9 @@
  "≈{0} on the first try": "≈{0} du premier coup",
  "✓ NCLC 7 reached": "✓ NCLC 7 atteint",
  "✓ best {0}/": "✓ meilleur {0}/",
- "✓ kept at bay": "✓ évitée"
+ "✓ kept at bay": "✓ évitée",
+ "Annales": "Annales",
+ "Listening exam papers": "Sujets de compréhension orale",
+ "Question {0}": "Question {0}",
+ "The recording could not load. Resume to try again.": "Impossible de charger l’enregistrement. Reprends pour réessayer."
 }
