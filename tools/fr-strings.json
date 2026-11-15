@@ -4509,7 +4509,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
    "… of … answered"
   ]
  },
@@ -4629,6 +4629,15 @@
   "where": "app",
   "ctx": [
    "<h3>Phase</h3><span>Advance on the exit criteria, not on the calendar</span> … Week 1 started <h3>Critères de sortie · exit criteria</h3><span>… of … met</span> … … …"
+  ]
+ },
+ {
+  "id": "12d70dda91c1",
+  "text": "{0} of {1} papers completed",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -5895,7 +5904,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
   ]
  },
  {
@@ -12653,6 +12662,15 @@
   ]
  },
  {
+  "id": "c184312629b5",
+  "text": "Choose a paper",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+  ]
+ },
+ {
   "id": "e30ec070d0ca",
   "text": "Choose a set",
   "kind": "exact",
@@ -16663,7 +16681,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · …</p> … <p>…</p> … … …"
+   "… <p>Examen blanc · …</p> … <p>…</p> … … … …"
   ]
  },
  {
@@ -18436,7 +18454,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
    "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
   ]
  },
@@ -24009,7 +24027,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
   ]
  },
  {
@@ -25401,7 +25419,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
    "… of … answered",
    "… of … answered…"
   ]
@@ -25486,6 +25504,15 @@
   "where": "app",
   "ctx": [
    "<h3>Phase</h3><span>Advance on the exit criteria, not on the calendar</span> … Week 1 started <h3>Critères de sortie · exit criteria</h3><span>… of … met</span> … … …"
+  ]
+ },
+ {
+  "id": "be4ea5e9c6ab",
+  "text": "of {0} papers completed",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -26166,6 +26193,15 @@
   ]
  },
  {
+  "id": "93bf7e86d197",
+  "text": "Open a question to compare your answer with the reference key from the paper.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Open a question to compare your answer with the reference key from the paper."
+  ]
+ },
+ {
   "id": "753cb6c9c215",
   "text": "Open homework already assigned: {0}.",
   "kind": "pattern",
@@ -26208,6 +26244,15 @@
   "where": "app",
   "ctx": [
    "<p><b>Next week's two aren't picked yet.</b> Open this to choose them.</p>"
+  ]
+ },
+ {
+  "id": "bf9d37d6449f",
+  "text": "Opening the paper…",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Opening the paper…"
   ]
  },
  {
@@ -28950,7 +28995,7 @@
   "where": "app",
   "ctx": [
    "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <p>Choose at any time…. When this question's time runs out, the next one starts by itself, as on the real test.</p> …",
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
   ]
  },
  {
@@ -28960,7 +29005,7 @@
   "where": "app",
   "ctx": [
    "… <p>Question … of … <span>…</span></p>… … … … <p>…</p> … … <p>Choose at any time…. When this question's time runs out, the next one starts by itself, as on the real test.</p> …",
-   "… <p>Question … of … <span>…</span></p>… … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
+   "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …"
   ]
  },
  {
@@ -29255,6 +29300,15 @@
   "where": "app",
   "ctx": [
    "Reading"
+  ]
+ },
+ {
+  "id": "59229d3a69b9",
+  "text": "Reading exam papers",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
   ]
  },
  {
@@ -33268,6 +33322,15 @@
   ]
  },
  {
+  "id": "144bf9a7b4fc",
+  "text": "Start this paper",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>…</span> <p>Collection Việt–Pháp</p><h2>Reading exam papers</h2> <p>… of … papers completed</p> Choose a paper … <button>Start this paper</button>"
+  ]
+ },
+ {
   "id": "961c84d1dc8c",
   "text": "Start this text",
   "kind": "exact",
@@ -36023,6 +36086,15 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
+ },
+ {
+  "id": "9b034d1090dc",
+  "text": "The paper could not be opened. Try again.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The paper could not be opened. Try again."
+  ]
  },
  {
   "id": "9540b691d758",

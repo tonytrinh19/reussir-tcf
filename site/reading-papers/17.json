@@ -1,0 +1,470 @@
+[
+  {
+    "level": "A1",
+    "text": "La bibliothèque de Chatou vous invite à passer un moment parent-enfant mercredi prochain.\nVenez avec votre enfant écrire une histoire avec des dessins. À la fin de la journée, nous imprimerons ces histoires et vous pourrez s histoires et vo repartir avec un petit livre!",
+    "q": "Qu’est-ce que la bibliothèque de Chautou organise?",
+    "options": [
+      "La décoration de ses salles.",
+      "La lecture d’une romane jeunesse.",
+      "Une activité à faire en famille.",
+      "Une rencontre avec un auteur."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "A1",
+    "text": "La société des transports T2C offre plusieurs moyens de transports publics: trente-quatre stations de tramway, de train et de métro en journée, 23 lignes de bus, Dont une de nuit. Plus de renseignements sur notre site www.t2c.fr!",
+    "q": "Quel transport circule après 23h?",
+    "options": [
+      "Le bus.",
+      "Le métro.",
+      "Le train.",
+      "Le tramway."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "A1",
+    "text": "Nouveau message Salut Anthony Je t'annonce une bonne nouvelle : j'ai trouvé un poste de vendeur pour cet été ! C'est dans une boutique du centre-ville de Bordeaux.\nC'est un peu loin de la maison mais en voiture j'y serai en 20 minutes. On fêtera ça samedi !\nSimon",
+    "q": "Qu’est-ce que Simon va faire ?",
+    "options": [
+      "Acheter une voiture.",
+      "Aller chez Anthony.",
+      "Faire des courses samedi.",
+      "Travailler à Bordeaux."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "A1",
+    "text": "Vous êtes passionné de photographie et vous voulez partager vos créations? Inscrivez-vous au Prix du << Petit Reporter » : envoyez une photo sur le thème de l'amitié au club << Images »>! Un appareil photo à gagner !\nInscriptions: www.clublmages.fr/Prix Petit Reporter",
+    "q": "Que propose le club “Images” ?",
+    "options": [
+      "D’acheter du matériel en soldes.",
+      "De participer à un concours.",
+      "De rencontrer des professionnels.",
+      "De suivre des cours débutants."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "A2",
+    "text": "SAMEDI 29 JUIN, VENEZ COURIR 10 KM POUR AIDER\nL'ASSOCIATION « TOUS ENSEMBLE POUR LA PAIX ».\nRENDEZ-VOUS À 10H, AU PARC DE\nVINCENNES.\nLANCE SYMPATHIC\nAMBIANCE SYMPATHIQUE ET REPAS OFFERT POUR\nLES SPORTIFS,\nVENEZ NOMBREUX!",
+    "q": "Qu’est-ce que cette annonce propose?",
+    "options": [
+      "D’aider à organiser une fête.",
+      "De devenir membre d’une association.",
+      "De distribuer des repas gratuits.",
+      "De participer à un événement sportif."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "A2",
+    "text": "De: cannelle@lilo.com À: Elke@mail.com Salut Elke, C'est bientôt la fête de nos 20 ans de mariage !\nBeaucoup d'invités viendront avec leurs enfants. Comme tu adores les petits, pourrais-tu t'occuper d'eux en journée ? Quand danser tous ils seront couchés, nous pourro pourrons dar ensemble ! Merci, bisous.\nCannelle",
+    "q": "Que demande Cannelle à son amie?",
+    "options": [
+      "D’écrire aux invités.",
+      "D’organiser la fête.",
+      "De garder des enfants.",
+      "De préparer des danses."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "A2",
+    "text": "Chers professeurs,\nChers étudiants, Venez rencontrer les nouveaux étudiants de la semaine!\nCe mardi, de 8 h 30 à 10 h 30. Rendez-vous salle «Les Mimosas >> 30 à 10 h 30.\nJ. Lebon, directrice École de langues ABC.",
+    "q": "Pourquoi Madame Lebon écrit-elle cette annonce?",
+    "options": [
+      "Pour changer un horaire.",
+      "Pour organiser une fête.",
+      "Pour présenter des élèves.",
+      "Pour proposer une sortie."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "A2",
+    "text": "Madame Chanmont,\nVous avez participé à notre concours et vous avez gagné un séjour d'une semaine tout compris (transport, hébergement, restauration) pour deux personnes en Italie ! Prenez contact par courriel avec notre service clientèle pour avoir toutes les informations.\nLe service commercial.",
+    "q": "Que doit faire madame Chanmont?",
+    "options": [
+      "Écrire un message.",
+      "Prendre un billet d’avion.",
+      "Réserver un hôtel.",
+      "S’inscrire à un jeu."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "A2",
+    "text": "Vous avez une expérience dans l'éducation ? Vous avez du temps libre, et vous avez envie d'aider des élèves en difficulté ?\nOffrez vos services de soutien scolaire dans notre association de quartier !\nÉcrivez-nous à avotreservice@mandarine.fr",
+    "q": "Qu’est-ce que cette annone propose?",
+    "options": [
+      "De donner des cours.",
+      "De garder des enfants.",
+      "De rencontrer des voisins.",
+      "De suivre des formations."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "A2",
+    "text": "Marché facile est une application pour téléphone portable qui vous conseille les bons fruits et légumes de saison dans les supermarchés. Elle donne aussi des informations sur le fromage, la viande et le poisson.",
+    "q": "Quoi sert cette application?",
+    "options": [
+      "À acheter sur Internet.",
+      "À choisir ses produits.",
+      "À noter les magasins.",
+      "À trouver des recettes."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B1",
+    "text": "Montréal, la plus grande ville du Québec, figure en tête de liste des métropoles francophones.\nPatrons à la découverte de ce morceau du Vieux Continent intégré au Nouveau Monde ! On le décrit comme la cité la plus européenne plus américaine des francophones.\nEt c'est d'abord cet aspect-là qui surprend les Eurepéens tout juste arrivés dans cette ville pleine d'énergie et de caractère",
+    "q": "Pourquoi cette ville est-elle particulière ?",
+    "options": [
+      "C’est la destination préférée des touristes français.",
+      "De plus en plus de jeunes souhaitent s’y installer.",
+      "Elle réunit les caractéristiques de deux continents.",
+      "On y entend des langues du monde entier."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "SAUVEZ DES VIES\nTous les samedis pendant l'été, vous pouvez donner votre sang pour les malades et les blessés.\nOù?\nDans un camion spécialisé garé devant la mairie.\nNOUS AVONS BESOIN DE VOUS !",
+    "q": "Que propose cette annonce?",
+    "options": [
+      "D’aider des malades.",
+      "De faire un don.",
+      "De s’informer à la mairie.",
+      "De travailler l’été."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B1",
+    "text": "Nous cherchons des acteurs sportifs entre 18 et 45 ans. Expérience comme chanteur et danseur souhaitée. Le tournage se fera à Limoges. Si vous êtes intéressé(e), envoyez votre CV à casting@art.com.",
+    "q": "Quelle activit é est proposee dans cette annonce ?",
+    "options": [
+      "Écrire une pièce.",
+      "Jouer dans un film.",
+      "Organiser un concert.",
+      "Participer à une course."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B1",
+    "text": "VOUS MANGEZ ITALIEN, DANSEZ LE\nFLAMENCO OU APPRENEZ LE SUÉDOIS?\nPartagez vos images qui montrent que l'Europe fait partie de votre vie. Participez au concours << Fenêtres sur l'Europe ». À gagner: un séjour à Bruxelles ou un atelier cuisine.",
+    "q": "Que propose ce concours?",
+    "options": [
+      "De découvrir une langue",
+      "De faire un spectacle.",
+      "D’envoyer des photos",
+      "D’inventer une recette."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "Lundi prochain, en France, les librairies organisent une soirée du livre de jeunesse. Au programme, des activités pour enfants et des dégustations de desserts.\nOn pourra aussi voir sur grand écran les princes et ussi voir sur princesses du cinéma.",
+    "q": "Que pourra-t-on aux soirées du livre de jeunesse ?",
+    "options": [
+      "Ecouter des chansons",
+      "Gagner des cadeaux",
+      "Gouter des recettes",
+      "Jouer dans un film"
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "Et si on partait vivre à la campagne?\nBeaucoup d'habitants de la ville rêvent d'une maison, d'un jardin potager. Et justement, de plus en plus de régions et de villes s'organisent pour attirer ces candidats et leur famille au départ.\nUn salon est organisé sur cette question aujourd'hui à Paris. Selon un sondage, 30 % des habitants de l'agglomération parisienne seraient prêts à partir. S'ils pouvaient pratiquer une activité professionnelle qui leur plaît, ils partiraient sans hésiter.",
+    "q": "Selon cet article, à quelle condition les gens quitteraient la ville ?",
+    "options": [
+      "Avoir un logement spacieux.",
+      "Exercer un travail satisfaisant.",
+      "Modifier le rythme quotidien,",
+      "Se rapprocher du monde agricole"
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B1",
+    "text": "La ville de Nantes a de quoi séduire grâce à son dynamisme culturel. Son renouveau, débuté il y a plus de deux décennies, est exceptionnel. Elle a retrouvé le goût du risque, un grain de folie et un peu de naïveté. Nantes, 'la bourgeoise cité des ducs de Bretagne, est une vraie boîte à idées, toujours en quête de nouvelles manières de conjuguer le « vivre ensemble juguer le « vivre »>. Pas étonnant qu'elle connaisse une des plus fortes croissances des métropoles de France.",
+    "q": "Qu'est ce qui attire les gens à Nantes?",
+    "options": [
+      "Sa position géographique.",
+      "Ses traditions régionales.",
+      "Son ambiance créative.",
+      "Son économie stable."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "PÉDAGOGIE\nTwitter dès l'école primaire, pour donner le goût d'écrire, de lire et de l'orthographe. Un instituteur raconte : « J'utilise Twitter dans ma classe depuis un an. Les productions d'élèves sont de plus en plus intéressantes. Grâce à Twitter, je peux approfondir les notions de façon concrète. Les activités scolaires paraissent artificielles, hors contexte voire dénuées de sens. Pourquoi essayer de maîtriser l'écriture ? Les enfants n'y songent même pas car leurs travaux sont cantonnés à des cahiers, eux-mêmes sont cantonnés à des cahier enfermés dans des casiers ou des cartables. Ils n'ont pas l'occasion de partager leurs productions, de les confronter, d'argumenter leurs choix.>>>.",
+    "q": "D’après cet article, qu’apporte l’utilisation de Twitter aux élèves ?",
+    "options": [
+      "Ils apprennent à se servir correctement des réseaux sociaux.",
+      "Ils communiquent plus facilement avec l’instituteur.",
+      "Ils comprennent mieux l’intérêt des apprentissages proposés.",
+      "Ils sont plus attentifs après un moment de détente."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "Les recherches sur le cerveau et le numérique n'en sont qu'à leurs débuts. Si le cerveau reste génétiquement constant, il s'adapte culturellement aux innovations de l'époque. Ainsi, depuis que nous utilisons les objets connectés, notre rapport à la mémoire a changé. Quant à la concentration, trois facteurs perturbent son fonctionnement le fait de tenter de faire plusieurs tâches à la fois, celui d'être bombardé d'informations, et enfin celui d'être interrompu fréquemment par des notifications. Par conséquent, les apprentissages, l'assimilation des informations et la capacité d'enchaîner les tâches s'en trouvent ralentis.",
+    "q": "Qu’explique ce texte au sujet des outils numériques?",
+    "options": [
+      "Ils améliorent l’efficacité au travail.",
+      "Ils dérèglent les rythmes biologiques.",
+      "Ils fluidifient les relations sociales.",
+      "Ils modifient les aptitudes mentales."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "Il y a quelque chose de rare dans « Normandie nue>>: ce film est résolument léger, tout en ayant du fond. À travers une histoire qui sert de fil conducteur cocasse et insolite celle d'un artiste américain qui veut photographier des paysans dévêtus-, « Normandie nue» aborde la crise des éleveurs avec beaucoup d'humanité, notamment grâce au maire du village qui voit dans la venue du photographe l'occasion de faire valoir sa cause aux yeux de la planète. Parfois un peu maladroite, cette comédie amuse en caricaturant gentiment les médias, les artistes et les bobos parisiens en mal de verdure.",
+    "q": "Quelle est l’opinion du journaliste sur le film “Normandie nue”?",
+    "options": [
+      "Il est facile de s’identifier aux personnages",
+      "Les lieux de tournage sont authentiques.",
+      "On y dresse un portrait juste de la société.",
+      "Son humour fait passer un message sérieux."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "Mathieu Lagouanère et Élodie Calas, Deux journalistes, ont fait un tour du monde avec Une idée originale : provoquer des rencontres en faisant goûter le roquefort, un from- age traditionnel, fabriqué dans leur région. «Le roque- fort était simplement un moyen de faire connaissance avec les habitants.\nSes principales caractéristiques, les taches de moisissure et l'odeur, peuvent faire réagir », explique Mathieu. La société Roquefort leur a fourni les fromages. Ils ont raconté leurs aventures dans un blog conté leurs aventur de voyage.",
+    "q": "Quel était l’objectif de Mathieu et Élodie?",
+    "options": [
+      "Découvrir des recettes locales.",
+      "Entrer en contact avec les gens.",
+      "Réaliser une opération publicitaire.",
+      "Vendre des spécialités françaises."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B2",
+    "text": "Dans le monde de l'éducation, la mode est au << ludique >> Pas une description d'un nouveau matériel informatique ms l'utilisation de cet adjectif miraculeux. N'ayant rien de mieux à offrir, les publicitaires insistent sur le côté « ludique » et neutre de leur matériel, sous-entendant ainsi que les difficultés des enfants sont liées uniquement au côté poussiéreux de la présentation d'exercices et à l'ennui qu'ils suscitent. En changeant l'apparence, on suscitera l'intérêt et la réussite sera assurée. La rééducation risque d'être êt et le tre perçue comme la modernisation de la pédagogie sans questionnement sur l'échec de la pédagogie traditionnelle.",
+    "q": "Que reproche l’auteur du texte à la mode du lundique?",
+    "options": [
+      "Elle demande des connaissances techniques poussées.",
+      "Elle empêche les jeunes utilisateurs de se concentrer.",
+      "Elle masque les problèmes pédagogiques essentiels.",
+      "Elle sert sans succès d’argument commercial."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B2",
+    "text": "Elle devait être démolie et un nouveau lieu de culte reconstruit à l'arrière de l'église actuelle, le long du boulevard. Le projet, qui prévoyait la restructuration complète de l'îlot avec la création de logements sociaux, ne verra finalement pas le jour. La Ville et le diocèse ont pris la décision de conserver l'église Sainte-Madeleine considérant avec certains experts que sa démolition aurait causé la perte regrettable d'un élément important du patrimoine nantais.\nDes travaux d'urgence vont être réalisés avant le lancement d'un véritable programme de restauration et de mise en valeur du bâtiment.",
+    "q": "Selon cet articel, quelle décision a été prise?",
+    "options": [
+      "Bâtir une église identique dans le quartier.",
+      "Débuter le réaménagement du boulevard.",
+      "Entreprendre une rénovation du lieu.",
+      "Réhabiliter les logements sociaux existants."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B2",
+    "text": "La charte des Jeux olympiques est sans ambiguïté : les deux langues officielles du Comité international olympique sont le français et l'anglais. Une étude permettant d'identifier la place et le statut de la langue française dans les organisations Sportives internationales a été lancée en 2008 : les francophones sont présents dans les instances des fédérations sportives internationales mais en nombre insuffisant aux postes de décision, les documents officiels étant rarement rédigés en français. Priorité a donc été accordée à l'aide à la traduction des textes et à la mobilisation des francophones dans leur ensemble, afin qu'ils s'entraident à accéder aux postes décisionnels.",
+    "q": "À quel constat a abouti l’enquête sur la place de la francophonie dans le mouvement sportif mondial ?",
+    "options": [
+      "La langue française et l’anglais jouissent d’un statut équitable.",
+      "Les ligues sportives internationales comptent peu de francophones.",
+      "Les textes officiels et les règlements sont traduits en langue française.",
+      "Très peu de francophones occupent des fonctions à responsabilité."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "Les villes se montrent soucieuses d'améliorer leur qualité de l'air.\nUne solution : la plantation d'arbres. En effet, les arbres filtrent les particules contenues dans l'atmosphère. Mais la plantation d'arbres doit être réfléchie. Il est pertinent de mettre des arbres le long des axes de circulation pour protéger les habitations des polluants, mais aussi dans les zones piétonnes.\nLe choix des arbres a aussi son importance. Les espèces d'arbres Plantées il y a 50 ans ne répondent pas aux besoins d'aujourd'hui car elles forment un couvercle retenant au sol la pollution. En revanche, les arbres aux feuilles poilues sont, eux, efficaces.",
+    "q": "À quelle condition les arbres peuvent-ils aider à combattre la pollution urbaine?",
+    "options": [
+      "S’ils appartiennent à une espèce adéquate.",
+      "S’ils ont des feuilles persistantes en hiver.",
+      "S’ils ont été plantés il y a longtemps.",
+      "S’ils se trouvent loin des zones de logement."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "B2",
+    "text": "Les bénéfices du bio pour la santé et pour l'environnement sont aujourd'hui prouvés. Mais pour ses détracteurs, ce type de production ne serait pas viable, faute de rendements suffisants pour subvenir aux besoins d'une planète à la démographie galopante. Une idée répandue que réfutent des chercheurs européens qui affirment qu'il est possible de nourrir plus de 9 milliards d'êtres humains en 2050 avec 100% d'agriculture biologique, à deux conditions: réduire le gaspillage alimentaire et limiter la ter la consommation de de produits d'origine animale.\nUn défi de taille, alors que le bio ne représente que 1% de la surface agricole utile dans le monde.",
+    "q": "De quel défi est-il question?",
+    "options": [
+      "Augmenter la surface des terres agricoles.",
+      "Garantir la qualité des aliments pour animaux.",
+      "Généraliser l’agriculture biologique.",
+      "Lutter contre la démographie galopante."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B2",
+    "text": "Paris veut réduire de 30% l'exposition aux ondes des antennes-relais pour devenir la métropole la plus protectrice d'Europe.\nMaîtriser l'exposition des Parisiens aux ondes, tout en continuant à faire de Paris une capitale numérique, c'est le double objectif de la nouvelle charte téléphonie mobile que la maire soumettra fin mars au Conseil de Paris. Il s'agit de trouver un équilibre entre préoccupations de santé publique et bonne qualité du service de téléphonie mobile",
+    "q": "Quel est l’objectif de la ville de Paris?",
+    "options": [
+      "Améliorer la puissance de la réception.",
+      "Diminuer les risques sanitaires",
+      "Limiter les dépenses de la ville.",
+      "Respecter les normes internationales."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B2",
+    "text": "Les conséquences de l'analphabétisme sont profondes, au point qu'elles peuvent mettre la vie en danger. Elles s'enracinent dans le refus d'un droit humain fondamental: le droit à l'éducation. À l'échelle de la société, dénier le droit à l'éducation c'est hypothéqué le progrès démocratique et social - et par conséquent, la paix et la sécurité internationale. En empêchant les enfants de se développer pleinement, l'analphabétisme sème d'embûches leur chemin vers l'âge adulte et rend encore plus difficile leur compréhension du monde dans sa diversité aussi bien que des valeurs de paix et d'égalité entre les personnes. L'analphabétisme prive également l'individu d'autres joies, comme celles de la culture et de l'art en général.",
+    "q": "Selon ce texte, que favorise le respect du droit à l’éducation?",
+    "options": [
+      "La constitution d’une culture nationale.",
+      "La stimulation de la croissance économique.",
+      "L’amélioration des comportements sanitaires.",
+      "Le développement d’une conscience civique."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "Plus de 40% des espèces d'insectes sont en déclin et un tiers sont menacées. Leur taux de mortalité est huit fois plus rapide que celui des mammifères. À ce rythme, s'inquiètent les scientifiques, les insectes pourraient disparaître d'ici un siècle. Cette prévision est préoccupante car ils sont essentiels au bon fonctionnement de tous les écosystèmes. Ils pollinisent les plantes, recyclent les nutriments et servent de nourriture aux autres animaux. Leur disparition <<aura des conséquences Catastrophiques à la fois pour les écosystèmes de la planète et pour la survie de l'humanité ». ité ». << Si les modes Si les modes de production alimentaire ne changent pas, les insectes dans leur ensemble s'engageront sur la voie de l'extinction dans quelques décennies », écrivent les chercheurs.",
+    "q": "D’a près l’article, qu’est-ce qui est à l’origine de la disparition des iinssects?",
+    "options": [
+      "Les changements de climat.",
+      "Les méthodes de culture.",
+      "Les oiseaux prédateurs.",
+      "Les politiques publiques"
+    ],
+    "answer": 1
+  },
+  {
+    "level": "C1",
+    "text": "Deux mondes s'affrontent : ceux de l'ancienne agriculture et de la nouvelle. Le productivisme soutenu par la chimie a fait progresser comme jamais les rendements agricoles, nourri la planète et abaissé le prix des denrées. Mais il a fait son temps. Les tenants du passé, dont on peut comprendre les motivations, tant les agriculteurs travaillent sous la pression éreintante de la compétitivité, soutiennent qu'il n'existe pas d'autre solution. Notre enquête montre le contraire : l'alliance de la technologie et de l'écologie pour remplacer des substances nocives par une panoplie de techniques inédites offre une alternative originale, crédible et soutenable à la dispersion incontrôlée de composants chimiques nuisibles à tous. C'est la voie de la sagesse autant que de la modernité.",
+    "q": "Que défend le journaliste?",
+    "options": [
+      "L’accès universel à des aliments bon marché.",
+      "L’innovation des procédés de production.",
+      "Le développement du commerce équitable.",
+      "Le partage d’expériences traditionnelles."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "C1",
+    "text": "\"Il faut te le dire en quelle langue ?\" Cette question, que des milliers de mères posent à leur enfant lorsqu'elles veulent se faire écouter, est en fait très sensée (comme tout ce que disent les mères). Des travaux scientifiques récents ont en effet démontré une réalité étonnante nous réfléchissons et prenons des décisions différemment lorsque nous traitons l'information dans une autre langue que notre langue maternelle. Nous comprenons tout aussi bien l'idée ou le problème mais, lorsque nous utilisons une autre langue, le résultat est plus réfléchi, moins dicté par les émotions, plus orienté vers l'utilité.",
+    "q": "Que permet l’utilisation d’une langue autre que la langue maternelle?",
+    "options": [
+      "D’attirer l’attention de l’interlocuteur.",
+      "D’imaginer des solutions originales.",
+      "De solliciter davantage la raison.",
+      "De trouver des réponses rapides."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "C1",
+    "text": "Depuis un an, l'association du Théâtre de la poudrerie, située à Sevran, à quelques kilomètres de Paris, organise des représentations gratuites à domicile d'une pièce inédite. Pour cela, l'association a convié une auteure professionnelle à venir en résidence pour l'écrire. Elle a recueilli le témoignage d'une trentaine d'habitantes sur le thème du pouvoir féminin, puis écrit son texte à partir de cette matière première. L'enjeu pour cette association est que les spectateurs s'approprient la pièce : quand il y a un phénomène d'identification, la phénomène d'identific parole se libère lors de la rencontre qui suit la représentation. Ce phénomène est amplifié par ce cadre intimiste qui favorise le rapprochement des spectateurs et des comédiens.",
+    "q": "Quel objectif poursuit cette association avec ce projet?",
+    "options": [
+      "Encourager le dialogue avec le public.",
+      "Former des acteurs en banlieue.",
+      "Réaliser une œuvre à plusieurs mains.",
+      "Sensibiliser à l’égalité des sexes."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C1",
+    "text": "Le stress est l'ennemi numéro 1 du bien-être. Quand il prend le dessus, on perd sa motivation et on manque continuellement d'énergie Les médecins sont formels : le stress est souvent à l'origine de dysfonctionnements physiques.\nC'est aussi une cause directe du vieillissement Prématuré. Une personne stressée se replie sur elle-même et renonce progressivement à profiter de certaines de ses capacités mentales. Voici comment canaliser ce stress pour le transformer en énergie positive: apprendre à bien respirer, ne plus gaspiller ses forces à réfléchir aux actions du passé, changer les mauvaises habitudes et finalement savoir se ménager au quotidien.",
+    "q": "Qu’apprend-on sur le stress dans cet article?",
+    "options": [
+      "C’est un handicap qui peut se transformer en atout.",
+      "Il décuple l’ensemble des aptitudes cérébrales.",
+      "Il est officiellement reconnu comme une maladie.",
+      "Ses effets touchent plus particulièrement les seniors."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C1",
+    "text": "Souvent critiquée pour la qualité de son service, la société berlinoise des transports en commun a fait parler d'elle, en proposant 500 paires de <<chaussures-billets » aux couleurs des banquettes du métro berlinois. Vendues 180 euros, ces baskets incluent un abonnement annuel métro bus - tram (hors trains de banlieue), contre 761 euros pour un forfait classique. Les consommateurs séduits par ce concept commercial qui permet de voyager presque gratuitement sur une partie du gratuitement sur ur réseau ont formé une longue file d'attente. Certains ont même tenté de revendre en ligne leur paire << collector », à un tarif de base quintuplé.",
+    "q": "Quel est l’objectif de la société berlinoise des transports?",
+    "options": [
+      "Attirer l’attention grâce à un coup de publicité.",
+      "Concurrencer les autres moyens de locomotion.",
+      "Multiplier le nombre de souscriptions par Internet.",
+      "Permettre de voyager extramuros à moindre frais."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C1",
+    "text": "«Un produit qui ne s'userait pas serait une tragédie pour les affaires », lisait-on dans une ancienne revue américaine. Des années plus tard, le concept d'obsolescence programmée n'a pas pris une ride! || s'agit pour les fabricants de réduire volontairement la durée de vie ou d'emploi d'un produit afin d'en augmenter le taux de remplacement. Ici se cache le cœur de la course à la consommation. Le bilan écologique est également sans appel : les matières que contiennent nos appareils finissent en grande partie en déchets incinérés ou enfouis. L'exemple du téléphone portable en dit long : dans un rapport, une sénatrice souligne que « la conception des téléphones est délibérément défavorable au réemploi et au recyclage».",
+    "q": "Que constate ce journaliste à propos des articles proposés par les fabricants?",
+    "options": [
+      "Ils se détériorent après un certain temps.",
+      "Ils sont dangereux pour la santé.",
+      "Ils sont nuisibles pour l’environnement.",
+      "Ils sont vendus à des prix élevés."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C2",
+    "text": "Le Sénat a adopté une proposition de loi visant à lutter contre l'exposition précoce des enfants aux écrans. Elle prévoit qu'un message avertissant des dangers des écrans chez les enfants de moins de 3 ans devra apparaître sur les emballages des outils et jeux numériques. Cette initiative salutaire n'a rien d'un gadget de nombreux psychologues et pédopsychiatres considèrent que l'exposition aux écrans avant 3 ans peut être nocive pour un cerveau en construction, notamment parce qu'elle parasite l'interaction avec autrui. Verra-t-on bientôt un autocollant << à utiliser avec modération » sur les consoles de jeu et les tablettes ?",
+    "q": "D’après cet article, quel l’objectif de cette loi?",
+    "options": [
+      "Encadrer le marché du numérique.",
+      "Prévenir l’addiction aux jeux vidéo.",
+      "Protéger les enfants des ondes.",
+      "Restreindre l’impact des écrans"
+    ],
+    "answer": 3
+  },
+  {
+    "level": "C2",
+    "text": "Maintenant elles étaient là. Non plus en éveil, en méfiance, et rassemblées sous l'influence de la crainte par troupes, hardes, Giles et bandes, selon la race, la tribu, la famille, mais confondues et mêlées au sein d'une sécurité ineffable dans la trêve de l'eau, en paix avec la brousse, elles-mêmes et l'aurore. À la distance où je me trouvais, il n'était pas possible de distinguer l'inflexion des mouvements, ou l'harmonie des couleurs, mais celle dis-lance ne m'empêchait pas de voir que les bêtes se comptaient par centaines et centaines, que toutes les espèces voisinaient, et que cet instant de leur Voisin gente que cet vie ne connaissait pas la peur ou la hâte. Gazelles, antilopes, girafes, gnous, zèbres, rhinocéros, buffles, éléphants - les animaux s'arrêtaient ou se déplaçaient au pas du loisir. Au gré de la soif, au goût du hasard.",
+    "q": "Quelle phrase résume exactement cet extrait de roman?",
+    "options": [
+      "Je ressentais pleinement l’anxiété des bêtes.",
+      "Je percevais parfaitement la quiétude de cet instant.",
+      "Je découvrais inopinément un spectacle effrayant et inquiétant.",
+      "J’éprouvais un sentiment de crainte face à ces troupeaux d’animaux sauvages."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "C2",
+    "text": "Les études le montrent loin de disparaître, la pause-déjeuner reste un moment sacré pour une très grande majorité du personnel. Et pas seulement pour se restaurer et recharger ses batteries. Cette coupure rituelle est aussi l'occasion de partager un moment avec ses collègues, d'échanger, de nouer des liens de convivialité.\nImmuable, la pause-déjeuner connaît pourtant depuis quelques années d'importantes mutations. La crise économique a évidemment eu ses effets, en pesant sur le budget du consommateur. Mais les bouleversements vont au-delà de ces aspects purement financiers et s'étendent au domaine alimentaire.\nAutrefois prépondérant, le souci de la sélection, gage selon les consommateurs de plus de qualité. Dans les restaurants d'entreprises, les salariés vont privilégier une offre moins large mais mieux choisie.",
+    "q": "Qu’apprend-on sur la pause-déjeuner au travail?",
+    "options": [
+      "Elle engendre une baisse du rendement du personnel",
+      "Elle est en partie prise en charge par les entreprises",
+      "Les employés sont attachés à l’origine des aliments.",
+      "Les salariés ont tendance à la prendre à l’extérieur"
+    ],
+    "answer": 2
+  },
+  {
+    "level": "C2",
+    "text": "La créativité instinctive, qui serait naturelle, est souvent opposée à la créativité plus rationalisée, cérébrale, éduquée, notamment en musique. Les musiciens ont tendance à surestimer la première, avec l'idée que moins on en sait, mieux c'est. Comme si la connaissance risquait de mettre des œillères et d'enfermer la créativité dans un cadre, à la manière d'un adulte qui s'autoriserait moins à imaginer des choses fantaisistes qu'un enfant.\nCe n'est pas impossible, mais la créativité est la capacité du cerveau à faire des associations mentales originales et cohérentes.\nUne éducation associée à l'intelligence, peut faciliter ces associations puisqu'elle nourrit le cerveau d'expériences, notamment esthétiques pour les artistes, et d'idées que l'on peut ensuite lier.",
+    "q": "Que souligne ce journaliste à propos du processus de création musicale?",
+    "options": [
+      "Il mobilise une zone spécifique du cerveau.",
+      "Il s’avère plus spontané chez les enfants.",
+      "Il s’enrichit des connaissances théoriques.",
+      "Il semble réservé aux esprits imaginatifs."
+    ],
+    "answer": 2
+  }
+]

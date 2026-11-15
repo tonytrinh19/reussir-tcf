@@ -3985,15 +3985,17 @@
   // The estimate adds the points of the items answered correctly; the official scale starts at 100. One exam
   // is taken at a time (ui.cx, with its skill), and each skill keeps its own unfinished record.
   const goTo = (hash) => { if (location.hash === hash) render(true); else location.hash = hash; };
+  const readingPapers = T.COMP.readingPapers || [];
+  const readingExamBank = [...(T.COMP.ceExams || []), ...readingPapers];
   const XSPEC = {
-    ce: { spec: TC.ceExam, bank: () => T.COMP.ceExams || [], home: "comp.ce.exam", label: "Examen blanc CE", ip: "exam--ce" },
+    ce: { spec: TC.ceExam, bank: () => readingExamBank, home: "comp.ce.exam", label: "Examen blanc CE", ip: "exam--ce" },
     co: { spec: TC.coExam, bank: () => T.COMP.coExams || [], home: "comp.co.exam", label: "Examen blanc CO", ip: "exam--co" },
   };
   // Exams and records from before the CO exam have no skill: they're reading exams.
   const skillOf = (x) => (x && x.skill === "co" ? "co" : "ce");
   const examRunning = () => !!(ui.cx && !ui.cx.done);
-  // Options read aloud keep the order they're heard in; written ones are shuffled.
-  const examOrder = (it) => (it.kind === "pic" || it.kind === "reply" ? [0, 1, 2, 3] : shuffle(it.options.map((_, j) => j)));
+  // Printed letters and recorded choices correspond to fixed positions in their respective source.
+  const examOrder = (it, src) => (src === "pdf" || it.kind === "pic" || it.kind === "reply" ? [0, 1, 2, 3] : shuffle(it.options.map((_, j) => j)));
   // Claude's exams exist only in this page's memory, so their attempts and records keep a copy.
   const examSnap = (ex) => ({ id: ex.id, title: ex.title, src: "claude", items: ex.items.map((it) => { const o = Object.assign({}, it); delete o.order; return o; }) });
   function examScore(exam, ans, skill) {
@@ -4007,13 +4009,33 @@
     });
     return { correct, total: exam.items.length, byLevel, est: Math.min(699, Math.max(100, raw)) };
   }
+  let paperRequest = 0;
+  async function loadReadingPaper(exam, open) {
+    const request = ++paperRequest, from = route, currentExam = ui.cx;
+    const stillHere = () => request === paperRequest && from === route && currentExam === ui.cx;
+    toast("Opening the paper…");
+    try {
+      const response = await fetch(exam.file);
+      if (!response.ok) throw new Error(String(response.status));
+      const items = await response.json();
+      if (!Array.isArray(items) || items.length !== TC.ceExam.blocks.reduce((sum, [, count]) => sum + count, 0)) throw new Error("incomplete_paper");
+      exam.items = items;
+    } catch (err) {
+      if (stillHere()) toast("The paper could not be opened. Try again.");
+      return;
+    }
+    if (stillHere()) { toastEl.hidden = true; open(); }
+  }
+
   function examStart(exam, skill) {
     skill = skill || "ce";
     if (examRunning()) { goTo("#" + XSPEC[skillOf(ui.cx)].home); return; }
     const X = XSPEC[skill];
+    if (exam.file && !exam.items) return loadReadingPaper(exam, () => examStart(exam, skill));
+    paperRequest++;
     const ex = clone(exam);
     ex.src = ex.src || "built-in";
-    ex.items.forEach((it) => { it.order = examOrder(it); });
+    ex.items.forEach((it) => { it.order = examOrder(it, ex.src); });
     ui.cx = { skill, exam: ex, i: 0, ans: {}, done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
     if (exam === ui.cxReady) ui.cxReady = null;
     timerSet(X.spec.minutes * 60, X.label, X.home);
@@ -4042,6 +4064,7 @@
     };
     if (cx.exam.src === "claude") doc.snap = examSnap(cx.exam);
     put("comp", id, doc);
+    if (cx.exam.src === "pdf") delete ui.form["ce-paper"];
     // Every practice exam goes into the score log that the Phase 4–5 criteria read, labelled as an estimate.
     put("mocks", uid(), { date: todayStr(), ts: Date.now(), label: `${cx.exam.title} · ${skill.toUpperCase()} (site estimate)`, [skill]: r.est, compId: id });
     ipDrop(X.ip);
@@ -4074,9 +4097,11 @@
     const skill = skillOf(ip), X = XSPEC[skill];
     const base = X.bank().find((e) => e.id === ip.examId) || ip.snap;
     if (!base) { toast("This exam's text wasn't saved, so it can't be picked up again."); return; }
+    if (base.file && !base.items) return loadReadingPaper(base, () => examResume(ip));
+    paperRequest++;
     const ex = clone(base);
     ex.src = ex.src || ip.src || "built-in";
-    ex.items.forEach((it) => { it.order = examOrder(it); });
+    ex.items.forEach((it) => { it.order = examOrder(it, ex.src); });
     ui.cx = { skill, exam: ex, i: Math.max(0, Math.min(Number(ip.i) || 0, ex.items.length - 1)), ans: Object.assign({}, ip.ans), done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
     const full = X.spec.minutes * 60;
     timerSet(full, X.label, X.home);
@@ -4101,6 +4126,8 @@
     const skill = skillOf(a), X = XSPEC[skill];
     const exam = a && (X.bank().find((e) => e.id === a.setId) || a.snap);
     if (!exam) { toast("This exam's text wasn't saved, so it can't be reviewed."); return; }
+    if (exam.file && !exam.items) return loadReadingPaper(exam, () => examReview(attemptId));
+    paperRequest++;
     const ex = clone(exam);
     ex.items.forEach((it) => { it.order = it.options.map((_, j) => j); });
     const ans = {};
@@ -4371,6 +4398,28 @@
     const what = skill === "co" ? "The full listening test: 39 questions in about 35 minutes, from A1 to C2, each recording heard once" : "The full reading test: 39 questions in 60 minutes, from A1 to C2";
     return paused ? `<button class="btn sm" data-act="ip-resume" data-id="${X.ip}" title="${what}" data-m="pop" data-k="exl-${skill}">${ico("exam")}Resume the exam</button>` : `<a class="btn sm${running ? " primary" : ""}" href="#${X.home}" title="${what}" data-m="pop" data-k="exl-${skill}">${ico("exam")}${running ? "Back to the exam" : "Examen blanc"}</a>`;
   }
+  function readingPaperShelf(exams) {
+    if (!readingPapers.length) return "";
+    const scores = new Map();
+    for (const attempt of exams) {
+      if (!scores.has(attempt.setId)) scores.set(attempt.setId, attempt.score);
+    }
+    const next = readingPapers.find((paper) => !scores.has(paper.id)) || readingPapers[0];
+    const selected = ui.form["ce-paper"] || next.id;
+    const completed = readingPapers.filter((paper) => scores.has(paper.id)).length;
+    const options = readingPapers.map((paper) => {
+      const score = scores.has(paper.id) ? ` · ✓ ${scores.get(paper.id)}/39` : "";
+      return `<option value="${esc(paper.id)}" ${paper.id === selected ? "selected" : ""}>${esc(paper.title + score)}</option>`;
+    }).join("");
+    return `<section class="panel paper-shelf" aria-labelledby="paper-title">
+      <header class="paper-heading"><span class="paper-icon">${ico("exam")}</span><div><p class="eyebrow">Collection Việt–Pháp</p><h2 class="h2" id="paper-title">Reading exam papers</h2></div></header>
+      <p class="small muted">${completed} of ${readingPapers.length} papers completed</p>
+      <div class="paper-pick"><label class="field">Choose a paper<select id="ce-paper" data-change="form" data-k="ce-paper">${options}</select></label>
+      <button class="btn primary" data-act="x-paper-start">Start this paper</button></div>
+    </section>`;
+  }
+  const readingOption = (exam, it, k) => (exam.src === "pdf" ? `<b>${"ABCD"[k]}.</b> ` : "") + typo(it.options[k]);
+
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
   function examView(skill) {
     const X = XSPEC[skill], spec = X.spec;
@@ -4389,10 +4438,10 @@
       const clock = `<div class="timer"><span class="clock" ${mine ? "data-timer" : ""}>${mine ? fmtClock(timerRemaining()) : "—"}</span>${mine ? `<button class="btn sm" data-act="timer-toggle" data-home="${X.home}" data-sec="${spec.minutes * 60}" data-label="${X.label}" data-timer-btn>${timer.running ? "Pause" : "Resume"}</button>` : ""}</div>`;
       const nav = `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((x, j) => `<button data-act="x-go" data-i="${j}" class="${cx.ans[j] != null ? "done" : ""}"${cx.ans[j] != null ? ` data-m="pop" data-k="xn-${esc(cx.exam.id)}-${j}"` : ""} aria-current="${j === cx.i}" aria-label="Question ${j + 1}${cx.ans[j] != null ? ", answered" : ""}">${j + 1}</button>`).join("")}</nav>`;
       return `${back}
-        <div class="row between"><p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p>${clock}</div>
+        <div class="row between"><div>${cx.exam.src === "pdf" ? `<p class="eyebrow paper-running">${esc(cx.exam.title)}</p>` : ""}<p class="h3">Question ${cx.i + 1} of ${n} <span class="lv">${esc(it.level)}</span></p></div>${clock}</div>
         ${nav}
         <div class="stack" data-m="slide" data-k="xq-${esc(cx.exam.id)}-${cx.i}"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p>${it.title ? `<h3>${typo(it.title)}</h3>` : ""}<p class="fr">${typo(it.text)}</p></article>
-        <div class="stack tight"><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${it.order.map((k) => `<label class="opt"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${typo(it.options[k])}</span></label>`).join("")}</div></div></div>
+        <div class="stack tight"><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${it.order.map((k) => `<label class="opt"><input type="radio" name="x${cx.i}" data-change="x-ans" data-k="${k}" ${cx.ans[cx.i] === k ? "checked" : ""}><span>${readingOption(cx.exam, it, k)}</span></label>`).join("")}</div></div></div>
         <div class="row between"><div class="row"><button class="btn" data-act="x-prev" ${cx.i === 0 ? "disabled" : ""}>← Previous</button><button class="btn" data-act="x-next" ${cx.i === n - 1 ? "disabled" : ""}>Next →</button></div><span class="small muted" id="x-count">${answered} of ${n} answered</span><button class="btn primary" data-act="x-finish">Hand in</button></div>
         ${cx.confirm ? `<div class="notice warn">${blanks} question${blanks > 1 ? "s are" : " is"} still blank and will count as wrong.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-submit">Hand in anyway</button><button class="btn sm" data-act="x-keep">Keep going</button></div></div>` : ""}
         <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
@@ -4405,13 +4454,14 @@
       const review = cx.exam.items.map((it, j) => {
         const a = cx.ans[j];
         if (skill === "co") return coxReviewItem(it, j, a, xhid);
-        const opts = it.order.map((k) => xOpt(k, it, a, xhid, typo(it.options[k]))).join("");
-        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, xhid)} · ${typo(it.title || it.type)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why && !xhid ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
+        const opts = it.order.map((k) => xOpt(k, it, a, xhid, readingOption(cx.exam, it, k))).join("");
+        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, xhid)} · ${typo(it.title || it.type || it.q)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why && !xhid ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
       }).join("");
       // What to do next, right from the results: the built-in exams not done yet, a retake, a new one from Claude, or the list.
       const doneIds = new Set(compAttempts(skill).filter((a) => a.kind === "exam").map((a) => a.setId));
-      const fresh = X.bank().filter((e) => e.id !== cx.exam.id && !doneIds.has(e.id));
-      const next = fresh.map((e) => `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>`).join("")
+      const pdf = cx.exam.src === "pdf";
+      const fresh = X.bank().filter((e) => (e.src === "pdf") === pdf && e.id !== cx.exam.id && !doneIds.has(e.id));
+      const next = (pdf ? fresh.slice(0, 1) : fresh).map((e) => `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>`).join("")
         + `<button class="btn" data-act="x-retake">Retake ${esc(cx.exam.title)}</button>${skill === "ce" ? claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn") : ""}`
         + `<button class="btn ghost" data-act="x-close">All exams</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a>`;
       return `${back}
@@ -4426,12 +4476,12 @@
           ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
         <section class="sec"><div class="sec-head"><h2 class="h2">Every question</h2>${xhid ? `<button class="btn primary sm" data-act="x-show">Show the answers</button>` : `<button class="btn ghost sm" data-act="x-hide">Hide the answers</button>`}</div>
-          <p class="small muted">${xhid ? `In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.` : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
+          <p class="small muted">${xhid ? `In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.` : pdf ? "Open a question to compare your answer with the reference key from the paper." : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
           <div class="stack tight">${review}</div></section>`;
     }
     const exams = compAttempts(skill).filter((a) => a.kind === "exam"), retakes = retakeIds();
     // One row per built-in exam, so each note sits by its own exam. The ones not done yet are the primary choice.
-    const starts = X.bank().map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<div class="row"><button class="btn ${prev ? "" : "primary"}" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date).replace(/\.$/, "")}. A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</span>` : ""}</div>`; }).join("");
+    const starts = X.bank().filter((e) => e.src !== "pdf").map((e) => { const prev = exams.find((a) => a.setId === e.id); return `<div class="row"><button class="btn ${prev ? "" : "primary"}" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>${prev ? `<span class="small muted">Done on ${shortDate(prev.date).replace(/\.$/, "")}. A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</span>` : ""}</div>`; }).join("");
     const paused = ipGet(X.ip);
     // The other skill's exam is still going: one exam at a time.
     const other = examRunning() && skillOf(ui.cx) !== skill;
@@ -4456,6 +4506,7 @@
           : `<div class="stack tight">${starts}${skill === "ce" ? `<div class="row">${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>` : ""}</div>`}
         ${skill === "ce" && ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
       </section>
+      ${skill === "ce" && !other && !paused ? readingPaperShelf(exams) : ""}
       ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
@@ -8584,6 +8635,11 @@
     "c-review": (el) => { compReview(el.dataset.skill, el.dataset.id); render(true); window.scrollTo({ top: 0, behavior: "smooth" }); },
     "c-hist-jump": () => { const h = document.getElementById("c-hist"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); },
     "x-start": (el) => { for (const sk of ["ce", "co"]) { const e = XSPEC[sk].bank().find((x) => x.id === el.dataset.id); if (e) { examStart(e, sk); return; } } },
+    "x-paper-start": () => {
+      const selected = document.getElementById("ce-paper");
+      const paper = selected && readingPapers.find((e) => e.id === selected.value);
+      if (paper) examStart(paper, "ce");
+    },
     "x-start-ready": () => { if (ui.cxReady) examStart(ui.cxReady); },
     "x-gen": examGenerate,
     "x-gen-stop": () => { const c = busy["cx-gen"]; ui.cxGen = null; if (c) c.abort(); render(true); },

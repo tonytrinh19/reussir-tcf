@@ -170,6 +170,28 @@ exams.forEach((ex) => {
   matchReport(`${ex.title} B1–B2`, mid);
 });
 
+/* ---------- imported reading papers ---------- */
+// The printed keys use the original choice order and were checked against all 32 PDFs.
+const papers = T.COMP.readingPapers;
+const paperLevels = spec.blocks.flatMap(([level, count]) => Array(count).fill(level));
+const paperKeys = [];
+if (papers.length !== 32) fail("expected 32 reading papers");
+for (const paper of papers) {
+  if (ids.has(paper.id)) fail(`${paper.id}: duplicate id`);
+  ids.add(paper.id);
+  const items = JSON.parse(fs.readFileSync(path.join(site, paper.file), "utf8"));
+  if (items.length !== paperLevels.length) fail(`${paper.id}: expected 39 questions`);
+  items.forEach((it, i) => {
+    const where = `${paper.id} question ${i + 1}`;
+    if (it.level !== paperLevels[i] || !it.text.trim() || !it.q.trim()) fail(`${where}: missing document, prompt or expected level`);
+    if (it.options.length !== 4 || it.options.some((s) => !s.trim()) || new Set(it.options.map((s) => norm(s).replace(/[^a-z0-9]/g, ""))).size !== 4) fail(`${where}: expected four distinct choices`);
+    if (!Number.isInteger(it.answer) || it.answer < 0 || it.answer > 3) fail(`${where}: invalid answer index`);
+    paperKeys.push(it.answer);
+  });
+}
+if (require("node:crypto").createHash("sha256").update(paperKeys.join("")).digest("hex") !== "aa7e97b7f6f51a23d0a5af8dbdc4a98d7b0a76f8163d787ae991581a8b79d6d2") fail("reading paper keys differ from the source");
+console.log(`Reading papers: ${papers.length} papers, ${paperKeys.length} keyed questions`);
+
 /* ---------- no document twice ---------- */
 // A title used twice across the practice sets and the exams usually means the same document came back.
 const seenTitles = new Map();
