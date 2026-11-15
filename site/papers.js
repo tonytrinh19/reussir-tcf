@@ -4,13 +4,14 @@
   const $ = (id) => document.getElementById(id);
   let catalog = [], skill = new URLSearchParams(location.search).get("skill") || "co", current = null, items = [], index = 0, request = 0;
   const choices = new Map();
+  const viewerUrl = (file, page = 1) => `pdf-viewer.html?file=${encodeURIComponent(file)}#page=${page}`;
   const status = (text) => { $("status").textContent = text; };
   function showQuestion() {
     const it = items[index];
     $("audio").pause();
     $("question-title").textContent = `Question ${index + 1} sur ${items.length}`;
     document.querySelectorAll("#questions button").forEach((b, i) => b.setAttribute("aria-current", String(i === index)));
-    $("document").src = `${current.pdf}#page=${it.page}`;
+    $("document").src = viewerUrl(current.pdf, it.page);
     $("picture").hidden = !it.image;
     if (it.image) { $("picture").src = it.image; $("picture").alt = `Illustration de la question ${index + 1}`; }
     $("audio").hidden = !it.audio;
@@ -29,7 +30,7 @@
     $("transcript").open = false;
     $("transcript").querySelector(".source-note").textContent = it.transcriptSource || "";
     $("transcript-original").hidden = !it.transcriptPage;
-    if (it.transcriptPage) $("transcript-original").href = `exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}`;
+    if (it.transcriptPage) $("transcript-original").href = viewerUrl("exam-sources/papers/transcripts.pdf", it.transcriptPage);
     $("transcript").querySelector(".transcript").textContent = it.lines.map(line => line.text).join("\n\n") || "Aucune transcription vérifiée pour cet enregistrement. Le recueil complet est accessible ci-dessous.";
     $("previous").disabled = index === 0; $("next").disabled = index === items.length - 1;
   }
@@ -49,9 +50,8 @@
         items = data;
       }
       if (token !== request) return;
-      $("title").textContent = current.title; $("original").href = current.pdf;
+      $("title").textContent = current.title; $("original").href = viewerUrl(current.pdf);
       $("listening").hidden = current.skill !== "co";
-      $("document").src = current.pdf;
       if (items.length) {
         index = 0; $("questions").replaceChildren();
         items.forEach((it, i) => {
@@ -59,7 +59,7 @@
           b.addEventListener("click", () => { index = i; showQuestion(); $("question-title").focus(); }); $("questions").append(b);
         });
         showQuestion();
-      }
+      } else $("document").src = viewerUrl(current.pdf);
       $("content").hidden = false; status("");
     } catch (_) { if (token === request) status("Impossible d’ouvrir le sujet. Choisis-le à nouveau pour réessayer."); }
   }

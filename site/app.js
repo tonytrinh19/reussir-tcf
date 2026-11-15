@@ -4357,7 +4357,7 @@
     return `<details class="fold" id="co-review-${j}"><summary>${j + 1} · ${esc(it.level)}${xMark(ok, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px">
       ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, hid ? "" : it.alt)}</figure>${hid ? "" : `<p class="small muted fr">${typo(it.alt)}</p>`}` : ""}
       ${it.situation ? `<p class="small muted fr">${typo(it.situation)}</p>` : ""}
-      <details class="fold"><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
+      <details class="fold"><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
       ${it.kind === "doc" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
       <div class="opts">${opts}</div>
       ${it.why && !hid ? `<p class="small">${typo(it.why)}</p>` : ""}

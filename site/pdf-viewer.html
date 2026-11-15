@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Document · Réussir le TCF</title>
+<script src="theme.js"></script>
+<link rel="stylesheet" href="pdf-viewer.css">
+<body>
+<nav aria-label="Pages du document">
+<button id="prev" disabled aria-label="Page précédente">←</button>
+<label>Page <input id="page" type="number" min="1" value="1" disabled inputmode="numeric"></label><span id="total"></span>
+<button id="next" disabled aria-label="Page suivante">→</button>
+<a id="download" hidden download>Télécharger le PDF</a>
+</nav>
+<p id="status" role="status">Ouverture du document…</p>
+<main id="sheet" aria-label="Document PDF"></main>
+<details id="text-version" hidden><summary>Texte de cette page</summary><div id="page-text"></div></details>
+<script type="module" src="pdf-viewer.js"></script>
+</body></html>
