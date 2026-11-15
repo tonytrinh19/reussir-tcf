@@ -1,0 +1,470 @@
+[
+  {
+    "level": "A1",
+    "text": "Vous partez en vacances et vous cherchez quelqu'un pour s'occuper de votre chien ? Je suis la personne idéale ! Je suis étudiant et j'habite dans une maison avec un jardin. Je serai heureux de vous rencontrer pour en parler, prenez contact avec moi : mikael.normand@lavilla.fr.",
+    "q": "Qu'est-ce que cette personne propose ?",
+    "options": [
+      "Une aide aux devoirs.",
+      "Une chambre à louer.",
+      "Une garde d’animaux.",
+      "Une visite touristique."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "A1",
+    "text": "Cédric,\nTa mère et moi rentrons tard ce soir. Ton repas est dans le réfrigérateur, je t'ai fait du poulet avec des légumes. Avant de te coucher, n'oublie pas de sortir le chien et de lui donner à manger !\nBonne soirée, Papa.",
+    "q": "Qu’est-ce que Cédric doit faire ?",
+    "options": [
+      "Préparer le repas.",
+      "Rentrer pour le diner.",
+      "Se coucher tôt.",
+      "S’occuper du chien."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "A1",
+    "text": "Madame, Monsieur,\nVous êtes convoqués à l'école avec votre fils, Paul Lemaire, inscrit en 6° B, le jeudi 13 janvier à 10 h, bureau 8.\nMerci de vous présenter au secrétariat du directeur adjoint.",
+    "q": "Qui est Paul Lemaire ?",
+    "options": [
+      "Un secrétaire.",
+      "Un parent.",
+      "Un élève.",
+      "Un professeur."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "A1",
+    "text": "Salut Alex,\nPourrais-tu m’emmener à la fête de Lina demain soir ? Ma voiture est en panne et c’est moi qui ai son cadeau d’anniversaire.\nÀ demain Elsa",
+    "q": "Que doit faire Alex ?",
+    "options": [
+      "Acheter un cadeau.",
+      "Emmener une amie.",
+      "Organiser une tête.",
+      "Réparer une voiture."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "A2",
+    "text": "Françoise, pouvons-nous nous rencontrer dans ton bureau demain matin ? Ariane.",
+    "q": "Pourquoi Ariane écrit-elle ce message ?",
+    "options": [
+      "Elle doit partir une journée.",
+      "Elle propose un déjeuner.",
+      "Elle souhaite parler à Françoise.",
+      "Elle veut visiter une entreprise."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "A2",
+    "text": "Moulin du Lac Cadre exceptionnel Location de salles de 35 à 400 personnes Services personnalisés pour mariages, baptêmes et séminaires.\n04 66 81 25 24 MOULIN DU LAC\n30170 VALATOUGES",
+    "q": "Que peut-on faire au Moulin du Lac ?",
+    "options": [
+      "Louer des chambres.",
+      "Organiser une fêter.",
+      "Se promener en bateau.",
+      "Visiter un monument."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "A2",
+    "text": "Dimanche 21 mai, venez Faire connaissance avec les habitants du quartier !!\nL'association « Immeubles en fête » vous donne rendez-vous vers midi.\nApportez un plat et une boisson et partageons-les ensemble !\nAnimation : Tennis De Table à 15 H. Place De La Victoire.",
+    "q": "Qu’est-ce que l’association « Immeubles en fête » ?",
+    "options": [
+      "De cuisiner tous ensemble.",
+      "De faire un repas entre voisins.",
+      "De s’inscrire à des activités.",
+      "De visiter de nouveaux logements."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "A2",
+    "text": "Votre bibliothèque vous invite à venir écouter une sélection de CD à l'occasion du festival de musique « Le printemps du Jazz » qui commence le mois prochain dans tout le département.",
+    "q": "Que propose la bibliothèque ?",
+    "options": [
+      "De découvrir une sélection de livres.",
+      "De gagner des places pour un festival.",
+      "De participer à une discussion sur le jazz.",
+      "De passer un moment agréable en musique."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "A2",
+    "text": "De : Jean.Roussel@epicesexotiques.com A : georges.Rouault@epicesexotiques.com Georges, je reste à Montélimar une semaine de plus parce que les ventes sur les marchés sont très bonnes. Est-ce que tu peux rencontrer les gens des magasins Biotopia à ma place ?\nAppelle-moi si tu as besoin. Jean",
+    "q": "Que va faire Jean Roussel ?",
+    "options": [
+      "Continuer ses ventes.",
+      "Déménager à Montélimar.",
+      "Rencontrer des clients.",
+      "Téléphoner à Biotopia."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "A2",
+    "text": "Vous mangez italien, dansez le flamenco ou apprenez le suédois ?\nPartagez vos prises de vue (portraits, paysages, etc.) qui montrent que l'Europe fait partie de votre vie. Participez au concours « Europe en images ».\nÀ Gagner : un séjour à Bruxelles ou un atelier cuisine.",
+    "q": "Que propose ce concours ?",
+    "options": [
+      "D’envoyer des photos.",
+      "D’inventer une recette.",
+      "De créer un spectacle.",
+      "De découvrir une langue."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "Vous souhaitez vivre une expérience qui sort de l'ordinaire ? Réservez une nuit dans l'une de nos maisons dans les arbres ! Intérieur confortable, sensation d'aventure, réveil aux bruits de la nature, tout est prévu pour un séjour inoubliable !",
+    "q": "Qu’est-ce que cette annonce propose ?",
+    "options": [
+      "De dormir au milieu de la nature.",
+      "De faire un parcours dans les arbres.",
+      "De participer à une aventure sportive.",
+      "De passer une nuit sous la tente."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B1",
+    "text": "CHERS CLIENTS,\nVotre supermarché vous accueille depuis 60 ANS. Le propriétaire et son équipe vous invitent à une semaine de festivités.\nÀ partir du 10 août, plus de 1000 OFFRES EXCEPTIONNELLES et des réductions JUSQU'À 50% sur les articles vous attendent.",
+    "q": "Qu’est-ce qu’on fête ?",
+    "options": [
+      "L’anniversaire d’un magasin.",
+      "L’augmentation des ventes.",
+      "L’ouverture d’un commerce.",
+      "Le début des soldes d’été."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B1",
+    "text": "Vous toussez ?\nSuivez les conseils de votre pharmacien.\nLa toux peut être aggravée par votre environnement : la pollution, le pollen, un air sec, des changements de température... Pour vous protéger : gardez votre gorge au chaud quand il fait froid, aérez votre chambre, mettez quelques feuilles de menthe dans vos paquets de mouchoirs et évitez de faire du sport dans les endroits pollués et où il y a de la fumée.\nEt si vous toussez beaucoup, consultez votre médecin.",
+    "q": "Que conseille cet article en cas ?",
+    "options": [
+      "Arrêter de fumer.",
+      "Boire du sirop de menthe.",
+      "Faire moins de sport.",
+      "Se couvrir la gorge."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "Le week-end prochain, l'école de musique ouvre ses portes aux habitants de la ville et des environs. Venez rencontrer nos professeurs.\nEssayez de jouer de la guitare, de la trompette, du piano ou d'un autre instrument que vous aimez !\nInformations au 02 97 86 87 88.",
+    "q": "Qu’est-ce qu’on peut faire à l’école de musique ?",
+    "options": [
+      "Assister à un concert.",
+      "Découvrir des instruments de musique.",
+      "S’inscrire à des cours.",
+      "Visiter une exposition."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B1",
+    "text": "BLOG DE L'ASSOCIATION DE TENNIS MONTRÉAL\nVous aimez le tennis et vous voulez partager votre passion ?\nVotre histoire nous intéresse ! Comment est-ce que vous avez commencé ? Avec qui est-ce que vous jouez ? Quels sont vos sentiments quand vous gagnez ?\nEnvoyez-nous votre article avant le 15 juin.",
+    "q": "Que propose ce blog ?",
+    "options": [
+      "Echanger avec d’autres passionnés de tennis.",
+      "Participer à la rédaction d’articles.",
+      "Prendre rendez-vous pour des matchs.",
+      "Raconter son histoire personnelle."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B1",
+    "text": "À partir d'expériences menées dans les années 1970 à New-York, des municipalités ont décidé de mettre de plus en plus d'espaces urbains à la disposition des habitants. Dans certaines villes, on délivre des permis de végétaliser aux personnes désireuses de faire pousser ce que bon leur semble dans leur quartier, avec pour seul impératif de s'engager à utiliser des espèces locales et des plantes susceptibles d'attirer les abeilles, sans employer ni insecticides ni pesticides. Parmi les avantages, on peut citer par exemple l'engazonnement qui limite les nuisances sonores, la spéculation immobilière et le bétonnage excessif.",
+    "q": "Que proposent certaines villes aux habitants ?",
+    "options": [
+      "D’installer des ruches sur les toits.",
+      "De jardiner dans des lieux publics.",
+      "De s’associer à la rénovation des bâtiments.",
+      "De s’inscrire à des formations à l’agriculture."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "B1",
+    "text": "Pour bien profiter de vos vacances, oubliez vos courriels professionnels.\nMais comment éviter de lire ses messages sans se retrouver avec une boîte pleine à son retour ? Il est nécessaire de préparer en amont son départ en vacances : laisser sur votre boîte un message qui précise vos dates d'absence. Cette solution toute simple réduira le nombre de messages que vous recevrez chaque jour.\nQuant à l'angoisse de retrouver au bureau une boîte chargée de centaines de courriels, sachez que si vous rentrez reposé, parcourir les mille qui vous attendent ne vous semblera pas un défi insurmontable.",
+    "q": "Que met en avant cet article ?",
+    "options": [
+      "L’augmentation du mal être au bureau lié au stress.",
+      "Le besoin de se former aux nouvelles technologies.",
+      "Le risque de surmenage dû à des horaires étendus.",
+      "Les bienfaits de la déconnexion pendant les congés."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B1",
+    "text": "REGAIN\nFrance 2 ★★★★ 20 h 55 Film de Marcel Pagnol (1937) d'après le roman de Jean Giono.\nUn village abandonné en Haute Provence reprend vie grâce à l'arrivée d'une femme qui se lie d'amitié avec l'un des derniers habitants du lieu.",
+    "q": "De quoi parle le film « Regain » de Marcel Pagnol ?",
+    "options": [
+      "Du dernier habitant d’un village.",
+      "Du dernier village de Provence.",
+      "De l’arrivée d’une femme dans un village.",
+      "De l’amitié dans un lieu abandonné."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B1",
+    "text": "Il y a quelque chose de rare dans « Normandie nue » : ce film est résolument léger, tout en ayant du fond. À travers une histoire qui sert de fil conducteur cocasse et insolite - celle d'un artiste américain qui veut photographier des paysans dévêtus -, « Normandie nue » aborde la crise des éleveurs avec beaucoup d'humanité, notamment grâce au maire du village qui voit dans la venue du photographe l'occasion de faire valoir sa cause aux yeux de la planète. Parfois un peu maladroite, cette comédie amuse en caricaturant gentiment les médias, les artistes et les bobos parisiens en mal de verdure.",
+    "q": "Quelle est l’opinion du journaliste sur le film « Normandie nue » ?",
+    "options": [
+      "Il est facile de s’identifier aux personnages.",
+      "Les lieux de tournage sont authentiques.",
+      "On y dresse un portrait juste de la société.",
+      "Son humour fait passer un message sérieux."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "B2",
+    "text": "En Provence et sur la Côte d'Azur, les campagnes sont jalonnées d'oliviers, d'orangers et autres pruniers dont les fruits ne sont jamais ramassés. À Grasse, l'association d'insertion Renouer a eu l'excellente idée de valoriser ces denrées pour s'autofinancer. Depuis 2012, la structure intervient dans les vergers de particuliers via des cueillettes dites solidaires. « Nous répertorions des parcelles laissées en friche et nous proposons aux propriétaires de ramasser les fruits à leur place » précise Sophie Allain, bénévole qui coordonne l'opération. Tous les ans, l'action mobilise entre 10 et 15 employés en insertion ainsi que des citoyens séduits par la dimension à la fois sociale et écologique de l'initiative.",
+    "q": "Quelle est l'activité de cette association ?",
+    "options": [
+      "Elle cultive des espaces verts abandonnés.",
+      "Elle réalise des petits services d’entretien.",
+      "Elle récolte les produits de terrains privés.",
+      "Elle s’occupe de gérer des jardins collectifs."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "Les consommateurs du passé acceptaient de manger de la viande en se souvenant que derrière il y avait un animal. Aujourd'hui, on achète du poisson, mais on ne veut pas voir les yeux et les arêtes. On veut un bifteck anonyme. Si l'on nous dit que derrière le steak il y avait une génisse de 18 mois, ça nous coupe l'appétit. Il s'agit de la consommation d'une viande qui n'a plus aucune référence à l'animal. En fait, on ne veut pas savoir ce que l'on mange, bien qu'en même temps, on veuille être sûr de ce que l'on mange.",
+    "q": "Quel est le paradoxe évoqué à propos des consommateurs ?",
+    "options": [
+      "Acheter les meilleurs produits et dépenser le moins possible.",
+      "Avoir la garantie de la qualité du produit et ignorer d’où il vient.",
+      "Être amateur de viande et militer pour le bien-être animal.",
+      "Privilégier les aliments bio et avoir du mal à s’en procurer."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B2",
+    "text": "Non, Maupassant n'est pas qu'un écrivain pour cours de français.\nComme tout bon auteur culte, ses thématiques sont percutantes, grinçantes, toujours d'actualité et tellement vraies dans le fond : hypocrisie de la bourgeoisie, monde paysan décrit sans artifice, rapports humains aliénés par le contexte social et culturel... Du pain bénit pour les auteurs de « Chez Maupassant » une collection de huit téléfilms tirés des contes et nouvelles du grand Guy.",
+    "q": "Que présente l'auteur de l'article ?",
+    "options": [
+      "Des adaptations télévisées de Maupassant.",
+      "Des programmes d'études littéraires.",
+      "Une exposition consacrée à Maupassant.",
+      "Un ouvrage critique récemment paru."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "B2",
+    "text": "Le PDG de la société SEB a avoué « ne plus espérer avoir une croissance importante » sur les marchés occidentaux, arrivés à saturation. Lui qui a toujours défendu la valeur ajoutée et le savoir-faire des usines tricolores, n'a pas pu faire face à l'arrivée des pays émergents dans le petit électroménager : 80% des grille-pains vendus en France coûtent désormais moins de 30€. Résultat, les ventes de l'inventeur de la cocotte-minute ont reculé de 5.6% en France et de 2.6% dans les autres pays de l'Union Européenne.",
+    "q": "Que regrette le PDG de la société SEB ?",
+    "options": [
+      "La faible qualité de la production française.",
+      "Le manque d'innovation dans son entreprise.",
+      "Les contraintes des contrôles financiers.",
+      "L'expansion de la concurrence internationale."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "Lors de l'inscription à la faculté de médecine de Boston, les professeurs privilégient les candidats... ayant déjà connu des échecs. Ils considèrent en effet que ces erreurs d'orientation permettent de grandir plus vite, de se rapprocher plus rapidement de sa vocation - bref, de mieux se connaître. Plus simplement, ils réduisent aussi le risque de recruter des élevés qui vont se rendre compte au bout de quelques mois qu'ils ne veulent plus devenir médecins: ils ont déjà changé de voie une fois, il est moins probable qu'ils en changent une seconde fois.",
+    "q": "Pourquoi les candidates qui se réorientent sont-ils privilégiés dans cette faculté ?",
+    "options": [
+      "Ils ont plus de facilités d'apprentissage.",
+      "Ils ont une idée claire de leur futur métier.",
+      "Ils sont déterminés à travailler beaucoup.",
+      "Ils sont plus sûrs de leur nouveau choix."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "B2",
+    "text": "La rétrospective Mali Twist montre comment, par sa diversité et son éclat, l'œuvre de Malick Sidibé s'inscrit dans le champ contemporain de la photographie. Tour à tour reporter et portraitiste, Malick Sidibé a construit, depuis l'ouverture de son studio à Bamako en 1962, un ensemble photographique en noir et blanc exceptionnel. Mali Twist révèle son regard attentif et son talent pour mettre en lumière le meilleur de chacun, sa singularité. Malick Sidibé a fait de la photographie un art de l'échange. S'il a eu pour règle d'or d'embellir ses modèles. Il témoigne aussi de la joie de vivre de la jeunesse bamakoise, peu après l'indépendance du Mali. Entre visages anonymes et corps en mouvement, poseurs élégants et flâneurs, Mali Twist offre plus de 250 photographies.",
+    "q": "Sur quoi repose le travail photographique de Malick Sidibé ?",
+    "options": [
+      "Un engagement politique.",
+      "Une contemplation abstraite.",
+      "Une mise en valeur de l'autre.",
+      "Une technique de retouche."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B2",
+    "text": "Journée «Portes Ouvertes» à Polytech 'Tours.\nVenez rencontre les étudiants. Enseignants et Associations de Polytech 'Tours Le samedi 12 février, De 9h à 16h sans interruption\n• Espaces d'information présents sur les trois sites de l'école.\n• Présentation des études et des métiers d'ingénieur par les responsables des spécialités sur chaque site.\n• Visites guidées des salles de travaux pratiques.\n• Des centres de documentation, des laboratoires de recherche et de langues.\n• Démonstration des projets réalisés dans nos cursus.\n• Présentation des associations étudiantes.",
+    "q": "Quel est l'objectif de cette journée ?",
+    "options": [
+      "Découvrir le travail de recherche en laboratoire.",
+      "Faire découvrir les formations pour devenir ingénieur.",
+      "Inaugurer l'ouverture d'un campus universitaire.",
+      "Obtenir des conseils afin de créer une association."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "B2",
+    "text": "Dixième anniversaire du musée de l'Europe Il y a maintenant près de dix ans, le musée de l'Europe n'était encore qu'un projet lancé par un petit groupe d'historiens et de promoteurs culturels issus de la société civile. Avec pour ambition de faire découvrir aux Européens les racines de leur civilisation commune. Installé dans la ville de Bruxelles siège des institutions européennes, celui-ci sera le « lieu de mémoire » dont l'Europe a besoin. C'est là que le parcours permanent et les expositions temporaires offriront à tous les Européens (et à leurs hôtes) une histoire raisonnée de l'union, entendue comme une civilisation diverse mais unique.",
+    "q": "Quelles sont les personnes à l'origine de ce projet ?",
+    "options": [
+      "Des conservateurs de musée.",
+      "Des élus européens.",
+      "De simples citoyens.",
+      "Des militants associatifs."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B2",
+    "text": "La désillusion de la jeunesse française d'aujourd'hui est un fait préoccupant. Elle est surtout due à la crise internationale, qui réduit les offres d'emploi, fait pression sur les salaries et raréfie les possibilités de promotion. Mais on peut également l'attribuer à un conflit de génération larvée : il oppose la classe d'âge des « baby-boomers », devenus aujourd'hui « papy-boomers » triomphants tout au long de leurs parcours, à celle de leurs enfants et maintenant de leurs petits-enfants.",
+    "q": "D'où vient la désillusion des jeunes en France ?",
+    "options": [
+      "De la concurrence des autres générations.",
+      "De la course à la compétitive.",
+      "De la situation économique tendue.",
+      "Des critiques émanant de leurs parents."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "B2",
+    "text": "Les implants médicaux (prothèses mammaires de hanche. etc.) sont censes vous améliorer la vie. Mais des lacunes dans leur contrôle seraient à l'origine d'incidents en nombre croissant. C'est ce que révèle la dernière enquête du Consortium international des journalistes d'investigation.\nOn y apprend que, en France, le nombre d'incidents liés à ces implants aurait doublé en dix ans. Le problème, souligne l'enquête, c'est que les informations sur les patients restent globalement très incomplètes et leurs données sont souvent confidentielles. I est donc difficile de dénombrer avec précision et le modèle des implants posés, et de retrouver les patients en cas de problème.",
+    "q": "Quel problème révèle cet article à propos des implants médicaux ?",
+    "options": [
+      "Les données des malades sont transmises aux fabricants.",
+      "Les incidents dus aux erreurs de diagnostic augmentent.",
+      "Les patients se méfient des innovations technologiques.",
+      "Les recherches sont limitées par le manque d'informations."
+    ],
+    "answer": 3
+  },
+  {
+    "level": "C1",
+    "text": "Quarante terrains de football. C'est la superficie que les forêts perdent chaque minute à travers le monde. La destruction de la forêt tropicale provoque chaque année plus de rejet dans l'atmosphère que l'ensemble du secteur des transports. L'imaginaire collectif rendrait volontiers le commerce du bois principal responsable de la déforestation, alors qu'il n'en est rien. L'acteur majeur de ce phénomène est l'agriculture, responsable à 80% des déboisements dans les zones tropicales. Le marché illégal du bois a aussi sa part de responsabilité. Il est un facteur déclenchant, et s'alimente des autres activités. Quelque 1.6 milliard d'habitants dépendent directement des forêts, et contribuent pourtant à sa raréfaction, voire à sa disparition.",
+    "q": "Selon cet article, sur quoi la déforestation a-t-elle un impact ?",
+    "options": [
+      "Sur l'industrie des bois rares.",
+      "Sur la démographie dans ces zones.",
+      "Sur la pollution atmosphérique.",
+      "Sur la progression des cultures tropicales."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "C1",
+    "text": "Salé, sucré, acide, amer, quatre termes - tels les points cardinaux - qui définissent le territoire d'expression du goût. Nous serions en droit de penser que c'est un peu court pour dépeindre toutes les nuances de la palette aromatique et les émotions qu'elle suscite. Les Japonais y ont d'ailleurs ajouté la notion d'umami, cette saveur qui littéralement signifie « goût délicieux », enrobante, qui tapisse le palais, très addictive. Dans l'imaginaire collectif, le sucre évoque douceur, gourmandise, réconfort.\nL'on peut cependant imaginer une douceur à la lecture moins immédiate que celle apportée par le sucre, une douceur qui soit synonyme de complexité aromatique, qui joue sur les notes amères, piquantes ou acidulées.",
+    "q": "Quel problème soulevé cet article ?",
+    "options": [
+      "L'addiction liée à certains aliments.",
+      "L'inévitable uniformisation du gout.",
+      "La difficulté à décrire les saveurs.",
+      "La multiplication des termes culinaires."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "C1",
+    "text": "Dans le monde de l'entreprise, les jeunes et les seniors éprouvent des sentiments analogues d'éviction et de dévalorisation. Pourtant, des actions de mentorat, menées par des seniors pour guider les jeunes sur le marché du travail ou lors de la création de leur entreprise, existent depuis de nombreuses années.\nPlus étonnant, est apparu récemment le mentorat renverse, où les jeunes habitués aux outils numériques initient les seniors à leur usage. Les seniors y gagnent de nouvelles compétences, et les jeunes élargissent leur réseau.\nEn période de crise, cette coopération peut constituer un moyen de désamorcer les tensions sociales. Favoriser les échanges intergénérationnels, c'est contribuer à établir des relations ou chacun prend conscience qu'il peut apporter quelque chose à l'autre.",
+    "q": "Quel est l'intérêt des mentorats décrits ?",
+    "options": [
+      "Créer de nouvelles sources d'emploi.",
+      "Éviter la solitude des personnes âgées.",
+      "Instaurer des rapports de réciprocité.",
+      "Répondre à l'allongement de la durée de vie."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "C1",
+    "text": "Plancher sur la réforme des rythmes scolaires, comme le fera la « conférence » installée aujourd'hui par le ministre de l'éducation, c'est prendre en compte toute une série de paramètres qui n'ont rien à voir, ou si peu, avec l'école primaire. C'est s'intéresser aux évolutions de la famille et à la multiplication des horaires de travail dits « atypiques ».\nC'est examiner, du point de vue des collectivités locales, les conséquences financières et pratiques (transport scolaire, cantine, centres de loisirs) de tout changement éventuel dans l'organisation de la semaine. C'est encore recueillir l'avis des experts de la circulation routière et entendre les préoccupations des professionnels du tourisme... Autant dire que l'intérêt de l'enfant se trouve plus ou moins sacrifié sur l'autel du compromis.",
+    "q": "Quel constat dresse le journaliste à propos de la réforme des rythmes scolaires ?",
+    "options": [
+      "Les familles sont opposées à toute modification.",
+      "Les impacts financiers demeurent insurmontables.",
+      "Les intérêts en jeu sont difficilement compatibles.",
+      "Les opinions des experts sont en total désaccord."
+    ],
+    "answer": 2
+  },
+  {
+    "level": "C1",
+    "text": "Une exposition de l'Institut d'Art Contemporain de Villeurbanne est consacrée à l'American Jimmie Durham et la Brésilienne Marie Thereza Alves. Depuis vingt ans, ils parcourent, au fil de leurs déplacements, le territoire méditerranéen et sont réunis au sein de cette exposition à la forme inédite. Le parcours se veut éloigné de tout didactisme, laissant assez d'espace au spectateur pour construire son propre récit autour d'une mer connue pour être le berceau fertile des civilisations. Dans un jeu de matières, de couleurs et d'objets, tous tangibles. Durham et Alvez tentent de décrypter une certaine pensée historique et mythologique notamment en déjouant les codes classiques utilisés dans les musées.",
+    "q": "Qu'est-ce qui fait la singularité de cette exposition ?",
+    "options": [
+      "La liberté accordée aux visiteurs.",
+      "La simplicité des moyens artistiques",
+      "Le classicisme de sa présentation.",
+      "Le discours politique des plasticiens."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C1",
+    "text": "Je suis persuadée que tous les enfants possèdent en eux la volonté de mettre en route leur imaginaire qui les pousse naturellement vers la littérature. Mais si elle n'est pas stimulée, cette force peut s'éteindre. C'est la mission de l'école que de sensibiliser les élèves aux grands textes classiques.\nMalheureusement, elle y a renoncé. Trop souvent, les enseignants ont tendance à penser qu'ils sont réservés à l'élite. Alors qu'au contraire, l'école devrait donner un accès à la haute culture aux élèves qui arrivent avec un bagage moins fourni que les autres.",
+    "q": "Selon l'auteur de ce texte, quelle ambition devraient avoir les enseignants ?",
+    "options": [
+      "Aborder des œuvres réputées difficiles avec leur élevés.",
+      "Encourager leurs élèves à écrire des textes littéraires.",
+      "Inviter régulièrement des écrivains célèbres dans leur classe.",
+      "Monter des pièces de théâtre d'auteurs classiques."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C2",
+    "text": "Sexistes, Les jeux vidéo ? Peut-être que oui, peut-être que non. En tout cas, à parcourir les allées de la Paris Games Week, L'œil avisé aura lui-même bien du mal à trouver un personnage principal féminin de jeu vidéo.\nIl y a bien la célébrissime Lara Croft du vidéo Tomb Raider, aux attributs particulièrement imposants, conçus presque sur mesure pour plaire à un certain nombre de joueurs masculins. Pour le reste, circulez, il n'y a -presque - rien d'autre à voir, si l'on bayle d'un coup de manette de jeu, au mieux, les princesses à sauver, au pire les calls girls de mafioso, Pourtant, l'industrie du jeu vidéo a pris conscience ces derniers années du potentiel du marché des joueuses.",
+    "q": "Quel constat est dressé sur les jeux vidéo ?",
+    "options": [
+      "La quasi-absence d'héroïnes.",
+      "L'appel constant à la violence.",
+      "L'atténuation des clichés.",
+      "L'uniformité des scénarios."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C2",
+    "text": "Défenseur.es et détracteur.es de l'écriture inclusive, qui consiste à féminiser les mots en plaçant entre des point la terminaison du féminin, s'écharpent sur cet épineux sujet.\nPour Eliane Viennot, il est important de défendre l'écriture inclusive qui, en remaniant l'orthographe, vise à combattre les stéréotypes sexistes.\nSelon elle, la langue structure notre représentation du monde. Apprendre aux plus jeunes que le masculin l'emporte sur le féminin ne peut guère contribuer à forger des consciences égalitaristes. Elle rappelle de surcroît que la langue française a longtemps été plus égalitaire qu'elle ne l'est aujourd'hui : il y a eu une masculinisation délibérée du langage à partir du XVII siècle. Ceux qui se piquaient alors de définir le bon usage en ont profité pour renforcer l'ordre masculin.",
+    "q": "Que pense Éliane Viennot de l'écriture inclusive ?",
+    "options": [
+      "Elle favorise l'évolution des mentalités.",
+      "Elle incarne une première historique.",
+      "Elle permet de moderniser le lexique.",
+      "Elle reflète les clivages de la société."
+    ],
+    "answer": 0
+  },
+  {
+    "level": "C2",
+    "text": "Non, tous les salariés ne sont pas faits pour le télétravailleur.\nLe rapport Obergo le prouve à travers soixante-quinze entretiens approfondis avec des télétravailleurs. Les autres tordent le cou à une idée reçue : télétravail serait l'organisation de demain car elle est bonne pour la productivité des entreprises et la qualité de vie des salariés. En effet, tous les métiers et les personnalités ne sont pas adaptés au télétravail.\nLa réussite du télétravail exige des profils de salariés très spécifiques.\nParmi les conditions sine qua non : vouloir aimer travailler seul, disposer d'une grande autonomie et posséder un logement pouvant accueillir un bureau isolé. «Autant de conditions difficiles à rassembler» constate Jean- Paul Boucher, commanditaire du rapport.",
+    "q": "Qu'est-ce qui ressort du rapport Obergo concernant le télétravail ?",
+    "options": [
+      "Il donne satisfaction aux employés interrogés.",
+      "Il est délicat à mettre en œuvre.",
+      "Il impose une restructuration des services.",
+      "Il nuit à la performance des cadres."
+    ],
+    "answer": 1
+  },
+  {
+    "level": "C2",
+    "text": "Mara Maudet, à son arrivée en France, constate que la politique d'insertion des foyers démunis et celle dédiée à la petite enfance sont déconnectées l'une de l'autre. Pour cette Brésilienne «un parent sans emploi doit être prioritaire pour obtenir une place en crèche». Tout le contraire des critères actuels. Elle crée alors L'IEPC (Institut d'éducation et des pratiques citoyennes) et constitue un réseau de crèches associatives dont le principe est qu'en échange d'une place pour son enfant sur une plage horaire de 13 heures, le parent célibataire- le plus souvent des mères-s'engage à trouver un emploi dans les mois suivants.\nIl bénéficie alors, dans les locaux de la crèche, d'un accompagnement professionnel personnalisé.",
+    "q": "Quel est l'objectif de l'IEPC?",
+    "options": [
+      "Embaucher des parents défavorisés.",
+      "Faciliter l'intégration professionnelle.",
+      "Proposer des tarifs préférentiels en crèche.",
+      "Trouver un accueil provisoire pour les enfants."
+    ],
+    "answer": 1
+  }
+]

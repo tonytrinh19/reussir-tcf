@@ -760,6 +760,7 @@ window.TCF.FR = {
 "Checklist": "Checklist",
 "Chin up! Reread the rule, then retry the misses.": "Courage ! Relis la règle, puis réessaie les ratées.",
 "Choose a backup file": "Choisir un fichier de sauvegarde",
+"Choose a paper": "Choisir un sujet",
 "Choose a set": "Choisir la série",
 "Choose what you'd enjoy in English too. Twenty minutes you look forward to beat an hour you put off.": "Choisis ce qui te ferait plaisir en anglais aussi. Vingt minutes qui te font envie valent mieux qu'une heure repoussée.",
 "Cinq examens": "Cinq examens",
@@ -2059,9 +2060,11 @@ window.TCF.FR = {
 "Only = seulement.": "Only = seulement.",
 "Only « B. Ils jouent aux échecs dans un parc. » matches the drawing, which shows two people sitting at an outdoor table playing a game of chess near a tree. A is ruled out because they are sitting rather than running on a beach; C is incorrect because they are outdoors at a small game table rather than cooking in a kitchen; D is incorrect because they are awake and playing a game rather than sleeping in a tent.": "Seule la phrase « B. Ils jouent aux échecs dans un parc. » correspond au dessin, qui montre deux personnes assises à une table en plein air en train de jouer aux échecs près d'un arbre. A est éliminé car ils sont assis et ne courent pas sur une plage ; C est incorrect car ils sont dehors devant une petite table de jeu et non en train de cuisiner ; D est incorrect car ils sont éveillés et jouent au lieu de dormir sous une tente.",
 "Open": "Ouvrir",
+"Open a question to compare your answer with the reference key from the paper.": "Ouvre une question pour comparer ta réponse avec le corrigé du sujet.",
 "Open the details": "Ouvrir les détails",
 "Open the study calendar": "Ouvrir le calendrier d’étude",
 "Open this to choose them.": "Ouvre ici pour les choisir.",
+"Opening the paper…": "Ouverture du sujet…",
 "Opinion after comparison": "Avis après comparaison",
 "Opinion before or instead of comparison": "Avis avant ou à la place d'une comparaison",
 "Opinion verbs in a question or the negative": "Verbes d'opinion dans une question ou à la forme négative",
@@ -2399,6 +2402,7 @@ window.TCF.FR = {
 "Rapid fire": "Questions rapides",
 "Read the transcript of today's news, then listen to it.": "Lis la transcription de l'actualité du jour, puis écoute-la.",
 "Reading": "Lecture",
+"Reading exam papers": "Sujets de compréhension écrite",
 "Reading set #2 at exam pace": "Série de lecture nº 2 au rythme de l'examen",
 "Reading set at exam pace": "Série de lecture au rythme de l'examen",
 "Reading sets": "Séries de lecture",
@@ -2818,6 +2822,7 @@ window.TCF.FR = {
 "Start review": "Commencer la révision",
 "Start the exam": "Commencer l'examen",
 "Start the exam · 60:00": "Commencer l'examen · 60:00",
+"Start this paper": "Commencer ce sujet",
 "Start this text": "Commencer ce texte",
 "Start typing, or insert a block from the bar.": "Commence à écrire ou insère un bloc depuis la barre.",
 "Starting the job is a completed event, like the first day: j'ai commencé.": "Commencer le travail est un événement achevé, comme le premier jour : j'ai commencé.",
@@ -3116,6 +3121,7 @@ window.TCF.FR = {
 "The official preparation partner: 560 questions in listening, language structure and reading, written by the test's own designers and validated by France Éducation International. Real audio and video.": "Le partenaire officiel de préparation : 560 questions de compréhension orale, structure de la langue et compréhension écrite, rédigées par les concepteurs du test et validées par France Éducation international. Vrais audios et vidéos.",
 "The ones you missed are underlined in red; their corrections come with the results.": "Ceux que tu as manqués sont soulignés en rouge ; leurs corrections s'affichent avec les résultats.",
 "The ongoing action takes the imparfait, the interruption the passé composé.": "L'action en cours prend l'imparfait, l'interruption le passé composé.",
+"The paper could not be opened. Try again.": "Impossible d’ouvrir le sujet. Réessaie.",
 "The paramedic explains that he had to adapt his mindset: « Il m'a fallu apprendre à composer avec leur attachement affectif, au lieu de vouloir l'effacer », which means taking their emotional closeness into account rather than suppressing it. « Exiger une neutralité rigoureuse » is what he realized he could not do (« je ne devais pas exiger une froide neutralité »). « Maintenir la distance professionnelle habituelle » was his former urban habit in Montréal, which did not fit the northern context. « Négocier de nouveaux financements » is never mentioned in the testimonial.": "L'ambulancier explique qu'il a dû adapter sa façon de penser : « Il m'a fallu apprendre à composer avec leur attachement affectif, au lieu de vouloir l'effacer », ce qui signifie prendre en compte leur proximité affective plutôt que de la supprimer. « Exiger une neutralité rigoureuse » est ce qu'il a compris qu'il ne pouvait pas faire (« je ne devais pas exiger une froide neutralité »). « Maintenir la distance professionnelle habituelle » était son ancienne habitude urbaine à Montréal, qui ne convenait pas au contexte nordique. « Négocier de nouveaux financements » n'est jamais mentionné dans le témoignage.",
 "The participe présent of être expresses the cause.": "Le participe présent de être exprime la cause.",
 "The participle agrees with mes sœurs: installées.": "Le participe s'accorde avec mes sœurs : installées.",
@@ -5284,6 +5290,10 @@ window.TCF.FR = {
 "{0} sur {1} validés"
 ],
 [
+"{0} of {1} papers completed",
+"Sujets terminés : {0} sur {1}"
+],
+[
 "{0} of {1} records couldn't be saved, so your progress here is partly the file's.{2} Check your connection, then import the file again.",
 "{0} entrées sur {1} n'ont pas pu être enregistrées : ta progression ici vient donc en partie du fichier.{2} Vérifie ta connexion, puis importe à nouveau le fichier."
 ],
@@ -6666,6 +6676,10 @@ window.TCF.FR = {
 [
 "of {0} met",
 "sur {0} validés"
+],
+[
+"of {0} papers completed",
+"sur {0} sujets terminés"
 ],
 [
 "of {0} records couldn't be saved, so your progress here is partly the file's.{1} Check your connection, then import the file again.",

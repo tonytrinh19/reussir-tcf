@@ -10,6 +10,14 @@
   const T = window.TCF;
   const item = (level, type, title, paras, q, options, why) => ({ level, type, title, text: paras.join("\n\n"), q, options, answer: 0, why });
 
+  // Paper numbers follow the source filenames. Some papers share a printed series number.
+  const paperSeries = { 1: 149, 2: 150, 3: 152, 4: 153, 5: 154, 6: 155, 7: 162, 11: 148, 13: 165, 14: 165, 15: 165, 17: 165, 26: 167 };
+  T.COMP.readingPapers = Array.from({ length: 32 }, (_, i) => {
+    const number = i + 1, label = String(number).padStart(2, "0");
+    const title = `Test ${label}` + (paperSeries[number] ? ` · Série ${paperSeries[number]}` : "");
+    return { id: `ce-pdf-test-${number}`, title, src: "pdf", file: `reading-papers/${label}.json` };
+  });
+
   T.COMP.ceExams = [{
     id: "ce-exam-1-v2",
     title: "Examen blanc 1",
