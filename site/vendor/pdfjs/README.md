@@ -5,4 +5,5 @@ Documentation: https://mozilla.github.io/pdf.js/examples/
 Vendored from pdfjs-dist: legacy/build/pdf.min.mjs and pdf.worker.min.mjs,
 renamed to .js so existing servers serve JavaScript MIME types without restarting.
 Includes unmodified cmaps, standard_fonts and wasm assets and their licenses.
+Trailing whitespace in license text is normalized; license wording is unchanged.
 The optional renderer worker is not enabled. No third-party CDN requests are needed.
