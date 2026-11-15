@@ -1,0 +1,934 @@
+[
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Et pour t'aider, j'avoue qu'il y a un petit peu d'appréhension. Suivez-nous, tentez-vous d'un morage. J'avoue qu'il y a un morage. Ah, voilà. J'avoue qu'il y a un morage. Et là, c'est là que j'avoue qu'il y avait. C'est là, tu m'as qu'il n'y a pas. C'est là, tu m'as qu'il n'y a pas."
+      }
+    ],
+    "secs": 40.06,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-19-1.jpg",
+    "alt": "Illustration de la question 1",
+    "audio": "exam-sources/audio/988b01fde55d3b38fbfafaf2.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Regardez l'image 2.\nA, j'aime prendre l'avion.\nB, le train est arrivé.\nC, quelle belle voiture.\nD, voilà enfin l'autobus."
+      }
+    ],
+    "secs": 33.97,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-19-2.jpg",
+    "alt": "Illustration de la question 2",
+    "audio": "exam-sources/audio/5834ecc214e0f2b83eca6a75.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 199,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez l'extrès sonore et les quatre propositions. Choisissez la bonne réponse. Question 3. Jacques, il faut qu'on achète un nouveau frigo. Quelle modèle tu préfères ? 1. Génial, il est très grand. B, je ne sais pas, tu peux choisir? C, non, la cuisinière est chère. D, tu as raison, c'est le gris."
+      }
+    ],
+    "secs": 54.83,
+    "page": 2,
+    "audio": "exam-sources/audio/3b1869654fdb842ec9b8344e.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Quand est-ce que la conférence commence ?\nA, à 9h.\nB, depuis deux jours.\nC, il y a dix minutes.\nD, mercredi dernier."
+      }
+    ],
+    "secs": 34.9,
+    "page": 2,
+    "audio": "exam-sources/audio/f48dd3489668854bcfd487cb.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 199,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Ici, tout va bien, il fait beau. Quel temps fait-il à Marseille ?\nA, c'est très très beau.\nB, beaucoup mieux, merci.\nC, encore trois jours.\nD, chaud et ensoleillé."
+      }
+    ],
+    "secs": 35.64,
+    "page": 2,
+    "audio": "exam-sources/audio/b5d602e07ecdaee8469ff369.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 199,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Tu es allé dans ce nouveau restaurant ? Qu'est-ce que tu penses du menu ?\nA, ça sent toujours bon.\nB, c'est complet chaque soir.\nC, il est proche du métro.\nD, il y a beaucoup de choix."
+      }
+    ],
+    "secs": 36.94,
+    "page": 3,
+    "audio": "exam-sources/audio/a66b14966c6989a4d5d3d2f3.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 199,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "– Qu'est-ce que tu prends pour aller à la plage ?\nA. Avec quelques amis.\nB. Juste mon maillot de bain.\nC. Nous y allons à pied.\nD. Oui, c'est un bel endroit."
+      }
+    ],
+    "secs": 34.54,
+    "page": 3,
+    "audio": "exam-sources/audio/225954329df0f7dfdf2ff8b7.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 85,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Quentin va bientôt passer ses examens de médecine. Est-ce qu'il travaille plus que l'année dernière\n?\nA, oui, il a de mauvaises notes.\nB, oui, il refuse d'aller en cours.\nC, oui, il révise tous les jours.\nD, oui, il s'est inscrit à l'université."
+      }
+    ],
+    "secs": 46.82,
+    "page": 3,
+    "audio": "exam-sources/audio/8c0063ff00b9be979318fd8c.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 200,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Pour notre voyage de juillet prochain, j'ai réservé l'hôtel et le train.\nEt toi, quelles informations est-ce que tu as eues sur les activités proposées ?\nA, je déteste prendre le bus.\nB, je préfère partir plus tard.\nC, on écrira des cartes postales.\nD, on pourra visiter un château."
+      }
+    ],
+    "secs": 47.01,
+    "page": 3,
+    "audio": "exam-sources/audio/c048176e9b4e796761895449.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 200,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’unlieu derestauration.",
+      "D’unnouveaumusée.",
+      "D’uneécole depâtisserie.",
+      "D’unemaison de famille."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez le document sonore et la question. Choisissez la bonne réponse. Salut. On va prendre un café avec plaisir. On peut aller au salon de thé à côté de chez moi. Il est très agréable et il serve des gâteaux comme ceux de ma grand-mère quand j'étais petite. Tu le connais ? C'est là où il y a des expositions de peinture ? Non ! Juste à côté ! Question 10 De quoi par le lit de personne ?"
+      }
+    ],
+    "secs": 55.2,
+    "page": 3,
+    "audio": "exam-sources/audio/7ef2db0fb37f2e78e91b2797.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ellevaacheter unrestaurant.",
+      "Ellevapartir en vacances.",
+      "Ellevasuivredes cours.",
+      "Ellevatravailler un mois."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Salut Sarah, comment tu vas ? Bien, j'ai trouvé un an de cloies de cerveuse en août. Et toi ? Qu'est-ce que tu vas faire cet été ? Tu vas finir ton stage ? Question 11. Que va sert Sarah ? ... ... ... ... ..."
+      }
+    ],
+    "secs": 36.57,
+    "page": 3,
+    "audio": "exam-sources/audio/e202cdf7ec50c00895affe83.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Unclimat trop froid.",
+      "Untarif trop cher.",
+      "Untrafic tropdense.",
+      "Untravailtrop dur."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Il est 7h45 et les automobilistes sont déjà très nombreux dans les rues de tièvres. Comme à tous les matin, j'osais sur Jean-Roi qu'est de la maison pour le travail, un court trajet de 8 kilomètres. Pourtant, pour la liste en deux tièvres, une course folle va débuter. Ici, il n'y a pas de prie à gagner. Gagné, seulement l'espoir d'arrivée attend au travail 45 minutes plus tard. Qu'est-ce qu'il y a en 12 ? Quel est le problème évoqué ici ?"
+      }
+    ],
+    "secs": 52.59,
+    "page": 4,
+    "audio": "exam-sources/audio/e19aa6ddd1e88bdf35391628.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Dîner avec unami.",
+      "Regarderunfilm.",
+      "Rentreravecelle.",
+      "Travaillertard."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Périne, tu viens au cinéma avec nous ?\nQuand ? Aujourd'hui ?\nCe soir, la séance est à 20h. Il passe une comédie romantique.\nNon, j'ai une réunion au bureau jusqu'à 18h.\nEt après, j'ai rendez-vous au restaurant avec Paul.\nQu'est-ce que Périne va faire ce soir ?"
+      }
+    ],
+    "secs": 47.76,
+    "page": 4,
+    "audio": "exam-sources/audio/d59f2e55d6af176e2e99c140.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 201,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Laqualitéducatalogue.",
+      "Leprix des entrées.",
+      "Lesconditions devisite.",
+      "Lesœuvresprésentées."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "J'ai adoré cette expo. C'était fantastique, non ?\nOui, sauf que comme tu n'avais pas acheté les billets en avance, on a dû faire la queue pendant\ntrois heures pour entrer.\nÇa en valait la peine. Il y avait tellement de monde, je ne voyais pas les œuvres.\nJe n'ai pas profité de la visite.\nTu as pris le catalogue au moins ? Non, je ne l'ai pas trouvé.\nQue critique cet homme ?"
+      }
+    ],
+    "secs": 49.8,
+    "page": 4,
+    "audio": "exam-sources/audio/946d4546ce1d257980a761b2.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 201,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Prendreuncar.",
+      "Resterdans letrain.",
+      "Serenseigner auguichet.",
+      "Prendreune correspondance."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Suite à un accident de voyageurs, le train numéro 8791 en direction de Marseille est immobilisé en\ngare de Lyon-Perrache.\nLes voyageurs sont invités à descendre du train et à se rendre au guichet où de plus amples\ninformations leur seront communiquées.\nNous vous remercions de votre compréhension."
+      }
+    ],
+    "secs": 50.37,
+    "page": 4,
+    "audio": "exam-sources/audio/6aa6b0779f61967c44f92fbc.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 298,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pourconseiller unlivre.",
+      "Pourdiscuter d’écologie.",
+      "Pourparler desa ville.",
+      "Pourraconterun voyage."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Rafika de Buffalo, bienvenue dans La Terre est Belle.\nBonjour Marc.\nAlors, nous sommes ravis de vous avoir à l'antenne parce qu'on n'a jamais eu personne de Buffalo.\nVous allez nous apprendre des choses.\nÇa se trouve, où déjà ? Totalement à l'ouest de l'état de New York.\nC'est l'imitreuve du Canada. C'est drôle comme nom.\nIl n'y a pas spécialement de buffles ou de choses comme ça ? Non, d'après la légende, ça vient de\nBeaufleuve, un nom donné par les explorateurs français.\nEnfin, c'est l'histoire qu'on raconte.\nPour quelles raisons Rafika intervient-elle ?"
+      }
+    ],
+    "secs": 60.78,
+    "page": 4,
+    "audio": "exam-sources/audio/676dce2ddfe528616a419e83.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 201,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Aquel moment ilpourra poser des congés.",
+      "Dans quelle villeildevra partir enmission.",
+      "Quisera de permanence aumoisd’août.",
+      "S’il sera autoriséà suivreun stage en été."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour Monique. Bonjour Olivier, que puis-je pour vous ?\n- Je viens vous voir au sujet de mes vacances. Je voudrais les prendre en juillet. Je sais\nque certains collègues seront en formation et d'autres en extérieur, pour les\nprésentations de nos produits sur les marchés d'Europe. Est-ce que cela sera possible ?\n- Nous aurons peut-être besoin de vous, effectivement. Je vais y réfléchir et je vous\ndonne ma réponse cette semaine.\n- Je vous remercie. Permettez-moi juste de vous rappeler que l'été dernier j'ai travaillé\ntout le mois d'août.\nQue demande Olivier ?"
+      }
+    ],
+    "secs": 61.54,
+    "page": 4,
+    "audio": "exam-sources/audio/8b8f0b3294fb30164553ccdb.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 66,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "De créer unréseau étudiant pour échanger des services.",
+      "De mettre encontact des personnes pour partager dumatériel.",
+      "De trouverune voiturepour transporter des affaireslourdes.",
+      "D’employer des jeunes pourréparerdevieux objets."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Lorsque nous nous sommes installés loin de chez l'emparant, nous nous sommes aperçus que le magasin, le plus proche de chez nous, pour l'avènement, était à plus de 2 kilomètres. C'est-à-dire que ce serait vraiment sympa si une voisine pouvait nous prêter sa machine à l'avée. Nous avons donc créé un site internet. Il met en relation ceux qui ont une machine à l'avée et leurs voisins qui n'en ont pas contre quelques euros. question 18 que propose le site Internet présentez."
+      }
+    ],
+    "secs": 53.89,
+    "page": 5,
+    "audio": "exam-sources/audio/245fc81a5ab4c70d22197e45.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Lesconditions derecrutement sont plus difficiles aujourd’hui.",
+      "Lesétudiants ignorent lefonctionnement del’entreprise.",
+      "Lesjeunes étaient préparésplus sérieusement dans lepassé.",
+      "Lespatrons actuelsont un degréd’exigencetrop élevé."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "J'ai commencé dans l'entreprise. Cela fait quand même 30 ans. À l'époque où on ne\ns'embarrassait pas avec le recrutement.\nJe me souviens, dès le soir où j'ai fini ma formation, mon patron de stage m'a proposé\nde rester. Et pour mes copains de formation, pareil. C'est sûr, on n'embauche plus si\nfacilement.\nMaintenant, je suis un ancien. Je dois recruter les jeunes qui arrivent et je trouve ça\nincroyable. Ils accumulent les diplômes.\nOn fait plein de stages, 150 à postuler. Cela ne doit pas être drôle.\nQue constate cet employé?"
+      }
+    ],
+    "secs": 61.72,
+    "page": 5,
+    "audio": "exam-sources/audio/b24d26c1c5173b3353c7b1ea.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 106,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Dis Jean-Paul, tu n'as pas l'air d'avoir très envie d'aller à la campagne ce week-end.\nEn tout cas, moi j'ai peur d'avoir froid. Le chauffage marche si mal.\nMoi, c'est pas ça. Ce qui m'ennuie, c'est de faire tous ces kilomètres pour rester à peine deux jours.\nOh, la route, c'est pas grave. Mais la météo n'est pas très bonne.\nCela ne me dit rien d'être bloqué tout le week-end dans la maison.\nPourquoi Jean-Paul n'a-t-il pas envie d'aller à la campagne ?"
+      }
+    ],
+    "secs": 54.18,
+    "page": 5,
+    "audio": "exam-sources/audio/fbb6af8dfca906010685601d.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 202,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elleest en congé.",
+      "Elleest tombéemalade.",
+      "Elletravaille la nuit.",
+      "Ellevoyagesouvent."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "● Stéphane, est-ce que Corinne est rentrée de sa mission au Japon ?\n● Oui, elle était au bureau hier et aujourd'hui, mais elle est très fatiguée.\n● La pauvre ! Sa mission a été plus difficile que d'habitude.\n● Oui, elle a eu des réunions dans plusieurs villes, elle n'a pas arrêté de circuler.\n● C'est sympa, elle a pu découvrir plein de lieux différents.\n● Pas du tout, elle terminait très tard le soir. Elle devrait prendre des vacances.\n● Impossible, elle repart pour une conférence au Canada, la semaine prochaine.\nQu'apprend-on sur Corinne ?"
+      }
+    ],
+    "secs": 55.46,
+    "page": 5,
+    "audio": "exam-sources/audio/111b2838ce446e8555284e13.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 107,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ellea perduaux jeux de société.",
+      "Elleest restéeprèsdechez elle.",
+      "Lamétéo était trèsmauvaise.",
+      "Lelogement était malsitué."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "● Salut Nathalie ! Alors, comment s'est passé ton week-end à la montagne ?\n● L'endroit était splendide, mais le séjour a été gâché parce qu'il a plu tout le\ntemps. On n'a pas pu faire de la randonnée comme prévu.\n● Ah, c'est dommage. Qu'est-ce que vous avez fait alors ?\n● On a sorti les dominos et les cartes.\n● On aurait pu faire ça chez nous, ça nous aurait coûté moins cher. On a fait\nbeaucoup de route pour rester enfermés.\nQue regrettes-tu, Nathalie ?"
+      }
+    ],
+    "secs": 55.3,
+    "page": 5,
+    "audio": "exam-sources/audio/5bf40ebcc8aa8cd52c33982c.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 120,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Laconstruction devilles sur l’eau.",
+      "Lacréationd’un lieudeviesous-marin.",
+      "Ledéveloppement debateaux aménagés.",
+      "L’installationde diguessur les côtes."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Si la mer monte beaucoup, ceux qui vivent sur les petits dits, ils vont aller où ?\nCe que je peux dire, c'est qu'il y a des architectes qui réfléchissent déjà à créer des cités flottantes\nqui seraient autosuffisantes pour accueillir jusqu'à 5000 habitants.\nDonc c'est un projet qui est un peu utopiste, mais en même temps, on s'est dit est-ce qu'on ne sera\npas amenés à développer ce genre de projet pour accueillir justement les réfugiés climatiques ?\nEn quoi consiste le projet évoqué ?"
+      }
+    ],
+    "secs": 49.22,
+    "page": 6,
+    "audio": "exam-sources/audio/ada7ce50f504ba0891c8ccb4.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 203,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Unmeilleur contrôledes repasdabs les cantines.",
+      "Une informationcomplètepour leconsommateur.",
+      "Une promotiondesproduits bons pour la santé.",
+      "Une suppressiondes emballages enplastique."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On a l'impression en vous entendant qu'on est en train de s'empoisonner chaque fois qu'on va à la\ncantine.\nCe qui est inacceptable, c'est qu'il y a plein de substances qui sont invisibles à l'œil nu dans les\naliments que le consommateur ne peut pas choisir s'il va les avaler ou pas puisque ça n'est pas\nindiqué sur les emballages, qu'on ne le sait pas et que oui, c'est dangereux pour la santé.\nDonc ce qu'on ne veut pas, c'est alimenter les peurs, mais encore faut-il... Un petit peu là, quand\nmême.\nLa seule façon de ne pas l'alimenter, c'est de dire faisons ce qu'il faut pour qu'effectivement, quand\non achète nos aliments, que ce soit au supermarché ou ailleurs on n'a pas à se poser la question\ndes substances cachées qui peuvent être dangereuses pour notre santé.\nQue souhaite cette intervenante ?"
+      }
+    ],
+    "secs": 62.63,
+    "page": 6,
+    "audio": "exam-sources/audio/ed2b38e12b2952d693ff3a58.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 203,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Al’époque desa jeunesse.",
+      "Asa passionpour unartiste.",
+      "Ason amour des langues.",
+      "Aun voyage aux Etats-Unis."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Vous d'ailleurs, vous lisez plutôt des romans anglo-saxons ?\nAméricains. Oui, mais c'est toute ma culture.\nQuand j'avais 20 ans, c'était une telle révolution aussi bien au niveau de la musique que de la mode,\nque du cinéma, tout ça.\nJ'étais obligé de lire des romans américains, d'autant plus que c'étaient les romans qui étaient\nimportants pour moi pour me donner des directions éventuellement et pour savoir un petit peu vers\nquoi j'avais envie de me diriger.\nÀ quoi sont liés les goûts littéraires de cet invité ?"
+      }
+    ],
+    "secs": 55.3,
+    "page": 6,
+    "audio": "exam-sources/audio/6972856c114e14732e8f513f.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 203,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ilavaitdu malà accepterses choix.",
+      "Ilessayait souvent de rivaliser avecelle.",
+      "Ilétait attentif à ses centresd’intérêt..",
+      "Illui interdisait les activitésintellectuelles."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Quel rapport aviez-vous avec votre père ?\nJe ne lui parlais plus de mes études. Il avait toujours la peur ou peut-être le désir que je n'y arrive\npas.\nIl s'énervait de me voir à longueur de journée dans les livres. Je crois qu'il pensait que j'étais\nmalheureuse.\nComment se comportait-il avec vous face au monde extérieur ?\nDevant la famille, les clients, de la gêne. Presque de la honte que je ne gagne pas encore ma vie à\n17 ans.\nIl craignait qu'on ne me prenne pour une paresseuse et lui pour un crâneur.\nIl disait que j'apprenais bien, jamais que je travaillais bien.\nQuelle était pour lui la définition du mot travail ? Travailler, c'était seulement travailler de ses mains.\nQuelle relation le père entretenait-il avec sa fille ?"
+      }
+    ],
+    "secs": 68.87,
+    "page": 6,
+    "audio": "exam-sources/audio/b8bb3e5e5e357f635b757a62.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 204,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pouraméliorerla cohésion deséquipes.",
+      "Pourempêcher la diffusionderumeurs.",
+      "Pouréviter lessollicitations abusives.",
+      "Pourlimiter les distractions autravail."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "L'affaire est révélée par le Wall Street Journal et fait beaucoup de bruit dans la presse\nanglo-saxonne.\nDésormais, chez Facebook, on ne peut proposer à un ou une collègue de sortir boire un verre ou de\ndîner.\nLes Américains parlent de date qu'une seule fois. S'ils ou elles refusent, on ne peut pas l'inviter une\nseconde fois.\nEt ça figure désormais dans le code de conduite de l'entreprise.\nAller plus loin peut s'exposer à des sanctions disciplinaires. La direction de Facebook est entrée\ndans les détails.\nUn non n'a pas à être totalement explicite.\nSi vous vous entendez répondre, je suis occupé ce soir, je ne suis pas disponible, cela suffit.\nVous n'aurez pas le droit de réitérer votre invitation.\nPassez cette limite, on pourrait entrer dans un possible harcèlement.\nPourquoi l'entreprise Facebook a-t-elle modifié son code de conduite ?"
+      }
+    ],
+    "secs": 72.13,
+    "page": 6,
+    "audio": "exam-sources/audio/f29ef8a826a854ceb6d735ea.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 204,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Conseiller des médicaments.",
+      "Etablir uncertificat médical.",
+      "Examinerune radiographie.",
+      "Traiterunproblèmedepoids."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour docteur, je voudrais faire de l'escalade et j'ai besoin de votre autorisation pour m'inscrire\ndans un club de sport.\nDe l'escalade, mais c'est très mauvais pour votre dos.\nJe vous conseille plutôt de faire de la natation.\nLa natation, ce n'est pas bon pour ma peau. Et puis j'adore la montagne.\nEh bien, faites plutôt de la randonnée.\nAh oui, la randonnée, c'est une idée. Cela peut m'aider à maigrir.\nQue doit faire le médecin ?"
+      }
+    ],
+    "secs": 53.29,
+    "page": 6,
+    "audio": "exam-sources/audio/d8ef91522c1526e618f0dd48.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 204,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’unoutilqui facilite l’apprentissage, quelle que soit la discipline étudiée.",
+      "De labonne méthode derévision d’uncours quand onest pris parletemps.",
+      "De ladifficultéà rédiger descours motivantspour les jeunes étudiants.",
+      "Des limitesde l’enseignement à distance pour certaines disciplines."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "De quoi est-il question dans cette émission ?\nParlons maintenant de l'enseignement à distance.\nMarielle Barreau, vous nous présentez un logiciel qui fait des fiches de révision à votre place,\nc'est ça ?\nFinalement, vous voulez inciter nos auditeurs étudiants à se tourner les pouces.\nCe n'est pas exactement ça.\nOn vous propose en fait de travailler plus efficacement.\nC'est un logiciel qui s'adapte à toutes les matières et qui vous fait réviser.\nLe principe, c'est que vous numérisez en un temps record n'importe quel cours.\nVous faites vous-même votre fiche de révision que vous saisissez sur votre clavier, et le logiciel\nvous interroge de la façon la plus adéquate pour vous faire apprendre.\nIl pose des questions en rafale et s'adapte à vos difficultés en mettant l'accent là où vous avez\ndes points faibles."
+      }
+    ],
+    "secs": 71.66,
+    "page": 7,
+    "audio": "exam-sources/audio/a7f3f5177fe4c79398b7cd58.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 169,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Unbijou d’artisanat local.",
+      "Unguidetouristique illustré.",
+      "Unmodèleréduit de bateau.",
+      "Unalbum desouvenirspersonnels."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Aujourd'hui, quand le voyageur rentre de Bamako, de Sarajevo ou de Québec, il\nrapporte un trésor très précieux, le carnet de voyage. Composé d'aquarelles, de\ncroquis, de descriptions de petits riens, de photos, de textes ou de collages, de sables\nou de coquillages, ces petits objets de mémoire et d'évasion sont à la mode en France,\nnotamment depuis le succès des carnets de voyage, du navigateur qui tourne l'Amazon.\nD'après cette chronique, en France, quel est l'objet qu'il est à la mode de rapporter de\nvoyage ?"
+      }
+    ],
+    "secs": 43.43,
+    "page": 7,
+    "audio": "exam-sources/audio/6c9314c3360817daeda9d70c.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 133,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Metteur enscène.",
+      "Explorateur.",
+      "Photographe.",
+      "Journaliste."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Jean-Pierre, pouvez-vous nous parler de votre métier qui est une vraie passion pour vous ?\nOui, eh bien, ce qui me plaît le plus, c'est que je voyage beaucoup.\nJe dois toujours me déplacer si je veux que les gens soient informés au moment même où les\névénements se produisent.\nOn vous connaît comme un voyageur infatigable qui ne se sépare jamais de son appareil photo,\nalors que vous ne vous en servez même pas.\nJ'ai toujours rêvé d'être reporter-photographe et avoir cet appareil avec moi me donne l'impression\nque mon rêve est presque réel.\nEn réalité, vous mettez en scène les mots et non les images.\nC'est ce qui caractérise votre métier et vous a rendu célèbre.\nQuel est le métier de Jean-Pierre ?"
+      }
+    ],
+    "secs": 63.18,
+    "page": 7,
+    "audio": "exam-sources/audio/a57fa0dc7e94b30b0b6c1d19.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 205,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Enécoutant les gens dans la sphèreprivée.",
+      "Enemployant destechnologies innovantes.",
+      "Eninterrogeant des personnescultivées.",
+      "Enobservantdivers types d’interlocuteurs."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "La communication est l'une des plus grandes révolutions de notre époque moderne. Elle a\nbouleversé nos existences et la société. Ainsi parle Dominique Volton, sociologue très\nmédiatique.\nDominique Volton a passé sa vie à valoriser une conception originale de la communication. Il\ns'est penché sur les mouvements de libération de la femme, les syndicats, les médias, la\npolitique. Une question obsède Dominique Volton.\nComment réussir à cohabiter avec l'autre ? Et un paradoxe l'étonne. Malgré les techniques de\ncommunication de plus en plus performantes, les hommes, les sociétés ou les cultures ne se\ncomprennent pas mieux qu'il y a 2000 ans.\nComment ce sociologue étudie-t-il la communication ?"
+      }
+    ],
+    "secs": 67.33,
+    "page": 7,
+    "audio": "exam-sources/audio/6d7ff8d05215db0b8b462cdc.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 42,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Sur l’amplitude del’effet dela dettesur la croissance.",
+      "Sur l’utilisation des recettesfiscales pour régler la dette.",
+      "Sur l’acquittement dela dette parla ventedu patrimoine de l’Etat.",
+      "Sur lemontant de la dettecontractéeparla provincequébécoise."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "J'en file la question pour l'avenir du Québec, veut aussi réduire la tête. Que propose un france au Legault, c'est d'investir 100 % des redevances tirées des ressources naturelles pour renforcer la d'autres, la tête, plutôt, on pourrait aller chercher environ 200 millions de dollars par année, mais pour s'y montrer un plat de l'institut de recherche et des formations socio-économiques, c'est pas du tout le bon idée. Au lieu d'investir dans des services publics qui, évidemment, sont d'une aimée qui aide à favoriser la croissance d'économie. Donc à réduire son rapport avec la dette, eh bien, on décide de le retirer du secteur d'économie. Ça me sent tout à fait une très très mauvaise idée de s'entendre là-dedans. Qu'est-ce qu'il y en trente, toi ? Sur quoi s'oppose, François Legault, et si mon tremble et pépin ?"
+      }
+    ],
+    "secs": 69.8,
+    "page": 7,
+    "audio": "exam-sources/audio/43a376618b87458a01e05c62.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Laqualitécroissantedes résultats.",
+      "Lesaménagementshydrauliques.",
+      "L’expérience deses collègues.",
+      "L’importation depieds devigne."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Depuis quelques années, des vignerons ont investi des sommes importantes au Québec pour\nse lancer dans une nouvelle culture, comme Daniel Desmoulins qui a ouvert le vignoble L'Ange\ngardien en face du fleuve Saint-Laurent. Faire du vin au Québec, c'est un challenge.\nJe ne serais peut-être pas parti là-dessus il y a vingt ans, mais je trouvais que les produits\nétaient de mieux en mieux et c'est pour ça qu'il y a dix ans, avec ma femme, on a dit « on va se\nlancer ».\nDans le vin, je pense que l'on a des produits extrêmement intéressants parce qu'il y a un petit\npeu d'acidité. Puis il y a toujours le vin de glace, on a la température pour ça. On cueille le raisin\nfin décembre, début janvier."
+      }
+    ],
+    "secs": 70.61,
+    "page": 8,
+    "audio": "exam-sources/audio/6dcbf3e7b11d3a90a800ee8c.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 29,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Des fouilles archéologiques dans unsanctuaire..",
+      "Laconstruction d’unédificeemblématique.",
+      "Letourisme religieux aucours des siècles.",
+      "Une visitelors des journéesdu patrimoine."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Aujourd'hui, le mont Saint-Michel est au patrimoine mondial de l'humanité.\nL'histoire et la légende veulent qu'une nuit d'octobre 708, Aubert, évêque d'Avranches, soit réveillé\npar l'archange Saint-Michel, lui ordonnant de construire un sanctuaire sur le mont Tombe, au milieu\nde cette baie.\nLe chantier va durer dix siècles, et aux travaux des bâtisseurs ont succédé depuis cent ans les plans\nde restauration des architectes des bâtiments historiques.\nQu'évoque cette personne ?"
+      }
+    ],
+    "secs": 54.34,
+    "page": 8,
+    "audio": "exam-sources/audio/6eef450feabe9ea6e814e3ec.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 206,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’automatiser leurs techniques.",
+      "D’éviterles rivalitésentrecollègues.",
+      "De perfectionner leur savoir-faire.",
+      "D’enrichir leurs échangesinternes."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bruno voulait nous parler ce matin des Serious Games.\nCes applications informatiques s'inspirent des jeux vidéo pour améliorer l'efficacité d'un médecin,\nmais pas seulement face à une maladie, face à un problème de santé, pour mieux comprendre.\nOn va prendre des exemples, et notamment celui qui est développé en ce moment au CHU de\nToulouse, Bruno.\nEh bien, ce jeu de simulation en 3D permet de tester le travail d'une équipe dans une salle\nd'opération.\nAlors, il ne porte pas sur les gestes médico-techniques, mais sur la communication au sein de\nl'équipe médicale et sur les procédures à respecter.\nC'est un jeu très utile quand on sait que près d'un tiers des événements indésirables graves liés aux\nsoins viennent d'un problème au niveau du travail en équipe.\nQue permet la pratique de ce jeu vidéo aux membres d'une équipe médicale ?"
+      }
+    ],
+    "secs": 67.4,
+    "page": 8,
+    "audio": "exam-sources/audio/fd75b4b3f436f5a606fd7b38.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 206,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’industrialisationgalopante des rives.",
+      "Ladégradation d’un sitenaturelrare.",
+      "Lapollution desnappes phréatiques.",
+      "Lararéfactiondes énergies fossiles."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'est-ce que vous avez en couverture ce mois-ci ?\nCe mois-ci, on se questionne sur la présence de pétrole dans le sous-sol du Golfe Saint-Laurent.\nIl y a beaucoup de controverses au sujet de son exploitation, son extraction, sur les dommages\npotentiels que ça pourrait causer au Golfe, qui est un écosystème assez précieux et assez unique\naussi au monde.\nMais il y a aussi cette richesse qu'on ne soupçonnait pas. Il y a une vingtaine, trentaine d'années, ce\npétrole dans le sous-sol, alors ça fait des débats de société assez importants ici.\nQu'est-ce qui fait polémique ?"
+      }
+    ],
+    "secs": 61.17,
+    "page": 8,
+    "audio": "exam-sources/audio/2e4a0c507c1a4712a3e07f1e.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 207,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elleest trop éloignéedesorientations politiques actuelles.",
+      "Ellefait référence à desévénements historiquesdouloureux.",
+      "Ellefait ressurgir des rivalitésoudes antagonismesoubliés.",
+      "Elleremet encause la dominationdefait decertains pays."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Avant-hier, dans une tribune officielle, une élue française a brisé un tabou, et sans doute\nheureusement.\nEn parlant des États-Unis d'Europe, comme de l'objectif ultime du processus d'unification\neuropéenne, elle a d'un coup redonné une clarté à cette entreprise si complexe qu'elle en est\ndevenue obscure à tant d'Européens.\nDe crainte de passer pour de doux rêveurs, romantiques, utopistes, ignorants des réalités\npolitiques, même les plus déterminés des partisans de l'unité de l'Europe n'osaient plus\nemployer l'expression de Victor Hugo.\n« On ne peut pas, dit-on, ce serait briser net un consensus, ce serait rompre avec certaines\nnations, susciter de nouvelles querelles bien plus violentes encore que celles du traité\nconstitutionnel.\nL'idée véhiculée par les États-Unis d'Europe, c'est-à-dire des États soumis à un pouvoir fédéral,\nn'est pas du tout à l'ordre du jour. »\nSelon le chroniqueur, pourquoi l'expression « États-Unis d'Europe » est-elle taboue ?"
+      }
+    ],
+    "secs": 85.53,
+    "page": 8,
+    "audio": "exam-sources/audio/7465e4fc6ba0aa6d34640179.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 53,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elles entraînent des dépendancesmaladives.",
+      "Elles nuisent aux capacitésd’apprentissage.",
+      "Elles perturbent la perception dela réalité.",
+      "Elles provoquent unisolement dangereux."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Et c'est tout l'art d'une série captilez son public, la place que peut prendre une série dans la vie de jeunes gens au moins jeunes peut tranquilleter Jean-Pierre Coutron et psychologue cliniciens spécialistes des addictions. On commence à avoir dans des gens trutiens avec des chalines, avec des jeunes ce problème qui est apporté, qui est en décutère de la tition sur le mode 2, j'arrive pas à faire entrements, j'arrive pas à contrôler et ça crée de la souffrance, c'est la thématique l'intervention. C'est la thématique dans la technologie sans limite, donc que c'est un humain de s'arrêter de même, mais c'est toujours difficile. On a tout une réflexion à partager avec les parents, parce que la première réponse, c'est quand même la réponse éducative. que constatent l'intervenant à propos des sévilles."
+      }
+    ],
+    "secs": 65.29,
+    "page": 8,
+    "audio": "exam-sources/audio/21a960b8a9eb265fdefeddd2.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  }
+]

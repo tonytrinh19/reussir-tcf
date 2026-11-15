@@ -4639,7 +4639,10 @@ window.TCF.FR = {
 "← Previous": "← Précédent",
 "→ fiche": "→ fiche",
 "✓ NCLC 7 reached": "✓ NCLC 7 atteint",
-"✓ kept at bay": "✓ évitée"
+"✓ kept at bay": "✓ évitée",
+"Annales": "Annales",
+"Listening exam papers": "Sujets de compréhension orale",
+"The recording could not load. Resume to try again.": "Impossible de charger l’enregistrement. Reprends pour réessayer."
 },
 "fiches": {
 "accord-participe": "# Avec être : accord avec le sujet\n= Elle est parti==e== à 8 h. — She left at 8.\n= Nous sommes arrivé==s== hier. — We arrived yesterday.\n> Être pour les verbes de mouvement de « DR MRS VANDERTRAMP » (devenir, revenir, monter, rester, sortir…) et pour tous les verbes pronominaux.\n\n# Avec avoir : accord avec le COD placé avant\n| Phrase | Où est le COD ? | Accord ? |\n|---|---|---|\n| J'ai envoyé **les lettres**. | après le verbe | non : envoyé |\n| Je **les** ai envoyées. | avant : les | oui : envoyées |\n| Les lettres **que** j'ai envoyées… | avant : que | oui : envoyées |\n| Elle a mangé. | pas de COD | non : mangé |\n\n# Les verbes pronominaux\n- En général, accord avec le sujet : elle s'est ==levée==, ils se sont ==rencontrés==.\n- Pas d'accord si un COD suit le verbe : elle s'est ==lavé== les mains (le COD, c'est les mains).\n- Pas d'accord quand se est un COI : elles se sont ==parlé== (parler **à** quelqu'un).\n- se rendre compte : nous nous sommes ==rendu== compte (compte est le COD).\n! Tes erreurs fréquentes : ~~nous avons rendu compte~~ ++nous nous sommes rendu compte++ · ~~elle a inquiété~~ ++elle s'est inquiétée++. Un verbe pronominal garde son se et prend être.",
@@ -7496,6 +7499,14 @@ window.TCF.FR = {
 [
 "your weakest skill, {0} · {1}",
 "ta compétence la plus faible, {0} · {1}"
+],
+[
+"Question {0}",
+"Question {0}"
+],
+[
+"· {0} min",
+"· {0} min"
 ]
 ]
 };

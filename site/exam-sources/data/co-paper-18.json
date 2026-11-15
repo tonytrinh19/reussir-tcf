@@ -1,0 +1,909 @@
+[
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez des câbles pour position, choisissez celles qui connaissent voire l'image. Regardez l'image 1. Ah, il est beau ces danseurs. L'île, j'adore cette chanson. C'est ma radienne très forte. C'est le jeûne !"
+      }
+    ],
+    "secs": 37.02,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-18-1.jpg",
+    "alt": "Illustration de la question 1",
+    "audio": "exam-sources/audio/45fb8502a0e193f8307608b1.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "C'est tout le monde. On regarde dès qu'il mange deux. Ah ! Tu vernes le neuf à la tête des croises ? Oui. Si tu connais l'heure du projet d'îme ? Oui. Tu sais où est l'astation de l'étrôme ? Tu vois un jamais sur ce plan ?"
+      }
+    ],
+    "secs": 40.2,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-18-2.jpg",
+    "alt": "Illustration de la question 2",
+    "audio": "exam-sources/audio/13a75e1b0f6ebcd9dc86a5cb.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez l'extrême sonore et les quatre poursitions. Choisissez la bonne réponse. Qu'est-ce qu'il y en trois ? Bonjour Madame, qu'est-ce que vous arrive ? Bonjour, j'ai très mal à la gorge. Est-ce que vous avez quelque chose pour moi ? Ah ! Oui, c'est plus difficile. Oui. Je suis malade aussi. Oui. Prenez ce vélicamment. Oui. Oui. Merci votre tactique."
+      }
+    ],
+    "secs": 50.95,
+    "page": 2,
+    "audio": "exam-sources/audio/13101c7beeaddadb2e93c6b3.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'est-ce que je veux prendre un café pour la bose ? Ah, deux euros. D, ça a les quatre. C, trois minutes. D, un secre."
+      }
+    ],
+    "secs": 30.05,
+    "page": 2,
+    "audio": "exam-sources/audio/a8eb08b1511a4d13e78534ac.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'est-ce qu'il y en a ? Madame, je vais vous y aller. Comment vous les voyager ? Ah, je parle de 12 minutes. Mais je préfère de l'avenir. C'est, je reste deux jours. C'est vrai, albain."
+      }
+    ],
+    "secs": 34.67,
+    "page": 2,
+    "audio": "exam-sources/audio/79f47e36f7db71acd367538a.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'est-ce qu'il y en a ou pas, le gros chez l'avion pourrait nous le jager, si vous voulez ? Ah ! Ah ! Ah ! Déil, à 22h37, c'est le gros de l'avion. Déil, pour m'en dissépeur."
+      }
+    ],
+    "secs": 31.96,
+    "page": 2,
+    "audio": "exam-sources/audio/2c2cf7d7bad659d049a380ed.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Je peux revenir et changer ce qu'il ne s'en peut pas. Aujourd'hui, tout est à 50%. Mais bien sûr, mais seulement avec le pique et la chambre, c'est désolé. Je m'ai pas besoin de ça t'as à dire. Oui, c'est bien oui. J'ai rien à dire. On m'a dit que j'ai fait ça."
+      }
+    ],
+    "secs": 38.66,
+    "page": 2,
+    "audio": "exam-sources/audio/0721dbe1d8d6875146b14eec.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Est-ce qu'il y en a eu ? Bonjour, j'ai très mal à la corgène. Est-ce que vous pouvez me donner quelque chose ? Je vous conseille, c'est concret. Qu'on s'entreise efficace. Je dois les prendre pendant combien de temps ? Au mieux, il y aura pas. Mais deux fois par jour. Si, s'en m'a remettant, D'un soleil."
+      }
+    ],
+    "secs": 39.63,
+    "page": 2,
+    "audio": "exam-sources/audio/98377302dd1c067ddfe7239b.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'est-ce que j'aime, n'est-ce pas ? Pourquoi tu vois ça, il y a un pédit ? Ah ! J'avais rendez-vous chez me ça ? Oui, moi, non plus. Je ne suis pas oublie. Oui, je ne sais pas. Je n'étais pas là. Oui, si. Mais je n'ai pas eu le temps."
+      }
+    ],
+    "secs": 32.27,
+    "page": 2,
+    "audio": "exam-sources/audio/3b4451b3214d5964c307b0a2.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Prendre des médicaments.",
+      "Rentrer chez elle se coucher.",
+      "Se rendre à la pharmacie.",
+      "Téléphoner au médecin."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez le document sonore et la question, choisissez la bonne dépose. Ça ne va pas ? Non, ma vie, c'est la vie. Je n'ai pas eu le temps d'aller voir que d'un coeur. Il ne faut pas entendre avec le... Qu'est-ce que tu en dis ? Que le conseil d'autres n'attendent pas son aime ?"
+      }
+    ],
+    "secs": 41.37,
+    "page": 2,
+    "audio": "exam-sources/audio/1d7c7547a69ae12176b81fc6.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’arrivée d’un vol.",
+      "Le retard d’un vol.",
+      "Le départ d’un vol.",
+      "L’annulation d’un vol."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les passages d'ivolo, l'R France 211, qui ont invité à se présenter pour deux, c'est pour un enrrement immédiat. Question 11, qu'est-ce que le message a donc son ?"
+      }
+    ],
+    "secs": 31.64,
+    "page": 2,
+    "audio": "exam-sources/audio/bcf233920c25cfff9919164b.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle cherche un grand logement.",
+      "Elle doit respecter un budget.",
+      "Elle souhaite avoir une belle vue.",
+      "Elle va voir un autre appartement."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Alors Adam, qu'est-ce que pensez-vous de cet appartement avec plus sur le parc ? Hmm, c'est facile, mais prend son branle. J'en ai un autre plus mieux, mais le chal, on voulait vous le visiter ? Oui, c'est le prix d'avortes peu. Qu'est-ce qu'il y en ause ? Qu'apprends-t-on sur la taillante ?"
+      }
+    ],
+    "secs": 36.91,
+    "page": 2,
+    "audio": "exam-sources/audio/e2d457f816c4e97fc01c310f.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Demander une facture détaillée.",
+      "Faire repeindre son automobile.",
+      "Prendre rendez-vous au garage.",
+      "Savoir si son véhicule est prêt."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Allons, bonjour et je vous appelle pour savoir quand je pourrais récupérer ma voiture une peu joverte, et c'est vous depuis une semaine. Un instant, si vous plaiez me là, je me renseigne. La pièce qui manque pour la boîte de vitesse, que devrais être livré sur la table, la réparation devrais être terminée en fait la publicit. Pour y vous le rappeler, vers 18 heures, vous le dites, pour n'y vous indiquer à ce moment-là, la sommet n'est-à-tout à l'heure. Qu'est-ce qu'on prête ? Qu'est-ce que c'est gagne ?"
+      }
+    ],
+    "secs": 56.53,
+    "page": 3,
+    "audio": "exam-sources/audio/92aadec9f5da69fb4802a069.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Parce que la file d’attente est très longue.",
+      "Parce qu’il manque d’information.",
+      "Parce que les conducteurs sont en grève.",
+      "Parce que les guichets sont fermés."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour, madame. Je viens de voir l'affichage que le train pour Londres a une heure de\nretard.\nPourquoi ? C'est encore des cheminots qui ne sont pas contents ? Non, pas cette fois.\nMais malheureusement, je n'en sais pas plus que vous. Alors là, c'est un comble.\nPour une fois que ce n'est pas un arrêt de travail, il n'y a personne qui puisse me\nrenseigner. Ben, non. C'est peut-être une panne.\nJe ne sais pas non plus. Il faut attendre et continuer à consulter le panneau. C'est tout.\nPourquoi le voyageur est-il en colère ?"
+      }
+    ],
+    "secs": 61.46,
+    "page": 3,
+    "audio": "exam-sources/audio/c2b21d7a10a2f84699b2bae5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 189,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La répartition des horaires.",
+      "Le contact avec les élèves.",
+      "Les activités pédagogiques.",
+      "L’organisation des leçons."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Je m'appelle Pascal. Ça fait 4 ans que je travaille dans une école maternelle.\nJe suis chargée d'aider les enseignants dans la classe. Alors, le plus dans le métier\npour moi, c'est les relations avec les enseignants et les enfants. Ça, on a vraiment\nbeaucoup de chance à ce niveau-là.\nSurtout avec les enfants. Les côtés négatifs du métier... Je dirais peut-être les journées\nun peu longues dans le bruit, parce que les enfants sont quand même en général\nbruyants. M\nQu'a-t-il aussi Pascal dans son métier ?"
+      }
+    ],
+    "secs": 56.03,
+    "page": 3,
+    "audio": "exam-sources/audio/d204cbfd31bcb4e051713131.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 189,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Au bureau.",
+      "Au cinéma.",
+      "Au restaurant.",
+      "Au théâtre."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Eh, Sophia, elle vient ? Non, elle ne pourra pas venir avec nous au cinéma.\nElle m'a demandé de vous prévenir. Pourquoi ? Elle a une sortie avec ses collègues et\nils ont réservé une table pour 19h. C'est dommage.\nPeut-être qu'elle pourra nous rejoindre plus tard.\nOù sera Sophia à 19h ?"
+      }
+    ],
+    "secs": 39.63,
+    "page": 3,
+    "audio": "exam-sources/audio/37ad96c77bedf3eb259feb7b.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 190,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La découverte des palais de l’empereur.",
+      "L’élargissement de Paris à ses environs.",
+      "Les lieux qui ont changé sous Napoléon.",
+      "Les traces des batailles napoléoniennes."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "A Newtodd, on voit s'il y a une idée de l'étude originale, l'exition pariable, au pulier, un ouvrage intitulé, pari et ses uns, tout en retard de l'avollion. Histoire de nous faire découvrir une vieux qui nous ont compté au cours de cette période, mais aussi les vraisciaux travaux, les constructions et présents bématiques, et les transformations est plus romancables et foutus par la volion car comme tu n'es pas à la guerre, il nourrit le grand dessin pour la capitale dans le triomph de la Colombode. Question 17 Qu'est le sujet du vivant ?"
+      }
+    ],
+    "secs": 59.06,
+    "page": 3,
+    "audio": "exam-sources/audio/bbaaeaf1505a97817ee83780.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il veut obtenir des renseignements.",
+      "Il cherche à joindre la directrice.",
+      "Il désire visiter les locaux disponibles.",
+      "Il souhaite participer à un congrès."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour madame, je voudrais louer une salle de conférence, quelles sont de d'arrives et de services proposés. C'est la maquillette de madame Martino qui s'occupe de la réservation de ça. Et je vous l'abasse. Merci madame. Au revoir. C'est trop n'est-ce pas ? C'est pas c'est tout de l'élection"
+      }
+    ],
+    "secs": 43.43,
+    "page": 3,
+    "audio": "exam-sources/audio/92953382f4d44d237b90aa2f.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elles ont assisté à un concert.",
+      "Elles ont lu le même livre.",
+      "Elles ont rencontré une célébrité.",
+      "Elles ont vu un film au cinéma."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Alors, ça d'a vu ? Oui, j'ai trouvé le salario en général, il a fait ce chrono, et je ne suis pas très éphane de la gueule principale. Je ne trop plus qu'il aurait pu choisir quelqu'un d'autre pour ce rôle. Et la musique était être supportable. Question n'est-à-dire, on fait ces personnes."
+      }
+    ],
+    "secs": 38.01,
+    "page": 3,
+    "audio": "exam-sources/audio/5d4157fd1ce93d68304c162d.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Délivrer des diplômes à ceux qui suivent ses cours.",
+      "Élargir les connaissances scientifiques des participants.",
+      "Faire progresser la recherche scientifique en France.",
+      "Recueillir des fonds pour les laboratoires français."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Boum boum boum boum boum Les avancées des sciences et des techniques se lèvent\ndes questions qui touchent à la vie de chacun et font débat.\nLe projet n'est plus une évidence. Les citoyens veulent comprendre ce que la recherche\nrend possible. Le collège de la cité des sciences et de l'industrie organise tout au long\nde l'année des cycles de conférences et de débats où des chercheurs viennent à la\nrencontre du public.\nL'ambition est de permettre à chacun d'acquérir des connaissances fondamentales, de\ns'informer des développements récents, de se former une opinion éclairée pour que la\nscience devienne une composante de la culture.\nQuel est le but du collège de la cité des sciences et de l'industrie ?"
+      }
+    ],
+    "secs": 62.11,
+    "page": 3,
+    "audio": "exam-sources/audio/d08711381f92184151bbda5f.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 191,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "De l’enthousiasme.",
+      "De l’étonnement.",
+      "De l’admiration.",
+      "De l’intérêt."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Mathieu, je vous félicite. Vous avez fait un très bon travail de recherche. C'est vrai ? Je\nne pensais pas avoir réussi.\nJ'ai mis beaucoup de temps. Ça n'a pas été facile. En tout cas, c'est une excellente\ncopie.\nVous avez la meilleure note du groupe. Ça alors ! Je ne peux pas le croire.\nT'exprimes le jeune homme ?"
+      }
+    ],
+    "secs": 42.81,
+    "page": 4,
+    "audio": "exam-sources/audio/5684b2d1cfe71ab47476c67f.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 191,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La fréquence des compétitions sportives.",
+      "Le contenu des programmes sportifs.",
+      "Les contraintes liées aux pratiques sportives.",
+      "L’insuffisance des résultats sportifs."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Est-ce que c'est toujours compatible, ça veut dire que l'odeur de sport comme ça, est pouvoir messier les études aussi ? Non, vous font tellement que votre jour qu'on va t'inquiébrer, dans l'an paradoxe, c'est pas dans le jeu, parce qu'on peut faire une sorte à nous enfin pour qu'il y vala les valares de rigards de l'esthétique, de l'esthétique, de l'esthétique, et puis on ne retrouve pas de voir comproder avec les esthuges qui ne sont pas très très de Quand elle t'aille, on va vraiment lire les enfants dans les voies de l'Ontario. On va l'habiter de voir tout le trois fois plus d'arché dans ce qui était nous qui est journaux pas dans des femmes. Donc on va plus bien dans le temps aller à fois pour les dire incongrues dans l'un."
+      }
+    ],
+    "secs": 65.6,
+    "page": 4,
+    "audio": "exam-sources/audio/e9e74eddaee0be00fc58aa19.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pour lui annoncer le rejet de sa proposition.",
+      "Pour lui confirmer un rendez-vous de travail.",
+      "Pour lui demander des documents supplémentaires.",
+      "Pour lui fixer un entretien d’embauche."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour Monsieur Nogueux, madame de Fèbre de la Diction des ressources gilènes de la Société à Gipro. Je vous appelle à aussi j'ai de votre candidatine pour le poste de Grafiste, votre cédé a été pressé électionné par la diète prise des ressources gilènes. Si ce poste est nous intéresse toujours, nous aimerons vous rencontrer dans les poches Bonjour, mais si vous devez rappeler, c'est loin, 25, 28, 67, 54, au revoir. Et tu en vas, 3. Pourquoi m'as la meufait dans un pâter l'appeler ? Je l'ai oublié."
+      }
+    ],
+    "secs": 59.24,
+    "page": 4,
+    "audio": "exam-sources/audio/1c4c7b714f2b67a661832e67.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il intéresse très peu les vacanciers.",
+      "Il offre des services de qualité supérieure.",
+      "Il permet le développement des campagnes.",
+      "II souffre d’une augmentation des tarifs."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les Français sont de plus en plus nombreux à rechercher les loisirs de plein air.\nEt le camping n'est plus seulement choisi pour de simples raisons économiques puisque l'on\ntrouve des terrains 5 étoiles qui proposent même des restaurants gastronomiques et des salles\nde bain privées.\nLe mot camping commence d'ailleurs à laisser la place à hôtellerie de plein air.\nQu'apprend-on sur le camping ?"
+      }
+    ],
+    "secs": 42.16,
+    "page": 4,
+    "audio": "exam-sources/audio/d1dae65b4a743157c2575329.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 26,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Une paire de boucles d’oreille.",
+      "Une paire de chaussures.",
+      "Une paire de lunettes.",
+      "Une paire de skis."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Et c'est là, parce qu'il est dans le ventre. Oui, pour l'âge. J'ai vu la forme des branches. Tantôt veux pour moi. Ce sera parfait pour la montagne. Je sais en pas de ces trois belles et je m'ai disé. Moi, je peux faire c'est là. Elle est en train de venir avec la couleur de tes cheveux et elles sont très éligantes. C'est tout le monde à l'aise, d'accord ? J'ai peur. Qu'est ce que l'a fait ? Qu'est ce que l'a fait ?"
+      }
+    ],
+    "secs": 52.85,
+    "page": 4,
+    "audio": "exam-sources/audio/08c134590cfada7999c6553a.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Avoir effectué de nombreux séjours à l’étranger.",
+      "Avoir été eux-mêmes formés à l’école Colbert.",
+      "Avoir obtenu la nationalité française.",
+      "Avoir vécu dans le pays de la langue qu’ils enseignent."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "L'institut de l'angue est civilisation pourrientale, c'est-à-dire Rinaldo, a été vendu par Kulper, qui s'estillé le siècle à l'istant boule. Aujourd'hui, encore, même s'il est collé parmi, les professeurs sont sois des autoclores, un originaire du pays dont des enseignes de la langue soient des français qui ont des puits dans ce pays. Les professeurs étrangers ont souvent acquis la nationalité française par la suite. Ils sont tous des spécialistes de leur domaine, un agustique, culturel et un certain nombre d'entre eux, pour faire un vie de la situation. Qu'est-ce qu'on va s'y ? Que son écrite a de reprêtement et professeur de l'inalbo."
+      }
+    ],
+    "secs": 55.25,
+    "page": 4,
+    "audio": "exam-sources/audio/9eb4352cf3d87689b391ae35.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Des différences entre la taxe locative et la taxe foncière.",
+      "Du délai accordé pour le paiement des taxes.",
+      "Du mode de calcul de la taxe locative.",
+      "Du système français de taxe d’habitation."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Bonjour à l'heure, j'invite en France de plus si moi seul dans un studio. J'ai eu aussi une feuille d'oeil pour qu'on bizarre à payer avant 15 autres projets pour quoi. Oui c'est normal, il y a le loyer et le préparant, il y a des encoules au coût, et sont basés sur la superficie de votre studio et sur une résistance. Quoi ? Il faut que je peux le loyer, c'est se faire sur le gars, mais dans mon pays ça résiste à quoi ça ? et résoudre les chapéries à ses voies. Et si vous voulez dire qu'au crimeur, vous payez aussi la base de fonction, mais pas de loyer bien sûr. Qu'est-ce qu'il y en a ? De quoi c'est dans le jeu dans le jeu ?"
+      }
+    ],
+    "secs": 55.09,
+    "page": 4,
+    "audio": "exam-sources/audio/ebd17b8b65055d74d737762b.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Un tour de la capitale en bus découvert.",
+      "Un parcours à pied le long des quais.",
+      "Une visite guidée du Musée du Louvre.",
+      "Une croisière-promenade sur la Seine."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Mais la déciue, rien de lui sur le bateau de la société s'artille, observez-nous, soutien à peu l'organe. Nous allons découvrir ensemble Paris, au plier de la salle, c'est comme un lieu, il y a pire, on voit l'autocard. Voici notre moment, il utilise la réserve, il nous a le grand projet de guet, et passez ce que nous nous propose. Nous nous arrêtons devant notre la vie mari, qui nous est nu et d'orcelles. En fin, nous arrivons au Troque année. Pour vous remerder toute cette notion, à un déjeuner épreuble, ici même à 12 à 30. Un déjeuner un gros grand, à 13 à 30, pour vous convier à vos repels. Pas c'est un très aléaire de romans en deuxième année. Question 28. C'est la ligne de votre liste."
+      }
+    ],
+    "secs": 70.72,
+    "page": 5,
+    "audio": "exam-sources/audio/a10a7fd7342b34dc2ca38635.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ils devront demander le remboursement de leur billet par écrit.",
+      "Ils devront descendre en gare de Valence suite à une panne.",
+      "Ils devront patienter à leur place jusqu’à l’arrêt complet du train.",
+      "Ils devront présenter leur billet à leur descente du train."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Mesdames, messieurs, je suis à l'insident technique que notre train arrive au garde de la lance dégérée avec un retard de 45 minutes. Notre ditons douille voyageur qui n'est sans la soin approchée personnelle de gare, et nous nous remettrons un dénorme l'eau, et nous devrons enblier et à retourner à la de la santiguille pour que la SNCF puisse ouvrir la soin pour respondant aux prix de votre guillet de trèl, à titre de l'épauvagement. C'est ce que vous le dis, on va parler de ce que vous l'avez dit par l'explwick. On va justement aller, être bien vous, à notre sexualité. Et pour la même chose, vous l'avez déjà demandé d'être au moins. On va te connaître à qui vousövez leüyor pour les termes de ton délai. Et alors, de toute la fois, vous serez à l'카�ien, à l'écran, à l'envoyer ou à qui vous entendz, et fors de l' utilizar. Maintenant, vous allez avoir la carte de l'écran,"
+      }
+    ],
+    "secs": 58.59,
+    "page": 5,
+    "audio": "exam-sources/audio/c02b1afc75afc8e0c1caed97.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ils bénéficient d’enseignements adaptés.",
+      "Ils se consacrent peu aux matières littéraires.",
+      "Ils sont dotés d’un esprit plus scientifique.",
+      "Ils sont encouragés lors de leur apprentissage."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "L'idée reçue selon les défis, ils sont bons, droits et pour les mathématiques, que les garçons étaient lents en créant dans la définitive des femmes, qui aient pertué les résultats des nesses et qui ont éleut tout entretien de cet idée reçu. Alors un tour de mes nannes à l'aimes de ceux qui animent cette idée reçu dans nos sociétés. Alors c'est vraiment un institution, on peut, on se trouve, ce stérélo-kips en même sorte que par exemple, les enseignements, les mathématiques ou de même, en tout cas, certains vont se courrer leur part de responsabilité des chercheurs ont les études dans des classes, ils ont observé que dans cette discipline, statistiquement, les enseignants ont des roches un petit peu moins les filles que les garçons et que les filles prennent la parole, ils ont aussi un peu moins à parler, à parler, à un peu moins longtemps. Qu'est-ce qu'ils ont trente ? Qu'est-ce qu'ils ont Mais c'est pas un demi-heure. Mais c'est pas un demi-heure. Mais c'est un demi-heure."
+      }
+    ],
+    "secs": 66.41,
+    "page": 5,
+    "audio": "exam-sources/audio/bb2d21aa23aefa857c7c028a.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "À baisse de l’intérêt manifesté pour le mariage.",
+      "À la difficulté de se retrouver dans un même lieu.",
+      "À l’augmentation des tarifs des transports aériens.",
+      "Aux problèmes relationnels rencontrés par les enfants."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "C'est vraiment pas ce qu'il y a pas ceci est là, mais je crois qu'on peut oublier le dimanche en famille et faire au polyphère. Donc, dans 10 ans, elle est par un monde de grandes sûres de se rencontrer à l'effort du pont. Des enfants, on est dans un baron des différents, ils voyaient plus souvent plus jeunes. Et tout ça, elle est certainement d'une grande monité dans le travail. La possibilité de se réunir de va-être d'inguer par le plus de force d'or. Alors, les familles, émotionnoires, les autres, internet très développées. Mais il y a un certain nombre d'amènes à l'aséloigne. Donc, vous pouvez imaginer qu'il y aura une notion entre la réalisation de la famille, en tant que l'autre, et les services à l'estero sont à la vie. Ils ont 30 ans, un croix sur un profond de la femme qui est dans le futur."
+      }
+    ],
+    "secs": 60.68,
+    "page": 5,
+    "audio": "exam-sources/audio/60fc7fade4aa3b13b7f3039e.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il a accepté les articles de presse dans les livres scolaires.",
+      "Il a créé un journal quotidien dédié à l’éducation publique.",
+      "Il a distribué des journaux aux établissements scolaires.",
+      "Il a intégré l’étude de la presse à ses programmes."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Les intitus de journaux, en tant que j'ai l'étude d'oréman-maisque, un éthiste depuis le XIXe siècle, en relanche, la qualité des journaux est très contente interdit d'entrer dans les écoles. Ce mécanisme 177, que le gouvernement, on fait aux journaux quotidien, plus droit de pénétrer telle qu'elle, dans les établissements scolaires. Enfin si l'idée que la presse et l'école avaient quelque chose à faire ensemble, que la presse pouvait constituer nos épidélogiques faisaient son choix, il a fallu attendre au 1908 pour que le ministre de l'Éducation nationale ne s'est décide à administrer dans ses mots de la presse à l'école, c'est la création du criminel plus centre de liaison pour le saillouant des moyens d'affordation. question trop simple que vous savez m'appréheta dans les années 80."
+      }
+    ],
+    "secs": 67.72,
+    "page": 5,
+    "audio": "exam-sources/audio/8437d15c2751d9ba20053835.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle cherche à privilégier le travail avec des entreprises françaises.",
+      "Elle organise régulièrement des réunions avec ses couturiers.",
+      "Elle s’apprête à signer un nouveau contrat avec un atelier de dentellerie.",
+      "Elle souhaite modifier ses commandes avec les usines partenaires."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On peut bien bien bien les espérer que mes relations tous étaient encore faire avec les autres pays. Ils ont fait confiance. Oui, on faut qu'on dit à ça de qui en France, et pour nous c'est très bon temps. J'ai continué le temps que je veux. On en est à notre caramne et ça compte pour ça de faire une confiance avec lesismes, avec une quel en travail, une vie très bon temps, une autre à l'aïe, une autre chambre, une quantité à la France, une autre à l'aïe, une chère très très proche. C'est une disparaise où nous passons à peut-être à l'envoyer, de se arrêter, et en chose, et puis nous passons à l'envoyer. C'est une chose qui est très jeune en entendre que j'ai quelque chose à fermer, et à quelque chose à faire d'avantage, et tout, et d'exerter qu'il y est. Qu'est-ce qu'il y est en 33 ? Qu'exmence que la créatrice a n'est-ce-bé ?"
+      }
+    ],
+    "secs": 61.35,
+    "page": 5,
+    "audio": "exam-sources/audio/086c2012ba78cf33b52887d3.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle commercialise des produits dangereux pour la santé.",
+      "Elle crée des besoins pour réutiliser de vieux remèdes.",
+      "Elle fait des profits grâce à la vente de traitements périmés.",
+      "Elle limite la recherche consacrée aux pathologies rares."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Le besoin de consacrer ce matin au déri de l'industrie pharmaceutique, nous pouvons inventer de nouvelles maladies pour recycler l'ancienne nourriture. Le maillot est devenu une scoule diartrie tranquille aux ans, c'est une période de tristesse d'achat, c'est mon dépression. Aujourd'hui, on a l'impression qu'il y avait même que tout est maladie. Oui, ça fait maintenant 15 ans de sept d'huile, où c'est des antennes électriques, de l'acteur pour repartir, il ne trouve plus médicale en adoré la tant que l'éradène. Pour recycler la évolue qu'une entière d'elle est née, une entière de nouveaux prédorés de présentation, vous vous n'aurez raconté que ce que l'on a dit, ce qu'elle a dit, la sortie de l'artiste de l'antiguénage antiquénalite. Exceptionnel, n'est pas nécessairement malheureusement, mais à aucun moyen de bénémer. Qu'est-ce qu'il y a 34 ? Quelle organisation de l'ordée contre l'industrie pharmaceutique ?"
+      }
+    ],
+    "secs": 67.93,
+    "page": 5,
+    "audio": "exam-sources/audio/042e275c66eba950aa4dedb7.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle critique la fiabilité des méthodes d’investigation utilisées.",
+      "Elle déplore leur manque d’impact au sein des entreprises.",
+      "Elle doute de la qualité de l’interprétation des données collectées.",
+      "Elle met en question la représentativité des échantillons."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Je suis le son des fonds de Pézarié, une qui baile la société, une boîte à livre, pour être audité et à chaque fois entre 200 et 800 à l'aise en profité. La réaction de Marie-Alice, Média fonds de vieux responsables, régiales et socials, au sein du fin et qu'un force populaire. Pour dire entreprise, comme ceci salarié est interrochée dans un structure extérieur, forcément, vous allez monter les qualités de votre entreprise et vous allez être les problèmes interne l'entreprise ne seront pas du tout déployé. Donc c'est ce que c'est le sondage, la façon dont on a regardé les questions. Et qui plus est, il s'agit aussi d'une procédure qui consiste à permettre à l'entreprise d'alléliorer son image à l'expérience dont forcément l'arrivée a été aisée. Qu'est-ce qu'il y a en 35 ? Quelle est la position de cette syndicaliste sur les audits de travail ?"
+      }
+    ],
+    "secs": 69.67,
+    "page": 5,
+    "audio": "exam-sources/audio/6d0aee29c4592c100973cfba.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il privilégie des partenaires impliqués dans la vie de leur région.",
+      "Il favorise des hôtels qui répondent aux exigences occidentales.",
+      "Il préfère les conseils des populations autochtones à ceux des fournisseurs.",
+      "Il propose des prestations qui contribuent au développement humanitaire."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Je vous ai choisi cet aspect d'avocueil, j'ai l'impression d'être responsable, c'est de le quimil, le bambou, j'ai genre le camion, de faire d'arropérage, j'ai choisi le soutenu de quelque travail, et de réservé d'arropéalement entre des locaux, en général, on a fait refaire qu'il est automobile, qu'elles sont chantes, et qu'on a brisé le développement des locaux. Qu'est-ce que vous sélectionnez les agences ? On ne va pouvoir dire tout le temps qu'on faut qu'il existe dans le pays, qu'on a savent qu'on quitte derrière sur la front boucle, qu'on est sur la réalité des échanges, sur l'expertise des agents et sur le activité des responsables. La gendarmerie n'a pas été par exemple. Qui a un enfermé un peu d'agence au démal, le réquel on ferait rester une partie de l'agence. Donc, des gens se lesaient de l'utiliser fortement. C'est le système qui a été... Question 36. Exprès que ce beau vieillissement sur ce façon de travailler."
+      }
+    ],
+    "secs": 63.44,
+    "page": 6,
+    "audio": "exam-sources/audio/9637c8d911ff876beae19503.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Sur des considérations morales.",
+      "Sur des convictions écologiques.",
+      "Sur des certitudes économiques,",
+      "Sur des prescriptions diététiques."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Pour le magasin, sur une article qui s'intitule, il faut dire qu'il y a un nombre et vous décryvez qu'il y a des nécessaires de diminuer une sorte dans notre consommation, sans pour autant de venir que j'ai d'arriens, c'est la condition à mal, qui vous intéresse principalement sur cette question. Oui, c'est une question d'éthique animal, je pense qu'il y a une grande évolution de la et la nature de coudée fondée à des animaux, avec plus en plus de mal à être accepté qu'on a assisté depuis les 50 dernières années à une mise en place une industrie de l'avion qui fait terriblement souffrir aux animaux. Question 37. Sur quoi ça pue, les recommandations de tout mal pétit."
+      }
+    ],
+    "secs": 59.03,
+    "page": 6,
+    "audio": "exam-sources/audio/4ebfe0595fd23f8e9ed4503c.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La situation de l’emploi ne s’améliore pas cette année en France.",
+      "La France n’est pas le pays européen le plus frappé par le chômage.",
+      "Le chômage a reculé pour tous, sans distinction d’âge ou de sexe.",
+      "L’action engagée par le gouvernement permettra une amélioration."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "J'ai entendu la radio et que le show-là j'avais reculé en fédriller, c'est dans le mystère du travail. Je n'ai pas l'analyphie de route à un national qui travaille. Pour qu'une autre show-là en France n'a pas varié en elle. Je t'assure que, comparant à l'évipé qui voisin, le show-là je me laisse et en France pour tout le monde. Bonne femme, jeune, pour qui c'est vrai. C'est bien qu'il y a rien, c'est ça dans nos voisins. Ce qui est occupant, c'est que la situation ça est gratte avant d'acheter pour les femmes et les jeunes. sur la liste de vrais avongés, mais gouvernement a fait de l'action pour l'emploi sa priorité. Les connaissances pour les deux derniers mois, le nombre des dons d'un endroit a augmenté de plus de 30% Question 38 Ce qu'est le poil de mes améasants son type d'accord"
+      }
+    ],
+    "secs": 61.14,
+    "page": 6,
+    "audio": "exam-sources/audio/b28f6fc89c5db163b0f7c03b.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pratiquer des exercices mentaux.",
+      "Exprimer ses sentiments.",
+      "Se montrer chaleureux.",
+      "Se retirer régulièrement au calme."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "La paix les accueurs plus manifestons d'amamidés et plus de ses rattons de sérotonymes d'armades d'arumeurs de plus la prise dans les effets positifs sur le cerveau, en activant des collections qui sont relibles à ce qu'on a compassion et à son de base les penséurs style vous me graissez, augmente le répliquant américain et la pression a priori avant que la Jean-Killass abaisse le niveau de stress et abaisse la banche. On a vu les gens, d'ailleurs, de même échancés de la facilité, pratiqués aux médicaments de l'arrivée de Garniac et conduit de ceux qui agravent tous les problèmes. Question 29 D'après les chercheurs qu'on parle de journalistes, qu'est-ce qui est bénéfique pour la santé ?"
+      }
+    ],
+    "secs": 66.67,
+    "page": 6,
+    "audio": "exam-sources/audio/3bef1e1f8ec2ec9b0bc4ff59.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  }
+]

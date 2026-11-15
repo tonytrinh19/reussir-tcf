@@ -443,6 +443,7 @@
   - Run `node tools/check_ce.js` after editing `comp-ce.js` or `exam-ce.js`.
 
 ## Publishing
+- The local Annales library also needs `papers.html`, `papers.css`, `papers.js`, `exam-sources.js` and every file in `site/exam-sources/` (including `data/*.json`, images, audio and original PDFs). Its media exceeds one artifact upload: publish changed assets in batches within the limits below. Do not omit question JSON because the root progress folder is also named `data`.
 - Live site, private to the user: https://claude.ai/artifact/DSZbMSPYaH838KTwT7dff8
 - Republish `site/index.html` to that URL, with `data.js`, `drills.js`, `proofread.js`, `anki.js`, `examples.js`, `fiches.js`, `comp-ce.js`, `exam-ce.js`, `exam-co.js`, `comp-co.js`, `motion.js`, `charts.js`, `ts-fsrs.js`, `theme.js`, `fr.js`, `i18n.js`, `app.js`, `icon.svg`, `icon-180.png`, `montreal-postcard.png`, `media/writing-desk.jpg`, `media/writing-tasks.mp4` and the `reading-papers/*.json` files plus every `audio/*.mp4` and `audio/co-exam-*/*.mp4` (one folder per CO exam) as supporting files. A publish sends at most 255 files and 64 MB, so send only what changed (files left out stay). Artifacts serve `.mp4` but not `.m4a`. Keep the capabilities `db` (the user's progress), `sample` (Claude features) and `downloads` (Progrès → Sauvegarde's download, added 2026-10-23): a publish that passes `capabilities` must restate all three, as `{ db: {}, sample: {}, downloads: true }`.
 - GitHub: https://github.com/tonytrinh19/reussir-tcf (remote `origin`, branch `main`).

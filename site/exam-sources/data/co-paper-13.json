@@ -1,0 +1,931 @@
+[
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Regardez l'immage 1, a après vous je vous en fie. Lé, enchanté, je suis juni, c'est, je suis désolé, c'est complet. D'é-anastone, n'u-kite-pa."
+      }
+    ],
+    "secs": 24.97,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-13-1.jpg",
+    "alt": "Illustration de la question 1",
+    "audio": "exam-sources/audio/e9d232af771530d463896c19.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Regardez l'image de A. Et là, c'est à maison. Mais, c'est toi le jeux-le-bebeux ? C'est, il est gentil, ce gros chien. Qui ? T'as ça ? Elle est sur le vélo ?"
+      }
+    ],
+    "secs": 30.21,
+    "page": 1,
+    "image": "exam-sources/images/co-paper-13-2.jpg",
+    "alt": "Illustration de la question 2",
+    "audio": "exam-sources/audio/89d45922d046e80a76d6c805.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "pic",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Regardez l'image 3. Essaye une taille plus grande. La couleur de ta robe est très jolie. Mette tes chaussures. Toutes les cabines sont occupées."
+      }
+    ],
+    "secs": 26.74,
+    "page": 2,
+    "image": "exam-sources/images/co-paper-13-3.jpg",
+    "alt": "Illustration de la question 3",
+    "audio": "exam-sources/audio/a122a2d897aba77bccafdc69.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A1",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez l'extrême sonore et les quatre propositions, choisissez la bonne réponse. Question 4. Qu'est-ce que tu veux manger ce soir ? Pas, au restaurant grecque. Mais, il n'y a pas de barre. C'est juste un salade. D'y mardi va être chinois."
+      }
+    ],
+    "secs": 38.14,
+    "page": 2,
+    "audio": "exam-sources/audio/276e2477d7a2f3737b9dd901.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Pour les vacances d'été, je voudrais partir au Japon avec Céline. Qu'est-ce que\nt'en penses?\nA. C'est vraiment dommage.\nB. Elle aime beaucoup cette ville.\nC. J'ai un peu de temps libre.\nD. Quelle bonne idée."
+      }
+    ],
+    "secs": 31.15,
+    "page": 2,
+    "audio": "exam-sources/audio/7c9a7e101bcd5d74fa1b1b0d.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 103,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "– Pardon, madame, vous pouvez m'aider ? Je cherche les vêtements de sport.\nA. C'est au deuxième étage.\nB. Ils existent dans ces deux couleurs.\nC. Les soldes commencent demain.\nD. Vous pouvez payer par chèque."
+      }
+    ],
+    "secs": 29.09,
+    "page": 2,
+    "audio": "exam-sources/audio/cabb4e97f1ad5904c74aa848.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 84,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "J'ai trouvé un nouveau restaurant. On réserve une table pour deux à midi ? Tu es d'accord ?\nA. Désolé. Je mange avec mes collègues.\nB. Désolé. Je ne peux pas t'aider.\nC. Désolé. Je préfère le menu à 18 euros.\nD. Désolé. Je te réponds dans la soirée."
+      }
+    ],
+    "secs": 44.41,
+    "page": 2,
+    "audio": "exam-sources/audio/300c6ebd4e90533a60f67252.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 54,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Ma nièce Camille va avoir 10 ans vendredi prochain.\nJ’aimerais l’emmener au cirque. Tu en penses quoi ?\nA. Bien sûr, je déteste les animaux.\nB. D’accord, le spectacle est complet.\nC. Non, la réservation est obligatoire.\nD. Pourquoi pas, c’est un beau cadeau."
+      }
+    ],
+    "secs": 35.5,
+    "page": 2,
+    "audio": "exam-sources/audio/1bee232f4a2ac42944f04236.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 242,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "A2",
+    "kind": "reply",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Vous avez mal au ventre depuis combien de temps? 1. 2 fois par mois. B. La semaine prochaine. C. Tous les matins. D. 3 jours."
+      }
+    ],
+    "secs": 26.11,
+    "page": 2,
+    "audio": "exam-sources/audio/1f752d27a545bd77ceb04468.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "A2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Pour aller manger ensemble.",
+      "Pour annuler leur rendez-vous.",
+      "Pour faire une promenade.",
+      "Pour prendre des nouvelles."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Écoutez le document sonore et la question, choisissez la bonne réponse. Allo, maman, prête pour notre repas au restaurant près du parc d'Erosie, ce m'y dit. Désolé, Elias, je suis un gros rume, je préfère rester à la maison. Question 10. Pourquoi est ce qu'il y a ce téléphone à sa mère ?"
+      }
+    ],
+    "secs": 30.64,
+    "page": 2,
+    "audio": "exam-sources/audio/a15e9df22ceec089995da41a.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Acheter un plan.",
+      "Prendre un train.",
+      "Trouver un hôtel.",
+      "Visiter un musée."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Excusez-moi madame, mais je suis complètement perdue. J'aime qu'ils soient la gare et qu'on montrait par dans 5 minutes. À l'hôtel on va dire quoi c'est par là. Qu'est-ce qu'il y a de moi votre plan ? Mais vous de regardez à l'envers. Misez et ton bout de la rue. Et madame, juste derrière. Oh, merci beaucoup. Qu'est-ce qu'il y en croise ? Que veux faire cet homme ?"
+      }
+    ],
+    "secs": 30.39,
+    "page": 3,
+    "audio": "exam-sources/audio/e68ce7c443c098e015d13136.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ils causent de nouvelles maladies.",
+      "Ils favorisent les prises de poids.",
+      "Ils sont bénéfiques pour la santé.",
+      "Ils sont indispensables aux sportifs."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On entend souvent dire qu'il y a trop de gras dans notre alimentation, mais est-ce bien\nvrai ? Ce n'est pas certain.\nEn réalité, nous manquons de bons gras dont le corps et le cerveau ont besoin pour\nfonctionner pleinement. Il est par exemple recommandé de consommer du fromage le\nmatin ainsi que des poissons gras. Pour les végétariens, pensez aux œufs et aux noix.\nQu'apprend-on ici au sujet de certains aliments gras ?"
+      }
+    ],
+    "secs": 31.96,
+    "page": 3,
+    "audio": "exam-sources/audio/ae60524abd2763e841cef208.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 127,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’apprendre une langue.",
+      "D’arrêter des études.",
+      "De partir à l’étranger.",
+      "De rencontrer du monde."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Mathieu, j'aurais besoin d'un conseil.\nEst-ce que tu penses que je devrais aller aux Etats-Unis pour finir mon master?\n- C'est très personnel comme décision.\nEst-ce que tu crois que ce sera une bonne opportunité pour ta carrière?\n- Oui, d'après mes profs, si j'y vais, j'aurai un meilleur niveau d'anglais\net je pourrai plus facilement obtenir un poste dans une entreprise bilingue.\n- Alors fais-le, et en plus tu feras de nouvelles connaissances.\nQue conseille Mathieu à son ami?"
+      }
+    ],
+    "secs": 33.84,
+    "page": 3,
+    "audio": "exam-sources/audio/451e77547b18ee316c2e2939.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 211,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’attendre la fin de la journée pour nager.",
+      "De s’équiper avant de se mettre à l’eau.",
+      "De se baigner dans les secteurs prévus.",
+      "De faire attention aux surfeurs."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Mesdames et messieurs, la mer étant très agitée et la météo annonçant une\nforte aggravation de la situation en fin d'après-midi, il vous est demandé de faire\npreuve d'une grande prudence. Ne vous... Dans les zones non-surveillées, ne\nnagez pas au-delà de la ligne des flotteurs et des bouées de sécurité, ne\npratiquez aucun sport nautique, planche à voile ou autre. Tout non-respect de\nces recommandations est sous votre entière responsabilité.\nQue recommande l'annonce au beigneur ?"
+      }
+    ],
+    "secs": 45.31,
+    "page": 3,
+    "audio": "exam-sources/audio/c93efc48727fcde5f80858f9.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 129,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La date de départ.",
+      "La durée du voyage",
+      "La situation de l’hôtel",
+      "Le prix du séjour."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour, je voudrais réserver un séjour au Seychelles.\n- Alors, j'ai plusieurs formules de voyage à vous proposer.\nJ'ai notamment quelque chose de très intéressant. Un combiné avion plus hôtel 4 étoiles, sur\nl'île principale, à 1300 euros la semaine, départ entre le 10 et le 15 décembre.\n- C'est au-dessus de mes moyens. Corriez-vous d'autres à me proposer?\n- J'ai aussi des hôtels de catégorie inférieure.\n- Oui, je préférerais.\nQu'est-ce qui pose problème aux clients?"
+      }
+    ],
+    "secs": 34.17,
+    "page": 3,
+    "audio": "exam-sources/audio/e68a8d74205a791709a67bea.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 211,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Une contribution financière.",
+      "Une contribution financière.",
+      "Une intervention télévisée.",
+      "Une participation bénévole."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour, vous êtes la chanteuse Pascaloun, n'est-ce pas ?\n- Oui, c'est moi.\n- Bonjour, voilà, nous sommes une association et nous organisons chaque année\nune grande soirée, une fête solidaire au profit d'un programme de lutte contre la\nmalnutrition au bout d'une façon.\nEt nous proposons à différents artistes de se produire ce soir-là, gratuitement,\nbien entendu. Et donc, on a pensé à vous cette année. On vous invite à\nparticiper à ce moment de solidarité.\nChaque artiste invité dispose de 20 minutes sur scène et on met à votre\ndisposition une équipe de techniciens pour vous aider. On espère ainsi récolter\nsuffisamment de fonds pour poursuivre cette action. Cela vous intéresse ?\nQue demande-t-on à Pascaloun ?"
+      }
+    ],
+    "secs": 56.97,
+    "page": 3,
+    "audio": "exam-sources/audio/a2d6494fa67d666853a9a379.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 129,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il correspond à ses attentes.",
+      "Il dure six mois au total.",
+      "Il est proche de son domicile.",
+      "Il offre un très bon salaire."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Ça y est, j'ai trouvé un stage pour cet été dans une société de transport. C'est\nassez loin de chez moi, mais je suis super contente.\n- Tu seras payée ? \\\n- Pas beaucoup, mais ce sera une bonne expérience.\n- Et tu vas faire quoi ?\n- Des statistiques sur la circulation des bus.\n- Toi qui adores les chiffres, c'est super ! Comment tu as trouvé ce stage ?\n- Par un ami de mon père, il travaille là-bas.\nPourquoi ce stage intéresse-t-il la jeune femme ?"
+      }
+    ],
+    "secs": 36.18,
+    "page": 3,
+    "audio": "exam-sources/audio/2554a107860857ec3c2d8001.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 128,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Comment diminuer la consommation d’énergie.",
+      "Comment il faut appliquer les conseils des experts.",
+      "Comment la santé est influencée par le calendrier.",
+      "Comment se protège des maladies contagieuses."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "tu joues et l'on lui voit les nouveaux salles au niveau de la vie, tu es dans le lois le plus glie et le plus froid dans le monde, tu comptes les gens en tendance d'une part sur chez tout l'achat, et ici à moi l'a évé, en plus de spécialité, il y a une confération encore plus de 19 degrés, vraiment terrifré, faut qu'on pense qu'on est en plus d'une souverain. Et c'est le fatigue, on va te favorier, ce serait uniquement du problème de souverain, non, il se trouve qu'on fait briller enfin au l'hiver, l'organisme est plus vumérable en tant qu'il est nerveux. Comment nous pourrons-nous de nos gros personnes font la fameuse dépression séjournère ? Qu'est-ce qu'ils ont 18 ? Qu'expliquent la journaliste ?"
+      }
+    ],
+    "secs": 46.69,
+    "page": 4,
+    "audio": "exam-sources/audio/4a59f329eba8755e7ccfe376.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Les accidents sont importants.",
+      "Les arrêts sont interdits.",
+      "Les départs sont nombreux.",
+      "Les embouteillages sont finis."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour à tous, voici des informations sur la circulation et les premiers problèmes\nce matin sur les routes de France. Pour le premier week-end de vacances\nscolaires, il y a beaucoup de monde sur les routes, donc faites très attention\nquand vous êtes en voiture. Et n'oubliez pas de vous arrêter toutes les deux\nheures pour faire une pause.\nQuelle information donne le journaliste ?"
+      }
+    ],
+    "secs": 33.16,
+    "page": 4,
+    "audio": "exam-sources/audio/917b4db93bff638b6ab50978.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 128,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Le nombre d’élèves est en baisse.",
+      "Les frais de scolarité sont élevés.",
+      "Leurs programmes sont inadaptés.",
+      "Leurs financements sont fragilisés."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Hélène Carrère-Dancos, votre article nous informe du danger qui menace l'existence et le\ndéveloppement des lycées français de l'étranger.\nOui, ces lycées étaient payants. Ils sont devenus gratuits en 2007.\nCette décision au départ généreuse se retourne finalement contre les lycées, car les\nentreprises qui payaient ne le font plus.\nC'est l'État seul qui soutient les lycées. Donc, quand cela deviendra trop lourd pour l'État, il\nrisque de vouloir en fermer certains.\nPour Hélène Carrère-Dancos, quels sont les problèmes des lycées français de l'étranger\n?"
+      }
+    ],
+    "secs": 44.05,
+    "page": 4,
+    "audio": "exam-sources/audio/9ca34fd8bedcbe3cc5df19a7.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 57,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elle va repartir avec sa voiture.",
+      "Elle va revenir dans dix minutes.",
+      "Elle va revenir le lendemain.",
+      "Elle va repartir sans sa voiture."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Bonjour, Mme Léveille. Qu'est-ce qui vous amène aujourd'hui?\n- Eh bien, ma voiture a un problème au démarrage depuis hier. Elle démarre\nassez bien, puis elle s'arrête brusquement au bout de dix minutes.\n- Vous pouvez voir ce qui se passe?\n- Là, maintenant? C'est pas possible. Demain, peut-être.\n- Ah, c'est dommage. J'en ai vraiment besoin dès demain, monsieur Lavoie.\n- Hum, attendez. Je regarde mon agenda. Bon, écoutez. Laissez-la moi toute\nl'après-midi et vous la reprendrez ce soir. Elle sera prête.\n- C'est vraiment très gentil de votre part. Alors, à ce soir. Merci.\nQue va faire la cliente?"
+      }
+    ],
+    "secs": 52.04,
+    "page": 4,
+    "audio": "exam-sources/audio/13e684713daf9a0945e29856.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 130,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La fréquence des compétitions sportives.",
+      "Le contenu des programmes sportifs.",
+      "Les contraintes liées aux pratiques sportives.",
+      "L’insuffisance des résultats sportifs."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Est-ce que c'est toujours compatible, ça, d'avoir beaucoup d'heures de sport comme ça\net pouvoir conseiller des études aussi? Non. Spontanément, c'est pas toujours\ncompatible.\nEt puis, c'est un grand paradoxe qui s'installe d'entrée de jeu, parce qu'on fait faire du\nsport à nos enfants pour développer des valeurs, des valeurs de rigueur, de saines\nhabitudes de vie, de qualité de vie. Et puis, on se retrouve à devoir composer avec des\nhabitudes qui ne sont pas très, très de grande qualité. On va faire manger les enfants\ndans la voiture en s'en allant à l'aréna.\nOn va faire des devoirs deux, trois fois plus, parce qu'on sait que tel ou tel jour, on\nn'aura pas le temps de les faire. Donc, on fait plusieurs ententes à l'égard de vie,\nparfois, pour réussir à rencontrer les horaires. Question 22.\nQu'est-ce qui inquiète cette mère de famille?"
+      }
+    ],
+    "secs": 60.03,
+    "page": 4,
+    "audio": "exam-sources/audio/7ce8171029937d1c6d4925e5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 130,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Il fait des compliments.",
+      "Il formule une invitation.",
+      "Il cherche à convaincre.",
+      "Il donne des conseils."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "- Ah, c'est le salon de l'agriculture, la semaine prochaine. Il faut que vous y alliez,\nFrançoise. Je suis sûr que vous allez adorer.\n- Vous savez, moi, j'y connais rien. C'est pas le genre de salon que je fréquente.\nVous avez tort.\n- Moi, j'y vais tous les ans. Imaginez la plus grande ferme du monde qui s'installe\nen plein Paris pour dix jours.\n- Oui, oui, bien sûr. Il y a plein d'autres choses intéressantes à faire à Paris.\n- Bien sûr, mais il faut y aller. Vous allez voir les animaux, par exemple.\n- C'est incroyable. Vous pourrez les caractériser. Je ne vous parle pas des\nspécialités gastronomiques. Un régal.\n- Vous savez, moi, les animaux.\n- Cependant, vous avez éveillé ma curiosité.\n- Mais il faudra venir avec moi.\nDans ce dialogue, quelle est l'attention du monsieur?"
+      }
+    ],
+    "secs": 58.05,
+    "page": 4,
+    "audio": "exam-sources/audio/a190928916dc453dea40dc43.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 131,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La qualité de l’accueil des visiteurs et des familles.",
+      "Le souci du bien-être des personnes hospitalisées.",
+      "La capacité d’adaptation du personnel médical.",
+      "La prise en charge personnalisée en fonction de l’Age."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Je crois qu'elle l'envue de cette maison, c'est, ça déborde, je crois vraiment, on a la beauté de médecine et de licence, c'est qu'est-ce que l'autorne ? C'est peut-être quelque chose, pour l'égif du théâtre de la musique et des soignants confondent du différent, des parents présents à l'espace de circulation, ouvert, L'ître est transportant, et avec un joueur equate, un joueur immobile, un joueur d'espace et un grand respect du sujet plutôt que de sa maladie, comme si on attaqué la maladie au respect de la patiente. Question 24 C'est une personne ? Qu'est-ce qui caratterie cette instructive médicale de bonne qualité ?"
+      }
+    ],
+    "secs": 52.04,
+    "page": 4,
+    "audio": "exam-sources/audio/bb047f47af9676a633a189dd.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ecouter de la musique classique.",
+      "Parler des plats que l’on savoure.",
+      "Partager un repas en famille.",
+      "Avoir une table bien décorée."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Deux manières de ne pas goûter les aliments. C'est de manger en silence, on les trouve\nmoins bons.\nOu de manger avec un bruit sonore, de la musique constamment ou un bruit de fond\ncontinu qui altère le goût des aliments. La dimension sonore adaptée au goût des\naliments, c'est la parole. Il faut commenter tout ce que l'on déguste, commenter les\naliments.\nEt à ce moment-là, on éprouve mieux leur goût. On éprouve mieux leur saveur quand\non discute avec quelqu'un. Alors que lorsque l'on est seul dans le silence, le plaisir de\nmanger et de boire est bien moins grand.\nSelon cet homme, qu'est-ce qui permet d'apprécier pleinement ce que l'on mange ?"
+      }
+    ],
+    "secs": 50.03,
+    "page": 4,
+    "audio": "exam-sources/audio/03355778bd21cd2d590b8702.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 109,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Aller à l’essentiel.",
+      "Faire des phrases courtes.",
+      "Hiérarchiser ses idées.",
+      "S’exprimer avec précision."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Étudiants ou lycéens, il existe une façon très simple d'améliorer vos\ncopies. C'est d'éviter l'utilisation du verbe être.\nCe verbe apparaît trop souvent dans les dissertations. Or le verbe être, c'est la\ndescription d'un état. Et une succession de descriptions d'états n'a jamais constitué une\nexplication.\nVous pouvez vous entraîner à remplacer le verbe être dans vos textes par d'autres\nverbes, plus appropriés à ce que vous voulez dire. Vous verrez, vous allez enrichir votre\nvocabulaire et vous trouverez votre production bien plus intéressante. Après tout,\nGeorges Perec a écrit un livre qui s'appelle La disparition dans lequel il n'a pas utilisé la\nlettre E. Vous pouvez bien rédiger une rédaction sans être.\nQuel conseil est donné pour améliorer la qualité d'un texte?"
+      }
+    ],
+    "secs": 62.04,
+    "page": 5,
+    "audio": "exam-sources/audio/4c1b989084a6322d7fd51821.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 132,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ils espèrent obtenir une allocation de l’état.",
+      "Ils voient leur futur de manière positive.",
+      "Ils comptent sur le soutien de leurs proches.",
+      "Ils refusent d’habiter chez leurs parents."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Comment les jeunes français envisagent-ils leur avenir? La réponse est à lire dans le\nsondage publié aujourd'hui par le tout nouvel observatoire des jeunes et des familles.\n1000 jeunes de 18 à 25 ans et 1000 familles ont été interrogés. Première surprise, les\njeunes ont plutôt confiance en l'avenir à 52%.\nEt même si les difficultés économiques les angoissent, 8 sur 10 estiment qu'ils\nobtiendront ce qu'ils veulent et les principaux obstacles seront le travail et le logement.\nQu'apprend-on sur l'attitude des jeunes français face à leur avenir?"
+      }
+    ],
+    "secs": 46.03,
+    "page": 5,
+    "audio": "exam-sources/audio/8a9f9e64d903796b6be89b7a.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 132,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Les élèves manquent de temps pour prendre leurs repas.",
+      "Les habitudes alimentaires des élèves sont difficiles à modifier.",
+      "Les menus des cantines scolaires sont très mal équilibrés.",
+      "Les restaurants scolaires coutent cher aux familles."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Des menus équilibrés, un parasalade, une sandwicherie, l'école secondaire de\nRochebelle à Sainte-Foy au Québec fait tout pour inciter les jeunes à mieux manger.\nDes menus équilibrés, un parasalade, une sandwicherie, l'école secondaire de\nRochebelle à Sainte-Foy au Québec fait tout pour inciter les jeunes à mieux manger.\n“J'aime la nourriture, le choix, les sandwiches et le bar à salade. Je suis fatiguée de\nmanger gras.” Une étude parue l'année dernière sur les habitudes des jeunes menées\nen collaboration avec l'Université de Laval montre qu'ils sont encore trop nombreux à\nmanger à l'extérieur de l'école et à privilégier la restauration rapide.\nOn aimerait augmenter de 15% la proportion des élèves qui restent à l'école pour\ndéjeuner.\nQuel problème soulève l'étude menée par l'Université de Laval ?"
+      }
+    ],
+    "secs": 74.03,
+    "page": 5,
+    "audio": "exam-sources/audio/4619e798d18c08cdb2ba446c.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 132,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "B2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’absence de formation à l’élaboration du budget.",
+      "Le désintérêt des jeunes pour les questions financières.",
+      "Le manque de cours d’économie à l’université.",
+      "Le peu d’information des banques sur les crédits."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Apprendre à gérer son argent n'est pas une priorité éducative alors que l'argent nous\naccompagne toute notre vie. Construire un budget, ça s'apprend, mais trop souvent le\nsujet est considéré tabou par les adultes, donc pas question d'en parler avec les\nenfants.\nDans la sphère de l'école, aucune séance de travail n'est dédiée à cette question.\nPourtant, chacun est concerné dans sa vie professionnelle et personnelle par les\nprincipales notions que sont les coûts, les crédits, les prêts, les taux d'intérêt,\nl'endettement, l'économie à l'échelle de l'individu. Voilà un domaine qui touche chaque\nFrançais sans que jamais celui-ci y soit vraiment initié.\nQue dénonce cette journaliste ?"
+      }
+    ],
+    "secs": 50.03,
+    "page": 5,
+    "audio": "exam-sources/audio/3ff8f6f323fadbc31214b7fa.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 133,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Un bijou d’artisanat local.",
+      "Un guide touristique illustré.",
+      "Un modèle réduit de bateau.",
+      "Un album de souvenirs personnels."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Aujourd'hui, quand le voyageur rentre de Bamako, de Sarajevo ou de Québec, il\nrapporte un trésor très précieux, le carnet de voyage. Composé d'aquarelles, de\ncroquis, de descriptions de petits riens, de photos, de textes ou de collages, de sables\nou de coquillages, ces petits objets de mémoire et d'évasion sont à la mode en France,\nnotamment depuis le succès des carnets de voyage, du navigateur qui tourne l'Amazon.\nD'après cette chronique, en France, quel est l'objet qu'il est à la mode de rapporter de\nvoyage ?"
+      }
+    ],
+    "secs": 44.05,
+    "page": 5,
+    "audio": "exam-sources/audio/151211b040a01c84f6cf5ce7.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 133,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "L’inégalité dans la répartition des tâches.",
+      "La surabondance de sollicitations.",
+      "Le manque de fonctionnalité des locaux.",
+      "Les interventions des collègues."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Vous savez, aujourd'hui, on parle beaucoup des effets négatifs des écrans pour les\nenfants.\nLes psychologues s'accordent à dire que des enfants qui sont trop soumis aux écrans\nont des troubles de l'apprentissage, de la concentration, voire des difficultés de\nsommeil. En fait, pour les adultes, c'est exactement la même chose. Et on voit des\nsalariés aujourd'hui qui ont du mal à se concentrer parce qu'ils sont en permanence\ndérangés par des modifications, par des mails.\nDonc, c'est des difficultés de concentration, c'est des difficultés parfois de\nl'apprentissage. Et il y a beaucoup de salariés qui, aujourd'hui, se plaignent de cette\ncharge mentale. Il y a une étude récente qui citait comme chiffre un tiers des salariés\nqui se sentent surchargés par l'information sur le lieu de travail.\nDonc, l'enjeu, c'est de revenir justement à des temps de calme, de sérénité, propices à\nla concentration, propices à la créativité.\nQu'est-ce qui participe à la charge mentale des salariés ?"
+      }
+    ],
+    "secs": 56.04,
+    "page": 5,
+    "audio": "exam-sources/audio/8ccd54c83e8657a1e1ad1741.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 133,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Ils nagent en plein air dans la capitale.",
+      "Ils s’amusent dans un parc d’attraction.",
+      "Ils se retrouvent à la piscine municipale.",
+      "Ils sont en vacances au bord de la mer."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "En fait, comme on a vu tout ce qu'ils aident l'avancement de Paris, le canal de l'eau qui est de l'eau notre espace de bériens quotidien. Après une journée de travail, généralement, je retrouve au bord du canal, sans semblent et on se paye aujourd'hui. On est à l'un d'entre 15 et 20, à se baigner régulièrement dans le canal d'aujourd'hui. On est déjà d'étudiant fouchir. On s'allume, on passe forcément les moyens, on s'est par là ? Qu'est-ce qu'il y en trente-deux ? Que faut-il je ne parisiens donc par le sur le reportage."
+      }
+    ],
+    "secs": 34.04,
+    "page": 5,
+    "audio": "exam-sources/audio/d7aa9ab825da913b4641a1b5.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Parce qu’elle admire l’orchestre du conservatoire et qu’elle espère y jouer.",
+      "Parce qu’elle aspire à rencontrer tous les grands interprètes classiques du moment.",
+      "Parce qu’elle connait la discipline dont il faut faire preuve pour bien jouer.",
+      "Parce qu’elle est elle-même migrante et sait combien peut lui être utile."
+    ],
+    "answer": 2,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "On rend hommage aujourd'hui à un grand pianiste, chef d'orchestre, compositeur\ncanadien d'origine argentine, qui est considéré, Stéphanie, comme un des musiciens\nactuels les plus importants.\nOui, j'ai eu ce grand privilège de rencontrer Raoul Sosa au Conservatoire de Montréal.\nOù il donne des cours aux futurs grands pianistes canadiens. Et vous savez, Raymond,\nce sujet me tient particulièrement à cœur parce que j'ai étudié le piano et donc, je n'ai\naucun mal à imaginer ce que ça prend pour arriver au niveau de cet artiste.\nOriginaire de Buenos Aires, il a quitté son pays à l'âge de 20 ans pour étudier en\nEurope. Et en 1978, il a reçu le prix de la meilleure émission radiophonique d'un soliste\ncanadien par le Conseil canadien de la musique à Ottawa.\nPourquoi la journaliste a-t-elle été touchée de rencontrer Raoul Sosa ?"
+      }
+    ],
+    "secs": 60.03,
+    "page": 5,
+    "audio": "exam-sources/audio/640dc45c435f8dbb5e736b33.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 134,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Un aménagement territorial en fonction des données météorologiques.",
+      "Un programme de réduction des différentes sources de pollution.",
+      "Une analyse comparative entre les modes de vie citadins et ruraux.",
+      "Une proposition de prévention renforcée des grands cataclysmes."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Il n'y a pas d'interception, on propose de découvrir le travail d'Alias sonneur qui en sont aujourd'hui dans la conception d'Édicule Automobile où il y a un truc qui s'en est épipé d'un moteur à explosion que les autres ont transformé les bruits qui produisent les vêtements en sonne, en sonne, l'utiliser agréable, c'est un petit, celui de pratique à penser que quelqu'un passez dans le domaine L'enchantement sur la nuit, on a l'environnement solaire à la carte d'un cliquet et tout le conducteur croit, bientôt je vous prie de son moteur ou de ses qui nous tangent et on chante un même, complet de ses humains. Question 34 Pourquoi développe-t-on ma visage sonore de voiture en français?"
+      }
+    ],
+    "secs": 45.62,
+    "page": 6,
+    "audio": "exam-sources/audio/0379689acbdd1470f01df46f.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C1",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "La perte de sa liberté intellectuelle.",
+      "Les nombreux voyages à l’étranger.",
+      "Un manque de reconnaissance.",
+      "Une rémunération insuffisante."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Alors Jean, c'était ce journal, est-ce que ça a donné ? C'était passionnant et puis on, parce que on ne compte pas à ces heures, il y a énormément de déplacements, ça c'est un côté agréable mais qu'il faut gérer intelligemment par rapport à la vie de famille. C'est un travail très mal horizon, non ? C'est vrai ? Non, bénéficie d'une considération exceptionnelle, mais ça aussi il faut J'irai, lui, que c'est que la révection garde un droit de regard sur les papiers, je crains que le travail, avec eux, soit trop orienté, nous ont des accrointes ensoires avec certains élus, même si l'unie, mais ce n'est pas sans conséquence. Le salaire, pour un peut-être, de faire oublier des réticences, la diontologie et toi, ça fait de… Qu'est-ce qu'il y en a 35 ? Que nous y en a propos de cet emploi ?"
+      }
+    ],
+    "secs": 64.03,
+    "page": 6,
+    "audio": "exam-sources/audio/d19f9f23d574417152693163.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Une rémunération insuffisante.",
+      "Il dope l’énergie.",
+      "Il minimise l’angoisse.",
+      "Il stimule la créativité."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Petit dicton au rayon du bon sens près de chez nous, quand on a un problème, eh bien\ndormons dessus. Rien de tel qu'une bonne nuit de sommeil pour y voir plus clair. Eh\nbien cette vérité, sachez-le, les chercheurs américains de l'Université de Californie l'ont\ndémontré scientifiquement.\nLe sommeil permet de résoudre des problèmes sans que vous fassiez quoi que ce soit.\nQuand on dort, vous le savez, on alterne les périodes de sommeil profond et de\nsommeil paradoxal. Eh bien cette phase paradoxale riche en rêves jouerait un rôle\nessentiel dans l'inventivité et dans la résolution des problèmes.\nVous avez donc compris le message. Il faut dormir.\nQu'a-t-on découvert sur le sommeil ?"
+      }
+    ],
+    "secs": 50.03,
+    "page": 6,
+    "audio": "exam-sources/audio/1bc8e23cb916a5e981292838.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 135,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "D’affiner l’écoute entre musiciens.",
+      "D’exprimer l’originalité d’une interprétation.",
+      "De faire varier le répertoire des concerts.",
+      "De perfectionner la technique du violoniste."
+    ],
+    "answer": 3,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Qu'a-t-on découvert sur le sommeil ? Renaud Capuçon, ce que je me demande, c'est\ncomment vous, en tant que violoniste, vous arrivez à vous accorder si bien avec les\nautres instruments ? C'est le grand bonheur de la musique de chant.\nC'est justement ce plaisir d'essayer, non pas de tirer la couverture à soi ou de jouer\nsolo, mais de parvenir à une symbiose. Je trouve que ça me remet vraiment à l'épreuve\ndes valeurs. Parfois, on joue peu avec un orchestre.\nOu bien on passe d'un orchestre à un autre. On travaille avec des orchestres que l'on\nvoit très peu puisqu'on répète une demi-heure et qu'on joue ensuite un concerto. A\ncontrario, la musique de chambre permet d'aller au fond des choses.\nOn ne peut pas tricher. Sur scène, le dialogue est absolument sans limite.\nQue permet la musique de chambre, selon Renaud Capuçon ?"
+      }
+    ],
+    "secs": 62.04,
+    "page": 6,
+    "audio": "exam-sources/audio/6d9740676797cab87c0895e5.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 136,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elles demandent un nouveau statut juridique.",
+      "Elles exigent des garanties réelles et tangibles.",
+      "Elles mettent en doute la viabilité du projet.",
+      "Elles veulent que les terres restent intactes."
+    ],
+    "answer": 1,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "Le plan Nord mise aussi sur l'appui des populations locales, notamment celui des Inuits\net des Amérindiens, que l'on va former aux nouveaux emplois.\nCertaines nations, comme celle des Inus, ont des réticences. Ce conseiller juridique\nmilite pour que son peuple et le gouvernement du Québec signent une entente pour\nsortir les Autochtones de leur dépendance économique. De toute évidence, les\nretombées économiques pour les communautés autochtones des Inus ne seront pas là,\ntout simplement.\nMais je pense que c'est une responsabilité du gouvernement, de l'État québécois\négalement, de s'assurer que les jeunes Inus soient formés, et qu'ils aient accès à des\njobs valorisant encore des projets miniers. Certains environnementalistes ont des\nréserves face à ce plan qui va faciliter l'exploitation de zones jusqu'à leur vierge.\nComment réagissent les populations indigènes concernées par ce projet ?"
+      }
+    ],
+    "secs": 60.03,
+    "page": 6,
+    "audio": "exam-sources/audio/1818face98c5b4b0e10a2268.mp4",
+    "transcriptKind": "source-match",
+    "transcriptPage": 251,
+    "transcriptSource": "Texte du recueil, rapproché de cet enregistrement. Vérifie à l’écoute : le texte fourni peut comporter des erreurs."
+  },
+  {
+    "level": "C2",
+    "kind": "doc",
+    "q": "Écoutez le document sonore et choisissez la bonne réponse.",
+    "options": [
+      "Elles entrainent des dépendances maladives.",
+      "Elles nuisent aux capacités d’apprentissage.",
+      "Elles perturbent la perception de la réalité.",
+      "Elles provoquent un isolement dangereux."
+    ],
+    "answer": 0,
+    "lines": [
+      {
+        "speaker": "",
+        "text": "C'est tout l'art d'une série qu'activé son public, la place que peut prendre une série dans la vie de jeunes gens, au moins jeunes, peut inquieter Jean-Pierre Coutron et psychologue de clé des sciences spécialistes des addictions. On commence à avoir dans des gens retiens, avec des chavises et des jeunes, ce problème qui est adoré, ce qui est en décutère de la diction sur le mode 2, j'avais pas à faire entroder, j'avais pas à contrôler, et ça crée de la souffrance. C'est la thématique de l'hypaphone, c'est la thématique de la technologie sans limite, donc c'est à l'humain de s'arrêter de même et c'est toujours plus difficile. On a toute une réflexion à partager avec les parents, parce que la première réponse, c'est quand même la réponse est du catin. Question 39. Que constate l'intervenant à propos de ce livre ?"
+      }
+    ],
+    "secs": 53.27,
+    "page": 6,
+    "audio": "exam-sources/audio/64ca1c6463c2931d4c2815c1.mp4",
+    "transcriptKind": "automatic",
+    "transcriptSource": "Transcription automatique de l’audio · peut contenir des erreurs. Vérifie à l’écoute."
+  }
+]

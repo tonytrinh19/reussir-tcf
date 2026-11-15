@@ -3990,9 +3990,11 @@
   const goTo = (hash) => { if (location.hash === hash) render(true); else location.hash = hash; };
   const readingPapers = T.COMP.readingPapers || [];
   const readingExamBank = [...(T.COMP.ceExams || []), ...readingPapers];
+  const listeningPapers = T.COMP.listeningPapers || [];
+  const listeningExamBank = [...(T.COMP.coExams || []), ...listeningPapers];
   const XSPEC = {
     ce: { spec: TC.ceExam, bank: () => readingExamBank, home: "comp.ce.exam", label: "Examen blanc CE", ip: "exam--ce" },
-    co: { spec: TC.coExam, bank: () => T.COMP.coExams || [], home: "comp.co.exam", label: "Examen blanc CO", ip: "exam--co" },
+    co: { spec: TC.coExam, bank: () => listeningExamBank, home: "comp.co.exam", label: "Examen blanc CO", ip: "exam--co" },
   };
   // Exams and records from before the CO exam have no skill: they're reading exams.
   const skillOf = (x) => (x && x.skill === "co" ? "co" : "ce");
@@ -4041,7 +4043,7 @@
     ex.items.forEach((it) => { it.order = examOrder(it, ex.src); });
     ui.cx = { skill, exam: ex, i: 0, ans: {}, done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
     if (exam === ui.cxReady) ui.cxReady = null;
-    timerSet(X.spec.minutes * 60, X.label, X.home);
+    timerSet((ex.minutes || X.spec.minutes) * 60, X.label, X.home);
     tone("start");
     timerStart();
     if (skill === "co") { stopAudio(); ui.cx.play = coxFresh(ex.items[0]); coxUnlock(); coxDurations(ex); examKeep(); tone("beep", 0.35); }
@@ -4106,7 +4108,7 @@
     ex.src = ex.src || ip.src || "built-in";
     ex.items.forEach((it) => { it.order = examOrder(it, ex.src); });
     ui.cx = { skill, exam: ex, i: Math.max(0, Math.min(Number(ip.i) || 0, ex.items.length - 1)), ans: Object.assign({}, ip.ans), done: false, confirm: false, quit: false, attemptId: null, result: null, t0: Date.now() };
-    const full = X.spec.minutes * 60;
+    const full = (ex.minutes || X.spec.minutes) * 60;
     timerSet(full, X.label, X.home);
     if (ip.left != null) timer.left = Math.min(full, Math.max(0, Number(ip.left)));
     tone("start");
@@ -4143,8 +4145,8 @@
   // As on the real test, each item runs by itself and takes its own fixed time: a beep, a pause to read (the
   // picture or the written options), the recording once (a document's ends with its question, read by the
   // narrator), then a short window to answer. When the window ends the next item starts, whether you've answered
-  // or not: no going back and no going faster. The clock on screen is the item's (the 35 minutes still run behind
-  // it, and the schedule fits inside them). Pause stops the clock, the countdown and the recording together;
+  // or not: no going back and no going faster. The clock on screen is the item's; the full exam clock runs behind
+  // it, using the supplied recordings' duration for imported papers. Pause stops the clock, the countdown and the recording together;
   // leaving the page or the tab pauses too, and a refresh brings the exam back paused.
   let coxAudio = null, coxSrc = "", coxTick = 0, coxToken = 0;
   const coxReadSecs = (it) => (it.kind === "reply" ? TC.coExam.read.reply : TC.coExam.read[it.level]);
@@ -4158,7 +4160,7 @@
       try { const a = new Audio(); a.preload = "metadata"; a.onloadedmetadata = () => { if (isFinite(a.duration)) coxDur[it.audio] = a.duration; }; a.src = it.audio; } catch (_) {}
     });
   }
-  const coxLen = (it) => (it.audio && coxSrc === it.audio && coxAudio && isFinite(coxAudio.duration) && coxAudio.duration) || coxDur[it.audio] || (() => { const r = (TC.coLevels[it.level] || {}).secs || [20, 40]; return (r[0] + r[1]) / 2; })();
+  const coxLen = (it) => (it.audio && coxSrc === it.audio && coxAudio && isFinite(coxAudio.duration) && coxAudio.duration) || coxDur[it.audio] || it.secs || (() => { const r = (TC.coLevels[it.level] || {}).secs || [20, 40]; return (r[0] + r[1]) / 2; })();
   // What's left of the current item: its reading pause, the rest of the recording and the window to answer.
   function coxItemLeft(cx) {
     const p = cx.play, it = cx.exam.items[cx.i], ans = TC.coExam.answer[it.level], len = coxLen(it);
@@ -4210,8 +4212,13 @@
     const a = coxAudio;
     a.onended = () => { if (token === coxToken) coxHeard(); };
     a.ontimeupdate = () => { if (token === coxToken) paintCox(); };
-    // A recording that can't load is read by the browser's French voice instead.
-    a.onerror = () => { if (token !== coxToken || !coxSrc) return; coxSrc = ""; coxSpeak(it, token); };
+    // Imported recordings pause on failure; built-in scripts can use the browser voice.
+    a.onerror = () => {
+      if (token !== coxToken || !coxSrc) return;
+      if (cx.exam.src === "pdf") { coxPause(); coxSrc = ""; toast("The recording could not load. Resume to try again."); return; }
+      coxSrc = "";
+      coxSpeak(it, token);
+    };
     const at = p.pos || 0;
     if (coxSrc !== it.audio) {
       coxSrc = it.audio;
@@ -4300,6 +4307,7 @@
   // A drawing from exam-co.js, in the page's ink. During the exam it's hidden from screen readers, since a
   // description would give the answer away; the review describes it.
   const sceneSvg = (art, label) => `<svg class="scene" viewBox="0 0 320 200" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" ${label ? `role="img" aria-label="${esc(label)}"` : `aria-hidden="true"`}>${art}</svg>`;
+  const coxPicture = (it, label) => it.image ? `<img src="${esc(it.image)}" alt="${esc(label)}" style="max-width:100%;height:auto">` : sceneSvg(it.pic, label);
   const COX_CONSIGNE = {
     pic: "Écoutez les quatre propositions. Choisissez celle qui correspond à l'image.",
     reply: "Écoutez la question et les quatre réponses. Choisissez la réponse qui convient.",
@@ -4325,7 +4333,7 @@
       <section class="panel stack cox" data-m="slide" data-k="cox-${esc(cx.exam.id)}-${cx.i}">
         <div class="row cox-phase">${phase}</div>
         <p class="small muted">${COX_CONSIGNE[it.kind]}</p>
-        ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, "")}</figure>` : ""}
+        ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, "")}</figure>` : ""}
         ${body}
         <p class="small muted">Choose at any time${it.kind === "doc" ? "" : " (A–D on the keyboard)"}. When this question's time runs out, the next one starts by itself, as on the real test.</p>
       </section>
@@ -4342,14 +4350,15 @@
   function coxReviewItem(it, j, a, hid) {
     const ok = a === it.answer;
     const lettered = it.kind !== "doc";
-    const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => xOpt(k, it, a, hid, `${lettered ? `<b>${"ABCD"[k]}.</b> ` : ""}${typo(it.options[k])}`)).join("");
-    const said = it.lines.filter((l) => l.speaker !== "Q");
+    const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => xOpt(k, it, a, hid, `${lettered ? `<b>${"ABCD"[k]}.</b>` : typo(it.options[k])}`)).join("");
+    const said = it.lines;
     const multi = new Set(said.map((l) => l.speaker)).size > 1;
     const title = it.kind === "pic" ? "Image" : it.kind === "reply" ? "Question et réponses" : esc(it.type || "Document");
-    return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(ok, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px">
-      ${it.kind === "pic" ? `<figure class="pic-card seyes">${sceneSvg(it.pic, hid ? "" : it.alt)}</figure>${hid ? "" : `<p class="small muted fr">${typo(it.alt)}</p>`}` : ""}
-      ${it.kind === "doc" && !hid ? `<p class="small muted fr" style="font-style:italic">${typo(it.situation)}</p><div class="transcript">${said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div>` : ""}
-      ${it.kind !== "pic" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
+    return `<details class="fold" id="co-review-${j}"><summary>${j + 1} · ${esc(it.level)}${xMark(ok, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px">
+      ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, hid ? "" : it.alt)}</figure>${hid ? "" : `<p class="small muted fr">${typo(it.alt)}</p>`}` : ""}
+      ${it.situation ? `<p class="small muted fr">${typo(it.situation)}</p>` : ""}
+      <details class="fold"><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
+      ${it.kind === "doc" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
       <div class="opts">${opts}</div>
       ${it.why && !hid ? `<p class="small">${typo(it.why)}</p>` : ""}
       ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
@@ -4401,24 +4410,26 @@
     const what = skill === "co" ? "The full listening test: 39 questions in about 35 minutes, from A1 to C2, each recording heard once" : "The full reading test: 39 questions in 60 minutes, from A1 to C2";
     return paused ? `<button class="btn sm" data-act="ip-resume" data-id="${X.ip}" title="${what}" data-m="pop" data-k="exl-${skill}">${ico("exam")}Resume the exam</button>` : `<a class="btn sm${running ? " primary" : ""}" href="#${X.home}" title="${what}" data-m="pop" data-k="exl-${skill}">${ico("exam")}${running ? "Back to the exam" : "Examen blanc"}</a>`;
   }
-  function readingPaperShelf(exams) {
-    if (!readingPapers.length) return "";
+  function readingPaperShelf(exams, skill) {
+    const papers = skill === "co" ? listeningPapers : readingPapers;
+    if (!papers.length) return "";
     const scores = new Map();
     for (const attempt of exams) {
       if (!scores.has(attempt.setId)) scores.set(attempt.setId, attempt.score);
     }
-    const next = readingPapers.find((paper) => !scores.has(paper.id)) || readingPapers[0];
-    const selected = ui.form["ce-paper"] || next.id;
-    const completed = readingPapers.filter((paper) => scores.has(paper.id)).length;
-    const options = readingPapers.map((paper) => {
+    const next = papers.find((paper) => !scores.has(paper.id)) || papers[0];
+    const selected = papers.some(p => p.id === ui.form["ce-paper"]) ? ui.form["ce-paper"] : next.id;
+    const completed = papers.filter((paper) => scores.has(paper.id)).length;
+    const options = papers.map((paper) => {
       const score = scores.has(paper.id) ? ` · ✓ ${scores.get(paper.id)}/39` : "";
-      return `<option value="${esc(paper.id)}" ${paper.id === selected ? "selected" : ""}>${esc(paper.title + score)}</option>`;
+      return `<option value="${esc(paper.id)}" ${paper.id === selected ? "selected" : ""}>${esc(paper.title + (skill === "co" ? ` · ${paper.minutes} min` : "") + score)}</option>`;
     }).join("");
     return `<section class="panel paper-shelf" aria-labelledby="paper-title">
-      <header class="paper-heading"><span class="paper-icon">${ico("exam")}</span><div><p class="eyebrow">Collection Việt–Pháp</p><h2 class="h2" id="paper-title">Reading exam papers</h2></div></header>
-      <p class="small muted">${completed} of ${readingPapers.length} papers completed</p>
+      <header class="paper-heading"><span class="paper-icon">${ico("exam")}</span><div><p class="eyebrow">Collection Việt–Pháp</p><h2 class="h2" id="paper-title">${skill === "co" ? "Listening exam papers" : "Reading exam papers"}</h2></div></header>
+      <p class="small muted">${completed} of ${papers.length} papers completed</p>
+      ${skill === "co" ? `<p class="small muted">Durée adaptée aux enregistrements fournis, pauses comprises. Ces annales peuvent dépasser les 35 minutes du TCF.</p>` : ""}
       <div class="paper-pick"><label class="field">Choose a paper<select id="ce-paper" data-change="form" data-k="ce-paper">${options}</select></label>
-      <button class="btn primary" data-act="x-paper-start">Start this paper</button></div>
+      <button class="btn primary" data-act="x-paper-start" data-skill="${skill}">Start this paper</button></div>
     </section>`;
   }
   const readingOption = (exam, it, k) => (exam.src === "pdf" ? `<b>${"ABCD"[k]}.</b> ` : "") + typo(it.options[k]);
@@ -4480,6 +4491,7 @@
         </section>
         <section class="sec"><div class="sec-head"><h2 class="h2">Every question</h2>${xhid ? `<button class="btn primary sm" data-act="x-show">Show the answers</button>` : `<button class="btn ghost sm" data-act="x-hide">Hide the answers</button>`}</div>
           <p class="small muted">${xhid ? `In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.` : pdf ? "Open a question to compare your answer with the reference key from the paper." : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
+          ${skill === "co" ? `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((it, j) => `<button data-act="x-review-jump" data-i="${j}" aria-label="Question ${j + 1}">${j + 1}</button>`).join("")}</nav>` : ""}
           <div class="stack tight">${review}</div></section>`;
     }
     const exams = compAttempts(skill).filter((a) => a.kind === "exam"), retakes = retakeIds();
@@ -4509,7 +4521,8 @@
           : `<div class="stack tight">${starts}${skill === "ce" ? `<div class="row">${claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn")}</div>` : ""}</div>`}
         ${skill === "ce" && ui.cxReady ? `<div class="notice">Claude's exam is ready: 39 new documents. The clock starts when you do.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-start-ready">Start it now</button></div></div>` : ""}
       </section>
-      ${skill === "ce" && !other && !paused ? readingPaperShelf(exams) : ""}
+      ${!other && !paused ? readingPaperShelf(exams, skill) : ""}
+      ${skill === "co" ? `<a class="btn" href="papers.html?skill=co">Annales · Réécouter les enregistrements</a>` : ""}
       ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
@@ -8676,10 +8689,11 @@
     "c-review": (el) => { compReview(el.dataset.skill, el.dataset.id); render(true); window.scrollTo({ top: 0, behavior: "smooth" }); },
     "c-hist-jump": () => { const h = document.getElementById("c-hist"); if (h) h.scrollIntoView({ behavior: "smooth", block: "start" }); },
     "x-start": (el) => { for (const sk of ["ce", "co"]) { const e = XSPEC[sk].bank().find((x) => x.id === el.dataset.id); if (e) { examStart(e, sk); return; } } },
-    "x-paper-start": () => {
+    "x-paper-start": (el) => {
       const selected = document.getElementById("ce-paper");
-      const paper = selected && readingPapers.find((e) => e.id === selected.value);
-      if (paper) examStart(paper, "ce");
+      const skill = el.dataset.skill || "ce";
+      const paper = selected && XSPEC[skill].bank().find((e) => e.id === selected.value);
+      if (paper) examStart(paper, skill);
     },
     "x-start-ready": () => { if (ui.cxReady) examStart(ui.cxReady); },
     "x-gen": examGenerate,
@@ -8697,6 +8711,15 @@
     "x-keep": () => { if (ui.cx) { ui.cx.confirm = false; ui.cx.quit = false; render(true); } },
     "x-quit": () => { if (ui.cx) { ui.cx.quit = true; render(true); } },
     "x-quit-yes": () => { const sk = skillOf(ui.cx); if (sk === "co") coxStop(); ui.cx = null; ipDrop(XSPEC[sk].ip); timerSet(0, "", ""); render(true); },
+    "x-review-jump": (el) => {
+      if (!ui.cx?.done || skillOf(ui.cx) !== "co") return;
+      const target = document.getElementById("co-review-" + el.dataset.i);
+      if (!target) return;
+      document.querySelectorAll(".cox-audio").forEach((audio) => audio.pause());
+      target.open = true;
+      target.querySelector("summary").focus({ preventScroll: true });
+      target.scrollIntoView({ block: "start" });
+    },
     "x-review": (el) => examReview(el.dataset.id),
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
     "x-hide": () => { const cx = ui.cx; if (cx && cx.done) { ansHide(cx.exam.id, true); render(true); } },
