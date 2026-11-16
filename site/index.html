@@ -2593,6 +2593,70 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
 .m-halo.g4 { color: var(--leaf-2); }
 .ee-paper-picker select { width:100%; min-width:0; max-width:100%; }
 .ee-paper-picker .field { min-width:0; }
+/* Practice and results share a visible route; ongoing timed exams keep their focused view. */
+.practice-nav { display:flex; flex-wrap:wrap; gap:6px; padding:6px; border:1px solid var(--rule); border-radius:var(--r-card); background:var(--surface); }
+.practice-nav a { display:flex; align-items:center; justify-content:center; gap:7px; flex:1; min-width:max-content; padding:11px 14px; border-radius:var(--r); color:var(--ink-2); text-decoration:none; font-weight:800; font-size:14px; transition:background var(--dur-fast),color var(--dur-fast); }
+.practice-nav a:hover { background:var(--hover); color:var(--accent); }
+.practice-nav a[aria-current] { background:var(--accent-soft); color:var(--accent); }
+.results-hero { display:flex; align-items:center; justify-content:space-between; gap:24px; position:relative; overflow:hidden; padding:30px; border:1px solid var(--rule-2); border-radius:var(--r-lg); background:linear-gradient(125deg,var(--surface),var(--accent-soft)); box-shadow:var(--shadow-sm); }
+.results-hero h2 { font-size:clamp(28px,4vw,38px); letter-spacing:-.04em; line-height:1.15; margin:8px 0 12px; }
+.results-hero p:last-child { max-width:48ch; color:var(--ink-2); }
+.results-hero-mark { flex-shrink:0; display:grid; place-items:center; width:94px; height:104px; border:1px solid var(--rule-2); border-radius:12px; background:repeating-linear-gradient(transparent 0 19px,var(--seyes) 19px 20px),var(--surface); color:var(--accent); transform:rotate(7deg); box-shadow:var(--shadow); }
+.results-hero-mark svg { width:48px; height:48px; }
+.results-browser { display:grid; gap:18px; min-width:0; }
+.results-tools { display:grid; grid-template-columns:minmax(0,1fr) minmax(180px,.4fr); gap:14px; }
+.results-tools .field { min-width:0; }
+.results-tools :is(input,select) { width:100%; min-width:0; min-height:46px; }
+.results-skills { display:flex; gap:8px; flex-wrap:wrap; }
+.results-skills button { font:inherit; font-size:14px; font-weight:750; padding:8px 15px; border-radius:99px; border:1px solid var(--rule-2); background:var(--surface); color:var(--ink-2); cursor:pointer; transition:background var(--dur-fast),border-color var(--dur-fast); }
+.results-skills button[aria-pressed=true] { color:var(--accent); background:var(--accent-soft); border-color:var(--accent); }
+.results-skills button:hover { border-color:var(--accent); }
+.results-status { display:flex; gap:22px; border-bottom:1px solid var(--rule-2); }
+.results-status button { display:flex; align-items:center; gap:8px; padding:10px 2px 13px; margin-bottom:-1px; border:0; border-bottom:3px solid transparent; background:none; color:var(--ink-2); font:inherit; font-weight:800; cursor:pointer; }
+.results-status button[aria-pressed=true] { color:var(--accent); border-bottom-color:var(--accent); }
+.results-status span { font-size:12px; padding:2px 7px; border-radius:99px; background:var(--sunk); color:var(--ink-2); }
+.results-status button[aria-pressed=true] span { background:var(--accent-soft); color:var(--accent); }
+.results-list { display:grid; gap:12px; }
+.result-card { display:grid; grid-template-columns:42px minmax(0,1fr) auto; align-items:start; gap:18px; padding:22px; border:1px solid var(--rule); border-radius:var(--r-card); background:var(--surface); box-shadow:var(--shadow-sm); scroll-margin:24px; transition:border-color var(--dur-fast),box-shadow var(--dur-fast); }
+.result-card:hover { border-color:var(--rule-2); box-shadow:var(--shadow); }
+.result-symbol { display:grid; place-items:center; width:42px; height:42px; border-radius:13px; color:var(--accent); background:var(--accent-soft); }
+.result-copy { min-width:0; }
+.result-copy h3,.resume-card h3 { font-size:17px; line-height:1.4; margin:7px 0 5px; overflow-wrap:anywhere; }
+.result-meta { display:flex; flex-wrap:wrap; gap:4px 10px; font-size:12px; color:var(--ink-3); }
+.result-meta span:first-child { font-weight:800; color:var(--ink-2); }
+.result-outcome { display:flex; flex-direction:column; align-items:flex-end; gap:8px; min-width:130px; max-width:220px; text-align:right; }
+.result-outcome strong { font-size:20px; line-height:1.3; color:var(--accent); font-variant-numeric:tabular-nums; }
+.result-outcome strong.result-pending { font-size:14px; padding:5px 10px; border-radius:99px; color:var(--amber); background:var(--amber-soft); }
+.result-tasks { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:10px; font-size:12px; color:var(--ink-2); }
+.result-tasks b { color:var(--ink); margin-left:4px; }
+.result-detail { grid-column:1/-1; border-top:1px solid var(--rule); padding-top:18px; min-width:0; }
+.resume-card { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px; border:1px solid var(--rule); border-left:4px solid var(--accent); border-radius:var(--r-card); background:var(--surface); }
+.resume-card > div:first-child { min-width:0; }
+.results-empty { text-align:center; padding:36px 22px; border:1px dashed var(--rule-2); border-radius:var(--r-card); background:var(--surface); }
+.results-empty > svg { width:36px; height:36px; color:var(--accent); margin-bottom:8px; }
+.results-empty h2 { font-size:20px; margin-bottom:8px; }
+.results-empty p { color:var(--ink-2); max-width:52ch; margin:0 auto 20px; }
+.results-empty .btn { margin:4px; }
+@media (max-width:620px) {
+  .practice-nav { gap:2px; padding:4px; }
+  .practice-nav a { gap:5px; padding:10px 6px; font-size:12px; }
+  .practice-nav a svg { width:17px; height:17px; }
+  .results-hero { padding:22px; gap:14px; }
+  .results-hero-mark { width:58px; height:74px; }
+  .results-hero-mark svg { width:32px; height:32px; }
+  .results-tools { grid-template-columns:1fr; gap:10px; }
+  .results-skills { gap:6px; }
+  .results-skills button { padding:7px 12px; }
+  .result-card { grid-template-columns:34px minmax(0,1fr); padding:16px; gap:12px; }
+  .result-symbol { width:34px; height:34px; border-radius:10px; }
+  .result-outcome { grid-column:2; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; max-width:none; min-width:0; text-align:left; }
+  .result-outcome strong { font-size:18px; }
+  .result-outcome .btn { margin-left:auto; white-space:normal; }
+  .resume-card { flex-direction:column; align-items:stretch; padding:18px; gap:14px; }
+  .results-status { gap:16px; }
+}
+@media (prefers-reduced-motion:reduce) { .practice-nav a,.result-card,.results-skills button { transition:none; } }
+
 </style>
 
 <!-- Brand kit shapes (from the "Réussir le TCF Brand Kit" design): the maple leaf, the é tile's clip, the stamp

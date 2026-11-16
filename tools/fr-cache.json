@@ -5500,5 +5500,21 @@
  "page": "page",
  "{0} · page {1}": "{0} · page {1}",
  "page {0}": "page {0}",
- "Source PDF ↗": "Source PDF ↗"
+ "Source PDF ↗": "Source PDF ↗",
+ "{0}Exercices": "{0}Exercices",
+ "aria-expanded=\"{0}\" aria-controls=\"detail-{1}\"": "aria-expanded=\"{0}\" aria-controls=\"detail-{1}\"",
+ "Exercice": "Exercice",
+ "Exercices": "Exercices",
+ "Non rendue": "Non rendue",
+ "Parcours de pratique": "Parcours de pratique",
+ "Rechercher": "Rechercher",
+ "Reprendre": "Reprendre",
+ "Sujet, examen, date…": "Sujet, examen, date…",
+ "Tout": "Tout",
+ "Type de pratique": "Type de pratique",
+ "Fermer :": "Fermer :",
+ "Reprendre l’examen": "Reprendre l’examen",
+ "hors estimation NCLC": "hors estimation NCLC",
+ "Nouvelle tentative": "Nouvelle tentative",
+ "Nouvelle tentative · hors estimation NCLC": "Nouvelle tentative · hors estimation NCLC"
 }

@@ -3545,7 +3545,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -3802,15 +3802,6 @@
   "where": "app",
   "ctx": [
    "<h2>Your … history</h2><span>… of … built-in sets done · … attempt…, newest first</span> … …"
-  ]
- },
- {
-  "id": "79d2ad17bda9",
-  "text": "{0} attempt{1}, newest first. Open one to see the questions, your answers and the results.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… … … <h2>Unfinished</h2><span>Saved as you go, from your first answer or keystroke.</span> … <h2>Finished</h2><span>… attempt…, newest first. Open one to see the questions, your answers and the results.</span> …"
   ]
  },
  {
@@ -4322,7 +4313,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -4564,7 +4555,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -5227,7 +5218,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -5597,6 +5588,15 @@
   "where": "app",
   "ctx": [
    "…Examens blancs · practice exams"
+  ]
+ },
+ {
+  "id": "af333f2de178",
+  "text": "{0}Exercices",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<a>…Exercices</a> <a>……</a> <a>…Mes résultats</a>"
   ]
  },
  {
@@ -9545,7 +9545,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -10136,7 +10136,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -10324,6 +10324,15 @@
   "ctx": []
  },
  {
+  "id": "d79817fa95a4",
+  "text": "aria-expanded=\"{0}\" aria-controls=\"detail-{1}\"",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "aria-expanded=\"…\" aria-controls=\"detail-…\""
+  ]
+ },
+ {
   "id": "b339ca5c7d00",
   "text": "aria-label=\"{0}\"",
   "kind": "pattern",
@@ -10491,16 +10500,6 @@
   ]
  },
  {
-  "id": "43d44fe4e187",
-  "text": "Attempt",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Section Attempt Last change …",
-   "Date Section Attempt Result … …"
-  ]
- },
- {
   "id": "2a289c55750f",
   "text": "attempt{0} · best {1} · last",
   "kind": "pattern",
@@ -10516,15 +10515,6 @@
   "where": "app",
   "ctx": [
    "…………<span>… attempt… · last …</span>"
-  ]
- },
- {
-  "id": "80616f52696d",
-  "text": "attempt{0}, newest first. Open one to see the questions, your answers and the results.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… … … <h2>Unfinished</h2><span>Saved as you go, from your first answer or keystroke.</span> … <h2>Finished</h2><span>… attempt…, newest first. Open one to see the questions, your answers and the results.</span> …"
   ]
  },
  {
@@ -13893,7 +13883,7 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -13902,8 +13892,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -13928,7 +13918,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -14257,7 +14247,7 @@
   "ctx": [
    "Date … Score …",
    "Date Task Words Level …",
-   "Date Section Attempt Result … …"
+   "Date"
   ]
  },
  {
@@ -16530,7 +16520,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -16589,15 +16579,6 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
- },
- {
-  "id": "4a66d1480779",
-  "text": "Everything",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Everything"
-  ]
  },
  {
   "id": "0d79f962ff7b",
@@ -16676,7 +16657,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>examen blanc</span>"
+   "<span>examen blanc</span>",
+   "examen blanc"
   ]
  },
  {
@@ -16918,6 +16900,25 @@
   ]
  },
  {
+  "id": "e171e2b01d83",
+  "text": "Exercice",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Exercice"
+  ]
+ },
+ {
+  "id": "5589e74bbd59",
+  "text": "Exercices",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<a>…Exercices</a> <a>……</a> <a>…Mes résultats</a>",
+   "Exercices"
+  ]
+ },
+ {
   "id": "f4a490e38d2d",
   "text": "Exercise:",
   "kind": "exact",
@@ -17129,8 +17130,19 @@
   "id": "5ab4ec640d65",
   "text": "Fermer",
   "kind": "exact",
-  "where": "index.html",
-  "ctx": []
+  "where": "app",
+  "ctx": [
+   "Fermer"
+  ]
+ },
+ {
+  "id": "8d30b43f5780",
+  "text": "Fermer :",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Fermer :"
+  ]
  },
  {
   "id": "8110373de255",
@@ -17325,25 +17337,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
-  ]
- },
- {
-  "id": "355bcc577d71",
-  "text": "Finished",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… … … <h2>Unfinished</h2><span>Saved as you go, from your first answer or keystroke.</span> … <h2>Finished</h2><span>… attempt…, newest first. Open one to see the questions, your answers and the results.</span> …"
-  ]
- },
- {
-  "id": "ca269b53de1f",
-  "text": "Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<p>Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.</p>"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -18288,7 +18282,7 @@
   "where": "app",
   "ctx": [
    "Grammaire",
-   "<h1><span>…</span>Grammaire</h1>… … <h2>grammar topics</h2> … …",
+   "<h1><span>…</span>Grammaire</h1>… … … <h2>grammar topics</h2> … …",
    "Grammaire · …"
   ]
  },
@@ -18314,7 +18308,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h1><span>…</span>Grammaire</h1>… … <h2>grammar topics</h2> … …",
+   "<h1><span>…</span>Grammaire</h1>… … … <h2>grammar topics</h2> … …",
    "grammar topics"
   ]
  },
@@ -18974,6 +18968,15 @@
   "kind": "exact",
   "where": "content:hunt",
   "ctx": []
+ },
+ {
+  "id": "38571c8a3834",
+  "text": "hors estimation NCLC",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Nouvelle tentative · hors estimation NCLC</p>"
+  ]
  },
  {
   "id": "cd0948751373",
@@ -19808,7 +19811,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -20645,15 +20648,6 @@
   ]
  },
  {
-  "id": "24ea1f77f475",
-  "text": "Last change",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Section Attempt Last change …"
-  ]
- },
- {
   "id": "1df9c4e2bd85",
   "text": "Last mock, {0}: {1}/20{2}.",
   "kind": "pattern",
@@ -21083,7 +21077,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>Lecture</span><span>The recording starts in <b>… s</b></span>"
+   "<span>Lecture</span><span>The recording starts in <b>… s</b></span>",
+   "Lecture"
   ]
  },
  {
@@ -21393,7 +21388,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …",
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …",
    "…",
    "Date Task Words Level …"
   ]
@@ -22534,7 +22529,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -24796,6 +24791,15 @@
   ]
  },
  {
+  "id": "c04236c2854f",
+  "text": "Non rendue",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Non rendue"
+  ]
+ },
+ {
   "id": "6eef6648406c",
   "text": "None",
   "kind": "exact",
@@ -25216,15 +25220,6 @@
   ]
  },
  {
-  "id": "402518a84275",
-  "text": "Nothing unfinished.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<p>Nothing unfinished.</p>"
-  ]
- },
- {
   "id": "dbf1d192c8ea",
   "text": "Nothing yet.",
   "kind": "exact",
@@ -25391,6 +25386,24 @@
   ]
  },
  {
+  "id": "19f2a2ba9cdc",
+  "text": "Nouvelle tentative",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Nouvelle tentative · hors estimation NCLC</p>"
+  ]
+ },
+ {
+  "id": "9a2bdb49c057",
+  "text": "Nouvelle tentative · hors estimation NCLC",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Nouvelle tentative · hors estimation NCLC</p>"
+  ]
+ },
+ {
   "id": "c9bc849a968f",
   "text": "now",
   "kind": "exact",
@@ -25490,7 +25503,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -26759,6 +26772,15 @@
   "ctx": []
  },
  {
+  "id": "8d58a86d1cf6",
+  "text": "Parcours de pratique",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<a>…Exercices</a> <a>……</a> <a>…Mes résultats</a>"
+  ]
+ },
+ {
   "id": "ccd26c92e270",
   "text": "Parents agreed on parties at home or in the park with no gift bags: « Personne n'y a été obligé », and « Les enfants, eux, n'ont rien remarqué ».",
   "kind": "exact",
@@ -27839,7 +27861,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
   ]
  },
  {
@@ -29554,6 +29576,15 @@
   "ctx": []
  },
  {
+  "id": "91f7d3e9dc3d",
+  "text": "Rechercher",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+  ]
+ },
+ {
   "id": "7a20d6a33755",
   "text": "Recognition only (il fut, il eut, il vint, il fit). You'll meet it in CE passages, never produce it.",
   "kind": "exact",
@@ -30079,6 +30110,24 @@
   "ctx": []
  },
  {
+  "id": "1c56710b73fa",
+  "text": "Reprendre",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>… · À reprendre</p><h3>…</h3><p>…</p><p>…</p> <button>Reprendre</button>…"
+  ]
+ },
+ {
+  "id": "964373f24bfd",
+  "text": "Reprendre l’examen",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Reprendre l’examen"
+  ]
+ },
+ {
   "id": "46cd4cfcfae5",
   "text": "Reproach about the past: conditionnel passé of devoir.",
   "kind": "exact",
@@ -30206,15 +30255,6 @@
   "ctx": [
    "<button>Restore the original</button><button>Keep my edits</button>",
    "<button>Restore the original</button>"
-  ]
- },
- {
-  "id": "5faa59d4bc37",
-  "text": "Result",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Date Section Attempt Result … …"
   ]
  },
  {
@@ -31290,15 +31330,6 @@
   ]
  },
  {
-  "id": "41f42d1a1bb6",
-  "text": "Saved as you go, from your first answer or keystroke.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… … … <h2>Unfinished</h2><span>Saved as you go, from your first answer or keystroke.</span> … <h2>Finished</h2><span>… attempt…, newest first. Open one to see the questions, your answers and the results.</span> …"
-  ]
- },
- {
   "id": "81ac36a88ab7",
   "text": "Saved from",
   "kind": "exact",
@@ -31846,17 +31877,6 @@
   ]
  },
  {
-  "id": "f2c6b564bd81",
-  "text": "Section",
-  "kind": "exact",
-  "where": "attr:aria-label",
-  "ctx": [
-   "…",
-   "Section Attempt Last change …",
-   "Date Section Attempt Result … …"
-  ]
- },
- {
   "id": "7ff5a6dafd80",
   "text": "Sections",
   "kind": "exact",
@@ -32314,15 +32334,6 @@
   "where": "app",
   "ctx": [
    "<p>… starter sheet… hidden · <button>Show …</button></p>"
-  ]
- },
- {
-  "id": "b90ba7f8b0b2",
-  "text": "Show {0} more",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<button>Show … more</button>"
   ]
  },
  {
@@ -33315,7 +33326,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -33634,7 +33645,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {
@@ -33867,6 +33878,15 @@
   "where": "app",
   "ctx": [
    "<p><b>Sujet :</b> …</p>"
+  ]
+ },
+ {
+  "id": "de5eebb38d8a",
+  "text": "Sujet, examen, date…",
+  "kind": "exact",
+  "where": "attr:placeholder",
+  "ctx": [
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
   ]
  },
  {
@@ -39193,6 +39213,15 @@
   "ctx": []
  },
  {
+  "id": "6b0b09b8a698",
+  "text": "Tout",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Tout"
+  ]
+ },
+ {
   "id": "1ef080dda7ee",
   "text": "Tout en + gérondif for a concession; keep the pronoun en.",
   "kind": "exact",
@@ -39801,6 +39830,15 @@
   ]
  },
  {
+  "id": "9058c142739b",
+  "text": "Type de pratique",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+  ]
+ },
+ {
   "id": "45aab7fd34c4",
   "text": "type the answer",
   "kind": "exact",
@@ -39979,15 +40017,6 @@
   "kind": "exact",
   "where": "content:drill",
   "ctx": []
- },
- {
-  "id": "21e6da94829a",
-  "text": "Unfinished",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… … … <h2>Unfinished</h2><span>Saved as you go, from your first answer or keystroke.</span> … <h2>Finished</h2><span>… attempt…, newest first. Open one to see the questions, your answers and the results.</span> …"
-  ]
  },
  {
   "id": "10f566e916d4",
@@ -42098,7 +42127,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Your exams</h2> …"
+   "<h2>Your exams</h2>… …"
   ]
  },
  {
@@ -42530,7 +42559,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
   ]
  },
  {

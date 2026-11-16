@@ -45,6 +45,12 @@ The 60-minute timer, word counts, draft saving, resume, submission and correctio
 
 To regenerate the collection, run `python3 tools/import_writing_papers.py` with `pdfplumber` installed, then `node tools/check_writing_papers.js`. The importer normalizes Unicode ligatures and known PDF font mappings for “ff”; other source wording is retained. June/July 2023 combinations have no printed numbers and are numbered by their order in the PDF.
 
+## Finding past results
+
+**Mes résultats** is visible in reading, listening and writing; grammar links directly to its own results. The page also lives at **Progrès → Historique**. Search by subject or date (with or without accents), filter by skill and exercise/exam, or switch to **À reprendre** for unfinished work.
+
+Each writing mock appears as one exam with all three task scores. Open a result to review the saved answers, then return with the same search and filters. Grouping is display-only: existing writing records, grading, charts and learning progress remain unchanged. Run `node tools/check_results.js` for the results-model regression checks.
+
 ## Options
 
 ```bash

@@ -364,7 +364,7 @@
       copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
     },
     calendarDay: null,
-    hist: { filter: "all", limit: 30, open: null },
+    hist: { filter: "all", type: "all", status: "done", query: "", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
     c: { skill: "ce", lv: { ce: "", co: "" }, theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
@@ -4478,7 +4478,7 @@
       const next = (pdf ? fresh.slice(0, 1) : fresh).map((e) => `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>`).join("")
         + `<button class="btn" data-act="x-retake">Retake ${esc(cx.exam.title)}</button>${skill === "ce" ? claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn") : ""}`
         + `<button class="btn ghost" data-act="x-close">All exams</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a>`;
-      return `${back}
+      return `${resultReturn()}${back}
         <section class="panel stack" data-m="pop" data-k="xr-${esc(cx.exam.id)}-${esc(r.date)}">
           <p class="eyebrow">${esc(cx.exam.title)} · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
           <div class="row"><span class="scorebig"${!r.review && !retake && (nclcOf(skill, r.est) || 0) >= 7 ? ` data-m="burst" data-k="x7-${esc(cx.exam.id)}-${esc(r.date)}-${r.est}"` : ""}>≈ <span data-tween="xest-${esc(cx.exam.id)}-${esc(r.date)}" data-tw="count" data-to="${r.est}">${r.est}</span></span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span>${retake ? `<span class="pill info">retake · not counted</span>` : ""}</div>
@@ -4523,7 +4523,7 @@
       </section>
       ${!other && !paused ? readingPaperShelf(exams, skill) : ""}
       ${skill === "co" ? `<a class="btn" href="papers.html?skill=co">Annales · Réécouter les enregistrements</a>` : ""}
-      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
+      ${exams.length ? `<section class="sec"><div class="sec-head"><h2 class="h2">Your exams</h2>${resultsLink(skill, "exam", "Tous les résultats")}</div><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
   /* =============== criteria & scores =============== */
@@ -5240,6 +5240,7 @@
     const s = settings();
     return `<div class="wrap grammar-library">
       <header class="stack tight"><h1 class="title chapter-title chapter-grammar"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-grammar">${ico("grammar")}</span>Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
+      ${resultsLink("grammar")}
       ${practiceRows()}
       <section class="topic-library" aria-labelledby="grammar-topics-title">
         <h2 id="grammar-topics-title">grammar topics</h2>
@@ -6840,7 +6841,7 @@
         ${ip ? "" : eePaperPicker()}
         ${ip ? `<div class="notice"><b>You have an unfinished mock:</b> ${esc(ipProgress(ip))}.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${EE_IP}">Resume the mock</button>${discardBtn(EE_IP)}</div></div>` : `<div class="row"><button class="btn primary" data-act="ee-start">Start the exam · 60:00</button></div>`}
       </section>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Tes examens blancs · Your mocks</h2><span class="small muted">${mocks.length ? `${mocks.length} so far, newest first` : ""}</span></div>
+      <section class="sec"><div class="sec-head"><h2 class="h2">Tes examens blancs · Your mocks</h2>${resultsLink("writing", "exam", "Tous les résultats")}<span class="small muted">${mocks.length ? `${mocks.length} so far, newest first` : ""}</span></div>
         ${mocks.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th>${EE_TASKS.map((t) => `<th class="n">${esc(T.WRITING[t].name)}</th>`).join("")}<th class="n">Score</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="small muted">Your mocks collect here, with each task's words and score.</p>`}
       </section>`;
   }
@@ -6881,7 +6882,7 @@
       return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div>${w.source ? `<a class="btn ghost sm" href="pdf-viewer.html?file=${encodeURIComponent(w.source.pdf)}#page=${w.source.page}" target="_blank" rel="noopener">Source PDF ↗</a>` : ""}<button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
     }).join("");
     const nc = m.score != null ? nclcOf("ee", m.score) : null;
-    return `<section class="panel stack" data-m="pop" data-k="eer-${esc(m.id)}">
+    return `${resultReturn()}<section class="panel stack" data-m="pop" data-k="eer-${esc(m.id)}">
         <p class="eyebrow">Examen blanc · Expression écrite · ${shortDate(m.date)}${m.up ? " · handed in when time ran out" : ""}</p>
         ${m.paperTitle ? `<p class="small muted">${esc(m.paperTitle)}</p>` : ""}
         <div class="row"><span class="scorebig">${m.score != null ? `<span data-tween="ees-${esc(m.id)}" data-tw="count" data-to="${m.score}">${m.score}</span>/20` : "…/20"}</span>${m.score != null ? `${nclcTag(m.score, "ee")}<span class="pill">${eeCefr(m.score)}</span>` : ""}</div>
@@ -6932,11 +6933,11 @@
       const tabsOf = (cur) => `<nav class="atelier-tabs" role="tablist" aria-label="Expression écrite">${EE_TASKS.map((k) => {
         const W = T.WRITING[k], icon = { t1: "envelope", t2: "writing", t3: "papers" }[k];
         return `<a href="#writing.${k}" role="tab" aria-selected="${k === cur}">${ico(icon)}<span>${W.name}</span><small>${W.min}–${W.max} mots</small></a>`;
-      }).join("")}<a href="#writing.mock" role="tab" aria-selected="${cur === "mock"}">${ico("exam")}<span>Examen blanc</span><small>3 tâches · 60 min</small></a></nav>`;
+      }).join("")}</nav>`;
       if (args[0] === "mock") {
         if (eeRunning()) return `<div class="wrap focus"><div class="stack">${eeView()}</div></div>`;
         const header = ui.ee && ui.ee.done ? `<header><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true">${ico("writing")}</span>Expression écrite</h1></header>` : writingCover();
-        return `<div class="wrap atelier-page">${header}${tabsOf("mock")}<div class="stack">${eeView()}</div></div>`;
+        return `<div class="wrap atelier-page">${header}${practiceNav("writing", "exam")}<div class="stack">${eeView()}</div></div>`;
       }
       if (args[0] && T.WRITING[args[0]]) ui.w.task = args[0];
       const task = ui.w.task, W = T.WRITING[task];
@@ -6960,6 +6961,7 @@
       })}</div>` : "";
       return `<div class="wrap atelier-page">
         ${writingCover()}
+        ${practiceNav("writing", "exercise")}
         ${tabsOf(task)}
         <div class="atelier-tools">${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}${fxTabs("writing." + task)}</div>
         <section class="panel prompt-card writing-brief">
@@ -7076,7 +7078,7 @@
       const skill = ui.c.skill;
       const head = `<header class="stack tight"><h1 class="title chapter-title chapter-comp"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-comp">${ico("comp")}</span>Compréhension</h1>${fold("intro-comp", "Comment ça marche · How it works", `<p class="small muted">TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</p>`)}</header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
-      if (args[1] === "exam") { const running = !!ui.cx && skillOf(ui.cx) === skill && !ui.cx.done; return `<div class="wrap${running ? " focus" : ""}">${running ? "" : head + tabs}<div class="stack">${examView(skill)}</div></div>`; }
+      if (args[1] === "exam") { const running = !!ui.cx && skillOf(ui.cx) === skill && !ui.cx.done; return `<div class="wrap${running ? " focus" : ""}">${running ? "" : head + tabs + practiceNav(skill, "exam")}<div class="stack">${examView(skill)}</div></div>`; }
       ensureCompSet(skill);
       const lvl = compLevel();
       const key = compKey(skill);
@@ -7170,10 +7172,11 @@
       return `<div class="wrap comp-studio comp-${skill}">
         ${head}
         <div class="comp-toolbar">
-          <div class="comp-nav tab-row">${tabs}${examLink(skill)}</div>
+          <div class="comp-nav tab-row">${tabs}</div>
+          ${practiceNav(skill, "exercise")}
           ${controls}
         </div>
-        <div class="stack comp-practice">${reviewNote}${fallback}${material}${timerRow}${qs}</div>
+        <div class="stack comp-practice">${submitted ? resultReturn() : ""}${reviewNote}${fallback}${material}${timerRow}${qs}</div>
         ${inProgress ? "" : examCta(skill)}
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
@@ -7195,7 +7198,7 @@
   // Only two kinds of entry: unfinished attempts (the inprogress records) and finished ones (drill rounds,
   // production checks, reading and listening sets, practice exams, writing tasks).
   const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit", eemock: "Écrit" };
-  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"]];
+  const H_FILTERS = [["all", "Tout"], ["grammar", "Grammaire"], ["co", "Écoute"], ["ce", "Lecture"], ["writing", "Écrit"]];
   const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind === "eemock" ? "writing" : kind);
   const clip = (s, n) => { const t = str(s).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
   function whenOf(ts) {
@@ -7414,32 +7417,98 @@
       </section>${calendarDay(selected, days.get(selected))}</div></div>`;
   }
 
+  // Results are a view of existing records. Group EE tasks here only: charts, calendars and scoring
+  // continue reading the original individual attempts from finishedAttempts().
+  function resultEntries() {
+    const entries = finishedAttempts().filter(x => !(x.kind === "writing" && x.doc.mock?.id));
+    for (const m of eeMocks()) entries.push({ kind: "eemock", id: "eemock-" + m.id, ts: m.ts, date: m.date,
+      title: m.paperTitle || "Examen blanc · Expression écrite", result: m.score == null ? "À corriger" : `${m.score}/20`, doc: m });
+    return entries.sort((a, b) => b.ts - a.ts);
+  }
+  const resultSkill = x => ["comp", "exam"].includes(x.kind) ? (x.doc || x).skill : sectionOf(x.kind);
+  const resultType = x => ["exam", "eemock"].includes(x.kind) ? "exam" : "exercise";
+  const resultText = text => str(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  function resultMatches(x, filters) {
+    const skill = resultSkill(x), type = resultType(x), d = x.doc || x;
+    if (filters.filter && filters.filter !== "all" && filters.filter !== skill && !(filters.filter === "comp" && ["ce", "co"].includes(skill))) return false;
+    if (filters.type && filters.type !== "all" && filters.type !== type) return false;
+    const terms = resultText(filters.query).trim().split(/\s+/).filter(Boolean);
+    const subjects = x.kind === "eemock" ? Object.values(d.tasks || d.prompts || {}).map(w => w.prompt || w.q).join(" ") : typeof d.prompt === "object" ? d.prompt?.q : d.prompt;
+    const text = resultText([x.title, x.date, x.date ? shortDate(x.date) : "", subjects, d.paperTitle, d.source?.title, SECTION[x.kind], skill, type === "exam" ? "examen blanc" : "exercice"].join(" "));
+    return terms.every(term => text.includes(term));
+  }
+  function resultsLink(skill = "all", type = "all", label = "Mes résultats") {
+    return `<a class="btn ghost sm" href="#progress.history.${skill}.${type}">${ico("progress")}${label}</a>`;
+  }
+  function practiceNav(skill, active) {
+    const writing = skill === "writing";
+    const paused = writing ? eeRunning() || ipGet(EE_IP) : (examRunning() && skillOf(ui.cx) === skill) || ipGet(XSPEC[skill].ip);
+    return `<nav class="practice-nav" aria-label="Parcours de pratique">
+      <a href="${writing ? "#writing." + ui.w.task : "#comp." + skill}"${active === "exercise" ? ' aria-current="page"' : ""}>${ico(writing ? "writing" : skill === "co" ? "listen" : "read")}Exercices</a>
+      <a href="${writing ? "#writing.mock" : "#comp." + skill + ".exam"}"${active === "exam" ? ' aria-current="page"' : ""}>${ico("exam")}${paused && active !== "exam" ? "Reprendre l’examen" : "Examens blancs"}</a>
+      <a href="#progress.history.${skill}.all">${ico("progress")}Mes résultats</a>
+    </nav>`;
+  }
+  function resultReturn() {
+    return ui.hist.backHash ? `<div><button class="btn ghost sm" data-act="h-return">← Retour aux résultats</button></div>` : "";
+  }
+  function resultCard(x, retakes) {
+    const d = x.doc, skill = resultSkill(x), exam = resultType(x) === "exam";
+    const icon = skill === "grammar" ? "grammar" : skill === "co" ? "listen" : skill === "ce" ? "read" : "writing";
+    const label = H_FILTERS.find(([k]) => k === skill)?.[1] || SECTION[x.kind];
+    const score = x.kind === "eemock" ? d.score : x.kind === "writing" ? d.fb?.score20 : x.kind === "exam" ? d.est : null;
+    const waiting = ["writing", "eemock"].includes(x.kind) && score == null;
+    const summary = waiting ? "À corriger" : score != null ? `${x.kind === "exam" ? "≈ " : ""}${score}${x.kind === "exam" ? " / 699" : " / 20"}` : x.result;
+    const detail = x.kind === "eemock" ? `3 tâches · ${d.min || 0} min` : x.kind === "writing" ? `${d.words || 0} mots` : x.kind === "exam" ? [`${d.score}/${d.total}`, mins(d.secs)].filter(Boolean).join(" · ") : mins(d.secs);
+    const available = x.kind === "comp" ? d.src !== "logged" && (samplesFor(d.skill).some(s => s.id === d.setId) || d.snap)
+      : x.kind === "exam" ? XSPEC[skillOf(d)].bank().some(e => e.id === d.setId) || d.snap : true;
+    const expanded = ui.hist.open === x.id && ["writing", "drill", "prod"].includes(x.kind);
+    return `<article class="result-card" id="h-${esc(x.id)}" tabindex="-1">
+      <div class="result-symbol" aria-hidden="true">${ico(icon)}</div>
+      <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span><time datetime="${esc(x.date)}">${shortDate(x.date)}</time></div>
+        <h3>${esc(x.title)}</h3>${x.kind === "exam" && retakes.has(x.id) ? `<p class="small muted">Nouvelle tentative · hors estimation NCLC</p>` : ""}${detail ? `<p class="small muted">${esc(detail)}</p>` : ""}
+        ${x.kind === "eemock" ? `<div class="result-tasks">${EE_TASKS.map((t, i) => `<span>${esc(T.WRITING[t].name)} <b>${!d.tasks[t] ? "Non rendue" : d.scores[i] == null ? "À corriger" : d.scores[i] + "/20"}</b></span>`).join("")}</div>` : ""}
+      </div>
+      <div class="result-outcome"><strong class="${waiting ? "result-pending" : ""}">${esc(summary)}</strong>${score != null && exam ? nclcTag(score, x.kind === "eemock" ? "ee" : skill) : ""}
+        ${available ? `<button class="btn sm" data-act="h-review" data-id="${esc(x.id)}" aria-label="${esc((expanded ? "Fermer : " : "Voir le résultat : ") + x.title + " · " + shortDate(x.date))}"${["writing", "drill", "prod"].includes(x.kind) ? ` aria-expanded="${expanded}" aria-controls="detail-${esc(x.id)}"` : ""}>${expanded ? "Fermer" : "Voir le résultat"}</button>` : `<span class="small muted">${d.src === "logged" ? "Score ajouté manuellement" : "Énoncé indisponible"}</span>`}
+      </div><div class="result-detail" id="detail-${esc(x.id)}"${expanded ? "" : " hidden"}>${expanded ? reviewOf(x) : ""}</div>
+    </article>`;
+  }
+  function unfinishedCard(ip) {
+    return `<article class="resume-card"><div><p class="eyebrow">${esc(SECTION[ip.kind])} · À reprendre</p><h3>${esc(ip.paperTitle || ip.title)}</h3><p class="small muted">${esc(ipProgress(ip))}</p><p class="small muted">${esc(whenOf(ip.updated))}</p></div>
+      <div class="row"><button class="btn primary sm" data-act="ip-resume" data-id="${esc(ip.id)}">Reprendre</button>${discardBtn(ip.id)}</div></article>`;
+  }
+  function historyList() {
+    const all = resultEntries().filter(x => resultMatches(x, ui.hist));
+    const ips = unfinished().filter(x => resultMatches(x, ui.hist));
+    const retakes = retakeIds();
+    const pending = ui.hist.status === "pending", shown = all.slice(0, ui.hist.limit), count = pending ? ips.length : all.length;
+    return `<div class="results-status" role="group" aria-label="État des tentatives">
+      <button data-act="h-status" data-status="done" aria-pressed="${!pending}">Terminés <span>${all.length}</span></button>
+      <button data-act="h-status" data-status="pending" aria-pressed="${pending}">À reprendre <span>${ips.length}</span></button></div>
+      <p class="small muted" role="status" aria-live="polite">${count} résultat${count === 1 ? "" : "s"} · du plus récent au plus ancien</p>
+      ${count ? `<div class="results-list">${pending ? ips.map(unfinishedCard).join("") : shown.map(x => resultCard(x, retakes)).join("")}</div>` : `<div class="results-empty">${ico("papers")}<h2>${ui.hist.query || ui.hist.filter !== "all" || ui.hist.type !== "all" ? "Aucun résultat avec ces filtres" : pending ? "Tout est à jour" : "Tes résultats commencent ici"}</h2><p>${pending ? "Tes exercices et examens inachevés seront disponibles ici pour les reprendre." : "Retrouve ici tes exercices, tes examens et tes corrections après chaque tentative."}</p><button class="btn sm" data-act="h-reset">Réinitialiser les filtres</button><a class="btn primary sm" href="#comp.co">Choisir un exercice</a></div>`}
+      ${!pending && all.length > shown.length ? `<button class="btn" data-act="h-more">Voir plus de résultats</button>` : ""}`;
+  }
   function historyView(head, tabs) {
-    const f = ui.hist.filter;
-    const pick = (x) => f === "all" || sectionOf(x.kind) === f;
-    const ips = unfinished().filter(pick);
-    const all = finishedAttempts().filter(pick);
-    const shown = all.slice(0, ui.hist.limit);
-    const chips = `<div class="seg" role="group" aria-label="Section">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div>`;
-    const ipRows = ips.map((ip) => `<tr><td class="small">${esc(SECTION[ip.kind])}</td><td>${typo(ip.title)}<br><span class="small muted">${esc(ipProgress(ip))}</span></td><td class="n small">${esc(whenOf(ip.updated))}</td><td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button>${discardBtn(ip.id)}</span></td></tr>`).join("");
-    const rows = shown.map((x) => `<tr id="h-${esc(x.id)}"><td class="n">${shortDate(x.date)}</td><td class="small">${esc(SECTION[x.kind])}</td><td>${typo(x.title)}</td><td class="n small">${esc(x.result)}</td><td>${historyOpenBtn(x)}</td></tr>${ui.hist.open === x.id ? `<tr><td colspan="5">${reviewOf(x)}</td></tr>` : ""}`).join("");
-    return `<div class="wrap">
-      ${head}
-      ${tabs}
-      <div class="row">${chips}</div>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Unfinished</h2><span class="small muted">Saved as you go, from your first answer or keystroke.</span></div>
-        ${ips.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Section</th><th>Attempt</th><th>Last change</th><th></th></tr></thead><tbody>${ipRows}</tbody></table></div>` : `<p class="small muted">Nothing unfinished.</p>`}
-      </section>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Finished</h2><span class="small muted">${all.length} attempt${all.length === 1 ? "" : "s"}, newest first. Open one to see the questions, your answers and the results.</span></div>
-        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.</p>`}
-      </section>
-    </div>`;
+    return `<div class="wrap results-page">${head}${tabs}
+      <section class="results-hero"><div><p class="eyebrow">Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p></div><span class="results-hero-mark" aria-hidden="true">${ico("papers")}</span></section>
+      <section class="results-browser" aria-label="Rechercher dans mes résultats">
+        <div class="results-tools"><label class="field">Rechercher<input id="h-query" type="search" data-input="h-query" value="${esc(ui.hist.query || "")}" placeholder="Sujet, examen, date…" aria-controls="results-content"></label>
+          <label class="field">Type de pratique<select id="h-type" data-change="h-type">${[["all", "Tous les formats"], ["exercise", "Exercices"], ["exam", "Examens blancs"]].map(([value, label]) => `<option value="${value}"${(ui.hist.type || "all") === value ? " selected" : ""}>${label}</option>`).join("")}</select></label></div>
+        <div class="results-skills" role="group" aria-label="Compétence">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${ui.hist.filter === k}">${l}</button>`).join("")}</div>
+        <div id="results-content" class="stack">${historyList()}</div>
+      </section></div>`;
+  }
+  function updateHistoryList() {
+    const target = document.getElementById("results-content");
+    if (target) target.innerHTML = historyList();
   }
   // Today's "Continue where you left off": the most recent unfinished attempts.
   function continueCard() {
     const ips = unfinished();
     if (!ips.length) return "";
-    return `<section data-m="paper" data-k="today-continue" class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
+    return `<section data-m="paper" data-k="today-continue" class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history.all.all.pending">All ${ips.length} unfinished →</a>` : ""}</section>`;
   }
 
   /* =============== progress report (Progrès → Évolution) =============== */
@@ -8374,7 +8443,13 @@
       const tab = ["history", "report", "backup", "calendar"].includes(args[0]) ? args[0] : "";
       const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.calendar" role="tab" aria-selected="${tab === "calendar"}">Calendrier<small>study calendar</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a><a href="#progress.backup" role="tab" aria-selected="${tab === "backup"}">Sauvegarde<small>backup</small></a></nav>`;
       if (tab === "calendar") return calendarView(head, tabs);
-      if (tab === "history") return historyView(head, tabs);
+      if (tab === "history") {
+        const key = args.join(".");
+        if (ui.hist.route !== key) {
+          ui.hist = { filter: H_FILTERS.some(([k]) => k === args[1]) || args[1] === "comp" ? args[1] : "all", type: ["exam", "exercise"].includes(args[2]) ? args[2] : "all", status: args[3] === "pending" ? "pending" : "done", query: "", limit: 30, open: null, route: key };
+        }
+        return historyView(head, tabs);
+      }
       if (tab === "backup") return backupView(head, tabs);
       if (tab === "report") return reportView(head, tabs);
       const s = settings();
@@ -8399,7 +8474,7 @@
       const tok = args.join(".");
       if (args[0] === "history") {
         const el = ui.hist.jump && document.getElementById("h-" + ui.hist.jump);
-        if (el) el.scrollIntoView({ block: "start" });
+        if (el) { el.scrollIntoView({ block: "center" }); el.focus({ preventScroll: true }); }
         ui.hist.jump = null;
         return;
       }
@@ -8503,7 +8578,20 @@
         document.getElementById("cal-" + ui.calendarDay)?.focus({ preventScroll: true });
       }
     },
-    "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; render(true); },
+    "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; document.querySelectorAll("[data-act=h-filter]").forEach(b => b.setAttribute("aria-pressed", b === el)); updateHistoryList(); },
+    "h-status": (el) => { ui.hist.status = el.dataset.status; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); document.querySelector(`[data-act=h-status][data-status="${ui.hist.status}"]`)?.focus(); },
+    "h-reset": () => { Object.assign(ui.hist, { filter: "all", type: "all", query: "", limit: 30, open: null }); render(true); document.getElementById("h-query")?.focus(); },
+    "h-review": (el) => {
+      const x = resultEntries().find(x => x.id === el.dataset.id);
+      if (!x) return;
+      if (x.kind === "eemock" && eeRunning()) { toast("Termine l’examen écrit en cours avant d’ouvrir un autre résultat."); return; }
+      ui.hist.backHash = location.hash; ui.hist.backId = x.id;
+      if (x.kind === "comp") { compReview(x.doc.skill, x.id); goTo("#comp." + x.doc.skill); window.scrollTo(0, 0); }
+      else if (x.kind === "exam") examReview(x.id);
+      else if (x.kind === "eemock") { ui.ee = { id: x.doc.id, done: true, view: null }; goTo("#writing.mock"); window.scrollTo(0, 0); }
+      else { ui.hist.open = ui.hist.open === x.id ? null : x.id; updateHistoryList(); document.getElementById("h-" + x.id)?.querySelector("[data-act=h-review]")?.focus({ preventScroll: true }); }
+    },
+    "h-return": () => { ui.hist.jump = ui.hist.backId; goTo(ui.hist.backHash || "#progress.history"); },
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
@@ -8529,8 +8617,11 @@
     // A "Review" link elsewhere opens that attempt in the history, scrolled into view.
     "h-show": (el) => {
       const f = el.dataset.f || "all", id = el.dataset.id;
-      const idx = finishedAttempts().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
-      ui.hist = { filter: f, limit: Math.max(30, idx + 1), open: id, jump: id };
+      const writing = S.writing.get(id);
+      if (writing?.mock?.id && eeRunning()) { toast("Termine l’examen écrit en cours avant d’ouvrir un autre résultat."); return; }
+      if (writing?.mock?.id) { ui.ee = { id: writing.mock.id, done: true, view: id }; goTo("#writing.mock"); return; }
+      const idx = resultEntries().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
+      ui.hist = { filter: f, type: "all", status: "done", query: "", route: "history", limit: Math.max(30, idx + 1), open: id, jump: id };
       goTo("#progress.history");
     },
     "drill-start": (el) => {
@@ -8801,6 +8892,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "h-type": (el) => { ui.hist.type = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "ee-paper": (el) => { ui.form["ee-paper"] = el.value; render(true); document.getElementById("ee-paper")?.focus(); },
     "library-theme": selectLibraryTheme,
     "card-draft": updateCardDraft,
@@ -8837,6 +8929,7 @@
     },
   };
   const INPUTS = {
+    "h-query": (el) => { ui.hist.query = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "card-draft": updateCardDraft,
     "c-seek": (el) => coSeek(Number(el.value) || 0),
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
