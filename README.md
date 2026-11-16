@@ -24,7 +24,7 @@ The transcriptions in `site/reading-papers/` follow the source files numbered 1�
 
 ## Listening, speaking and writing annales
 
-Open **Annales** in the navigation for 24 listening papers, 25 speaking collections and 61 writing PDFs. Speaking and writing subjects remain browsable original PDFs, including the model answers present in the sources.
+Open **Annales** in the navigation for 24 listening papers, 25 speaking collections and 61 writing PDFs. Speaking and writing subjects remain browsable original PDFs, including the model answers present in the sources. Documents open in the built-in PDF reader, with page controls and a text view. Files download only when you choose “Télécharger le PDF”; browsing subjects does not invoke the browser’s native PDF handler.
 
 Listening review lets you jump between all 39 questions, replay the recording, inspect its picture, and independently reveal the transcript or reference answer. The supplied transcription PDF is unordered: passages are matched against locally recognized audio, with explicitly labelled automatic transcripts when no reliable source match is found. These aids may contain transcription errors; the original recording and PDF remain available.
 
