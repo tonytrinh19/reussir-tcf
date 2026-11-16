@@ -5516,5 +5516,7 @@
  "Reprendre l’examen": "Reprendre l’examen",
  "hors estimation NCLC": "hors estimation NCLC",
  "Nouvelle tentative": "Nouvelle tentative",
- "Nouvelle tentative · hors estimation NCLC": "Nouvelle tentative · hors estimation NCLC"
+ "Nouvelle tentative · hors estimation NCLC": "Nouvelle tentative · hors estimation NCLC",
+ "Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.": "Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.",
+ "Programme allégé : {0} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre.": "Programme allégé : {0} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre."
 }

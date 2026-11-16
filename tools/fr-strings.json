@@ -20919,6 +20919,15 @@
   "ctx": []
  },
  {
+  "id": "f48903d4797e",
+  "text": "Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.</p>"
+  ]
+ },
+ {
   "id": "89f31e5a6a45",
   "text": "Le Québec (the province) is masculine: au Québec. For the city, it's à Québec.",
   "kind": "exact",
@@ -28467,6 +28476,15 @@
   "where": "app",
   "ctx": [
    "Production task passed"
+  ]
+ },
+ {
+  "id": "2cb2fdece0ab",
+  "text": "Programme allégé : {0} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre.",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>Programme allégé : … en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre.</p>"
   ]
  },
  {

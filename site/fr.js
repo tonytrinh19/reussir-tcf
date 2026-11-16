@@ -1537,6 +1537,7 @@ window.TCF.FR = {
 "Le fait que at the start of a sentence usually takes the subjonctif.": "Le fait que en début de phrase se construit généralement avec le subjonctif.",
 "Le héros keeps le (aspirated h), but de l'histoire and s'appelle elide.": "Le héros conserve le (h aspiré), mais de l'histoire et s'appelle s'élident.",
 "Le matériel is a thing and a direct object: le (or en, some of it). Lui is for a person after à.": "Le matériel est une chose et un COD : le (ou en, une partie). Lui s'utilise pour une personne après à.",
+"Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.": "Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.",
 "Le travail is the direct object of rendre (nous is the subject): que.": "Le travail est le COD de rendre (nous est le sujet) : que.",
 "Le → l' before a vowel.": "Le → l' devant une voyelle.",
 "Le, la, les come before lui, leur: les lui. Les clés comes before the verb, so données agrees.": "Le, la, les se placent avant lui, leur : les lui. Les clés est placé avant le verbe, donc données s'accorde.",
@@ -6863,6 +6864,10 @@ window.TCF.FR = {
 [
 "Prepare {0} with Claude",
 "Préparer {0} avec Claude"
+],
+[
+"Programme allégé : {0} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre.",
+"Programme allégé : {0} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre."
 ],
 [
 "Progress: question {0} of",

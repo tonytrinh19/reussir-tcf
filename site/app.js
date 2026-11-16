@@ -514,37 +514,68 @@
   }
 
   /* =============== plan helpers =============== */
+  // Keep historical templates and their block IDs. From this date, remove one untouched structured
+  // block; a two-week rotation keeps the different writing tasks and grammar topics in the programme.
+  const LIGHT_PLAN_FROM = "2026-11-16";
+  const LIGHT_PLAN_SKIP = {
+    1: [[2, 3], [1, 2], [2, 3], [2, 1], [1, 2], [0, 1]],
+    2: [[2, 3], [3, 2], [3, 2], [3, 1], [0, 1], [3, 0]],
+    3: [[2, 3], [3, 2], [3, 2], [3, 1], [1, 2], [0]],
+    4: [[1, 0], [1, 2], [1, 0], [0], [1, 2], [0]],
+    5: [[0], [0], [0], [1, 2], [1], []],
+  };
+  const dateIsLight = date => date >= LIGHT_PLAN_FROM;
+  const originalPlan = (phase, date) => (T.PLAN[phase]?.days || [])[dow(date)] || null;
   function planFor(phase, date) {
-    const P = T.PLAN[phase];
-    const d = dow(date);
-    if (!P || d === 6) return null;
-    return P.days[d] || null;
+    const original = originalPlan(phase, date);
+    if (!original) return null;
+    const doc0 = S.days.get(date), doc = doc0?.phase === phase ? doc0 : null;
+    let slots = original.map((_, i) => i);
+    if (date >= LIGHT_PLAN_FROM) {
+      if (Array.isArray(doc?.planSlots) && doc.planSlots.length && doc.planSlots.every(i => Number.isInteger(i) && i >= 0 && i < original.length) && new Set(doc.planSlots).size === doc.planSlots.length) {
+        slots = doc.planSlots;
+      } else {
+        const choices = LIGHT_PLAN_SKIP[phase]?.[dow(date)] || [];
+        const week = Math.floor((Date.parse(date + "T12:00:00Z") - Date.parse(LIGHT_PLAN_FROM + "T12:00:00Z")) / (7 * 86400000));
+        const order = choices.length > 1 && week % 2 ? [...choices].reverse() : choices;
+        const protectedSlot = i => !!(doc?.done?.[`p${phase}b${i}`] || doc?.went?.[`p${phase}b${i}`]);
+        const removable = i => !protectedSlot(i) && /^(grammar(?:\.|$)|writing(?:\.t[123]|$)|comp\.(co|ce)$|vocab(?:\.|$))/.test(original[i][5]);
+        const candidates = [...new Set([...order, ...slots.filter(i => removable(i))])];
+        const skip = choices.length ? candidates.find(i => removable(i)) : undefined;
+        if (skip != null) slots = slots.filter(i => i !== skip);
+      }
+    }
+    // The seventh item is its original position, never its position in the shortened list.
+    return slots.map(i => {
+      const block = [...original[i], i];
+      if (dateIsLight(date) && /^comp\.(co|ce)$/.test(block[5])) block[3] = "Une seule série à ton niveau, puis la correction de tes erreurs. Les séries supplémentaires sont facultatives.";
+      return block;
+    });
   }
-  const blockKey = (phase, i) => `p${phase}b${i}`;
-  // A day is judged against its plan as it was when ticked (doc.total), so later edits to the templates don't rewrite past days.
+  const blockKey = (phase, i, plan) => `p${phase}b${plan?.[i]?.[6] ?? i}`;
+  function keepPlan(doc, plan, date) {
+    if (plan) { doc.total = plan.length; if (date >= LIGHT_PLAN_FROM) doc.planSlots = plan.map(b => b[6]); }
+  }
   function dayStats(date) {
-    const doc = S.days.get(date);
-    const phase = (doc && doc.phase) || settings().phase;
-    const plan = planFor(phase, date);
+    const doc = S.days.get(date), phase = doc?.phase || settings().phase, plan = planFor(phase, date);
     if (!plan) return null;
-    const done = (doc && doc.done) || {};
-    const total = (doc && doc.total) || plan.length;
-    let n = 0;
-    for (let i = 0; i < total; i++) if (done[blockKey(phase, i)]) n++;
-    return { n, total, phase };
+    const done = doc?.done || {};
+    // Older totals keep the original meaning; new days count the actual retained block IDs.
+    const keys = date < LIGHT_PLAN_FROM ? Array.from({ length: doc?.total || plan.length }, (_, i) => blockKey(phase, i)) : plan.map((_, i) => blockKey(phase, i, plan));
+    return { n: keys.filter(k => done[k]).length, total: keys.length, phase };
   }
   function setBlock(date, key, val) {
     const cur = S.days.get(date);
     const doc = cur ? clone(cur) : { phase: settings().phase, done: {} };
+    const plan = planFor(doc.phase || settings().phase, date);
     doc.done = doc.done || {};
     if (val) doc.done[key] = true; else delete doc.done[key];
     doc.phase = doc.phase || settings().phase;
-    const plan = planFor(doc.phase, date);
-    if (plan) doc.total = plan.length;
+    keepPlan(doc, plan, date);
     // A block ticked by hand today keeps the coach's minutes for it, as one the app ticks keeps what was done.
     doc.min = Object.assign({}, doc.min);
     if (!val) delete doc.min[key];
-    else if (plan && date === todayStr() && doc.min[key] == null && doc.phase === settings().phase) { const i = plan.findIndex((b, k) => blockKey(doc.phase, k) === key); if (i >= 0) doc.min[key] = coach(plan[i], i, date).min; }
+    else if (plan && date === todayStr() && doc.min[key] == null && doc.phase === settings().phase) { const i = plan.findIndex((b, k) => blockKey(doc.phase, k, plan) === key); if (i >= 0) doc.min[key] = coach(plan[i], i, date).min; }
     put("days", date, doc);
   }
   // Start on a block of today's plan (or in the next bar): what it opened is kept on the day, so the block knows its
@@ -560,8 +591,9 @@
     const doc = cur ? clone(cur) : { phase: s.phase, done: {} };
     doc.went = Object.assign({}, doc.went);
     const w = doc.went[key] || {}, part = st.parts.find((x) => !x.done);
-    doc.went[key] = Object.assign({ at: Date.now() }, w, { go: st.go }, part && part.clock && !w.clock ? { clock: part.clock } : {});
+    doc.went[key] = Object.assign({ at: Date.now(), singleSet: dateIsLight(t) && !w.at }, w, { go: st.go }, part && part.clock && !w.clock ? { clock: part.clock } : {});
     doc.phase = doc.phase || s.phase;
+    keepPlan(doc, plan, t);
     put("days", t, doc);
     st.launch();
   }
@@ -679,7 +711,7 @@
     }).sort((a, b) => b.need - a.need);
   }
   // The topics this phase's week already gives a slot to.
-  const weekTopics = (phase) => new Set(arr((T.PLAN[phase] || {}).days).flat().map((b) => b[5]).filter((g) => /^grammar\.[a-z]/.test(g)).map((g) => g.split(".")[1]).filter((id) => TOPIC[id]));
+  const weekTopics = (phase) => new Set(Array.from({ length: 6 }, (_, i) => planFor(phase, addDays(mondayOf(todayStr()), i)) || []).flat().map((b) => b[5]).filter((g) => /^grammar\.[a-z]/.test(g)).map((g) => g.split(".")[1]).filter((id) => TOPIC[id]));
   // Your own pace: seconds a drill question (your last 5 rounds that kept their time), seconds a review card and
   // a new card (your last 5 sessions), and minutes for each writing task (your last 3 on the clock).
   function myPace() {
@@ -707,10 +739,11 @@
   const partHit = (p, token) => (p.exact ? token === p.tok : token === p.tok || token.startsWith(p.tok + "."));
   const chip = (t, cls) => ({ t, cls: cls || "" });
 
-  // Listening and reading: one set at your level (reading's clock at your pace), your misses gone over, and a pass
-  // adds a stretch set: one pace step faster, or at exam pace already, the next level at relaxed pace.
+  // Listening and reading: one set at your level and a review of the misses. A legacy session already
+  // started can still include its stretch set; new lighter sessions never add one automatically.
   function compStep(skill, b, key, date) {
     const w = wentOf(date, key), lad = compLadder(skill), P = phaseInfo();
+    const singleSet = dateIsLight(date) && (!w || w.singleSet === true);
     const done = list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.date === date && (c.ts || 0) >= ((w && w.at) || 0)).sort((a, b2) => (a.ts || 0) - (b2.ts || 0));
     const first = firstTries(list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.total));
     const accAt = (lvl) => { const xs = first.filter((c) => c.level === lvl).slice(-3); return xs.length ? avg(xs.map((c) => c.score / c.total)) : 0.7; };
@@ -744,8 +777,8 @@
     const st = stretchOf(lvl, k1 < 0 ? (pace ? pace.k : 2) : k1);
     const passed = done[0] ? passOf(done[0], clock1) : false;
     const parts = [{ kind: "set", tok: "comp." + skill, exact: true, done: !!done[0], level: lvl, clock: clock1, min: setMin(lvl, clock1, done[0]) }];
-    if (passed && !untimed) parts.push({ kind: "stretch", tok: "comp." + skill, exact: true, done: !!done[1], level: st.level, clock: st.clock, min: setMin(st.level, st.clock, done[1]) });
-    const expect = done[0] || untimed ? 0 : pPass(lvl) * (SWITCH_MIN + setMin(st.level, st.clock));
+    if (passed && !untimed && !singleSet) parts.push({ kind: "stretch", tok: "comp." + skill, exact: true, done: !!done[1], level: st.level, clock: st.clock, min: setMin(st.level, st.clock, done[1]) });
+    const expect = done[0] || untimed || singleSet ? 0 : pPass(lvl) * (SWITCH_MIN + setMin(st.level, st.clock));
     const min = parts.reduce((a, p) => a + p.min, 0) + (parts.length > 1 ? SWITCH_MIN : 0) + expect;
     const cl = (c) => `${fmtClock(c)} clock`;
     const kName = (c, l) => { const k = PACE_STEPS.findIndex((s) => Math.round(s[0] * (CE_PACE[l] || 90) * CE_SET_SIZE) === c); return k >= 0 ? PACE_STEPS[k][1] : ""; };
@@ -755,7 +788,7 @@
     const cur = parts.find((p) => !p.done);
     if (!done[0]) {
       line1 = untimed ? `${lvl} set, untimed, then your misses.` : skill === "ce" ? `${lvl} set · ${cl(clock1)} (${kName(clock1, lvl)}), then your misses.` : `${lvl} set: once through, then your misses with the transcript.`;
-      line2 = untimed ? "A baseline: no clock yet." : `${passTxt} → ${stTxt}.`;
+      line2 = singleSet ? "Une seule série, puis la correction de tes erreurs. Une autre série reste facultative." : untimed ? "A baseline: no clock yet." : `${passTxt} → ${stTxt}.`;
       chips = skill === "ce" && !untimed ? [chip(lvl, "lvl"), chip(fmtClock(clock1) + " · " + kName(clock1, lvl))] : [chip(lvl, "lvl")];
     } else if (cur) {
       line1 = skill === "ce" ? `Part 2 · ${cur.level} set · ${cl(cur.clock)} (${kName(cur.clock, cur.level)}).` : `Part 2 · ${cur.level} set: once through, then your misses.`;
@@ -763,7 +796,7 @@
       chips = [chip(cur.level, "lvl")].concat(skill === "ce" ? [chip(fmtClock(cur.clock) + " · " + kName(cur.clock, cur.level))] : []);
     } else {
       line1 = `Done: ${done.slice(0, parts.length).map((c) => `${c.score}/${c.total}`).join(" then ")}.`;
-      line2 = passed || !done[0] ? "" : `${passTxt} adds a stretch set next time.`;
+      line2 = singleSet ? "Objectif du jour terminé. Tu peux t’arrêter après la correction." : passed || !done[0] ? "" : `${passTxt} adds a stretch set next time.`;
     }
     const meter = lad.level === "B1" ? { label: `B2 at ${pct(lad.up)}`, have: lad.have, need: lad.up } : { label: "B2 · stay above 50%", have: lad.have, need: LADDER_DOWN };
     let adapted = "";
@@ -976,7 +1009,7 @@
 
   // What a block of the day's plan is today. Only today's blocks are coached; other days show the plan.
   function coach(b, i, date) {
-    const key = blockKey(settings().phase, i), go = b[5];
+    const key = blockKey(settings().phase, b[6] ?? i), go = b[5];
     const plain = (tok) => ({ go, line1: b[3] || "", line2: "", chips: [], parts: tok ? [{ kind: "free", tok, exact: true, done: !!didOf(wentOf(date, key)).free, min: b[1] }] : [], min: b[1], launch: () => goTo("#" + go) });
     let st;
     // Saturdays in Phase 2: until the CO Examen blanc is done, it replaces the two timed sets.
@@ -1020,10 +1053,10 @@
     doc.went = doc.went || {};
     doc.min = doc.min || {};
     doc.phase = s.phase;
-    doc.total = plan.length;
+    keepPlan(doc, plan, t);
     let hit = -1, merge = false;
     for (let i = 0; i < plan.length; i++) {
-      const key = blockKey(s.phase, i);
+      const key = blockKey(s.phase, i, plan);
       if (doc.done[key]) continue;
       const st = coach(plan[i], i, t);
       // A part the token finishes: the first not done yet, or one already counted as done from what was saved
@@ -1031,7 +1064,7 @@
       const hits = st.parts.filter((x) => partHit(x, token));
       const p = hits.find((x) => !x.done) || hits[0] || (!st.parts.length && (token === plan[i][5] || token.startsWith(plan[i][5] + ".")) ? {} : null);
       if (!p) continue;
-      const w = Object.assign({ go: st.go, at: 0 }, doc.went[key] || {});
+      const w = Object.assign({ go: st.go, at: 0, singleSet: dateIsLight(t) && !doc.went[key] }, doc.went[key] || {});
       if (p.kind && p.kind !== "set" && p.kind !== "stretch") w.did = Object.assign({}, w.did, { [p.kind]: info && info.min > 0 ? Math.round(info.min * 10) / 10 : true });
       doc.went[key] = w;
       put("days", t, doc);
@@ -1043,7 +1076,7 @@
         merge = !!st.merge;
         hit = i;
         // The CO Examen blanc that stands in for Saturday's timed sets ticks them both.
-        if (merge) for (let j = i + 1; j < plan.length; j++) { const kj = blockKey(s.phase, j); if (!doc.done[kj] && coach(plan[j], j, t).merge) { doc.done[kj] = true; doc.min[kj] = 0; put("days", t, doc); } }
+        if (merge) for (let j = i + 1; j < plan.length; j++) { const kj = blockKey(s.phase, j, plan); if (!doc.done[kj] && coach(plan[j], j, t).merge) { doc.done[kj] = true; doc.min[kj] = 0; put("days", t, doc); } }
         if (dayComplete(t)) ui.thunk = t;
         ui.nextUp = { date: t, from: key };
       } else ui.nextUp = { date: t, from: key, part: true };
@@ -1482,7 +1515,7 @@
     // One box per criterion, ticked in blue ink when it's met; they're pressed in, one after another, as the page opens.
     const boxes = ck.crit.length ? `<div class="checkin"><small>Enregistrement · Check-in</small><span class="ck-row" role="img" aria-label="${ck.n} of ${ck.crit.length} exit criteria met">${ck.crit.map((c, i) => `<i class="ck${ck.ok[i] ? " on" : ""}" data-tip="${esc(c.text)}\n${ck.ok[i] ? "Met" : "Not met yet"}"${ck.ok[i] ? ` data-m="press" data-k="ck-${s.phase}-${esc(c.id)}"` : ""}>${ck.ok[i] ? `<svg viewBox="0 0 24 24" aria-hidden="true">${TICK_PATH}</svg>` : ""}</i>`).join("")}</span></div>` : "";
     const t = todayStr(), plan = planFor(s.phase, t), done = (S.days.get(t) || {}).done || {};
-    const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k)]) : -1;
+    const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k, plan)]) : -1;
     const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${plan[open][2]}`;
     const mins = plan ? `${planMins(t, s.phase)} min` : "Repos";
     return `<div class="pass${ck.all ? " boarded" : ""}"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
@@ -2934,9 +2967,9 @@
     const nu = ui.nextUp, t = todayStr(), s = settings(), plan = planFor(s.phase, t);
     if (!nu || nu.date !== t || !plan) return "";
     const done = (S.days.get(t) || {}).done || {};
-    const fromI = plan.findIndex((b, k) => blockKey(s.phase, k) === nu.from);
+    const fromI = plan.findIndex((b, k) => blockKey(s.phase, k, plan) === nu.from);
     // A block with a part still to do comes first; otherwise the next block not ticked.
-    const i = fromI >= 0 && !done[nu.from] ? fromI : plan.findIndex((b, k) => !done[blockKey(s.phase, k)]);
+    const i = fromI >= 0 && !done[nu.from] ? fromI : plan.findIndex((b, k) => !done[blockKey(s.phase, k, plan)]);
     const was = fromI >= 0 ? `<span class="nu-was"><svg class="nu-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg>${i === fromI ? "Part 1 · " : ""}${esc(plan[fromI][2])}</span>` : "";
     const x = `<button class="btn ghost sm nu-x" data-act="nextup-close" aria-label="Dismiss">×</button>`;
     if (i < 0) return `<div class="nu-in nu-day">${was}<span class="nu-next"><b class="nu-hand">Journée terminée&#160;!</b></span><a class="btn sm primary" href="#today">See the stamp</a>${x}</div>`;
@@ -4828,7 +4861,7 @@
   function blockMins(date, plan, phase, steps) {
     const saved = (S.days.get(date) || {}).min || {};
     const st = steps || (date === todayStr() && phase === settings().phase ? plan.map((b, i) => coach(b, i, date)) : null);
-    return plan.map((b, i) => { const k = blockKey(phase, i); return saved[k] != null ? saved[k] : st ? st[i].min : b[1]; });
+    return plan.map((b, i) => { const k = blockKey(phase, i, plan); return saved[k] != null ? saved[k] : st ? st[i].min : b[1]; });
   }
   const planMins = (date, phase) => { const plan = planFor(phase, date); return plan ? blockMins(date, plan, phase).reduce((a, x) => a + x, 0) : 0; };
   // The minutes of each skill in a day's ticked blocks: what was saved with each tick, or for days ticked before
@@ -4837,7 +4870,7 @@
     const doc = S.days.get(date);
     if (!doc || !doc.done) return {};
     const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {}, saved = doc.min || {};
-    if (plan) plan.forEach((b, i) => { const k = blockKey(phase, i); if (doc.done[k]) by[b[0]] = (by[b[0]] || 0) + (saved[k] != null ? saved[k] : b[1]); });
+    if (plan) plan.forEach((b, i) => { const k = blockKey(phase, i, plan); if (doc.done[k]) by[b[0]] = (by[b[0]] || 0) + (saved[k] != null ? saved[k] : b[1]); });
     return by;
   }
   const minTotal = (by) => Object.values(by).reduce((a, b) => a + b, 0);
@@ -4888,16 +4921,18 @@
         const steps = sel === t ? plan.map((b, i) => coach(b, i, t)) : null;
         const bm = blockMins(sel, plan, s.phase, steps);
         const mins = bm.reduce((a, x) => a + x, 0);
-        const doneN = plan.filter((b, i) => done[blockKey(s.phase, i)]).length;
-        const doneMin = bm.reduce((a, x, i) => a + (done[blockKey(s.phase, i)] ? x : 0), 0);
+        const doneN = plan.filter((b, i) => done[blockKey(s.phase, i, plan)]).length;
+        const doneMin = bm.reduce((a, x, i) => a + (done[blockKey(s.phase, i, plan)] ? x : 0), 0);
         const pnote = T.PLAN[s.phase].note;
-        const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i)]);
+        const omitted = originalPlan(s.phase, sel).find((b, i) => !plan.some(p => p[6] === i));
+        const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i, plan)]);
         if (sel === t) rm = remyToday(plan, doneN, mins - doneMin);
         const progress = dayComplete(sel) ? tbStamp(sel) : dayRing(sel, doneN, plan.length, doneMin, mins);
         body = `<section class="day-plan stack" aria-labelledby="plan-title">
           <div class="plan-heading"><h2 class="h2" id="plan-title" lang="fr">Au programme</h2>${progress}</div>
+          ${plan.length < originalPlan(s.phase, sel).length ? `<p class="notice small">Programme allégé : ${esc(omitted[2])} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre.</p>` : ""}
           <ol class="blocks">${plan.map((b, i) => todayBlock(b, i, sel, s.phase, done, i === next, steps && steps[i])).join("")}</ol>
-          ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p></details>` : ""}
+          ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p>${dateIsLight(sel) ? `<p class="small muted">Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.</p>` : ""}</details>` : ""}
         </section>`;
       }
       if (!plan && sel === t) rm = remyToday(null);
@@ -4948,7 +4983,7 @@
   // their title and open with a tap; done ones shrink to a ticked line. Today's blocks are the coach's: what Start
   // presents, in two short lines, its own minutes and, when the plan was changed for you, why.
   function todayBlock(b, i, sel, phase, done, isNext, st) {
-    const key = blockKey(phase, i), isDone = !!done[key], fk = `blk-${sel}-${key}`;
+    const key = blockKey(phase, b[6] ?? i), isDone = !!done[key], fk = `blk-${sel}-${key}`;
     const tick = `<label class="tick"><input type="checkbox" data-change="tick" data-date="${sel}" data-key="${key}" ${isDone ? "checked" : ""} aria-label="Mark “${esc((st && st.title) || b[2])}” done"><svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"${isDone ? ` data-m="tick" data-k="t-${sel}-${key}"` : ""}><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg></label>`;
     const cls = `block${isDone ? " done" : ""}${isNext ? " next" : ""}`;
     if (st) {
@@ -5038,7 +5073,7 @@
   // you are from the bar, and where the plan deals with it. Most serious first, four at most.
   function blockers() {
     const s = settings(), rc = recentCats(3), out = [];
-    const week = arr((T.PLAN[s.phase] || {}).days);
+    const week = Array.from({ length: 6 }, (_, i) => planFor(s.phase, addDays(mondayOf(todayStr()), i)) || []);
     const dayOf = (tid) => week.findIndex((d) => d.some((b) => b[5] === "grammar." + tid || b[5].startsWith("grammar." + tid + ".")));
     const mixedDay = week.findIndex((d) => d.some((b) => b[5] === "grammar.mixed"));
     const EN_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -7363,7 +7398,7 @@
       const phase = doc.phase || settings().phase;
       const plan = planFor(phase, date) || [];
       plan.forEach((block, i) => {
-        if (doc.done[blockKey(phase, i)]) day(date).blocks.push(block[2]);
+        if (doc.done[blockKey(phase, i, plan)]) day(date).blocks.push(block[2]);
       });
     }
     return days;
@@ -8021,7 +8056,7 @@
     return Array.from({ length: n }, (_, i) => {
       const d = addDays(D.t, i), plan = planFor(s.phase, d), done = ((S.days.get(d) || {}).done) || {};
       const mins = plan ? blockMins(d, plan, s.phase) : [], by = {}, blocks = [];
-      if (plan) plan.forEach((b, k) => { if (!i && done[blockKey(s.phase, k)]) return; by[b[0]] = (by[b[0]] || 0) + mins[k]; blocks.push(b[2]); });
+      if (plan) plan.forEach((b, k) => { if (!i && done[blockKey(s.phase, k, plan)]) return; by[b[0]] = (by[b[0]] || 0) + mins[k]; blocks.push(b[2]); });
       const due = D.srs.filter(([, st]) => st.due && (i ? st.due === d : st.due <= d)).length;
       return { d, i, plan: !!plan, by, total: minTotal(by), blocks, due, rev: (due * pace.rc) / 60 };
     });

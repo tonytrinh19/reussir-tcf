@@ -51,6 +51,16 @@ To regenerate the collection, run `python3 tools/import_writing_papers.py` with 
 
 Each writing mock appears as one exam with all three task scores. Open a result to review the saved answers, then return with the same search and filters. Grouping is display-only: existing writing records, grading, charts and learning progress remain unchanged. Run `node tools/check_results.js` for the results-model regression checks.
 
+## Lighter daily coach plan
+
+From 16 November 2026, the daily plan removes one structured block while retaining the easy reading/listening. The omitted subjects alternate over two weeks so Phase 3 still covers reading, listening, all three writing tasks and its grammar topics. Full mock lengths and their correction time are preserved; on mock-only days the card block is the one removed. Phase 5's single optional dress rehearsal is unchanged.
+
+Anything already started or completed is kept. For the current partially completed day, another untouched block is removed if possible. Once you start or tick a block, the retained original slot IDs are saved in `days.planSlots`; this prevents existing checks and minutes from shifting to a different task. Earlier days and completed legacy days retain their original plan.
+
+New coached reading/listening sessions require one set plus reviewing mistakes. Passing no longer adds a required stretch set. Existing sessions that have already started keep their original parts. Extra practice remains available on the practice pages. Estimates still reflect personal pace, so full mock days can remain longer than ordinary days.
+
+`node tools/check_coach.js` covers the two-week rotation, preserved historical progress and the single-set rule.
+
 ## Options
 
 ```bash
