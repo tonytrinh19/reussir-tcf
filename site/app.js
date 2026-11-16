@@ -6593,6 +6593,45 @@
   // Claude corrects the three when you hand in. The mock's score is the mean of the three tasks' scores, a blank task
   // counting 0: an estimate, since FEI doesn't publish how it combines them.
   const EE_HOME = "writing.mock", EE_IP = "writing--mock", EE_MIN = 60, EE_TASKS = ["t1", "t2", "t3"];
+  let eePapers = null, eePapersLoading = false, eePapersError = false;
+  async function eeLoadPapers() {
+    if (eePapersLoading || eePapers) return;
+    eePapersLoading = true; eePapersError = false;
+    try {
+      const response = await fetch("exam-sources/writing.json");
+      if (!response.ok) throw new Error("writing_papers");
+      const data = await response.json();
+      if (!Array.isArray(data.papers) || !EE_TASKS.every(t => Array.isArray(data.tasks[t]) && data.tasks[t].length)) throw new Error("writing_papers");
+      eePapers = data;
+    } catch (_) { eePapersError = true; }
+    eePapersLoading = false;
+    if (route.view === "writing" && route.args[0] === "mock" && !eeRunning()) render(true);
+  }
+  function eePaperPicker() {
+    if (!eePapers && !eePapersError) eeLoadPapers();
+    if (!eePapers) return `<p class="small muted">${eePapersError ? 'Impossible de charger les sujets PDF. <button class="btn sm" data-act="ee-load-papers">Réessayer</button>' : "Chargement des sujets PDF…"}</p>`;
+    const selected = ui.form["ee-paper"] || "builtin";
+    const options = eePapers.papers.map(p => `<option value="${esc(p.id)}"${selected === p.id ? " selected" : ""}>${esc(p.title)}</option>`).join("");
+    const custom = selected === "custom" ? EE_TASKS.map(t => `<label class="field">${esc(T.WRITING[t].name)}<select id="ee-pick-${t}" data-change="form" data-k="ee-pick-${t}">${eePapers.tasks[t].map(p => `<option value="${esc(p.id)}"${ui.form["ee-pick-" + t] === p.id ? " selected" : ""}>${esc(p.source.title + " · " + clip(p.q, 100))}</option>`).join("")}</select></label>`).join("") : "";
+    return `<div class="panel flat stack ee-paper-picker"><p class="eyebrow">Sujets de tes PDF</p>
+      <label class="field">Choisir les sujets<select id="ee-paper" data-change="ee-paper"><option value="builtin"${selected === "builtin" ? " selected" : ""}>Sujets habituels · sélection automatique</option><option value="custom"${selected === "custom" ? " selected" : ""}>Composer mon examen avec les sujets PDF</option><optgroup label="Examens complets des PDF">${options}</optgroup></select></label>
+      ${custom}<p class="small muted">${eePapers.papers.length} examens complets disponibles. Tu peux aussi choisir chaque tâche séparément, y compris les sujets des recueils mensuels. Les sections incomplètes restent consultables dans Annales.</p></div>`;
+  }
+  function eeChosenPaper() {
+    const selected = document.getElementById("ee-paper")?.value || "builtin";
+    if (selected === "builtin") return { prompts: Object.fromEntries(EE_TASKS.map(t => [t, eePrompt(t)])), paperTitle: "" };
+    if (!eePapers) return null;
+    const paper = eePapers.papers.find(p => p.id === selected);
+    if (selected !== "custom" && !paper) return null;
+    const prompts = {};
+    for (const t of EE_TASKS) {
+      const id = selected === "custom" ? document.getElementById("ee-pick-" + t)?.value : paper.tasks[t];
+      const prompt = eePapers.tasks[t].find(p => p.id === id);
+      if (!prompt) return null;
+      prompts[t] = clone(prompt);
+    }
+    return { prompts, paperTitle: paper?.title || "Sélection personnelle · sujets PDF" };
+  }
   // A task's prompt: the first you haven't written yet, or else the one written longest ago.
   function eePrompt(task) {
     const W = T.WRITING[task], lastAt = new Map();
@@ -6616,7 +6655,7 @@
     const e = ui.ee;
     if (!e || e.done) return;
     const left = timer.home === EE_HOME ? Math.max(0, Math.round(timerRemaining())) : null;
-    ipSave(EE_IP, { kind: "eemock", title: "Examen blanc EE", route: EE_HOME, mockId: e.id, prompts: e.prompts, texts: e.texts, task: e.task, spent: e.spent, left }, delay);
+    ipSave(EE_IP, { kind: "eemock", title: "Examen blanc EE", route: EE_HOME, mockId: e.id, paperTitle: e.paperTitle || "", prompts: e.prompts, texts: e.texts, task: e.task, spent: e.spent, left }, delay);
   }
   function eeStart() {
     if (eeRunning()) { goTo("#" + EE_HOME); return; }
@@ -6627,7 +6666,9 @@
     // One clock serves every page, so a practice exam already running keeps it.
     if (examRunning()) { toast("A practice exam is running: hand it in or pause it first."); return; }
     if (ipGet(EE_IP)) { ipResume(EE_IP); return; }
-    ui.ee = { id: uid(), prompts: Object.fromEntries(EE_TASKS.map((t) => [t, eePrompt(t)])), texts: { t1: "", t2: "", t3: "" }, task: "t1", spent: { t1: 0, t2: 0, t3: 0 }, at: Date.now(), done: false };
+    const chosen = eeChosenPaper();
+    if (!chosen) { toast("Choisis un sujet pour chaque tâche avant de commencer."); return; }
+    ui.ee = { id: uid(), prompts: chosen.prompts, paperTitle: chosen.paperTitle, texts: { t1: "", t2: "", t3: "" }, task: "t1", spent: { t1: 0, t2: 0, t3: 0 }, at: Date.now(), done: false };
     timerSet(EE_MIN * 60, "Examen blanc EE", EE_HOME);
     tone("start");
     timerStart();
@@ -6638,7 +6679,7 @@
   function eeResume(ip) {
     if (eeRunning() && ui.ee.id === ip.mockId) { goTo("#" + EE_HOME); return; }
     if (examRunning()) { toast("A practice exam is running: hand it in or pause it first."); return; }
-    ui.ee = { id: ip.mockId || uid(), prompts: clone(ip.prompts), texts: Object.assign({ t1: "", t2: "", t3: "" }, clone(ip.texts)), task: EE_TASKS.includes(ip.task) ? ip.task : "t1", spent: Object.assign({ t1: 0, t2: 0, t3: 0 }, clone(ip.spent)), at: Date.now(), done: false };
+    ui.ee = { id: ip.mockId || uid(), paperTitle: ip.paperTitle || "", prompts: clone(ip.prompts), texts: Object.assign({ t1: "", t2: "", t3: "" }, clone(ip.texts)), task: EE_TASKS.includes(ip.task) ? ip.task : "t1", spent: Object.assign({ t1: 0, t2: 0, t3: 0 }, clone(ip.spent)), at: Date.now(), done: false };
     timerSet(EE_MIN * 60, "Examen blanc EE", EE_HOME);
     if (ip.left != null) timer.left = Math.min(EE_MIN * 60, Math.max(0, Number(ip.left)));
     tone("start");
@@ -6679,7 +6720,7 @@
       const text = str(e.texts[t]);
       if (!text.trim()) return;
       const p = e.prompts[t];
-      put("writing", uid(), { task: t, date: todayStr(), ts: ts + k, prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: Math.max(1, Math.round((e.spent[t] || 0) / 60)), fb: null, mock: { id: e.id, min, up } });
+      put("writing", uid(), { task: t, date: todayStr(), ts: ts + k, prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: Math.max(1, Math.round((e.spent[t] || 0) / 60)), fb: null, source: p.source || null, mock: { id: e.id, min, up, paperTitle: e.paperTitle || "" } });
     });
     ipDrop(EE_IP);
     Object.assign(e, { done: true, confirm: false, view: null });
@@ -6702,7 +6743,7 @@
     list("writing").forEach((w) => {
       const m = w.mock;
       if (!m || !m.id) return;
-      const x = by.get(m.id) || { id: m.id, date: w.date, ts: w.ts || 0, min: m.min, up: !!m.up, tasks: {} };
+      const x = by.get(m.id) || { id: m.id, date: w.date, ts: w.ts || 0, min: m.min, up: !!m.up, paperTitle: m.paperTitle || "", tasks: {} };
       x.tasks[w.task] = w;
       by.set(m.id, x);
     });
@@ -6790,12 +6831,13 @@
   function eeIntro() {
     const ip = ipGet(EE_IP), mocks = eeMocks();
     const plan = EE_TASKS.map((t) => { const W = T.WRITING[t]; return `<li><b>${esc(W.name)}</b> · ${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} min</li>`; }).join("");
-    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">not corrected</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
+    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">not corrected</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
     return `<section class="panel stack" data-spot>
         <p class="h3 with-ico">${ico("exam")}Examen blanc · Expression écrite</p>
         <p class="small">The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p>
         <ul class="small ee-plan">${plan}</ul>
-        <p class="small muted">Each task gets a prompt you haven't written yet. ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
+        <p class="small muted">${(ui.form["ee-paper"] || "builtin") === "builtin" ? "Each task gets a prompt you haven't written yet." : "Les sujets PDF sélectionnés sont conservés ensemble pour cet examen."} ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
+        ${ip ? "" : eePaperPicker()}
         ${ip ? `<div class="notice"><b>You have an unfinished mock:</b> ${esc(ipProgress(ip))}.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${EE_IP}">Resume the mock</button>${discardBtn(EE_IP)}</div></div>` : `<div class="row"><button class="btn primary" data-act="ee-start">Start the exam · 60:00</button></div>`}
       </section>
       <section class="sec"><div class="sec-head"><h2 class="h2">Tes examens blancs · Your mocks</h2><span class="small muted">${mocks.length ? `${mocks.length} so far, newest first` : ""}</span></div>
@@ -6810,10 +6852,13 @@
     const docs = e.task === "t3" && p.docs ? `<div class="docs">${p.docs.map((d, k) => `<div class="doc"><p class="eyebrow">Document ${k + 1}</p><p class="fr">${typo(d.text)}</p><p class="who">${esc(d.who)}</p></div>`).join("")}</div>` : "";
     const issues = e.confirm ? eeIssues(e) : [];
     return `<div class="row between"><p class="h3 with-ico">${ico("exam")}Examen blanc EE</p>${clock}</div>
+      ${e.paperTitle ? `<p class="small muted" lang="fr">${esc(e.paperTitle)}</p>` : ""}
       ${tabs}
       <section class="panel prompt-card" data-m="slide" data-k="ee-${esc(e.id)}-${e.task}">
-        <span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} of the 60 min</span>
+        <span class="eyebrow">${esc(p.source ? W.name : W.kind)} · ${W.min}–${W.max} words · about ${W.exam} of the 60 min</span>
         <p class="fr">${typo(p.q)}</p>
+        ${p.source && e.task === "t3" ? `<p class="small fr">Comparez les deux points de vue, puis donnez votre opinion sur le sujet (120–180 mots).</p>` : ""}
+        ${p.source ? `<p class="small muted">${esc(p.source.title)} · page ${p.source.page}</p>` : ""}
         ${p.en ? `<p class="small muted en-gloss">${esc(p.en)}</p>` : ""}
         ${docs}
       </section>
@@ -6833,11 +6878,12 @@
       const W = T.WRITING[t], w = m.tasks[t];
       if (!w) return `<div class="panel flat stack tight ee-task"><p class="eyebrow">${esc(W.name)}</p><p class="small"><span class="pill bad">Blank</span> counts 0</p></div>`;
       const st = w.fb ? (w.fb.score20 != null ? `<b class="ee-score">${w.fb.score20}<small>/20</small></b> <span class="pill">${esc(w.fb.level || "")}</span>` : `<span class="pill">${esc(w.fb.level || "Corrected")}</span>`) : busy ? `<span class="small muted thinking">Claude is correcting</span>` : `<span class="small muted">Not corrected</span>`;
-      return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div><button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
+      return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div>${w.source ? `<a class="btn ghost sm" href="pdf-viewer.html?file=${encodeURIComponent(w.source.pdf)}#page=${w.source.page}" target="_blank" rel="noopener">Source PDF ↗</a>` : ""}<button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
     }).join("");
     const nc = m.score != null ? nclcOf("ee", m.score) : null;
     return `<section class="panel stack" data-m="pop" data-k="eer-${esc(m.id)}">
         <p class="eyebrow">Examen blanc · Expression écrite · ${shortDate(m.date)}${m.up ? " · handed in when time ran out" : ""}</p>
+        ${m.paperTitle ? `<p class="small muted">${esc(m.paperTitle)}</p>` : ""}
         <div class="row"><span class="scorebig">${m.score != null ? `<span data-tween="ees-${esc(m.id)}" data-tw="count" data-to="${m.score}">${m.score}</span>/20` : "…/20"}</span>${m.score != null ? `${nclcTag(m.score, "ee")}<span class="pill">${eeCefr(m.score)}</span>` : ""}</div>
         <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : claudeOn() ? "Not corrected yet." : "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI."}</p>
         ${m.score != null ? greet(...remyScore("exam", m.score, 20, { nclc: nc || 0, key: m.id }), "sm") : ""}
@@ -8625,7 +8671,8 @@
     "w-del": (el) => { if (ui.w.viewing === el.dataset.id) ui.w.viewing = null; ui.confirm = ""; remove("writing", el.dataset.id); },
     // The Examen blanc EE (#writing.mock).
     "ee-start": eeStart,
-    "ee-new": () => { ui.ee = null; eeStart(); },
+    "ee-load-papers": eeLoadPapers,
+    "ee-new": () => { ui.ee = null; ui.eeCopyOut = null; render(true); document.getElementById("ee-paper")?.focus(); window.scrollTo(0, 0); },
     "ee-task": (el) => eeSwitch(el.dataset.t),
     "ee-hand-in": (el) => { if (el.dataset.force && ui.ee) ui.ee.confirm = true; eeHandIn(); },
     "ee-keep": () => { if (ui.ee) ui.ee.confirm = false; render(true); },
@@ -8754,6 +8801,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "ee-paper": (el) => { ui.form["ee-paper"] = el.value; render(true); document.getElementById("ee-paper")?.focus(); },
     "library-theme": selectLibraryTheme,
     "card-draft": updateCardDraft,
     "c-seek": () => coSeekDone(),

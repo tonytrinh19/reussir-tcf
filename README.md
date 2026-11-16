@@ -35,6 +35,16 @@ Twenty listening papers also appear in **Compréhension → Compréhension orale
 
 The collection lives in `site/exam-sources/`: original PDFs, extracted pictures, question JSON and deduplicated AAC recordings (approximately 425 MB total). Existing learning progress and the database schema are unchanged. Run `npm run check` to validate the content and asset references.
 
+## Writing mock exams from PDFs
+
+In **Écrit → Examen blanc**, use **Sujets de tes PDF** to select one of 177 complete three-task exams, or choose **Composer mon examen avec les sujets PDF** to pick each task separately from 631 available prompts. The original built-in subject selection remains available.
+
+The 60-minute timer, word counts, draft saving, resume, submission and correction flows work as before. Both Tâche 3 documents are shown. Saved attempts keep the exact prompts, source references and exam title, and link back to the original PDF after submission. Model corrections are excluded from the question bank.
+
+`site/exam-sources/writing.json` contains the extracted subjects, complete combinations and source gaps. Older monthly files list independent task choices; these are offered individually without inventing original combinations. Thirteen incomplete sections remain in the source PDFs rather than becoming incomplete timed exams. Repeated topics across different PDFs retain their source references.
+
+To regenerate the collection, run `python3 tools/import_writing_papers.py` with `pdfplumber` installed, then `node tools/check_writing_papers.js`. The importer normalizes Unicode ligatures and known PDF font mappings for “ff”; other source wording is retained. June/July 2023 combinations have no printed numbers and are numbered by their order in the PDF.
+
 ## Options
 
 ```bash

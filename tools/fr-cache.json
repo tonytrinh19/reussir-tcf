@@ -5496,5 +5496,9 @@
  "Annales": "Annales",
  "Listening exam papers": "Sujets de compréhension orale",
  "Question {0}": "Question {0}",
- "The recording could not load. Resume to try again.": "Impossible de charger l’enregistrement. Reprends pour réessayer."
+ "The recording could not load. Resume to try again.": "Impossible de charger l’enregistrement. Reprends pour réessayer.",
+ "page": "page",
+ "{0} · page {1}": "{0} · page {1}",
+ "page {0}": "page {0}",
+ "Source PDF ↗": "Source PDF ↗"
 }

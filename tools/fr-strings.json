@@ -42,7 +42,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>"
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>"
   ]
  },
  {
@@ -3536,7 +3536,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -3611,6 +3611,15 @@
   "where": "app",
   "ctx": [
    "<span><span><i></i></span><small>… · now …</small></span>"
+  ]
+ },
+ {
+  "id": "194c5f81d3e5",
+  "text": "{0} · page {1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>… · page …</p>"
   ]
  },
  {
@@ -4313,7 +4322,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -5097,7 +5106,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>",
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>",
    "…/20… … · … · … words",
    "… <span>… words</span><span>Not corrected</span> <p>…</p>"
   ]
@@ -5180,7 +5189,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>"
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>"
   ]
  },
  {
@@ -5200,7 +5209,7 @@
   "ctx": [
    "…–… words",
    "<li><b>…</b> · … · …–… words · about … min</li>",
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -5209,7 +5218,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -5569,7 +5578,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -8443,7 +8452,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -9536,7 +9545,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -13893,7 +13902,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
+   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
    "… … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Finish"
   ]
  },
@@ -15463,16 +15472,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
-  ]
- },
- {
-  "id": "de399a9bdb63",
-  "text": "Each task gets a prompt you haven't written yet. {0}",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+   "Each task gets a prompt you haven't written yet."
   ]
  },
  {
@@ -16749,7 +16749,7 @@
   "where": "app",
   "ctx": [
    "Examen blanc EE",
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -18470,7 +18470,7 @@
   "where": "app",
   "ctx": [
    "… …<p>Question … of … <span>…</span></p> … … <p>…</p>…<p>…</p> <p><b>…</b></p> … <button>← Previous</button><button>Next →</button> <span>… of … answered</span><button>Hand in</button> … …",
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -22534,7 +22534,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -26664,6 +26664,24 @@
   "where": "app",
   "ctx": [
    "<a>Vue d'ensemble<small>overview</small></a><a>Calendrier<small>study calendar</small></a><a>Évolution<small>progress report</small></a><a>Historique<small>history</small></a><a>Sauvegarde<small>backup</small></a>"
+  ]
+ },
+ {
+  "id": "767013ce0ee0",
+  "text": "page",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>… · page …</p>"
+  ]
+ },
+ {
+  "id": "6f5dbda8a8a1",
+  "text": "page {0}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<p>… · page …</p>"
   ]
  },
  {
@@ -33100,6 +33118,15 @@
   ]
  },
  {
+  "id": "3e947d3cc1ca",
+  "text": "Source PDF ↗",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<a>Source PDF ↗</a>"
+  ]
+ },
+ {
   "id": "f54498e5486a",
   "text": "Sourire À quelqu'un: indirect object, no agreement. Souri never agrees.",
   "kind": "exact",
@@ -33288,7 +33315,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Examen blanc · Expression écrite · ……</p> <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "<p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
   ]
  },
  {
@@ -34531,7 +34558,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>… …</p> … …"
   ]
  },
  {
@@ -37259,7 +37286,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>… …</p> … …"
   ]
  },
  {
@@ -41201,7 +41228,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> <button>…</button>",
+   "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>",
    "… <span>… words</span><span>Not corrected</span> <p>…</p>",
    "… words"
   ]
@@ -42307,7 +42334,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>Each task g"
+   "<p>…Examen blanc · Expression écrite</p> <p>The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p> … <p>… …</p> … …"
   ]
  },
  {
@@ -42530,7 +42557,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
@@ -42539,7 +42566,7 @@
   "kind": "pattern",
   "where": "attr:aria-label",
   "ctx": [
-   "<p>…Examen blanc EE</p>… … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … <button>Hand in</button>…"
+   "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
  {
