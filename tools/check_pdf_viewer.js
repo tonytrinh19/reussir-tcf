@@ -6,7 +6,7 @@ const vm = require('node:vm');
 const site = path.join(__dirname, '..', 'site');
 const source = fs.readFileSync(path.join(site, 'pdf-viewer.js'), 'utf8')
   .replace(/^import .*;$/m, '')
-  .replace('import.meta.url', '"http://localhost/pdf-viewer.js"');
+  .replaceAll('import.meta.url', '"http://localhost/pdf-viewer.js"');
 const tick = () => new Promise(resolve => setImmediate(resolve));
 async function waitFor(test) { for (let i = 0; i < 100; i++) { if (test()) return; await tick(); } throw Error('Viewer state did not settle'); }
 class Element {
@@ -38,6 +38,7 @@ function setup(file = 'exam-sources/papers/co-paper-1.pdf', failure = false) {
 (async()=>{
   const s=setup();await waitFor(()=>s.elements['page-text'].textContent==='Page 1\n');
   assert.equal(s.loads.length,1);
+  for (const key of ['cMapUrl','standardFontDataUrl','wasmUrl']) assert(s.loads[0][key].startsWith('http://localhost/vendor/pdfjs/'), 'Worker assets must resolve from the viewer, not the worker directory');
   assert.equal(s.elements.download.download,'co-paper-1.pdf');
   assert.equal(s.elements.prev.disabled,true);
   let release; s.hold(new Promise(r=>{release=r}));

@@ -62,7 +62,7 @@ async function open() {
   $("download").download = file.split("/").pop();
   $("download").hidden = false;
   try {
-    pdf = await getDocument({ url: file, cMapUrl: "vendor/pdfjs/cmaps/", cMapPacked: true, standardFontDataUrl: "vendor/pdfjs/standard_fonts/", wasmUrl: "vendor/pdfjs/wasm/", isEvalSupported: false }).promise;
+    pdf = await getDocument({ url: file, cMapUrl: new URL("./vendor/pdfjs/cmaps/", import.meta.url).href, cMapPacked: true, standardFontDataUrl: new URL("./vendor/pdfjs/standard_fonts/", import.meta.url).href, wasmUrl: new URL("./vendor/pdfjs/wasm/", import.meta.url).href, isEvalSupported: false }).promise;
     $("total").textContent = `sur ${pdf.numPages}`;
     $("page").max = pdf.numPages;
     $("page").disabled = false;
