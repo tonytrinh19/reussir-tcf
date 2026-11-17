@@ -5571,5 +5571,7 @@
  "Your saved grade out of 20 for each text": "Ta note enregistrée sur 20 pour chaque texte",
  "Your saved writing grades out of 20, across prompts. 10/20 is NCLC 7.": "Tes notes enregistrées sur 20 à l’écrit, tous sujets confondus. 10/20 correspond au NCLC 7.",
  "your writing grades": "tes notes à l’écrit",
- "Save my text": "Enregistrer mon texte"
+ "Save my text": "Enregistrer mon texte",
+ "Write at least a few sentences before adding an AI review.": "Écris au moins quelques phrases avant d’ajouter un avis de l’IA.",
+ "Already have feedback from another AI? Paste it here. Your text is saved first if needed.": "Tu as déjà le retour d’une autre IA ? Colle-le ici. Ton texte est d’abord enregistré si nécessaire."
 }
