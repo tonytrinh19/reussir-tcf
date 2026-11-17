@@ -5099,7 +5099,7 @@
   "ctx": [
    "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>",
    "…/20… … · … · … words",
-   "… <span>… words</span><span>…</span> … …… <summary>Your original</summary><p>…</p>"
+   "<span>… words</span><span>Not corrected</span>"
   ]
  },
  {
@@ -5501,15 +5501,6 @@
   ]
  },
  {
-  "id": "ee5dcbc55b7b",
-  "text": "{0}/20 · {1} · NCLC {2}",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "…/20 · … · NCLC …"
-  ]
- },
- {
   "id": "b8457c64c704",
   "text": "{0}A day counts once every block in its plan is ticked. Sundays don't break a streak.",
   "kind": "pattern",
@@ -5519,12 +5510,12 @@
   ]
  },
  {
-  "id": "ca08e5279e34",
-  "text": "{0}Claude's estimate on the TCF Canada scale, not an official score.",
+  "id": "11280817a85d",
+  "text": "{0}AI estimate on the TCF Canada scale, not an official score.",
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "<span>…</span> <span>…AI estimate on the TCF Canada scale, not an official score.</span>…<p>…</p> … … … …… … … … … … … … … …"
   ]
  },
  {
@@ -5768,15 +5759,6 @@
   "where": "app",
   "ctx": [
    "… <h3>Pour la semaine du …</h3><span>…</span> <p>Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your "
-  ]
- },
- {
-  "id": "17ad3d369432",
-  "text": "/20 · {0} · NCLC",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "…/20 · … · NCLC …"
   ]
  },
  {
@@ -7463,15 +7445,6 @@
   "ctx": []
  },
  {
-  "id": "0b4a15cbf50f",
-  "text": "A level and one sentence for each criterion: {0}.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "A level and one sentence for each criterion: …."
-  ]
- },
- {
   "id": "8887685d1b09",
   "text": "A list, prices per kilo, cooking ahead: « La plupart de ces gestes ne demandent ni temps ni argent : seulement un peu d'organisation. » Big formats « ne sont pas toujours les moins chers ».",
   "kind": "exact",
@@ -8053,15 +8026,6 @@
   ]
  },
  {
-  "id": "90f41d54fb79",
-  "text": "A score out of 20 on the TCF Canada scale, with the CEFR and NCLC levels it corresponds to. If the word count is outside the range, the text is off-topic or the instructions aren't followed, cap the score as the TCF Canada would.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "A score out of 20 on the TCF Canada scale, with the CEFR and NCLC levels it corresponds to. If the word count is outside the range, the text is off-topic or the instructions aren't followed, cap the score as the TCF Canada would."
-  ]
- },
- {
   "id": "ad37fd83ad17",
   "text": "a second B2 set",
   "kind": "exact",
@@ -8471,24 +8435,6 @@
   "where": "app",
   "ctx": [
    "… · about NCLC … ·"
-  ]
- },
- {
-  "id": "ce821eca9dcd",
-  "text": "About NCLC {0}",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "About NCLC … ·"
-  ]
- },
- {
-  "id": "45e599efd500",
-  "text": "About NCLC {0} ·",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "About NCLC … ·"
   ]
  },
  {
@@ -9326,7 +9272,16 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
+  ]
+ },
+ {
+  "id": "f7f3c35ab9b4",
+  "text": "AI estimate on the TCF Canada scale, not an official score.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>…</span> <span>…AI estimate on the TCF Canada scale, not an official score.</span>…<p>…</p> … … … …… … … … … … … … … …"
   ]
  },
  {
@@ -10278,15 +10233,6 @@
   "where": "app",
   "ctx": [
    "any everyday or social topic typical of the TCF Canada (work, housing, services, health, environment, technology, culture, settling in Canada)"
-  ]
- },
- {
-  "id": "90bca68c1c55",
-  "text": "Any format is welcome. The full response and line breaks are kept exactly as pasted.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
   ]
  },
  {
@@ -11905,7 +11851,7 @@
   "ctx": [
    "… <p>It's already in <b>…</b>:</p> <p>…</p><p>…</p> … …<button>Make a new card anyway</button><button>Cancel</button>",
    "… … … … … … … … … … <button>Save <span>↵</span></button><button>Cancel <span>Esc</span></button>",
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
   ]
  },
  {
@@ -12619,7 +12565,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
   ]
  },
  {
@@ -13084,15 +13030,6 @@
   ]
  },
  {
-  "id": "862589827427",
-  "text": "Claude's estimate on the TCF Canada scale, not an official score.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
-  ]
- },
- {
   "id": "306d5b29005f",
   "text": "Claude's exam is ready: 39 new documents. The clock starts when you do.",
   "kind": "exact",
@@ -13117,15 +13054,6 @@
   "where": "app",
   "ctx": [
    "Claude's items didn't come back in a usable shape. Try again."
-  ]
- },
- {
-  "id": "17d7b39793b1",
-  "text": "Claude's suggestions. Add the ones you want to your homework.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<p>Follow-up tasks</p><p>Claude's suggestions. Add the ones you want to your homework.</p> …"
   ]
  },
  {
@@ -13942,15 +13870,6 @@
   ]
  },
  {
-  "id": "80831787cdee",
-  "text": "Copy only the grade given for each task. A blank field keeps its current grade. New grades update your results; earlier reviews stay available.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
-  ]
- },
- {
   "id": "7e17aa945e5e",
   "text": "Copy this into another AI",
   "kind": "exact",
@@ -14080,7 +13999,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "<p>Corrections <span>· …</span></p>……"
   ]
  },
  {
@@ -16517,15 +16436,6 @@
   ]
  },
  {
-  "id": "33f3fe3e4a3f",
-  "text": "Every grammar, spelling, agreement and word-choice mistake, most important first, as: wrong → right (why).",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Every grammar, spelling, agreement and word-choice mistake, most important first, as: wrong → right (why)."
-  ]
- },
- {
   "id": "1fb5c32d28b1",
   "text": "Every miss of a round fixed on a retry",
   "kind": "exact",
@@ -17536,7 +17446,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>Follow-up tasks</p><p>Claude's suggestions. Add the ones you want to your homework.</p> …"
+   "<p>Follow-up tasks</p><p>Suggestions from this review. Add the ones you want to your homework.</p> …"
   ]
  },
  {
@@ -17953,7 +17863,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
   ]
  },
  {
@@ -18332,15 +18242,6 @@
   "ctx": []
  },
  {
-  "id": "e51585382064",
-  "text": "Grade entered from an AI review. This is a practice estimate, not an official score.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<p>Grade entered from an AI review. This is a practice estimate, not an official score.</p>"
-  ]
- },
- {
   "id": "79a60a5b2483",
   "text": "grade from AI review",
   "kind": "exact",
@@ -18373,6 +18274,15 @@
   "kind": "exact",
   "where": "free",
   "ctx": []
+ },
+ {
+  "id": "6848eb2c4677",
+  "text": "Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
+  ]
  },
  {
   "id": "895ff17632e8",
@@ -21189,6 +21099,15 @@
   ]
  },
  {
+  "id": "621363331446",
+  "text": "Leave the grade blank to use the one detected in the review. Enter a grade only to override it. If none is found, your current grade stays unchanged.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
+  ]
+ },
+ {
   "id": "3bdb363e1c06",
   "text": "Lecture",
   "kind": "exact",
@@ -23221,17 +23140,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "MY TEXT: \"\"\" … \"\"\"",
    "TÂCHE …: …, …. … Required length: …–… words.… SUBJECT: …… MY TEXT: \"\"\" … \"\"\""
-  ]
- },
- {
-  "id": "b77aa0d74b25",
-  "text": "My whole text corrected, keeping my ideas and paragraph breaks.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "My whole text corrected, keeping my ideas and paragraph breaks."
   ]
  },
  {
@@ -23282,8 +23191,8 @@
   "where": "app",
   "ctx": [
    "<span>NCLC …</span>",
-   "…/20 · … · NCLC …",
-   "NCLC …"
+   "NCLC …",
+   "… · NCLC … … · …"
   ]
  },
  {
@@ -25021,6 +24930,15 @@
   ]
  },
  {
+  "id": "7aadcc7512c4",
+  "text": "Not corrected",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>… words</span><span>Not corrected</span>"
+  ]
+ },
+ {
   "id": "116a5734b684",
   "text": "not counted",
   "kind": "exact",
@@ -26654,6 +26572,15 @@
   ]
  },
  {
+  "id": "e7c0faf0d696",
+  "text": "Original AI response",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary><span>… <span>· … · …</span></span><span>…</span></summary> <p>…</p> … <summary>Original AI response</summary> … …"
+  ]
+ },
+ {
   "id": "1539beead645",
   "text": "Orthographe",
   "kind": "exact",
@@ -26990,15 +26917,6 @@
   "where": "app",
   "ctx": [
    "Part 1 ·"
-  ]
- },
- {
-  "id": "df2bb60f27d8",
-  "text": "Part 1 (my first paragraph): {0} words (TCF Canada: 40–60). Part 2 (everything after it): {1} words (TCF Canada: 80–120).",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "Part 1 (my first paragraph): … words (TCF Canada: 40–60). Part 2 (everything after it): … words (TCF Canada: 80–120)."
   ]
  },
  {
@@ -27363,7 +27281,7 @@
   "where": "app",
   "ctx": [
    "<p>Keep your AI feedback</p><p>Paste the response here to keep the review and grades with your writing.</p> <button>Paste AI review</button>",
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad",
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b",
    "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
@@ -27382,7 +27300,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p> AI / source (optional) … <p>Leave the grade b"
   ]
  },
  {
@@ -34135,6 +34053,15 @@
   ]
  },
  {
+  "id": "545a4f3e8f88",
+  "text": "Suggestions from this review. Add the ones you want to your homework.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Follow-up tasks</p><p>Suggestions from this review. Add the ones you want to your homework.</p> …"
+  ]
+ },
+ {
   "id": "f89d6a5344b2",
   "text": "Suivante is an adjective: it agrees with la semaine.",
   "kind": "exact",
@@ -34557,24 +34484,6 @@
   "where": "app",
   "ctx": [
    "You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct the learner's text and grade it strictly the way the TCF Canada does, using the TCF Canada rules, criteria and score bands below. Don't us"
-  ]
- },
- {
-  "id": "dbd24df0d191",
-  "text": "TASK: {0}, {1}. {2} Required length: {3}–{4} words. My word count: {5}.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "TASK: …, …. … Required length: …–… words. My word count: ….…"
-  ]
- },
- {
-  "id": "d572b20502d3",
-  "text": "TASK: {0}, {1}. {2} Required length: {3}–{4} words. My word count: {5}.{6}",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "TASK: …, …. … Required length: …–… words. My word count: ….…"
   ]
  },
  {
@@ -38282,6 +38191,15 @@
   ]
  },
  {
+  "id": "9373d150a292",
+  "text": "This review has no grade. The grade shown is the one already saved for this text.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>This review has no grade. The grade shown is the one already saved for this text.</p>"
+  ]
+ },
+ {
   "id": "6eaceae91b6f",
   "text": "This round is from before whole rounds were saved, so only the questions you missed are here.",
   "kind": "exact",
@@ -38441,15 +38359,6 @@
   "where": "app",
   "ctx": [
    "Three notes on your Pense-bête"
-  ]
- },
- {
-  "id": "5b331cbfd20c",
-  "text": "Three phrases from my text rewritten at B2 level, and the three things I should work on first.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Three phrases from my text rewritten at B2 level, and the three things I should work on first."
   ]
  },
  {
@@ -41228,15 +41137,6 @@
   "ctx": []
  },
  {
-  "id": "ee9c3ef2d7bd",
-  "text": "Whether part 1 compares both documents' viewpoints, and whether my own position comes only in part 2.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Whether part 1 compares both documents' viewpoints, and whether my own position comes only in part 2."
-  ]
- },
- {
   "id": "8dd496e98094",
   "text": "Which category is still weakest? That's next week's extra focus.",
   "kind": "exact",
@@ -41582,7 +41482,7 @@
   "where": "app",
   "ctx": [
    "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>",
-   "… <span>… words</span><span>…</span> … …… <summary>Your original</summary><p>…</p>",
+   "<span>… words</span><span>Not corrected</span>",
    "… words"
   ]
  },
@@ -42741,8 +42641,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span>… words</span><span>…</span> … …… <summary>Your original</summary><p>…</p>",
-   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "<h2>… · …</h2><button>Close</button> <p>…</p> … <summary>Your original</summary><p>…</p> … …"
   ]
  },
  {

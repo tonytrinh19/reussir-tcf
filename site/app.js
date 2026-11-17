@@ -1758,7 +1758,7 @@
     for (const w of list("writing")) {
       if (!w.fb || !arr(w.fb.errors).length) continue;
       const W = T.WRITING[w.task];
-      out.push({ ref: "w-" + w.id, ee: true, ts: w.ts || 0, text: str(w.text), corrected: str(w.fb.corrected), errs: arr(w.fb.errors), sujet: str(w.prompt), title: `${W ? `${W.name} · ${W.kind}` : "Écrit"} · ${shortDate(w.date)}`, from: `your ${W ? W.name : "writing"} of ${shortDate(w.date)}` });
+      out.push({ ref: "w-" + w.id, reviewKey: w.fb.errorReviewId || null, ee: true, ts: w.ts || 0, text: str(w.text), corrected: str(w.fb.corrected), errs: arr(w.fb.errors), sujet: str(w.prompt), title: `${W ? `${W.name} · ${W.kind}` : "Écrit"} · ${shortDate(w.date)}`, from: `your ${W ? W.name : "writing"} of ${shortDate(w.date)}` });
     }
     for (const d of list("drills")) {
       if (d.set !== "prod" || !d.fb || !arr(d.fb.errors).length) continue;
@@ -1769,7 +1769,7 @@
   }
   // What Claude prepared, by text: w-<writing id>, p-<production check id>, and "log" for the error log (by entry).
   const PREP_V = 1;
-  const prepDoc = (ref) => { const p = S.mistakes.get(ref); return p && p.v === PREP_V ? p : null; };
+  const prepDoc = (ref) => { const p = S.mistakes.get(ref), reviewKey = ref.startsWith("w-") ? S.writing.get(ref.slice(2))?.fb?.errorReviewId || null : null; return p && p.v === PREP_V && (p.reviewKey || null) === reviewKey ? p : null; };
   // The preparation of correction n of a text, if it's still for that same mistake.
   const prepFor = (src, n, e) => { const p = prepDoc(src.ref), x = p && arr(p.items).find((y) => y.n === n); return x && norm(x.mk) === norm(e.wrong) ? x : null; };
   const prepLog = (e) => { const p = prepDoc("log"), x = p && p.items && p.items[e.id]; return x && norm(x.mk) === norm(e.wrong) ? x : null; };
@@ -1884,7 +1884,7 @@
     const out = await ask("mine-prep-" + src.ref, minePrompt(src), { quiet });
     if (!out) return false;
     const items = minePrepClean(src, out);
-    if (src.ref !== "log") { put("mistakes", src.ref, { ref: src.ref, v: PREP_V, ts: Date.now(), items }); return true; }
+    if (src.ref !== "log") { put("mistakes", src.ref, { ref: src.ref, reviewKey: src.reviewKey || null, v: PREP_V, ts: Date.now(), items }); return true; }
     // An entry Claude left out is still marked as prepared, so it's asked as the correction or what you wrote.
     const cur = prepDoc("log"), all = Object.assign({}, cur ? cur.items : {});
     src.errs.forEach((e, n) => { all[src.ids[n]] = items.find((x) => x.n === n) || { n, mk: str(e.wrong).trim(), kind: "error", span: str(e.right).trim(), wrong: str(e.wrong).trim(), near: [], why: str(e.why) }; });
@@ -3326,28 +3326,7 @@
   // criteria and score bands, the task and its subject, the learner, the draft, and what to send back.
   // For when Claude can't correct it (unavailable, or out of usage).
   function wCopyPrompt(task) {
-    const W = T.WRITING[task], p = wPrompt(task);
-    const text = str(ui.w.text[task]).trim();
-    const docs = task === "t3" && p.docs ? p.docs.map((d, k) => `\n\nDOCUMENT ${k + 1} (${d.who}) :\n${d.text}`).join("") : "";
-    const ps = paragraphs(text);
-    const parts = task === "t3" ? ` Part 1 (my first paragraph): ${ps[0] ? countWords(ps[0]) : 0} words (TCF Canada: 40–60). Part 2 (everything after it): ${ps.slice(1).reduce((n, x) => n + countWords(x), 0)} words (TCF Canada: 80–120).` : "";
-    const asks = [
-      "A score out of 20 on the TCF Canada scale, with the CEFR and NCLC levels it corresponds to. If the word count is outside the range, the text is off-topic or the instructions aren't followed, cap the score as the TCF Canada would.",
-      `A level and one sentence for each criterion: ${TC.ee.criteria.map(([n]) => n).join(", ")}.`,
-      ...(task === "t3" ? ["Whether part 1 compares both documents' viewpoints, and whether my own position comes only in part 2."] : []),
-      "Every grammar, spelling, agreement and word-choice mistake, most important first, as: wrong → right (why).",
-      "My whole text corrected, keeping my ideas and paragraph breaks.",
-      "Three phrases from my text rewritten at B2 level, and the three things I should work on first.",
-    ];
-    return [
-      "You are a certified TCF Canada Expression écrite corrector (France Éducation International) and a French teacher. Correct my text and grade it strictly the way the TCF Canada does, using the rules, criteria and score bands below. Don't use DELF, TEF or TCF tout public grading.",
-      `${EE_RUBRIC}\nSCORE BANDS: ${TC.bands}`,
-      `TASK: ${W.name}, ${W.kind}. ${W.expected} Required length: ${W.min}–${W.max} words. My word count: ${countWords(text)}.${parts}`,
-      `SUBJECT:\n${p.q}${docs}`,
-      `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.${watchBrief(true)}`,
-      `MY TEXT:\n"""\n${text}\n"""`,
-      `Reply in ${replyLang()} with:\n${asks.map((a, i) => `${i + 1}. ${a}`).join("\n")}`,
-    ].join("\n\n");
+    return wCorrectPrompt(task, wPrompt(task), str(ui.w.text[task]).trim());
   }
   // Copy to the clipboard. The page can run in a frame where the Clipboard API is blocked, so fall back
   // to a hidden text box; if that fails too, the caller shows the text to copy by hand.
@@ -3427,15 +3406,45 @@
   }
   function writingWithReview(doc, review) {
     if (arr(doc.aiReviews).some(r => r.id === review.id)) return doc; // retry after a partial mock save
-    const entry = { ...review };
-    if (review.score20 != null && doc.fb && !doc.fb.reviewId) entry.previousFeedback = clone(doc.fb);
+    const parsed = writingParseReview(review, doc.task);
+    const score = review.score20 ?? parsed?.score20 ?? null;
+    const entry = { ...review, score20: score, feedback: parsed };
+    if (doc.fb && !doc.fb.reviewId) entry.previousFeedback = clone(doc.fb);
     const next = { ...doc, aiReviews: [...arr(doc.aiReviews), entry] };
-    if (review.score20 != null) {
-      next.fb = { ...(doc.fb || cleanFb({}, doc.task)), score20: review.score20, level: eeCefr(review.score20), nclc: nclcLabel(nclcOf("ee", review.score20)), reviewId: review.id, errors: doc.fb?.errors ?? null };
-      // Retain any real error analysis for existing practice. A pasted response alone supplies none.
+    if (score != null || (parsed && parsed.format !== "text")) {
+      next.fb = { ...(doc.fb || cleanFb({}, doc.task)), reviewId: review.id, errors: doc.fb?.errors ?? null };
+      if (!doc.fb) next.fb.compliance = {};
       if (!doc.fb?.tache3) delete next.fb.tache3;
+      if (parsed && parsed.format !== "text") {
+        for (const k of ["summary", "criteria", "corrected", "upgrades", "strengths", "homework"]) if (parsed[k]?.length) next.fb[k] = parsed[k];
+        if (Object.keys(parsed.compliance).length) next.fb.compliance = parsed.compliance;
+        if (parsed.tache3) next.fb.tache3 = parsed.tache3;
+        if (Array.isArray(parsed.errors)) { next.fb.errors = parsed.errors; next.fb.errorReviewId = review.id; }
+        if (parsed.corrected) next.fb.errorReviewId = review.id;
+      }
+      if (score != null) Object.assign(next.fb, { score20: score, level: eeCefr(score), nclc: nclcLabel(nclcOf("ee", score)) });
     }
     return next;
+  }
+  function writingParseReview(review, task) {
+    const o = window.TCFWritingReview?.parse(review.text, task, review.scope);
+    if (!o) return null;
+    const fb = cleanFb(o, task);
+    fb.format = o.format;
+    fb.score20 = o.score20 ?? null;
+    fb.level = fb.score20 != null ? eeCefr(fb.score20) : fb.level;
+    fb.nclc = fb.score20 != null ? nclcLabel(nclcOf("ee", fb.score20)) : "";
+    fb.errors = Array.isArray(o.errors) ? fb.errors : null;
+    fb.compliance = o.compliance || {};
+    if (o.tache3) fb.tache3 = o.tache3; else delete fb.tache3;
+    return fb;
+  }
+  // Older saved responses are formatted on read, without rewriting the learner's records.
+  function writingDisplayFeedback(doc, review) {
+    if (!review) return doc.fb;
+    const fb = review.feedback || writingParseReview(review, doc.task);
+    const score = review.score20 ?? fb?.score20 ?? doc.fb?.score20 ?? null;
+    return { ...(fb || cleanFb({}, doc.task)), score20: score, retainedScore: review.score20 == null && fb?.score20 == null && doc.fb?.score20 != null, level: score != null ? eeCefr(score) : fb?.level || "", nclc: score != null ? nclcLabel(nclcOf("ee", score)) : "", errors: fb?.errors ?? null, compliance: fb?.compliance || {}, tache3: fb?.tache3, reviewId: review.id };
   }
   const writingReviewStatus = doc => arr(doc.aiReviews).length ? "Review saved · no score" : "not corrected";
   function writingReviewTargets(el) {
@@ -3457,10 +3466,10 @@
     return `<form id="ai-review-form" class="review-import stack" novalidate aria-labelledby="ai-review-title" aria-busy="${!!d.saving}">
       <div class="stack tight"><h3 class="h3" id="ai-review-title">Paste AI review</h3><p class="small muted">${docs.length > 1 ? "One response for the whole mock. Enter each task's grade separately; the app calculates the overall estimate." : "Attach the AI response to this saved text."}</p></div>
       <label class="field" for="ai-review-text">Full AI response<textarea id="ai-review-text" data-input="w-review" data-k="text" rows="9" maxlength="60000" required aria-describedby="ai-review-help" ${locked ? "disabled" : ""} placeholder="Paste the grading, corrections and advice here…">${esc(d.text)}</textarea></label>
-      <p class="small muted" id="ai-review-help">Any format is welcome. The full response and line breaks are kept exactly as pasted.</p>
+      <p class="small muted" id="ai-review-help">Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.</p>
       <div class="review-fields"><label class="field">AI / source (optional)<input data-input="w-review" data-k="source" maxlength="80" value="${esc(d.source)}" placeholder="ChatGPT, Claude, Gemini…" ${locked ? "disabled" : ""}></label>
       ${docs.map(w => `<label class="field"><span>${esc(T.WRITING[w.task].name)} · <span>Score /20 (optional)</span></span><input type="text" inputmode="decimal" data-input="w-review-score" data-id="${esc(w.id)}" value="${esc(d.scores[w.id] || "")}" aria-describedby="ai-review-grade-help" placeholder="0–20" ${locked ? "disabled" : ""}></label>`).join("")}</div>
-      <p class="small muted" id="ai-review-grade-help">Copy only the grade given for each task. A blank field keeps its current grade. New grades update your results; earlier reviews stay available.</p>
+      <p class="small muted" id="ai-review-grade-help">Leave the grade blank to use the one detected in the review. Enter a grade only to override it. If none is found, your current grade stays unchanged.</p>
       ${d.error ? `<p class="notice warn" role="alert">${esc(d.error)}</p>` : ""}
       <div class="row"><button class="btn primary" type="submit" ${d.saving ? "disabled" : ""}>${d.saving ? "Saving…" : d.started ? "Retry saving review" : "Save review"}</button><button class="btn ghost" type="button" data-act="w-review-cancel" ${d.saving ? "disabled" : ""}>Cancel</button></div>
     </form>`;
@@ -3499,7 +3508,7 @@
       for (const id of d.ids) {
         await writingReviewStore("writing", id, doc => {
           if (!doc) throw new Error("This writing entry is no longer available.");
-          return writingWithReview(doc, { id: d.id, ts: d.ts, text: d.text, source: d.source.trim().slice(0, 80), score20: scores[id], scope: d.ids.length > 1 ? "mock" : "task" });
+          return writingWithReview(doc, { id: d.id, ts: d.ts, text: d.text, source: d.source.trim().slice(0, 80), score20: scores[id], scope: d.key.startsWith("mock-") ? "mock" : "task" });
         });
       }
       for (const mockId of new Set(d.ids.map(id => S.writing.get(id)?.mock?.id).filter(Boolean))) await eeSyncReviewScore(mockId);
@@ -3521,16 +3530,15 @@
     const old = list("mocks").find(x => x.compId === "ee-" + mockId);
     await writingReviewStore("mocks", old?.id || "ee-" + mockId, doc => ({ ...doc, date: m.date, ts: doc?.ts || m.ts, label: doc?.label || "Examen blanc EE (site estimate)", ee: m.score, compId: "ee-" + mockId }));
   }
-  function writingReviews(doc) {
+  function writingReviews(doc, id) {
     const reviews = arr(doc.aiReviews).slice().reverse();
     if (!reviews.length) return "";
-    return `<div class="stack review-history"><h3 class="h3">Saved AI reviews</h3>${reviews.map((r, i) => `<details class="review-entry" ${i === 0 ? "open" : ""}>
+    return `<div class="stack review-history"><h3 class="h3">Saved AI reviews</h3>${reviews.map((r, i) => `<details class="review-entry">
       <summary><span>${esc(r.source || "AI review")} <span class="small muted">· ${shortDate(ymd(new Date(r.ts)))} · ${hhmm(r.ts)}</span></span><span class="pill">${r.score20 != null ? `${r.score20}/20` : "No grade attached"}</span></summary>
-      <div class="stack"><p class="small muted">${r.scope === "mock" ? "Full mock review · the grade above is for this task." : "Review attached to this task."}</p><div class="review-response" translate="no">${esc(r.text)}</div>
-      ${r.previousFeedback ? `<details class="fold"><summary>Earlier in-app correction</summary>${writingEarlierFeedback(r.previousFeedback)}</details>` : ""}</div></details>`).join("")}</div>`;
-  }
-  function writingEarlierFeedback(fb) {
-    return `<div class="stack tight"><p>${fb.score20 != null ? `${fb.score20}/20 · ` : ""}${esc(fb.level)} · ${esc(fb.summary)}</p>${criteriaTable(fb.criteria)}${fb.compliance?.notes ? `<p>${esc(fb.compliance.notes)}</p>` : ""}${fb.tache3?.notes ? `<p>${esc(fb.tache3.notes)}</p>` : ""}${errList(arr(fb.errors), true)}${fb.corrected ? `<p class="corrected seyes">${esc(fb.corrected)}</p>` : ""}${arr(fb.upgrades).map(u => `<p>${esc(u.from)} → ${esc(u.to)}</p>`).join("")}${arr(fb.strengths).concat(arr(fb.homework)).map(x => `<p>${esc(x)}</p>`).join("")}</div>`;
+      <div class="stack"><p class="small muted">${r.scope === "mock" ? "Full mock review · the grade above is for this task." : "Review attached to this task."}</p>
+      ${i > 0 ? writingFeedbackBody(id + "-" + r.id, { ...doc, fb: null }, writingDisplayFeedback({ ...doc, fb: null }, r), r.source || "") : ""}
+      <details class="fold" ${i === 0 ? "open" : ""}><summary>Original AI response</summary><div class="review-response" translate="no">${esc(r.text)}</div></details>
+      ${r.previousFeedback ? `<details class="fold"><summary>Earlier in-app correction</summary>${writingFeedbackBody(id + "-previous-" + r.id, doc, r.previousFeedback)}</details>` : ""}</div></details>`).join("")}</div>`;
   }
   async function writingGenPrompt() {
     const task = ui.w.task, W = T.WRITING[task];
@@ -6962,6 +6970,7 @@
       ...parts,
       `ABOUT ME: an adult B1 learner of French preparing the TCF Canada, aiming for NCLC 7 (B2). Mistakes I often make: ${T.KNOWN_ERRORS.join("; ")}.${watchBrief(true)}`,
       `Reply in ${replyLang()} with, for each task: a score out of 20 on the TCF Canada scale (a blank task, or one outside its word range, capped as the TCF Canada would), a level and one sentence for each criterion (${TC.ee.criteria.map(([n]) => n).join(", ")}), every mistake as wrong → right (why), and the text corrected. For Tâche 3, whether part 1 compares both documents and my own position comes only in part 2. Then my overall Expression écrite score out of 20 and its NCLC level, and the three things to work on first.`,
+      `Return only JSON so I can paste it back into my practice app. Use {"tasks":{"t1":{...},"t2":{...},"t3":{...}}}. Each task must contain: score20 (number 0–20), level, summary, criteria [{name,level,comment}], compliance {on_topic,length_ok,register_ok,notes}, errors [{wrong,right,category,why}], corrected_text (the complete corrected text with paragraph breaks), upgrades [{from,to}], strengths [strings], homework [strings]. For t3 include tache3 {compared_both,opinion_after_comparison,notes}. Error category IDs: ${Object.keys(CAT).join(", ")}. Keep the three task grades separate; do not substitute the overall grade.`,
     ].join("\n\n");
   }
   async function eeCopy(mockId) {
@@ -7192,39 +7201,41 @@
   const errorCountsOf = (errs) => Object.entries(arr(errs).reduce((m, e) => { const c = catOf(e.category); m[c] = (m[c] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]);
   function writingFb(id, doc, closeAct) {
     const W = T.WRITING[doc.task] || T.WRITING.t1;
-    const fb = doc.fb;
+    const latest = arr(doc.aiReviews).at(-1);
+    const fb = writingDisplayFeedback(doc, latest);
+    return `<section class="panel fb" id="w-fb" data-m="rise" data-k="wfb-${esc(id)}-${esc(latest?.id || "native")}">
+      <div class="row between"><h2 class="h2">${esc(W.name)} · ${shortDate(doc.date)}</h2><button class="btn ghost sm" data-act="${closeAct || "w-close"}">Close</button></div>
+      <p class="small muted fr">${typo(doc.prompt || "")}</p>
+      ${fb ? writingFeedbackBody(id, doc, fb, latest?.source || "", true) : `<div class="flags"><span class="pill">${doc.words} words</span><span class="pill">Not corrected</span></div>`}
+      <details class="fold" ${fb ? "" : "open"}><summary>Your original</summary><p class="corrected seyes" style="margin-top:10px">${esc(doc.text)}</p></details>
+      ${writingReviewForm(id, `data-id="${esc(id)}"`, [{ ...doc, id }])}
+      ${writingReviews(doc, id)}
+    </section>`;
+  }
+  // Both in-app corrections and pasted feedback use this layout. Unknown assessments stay absent.
+  function writingFeedbackBody(id, doc, fb, source = "", interactive = false) {
+    const W = T.WRITING[doc.task] || T.WRITING.t1, t3 = fb.tache3;
     const inRange = doc.words >= W.min && doc.words <= W.max;
-    const head = `<div class="row between"><h2 class="h2">${esc(W.name)} · ${shortDate(doc.date)}</h2><button class="btn ghost sm" data-act="${closeAct || "w-close"}">Close</button></div>
-      <p class="small muted fr">${typo(doc.prompt || "")}</p>`;
-    const reviewForm = writingReviewForm(id, `data-id="${esc(id)}"`, [{ ...doc, id }]);
-    const reviews = writingReviews(doc);
-    if (!fb || fb.reviewId) return `<section class="panel fb" id="w-fb">${head}
-      <div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">${fb?.score20 != null ? `${fb.score20}/20 · ${esc(fb.level)} · NCLC ${esc(fb.nclc)}` : writingReviewStatus(doc)}</span></div>
-      ${fb?.reviewId ? `<p class="small muted">Grade entered from an AI review. This is a practice estimate, not an official score.</p>` : ""}
-      ${reviewForm}${reviews}<details class="fold" ${reviews ? "" : "open"}><summary>Your original</summary><p class="corrected seyes">${esc(doc.text)}</p></details></section>`;
-    const flag = (ok, yes, no) => `<span class="pill ${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(ok ? yes : no)}</span>`;
-    const t3 = fb.tache3;
-    return `<section class="panel fb" id="w-fb" data-m="rise" data-k="wfb-${esc(id)}">
-      ${head}
-      ${reviewForm}${reviews}
-      <div class="fb-head"><span class="level">${fb.score20 != null ? `<span data-tween="w20-${esc(id)}" data-tw="count" data-to="${fb.score20}">${fb.score20}</span><small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : fb.nclc ? `About NCLC ${esc(fb.nclc)} · ` : ""}Claude's estimate on the TCF Canada scale, not an official score.</span><p>${esc(fb.summary)}</p></div></div>
-      ${greet("correction", ...remyMarks(fb.errors), "sm")}
+    const errors = arr(fb.errors), compliance = fb.compliance || {};
+    const flag = (ok, yes, no) => typeof ok === "boolean" ? `<span class="pill ${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(ok ? yes : no)}</span>` : "";
+    const storedErrors = interactive && errors.length && JSON.stringify(doc.fb?.errors) === JSON.stringify(fb.errors);
+    const storedHomework = interactive;
+    return `<div class="fb-head"><span class="level">${fb.score20 != null ? `<span${Number.isInteger(fb.score20) ? ` data-tween="w20-${esc(id)}-${esc(fb.reviewId || "native")}" data-tw="count" data-to="${fb.score20}"` : ""}>${fb.score20}</span><small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : ""}AI estimate on the TCF Canada scale, not an official score.</span>${source ? `<span class="small muted" translate="no">${esc(source)}</span>` : ""}<p class="feedback-summary" translate="no">${esc(fb.summary)}</p></div></div>
+      ${fb.retainedScore ? `<p class="small muted">This review has no grade. The grade shown is the one already saved for this text.</p>` : ""}
+      ${Array.isArray(fb.errors) ? greet("correction", ...remyMarks(errors), "sm") : ""}
       <div class="flags">
         ${flag(inRange, `${doc.words} words, inside ${W.min}–${W.max}`, `${doc.words} words, outside ${W.min}–${W.max}`)}
-        ${flag(fb.compliance.on_topic, "On topic", "Off topic")}
-        ${flag(fb.compliance.register_ok, "Register fits", "Register off")}
+        ${flag(compliance.on_topic, "On topic", "Off topic")}${flag(compliance.register_ok, "Register fits", "Register off")}
         ${t3 ? flag(t3.compared_both, "Compared both documents", "Didn't compare both documents") + flag(t3.opinion_after_comparison, "Opinion after comparison", "Opinion before or instead of comparison") : ""}
         ${doc.minutes ? `<span class="pill">${doc.minutes} min on the clock</span>` : ""}
       </div>
-      ${fb.compliance.notes || (t3 && t3.notes) ? `<p class="small">${esc([fb.compliance.notes, t3 && t3.notes].filter(Boolean).join(" "))}</p>` : ""}
+      ${compliance.notes || t3?.notes ? `<p class="small" translate="no">${esc([compliance.notes, t3?.notes].filter(Boolean).join(" "))}</p>` : ""}
       ${criteriaTable(fb.criteria, "Graded against the criteria France Éducation International publishes for the TCF Canada. Its internal marking grids aren't public, so treat the score as an estimate.")}
-      <div class="stack tight"><p class="h3">Corrections <span class="muted small">· ${fb.errors.length}</span></p>${errList(fb.errors, true)}${fb.errors.length ? `<a class="small" href="#grammar.mine">Practise these in Your mistakes →</a>` : ""}</div>
-      ${fb.upgrades.length ? `<div class="stack tight"><p class="h3">B1 → B2 upgrades</p><ul class="upgrades">${fb.upgrades.map((u) => `<li><span>${typo(u.from)}</span><span class="arrow">→</span><b>${typo(u.to)}</b></li>`).join("")}</ul></div>` : ""}
-      ${fb.strengths.length ? `<div class="stack tight"><p class="h3">What worked</p><ul class="small" style="margin:0;padding-left:20px">${fb.strengths.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
-      ${fb.corrected ? `<details class="fold"><summary>Corrected text</summary><p class="corrected seyes" style="margin-top:10px">${esc(fb.corrected)}</p></details>` : ""}
-      <details class="fold"><summary>Your original</summary><p class="corrected seyes" style="margin-top:10px">${esc(doc.text)}</p></details>
-      ${fb.homework.length ? `<div class="stack tight"><p class="h3">Follow-up tasks</p><p class="small muted">Claude's suggestions. Add the ones you want to your homework.</p><ul class="hw">${fb.homework.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${esc(h)}</span>${list("homework").some((x) => x.text === h) ? `<span class="small muted">Added</span>` : `<button class="btn sm" data-act="hw-fb-add" data-id="${esc(id)}" data-i="${i}">Add</button>`}</li>`).join("")}</ul></div>` : ""}
-    </section>`;
+      ${Array.isArray(fb.errors) ? `<div class="stack tight"><p class="h3">Corrections <span class="muted small">· ${errors.length}</span></p>${errList(errors, true)}${storedErrors ? `<a class="small" href="#grammar.mine">Practise these in Your mistakes →</a>` : ""}</div>` : ""}
+      ${arr(fb.upgrades).length ? `<div class="stack tight"><p class="h3">B1 → B2 upgrades</p><ul class="upgrades" translate="no">${fb.upgrades.map(u => `<li><span>${typo(u.from)}</span><span class="arrow">→</span><b>${typo(u.to)}</b></li>`).join("")}</ul></div>` : ""}
+      ${arr(fb.strengths).length ? `<div class="stack tight"><p class="h3">What worked</p><ul class="small" translate="no" style="margin:0;padding-left:20px">${fb.strengths.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+      ${fb.corrected ? `<details class="fold"><summary>Corrected text</summary><p class="corrected seyes" translate="no" style="margin-top:10px">${esc(fb.corrected)}</p></details>` : ""}
+      ${arr(fb.homework).length ? `<div class="stack tight"><p class="h3">Follow-up tasks</p><p class="small muted">Suggestions from this review. Add the ones you want to your homework.</p><ul class="hw">${fb.homework.map((h, i) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span translate="no">${esc(h)}</span>${storedHomework ? list("homework").some(x => x.text === h) ? `<span class="small muted">Added</span>` : `<button class="btn sm" data-act="hw-fb-add" data-id="${esc(id)}" data-i="${i}">Add</button>` : ""}</li>`).join("")}</ul></div>` : ""}`;
   }
 
   /* =============== view: comprehension =============== */
@@ -8721,7 +8732,7 @@
     "hw-sug-clear": () => { ui.hwSug = null; render(true); },
     "hw-fb-add": (el) => {
       const w = S.writing.get(el.dataset.id), W = w && T.WRITING[w.task];
-      const h = w && w.fb && arr(w.fb.homework)[Number(el.dataset.i)];
+      const h = w && arr(writingDisplayFeedback(w, arr(w.aiReviews).at(-1))?.homework)[Number(el.dataset.i)];
       if (!h || list("homework").some((x) => x.text === h)) return;
       put("homework", uid(), { text: h, created: todayStr(), ts: Date.now(), done: false, src: `${W ? W.name : "Écrit"} correction` });
       toast("Added to your homework.");

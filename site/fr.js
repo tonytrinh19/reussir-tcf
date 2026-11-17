@@ -261,7 +261,6 @@ window.TCF.FR = {
 "A retake: it doesn't count toward your estimate.": "Un nouvel essai : il ne compte pas dans ton estimation.",
 "A rota where each picks tasks, swapped every month, and the bathroom in turns: they'll share the chores more fairly. Washing up is what she always does now, and nothing says Max takes it over; nobody mentions hiring help; and the bins still have to go out.": "Un tableau de roulement où chacun choisit des tâches, changées chaque mois, et la salle de bains à tour de rôle : ils partageront les corvées plus équitablement. La vaisselle est ce qu'elle fait toujours actuellement, et rien ne dit que Max la reprend ; personne ne mentionne l'embauche d'une aide ; et il faut toujours sortir les poubelles.",
 "A round is one of your corrected texts with every mistake Claude found in it put back, exactly as you wrote it; the rest is the corrected version. Tap the words that look wrong and check, then pick the right version of each mistake you found, from four. A mistake is caught when it's found and fixed, and fixed once you've caught it twice in a row. Your EE drafts come first, the one with the most mistakes not fixed yet. Mistakes that aren't in a text (from your error log) come as « Hors texte » cards, and style tips, where what you wrote was already correct, are practised apart.": "Un tour consiste en l'un de tes textes corrigés dans lequel toutes les erreurs trouvées par Claude ont été remises telles que tu les as écrites ; le reste correspond à la version corrigée. Tape sur les mots qui te semblent incorrects et vérifie, puis choisis la bonne version de chaque erreur parmi quatre. Une erreur est validée quand elle est trouvée et corrigée, et réussie quand tu l'as trouvée deux fois de suite. Tes brouillons d'EE passent en premier, en commençant par celui qui a le plus d'erreurs non corrigées. Les erreurs qui ne proviennent pas d'un texte (issues de ton journal d'erreurs) apparaissent sous forme de cartes « Hors texte », et les conseils de style, là où ce que tu as écrit était déjà correct, sont travaillés à part.",
-"A score out of 20 on the TCF Canada scale, with the CEFR and NCLC levels it corresponds to. If the word count is outside the range, the text is off-topic or the instructions aren't followed, cap the score as the TCF Canada would.": "Un score sur 20 selon l'échelle du TCF Canada, avec les niveaux CECR et NCLC correspondants. Si le nombre de mots est hors limites, que le texte est hors sujet ou que les consignes ne sont pas respectées, le score est plafonné comme le ferait le TCF Canada.",
 "A short text like the ones the TCF asks you to write, with a few mistakes of the kinds you make. It's the proofreading pass to do on every draft before you hand it in.": "Un texte court semblable à ceux demandés au TCF, comportant quelques erreurs du type de celles que tu fais. C'est l'exercice de relecture à effectuer sur chaque brouillon avant de le rendre.",
 "A single event this morning: j'ai oublié.": "Un événement unique ce matin : j'ai oublié.",
 "A single event: the passé composé.": "Un événement unique : le passé composé.",
@@ -306,6 +305,7 @@ window.TCF.FR = {
 "A yes/no question → si": "Une question fermée (oui/non) → si",
 "A été annulée: être in the passé composé, then the participle.": "A été annulée : être au passé composé, puis le participe passé.",
 "AI / source (optional)": "IA / source (facultatif)",
+"AI estimate on the TCF Canada scale, not an official score.": "Estimation de l’IA sur l’échelle du TCF Canada, pas une note officielle.",
 "AI review": "Avis de l’IA",
 "AI review saved with your writing.": "Avis de l’IA enregistré avec ton texte.",
 "Accented letters": "Lettres accentuées",
@@ -512,7 +512,6 @@ window.TCF.FR = {
 "Anterior to je me suis aperçu: plus-que-parfait with être.": "Antérieur à je me suis aperçu : plus-que-parfait avec être.",
 "Anterior: plus-que-parfait. Que (= les clés) comes before avoir, so perdues.": "Antérieur : plus-que-parfait. Que (= les clés) est placé avant avoir, donc perdues.",
 "Antoine explains that although he initially worried, in fact « ce ralentissement profite à notre activité plutôt que de nous nuire » because pedestrians now take the time to stroll and look at shop windows. He feared « une forte baisse de fréquentation », but that was only his initial doubt (« au début »); parking spaces are never mentioned; and deliveries are not discussed, with « ralentissement » functioning as a benefit rather than a regretted burden.": "Antoine explique que, même s'il s'est d'abord inquiété, en réalité « ce ralentissement profite à notre activité plutôt que de nous nuire », car les piétons prennent désormais le temps de flâner et de regarder les vitrines. Il craignait « une forte baisse de fréquentation », mais ce n'était que son doute initial (« au début ») ; les places de stationnement ne sont jamais mentionnées ; et les livraisons ne sont pas abordées, le mot « ralentissement » désignant ici un avantage plutôt qu'une contrainte regrettée.",
-"Any format is welcome. The full response and line breaks are kept exactly as pasted.": "Tous les formats sont acceptés. La réponse complète et les sauts de ligne sont conservés tels quels.",
 "Any topic": "N'importe quel thème",
 "Appeler quelqu'un is direct: l'. It comes before the verb, so appelée agrees.": "Appeler quelqu'un est direct : l'. Il est placé avant le verbe, donc appelée s'accorde.",
 "Appeler: que j'appelle (two l), but nous appelions.": "Appeler : que j'appelle (deux l), mais nous appelions.",
@@ -788,11 +787,9 @@ window.TCF.FR = {
 "Claude returned nothing. Try again.": "Claude n'a rien renvoyé. Réessaye.",
 "Claude sets with no topic": "Séries Claude sans sujet",
 "Claude's answer came back in the wrong shape. Try again.": "La réponse de Claude n'est pas au bon format. Réessaye.",
-"Claude's estimate on the TCF Canada scale, not an official score.": "Estimation de Claude sur l'échelle du TCF Canada, ce n'est pas un score officiel.",
 "Claude's exam is ready: 39 new documents. The clock starts when you do.": "L'examen de Claude est prêt : 39 nouveaux documents. Le chrono démarre quand tu commences.",
 "Claude's items": "Éléments de Claude",
 "Claude's items didn't come back in a usable shape. Try again.": "Les éléments de Claude ne sont pas dans un format exploitable. Réessaye.",
-"Claude's suggestions. Add the ones you want to your homework.": "Suggestions de Claude. Ajoute celles que tu veux à tes devoirs.",
 "Claude's suggestions. Nothing is saved unless you add it.": "Suggestions de Claude. Rien n'est enregistré tant que tu ne l'ajoutes pas.",
 "Claude: not quite.": "Claude : pas tout à fait.",
 "Claude: your answer works too. Counted as correct.": "Claude : ta réponse fonctionne aussi. Comptée comme correcte.",
@@ -876,7 +873,6 @@ window.TCF.FR = {
 "Copied: the TCF Canada rules and your three texts. Paste it into any AI chat.": "Copié : les règles du TCF Canada et tes trois textes. Colle-les dans n'importe quel chat IA.",
 "Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction": "Copie la tâche, les règles et critères du TCF Canada ainsi que ton brouillon, prêt à être collé dans une autre IA pour correction",
 "Copy for another AI": "Copier pour une autre IA",
-"Copy only the grade given for each task. A blank field keeps its current grade. New grades update your results; earlier reviews stay available.": "Recopie uniquement la note donnée pour chaque tâche. Un champ vide conserve la note actuelle. Les nouvelles notes mettent tes résultats à jour ; les avis précédents restent disponibles.",
 "Copy this into another AI": "Copie ceci dans une autre IA",
 "Copy your texts for another AI, then paste its review and each task's grade below.": "Copie tes textes pour une autre IA, puis colle son avis et la note de chaque tâche ci-dessous.",
 "Core B2 argumentation structure: comparing viewpoints and speculating in Tâche 3 and Orale Tâche 3.": "Structure argumentative clé du B2 : comparer des points de vue et émettre des hypothèses dans la Tâche 3 et l'Épreuve Orale Tâche 3.",
@@ -1115,7 +1111,6 @@ window.TCF.FR = {
 "Every day from Monday to Saturday": "Tous les jours du lundi au samedi",
 "Every difficulty is solved by someone « à point nommé », so exile becomes « une suite de bonnes surprises ». The critic praises the humour and the dialogue.": "Chaque difficulté est résolue par quelqu'un « à point nommé », si bien que l'exil devient « une suite de bonnes surprises ». La critique fait l'éloge de l'humour et des dialogues.",
 "Every grammar topic mastered": "Tous les points de grammaire maîtrisés",
-"Every grammar, spelling, agreement and word-choice mistake, most important first, as: wrong → right (why).": "Chaque erreur de grammaire, d'orthographe, d'accord et de vocabulaire, de la plus importante à la moins importante, sous la forme : faux → juste (explication).",
 "Every miss of a round fixed on a retry": "Toutes les erreurs d'un tour corrigées au rattrapage",
 "Every miss: which trap caught you?": "Chaque erreur : quel piège t'a eu ?",
 "Every mistake from Claude's corrections of your writing and production checks, and from your error log.": "Toutes les erreurs issues des corrections de tes écrits et de tes vérifications de production par Claude, ainsi que de ton journal des erreurs.",
@@ -1280,9 +1275,9 @@ window.TCF.FR = {
 "Going from 3 000 to 7 000 steps « gagne bien davantage » than from 10 000 to 14 000: the least active gain the most. The 10 000 figure came from an advert for a Japanese pedometer, « d'aucune étude scientifique ».": "Passer de 3 000 à 7 000 pas « gagne bien davantage » que de 10 000 à 14 000 : les personnes les moins actives gagnent le plus. Le chiffre de 10 000 venait d'une publicité pour un podomètre japonais, « d'aucune étude scientifique ».",
 "Good": "Bien",
 "Got it, next": "Compris, suivant",
-"Grade entered from an AI review. This is a practice estimate, not an official score.": "Note saisie à partir d’un avis de l’IA. C’est une estimation d’entraînement, pas une note officielle.",
 "Graded against the criteria France Éducation International publishes for the TCF Canada. Its internal marking grids aren't public, so treat the score as an estimate.": "Évalué selon les critères publiés par France Éducation International pour le TCF Canada. Ses grilles de notation internes n'étant pas publiques, considère ce score comme une estimation.",
 "Graded readers from A1 to B2: novels and classics rewritten for learners, as e-books too. Start at B1.": "Lectures graduées de A1 à B2 : romans et classiques réécrits pour apprenants, également en e-books. Commence au B1.",
+"Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.": "Les notes, critères, corrections et conseils sont présentés comme tes autres résultats. Les avis en français et en anglais sont acceptés. La réponse originale est également conservée.",
 "Grammaire": "Grammaire",
 "Grammar drills": "Exercices de grammaire",
 "Grammar: one round, then Retry the misses, and two rounds at most in a sitting. Only the day's first round counts toward a criterion, and each topic comes back a week later. Easy listening and reading go outside your study time. Once this phase, take the CO Examen blanc on a Saturday instead of the timed sets, as your listening baseline.": "Grammaire : un tour, puis Reprendre les erreurs, et deux tours au maximum par session. Seul le premier tour du jour compte pour un critère, et chaque point revient une semaine plus tard. L'écoute et la lecture faciles se font en dehors de ton temps d'étude. Une fois cette phase passée, passe l'examen blanc de CO un samedi à la place des séries chronométrées, pour établir ton niveau d'écoute de référence.",
@@ -1559,6 +1554,7 @@ window.TCF.FR = {
 "Learner's answer:": "Réponse de l'apprenant :",
 "Learning new cards": "Apprentissage de nouvelles cartes",
 "Leave a skill blank if you didn't sit it.": "Laisse une compétence vide si tu ne l'as pas passée.",
+"Leave the grade blank to use the one detected in the review. Enter a grade only to override it. If none is found, your current grade stays unchanged.": "Laisse la note vide pour utiliser celle détectée dans l’avis. Saisis une note uniquement pour la remplacer. Si aucune note n’est trouvée, ta note actuelle est conservée.",
 "Lecture": "Écoute",
 "Lecture B1": "Lecture B1",
 "Lecture B2": "Lecture B2",
@@ -1755,7 +1751,6 @@ window.TCF.FR = {
 "Muted": "En sourdine",
 "My opinion comes after the comparison": "Mon avis vient après la comparaison",
 "My opinion is woven in, not a neutral recount": "Mon avis est intégré au texte, ce n'est pas un résumé neutre",
-"My whole text corrected, keeping my ideas and paragraph breaks.": "Mon texte entier corrigé, en conservant mes idées et mes paragraphes.",
 "Même si + imparfait, never the conditionnel.": "Même si + imparfait, jamais le conditionnel.",
 "Même si + indicatif (c'est); bien que would need ce soit.": "Même si + indicatif (c'est) ; bien que demanderait ce soit.",
 "Même si + indicatif: tu as.": "Même si + indicatif : tu as.",
@@ -1963,6 +1958,7 @@ window.TCF.FR = {
 "Not a single mistake! Hats off.": "Pas une seule erreur ! Chapeau.",
 "Not bad! Go over the misses below.": "Pas mal ! Revois les erreurs ci-dessous.",
 "Not bad! The explanations show where the trap was.": "Pas mal ! Les explications montrent où était le piège.",
+"Not corrected": "Non corrigé",
 "Not met yet": "Pas encore atteint",
 "Not now": "Pas maintenant",
 "Not one mistake got past you. Hats off!": "Aucune faute ne t'a échappé. Chapeau !",
@@ -2096,6 +2092,7 @@ window.TCF.FR = {
 "Orders: de + infinitive": "Ordres : de + infinitif",
 "Ordre": "Ordre",
 "Oreille fine": "Oreille fine",
+"Original AI response": "Réponse originale de l’IA",
 "Orthographe": "Orthographe",
 "Other": "Autre",
 "Other tense shifts: venir de, the futur antérieur, the conditionnel stays": "Autres concordances de temps : venir de, le futur antérieur, le conditionnel reste",
@@ -2887,6 +2884,7 @@ window.TCF.FR = {
 "Succéder À quelqu'un: se is indirect, so no agreement, even with a feminine plural subject.": "Succéder À quelqu'un : se est indirect, donc pas d'accord, même avec un sujet féminin pluriel.",
 "Suggest 3 from my error log": "Suggérer 3 éléments de mon journal d'erreurs",
 "Suggested by Claude": "Suggéré par Claude",
+"Suggestions from this review. Add the ones you want to your homework.": "Suggestions de cet avis. Ajoute celles que tu veux à tes devoirs.",
 "Suivante is an adjective: it agrees with la semaine.": "Suivante est un adjectif : il s'accorde avec la semaine.",
 "Sujet :": "Sujet :",
 "Sujet, examen, date…": "Sujet, examen, date…",
@@ -3370,6 +3368,7 @@ window.TCF.FR = {
 "This page lost access to its saved data. Reload to reconnect.": "Cette page a perdu l'accès à ses données enregistrées. Recharge la page pour te reconnecter.",
 "This question's time: reading, the recording and the answer. The next one starts by itself when it runs out.": "Temps pour cette question : lecture, enregistrement et réponse. La suivante démarre automatiquement une fois le temps écoulé.",
 "This replaces all your progress here.": "Ceci remplace toute ta progression ici.",
+"This review has no grade. The grade shown is the one already saved for this text.": "Cet avis ne contient pas de note. La note affichée est celle déjà enregistrée pour ce texte.",
 "This round is from before whole rounds were saved, so only the questions you missed are here.": "Ce tour date d'avant l'enregistrement des tours complets, seules les questions ratées s'y trouvent donc.",
 "This sentence is already one of its examples.": "Cette phrase fait déjà partie de ses exemples.",
 "This set has since been replaced, so it can't be opened again.": "Ce thème a été remplacé depuis, il ne peut donc plus être ouvert.",
@@ -3384,7 +3383,6 @@ window.TCF.FR = {
 "Those mistakes are fixed now!": "Ces fautes sont corrigées maintenant !",
 "Three elisions: s', qu', n'.": "Trois élisions : s', qu', n'.",
 "Three notes on your Pense-bête": "Trois notes sur ton Pense-bête",
-"Three phrases from my text rewritten at B2 level, and the three things I should work on first.": "Trois phrases de mon texte réécrites au niveau B2, et les trois points sur lesquels je dois travailler en premier.",
 "Three tasks, 60 minutes.": "Trois tâches, 60 minutes.",
 "Thursday": "Jeudi",
 "Tick blocks on Aujourd'hui and the split shows here.": "Coche les blocs sur Aujourd'hui et la répartition s'affichera ici.",
@@ -3689,7 +3687,6 @@ window.TCF.FR = {
 "Where you started": "Point de départ",
 "Where your own mistakes stand": "Où en sont tes propres erreurs",
 "Whether = si: si j'aimais.": "Whether = si : si j'aimais.",
-"Whether part 1 compares both documents' viewpoints, and whether my own position comes only in part 2.": "Si la partie 1 compare les points de vue des deux documents, et si ma propre position n'apparaît que dans la partie 2.",
 "Which category is still weakest? That's next week's extra focus.": "Quelle catégorie reste la plus faible ? Ce sera l'objectif prioritaire de la semaine prochaine.",
 "Which is correct here?": "Qu'est-ce qui est correct ici ?",
 "Which past tense?": "Quel temps du passé ?",
@@ -5716,16 +5713,12 @@ window.TCF.FR = {
 "{0}/2 choisis"
 ],
 [
-"{0}/20 · {1} · NCLC {2}",
-"{0}/20 · {1} · NCLC {2}"
-],
-[
 "{0}A day counts once every block in its plan is ticked. Sundays don't break a streak.",
 "{0}Un jour compte dès que tous les blocs de son plan sont cochés. Le dimanche ne coupe pas la série."
 ],
 [
-"{0}Claude's estimate on the TCF Canada scale, not an official score.",
-"{0}Estimation de Claude sur l'échelle du TCF Canada, non officielle."
+"{0}AI estimate on the TCF Canada scale, not an official score.",
+"{0}Estimation de l’IA sur l’échelle du TCF Canada, pas une note officielle."
 ],
 [
 "{0}Devoirs",
@@ -5820,10 +5813,6 @@ window.TCF.FR = {
 "/ {0} · {1} correctes"
 ],
 [
-"/20 · {0} · NCLC",
-"/20 · {0} · NCLC"
-],
-[
 "/api/data/{0}/",
 "/api/data/{0}/"
 ],
@@ -5904,10 +5893,6 @@ window.TCF.FR = {
 "À chercher · {0} enregistré sans définition"
 ],
 [
-"A level and one sentence for each criterion: {0}.",
-"Un niveau et une phrase pour chaque critère : {0}."
-],
-[
 "a second set at {0}",
 "une deuxième série à {0}"
 ],
@@ -5922,14 +5907,6 @@ window.TCF.FR = {
 [
 "about NCLC {0}",
 "autour du NCLC {0}"
-],
-[
-"About NCLC {0}",
-"À propos du NCLC {0}"
-],
-[
-"About NCLC {0} ·",
-"À propos du NCLC {0} ·"
 ],
 [
 "Accepted: {0}",
@@ -6820,10 +6797,6 @@ window.TCF.FR = {
 "page {0}"
 ],
 [
-"Part 1 (my first paragraph): {0} words (TCF Canada: 40–60). Part 2 (everything after it): {1} words (TCF Canada: 80–120).",
-"Partie 1 (mon premier paragraphe) : {0} mots (TCF Canada : 40–60). Partie 2 (tout le reste) : {1} mots (TCF Canada : 80–120)."
-],
-[
 "Part 1: {0}/{1}{2}. Well done.",
 "Partie 1 : {0}/{1}{2}. Bien joué."
 ],
@@ -7202,14 +7175,6 @@ window.TCF.FR = {
 [
 "TASK: {0}, {1}. {2} Required length: {3}–{4} words. Learner's word count (anything between two spaces): {5}.{6}",
 "TÂCHE : {0}, {1}. {2} Longueur requise : {3}–{4} mots. Nombre de mots de l'apprenant (tout ce qui est entre deux espaces) : {5}.{6}"
-],
-[
-"TASK: {0}, {1}. {2} Required length: {3}–{4} words. My word count: {5}.",
-"TÂCHE : {0}, {1}. {2} Longueur requise : {3}–{4} mots. Mon nombre de mots : {5}."
-],
-[
-"TASK: {0}, {1}. {2} Required length: {3}–{4} words. My word count: {5}.{6}",
-"TÂCHE : {0}, {1}. {2} Longueur requise : {3}–{4} mots. Mon nombre de mots : {5}.{6}"
 ],
 [
 "text · {0} mistakes to find, then correct.",
