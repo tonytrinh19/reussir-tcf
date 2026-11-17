@@ -3545,7 +3545,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -5218,7 +5218,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -9750,6 +9750,15 @@
   "ctx": []
  },
  {
+  "id": "326bb7830a4d",
+  "text": "Already have feedback from another AI? Paste it here. Your text is saved first if needed.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
+  ]
+ },
+ {
   "id": "e5f893822057",
   "text": "Already know:",
   "kind": "exact",
@@ -10172,7 +10181,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -13919,7 +13928,7 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -13929,7 +13938,7 @@
   "where": "app",
   "ctx": [
    "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …",
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -19901,7 +19910,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -27354,7 +27363,8 @@
   "where": "app",
   "ctx": [
    "<p>Keep your AI feedback</p><p>Paste the response here to keep the review and grades with your writing.</p> <button>Paste AI review</button>",
-   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad",
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -31479,7 +31489,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -33905,7 +33915,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {
@@ -41678,6 +41688,15 @@
   ]
  },
  {
+  "id": "9234ed50ce5d",
+  "text": "Write at least a few sentences before adding an AI review.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Write at least a few sentences before adding an AI review."
+  ]
+ },
+ {
   "id": "56426d149527",
   "text": "Write at least a few sentences first.",
   "kind": "exact",
@@ -42901,7 +42920,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
  {

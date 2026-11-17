@@ -3398,6 +3398,24 @@
     toast(`Finished. It's in your writing history.${stopped ? ` The clock stopped at ${timerTaken()} min.` : ""}`);
     render(true);
     document.getElementById("w-fb")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    return id;
+  }
+  // The editor's paste action is visible before submission. Reuse the matching saved exercise
+  // when returning from another AI, so opening its review never creates a duplicate attempt.
+  function writingSavedDraft(task, p, text) {
+    return list("writing").filter(w => !w.mock && w.task === task && w.text === text && w.prompt === p.q && JSON.stringify(w.docs || null) === JSON.stringify(p.docs || null))
+      .sort((a, b) => (b.ts || 0) - (a.ts || 0))[0] || null;
+  }
+  function writingReviewDraftOpen() {
+    if (ui.wReview?.saving) return;
+    const task = ui.w.task, text = ui.w.text[task] || "";
+    if (countWords(text) < 5) { toast("Write at least a few sentences before adding an AI review."); return; }
+    const saved = writingSavedDraft(task, wPrompt(task), text);
+    if (ui.wReview?.text && ui.wReview.key !== saved?.id) { toast("Save or cancel your open review before starting another."); return; }
+    const id = saved?.id || writingSave();
+    if (!id) return;
+    ui.w.viewing = id;
+    writingReviewOpen({ dataset: { id } });
   }
   // External AI reviews are append-only attachments to the original submission. A missing score
   // leaves its grade alone; a supplied score uses the same /20 results as an in-app correction.
@@ -7146,7 +7164,8 @@
           <label class="check"><input type="checkbox" id="chk-words" disabled><span>Word count inside ${W.min}–${W.max}. Outside the range, a task can be marked “A1 non atteint” however good the French.</span></label>
           ${checks.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="w-check" data-k="${k}" ${ch[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}
         </div>`)}
-        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Save my text</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn primary" data-act="w-review-draft" aria-describedby="w-review-hint">Paste AI review</button><button class="btn" data-act="w-save">Save my text</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        <p class="small muted" id="w-review-hint">Already have feedback from another AI? Paste it here. Your text is saved first if needed.</p>
         ${ui.w.copyOut && ui.w.copyOut.task === task ? `<section class="panel stack tight"><p class="h3">Copy this into another AI</p><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p><textarea id="w-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.w.copyOut.text)}</textarea><div class="row"><button class="btn sm ghost" data-act="w-copy-close">Close</button></div></section>` : ""}
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
         <section class="sec"><div class="sec-head"><h2 class="h2">History</h2><span class="small muted">${hist.length ? `${hist.length} most recent` : ""}</span></div>
@@ -8918,6 +8937,7 @@
     "w-copy-close": () => { ui.w.copyOut = null; render(true); },
     "w-save": writingSave,
     "w-review-open": writingReviewOpen,
+    "w-review-draft": writingReviewDraftOpen,
     "w-review-cancel": () => { if (!ui.wReview?.saving) { ui.wReview = null; render(true); } },
     "w-clear": () => { const t = ui.w.task; ipDrop("writing--" + t); ui.w.text[t] = ""; ui.w.checks[t] = {}; ui.confirm = ""; render(true); },
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },
