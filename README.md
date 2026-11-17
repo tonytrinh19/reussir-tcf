@@ -35,6 +35,32 @@ Twenty listening papers also appear in **Compréhension → Compréhension orale
 
 The collection lives in `site/exam-sources/`: original PDFs, extracted pictures, question JSON and deduplicated AAC recordings (approximately 425 MB total). Existing learning progress and the database schema are unchanged. Run `npm run check` to validate the content and asset references.
 
+## Writing mock exams from PDFs
+
+In **Écrit → Examen blanc**, use **Sujets de tes PDF** to select one of 177 complete three-task exams, or choose **Composer mon examen avec les sujets PDF** to pick each task separately from 631 available prompts. The original built-in subject selection remains available.
+
+The 60-minute timer, word counts, draft saving, resume, submission and correction flows work as before. Both Tâche 3 documents are shown. Saved attempts keep the exact prompts, source references and exam title, and link back to the original PDF after submission. Model corrections are excluded from the question bank.
+
+`site/exam-sources/writing.json` contains the extracted subjects, complete combinations and source gaps. Older monthly files list independent task choices; these are offered individually without inventing original combinations. Thirteen incomplete sections remain in the source PDFs rather than becoming incomplete timed exams. Repeated topics across different PDFs retain their source references.
+
+To regenerate the collection, run `python3 tools/import_writing_papers.py` with `pdfplumber` installed, then `node tools/check_writing_papers.js`. The importer normalizes Unicode ligatures and known PDF font mappings for “ff”; other source wording is retained. June/July 2023 combinations have no printed numbers and are numbered by their order in the PDF.
+
+## Finding past results
+
+**Mes résultats** is visible in reading, listening and writing; grammar links directly to its own results. The page also lives at **Progrès → Historique**. Search by subject or date (with or without accents), filter by skill and exercise/exam, or switch to **À reprendre** for unfinished work.
+
+Each writing mock appears as one exam with all three task scores. Open a result to review the saved answers, then return with the same search and filters. Grouping is display-only: existing writing records, grading, charts and learning progress remain unchanged. Run `node tools/check_results.js` for the results-model regression checks.
+
+## Lighter daily coach plan
+
+From 16 November 2026, the daily plan removes one structured block while retaining the easy reading/listening. The omitted subjects alternate over two weeks so Phase 3 still covers reading, listening, all three writing tasks and its grammar topics. Full mock lengths and their correction time are preserved; on mock-only days the card block is the one removed. Phase 5's single optional dress rehearsal is unchanged.
+
+Anything already started or completed is kept. For the current partially completed day, another untouched block is removed if possible. Once you start or tick a block, the retained original slot IDs are saved in `days.planSlots`; this prevents existing checks and minutes from shifting to a different task. Earlier days and completed legacy days retain their original plan.
+
+New coached reading/listening sessions require one set plus reviewing mistakes. Passing no longer adds a required stretch set. Existing sessions that have already started keep their original parts. Extra practice remains available on the practice pages. Estimates still reflect personal pace, so full mock days can remain longer than ordinary days.
+
+`node tools/check_coach.js` covers the two-week rotation, preserved historical progress and the single-set rule.
+
 ## Options
 
 ```bash

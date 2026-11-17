@@ -363,8 +363,9 @@
       viewing: null,
       copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
     },
+    wReview: null, // a pasted review being attached to an existing submission
     calendarDay: null,
-    hist: { filter: "all", limit: 30, open: null },
+    hist: { filter: "all", type: "all", status: "done", query: "", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
     c: { skill: "ce", lv: { ce: "", co: "" }, theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
@@ -514,37 +515,68 @@
   }
 
   /* =============== plan helpers =============== */
+  // Keep historical templates and their block IDs. From this date, remove one untouched structured
+  // block; a two-week rotation keeps the different writing tasks and grammar topics in the programme.
+  const LIGHT_PLAN_FROM = "2026-11-16";
+  const LIGHT_PLAN_SKIP = {
+    1: [[2, 3], [1, 2], [2, 3], [2, 1], [1, 2], [0, 1]],
+    2: [[2, 3], [3, 2], [3, 2], [3, 1], [0, 1], [3, 0]],
+    3: [[2, 3], [3, 2], [3, 2], [3, 1], [1, 2], [0]],
+    4: [[1, 0], [1, 2], [1, 0], [0], [1, 2], [0]],
+    5: [[0], [0], [0], [1, 2], [1], []],
+  };
+  const dateIsLight = date => date >= LIGHT_PLAN_FROM;
+  const originalPlan = (phase, date) => (T.PLAN[phase]?.days || [])[dow(date)] || null;
   function planFor(phase, date) {
-    const P = T.PLAN[phase];
-    const d = dow(date);
-    if (!P || d === 6) return null;
-    return P.days[d] || null;
+    const original = originalPlan(phase, date);
+    if (!original) return null;
+    const doc0 = S.days.get(date), doc = doc0?.phase === phase ? doc0 : null;
+    let slots = original.map((_, i) => i);
+    if (date >= LIGHT_PLAN_FROM) {
+      if (Array.isArray(doc?.planSlots) && doc.planSlots.length && doc.planSlots.every(i => Number.isInteger(i) && i >= 0 && i < original.length) && new Set(doc.planSlots).size === doc.planSlots.length) {
+        slots = doc.planSlots;
+      } else {
+        const choices = LIGHT_PLAN_SKIP[phase]?.[dow(date)] || [];
+        const week = Math.floor((Date.parse(date + "T12:00:00Z") - Date.parse(LIGHT_PLAN_FROM + "T12:00:00Z")) / (7 * 86400000));
+        const order = choices.length > 1 && week % 2 ? [...choices].reverse() : choices;
+        const protectedSlot = i => !!(doc?.done?.[`p${phase}b${i}`] || doc?.went?.[`p${phase}b${i}`]);
+        const removable = i => !protectedSlot(i) && /^(grammar(?:\.|$)|writing(?:\.t[123]|$)|comp\.(co|ce)$|vocab(?:\.|$))/.test(original[i][5]);
+        const candidates = [...new Set([...order, ...slots.filter(i => removable(i))])];
+        const skip = choices.length ? candidates.find(i => removable(i)) : undefined;
+        if (skip != null) slots = slots.filter(i => i !== skip);
+      }
+    }
+    // The seventh item is its original position, never its position in the shortened list.
+    return slots.map(i => {
+      const block = [...original[i], i];
+      if (dateIsLight(date) && /^comp\.(co|ce)$/.test(block[5])) block[3] = "Une seule série à ton niveau, puis la correction de tes erreurs. Les séries supplémentaires sont facultatives.";
+      return block;
+    });
   }
-  const blockKey = (phase, i) => `p${phase}b${i}`;
-  // A day is judged against its plan as it was when ticked (doc.total), so later edits to the templates don't rewrite past days.
+  const blockKey = (phase, i, plan) => `p${phase}b${plan?.[i]?.[6] ?? i}`;
+  function keepPlan(doc, plan, date) {
+    if (plan) { doc.total = plan.length; if (date >= LIGHT_PLAN_FROM) doc.planSlots = plan.map(b => b[6]); }
+  }
   function dayStats(date) {
-    const doc = S.days.get(date);
-    const phase = (doc && doc.phase) || settings().phase;
-    const plan = planFor(phase, date);
+    const doc = S.days.get(date), phase = doc?.phase || settings().phase, plan = planFor(phase, date);
     if (!plan) return null;
-    const done = (doc && doc.done) || {};
-    const total = (doc && doc.total) || plan.length;
-    let n = 0;
-    for (let i = 0; i < total; i++) if (done[blockKey(phase, i)]) n++;
-    return { n, total, phase };
+    const done = doc?.done || {};
+    // Older totals keep the original meaning; new days count the actual retained block IDs.
+    const keys = date < LIGHT_PLAN_FROM ? Array.from({ length: doc?.total || plan.length }, (_, i) => blockKey(phase, i)) : plan.map((_, i) => blockKey(phase, i, plan));
+    return { n: keys.filter(k => done[k]).length, total: keys.length, phase };
   }
   function setBlock(date, key, val) {
     const cur = S.days.get(date);
     const doc = cur ? clone(cur) : { phase: settings().phase, done: {} };
+    const plan = planFor(doc.phase || settings().phase, date);
     doc.done = doc.done || {};
     if (val) doc.done[key] = true; else delete doc.done[key];
     doc.phase = doc.phase || settings().phase;
-    const plan = planFor(doc.phase, date);
-    if (plan) doc.total = plan.length;
+    keepPlan(doc, plan, date);
     // A block ticked by hand today keeps the coach's minutes for it, as one the app ticks keeps what was done.
     doc.min = Object.assign({}, doc.min);
     if (!val) delete doc.min[key];
-    else if (plan && date === todayStr() && doc.min[key] == null && doc.phase === settings().phase) { const i = plan.findIndex((b, k) => blockKey(doc.phase, k) === key); if (i >= 0) doc.min[key] = coach(plan[i], i, date).min; }
+    else if (plan && date === todayStr() && doc.min[key] == null && doc.phase === settings().phase) { const i = plan.findIndex((b, k) => blockKey(doc.phase, k, plan) === key); if (i >= 0) doc.min[key] = coach(plan[i], i, date).min; }
     put("days", date, doc);
   }
   // Start on a block of today's plan (or in the next bar): what it opened is kept on the day, so the block knows its
@@ -560,8 +592,9 @@
     const doc = cur ? clone(cur) : { phase: s.phase, done: {} };
     doc.went = Object.assign({}, doc.went);
     const w = doc.went[key] || {}, part = st.parts.find((x) => !x.done);
-    doc.went[key] = Object.assign({ at: Date.now() }, w, { go: st.go }, part && part.clock && !w.clock ? { clock: part.clock } : {});
+    doc.went[key] = Object.assign({ at: Date.now(), singleSet: dateIsLight(t) && !w.at }, w, { go: st.go }, part && part.clock && !w.clock ? { clock: part.clock } : {});
     doc.phase = doc.phase || s.phase;
+    keepPlan(doc, plan, t);
     put("days", t, doc);
     st.launch();
   }
@@ -679,7 +712,7 @@
     }).sort((a, b) => b.need - a.need);
   }
   // The topics this phase's week already gives a slot to.
-  const weekTopics = (phase) => new Set(arr((T.PLAN[phase] || {}).days).flat().map((b) => b[5]).filter((g) => /^grammar\.[a-z]/.test(g)).map((g) => g.split(".")[1]).filter((id) => TOPIC[id]));
+  const weekTopics = (phase) => new Set(Array.from({ length: 6 }, (_, i) => planFor(phase, addDays(mondayOf(todayStr()), i)) || []).flat().map((b) => b[5]).filter((g) => /^grammar\.[a-z]/.test(g)).map((g) => g.split(".")[1]).filter((id) => TOPIC[id]));
   // Your own pace: seconds a drill question (your last 5 rounds that kept their time), seconds a review card and
   // a new card (your last 5 sessions), and minutes for each writing task (your last 3 on the clock).
   function myPace() {
@@ -707,10 +740,11 @@
   const partHit = (p, token) => (p.exact ? token === p.tok : token === p.tok || token.startsWith(p.tok + "."));
   const chip = (t, cls) => ({ t, cls: cls || "" });
 
-  // Listening and reading: one set at your level (reading's clock at your pace), your misses gone over, and a pass
-  // adds a stretch set: one pace step faster, or at exam pace already, the next level at relaxed pace.
+  // Listening and reading: one set at your level and a review of the misses. A legacy session already
+  // started can still include its stretch set; new lighter sessions never add one automatically.
   function compStep(skill, b, key, date) {
     const w = wentOf(date, key), lad = compLadder(skill), P = phaseInfo();
+    const singleSet = dateIsLight(date) && (!w || w.singleSet === true);
     const done = list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.date === date && (c.ts || 0) >= ((w && w.at) || 0)).sort((a, b2) => (a.ts || 0) - (b2.ts || 0));
     const first = firstTries(list("comp").filter((c) => c.skill === skill && c.kind !== "exam" && c.total));
     const accAt = (lvl) => { const xs = first.filter((c) => c.level === lvl).slice(-3); return xs.length ? avg(xs.map((c) => c.score / c.total)) : 0.7; };
@@ -744,8 +778,8 @@
     const st = stretchOf(lvl, k1 < 0 ? (pace ? pace.k : 2) : k1);
     const passed = done[0] ? passOf(done[0], clock1) : false;
     const parts = [{ kind: "set", tok: "comp." + skill, exact: true, done: !!done[0], level: lvl, clock: clock1, min: setMin(lvl, clock1, done[0]) }];
-    if (passed && !untimed) parts.push({ kind: "stretch", tok: "comp." + skill, exact: true, done: !!done[1], level: st.level, clock: st.clock, min: setMin(st.level, st.clock, done[1]) });
-    const expect = done[0] || untimed ? 0 : pPass(lvl) * (SWITCH_MIN + setMin(st.level, st.clock));
+    if (passed && !untimed && !singleSet) parts.push({ kind: "stretch", tok: "comp." + skill, exact: true, done: !!done[1], level: st.level, clock: st.clock, min: setMin(st.level, st.clock, done[1]) });
+    const expect = done[0] || untimed || singleSet ? 0 : pPass(lvl) * (SWITCH_MIN + setMin(st.level, st.clock));
     const min = parts.reduce((a, p) => a + p.min, 0) + (parts.length > 1 ? SWITCH_MIN : 0) + expect;
     const cl = (c) => `${fmtClock(c)} clock`;
     const kName = (c, l) => { const k = PACE_STEPS.findIndex((s) => Math.round(s[0] * (CE_PACE[l] || 90) * CE_SET_SIZE) === c); return k >= 0 ? PACE_STEPS[k][1] : ""; };
@@ -755,7 +789,7 @@
     const cur = parts.find((p) => !p.done);
     if (!done[0]) {
       line1 = untimed ? `${lvl} set, untimed, then your misses.` : skill === "ce" ? `${lvl} set · ${cl(clock1)} (${kName(clock1, lvl)}), then your misses.` : `${lvl} set: once through, then your misses with the transcript.`;
-      line2 = untimed ? "A baseline: no clock yet." : `${passTxt} → ${stTxt}.`;
+      line2 = singleSet ? "Une seule série, puis la correction de tes erreurs. Une autre série reste facultative." : untimed ? "A baseline: no clock yet." : `${passTxt} → ${stTxt}.`;
       chips = skill === "ce" && !untimed ? [chip(lvl, "lvl"), chip(fmtClock(clock1) + " · " + kName(clock1, lvl))] : [chip(lvl, "lvl")];
     } else if (cur) {
       line1 = skill === "ce" ? `Part 2 · ${cur.level} set · ${cl(cur.clock)} (${kName(cur.clock, cur.level)}).` : `Part 2 · ${cur.level} set: once through, then your misses.`;
@@ -763,7 +797,7 @@
       chips = [chip(cur.level, "lvl")].concat(skill === "ce" ? [chip(fmtClock(cur.clock) + " · " + kName(cur.clock, cur.level))] : []);
     } else {
       line1 = `Done: ${done.slice(0, parts.length).map((c) => `${c.score}/${c.total}`).join(" then ")}.`;
-      line2 = passed || !done[0] ? "" : `${passTxt} adds a stretch set next time.`;
+      line2 = singleSet ? "Objectif du jour terminé. Tu peux t’arrêter après la correction." : passed || !done[0] ? "" : `${passTxt} adds a stretch set next time.`;
     }
     const meter = lad.level === "B1" ? { label: `B2 at ${pct(lad.up)}`, have: lad.have, need: lad.up } : { label: "B2 · stay above 50%", have: lad.have, need: LADDER_DOWN };
     let adapted = "";
@@ -976,7 +1010,7 @@
 
   // What a block of the day's plan is today. Only today's blocks are coached; other days show the plan.
   function coach(b, i, date) {
-    const key = blockKey(settings().phase, i), go = b[5];
+    const key = blockKey(settings().phase, b[6] ?? i), go = b[5];
     const plain = (tok) => ({ go, line1: b[3] || "", line2: "", chips: [], parts: tok ? [{ kind: "free", tok, exact: true, done: !!didOf(wentOf(date, key)).free, min: b[1] }] : [], min: b[1], launch: () => goTo("#" + go) });
     let st;
     // Saturdays in Phase 2: until the CO Examen blanc is done, it replaces the two timed sets.
@@ -1020,10 +1054,10 @@
     doc.went = doc.went || {};
     doc.min = doc.min || {};
     doc.phase = s.phase;
-    doc.total = plan.length;
+    keepPlan(doc, plan, t);
     let hit = -1, merge = false;
     for (let i = 0; i < plan.length; i++) {
-      const key = blockKey(s.phase, i);
+      const key = blockKey(s.phase, i, plan);
       if (doc.done[key]) continue;
       const st = coach(plan[i], i, t);
       // A part the token finishes: the first not done yet, or one already counted as done from what was saved
@@ -1031,7 +1065,7 @@
       const hits = st.parts.filter((x) => partHit(x, token));
       const p = hits.find((x) => !x.done) || hits[0] || (!st.parts.length && (token === plan[i][5] || token.startsWith(plan[i][5] + ".")) ? {} : null);
       if (!p) continue;
-      const w = Object.assign({ go: st.go, at: 0 }, doc.went[key] || {});
+      const w = Object.assign({ go: st.go, at: 0, singleSet: dateIsLight(t) && !doc.went[key] }, doc.went[key] || {});
       if (p.kind && p.kind !== "set" && p.kind !== "stretch") w.did = Object.assign({}, w.did, { [p.kind]: info && info.min > 0 ? Math.round(info.min * 10) / 10 : true });
       doc.went[key] = w;
       put("days", t, doc);
@@ -1043,7 +1077,7 @@
         merge = !!st.merge;
         hit = i;
         // The CO Examen blanc that stands in for Saturday's timed sets ticks them both.
-        if (merge) for (let j = i + 1; j < plan.length; j++) { const kj = blockKey(s.phase, j); if (!doc.done[kj] && coach(plan[j], j, t).merge) { doc.done[kj] = true; doc.min[kj] = 0; put("days", t, doc); } }
+        if (merge) for (let j = i + 1; j < plan.length; j++) { const kj = blockKey(s.phase, j, plan); if (!doc.done[kj] && coach(plan[j], j, t).merge) { doc.done[kj] = true; doc.min[kj] = 0; put("days", t, doc); } }
         if (dayComplete(t)) ui.thunk = t;
         ui.nextUp = { date: t, from: key };
       } else ui.nextUp = { date: t, from: key, part: true };
@@ -1482,7 +1516,7 @@
     // One box per criterion, ticked in blue ink when it's met; they're pressed in, one after another, as the page opens.
     const boxes = ck.crit.length ? `<div class="checkin"><small>Enregistrement · Check-in</small><span class="ck-row" role="img" aria-label="${ck.n} of ${ck.crit.length} exit criteria met">${ck.crit.map((c, i) => `<i class="ck${ck.ok[i] ? " on" : ""}" data-tip="${esc(c.text)}\n${ck.ok[i] ? "Met" : "Not met yet"}"${ck.ok[i] ? ` data-m="press" data-k="ck-${s.phase}-${esc(c.id)}"` : ""}>${ck.ok[i] ? `<svg viewBox="0 0 24 24" aria-hidden="true">${TICK_PATH}</svg>` : ""}</i>`).join("")}</span></div>` : "";
     const t = todayStr(), plan = planFor(s.phase, t), done = (S.days.get(t) || {}).done || {};
-    const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k)]) : -1;
+    const open = plan ? plan.findIndex((b, k) => !done[blockKey(s.phase, k, plan)]) : -1;
     const gate = !plan ? "Repos · Rest day" : open < 0 ? "Journée validée" : `${T.SKILLS[plan[open][0]].code} · ${plan[open][2]}`;
     const mins = plan ? `${planMins(t, s.phase)} min` : "Repos";
     return `<div class="pass${ck.all ? " boarded" : ""}"><div class="pass-main"><div class="pass-band"><span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span></div>
@@ -2934,9 +2968,9 @@
     const nu = ui.nextUp, t = todayStr(), s = settings(), plan = planFor(s.phase, t);
     if (!nu || nu.date !== t || !plan) return "";
     const done = (S.days.get(t) || {}).done || {};
-    const fromI = plan.findIndex((b, k) => blockKey(s.phase, k) === nu.from);
+    const fromI = plan.findIndex((b, k) => blockKey(s.phase, k, plan) === nu.from);
     // A block with a part still to do comes first; otherwise the next block not ticked.
-    const i = fromI >= 0 && !done[nu.from] ? fromI : plan.findIndex((b, k) => !done[blockKey(s.phase, k)]);
+    const i = fromI >= 0 && !done[nu.from] ? fromI : plan.findIndex((b, k) => !done[blockKey(s.phase, k, plan)]);
     const was = fromI >= 0 ? `<span class="nu-was"><svg class="nu-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg>${i === fromI ? "Part 1 · " : ""}${esc(plan[fromI][2])}</span>` : "";
     const x = `<button class="btn ghost sm nu-x" data-act="nextup-close" aria-label="Dismiss">×</button>`;
     if (i < 0) return `<div class="nu-in nu-day">${was}<span class="nu-next"><b class="nu-hand">Journée terminée&#160;!</b></span><a class="btn sm primary" href="#today">See the stamp</a>${x}</div>`;
@@ -3240,7 +3274,7 @@
   }
   function cleanFb(o, task) {
     const c = o.compliance || {};
-    const sc = Number(o.score20);
+    const sc = o.score20 == null || o.score20 === "" ? NaN : Number(o.score20);
     const score20 = Number.isFinite(sc) ? Math.max(0, Math.min(20, Math.round(sc))) : null;
     const fb = {
       level: str(o.level).slice(0, 8), score20, nclc: score20 != null ? nclcLabel(nclcOf("ee", score20)) : str(o.nclc).slice(0, 10), summary: str(o.summary),
@@ -3363,6 +3397,122 @@
     autoTick("writing." + task, { min: timerElapsedMin("writing." + task) || 0 });
     toast(`Finished. It's in your writing history.${stopped ? ` The clock stopped at ${timerTaken()} min.` : ""}`);
     render(true);
+    document.getElementById("w-fb")?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  // External AI reviews are append-only attachments to the original submission. A missing score
+  // leaves its grade alone; a supplied score uses the same /20 results as an in-app correction.
+  function writingReviewScore(value) {
+    if (!str(value).trim()) return null;
+    const n = Number(str(value).trim().replace(",", "."));
+    if (!/^\d+(?:[.,]\d+)?$/.test(str(value).trim()) || !Number.isFinite(n) || n < 0 || n > 20) throw new Error("Enter a score between 0 and 20, or leave it blank.");
+    return n;
+  }
+  function writingWithReview(doc, review) {
+    if (arr(doc.aiReviews).some(r => r.id === review.id)) return doc; // retry after a partial mock save
+    const entry = { ...review };
+    if (review.score20 != null && doc.fb && !doc.fb.reviewId) entry.previousFeedback = clone(doc.fb);
+    const next = { ...doc, aiReviews: [...arr(doc.aiReviews), entry] };
+    if (review.score20 != null) {
+      next.fb = { ...(doc.fb || cleanFb({}, doc.task)), score20: review.score20, level: eeCefr(review.score20), nclc: nclcLabel(nclcOf("ee", review.score20)), reviewId: review.id, errors: doc.fb?.errors ?? null };
+      // Retain any real error analysis for existing practice. A pasted response alone supplies none.
+      if (!doc.fb?.tache3) delete next.fb.tache3;
+    }
+    return next;
+  }
+  const writingReviewStatus = doc => arr(doc.aiReviews).length ? "Review saved · no score" : "not corrected";
+  function writingReviewTargets(el) {
+    return el.dataset.mock ? Object.values(eeMocks().find(m => m.id === el.dataset.mock)?.tasks || {}).sort((a, b) => a.task.localeCompare(b.task)).map(w => w.id) : [el.dataset.id];
+  }
+  function writingReviewOpen(el) {
+    if (ui.wReview?.saving) return;
+    const key = el.dataset.mock ? "mock-" + el.dataset.mock : el.dataset.id;
+    if (ui.wReview && ui.wReview.key !== key && ui.wReview.text) { toast("Save or cancel your open review before starting another."); return; }
+    if (ui.wReview?.key !== key) ui.wReview = { key, ids: writingReviewTargets(el), id: uid(), ts: Date.now(), text: "", source: "", scores: {}, error: "" };
+    render(true);
+    const field = document.getElementById("ai-review-text");
+    if (field) { field.focus(); field.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  }
+  function writingReviewForm(key, attrs, docs) {
+    const d = ui.wReview?.key === key ? ui.wReview : null;
+    if (!d) return `<div class="review-invite"><div><p class="h3">Keep your AI feedback</p><p class="small muted">Paste the response here to keep the review and grades with your writing.</p></div><button class="btn" data-act="w-review-open" ${attrs}>Paste AI review</button></div>`;
+    const locked = d.saving || d.started;
+    return `<form id="ai-review-form" class="review-import stack" novalidate aria-labelledby="ai-review-title" aria-busy="${!!d.saving}">
+      <div class="stack tight"><h3 class="h3" id="ai-review-title">Paste AI review</h3><p class="small muted">${docs.length > 1 ? "One response for the whole mock. Enter each task's grade separately; the app calculates the overall estimate." : "Attach the AI response to this saved text."}</p></div>
+      <label class="field" for="ai-review-text">Full AI response<textarea id="ai-review-text" data-input="w-review" data-k="text" rows="9" maxlength="60000" required aria-describedby="ai-review-help" ${locked ? "disabled" : ""} placeholder="Paste the grading, corrections and advice here…">${esc(d.text)}</textarea></label>
+      <p class="small muted" id="ai-review-help">Any format is welcome. The full response and line breaks are kept exactly as pasted.</p>
+      <div class="review-fields"><label class="field">AI / source (optional)<input data-input="w-review" data-k="source" maxlength="80" value="${esc(d.source)}" placeholder="ChatGPT, Claude, Gemini…" ${locked ? "disabled" : ""}></label>
+      ${docs.map(w => `<label class="field"><span>${esc(T.WRITING[w.task].name)} · <span>Score /20 (optional)</span></span><input type="text" inputmode="decimal" data-input="w-review-score" data-id="${esc(w.id)}" value="${esc(d.scores[w.id] || "")}" aria-describedby="ai-review-grade-help" placeholder="0–20" ${locked ? "disabled" : ""}></label>`).join("")}</div>
+      <p class="small muted" id="ai-review-grade-help">Copy only the grade given for each task. A blank field keeps its current grade. New grades update your results; earlier reviews stay available.</p>
+      ${d.error ? `<p class="notice warn" role="alert">${esc(d.error)}</p>` : ""}
+      <div class="row"><button class="btn primary" type="submit" ${d.saving ? "disabled" : ""}>${d.saving ? "Saving…" : d.started ? "Retry saving review" : "Save review"}</button><button class="btn ghost" type="button" data-act="w-review-cancel" ${d.saving ? "disabled" : ""}>Cancel</button></div>
+    </form>`;
+  }
+  // Wait for durable storage before saying the review is saved. The normal put() is optimistic.
+  async function writingReviewStore(coll, id, build) {
+    return queue(coll + "/" + id, async () => {
+      const doc = build(S[coll].get(id));
+      if (backend.kind === "local") {
+        // The browser fallback normally serializes S optimistically and suppresses quota failures.
+        // Store a snapshot containing this review first, and let errors keep the form open.
+        const data = Object.fromEntries(COLLS.map(c => [c, Object.fromEntries(S[c])]));
+        data[coll][id] = doc;
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+      } else await backend.set(coll, id, doc);
+      S[coll].set(id, doc);
+      dataRev++;
+      scheduleRender();
+    });
+  }
+  async function writingReviewSave() {
+    const d = ui.wReview;
+    if (!d || d.saving) return;
+    try {
+      if (!d.text.trim()) throw new Error("Paste the AI response before saving.");
+      if (d.text.length > 60000) throw new Error("The response is too long. Keep it under 60,000 characters.");
+      if (!d.ids.length || d.ids.some(id => !S.writing.has(id))) throw new Error("This writing entry is no longer available.");
+      const scores = Object.fromEntries(d.ids.map(id => [id, writingReviewScore(d.scores[id])]));
+      if (!loaded || importing || backend.kind === "loading") throw new Error("Your saved work is still loading. Try again in a moment.");
+      if (ui.eeBusy) throw new Error("Wait for the current correction to finish before adding a review.");
+      d.saving = true;
+      if (!d.started) d.ts = Date.now();
+      d.started = true;
+      d.error = "";
+      render(true);
+      for (const id of d.ids) {
+        await writingReviewStore("writing", id, doc => {
+          if (!doc) throw new Error("This writing entry is no longer available.");
+          return writingWithReview(doc, { id: d.id, ts: d.ts, text: d.text, source: d.source.trim().slice(0, 80), score20: scores[id], scope: d.ids.length > 1 ? "mock" : "task" });
+        });
+      }
+      for (const mockId of new Set(d.ids.map(id => S.writing.get(id)?.mock?.id).filter(Boolean))) await eeSyncReviewScore(mockId);
+      if (ui.ee?.done && d.key === "mock-" + ui.ee.id) ui.ee.view = d.ids[0];
+      if (ui.wReview === d) ui.wReview = null;
+      toast("AI review saved with your writing.");
+    } catch (e) {
+      d.error = d.started ? "The save did not finish. Your pasted response is still here. Retry to finish saving without duplicates." : e.message;
+    } finally {
+      d.saving = false;
+      render(true);
+      tabSave();
+      if (d.error) document.querySelector("#ai-review-form [role=alert]")?.scrollIntoView({ block: "nearest" });
+    }
+  }
+  async function eeSyncReviewScore(mockId) {
+    const m = eeMocks().find(x => x.id === mockId);
+    if (!m || m.score == null) return;
+    const old = list("mocks").find(x => x.compId === "ee-" + mockId);
+    await writingReviewStore("mocks", old?.id || "ee-" + mockId, doc => ({ ...doc, date: m.date, ts: doc?.ts || m.ts, label: doc?.label || "Examen blanc EE (site estimate)", ee: m.score, compId: "ee-" + mockId }));
+  }
+  function writingReviews(doc) {
+    const reviews = arr(doc.aiReviews).slice().reverse();
+    if (!reviews.length) return "";
+    return `<div class="stack review-history"><h3 class="h3">Saved AI reviews</h3>${reviews.map((r, i) => `<details class="review-entry" ${i === 0 ? "open" : ""}>
+      <summary><span>${esc(r.source || "AI review")} <span class="small muted">· ${shortDate(ymd(new Date(r.ts)))} · ${hhmm(r.ts)}</span></span><span class="pill">${r.score20 != null ? `${r.score20}/20` : "No grade attached"}</span></summary>
+      <div class="stack"><p class="small muted">${r.scope === "mock" ? "Full mock review · the grade above is for this task." : "Review attached to this task."}</p><div class="review-response" translate="no">${esc(r.text)}</div>
+      ${r.previousFeedback ? `<details class="fold"><summary>Earlier in-app correction</summary>${writingEarlierFeedback(r.previousFeedback)}</details>` : ""}</div></details>`).join("")}</div>`;
+  }
+  function writingEarlierFeedback(fb) {
+    return `<div class="stack tight"><p>${fb.score20 != null ? `${fb.score20}/20 · ` : ""}${esc(fb.level)} · ${esc(fb.summary)}</p>${criteriaTable(fb.criteria)}${fb.compliance?.notes ? `<p>${esc(fb.compliance.notes)}</p>` : ""}${fb.tache3?.notes ? `<p>${esc(fb.tache3.notes)}</p>` : ""}${errList(arr(fb.errors), true)}${fb.corrected ? `<p class="corrected seyes">${esc(fb.corrected)}</p>` : ""}${arr(fb.upgrades).map(u => `<p>${esc(u.from)} → ${esc(u.to)}</p>`).join("")}${arr(fb.strengths).concat(arr(fb.homework)).map(x => `<p>${esc(x)}</p>`).join("")}</div>`;
   }
   async function writingGenPrompt() {
     const task = ui.w.task, W = T.WRITING[task];
@@ -4478,7 +4628,7 @@
       const next = (pdf ? fresh.slice(0, 1) : fresh).map((e) => `<button class="btn primary" data-act="x-start" data-id="${esc(e.id)}">Start ${esc(e.title)}</button>`).join("")
         + `<button class="btn" data-act="x-retake">Retake ${esc(cx.exam.title)}</button>${skill === "ce" ? claudeBtn("cx-gen", "x-gen", "New exam from Claude", "", "btn") : ""}`
         + `<button class="btn ghost" data-act="x-close">All exams</button><a class="btn ghost" href="#progress.scores">Scores and NCLC</a>`;
-      return `${back}
+      return `${resultReturn()}${back}
         <section class="panel stack" data-m="pop" data-k="xr-${esc(cx.exam.id)}-${esc(r.date)}">
           <p class="eyebrow">${esc(cx.exam.title)} · ${skill === "co" ? "Compréhension orale" : "Compréhension écrite"} · ${r.review ? `your attempt of ${shortDate(r.date)}` : "handed in"}${r.timeUp ? " when time ran out" : ""}</p>
           <div class="row"><span class="scorebig"${!r.review && !retake && (nclcOf(skill, r.est) || 0) >= 7 ? ` data-m="burst" data-k="x7-${esc(cx.exam.id)}-${esc(r.date)}-${r.est}"` : ""}>≈ <span data-tween="xest-${esc(cx.exam.id)}-${esc(r.date)}" data-tw="count" data-to="${r.est}">${r.est}</span></span>${nclcTag(r.est, skill)}<span class="pill">${cefrOf(r.est)}</span>${retake ? `<span class="pill info">retake · not counted</span>` : ""}</div>
@@ -4523,7 +4673,7 @@
       </section>
       ${!other && !paused ? readingPaperShelf(exams, skill) : ""}
       ${skill === "co" ? `<a class="btn" href="papers.html?skill=co">Annales · Réécouter les enregistrements</a>` : ""}
-      ${exams.length ? `<section class="sec"><h2 class="h2">Your exams</h2><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
+      ${exams.length ? `<section class="sec"><div class="sec-head"><h2 class="h2">Your exams</h2>${resultsLink(skill, "exam", "Tous les résultats")}</div><div class="stack tight">${exams.slice(0, 8).map((a) => `<div class="h-att"><span class="num">${shortDate(a.date)}</span><span>${esc(a.title)}</span><span class="pill">≈${a.est}</span>${nclcTag(a.est, skill)}${retakes.has(a.id) ? `<span class="pill info">retake · not counted</span>` : ""}<span class="small muted">${a.score}/${a.total}</span>${X.bank().some((e) => e.id === a.setId) || a.snap ? `<button class="btn ghost sm" data-act="x-review" data-id="${esc(a.id)}">Review</button>` : ""}</div>`).join("")}</div></section>` : ""}`;
   }
 
   /* =============== criteria & scores =============== */
@@ -4635,7 +4785,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
-  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "libraryTheme", "libraryLimit", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
+  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "libraryTheme", "libraryLimit", "w", "wReview", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -4652,6 +4802,7 @@
       u.c = Object.assign({}, ui.c);
       ["player", "inflight", "queued", "failed"].forEach((k) => delete u.c[k]);
       u.w = Object.assign({}, ui.w, { copyOut: null });
+      u.wReview = ui.wReview ? { ...ui.wReview, saving: false } : null;
       if (examRunning() && skillOf(ui.cx) === "co" && ui.cx.play) ui.cx.play.pos = coxPos();
       const set = ui.c.set.co;
       const audio = audioEl && set && set.audio ? { id: set.id, t: audioEl.currentTime || 0, ended: ui.c.player === "ended" } : null;
@@ -4828,7 +4979,7 @@
   function blockMins(date, plan, phase, steps) {
     const saved = (S.days.get(date) || {}).min || {};
     const st = steps || (date === todayStr() && phase === settings().phase ? plan.map((b, i) => coach(b, i, date)) : null);
-    return plan.map((b, i) => { const k = blockKey(phase, i); return saved[k] != null ? saved[k] : st ? st[i].min : b[1]; });
+    return plan.map((b, i) => { const k = blockKey(phase, i, plan); return saved[k] != null ? saved[k] : st ? st[i].min : b[1]; });
   }
   const planMins = (date, phase) => { const plan = planFor(phase, date); return plan ? blockMins(date, plan, phase).reduce((a, x) => a + x, 0) : 0; };
   // The minutes of each skill in a day's ticked blocks: what was saved with each tick, or for days ticked before
@@ -4837,7 +4988,7 @@
     const doc = S.days.get(date);
     if (!doc || !doc.done) return {};
     const phase = doc.phase || settings().phase, plan = planFor(phase, date), by = {}, saved = doc.min || {};
-    if (plan) plan.forEach((b, i) => { const k = blockKey(phase, i); if (doc.done[k]) by[b[0]] = (by[b[0]] || 0) + (saved[k] != null ? saved[k] : b[1]); });
+    if (plan) plan.forEach((b, i) => { const k = blockKey(phase, i, plan); if (doc.done[k]) by[b[0]] = (by[b[0]] || 0) + (saved[k] != null ? saved[k] : b[1]); });
     return by;
   }
   const minTotal = (by) => Object.values(by).reduce((a, b) => a + b, 0);
@@ -4888,16 +5039,18 @@
         const steps = sel === t ? plan.map((b, i) => coach(b, i, t)) : null;
         const bm = blockMins(sel, plan, s.phase, steps);
         const mins = bm.reduce((a, x) => a + x, 0);
-        const doneN = plan.filter((b, i) => done[blockKey(s.phase, i)]).length;
-        const doneMin = bm.reduce((a, x, i) => a + (done[blockKey(s.phase, i)] ? x : 0), 0);
+        const doneN = plan.filter((b, i) => done[blockKey(s.phase, i, plan)]).length;
+        const doneMin = bm.reduce((a, x, i) => a + (done[blockKey(s.phase, i, plan)] ? x : 0), 0);
         const pnote = T.PLAN[s.phase].note;
-        const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i)]);
+        const omitted = originalPlan(s.phase, sel).find((b, i) => !plan.some(p => p[6] === i));
+        const next = plan.findIndex((b, i) => !done[blockKey(s.phase, i, plan)]);
         if (sel === t) rm = remyToday(plan, doneN, mins - doneMin);
         const progress = dayComplete(sel) ? tbStamp(sel) : dayRing(sel, doneN, plan.length, doneMin, mins);
         body = `<section class="day-plan stack" aria-labelledby="plan-title">
           <div class="plan-heading"><h2 class="h2" id="plan-title" lang="fr">Au programme</h2>${progress}</div>
+          ${plan.length < originalPlan(s.phase, sel).length ? `<p class="notice small">Programme allégé : ${esc(omitted[2])} en moins aujourd’hui. La lecture ou l’écoute libre reste au programme. Les sujets alternent d’une semaine à l’autre.</p>` : ""}
           <ol class="blocks">${plan.map((b, i) => todayBlock(b, i, sel, s.phase, done, i === next, steps && steps[i])).join("")}</ol>
-          ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p></details>` : ""}
+          ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p>${dateIsLight(sel) ? `<p class="small muted">Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.</p>` : ""}</details>` : ""}
         </section>`;
       }
       if (!plan && sel === t) rm = remyToday(null);
@@ -4948,7 +5101,7 @@
   // their title and open with a tap; done ones shrink to a ticked line. Today's blocks are the coach's: what Start
   // presents, in two short lines, its own minutes and, when the plan was changed for you, why.
   function todayBlock(b, i, sel, phase, done, isNext, st) {
-    const key = blockKey(phase, i), isDone = !!done[key], fk = `blk-${sel}-${key}`;
+    const key = blockKey(phase, b[6] ?? i), isDone = !!done[key], fk = `blk-${sel}-${key}`;
     const tick = `<label class="tick"><input type="checkbox" data-change="tick" data-date="${sel}" data-key="${key}" ${isDone ? "checked" : ""} aria-label="Mark “${esc((st && st.title) || b[2])}” done"><svg class="tick-mark" viewBox="0 0 24 24" aria-hidden="true"${isDone ? ` data-m="tick" data-k="t-${sel}-${key}"` : ""}><path d="M6.5 12.5l3.6 3.6 7.4-8"/></svg></label>`;
     const cls = `block${isDone ? " done" : ""}${isNext ? " next" : ""}`;
     if (st) {
@@ -5038,7 +5191,7 @@
   // you are from the bar, and where the plan deals with it. Most serious first, four at most.
   function blockers() {
     const s = settings(), rc = recentCats(3), out = [];
-    const week = arr((T.PLAN[s.phase] || {}).days);
+    const week = Array.from({ length: 6 }, (_, i) => planFor(s.phase, addDays(mondayOf(todayStr()), i)) || []);
     const dayOf = (tid) => week.findIndex((d) => d.some((b) => b[5] === "grammar." + tid || b[5].startsWith("grammar." + tid + ".")));
     const mixedDay = week.findIndex((d) => d.some((b) => b[5] === "grammar.mixed"));
     const EN_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -5240,6 +5393,7 @@
     const s = settings();
     return `<div class="wrap grammar-library">
       <header class="stack tight"><h1 class="title chapter-title chapter-grammar"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-grammar">${ico("grammar")}</span>Grammaire</h1>${fold("intro-grammar", "Comment ça marche · How it works", `<p class="small muted">Ordered by priority for you, from your own error history. Topics marked for Phase ${s.phase} are this phase's focus.</p>`)}</header>
+      ${resultsLink("grammar")}
       ${practiceRows()}
       <section class="topic-library" aria-labelledby="grammar-topics-title">
         <h2 id="grammar-topics-title">grammar topics</h2>
@@ -6593,6 +6747,45 @@
   // Claude corrects the three when you hand in. The mock's score is the mean of the three tasks' scores, a blank task
   // counting 0: an estimate, since FEI doesn't publish how it combines them.
   const EE_HOME = "writing.mock", EE_IP = "writing--mock", EE_MIN = 60, EE_TASKS = ["t1", "t2", "t3"];
+  let eePapers = null, eePapersLoading = false, eePapersError = false;
+  async function eeLoadPapers() {
+    if (eePapersLoading || eePapers) return;
+    eePapersLoading = true; eePapersError = false;
+    try {
+      const response = await fetch("exam-sources/writing.json");
+      if (!response.ok) throw new Error("writing_papers");
+      const data = await response.json();
+      if (!Array.isArray(data.papers) || !EE_TASKS.every(t => Array.isArray(data.tasks[t]) && data.tasks[t].length)) throw new Error("writing_papers");
+      eePapers = data;
+    } catch (_) { eePapersError = true; }
+    eePapersLoading = false;
+    if (route.view === "writing" && route.args[0] === "mock" && !eeRunning()) render(true);
+  }
+  function eePaperPicker() {
+    if (!eePapers && !eePapersError) eeLoadPapers();
+    if (!eePapers) return `<p class="small muted">${eePapersError ? 'Impossible de charger les sujets PDF. <button class="btn sm" data-act="ee-load-papers">Réessayer</button>' : "Chargement des sujets PDF…"}</p>`;
+    const selected = ui.form["ee-paper"] || "builtin";
+    const options = eePapers.papers.map(p => `<option value="${esc(p.id)}"${selected === p.id ? " selected" : ""}>${esc(p.title)}</option>`).join("");
+    const custom = selected === "custom" ? EE_TASKS.map(t => `<label class="field">${esc(T.WRITING[t].name)}<select id="ee-pick-${t}" data-change="form" data-k="ee-pick-${t}">${eePapers.tasks[t].map(p => `<option value="${esc(p.id)}"${ui.form["ee-pick-" + t] === p.id ? " selected" : ""}>${esc(p.source.title + " · " + clip(p.q, 100))}</option>`).join("")}</select></label>`).join("") : "";
+    return `<div class="panel flat stack ee-paper-picker"><p class="eyebrow">Sujets de tes PDF</p>
+      <label class="field">Choisir les sujets<select id="ee-paper" data-change="ee-paper"><option value="builtin"${selected === "builtin" ? " selected" : ""}>Sujets habituels · sélection automatique</option><option value="custom"${selected === "custom" ? " selected" : ""}>Composer mon examen avec les sujets PDF</option><optgroup label="Examens complets des PDF">${options}</optgroup></select></label>
+      ${custom}<p class="small muted">${eePapers.papers.length} examens complets disponibles. Tu peux aussi choisir chaque tâche séparément, y compris les sujets des recueils mensuels. Les sections incomplètes restent consultables dans Annales.</p></div>`;
+  }
+  function eeChosenPaper() {
+    const selected = document.getElementById("ee-paper")?.value || "builtin";
+    if (selected === "builtin") return { prompts: Object.fromEntries(EE_TASKS.map(t => [t, eePrompt(t)])), paperTitle: "" };
+    if (!eePapers) return null;
+    const paper = eePapers.papers.find(p => p.id === selected);
+    if (selected !== "custom" && !paper) return null;
+    const prompts = {};
+    for (const t of EE_TASKS) {
+      const id = selected === "custom" ? document.getElementById("ee-pick-" + t)?.value : paper.tasks[t];
+      const prompt = eePapers.tasks[t].find(p => p.id === id);
+      if (!prompt) return null;
+      prompts[t] = clone(prompt);
+    }
+    return { prompts, paperTitle: paper?.title || "Sélection personnelle · sujets PDF" };
+  }
   // A task's prompt: the first you haven't written yet, or else the one written longest ago.
   function eePrompt(task) {
     const W = T.WRITING[task], lastAt = new Map();
@@ -6616,7 +6809,7 @@
     const e = ui.ee;
     if (!e || e.done) return;
     const left = timer.home === EE_HOME ? Math.max(0, Math.round(timerRemaining())) : null;
-    ipSave(EE_IP, { kind: "eemock", title: "Examen blanc EE", route: EE_HOME, mockId: e.id, prompts: e.prompts, texts: e.texts, task: e.task, spent: e.spent, left }, delay);
+    ipSave(EE_IP, { kind: "eemock", title: "Examen blanc EE", route: EE_HOME, mockId: e.id, paperTitle: e.paperTitle || "", prompts: e.prompts, texts: e.texts, task: e.task, spent: e.spent, left }, delay);
   }
   function eeStart() {
     if (eeRunning()) { goTo("#" + EE_HOME); return; }
@@ -6627,7 +6820,9 @@
     // One clock serves every page, so a practice exam already running keeps it.
     if (examRunning()) { toast("A practice exam is running: hand it in or pause it first."); return; }
     if (ipGet(EE_IP)) { ipResume(EE_IP); return; }
-    ui.ee = { id: uid(), prompts: Object.fromEntries(EE_TASKS.map((t) => [t, eePrompt(t)])), texts: { t1: "", t2: "", t3: "" }, task: "t1", spent: { t1: 0, t2: 0, t3: 0 }, at: Date.now(), done: false };
+    const chosen = eeChosenPaper();
+    if (!chosen) { toast("Choisis un sujet pour chaque tâche avant de commencer."); return; }
+    ui.ee = { id: uid(), prompts: chosen.prompts, paperTitle: chosen.paperTitle, texts: { t1: "", t2: "", t3: "" }, task: "t1", spent: { t1: 0, t2: 0, t3: 0 }, at: Date.now(), done: false };
     timerSet(EE_MIN * 60, "Examen blanc EE", EE_HOME);
     tone("start");
     timerStart();
@@ -6638,7 +6833,7 @@
   function eeResume(ip) {
     if (eeRunning() && ui.ee.id === ip.mockId) { goTo("#" + EE_HOME); return; }
     if (examRunning()) { toast("A practice exam is running: hand it in or pause it first."); return; }
-    ui.ee = { id: ip.mockId || uid(), prompts: clone(ip.prompts), texts: Object.assign({ t1: "", t2: "", t3: "" }, clone(ip.texts)), task: EE_TASKS.includes(ip.task) ? ip.task : "t1", spent: Object.assign({ t1: 0, t2: 0, t3: 0 }, clone(ip.spent)), at: Date.now(), done: false };
+    ui.ee = { id: ip.mockId || uid(), paperTitle: ip.paperTitle || "", prompts: clone(ip.prompts), texts: Object.assign({ t1: "", t2: "", t3: "" }, clone(ip.texts)), task: EE_TASKS.includes(ip.task) ? ip.task : "t1", spent: Object.assign({ t1: 0, t2: 0, t3: 0 }, clone(ip.spent)), at: Date.now(), done: false };
     timerSet(EE_MIN * 60, "Examen blanc EE", EE_HOME);
     if (ip.left != null) timer.left = Math.min(EE_MIN * 60, Math.max(0, Number(ip.left)));
     tone("start");
@@ -6679,7 +6874,7 @@
       const text = str(e.texts[t]);
       if (!text.trim()) return;
       const p = e.prompts[t];
-      put("writing", uid(), { task: t, date: todayStr(), ts: ts + k, prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: Math.max(1, Math.round((e.spent[t] || 0) / 60)), fb: null, mock: { id: e.id, min, up } });
+      put("writing", uid(), { task: t, date: todayStr(), ts: ts + k, prompt: p.q, docs: p.docs || null, text, words: countWords(text), minutes: Math.max(1, Math.round((e.spent[t] || 0) / 60)), fb: null, source: p.source || null, mock: { id: e.id, min, up, paperTitle: e.paperTitle || "" } });
     });
     ipDrop(EE_IP);
     Object.assign(e, { done: true, confirm: false, view: null });
@@ -6702,7 +6897,7 @@
     list("writing").forEach((w) => {
       const m = w.mock;
       if (!m || !m.id) return;
-      const x = by.get(m.id) || { id: m.id, date: w.date, ts: w.ts || 0, min: m.min, up: !!m.up, tasks: {} };
+      const x = by.get(m.id) || { id: m.id, date: w.date, ts: w.ts || 0, min: m.min, up: !!m.up, paperTitle: m.paperTitle || "", tasks: {} };
       x.tasks[w.task] = w;
       by.set(m.id, x);
     });
@@ -6790,15 +6985,16 @@
   function eeIntro() {
     const ip = ipGet(EE_IP), mocks = eeMocks();
     const plan = EE_TASKS.map((t) => { const W = T.WRITING[t]; return `<li><b>${esc(W.name)}</b> · ${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} min</li>`; }).join("");
-    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">not corrected</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
+    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">${writingReviewStatus(w)}</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
     return `<section class="panel stack" data-spot>
         <p class="h3 with-ico">${ico("exam")}Examen blanc · Expression écrite</p>
         <p class="small">The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p>
         <ul class="small ee-plan">${plan}</ul>
-        <p class="small muted">Each task gets a prompt you haven't written yet. ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
+        <p class="small muted">${(ui.form["ee-paper"] || "builtin") === "builtin" ? "Each task gets a prompt you haven't written yet." : "Les sujets PDF sélectionnés sont conservés ensemble pour cet examen."} ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
+        ${ip ? "" : eePaperPicker()}
         ${ip ? `<div class="notice"><b>You have an unfinished mock:</b> ${esc(ipProgress(ip))}.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${EE_IP}">Resume the mock</button>${discardBtn(EE_IP)}</div></div>` : `<div class="row"><button class="btn primary" data-act="ee-start">Start the exam · 60:00</button></div>`}
       </section>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Tes examens blancs · Your mocks</h2><span class="small muted">${mocks.length ? `${mocks.length} so far, newest first` : ""}</span></div>
+      <section class="sec"><div class="sec-head"><h2 class="h2">Tes examens blancs · Your mocks</h2>${resultsLink("writing", "exam", "Tous les résultats")}<span class="small muted">${mocks.length ? `${mocks.length} so far, newest first` : ""}</span></div>
         ${mocks.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th>${EE_TASKS.map((t) => `<th class="n">${esc(T.WRITING[t].name)}</th>`).join("")}<th class="n">Score</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<p class="small muted">Your mocks collect here, with each task's words and score.</p>`}
       </section>`;
   }
@@ -6810,10 +7006,13 @@
     const docs = e.task === "t3" && p.docs ? `<div class="docs">${p.docs.map((d, k) => `<div class="doc"><p class="eyebrow">Document ${k + 1}</p><p class="fr">${typo(d.text)}</p><p class="who">${esc(d.who)}</p></div>`).join("")}</div>` : "";
     const issues = e.confirm ? eeIssues(e) : [];
     return `<div class="row between"><p class="h3 with-ico">${ico("exam")}Examen blanc EE</p>${clock}</div>
+      ${e.paperTitle ? `<p class="small muted" lang="fr">${esc(e.paperTitle)}</p>` : ""}
       ${tabs}
       <section class="panel prompt-card" data-m="slide" data-k="ee-${esc(e.id)}-${e.task}">
-        <span class="eyebrow">${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} of the 60 min</span>
+        <span class="eyebrow">${esc(p.source ? W.name : W.kind)} · ${W.min}–${W.max} words · about ${W.exam} of the 60 min</span>
         <p class="fr">${typo(p.q)}</p>
+        ${p.source && e.task === "t3" ? `<p class="small fr">Comparez les deux points de vue, puis donnez votre opinion sur le sujet (120–180 mots).</p>` : ""}
+        ${p.source ? `<p class="small muted">${esc(p.source.title)} · page ${p.source.page}</p>` : ""}
         ${p.en ? `<p class="small muted en-gloss">${esc(p.en)}</p>` : ""}
         ${docs}
       </section>
@@ -6832,18 +7031,20 @@
     const cards = EE_TASKS.map((t, k) => {
       const W = T.WRITING[t], w = m.tasks[t];
       if (!w) return `<div class="panel flat stack tight ee-task"><p class="eyebrow">${esc(W.name)}</p><p class="small"><span class="pill bad">Blank</span> counts 0</p></div>`;
-      const st = w.fb ? (w.fb.score20 != null ? `<b class="ee-score">${w.fb.score20}<small>/20</small></b> <span class="pill">${esc(w.fb.level || "")}</span>` : `<span class="pill">${esc(w.fb.level || "Corrected")}</span>`) : busy ? `<span class="small muted thinking">Claude is correcting</span>` : `<span class="small muted">Not corrected</span>`;
-      return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div><button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
+      const st = w.fb ? (w.fb.score20 != null ? `<b class="ee-score">${w.fb.score20}<small>/20</small></b> <span class="pill">${esc(w.fb.level || "")}</span>` : `<span class="pill">${esc(w.fb.level || "Corrected")}</span>`) : busy ? `<span class="small muted thinking">Claude is correcting</span>` : `<span class="small muted">${writingReviewStatus(w)}</span>`;
+      return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div>${w.source ? `<a class="btn ghost sm" href="pdf-viewer.html?file=${encodeURIComponent(w.source.pdf)}#page=${w.source.page}" target="_blank" rel="noopener">Source PDF ↗</a>` : ""}<button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
     }).join("");
     const nc = m.score != null ? nclcOf("ee", m.score) : null;
-    return `<section class="panel stack" data-m="pop" data-k="eer-${esc(m.id)}">
+    return `${resultReturn()}<section class="panel stack" data-m="pop" data-k="eer-${esc(m.id)}">
         <p class="eyebrow">Examen blanc · Expression écrite · ${shortDate(m.date)}${m.up ? " · handed in when time ran out" : ""}</p>
+        ${m.paperTitle ? `<p class="small muted">${esc(m.paperTitle)}</p>` : ""}
         <div class="row"><span class="scorebig">${m.score != null ? `<span data-tween="ees-${esc(m.id)}" data-tw="count" data-to="${m.score}">${m.score}</span>/20` : "…/20"}</span>${m.score != null ? `${nclcTag(m.score, "ee")}<span class="pill">${eeCefr(m.score)}</span>` : ""}</div>
-        <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : claudeOn() ? "Not corrected yet." : "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI."}</p>
+        <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : "Copy your texts for another AI, then paste its review and each task's grade below."}</p>
         ${m.score != null ? greet(...remyScore("exam", m.score, 20, { nclc: nc || 0, key: m.id }), "sm") : ""}
         <div class="ee-tasks">${cards}</div>
         <div class="row">${open && !busy ? claudeBtn("ee-correct", "ee-correct", "Correct with Claude", `data-id="${esc(m.id)}"`, "btn primary") : ""}<button class="btn" data-act="ee-copy" data-id="${esc(m.id)}">Copy for another AI</button><button class="btn" data-act="ee-new">Start another mock</button><button class="btn ghost" data-act="ee-close">All your mocks</button></div>
         ${ui.eeCopyOut && ui.eeCopyOut.id === m.id ? `<div class="stack tight"><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).</p><textarea id="ee-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.eeCopyOut.text)}</textarea></div>` : ""}
+        ${writingReviewForm("mock-" + m.id, `data-mock="${esc(m.id)}"`, EE_TASKS.map(t => m.tasks[t]).filter(Boolean))}
       </section>
       ${view ? writingFb(e.view, view, "ee-view-close") : ""}`;
   }
@@ -6886,11 +7087,11 @@
       const tabsOf = (cur) => `<nav class="atelier-tabs" role="tablist" aria-label="Expression écrite">${EE_TASKS.map((k) => {
         const W = T.WRITING[k], icon = { t1: "envelope", t2: "writing", t3: "papers" }[k];
         return `<a href="#writing.${k}" role="tab" aria-selected="${k === cur}">${ico(icon)}<span>${W.name}</span><small>${W.min}–${W.max} mots</small></a>`;
-      }).join("")}<a href="#writing.mock" role="tab" aria-selected="${cur === "mock"}">${ico("exam")}<span>Examen blanc</span><small>3 tâches · 60 min</small></a></nav>`;
+      }).join("")}</nav>`;
       if (args[0] === "mock") {
         if (eeRunning()) return `<div class="wrap focus"><div class="stack">${eeView()}</div></div>`;
         const header = ui.ee && ui.ee.done ? `<header><h1 class="title chapter-title chapter-writing"><span class="chapter-mark" aria-hidden="true">${ico("writing")}</span>Expression écrite</h1></header>` : writingCover();
-        return `<div class="wrap atelier-page">${header}${tabsOf("mock")}<div class="stack">${eeView()}</div></div>`;
+        return `<div class="wrap atelier-page">${header}${practiceNav("writing", "exam")}<div class="stack">${eeView()}</div></div>`;
       }
       if (args[0] && T.WRITING[args[0]]) ui.w.task = args[0];
       const task = ui.w.task, W = T.WRITING[task];
@@ -6914,6 +7115,7 @@
       })}</div>` : "";
       return `<div class="wrap atelier-page">
         ${writingCover()}
+        ${practiceNav("writing", "exercise")}
         ${tabsOf(task)}
         <div class="atelier-tools">${fold("intro-writing", "Comment ça marche · How it works", `<p class="small muted">TCF Canada format and grading. Spellcheck is off, like on exam day, and your draft is saved with its prompt as you type, so you can come back to it on any device.</p>`)}${fxTabs("writing." + task)}</div>
         <section class="panel prompt-card writing-brief">
@@ -6944,7 +7146,7 @@
           <label class="check"><input type="checkbox" id="chk-words" disabled><span>Word count inside ${W.min}–${W.max}. Outside the range, a task can be marked “A1 non atteint” however good the French.</span></label>
           ${checks.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="w-check" data-k="${k}" ${ch[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}
         </div>`)}
-        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Finish without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Save my text</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
         ${ui.w.copyOut && ui.w.copyOut.task === task ? `<section class="panel stack tight"><p class="h3">Copy this into another AI</p><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p><textarea id="w-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.w.copyOut.text)}</textarea><div class="row"><button class="btn sm ghost" data-act="w-copy-close">Close</button></div></section>` : ""}
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
         <section class="sec"><div class="sec-head"><h2 class="h2">History</h2><span class="small muted">${hist.length ? `${hist.length} most recent` : ""}</span></div>
@@ -6952,7 +7154,7 @@
           ${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Task</th><th>Words</th><th>Level</th><th></th></tr></thead><tbody>${hist.map((w) => {
             const WW = T.WRITING[w.task] || W;
             const ok = w.words >= WW.min && w.words <= WW.max;
-            return `<tr><td class="n">${shortDate(w.date)}</td><td>${esc(WW.name)}${w.mock ? ` <span class="pill info">examen blanc</span>` : ""}</td><td class="n"><span class="tag7 ${ok ? "ok" : "no"}">${w.words}</span></td><td>${w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${esc(w.fb.level)}` : w.fb && w.fb.level ? esc(w.fb.level) : `<span class="muted small">not corrected</span>`}</td>
+            return `<tr><td class="n">${shortDate(w.date)}</td><td>${esc(WW.name)}${w.mock ? ` <span class="pill info">examen blanc</span>` : ""}</td><td class="n"><span class="tag7 ${ok ? "ok" : "no"}">${w.words}</span></td><td>${w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${esc(w.fb.level)}` : w.fb && w.fb.level ? esc(w.fb.level) : `<span class="muted small">${writingReviewStatus(w)}</span>`}</td>
               <td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn ghost sm" data-act="w-open" data-id="${esc(w.id)}">${ui.w.viewing === w.id ? "Showing" : "Open"}</button>${confirmBtn("w-del-" + w.id, "Delete this entry", "w-del", `data-id="${esc(w.id)}"`)}</span></td></tr>`;
           }).join("")}</tbody></table></div>` : `<p class="small muted">Corrected and saved drafts collect here, with their word counts.</p>`}
         </section>
@@ -6975,11 +7177,17 @@
     const inRange = doc.words >= W.min && doc.words <= W.max;
     const head = `<div class="row between"><h2 class="h2">${esc(W.name)} · ${shortDate(doc.date)}</h2><button class="btn ghost sm" data-act="${closeAct || "w-close"}">Close</button></div>
       <p class="small muted fr">${typo(doc.prompt || "")}</p>`;
-    if (!fb) return `<section class="panel fb" id="w-fb">${head}<div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">Not corrected</span></div><p class="corrected seyes">${esc(doc.text)}</p></section>`;
+    const reviewForm = writingReviewForm(id, `data-id="${esc(id)}"`, [{ ...doc, id }]);
+    const reviews = writingReviews(doc);
+    if (!fb || fb.reviewId) return `<section class="panel fb" id="w-fb">${head}
+      <div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">${fb?.score20 != null ? `${fb.score20}/20 · ${esc(fb.level)} · NCLC ${esc(fb.nclc)}` : writingReviewStatus(doc)}</span></div>
+      ${fb?.reviewId ? `<p class="small muted">Grade entered from an AI review. This is a practice estimate, not an official score.</p>` : ""}
+      ${reviewForm}${reviews}<details class="fold" ${reviews ? "" : "open"}><summary>Your original</summary><p class="corrected seyes">${esc(doc.text)}</p></details></section>`;
     const flag = (ok, yes, no) => `<span class="pill ${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(ok ? yes : no)}</span>`;
     const t3 = fb.tache3;
     return `<section class="panel fb" id="w-fb" data-m="rise" data-k="wfb-${esc(id)}">
       ${head}
+      ${reviewForm}${reviews}
       <div class="fb-head"><span class="level">${fb.score20 != null ? `<span data-tween="w20-${esc(id)}" data-tw="count" data-to="${fb.score20}">${fb.score20}</span><small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : fb.nclc ? `About NCLC ${esc(fb.nclc)} · ` : ""}Claude's estimate on the TCF Canada scale, not an official score.</span><p>${esc(fb.summary)}</p></div></div>
       ${greet("correction", ...remyMarks(fb.errors), "sm")}
       <div class="flags">
@@ -7030,7 +7238,7 @@
       const skill = ui.c.skill;
       const head = `<header class="stack tight"><h1 class="title chapter-title chapter-comp"><span class="chapter-mark" aria-hidden="true" data-m="press" data-k="chapter-comp">${ico("comp")}</span>Compréhension</h1>${fold("intro-comp", "Comment ça marche · How it works", `<p class="small muted">TCF Canada-style sets: four options, one right answer. Every topic has a built-in B1 and B2 set for both reading and listening, so switching topics is instant. A reading set is four short documents with one question each, pitched like the real test's B1 or B2 items. The listening sets are recorded with natural voices, 2 to 4 minutes each, and on the real test each recording plays once. Every set you finish or start is kept in your history at the bottom of the page. Select any word or phrase to save it to your cards.</p>`)}</header>`;
       const tabs = `<nav class="tabs" role="tablist"><a href="#comp.co" role="tab" aria-selected="${skill === "co"}">${ico("listen")}CO · Écoute<small>listening</small></a><a href="#comp.ce" role="tab" aria-selected="${skill === "ce"}">${ico("read")}CE · Lecture<small>reading</small></a></nav>`;
-      if (args[1] === "exam") { const running = !!ui.cx && skillOf(ui.cx) === skill && !ui.cx.done; return `<div class="wrap${running ? " focus" : ""}">${running ? "" : head + tabs}<div class="stack">${examView(skill)}</div></div>`; }
+      if (args[1] === "exam") { const running = !!ui.cx && skillOf(ui.cx) === skill && !ui.cx.done; return `<div class="wrap${running ? " focus" : ""}">${running ? "" : head + tabs + practiceNav(skill, "exam")}<div class="stack">${examView(skill)}</div></div>`; }
       ensureCompSet(skill);
       const lvl = compLevel();
       const key = compKey(skill);
@@ -7124,10 +7332,11 @@
       return `<div class="wrap comp-studio comp-${skill}">
         ${head}
         <div class="comp-toolbar">
-          <div class="comp-nav tab-row">${tabs}${examLink(skill)}</div>
+          <div class="comp-nav tab-row">${tabs}</div>
+          ${practiceNav(skill, "exercise")}
           ${controls}
         </div>
-        <div class="stack comp-practice">${reviewNote}${fallback}${material}${timerRow}${qs}</div>
+        <div class="stack comp-practice">${submitted ? resultReturn() : ""}${reviewNote}${fallback}${material}${timerRow}${qs}</div>
         ${inProgress ? "" : examCta(skill)}
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
@@ -7149,7 +7358,7 @@
   // Only two kinds of entry: unfinished attempts (the inprogress records) and finished ones (drill rounds,
   // production checks, reading and listening sets, practice exams, writing tasks).
   const SECTION = { drill: "Grammaire", prod: "Grammaire", comp: "Compréhension", exam: "Compréhension", writing: "Écrit", eemock: "Écrit" };
-  const H_FILTERS = [["all", "Everything"], ["grammar", "Grammaire"], ["comp", "Compréhension"], ["writing", "Écrit"]];
+  const H_FILTERS = [["all", "Tout"], ["grammar", "Grammaire"], ["co", "Écoute"], ["ce", "Lecture"], ["writing", "Écrit"]];
   const sectionOf = (kind) => (kind === "drill" || kind === "prod" ? "grammar" : kind === "exam" ? "comp" : kind === "eemock" ? "writing" : kind);
   const clip = (s, n) => { const t = str(s).replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
   function whenOf(ts) {
@@ -7241,7 +7450,7 @@
       const exam = c.kind === "exam";
       out.push({ kind: exam ? "exam" : "comp", id: c.id, ts: c.ts || 0, date: c.date, title: `${c.skill === "co" ? "CO" : "CE"} · ${exam ? c.title : `${c.title || ""}${c.level ? " · " + c.level : ""}`}`, result: exam ? `≈${c.est} · ${c.score}/${c.total}` : `${c.score}/${c.total}${c.src === "logged" ? " · logged" : ""}`, doc: c });
     }
-    for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : "not corrected", doc: w }); }
+    for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : writingReviewStatus(w), doc: w }); }
     return out.sort((a, b) => b.ts - a.ts);
   }
   function drillReview(d) {
@@ -7314,7 +7523,7 @@
       const phase = doc.phase || settings().phase;
       const plan = planFor(phase, date) || [];
       plan.forEach((block, i) => {
-        if (doc.done[blockKey(phase, i)]) day(date).blocks.push(block[2]);
+        if (doc.done[blockKey(phase, i, plan)]) day(date).blocks.push(block[2]);
       });
     }
     return days;
@@ -7368,32 +7577,99 @@
       </section>${calendarDay(selected, days.get(selected))}</div></div>`;
   }
 
+  // Results are a view of existing records. Group EE tasks here only: charts, calendars and scoring
+  // continue reading the original individual attempts from finishedAttempts().
+  function resultEntries() {
+    const entries = finishedAttempts().filter(x => !(x.kind === "writing" && x.doc.mock?.id));
+    for (const m of eeMocks()) entries.push({ kind: "eemock", id: "eemock-" + m.id, ts: m.ts, date: m.date,
+      title: m.paperTitle || "Examen blanc · Expression écrite", result: m.score == null ? "À corriger" : `${m.score}/20`, doc: m });
+    return entries.sort((a, b) => b.ts - a.ts);
+  }
+  const resultSkill = x => ["comp", "exam"].includes(x.kind) ? (x.doc || x).skill : sectionOf(x.kind);
+  const resultType = x => ["exam", "eemock"].includes(x.kind) ? "exam" : "exercise";
+  const resultText = text => str(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  function resultMatches(x, filters) {
+    const skill = resultSkill(x), type = resultType(x), d = x.doc || x;
+    if (filters.filter && filters.filter !== "all" && filters.filter !== skill && !(filters.filter === "comp" && ["ce", "co"].includes(skill))) return false;
+    if (filters.type && filters.type !== "all" && filters.type !== type) return false;
+    const terms = resultText(filters.query).trim().split(/\s+/).filter(Boolean);
+    const subjects = x.kind === "eemock" ? Object.values(d.tasks || d.prompts || {}).map(w => w.prompt || w.q).join(" ") : typeof d.prompt === "object" ? d.prompt?.q : d.prompt;
+    const text = resultText([x.title, x.date, x.date ? shortDate(x.date) : "", subjects, d.paperTitle, d.source?.title, SECTION[x.kind], skill, type === "exam" ? "examen blanc" : "exercice"].join(" "));
+    return terms.every(term => text.includes(term));
+  }
+  function resultsLink(skill = "all", type = "all", label = "Mes résultats") {
+    return `<a class="btn ghost sm" href="#progress.history.${skill}.${type}">${ico("progress")}${label}</a>`;
+  }
+  function practiceNav(skill, active) {
+    const writing = skill === "writing";
+    const paused = writing ? eeRunning() || ipGet(EE_IP) : (examRunning() && skillOf(ui.cx) === skill) || ipGet(XSPEC[skill].ip);
+    return `<nav class="practice-nav" aria-label="Parcours de pratique">
+      <a href="${writing ? "#writing." + ui.w.task : "#comp." + skill}"${active === "exercise" ? ' aria-current="page"' : ""}>${ico(writing ? "writing" : skill === "co" ? "listen" : "read")}Exercices</a>
+      <a href="${writing ? "#writing.mock" : "#comp." + skill + ".exam"}"${active === "exam" ? ' aria-current="page"' : ""}>${ico("exam")}${paused && active !== "exam" ? "Reprendre l’examen" : "Examens blancs"}</a>
+      <a href="#progress.history.${skill}.all">${ico("progress")}Mes résultats</a>
+    </nav>`;
+  }
+  function resultReturn() {
+    return ui.hist.backHash ? `<div><button class="btn ghost sm" data-act="h-return">← Retour aux résultats</button></div>` : "";
+  }
+  function resultCard(x, retakes) {
+    const d = x.doc, skill = resultSkill(x), exam = resultType(x) === "exam";
+    const icon = skill === "grammar" ? "grammar" : skill === "co" ? "listen" : skill === "ce" ? "read" : "writing";
+    const label = H_FILTERS.find(([k]) => k === skill)?.[1] || SECTION[x.kind];
+    const score = x.kind === "eemock" ? d.score : x.kind === "writing" ? d.fb?.score20 : x.kind === "exam" ? d.est : null;
+    const waiting = ["writing", "eemock"].includes(x.kind) && score == null;
+    const reviewed = x.kind === "writing" ? arr(d.aiReviews).length : x.kind === "eemock" && Object.values(d.tasks).some(w => arr(w.aiReviews).length);
+    const summary = waiting ? reviewed ? "Avis enregistré · note en attente" : "À corriger" : score != null ? `${x.kind === "exam" ? "≈ " : ""}${score}${x.kind === "exam" ? " / 699" : " / 20"}` : x.result;
+    const detail = x.kind === "eemock" ? `3 tâches · ${d.min || 0} min` : x.kind === "writing" ? `${d.words || 0} mots` : x.kind === "exam" ? [`${d.score}/${d.total}`, mins(d.secs)].filter(Boolean).join(" · ") : mins(d.secs);
+    const available = x.kind === "comp" ? d.src !== "logged" && (samplesFor(d.skill).some(s => s.id === d.setId) || d.snap)
+      : x.kind === "exam" ? XSPEC[skillOf(d)].bank().some(e => e.id === d.setId) || d.snap : true;
+    const expanded = ui.hist.open === x.id && ["writing", "drill", "prod"].includes(x.kind);
+    return `<article class="result-card" id="h-${esc(x.id)}" tabindex="-1">
+      <div class="result-symbol" aria-hidden="true">${ico(icon)}</div>
+      <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span><time datetime="${esc(x.date)}">${shortDate(x.date)}</time></div>
+        <h3>${esc(x.title)}</h3>${x.kind === "exam" && retakes.has(x.id) ? `<p class="small muted">Nouvelle tentative · hors estimation NCLC</p>` : ""}${detail ? `<p class="small muted">${esc(detail)}</p>` : ""}
+        ${x.kind === "eemock" ? `<div class="result-tasks">${EE_TASKS.map((t, i) => `<span>${esc(T.WRITING[t].name)} <b>${!d.tasks[t] ? "Non rendue" : d.scores[i] == null ? arr(d.tasks[t].aiReviews).length ? "Avis enregistré" : "À corriger" : d.scores[i] + "/20"}</b></span>`).join("")}</div>` : ""}
+      </div>
+      <div class="result-outcome"><strong class="${waiting ? "result-pending" : ""}">${esc(summary)}</strong>${score != null && exam ? nclcTag(score, x.kind === "eemock" ? "ee" : skill) : ""}
+        ${available ? `<button class="btn sm" data-act="h-review" data-id="${esc(x.id)}" aria-label="${esc((expanded ? "Fermer : " : "Voir le résultat : ") + x.title + " · " + shortDate(x.date))}"${["writing", "drill", "prod"].includes(x.kind) ? ` aria-expanded="${expanded}" aria-controls="detail-${esc(x.id)}"` : ""}>${expanded ? "Fermer" : "Voir le résultat"}</button>` : `<span class="small muted">${d.src === "logged" ? "Score ajouté manuellement" : "Énoncé indisponible"}</span>`}
+      </div><div class="result-detail" id="detail-${esc(x.id)}"${expanded ? "" : " hidden"}>${expanded ? reviewOf(x) : ""}</div>
+    </article>`;
+  }
+  function unfinishedCard(ip) {
+    return `<article class="resume-card"><div><p class="eyebrow">${esc(SECTION[ip.kind])} · À reprendre</p><h3>${esc(ip.paperTitle || ip.title)}</h3><p class="small muted">${esc(ipProgress(ip))}</p><p class="small muted">${esc(whenOf(ip.updated))}</p></div>
+      <div class="row"><button class="btn primary sm" data-act="ip-resume" data-id="${esc(ip.id)}">Reprendre</button>${discardBtn(ip.id)}</div></article>`;
+  }
+  function historyList() {
+    const all = resultEntries().filter(x => resultMatches(x, ui.hist));
+    const ips = unfinished().filter(x => resultMatches(x, ui.hist));
+    const retakes = retakeIds();
+    const pending = ui.hist.status === "pending", shown = all.slice(0, ui.hist.limit), count = pending ? ips.length : all.length;
+    return `<div class="results-status" role="group" aria-label="État des tentatives">
+      <button data-act="h-status" data-status="done" aria-pressed="${!pending}">Terminés <span>${all.length}</span></button>
+      <button data-act="h-status" data-status="pending" aria-pressed="${pending}">À reprendre <span>${ips.length}</span></button></div>
+      <p class="small muted" role="status" aria-live="polite">${count} résultat${count === 1 ? "" : "s"} · du plus récent au plus ancien</p>
+      ${count ? `<div class="results-list">${pending ? ips.map(unfinishedCard).join("") : shown.map(x => resultCard(x, retakes)).join("")}</div>` : `<div class="results-empty">${ico("papers")}<h2>${ui.hist.query || ui.hist.filter !== "all" || ui.hist.type !== "all" ? "Aucun résultat avec ces filtres" : pending ? "Tout est à jour" : "Tes résultats commencent ici"}</h2><p>${pending ? "Tes exercices et examens inachevés seront disponibles ici pour les reprendre." : "Retrouve ici tes exercices, tes examens et tes corrections après chaque tentative."}</p><button class="btn sm" data-act="h-reset">Réinitialiser les filtres</button><a class="btn primary sm" href="#comp.co">Choisir un exercice</a></div>`}
+      ${!pending && all.length > shown.length ? `<button class="btn" data-act="h-more">Voir plus de résultats</button>` : ""}`;
+  }
   function historyView(head, tabs) {
-    const f = ui.hist.filter;
-    const pick = (x) => f === "all" || sectionOf(x.kind) === f;
-    const ips = unfinished().filter(pick);
-    const all = finishedAttempts().filter(pick);
-    const shown = all.slice(0, ui.hist.limit);
-    const chips = `<div class="seg" role="group" aria-label="Section">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}</div>`;
-    const ipRows = ips.map((ip) => `<tr><td class="small">${esc(SECTION[ip.kind])}</td><td>${typo(ip.title)}<br><span class="small muted">${esc(ipProgress(ip))}</span></td><td class="n small">${esc(whenOf(ip.updated))}</td><td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button>${discardBtn(ip.id)}</span></td></tr>`).join("");
-    const rows = shown.map((x) => `<tr id="h-${esc(x.id)}"><td class="n">${shortDate(x.date)}</td><td class="small">${esc(SECTION[x.kind])}</td><td>${typo(x.title)}</td><td class="n small">${esc(x.result)}</td><td>${historyOpenBtn(x)}</td></tr>${ui.hist.open === x.id ? `<tr><td colspan="5">${reviewOf(x)}</td></tr>` : ""}`).join("");
-    return `<div class="wrap">
-      ${head}
-      ${tabs}
-      <div class="row">${chips}</div>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Unfinished</h2><span class="small muted">Saved as you go, from your first answer or keystroke.</span></div>
-        ${ips.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Section</th><th>Attempt</th><th>Last change</th><th></th></tr></thead><tbody>${ipRows}</tbody></table></div>` : `<p class="small muted">Nothing unfinished.</p>`}
-      </section>
-      <section class="sec"><div class="sec-head"><h2 class="h2">Finished</h2><span class="small muted">${all.length} attempt${all.length === 1 ? "" : "s"}, newest first. Open one to see the questions, your answers and the results.</span></div>
-        ${all.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Section</th><th>Attempt</th><th>Result</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${all.length > shown.length ? `<div class="row"><button class="btn" data-act="h-more">Show ${Math.min(30, all.length - shown.length)} more</button></div>` : ""}` : `<p class="small muted">Finished drill rounds, reading and listening sets, practice exams and writing tasks collect here.</p>`}
-      </section>
-    </div>`;
+    return `<div class="wrap results-page">${head}${tabs}
+      <section class="results-hero"><div><p class="eyebrow">Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p></div><span class="results-hero-mark" aria-hidden="true">${ico("papers")}</span></section>
+      <section class="results-browser" aria-label="Rechercher dans mes résultats">
+        <div class="results-tools"><label class="field">Rechercher<input id="h-query" type="search" data-input="h-query" value="${esc(ui.hist.query || "")}" placeholder="Sujet, examen, date…" aria-controls="results-content"></label>
+          <label class="field">Type de pratique<select id="h-type" data-change="h-type">${[["all", "Tous les formats"], ["exercise", "Exercices"], ["exam", "Examens blancs"]].map(([value, label]) => `<option value="${value}"${(ui.hist.type || "all") === value ? " selected" : ""}>${label}</option>`).join("")}</select></label></div>
+        <div class="results-skills" role="group" aria-label="Compétence">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${ui.hist.filter === k}">${l}</button>`).join("")}</div>
+        <div id="results-content" class="stack">${historyList()}</div>
+      </section></div>`;
+  }
+  function updateHistoryList() {
+    const target = document.getElementById("results-content");
+    if (target) target.innerHTML = historyList();
   }
   // Today's "Continue where you left off": the most recent unfinished attempts.
   function continueCard() {
     const ips = unfinished();
     if (!ips.length) return "";
-    return `<section data-m="paper" data-k="today-continue" class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history">All ${ips.length} unfinished →</a>` : ""}</section>`;
+    return `<section data-m="paper" data-k="today-continue" class="panel stack tight" data-spot><h2 class="h3">Continue where you left off</h2><ul class="hw">${ips.slice(0, 4).map((ip) => `<li style="grid-template-columns:minmax(0,1fr) auto"><span>${typo(ip.title)}<small>${esc(SECTION[ip.kind])} · ${esc(ipProgress(ip))}</small></span><button class="btn sm primary" data-act="ip-resume" data-id="${esc(ip.id)}">Resume</button></li>`).join("")}</ul>${ips.length > 4 ? `<a class="small" href="#progress.history.all.all.pending">All ${ips.length} unfinished →</a>` : ""}</section>`;
   }
 
   /* =============== progress report (Progrès → Évolution) =============== */
@@ -7452,7 +7728,7 @@
         const errs = fb && Array.isArray(fb.errors) ? fb.errors.length : null;
         return {
           id: w.id, date: w.date, ts: w.ts, v: sc, show: String(sc),
-          pill: sc != null ? `<span class="pill ${sc >= 10 ? "ok" : ""}">${sc}/20 · ${esc(fb.level)}</span>` : `<span class="pill">${fb && fb.level ? esc(fb.level) : "not corrected"}</span>`,
+          pill: sc != null ? `<span class="pill ${sc >= 10 ? "ok" : ""}">${sc}/20 · ${esc(fb.level)}</span>` : `<span class="pill">${fb && fb.level ? esc(fb.level) : writingReviewStatus(w)}</span>`,
           meta: `<span class="small muted">${w.words} words${errs != null ? ` · ${errs} mistake${errs === 1 ? "" : "s"}` : ""}</span>`,
           sub: typo(clip(w.prompt, 90)),
           tags: n > 1 ? `<span class="pill info">same prompt · try ${n}</span>` : "",
@@ -7531,7 +7807,7 @@
   }
   function reportView(head, tabs) {
     const parts = [
-      ["Écrit", "Claude's score out of 20 on each corrected task, across prompts. 10/20 is NCLC 7.", repWriting()],
+      ["Écrit", "Your saved writing grades out of 20, across prompts. 10/20 is NCLC 7.", repWriting()],
       ["Compréhension", "Your score on each listening and reading set. Sets differ in difficulty, so read the trend over several sets.", repComp()],
       ["Grammaire", "Your score on each drill round. Every round draws different questions from its set.", repDrills()],
     ].filter(([, , gs]) => gs.length);
@@ -7631,7 +7907,7 @@
     // Writing: Claude's corrections, oldest first, with mistakes per 100 words.
     D.writes = list("writing").filter((w) => w.fb).sort((a, b) => (a.ts || 0) - (b.ts || 0)).map((w) => {
       const n = arr(w.fb.errors).length, sc = w.fb.score20;
-      return { w, n, rate: w.words ? (n / w.words) * 100 : null, score: sc != null && sc !== "" && !isNaN(sc) ? Number(sc) : null };
+      return { w, n, rate: w.words && Array.isArray(w.fb.errors) ? (n / w.words) * 100 : null, score: sc != null && sc !== "" && !isNaN(sc) ? Number(sc) : null };
     });
     D.rates = D.writes.filter((x) => x.rate != null);
     D.scores = D.writes.filter((x) => x.score != null);
@@ -7674,7 +7950,7 @@
       // Practice exams, and scores you logged (a practice exam's own copy in the log isn't counted twice).
       let hist = compAttempts(k).filter((a) => a.kind === "exam" && a.est && !R.has(a.id)).map((a) => ({ v: Number(a.est), date: a.date, ts: a.ts || 0, src: "Examen blanc (site estimate)" }))
         .concat(list("mocks").filter((m) => m[k] != null && m[k] !== "" && !isNaN(m[k]) && !m.compId).map((m) => ({ v: Number(m[k]), date: m.date, ts: m.ts || 0, src: m.label || "Logged score" })));
-      const fromClaude = k === "ee" ? D.scores.map((x) => ({ v: x.score, date: x.w.date, ts: x.w.ts || 0, src: `${taskName(x.w)}, Claude's estimate`, claude: true })) : [];
+      const fromClaude = k === "ee" ? D.scores.map((x) => ({ v: x.score, date: x.w.date, ts: x.w.ts || 0, src: `${taskName(x.w)}, ${x.w.fb.reviewId ? "grade from AI review" : "Claude’s estimate"}`, claude: true })) : [];
       hist = hist.concat(fromClaude).sort((a, b) => str(a.date).localeCompare(str(b.date)) || a.ts - b.ts);
       hist.forEach((h) => all.push({ d: str(h.date), ts: h.ts, row: [name, shortDate(h.date), h.src, scoreText(k, h.v), `NCLC ${nclcLabel(nclcOf(k, h.v))}`] }));
       // Retakes are listed in the numbers, but kept off the charts and out of the estimate.
@@ -7684,7 +7960,7 @@
       let est = null, note = "", ghosts = hist;
       if (last3.length && !(lastLogged && str(lastLogged.date) >= str(last3[last3.length - 1].date))) {
         est = last3.reduce((a, x) => a + x.v, 0) / last3.length;
-        note = `Average of Claude's last ${last3.length} score${last3.length > 1 ? "s" : ""}`;
+        note = `Average of your last ${last3.length} writing grade${last3.length > 1 ? "s" : ""}`;
       } else if (hist.length) {
         const h = hist[hist.length - 1];
         est = h.v;
@@ -7881,12 +8157,12 @@
   function eePlot(D, h) {
     const pts = D.scores, n = pts.length, lastP = pts[n - 1];
     return n ? CH.plot({
-      key: "ee-scores", h, yMin: 0, yMax: 20, ticks: [5, 10, 15, 20], label: "Claude's score out of 20 for each corrected text",
+      key: "ee-scores", h, yMin: 0, yMax: 20, ticks: [5, 10, 15, 20], label: "Your saved grade out of 20 for each text",
       bands: [{ from: 7, to: 10, label: "NCLC 6" }, { from: 10, to: 12, label: "NCLC 7", cls: "target" }],
       series: [{ label: "Score /20", color: "var(--c-ee)", line: true, points: pts.map((x, i) => ({ x: n > 1 ? i / (n - 1) : 0.5, y: x.score, tip: `${x.score}/20${x.w.fb.level ? " · " + x.w.fb.level : ""}\n${taskName(x.w)} · ${shortDate(x.w.date)} · ${x.w.words} words` })) }],
       end: { x: n > 1 ? 1 : 0.5, y: lastP.score, label: `${lastP.score}/20` },
       xs: n > 1 ? [{ x: 0, label: shortDate(pts[0].w.date) }, { x: 1, label: shortDate(lastP.w.date) }] : [],
-    }) : hint("Correct a writing task with Claude and its score shows here.");
+    }) : hint("Save a grade with your writing to see it here");
   }
   function writingMore(D) {
     const pts = D.scores, n = pts.length, last3 = pts.slice(-3), avg = last3.length ? last3.reduce((a, x) => a + x.score, 0) / last3.length : null;
@@ -7906,7 +8182,7 @@
     return Array.from({ length: n }, (_, i) => {
       const d = addDays(D.t, i), plan = planFor(s.phase, d), done = ((S.days.get(d) || {}).done) || {};
       const mins = plan ? blockMins(d, plan, s.phase) : [], by = {}, blocks = [];
-      if (plan) plan.forEach((b, k) => { if (!i && done[blockKey(s.phase, k)]) return; by[b[0]] = (by[b[0]] || 0) + mins[k]; blocks.push(b[2]); });
+      if (plan) plan.forEach((b, k) => { if (!i && done[blockKey(s.phase, k, plan)]) return; by[b[0]] = (by[b[0]] || 0) + mins[k]; blocks.push(b[2]); });
       const due = D.srs.filter(([, st]) => st.due && (i ? st.due === d : st.due <= d)).length;
       return { d, i, plan: !!plan, by, total: minTotal(by), blocks, due, rev: (due * pace.rc) / 60 };
     });
@@ -8132,8 +8408,8 @@
         more: () => dashComp(),
       },
       writing: {
-        icon: "writing", title: "Écrit", en: "Claude's scores",
-        face: (() => { const l3 = D.scores.slice(-3), avg = l3.length ? l3.reduce((a, x) => a + x.score, 0) / l3.length : null; return (avg == null ? tileHero("—", "Once Claude corrects a text") : tileHero(`${CH.fr(avg, 1)}<small>/20</small>`, `the average of your last ${l3.length > 1 ? l3.length + " scores" : "score"} · NCLC ${nclcLabel(nclcOf("ee", avg))} · 10/20 is NCLC 7`)) + eePlot(D, 124); })(),
+        icon: "writing", title: "Écrit", en: "your writing grades",
+        face: (() => { const l3 = D.scores.slice(-3), avg = l3.length ? l3.reduce((a, x) => a + x.score, 0) / l3.length : null; return (avg == null ? tileHero("—", "Save a grade with your writing to see it here") : tileHero(`${CH.fr(avg, 1)}<small>/20</small>`, `the average of your last ${l3.length > 1 ? l3.length + " scores" : "score"} · NCLC ${nclcLabel(nclcOf("ee", avg))} · 10/20 is NCLC 7`)) + eePlot(D, 124); })(),
         more: () => writingMore(D),
       },
       stamps: { icon: "stamp", title: "Tampons", en: "stamps", face: stampsFace(stamps), more: () => stampsMore(stamps) },
@@ -8328,7 +8604,13 @@
       const tab = ["history", "report", "backup", "calendar"].includes(args[0]) ? args[0] : "";
       const tabs = `<nav class="tabs" role="tablist"><a href="#progress" role="tab" aria-selected="${!tab}">Vue d'ensemble<small>overview</small></a><a href="#progress.calendar" role="tab" aria-selected="${tab === "calendar"}">Calendrier<small>study calendar</small></a><a href="#progress.report" role="tab" aria-selected="${tab === "report"}">Évolution<small>progress report</small></a><a href="#progress.history" role="tab" aria-selected="${tab === "history"}">Historique<small>history</small></a><a href="#progress.backup" role="tab" aria-selected="${tab === "backup"}">Sauvegarde<small>backup</small></a></nav>`;
       if (tab === "calendar") return calendarView(head, tabs);
-      if (tab === "history") return historyView(head, tabs);
+      if (tab === "history") {
+        const key = args.join(".");
+        if (ui.hist.route !== key) {
+          ui.hist = { filter: H_FILTERS.some(([k]) => k === args[1]) || args[1] === "comp" ? args[1] : "all", type: ["exam", "exercise"].includes(args[2]) ? args[2] : "all", status: args[3] === "pending" ? "pending" : "done", query: "", limit: 30, open: null, route: key };
+        }
+        return historyView(head, tabs);
+      }
       if (tab === "backup") return backupView(head, tabs);
       if (tab === "report") return reportView(head, tabs);
       const s = settings();
@@ -8353,7 +8635,7 @@
       const tok = args.join(".");
       if (args[0] === "history") {
         const el = ui.hist.jump && document.getElementById("h-" + ui.hist.jump);
-        if (el) el.scrollIntoView({ block: "start" });
+        if (el) { el.scrollIntoView({ block: "center" }); el.focus({ preventScroll: true }); }
         ui.hist.jump = null;
         return;
       }
@@ -8457,7 +8739,20 @@
         document.getElementById("cal-" + ui.calendarDay)?.focus({ preventScroll: true });
       }
     },
-    "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; render(true); },
+    "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; document.querySelectorAll("[data-act=h-filter]").forEach(b => b.setAttribute("aria-pressed", b === el)); updateHistoryList(); },
+    "h-status": (el) => { ui.hist.status = el.dataset.status; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); document.querySelector(`[data-act=h-status][data-status="${ui.hist.status}"]`)?.focus(); },
+    "h-reset": () => { Object.assign(ui.hist, { filter: "all", type: "all", query: "", limit: 30, open: null }); render(true); document.getElementById("h-query")?.focus(); },
+    "h-review": (el) => {
+      const x = resultEntries().find(x => x.id === el.dataset.id);
+      if (!x) return;
+      if (x.kind === "eemock" && eeRunning()) { toast("Termine l’examen écrit en cours avant d’ouvrir un autre résultat."); return; }
+      ui.hist.backHash = location.hash; ui.hist.backId = x.id;
+      if (x.kind === "comp") { compReview(x.doc.skill, x.id); goTo("#comp." + x.doc.skill); window.scrollTo(0, 0); }
+      else if (x.kind === "exam") examReview(x.id);
+      else if (x.kind === "eemock") { ui.ee = { id: x.doc.id, done: true, view: null }; goTo("#writing.mock"); window.scrollTo(0, 0); }
+      else { ui.hist.open = ui.hist.open === x.id ? null : x.id; updateHistoryList(); document.getElementById("h-" + x.id)?.querySelector("[data-act=h-review]")?.focus({ preventScroll: true }); }
+    },
+    "h-return": () => { ui.hist.jump = ui.hist.backId; goTo(ui.hist.backHash || "#progress.history"); },
     "h-more": () => { ui.hist.limit += 30; render(true); },
     "h-open": (el) => { ui.hist.open = ui.hist.open === el.dataset.id ? null : el.dataset.id; render(true); },
     "h-close": () => { ui.hist.open = null; render(true); },
@@ -8483,8 +8778,11 @@
     // A "Review" link elsewhere opens that attempt in the history, scrolled into view.
     "h-show": (el) => {
       const f = el.dataset.f || "all", id = el.dataset.id;
-      const idx = finishedAttempts().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
-      ui.hist = { filter: f, limit: Math.max(30, idx + 1), open: id, jump: id };
+      const writing = S.writing.get(id);
+      if (writing?.mock?.id && eeRunning()) { toast("Termine l’examen écrit en cours avant d’ouvrir un autre résultat."); return; }
+      if (writing?.mock?.id) { ui.ee = { id: writing.mock.id, done: true, view: id }; goTo("#writing.mock"); return; }
+      const idx = resultEntries().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
+      ui.hist = { filter: f, type: "all", status: "done", query: "", route: "history", limit: Math.max(30, idx + 1), open: id, jump: id };
       goTo("#progress.history");
     },
     "drill-start": (el) => {
@@ -8619,13 +8917,16 @@
     "w-copy": writingCopy,
     "w-copy-close": () => { ui.w.copyOut = null; render(true); },
     "w-save": writingSave,
+    "w-review-open": writingReviewOpen,
+    "w-review-cancel": () => { if (!ui.wReview?.saving) { ui.wReview = null; render(true); } },
     "w-clear": () => { const t = ui.w.task; ipDrop("writing--" + t); ui.w.text[t] = ""; ui.w.checks[t] = {}; ui.confirm = ""; render(true); },
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },
     "w-close": () => { ui.w.viewing = null; render(true); },
     "w-del": (el) => { if (ui.w.viewing === el.dataset.id) ui.w.viewing = null; ui.confirm = ""; remove("writing", el.dataset.id); },
     // The Examen blanc EE (#writing.mock).
     "ee-start": eeStart,
-    "ee-new": () => { ui.ee = null; eeStart(); },
+    "ee-load-papers": eeLoadPapers,
+    "ee-new": () => { ui.ee = null; ui.eeCopyOut = null; render(true); document.getElementById("ee-paper")?.focus(); window.scrollTo(0, 0); },
     "ee-task": (el) => eeSwitch(el.dataset.t),
     "ee-hand-in": (el) => { if (el.dataset.force && ui.ee) ui.ee.confirm = true; eeHandIn(); },
     "ee-keep": () => { if (ui.ee) ui.ee.confirm = false; render(true); },
@@ -8754,6 +9055,8 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "h-type": (el) => { ui.hist.type = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
+    "ee-paper": (el) => { ui.form["ee-paper"] = el.value; render(true); document.getElementById("ee-paper")?.focus(); },
     "library-theme": selectLibraryTheme,
     "card-draft": updateCardDraft,
     "c-seek": () => coSeekDone(),
@@ -8789,6 +9092,9 @@
     },
   };
   const INPUTS = {
+    "w-review": el => { if (ui.wReview && !ui.wReview.started) ui.wReview[el.dataset.k] = el.value; },
+    "w-review-score": el => { if (ui.wReview && !ui.wReview.started) ui.wReview.scores[el.dataset.id] = el.value; },
+    "h-query": (el) => { ui.hist.query = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "card-draft": updateCardDraft,
     "c-seek": (el) => coSeek(Number(el.value) || 0),
     drill: (el) => { if (ui.drill) ui.drill.given = el.value; },
@@ -8835,6 +9141,7 @@
   // "toggle", which also fires for folds a redraw draws open.
   document.addEventListener("click", (e) => { const s = e.target.closest && e.target.closest("summary"), d = s && s.parentElement; if (d && d.dataset && d.dataset.fold) FOLD[d.dataset.fold] = !d.open; }, true);
   document.addEventListener("submit", (e) => {
+    if (e.target.id === "ai-review-form") { e.preventDefault(); writingReviewSave(); return; }
     if (e.target.id !== "card-maker-form") return;
     e.preventDefault();
     saveCardDraft(e.target);
