@@ -3545,7 +3545,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -4313,7 +4313,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -5099,7 +5099,7 @@
   "ctx": [
    "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>",
    "…/20… … · … · … words",
-   "… <span>… words</span><span>Not corrected</span> <p>…</p>"
+   "… <span>… words</span><span>…</span> … …… <summary>Your original</summary><p>…</p>"
   ]
  },
  {
@@ -5218,7 +5218,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -5246,15 +5246,6 @@
   "where": "app",
   "ctx": [
    "<b>You have an unfinished exam:</b> …, …. Pick it up where you stopped, or discard it to start another. <button>Resume</button>…"
-  ]
- },
- {
-  "id": "1053def2f86e",
-  "text": "{0}, Claude's estimate",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "…, Claude's estimate"
   ]
  },
  {
@@ -5510,6 +5501,15 @@
   ]
  },
  {
+  "id": "ee5dcbc55b7b",
+  "text": "{0}/20 · {1} · NCLC {2}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "…/20 · … · NCLC …"
+  ]
+ },
+ {
   "id": "b8457c64c704",
   "text": "{0}A day counts once every block in its plan is ticked. Sundays don't break a streak.",
   "kind": "pattern",
@@ -5524,7 +5524,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
   ]
  },
  {
@@ -5768,6 +5768,15 @@
   "where": "app",
   "ctx": [
    "… <h3>Pour la semaine du …</h3><span>…</span> <p>Look at your exit criteria and this week's misses, then keep the two mistakes you'll watch for in next week's writing. The coach's two come first: the ones that came back most in your last corrected texts, your "
+  ]
+ },
+ {
+  "id": "17ad3d369432",
+  "text": "/20 · {0} · NCLC",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "…/20 · … · NCLC …"
   ]
  },
  {
@@ -9312,6 +9321,33 @@
   "ctx": []
  },
  {
+  "id": "7abe1dab9e83",
+  "text": "AI / source (optional)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+  ]
+ },
+ {
+  "id": "c8c27c53bd47",
+  "text": "AI review",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "AI review"
+  ]
+ },
+ {
+  "id": "c06357c1b8a0",
+  "text": "AI review saved with your writing.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "AI review saved with your writing."
+  ]
+ },
+ {
   "id": "8aee09cd9a5d",
   "text": "Aider isn't pronominal: it takes avoir. M' (Inès) comes before the verb, so aidée agrees: m'ont beaucoup aidée.",
   "kind": "exact",
@@ -9545,7 +9581,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -10136,7 +10172,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -10233,6 +10269,15 @@
   "where": "app",
   "ctx": [
    "any everyday or social topic typical of the TCF Canada (work, housing, services, health, environment, technology, culture, settling in Canada)"
+  ]
+ },
+ {
+  "id": "90bca68c1c55",
+  "text": "Any format is welcome. The full response and line breaks are kept exactly as pasted.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
   ]
  },
  {
@@ -10491,6 +10536,15 @@
   ]
  },
  {
+  "id": "89005b738cfb",
+  "text": "Attach the AI response to this saved text.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Attach the AI response to this saved text."
+  ]
+ },
+ {
   "id": "38e4e4b0ad78",
   "text": "attempt",
   "kind": "exact",
@@ -10644,30 +10698,30 @@
   ]
  },
  {
-  "id": "ea9deda0d5cf",
-  "text": "Average of Claude's last {0} score",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "Average of Claude's last … score…"
-  ]
- },
- {
-  "id": "6ad2073cfbc7",
-  "text": "Average of Claude's last {0} score{1}",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "Average of Claude's last … score…"
-  ]
- },
- {
   "id": "e436ec9ebf8d",
   "text": "Average of the last 3",
   "kind": "exact",
   "where": "app",
   "ctx": [
    "Average of the last 3 … Best so far … Inside the word count … Texts corrected …"
+  ]
+ },
+ {
+  "id": "ee0a4cbbf3f2",
+  "text": "Average of your last {0} writing grade",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Average of your last … writing grade…"
+  ]
+ },
+ {
+  "id": "371abacdaef5",
+  "text": "Average of your last {0} writing grade{1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "Average of your last … writing grade…"
   ]
  },
  {
@@ -11842,7 +11896,7 @@
   "ctx": [
    "… <p>It's already in <b>…</b>:</p> <p>…</p><p>…</p> … …<button>Make a new card anyway</button><button>Cancel</button>",
    "… … … … … … … … … … <button>Save <span>↵</span></button><button>Cancel <span>Esc</span></button>",
-   "<button>Confirm</button><button>Cancel</button>"
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
   ]
  },
  {
@@ -12551,6 +12605,15 @@
   ]
  },
  {
+  "id": "154176f26955",
+  "text": "ChatGPT, Claude, Gemini…",
+  "kind": "exact",
+  "where": "attr:placeholder",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+  ]
+ },
+ {
   "id": "4b5e84be0e45",
   "text": "Check",
   "kind": "exact",
@@ -13003,12 +13066,12 @@
   ]
  },
  {
-  "id": "a0a1637fff76",
-  "text": "Claude's estimate",
+  "id": "e0939c393936",
+  "text": "Claude’s estimate",
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…, Claude's estimate"
+   "Claude’s estimate"
   ]
  },
  {
@@ -13017,7 +13080,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
   ]
  },
  {
@@ -13045,33 +13108,6 @@
   "where": "app",
   "ctx": [
    "Claude's items didn't come back in a usable shape. Try again."
-  ]
- },
- {
-  "id": "e0090a62aab9",
-  "text": "Claude's score out of 20 for each corrected text",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Claude's score out of 20 for each corrected text"
-  ]
- },
- {
-  "id": "e423cd32df73",
-  "text": "Claude's score out of 20 on each corrected task, across prompts. 10/20 is NCLC 7.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Claude's score out of 20 on each corrected task, across prompts. 10/20 is NCLC 7."
-  ]
- },
- {
-  "id": "2892707273b5",
-  "text": "Claude's scores",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Claude's scores"
   ]
  },
  {
@@ -13883,7 +13919,7 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -13892,8 +13928,17 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …",
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …",
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+  ]
+ },
+ {
+  "id": "80831787cdee",
+  "text": "Copy only the grade given for each task. A blank field keeps its current grade. New grades update your results; earlier reviews stay available.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
   ]
  },
  {
@@ -13903,6 +13948,15 @@
   "where": "app",
   "ctx": [
    "<p>Copy this into another AI</p><p>This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p> … <button>Close</button>"
+  ]
+ },
+ {
+  "id": "9e8bdc7c8bb5",
+  "text": "Copy your texts for another AI, then paste its review and each task's grade below.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Copy your texts for another AI, then paste its review and each task's grade below."
   ]
  },
  {
@@ -13937,15 +13991,6 @@
   "where": "app",
   "ctx": [
    "Correct a writing task with Claude and it shows here."
-  ]
- },
- {
-  "id": "13ca075a7d70",
-  "text": "Correct a writing task with Claude and its score shows here.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Correct a writing task with Claude and its score shows here."
   ]
  },
  {
@@ -14026,7 +14071,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
   ]
  },
  {
@@ -14036,15 +14081,6 @@
   "where": "app",
   "ctx": [
    "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."
-  ]
- },
- {
-  "id": "7c2172ec8cc0",
-  "text": "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI."
   ]
  },
  {
@@ -15484,6 +15520,15 @@
   ]
  },
  {
+  "id": "485dac78cf2d",
+  "text": "Earlier in-app correction",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary>Earlier in-app correction</summary>…"
+  ]
+ },
+ {
   "id": "bd255607d31d",
   "text": "earlier scores",
   "kind": "exact",
@@ -16007,6 +16052,15 @@
   "where": "app",
   "ctx": [
    "Enter a score and a total, with the score no higher than the total."
+  ]
+ },
+ {
+  "id": "5f18e115aad2",
+  "text": "Enter a score between 0 and 20, or leave it blank.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Enter a score between 0 and 20, or leave it blank."
   ]
  },
  {
@@ -17332,15 +17386,6 @@
   ]
  },
  {
-  "id": "2d92099164c5",
-  "text": "Finish without correction",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
-  ]
- },
- {
   "id": "2827a048616d",
   "text": "Finished. It's in your writing history.",
   "kind": "exact",
@@ -17894,6 +17939,15 @@
   ]
  },
  {
+  "id": "745fa745a62f",
+  "text": "Full AI response",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+  ]
+ },
+ {
   "id": "c5506ae775fe",
   "text": "Full draft to a fresh prompt (60–120 words). Check the word count before you finish.",
   "kind": "exact",
@@ -17914,6 +17968,24 @@
   "where": "app",
   "ctx": [
    "Full immersion: the whole interface in French, no English."
+  ]
+ },
+ {
+  "id": "3f087b193f26",
+  "text": "Full mock review",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Full mock review · the grade above is for this task."
+  ]
+ },
+ {
+  "id": "8b8b59de1b95",
+  "text": "Full mock review · the grade above is for this task.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Full mock review · the grade above is for this task."
   ]
  },
  {
@@ -18249,6 +18321,24 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "e51585382064",
+  "text": "Grade entered from an AI review. This is a practice estimate, not an official score.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Grade entered from an AI review. This is a practice estimate, not an official score.</p>"
+  ]
+ },
+ {
+  "id": "79a60a5b2483",
+  "text": "grade from AI review",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "grade from AI review"
+  ]
  },
  {
   "id": "a65accf43665",
@@ -19811,7 +19901,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -20339,6 +20429,15 @@
   "where": "app",
   "ctx": [
    "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
+  ]
+ },
+ {
+  "id": "a66a2fa624f1",
+  "text": "Keep your AI feedback",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Keep your AI feedback</p><p>Paste the response here to keep the review and grades with your writing.</p> <button>Paste AI review</button>"
   ]
  },
  {
@@ -22538,7 +22637,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -23174,8 +23273,8 @@
   "where": "app",
   "ctx": [
    "<span>NCLC …</span>",
-   "NCLC …",
-   "… · NCLC … … · …"
+   "…/20 · … · NCLC …",
+   "NCLC …"
   ]
  },
  {
@@ -24388,6 +24487,15 @@
   "ctx": []
  },
  {
+  "id": "1d6d22da772b",
+  "text": "No grade attached",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "No grade attached"
+  ]
+ },
+ {
   "id": "224fc31657f9",
   "text": "No homework yet. Add your own, or take the follow-up tasks Claude suggests with a correction.",
   "kind": "exact",
@@ -24674,6 +24782,15 @@
   ]
  },
  {
+  "id": "2aa01887e6ea",
+  "text": "no score",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Review saved · no score"
+  ]
+ },
+ {
   "id": "745da31695a4",
   "text": "no score yet",
   "kind": "exact",
@@ -24891,27 +25008,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>not corrected</span>",
    "not corrected"
-  ]
- },
- {
-  "id": "7aadcc7512c4",
-  "text": "Not corrected",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "<span>Not corrected</span>",
-   "… <span>… words</span><span>Not corrected</span> <p>…</p>"
-  ]
- },
- {
-  "id": "ea2188cad987",
-  "text": "Not corrected yet.",
-  "kind": "exact",
-  "where": "app",
-  "ctx": [
-   "Not corrected yet."
   ]
  },
  {
@@ -26102,6 +26199,15 @@
   ]
  },
  {
+  "id": "556c9d18cbe2",
+  "text": "One response for the whole mock. Enter each task's grade separately; the app calculates the overall estimate.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "One response for the whole mock. Enter each task's grade separately; the app calculates the overall estimate."
+  ]
+ },
+ {
   "id": "efe2cea48ffa",
   "text": "One round of the mistakes from your own corrected writing.",
   "kind": "exact",
@@ -27240,6 +27346,43 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "e703ea70204e",
+  "text": "Paste AI review",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Keep your AI feedback</p><p>Paste the response here to keep the review and grades with your writing.</p> <button>Paste AI review</button>",
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+  ]
+ },
+ {
+  "id": "2a17e5fa282e",
+  "text": "Paste the AI response before saving.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Paste the AI response before saving."
+  ]
+ },
+ {
+  "id": "54589433295c",
+  "text": "Paste the grading, corrections and advice here…",
+  "kind": "exact",
+  "where": "attr:placeholder",
+  "ctx": [
+   "<h3>Paste AI review</h3><p>…</p> Full AI response … <p>Any format is welcome. The full response and line breaks are kept exactly as pasted.</p> AI / source (optional) … <p>Copy only the grade given for each task. A blank field keeps its current grade. New grad"
+  ]
+ },
+ {
+  "id": "d0047440319a",
+  "text": "Paste the response here to keep the review and grades with your writing.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Keep your AI feedback</p><p>Paste the response here to keep the review and grades with your writing.</p> <button>Paste AI review</button>"
+  ]
  },
  {
   "id": "b59c35e01b44",
@@ -30532,6 +30675,15 @@
   ]
  },
  {
+  "id": "a777d602edf9",
+  "text": "Retry saving review",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Retry saving review"
+  ]
+ },
+ {
   "id": "fc2ecc282a74",
   "text": "Retry today's",
   "kind": "exact",
@@ -30618,6 +30770,15 @@
   "ctx": []
  },
  {
+  "id": "cfacc84985cb",
+  "text": "Review attached to this task.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Review attached to this task."
+  ]
+ },
+ {
   "id": "92fd395d6960",
   "text": "Review every wrong or weak answer.",
   "kind": "exact",
@@ -30647,6 +30808,24 @@
   "where": "app",
   "ctx": [
    "review only until fewer than"
+  ]
+ },
+ {
+  "id": "7baffaf4dfeb",
+  "text": "Review saved",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Review saved · no score"
+  ]
+ },
+ {
+  "id": "e5a5d66bc188",
+  "text": "Review saved · no score",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Review saved · no score"
   ]
  },
  {
@@ -31259,6 +31438,15 @@
   ]
  },
  {
+  "id": "c7f7dd3bcd83",
+  "text": "Save a grade with your writing to see it here",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Save a grade with your writing to see it here"
+  ]
+ },
+ {
   "id": "9b0ce2e59e30",
   "text": "Save all",
   "kind": "exact",
@@ -31283,6 +31471,33 @@
   "where": "app",
   "ctx": [
    "Save failed"
+  ]
+ },
+ {
+  "id": "06c027dae183",
+  "text": "Save my text",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
+  ]
+ },
+ {
+  "id": "825b6bb5d78f",
+  "text": "Save or cancel your open review before starting another.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Save or cancel your open review before starting another."
+  ]
+ },
+ {
+  "id": "f450a9da05a2",
+  "text": "Save review",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Save review"
   ]
  },
  {
@@ -31345,6 +31560,15 @@
   "ctx": [
    "<span>Saved activity</span>",
    "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+  ]
+ },
+ {
+  "id": "7d3b5cd8bb9c",
+  "text": "Saved AI reviews",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h3>Saved AI reviews</h3>…"
   ]
  },
  {
@@ -31417,6 +31641,15 @@
   "where": "app",
   "ctx": [
    "Saved. It comes up in your reviews from tomorrow."
+  ]
+ },
+ {
+  "id": "56a2285c5b11",
+  "text": "Saving…",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Saving…"
   ]
  },
  {
@@ -31550,6 +31783,15 @@
   "where": "app",
   "ctx": [
    "Score /20"
+  ]
+ },
+ {
+  "id": "f2153531c645",
+  "text": "Score /20 (optional)",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>… · <span>Score /20 (optional)</span></span>"
   ]
  },
  {
@@ -33344,7 +33586,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -33663,7 +33905,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -34253,6 +34495,15 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "7fbb727db4b2",
+  "text": "task",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "task"
+  ]
  },
  {
   "id": "7bb0ddf9221c",
@@ -35802,6 +36053,15 @@
   "ctx": []
  },
  {
+  "id": "bf22e6bdd953",
+  "text": "the grade above is for this task.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Full mock review · the grade above is for this task."
+  ]
+ },
+ {
   "id": "8f473cbfa9c8",
   "text": "The grower explains that the real unexpected issue was « l'épaisse pellicule de givre sur les surfaces vitrées : elle masquait complètement le ciel et privait nos plantations de luminosité », which corresponds to a lack of light caused by frost/freezing. The underground geothermal power outage (« panne majeure de l'énergie souterraine ») and the burdensome maintenance of the pipes (« entretien épuisant des tuyaux ») were worries raised by former colleagues before starting, not things that actually failed. The heating system itself worked without trouble (« notre système thermique a parfaitement fonctionné sous la neige »).",
   "kind": "exact",
@@ -36673,6 +36933,15 @@
   "ctx": []
  },
  {
+  "id": "5ecf991853aa",
+  "text": "The response is too long. Keep it under 60,000 characters.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The response is too long. Keep it under 60,000 characters."
+  ]
+ },
+ {
   "id": "82d96d7ec5cd",
   "text": "The result of a si + imparfait condition.",
   "kind": "exact",
@@ -36854,6 +37123,15 @@
   "kind": "exact",
   "where": "content:comp",
   "ctx": []
+ },
+ {
+  "id": "5bc055d2312f",
+  "text": "The save did not finish. Your pasted response is still here. Retry to finish saving without duplicates.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "The save did not finish. Your pasted response is still here. Retry to finish saving without duplicates."
+  ]
  },
  {
   "id": "2cb5872101b5",
@@ -38119,6 +38397,15 @@
   "where": "app",
   "ctx": [
    "<h2>Repos</h2><p>Sunday is a rest day in every phase. If you want something light, review your due cards or reread this week's corrections, but it isn't on the plan.</p> <a>Due cards</a><a>This week's errors</a>"
+  ]
+ },
+ {
+  "id": "b427f5701def",
+  "text": "This writing entry is no longer available.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "This writing entry is no longer available."
   ]
  },
  {
@@ -40460,6 +40747,15 @@
   ]
  },
  {
+  "id": "700d4703da97",
+  "text": "Wait for the current correction to finish before adding a review.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Wait for the current correction to finish before adding a review."
+  ]
+ },
+ {
   "id": "a0bfdfb9d3d7",
   "text": "waiting for Claude, which prepares them when this page is opened on claude.ai. Until then their mistakes are asked as a choice between the correction and what you wrote.",
   "kind": "exact",
@@ -41276,7 +41572,7 @@
   "where": "app",
   "ctx": [
    "<p>…</p> … <p><span>… words</span> <span>…–… · … min</span></p> …<button>…</button>",
-   "… <span>… words</span><span>Not corrected</span> <p>…</p>",
+   "… <span>… words</span><span>…</span> … …… <summary>Your original</summary><p>…</p>",
    "… words"
   ]
  },
@@ -42426,7 +42722,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
+   "… <span>… words</span><span>…</span> … …… <summary>Your original</summary><p>…</p>",
+   "… …… <span>…</span> <span>…Claude's estimate on the TCF Canada scale, not an official score.</span><p>…</p> … … … … … … … … <p>Corrections <span>· …</span></p>…… … … … <summary>Your original</summary><p>…</p> …"
   ]
  },
  {
@@ -42527,6 +42824,33 @@
   "ctx": []
  },
  {
+  "id": "c1ed6b4a234d",
+  "text": "Your saved grade out of 20 for each text",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your saved grade out of 20 for each text"
+  ]
+ },
+ {
+  "id": "2e2b6462fe71",
+  "text": "Your saved work is still loading. Try again in a moment.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your saved work is still loading. Try again in a moment."
+  ]
+ },
+ {
+  "id": "d845645bf9b1",
+  "text": "Your saved writing grades out of 20, across prompts. 10/20 is NCLC 7.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Your saved writing grades out of 20, across prompts. 10/20 is NCLC 7."
+  ]
+ },
+ {
   "id": "d3ec161a8f88",
   "text": "Your score on each drill round. Every round draws different questions from its set.",
   "kind": "exact",
@@ -42577,7 +42901,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Fini"
+   "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Save"
   ]
  },
  {
@@ -42677,6 +43001,15 @@
   "where": "app",
   "ctx": [
    "your weakest skill, … · …"
+  ]
+ },
+ {
+  "id": "e8cf4adecde5",
+  "text": "your writing grades",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "your writing grades"
   ]
  },
  {

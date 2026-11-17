@@ -363,6 +363,7 @@
       viewing: null,
       copyOut: null, // the copied prompt, shown to copy by hand when the browser blocks the clipboard
     },
+    wReview: null, // a pasted review being attached to an existing submission
     calendarDay: null,
     hist: { filter: "all", type: "all", status: "done", query: "", limit: 30, open: null },
     rep: { open: null },
@@ -3273,7 +3274,7 @@
   }
   function cleanFb(o, task) {
     const c = o.compliance || {};
-    const sc = Number(o.score20);
+    const sc = o.score20 == null || o.score20 === "" ? NaN : Number(o.score20);
     const score20 = Number.isFinite(sc) ? Math.max(0, Math.min(20, Math.round(sc))) : null;
     const fb = {
       level: str(o.level).slice(0, 8), score20, nclc: score20 != null ? nclcLabel(nclcOf("ee", score20)) : str(o.nclc).slice(0, 10), summary: str(o.summary),
@@ -3396,6 +3397,122 @@
     autoTick("writing." + task, { min: timerElapsedMin("writing." + task) || 0 });
     toast(`Finished. It's in your writing history.${stopped ? ` The clock stopped at ${timerTaken()} min.` : ""}`);
     render(true);
+    document.getElementById("w-fb")?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  // External AI reviews are append-only attachments to the original submission. A missing score
+  // leaves its grade alone; a supplied score uses the same /20 results as an in-app correction.
+  function writingReviewScore(value) {
+    if (!str(value).trim()) return null;
+    const n = Number(str(value).trim().replace(",", "."));
+    if (!/^\d+(?:[.,]\d+)?$/.test(str(value).trim()) || !Number.isFinite(n) || n < 0 || n > 20) throw new Error("Enter a score between 0 and 20, or leave it blank.");
+    return n;
+  }
+  function writingWithReview(doc, review) {
+    if (arr(doc.aiReviews).some(r => r.id === review.id)) return doc; // retry after a partial mock save
+    const entry = { ...review };
+    if (review.score20 != null && doc.fb && !doc.fb.reviewId) entry.previousFeedback = clone(doc.fb);
+    const next = { ...doc, aiReviews: [...arr(doc.aiReviews), entry] };
+    if (review.score20 != null) {
+      next.fb = { ...(doc.fb || cleanFb({}, doc.task)), score20: review.score20, level: eeCefr(review.score20), nclc: nclcLabel(nclcOf("ee", review.score20)), reviewId: review.id, errors: doc.fb?.errors ?? null };
+      // Retain any real error analysis for existing practice. A pasted response alone supplies none.
+      if (!doc.fb?.tache3) delete next.fb.tache3;
+    }
+    return next;
+  }
+  const writingReviewStatus = doc => arr(doc.aiReviews).length ? "Review saved · no score" : "not corrected";
+  function writingReviewTargets(el) {
+    return el.dataset.mock ? Object.values(eeMocks().find(m => m.id === el.dataset.mock)?.tasks || {}).sort((a, b) => a.task.localeCompare(b.task)).map(w => w.id) : [el.dataset.id];
+  }
+  function writingReviewOpen(el) {
+    if (ui.wReview?.saving) return;
+    const key = el.dataset.mock ? "mock-" + el.dataset.mock : el.dataset.id;
+    if (ui.wReview && ui.wReview.key !== key && ui.wReview.text) { toast("Save or cancel your open review before starting another."); return; }
+    if (ui.wReview?.key !== key) ui.wReview = { key, ids: writingReviewTargets(el), id: uid(), ts: Date.now(), text: "", source: "", scores: {}, error: "" };
+    render(true);
+    const field = document.getElementById("ai-review-text");
+    if (field) { field.focus(); field.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  }
+  function writingReviewForm(key, attrs, docs) {
+    const d = ui.wReview?.key === key ? ui.wReview : null;
+    if (!d) return `<div class="review-invite"><div><p class="h3">Keep your AI feedback</p><p class="small muted">Paste the response here to keep the review and grades with your writing.</p></div><button class="btn" data-act="w-review-open" ${attrs}>Paste AI review</button></div>`;
+    const locked = d.saving || d.started;
+    return `<form id="ai-review-form" class="review-import stack" novalidate aria-labelledby="ai-review-title" aria-busy="${!!d.saving}">
+      <div class="stack tight"><h3 class="h3" id="ai-review-title">Paste AI review</h3><p class="small muted">${docs.length > 1 ? "One response for the whole mock. Enter each task's grade separately; the app calculates the overall estimate." : "Attach the AI response to this saved text."}</p></div>
+      <label class="field" for="ai-review-text">Full AI response<textarea id="ai-review-text" data-input="w-review" data-k="text" rows="9" maxlength="60000" required aria-describedby="ai-review-help" ${locked ? "disabled" : ""} placeholder="Paste the grading, corrections and advice here…">${esc(d.text)}</textarea></label>
+      <p class="small muted" id="ai-review-help">Any format is welcome. The full response and line breaks are kept exactly as pasted.</p>
+      <div class="review-fields"><label class="field">AI / source (optional)<input data-input="w-review" data-k="source" maxlength="80" value="${esc(d.source)}" placeholder="ChatGPT, Claude, Gemini…" ${locked ? "disabled" : ""}></label>
+      ${docs.map(w => `<label class="field"><span>${esc(T.WRITING[w.task].name)} · <span>Score /20 (optional)</span></span><input type="text" inputmode="decimal" data-input="w-review-score" data-id="${esc(w.id)}" value="${esc(d.scores[w.id] || "")}" aria-describedby="ai-review-grade-help" placeholder="0–20" ${locked ? "disabled" : ""}></label>`).join("")}</div>
+      <p class="small muted" id="ai-review-grade-help">Copy only the grade given for each task. A blank field keeps its current grade. New grades update your results; earlier reviews stay available.</p>
+      ${d.error ? `<p class="notice warn" role="alert">${esc(d.error)}</p>` : ""}
+      <div class="row"><button class="btn primary" type="submit" ${d.saving ? "disabled" : ""}>${d.saving ? "Saving…" : d.started ? "Retry saving review" : "Save review"}</button><button class="btn ghost" type="button" data-act="w-review-cancel" ${d.saving ? "disabled" : ""}>Cancel</button></div>
+    </form>`;
+  }
+  // Wait for durable storage before saying the review is saved. The normal put() is optimistic.
+  async function writingReviewStore(coll, id, build) {
+    return queue(coll + "/" + id, async () => {
+      const doc = build(S[coll].get(id));
+      if (backend.kind === "local") {
+        // The browser fallback normally serializes S optimistically and suppresses quota failures.
+        // Store a snapshot containing this review first, and let errors keep the form open.
+        const data = Object.fromEntries(COLLS.map(c => [c, Object.fromEntries(S[c])]));
+        data[coll][id] = doc;
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+      } else await backend.set(coll, id, doc);
+      S[coll].set(id, doc);
+      dataRev++;
+      scheduleRender();
+    });
+  }
+  async function writingReviewSave() {
+    const d = ui.wReview;
+    if (!d || d.saving) return;
+    try {
+      if (!d.text.trim()) throw new Error("Paste the AI response before saving.");
+      if (d.text.length > 60000) throw new Error("The response is too long. Keep it under 60,000 characters.");
+      if (!d.ids.length || d.ids.some(id => !S.writing.has(id))) throw new Error("This writing entry is no longer available.");
+      const scores = Object.fromEntries(d.ids.map(id => [id, writingReviewScore(d.scores[id])]));
+      if (!loaded || importing || backend.kind === "loading") throw new Error("Your saved work is still loading. Try again in a moment.");
+      if (ui.eeBusy) throw new Error("Wait for the current correction to finish before adding a review.");
+      d.saving = true;
+      if (!d.started) d.ts = Date.now();
+      d.started = true;
+      d.error = "";
+      render(true);
+      for (const id of d.ids) {
+        await writingReviewStore("writing", id, doc => {
+          if (!doc) throw new Error("This writing entry is no longer available.");
+          return writingWithReview(doc, { id: d.id, ts: d.ts, text: d.text, source: d.source.trim().slice(0, 80), score20: scores[id], scope: d.ids.length > 1 ? "mock" : "task" });
+        });
+      }
+      for (const mockId of new Set(d.ids.map(id => S.writing.get(id)?.mock?.id).filter(Boolean))) await eeSyncReviewScore(mockId);
+      if (ui.ee?.done && d.key === "mock-" + ui.ee.id) ui.ee.view = d.ids[0];
+      if (ui.wReview === d) ui.wReview = null;
+      toast("AI review saved with your writing.");
+    } catch (e) {
+      d.error = d.started ? "The save did not finish. Your pasted response is still here. Retry to finish saving without duplicates." : e.message;
+    } finally {
+      d.saving = false;
+      render(true);
+      tabSave();
+      if (d.error) document.querySelector("#ai-review-form [role=alert]")?.scrollIntoView({ block: "nearest" });
+    }
+  }
+  async function eeSyncReviewScore(mockId) {
+    const m = eeMocks().find(x => x.id === mockId);
+    if (!m || m.score == null) return;
+    const old = list("mocks").find(x => x.compId === "ee-" + mockId);
+    await writingReviewStore("mocks", old?.id || "ee-" + mockId, doc => ({ ...doc, date: m.date, ts: doc?.ts || m.ts, label: doc?.label || "Examen blanc EE (site estimate)", ee: m.score, compId: "ee-" + mockId }));
+  }
+  function writingReviews(doc) {
+    const reviews = arr(doc.aiReviews).slice().reverse();
+    if (!reviews.length) return "";
+    return `<div class="stack review-history"><h3 class="h3">Saved AI reviews</h3>${reviews.map((r, i) => `<details class="review-entry" ${i === 0 ? "open" : ""}>
+      <summary><span>${esc(r.source || "AI review")} <span class="small muted">· ${shortDate(ymd(new Date(r.ts)))} · ${hhmm(r.ts)}</span></span><span class="pill">${r.score20 != null ? `${r.score20}/20` : "No grade attached"}</span></summary>
+      <div class="stack"><p class="small muted">${r.scope === "mock" ? "Full mock review · the grade above is for this task." : "Review attached to this task."}</p><div class="review-response" translate="no">${esc(r.text)}</div>
+      ${r.previousFeedback ? `<details class="fold"><summary>Earlier in-app correction</summary>${writingEarlierFeedback(r.previousFeedback)}</details>` : ""}</div></details>`).join("")}</div>`;
+  }
+  function writingEarlierFeedback(fb) {
+    return `<div class="stack tight"><p>${fb.score20 != null ? `${fb.score20}/20 · ` : ""}${esc(fb.level)} · ${esc(fb.summary)}</p>${criteriaTable(fb.criteria)}${fb.compliance?.notes ? `<p>${esc(fb.compliance.notes)}</p>` : ""}${fb.tache3?.notes ? `<p>${esc(fb.tache3.notes)}</p>` : ""}${errList(arr(fb.errors), true)}${fb.corrected ? `<p class="corrected seyes">${esc(fb.corrected)}</p>` : ""}${arr(fb.upgrades).map(u => `<p>${esc(u.from)} → ${esc(u.to)}</p>`).join("")}${arr(fb.strengths).concat(arr(fb.homework)).map(x => `<p>${esc(x)}</p>`).join("")}</div>`;
   }
   async function writingGenPrompt() {
     const task = ui.w.task, W = T.WRITING[task];
@@ -4668,7 +4785,7 @@
   // another device, say) wins over it in hydrate(). Bump TAB_V when the shape of ui changes, so an older copy
   // is dropped rather than misread.
   const TAB_KEY = "tcf-reussir-tab", TAB_V = 4;
-  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "libraryTheme", "libraryLimit", "w", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
+  const TAB_UI = ["bento", "day", "calendarDay", "drill", "hunt", "huntLevel", "mh", "gen", "prod", "vocab", "vTheme", "vCount", "libraryTheme", "libraryLimit", "w", "wReview", "hist", "rep", "hwSug", "c", "cx", "cxReady", "form", "applied", "grab", "fx", "nextUp", "xp", "ee"];
   let tabAt = 0; // when the copy put back was saved; 0 when there was none
   let tabCheck = false; // a copy was put back and hasn't been drawn with your progress loaded yet
   let tabUndo = null; // ui as it was before, in case the copy can't be drawn
@@ -4685,6 +4802,7 @@
       u.c = Object.assign({}, ui.c);
       ["player", "inflight", "queued", "failed"].forEach((k) => delete u.c[k]);
       u.w = Object.assign({}, ui.w, { copyOut: null });
+      u.wReview = ui.wReview ? { ...ui.wReview, saving: false } : null;
       if (examRunning() && skillOf(ui.cx) === "co" && ui.cx.play) ui.cx.play.pos = coxPos();
       const set = ui.c.set.co;
       const audio = audioEl && set && set.audio ? { id: set.id, t: audioEl.currentTime || 0, ended: ui.c.player === "ended" } : null;
@@ -6867,7 +6985,7 @@
   function eeIntro() {
     const ip = ipGet(EE_IP), mocks = eeMocks();
     const plan = EE_TASKS.map((t) => { const W = T.WRITING[t]; return `<li><b>${esc(W.name)}</b> · ${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} min</li>`; }).join("");
-    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">not corrected</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
+    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">${writingReviewStatus(w)}</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
     return `<section class="panel stack" data-spot>
         <p class="h3 with-ico">${ico("exam")}Examen blanc · Expression écrite</p>
         <p class="small">The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p>
@@ -6913,7 +7031,7 @@
     const cards = EE_TASKS.map((t, k) => {
       const W = T.WRITING[t], w = m.tasks[t];
       if (!w) return `<div class="panel flat stack tight ee-task"><p class="eyebrow">${esc(W.name)}</p><p class="small"><span class="pill bad">Blank</span> counts 0</p></div>`;
-      const st = w.fb ? (w.fb.score20 != null ? `<b class="ee-score">${w.fb.score20}<small>/20</small></b> <span class="pill">${esc(w.fb.level || "")}</span>` : `<span class="pill">${esc(w.fb.level || "Corrected")}</span>`) : busy ? `<span class="small muted thinking">Claude is correcting</span>` : `<span class="small muted">Not corrected</span>`;
+      const st = w.fb ? (w.fb.score20 != null ? `<b class="ee-score">${w.fb.score20}<small>/20</small></b> <span class="pill">${esc(w.fb.level || "")}</span>` : `<span class="pill">${esc(w.fb.level || "Corrected")}</span>`) : busy ? `<span class="small muted thinking">Claude is correcting</span>` : `<span class="small muted">${writingReviewStatus(w)}</span>`;
       return `<div class="panel flat stack tight ee-task" data-m="rise" data-k="eet-${esc(m.id)}-${t}-${w.fb ? 1 : 0}"><p class="eyebrow">${esc(W.name)}</p><div class="row">${st}</div><p class="small"><span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words} words</span> <span class="muted">${W.min}–${W.max} · ${w.minutes} min</span></p><div>${w.source ? `<a class="btn ghost sm" href="pdf-viewer.html?file=${encodeURIComponent(w.source.pdf)}#page=${w.source.page}" target="_blank" rel="noopener">Source PDF ↗</a>` : ""}<button class="btn ghost sm" data-act="ee-view" data-id="${esc(w.id)}">${e.view === w.id ? "Showing" : w.fb ? "See the correction" : "See the text"}</button></div></div>`;
     }).join("");
     const nc = m.score != null ? nclcOf("ee", m.score) : null;
@@ -6921,11 +7039,12 @@
         <p class="eyebrow">Examen blanc · Expression écrite · ${shortDate(m.date)}${m.up ? " · handed in when time ran out" : ""}</p>
         ${m.paperTitle ? `<p class="small muted">${esc(m.paperTitle)}</p>` : ""}
         <div class="row"><span class="scorebig">${m.score != null ? `<span data-tween="ees-${esc(m.id)}" data-tw="count" data-to="${m.score}">${m.score}</span>/20` : "…/20"}</span>${m.score != null ? `${nclcTag(m.score, "ee")}<span class="pill">${eeCefr(m.score)}</span>` : ""}</div>
-        <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : claudeOn() ? "Not corrected yet." : "Corrections need Claude, on claude.ai. Here, copy your three texts for another AI."}</p>
+        <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : "Copy your texts for another AI, then paste its review and each task's grade below."}</p>
         ${m.score != null ? greet(...remyScore("exam", m.score, 20, { nclc: nc || 0, key: m.id }), "sm") : ""}
         <div class="ee-tasks">${cards}</div>
         <div class="row">${open && !busy ? claudeBtn("ee-correct", "ee-correct", "Correct with Claude", `data-id="${esc(m.id)}"`, "btn primary") : ""}<button class="btn" data-act="ee-copy" data-id="${esc(m.id)}">Copy for another AI</button><button class="btn" data-act="ee-new">Start another mock</button><button class="btn ghost" data-act="ee-close">All your mocks</button></div>
         ${ui.eeCopyOut && ui.eeCopyOut.id === m.id ? `<div class="stack tight"><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).</p><textarea id="ee-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.eeCopyOut.text)}</textarea></div>` : ""}
+        ${writingReviewForm("mock-" + m.id, `data-mock="${esc(m.id)}"`, EE_TASKS.map(t => m.tasks[t]).filter(Boolean))}
       </section>
       ${view ? writingFb(e.view, view, "ee-view-close") : ""}`;
   }
@@ -7027,7 +7146,7 @@
           <label class="check"><input type="checkbox" id="chk-words" disabled><span>Word count inside ${W.min}–${W.max}. Outside the range, a task can be marked “A1 non atteint” however good the French.</span></label>
           ${checks.map(([k, l]) => `<label class="check"><input type="checkbox" data-change="w-check" data-k="${k}" ${ch[k] ? "checked" : ""}><span>${esc(l)}</span></label>`).join("")}
         </div>`)}
-        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Finish without correction</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
+        <div class="row">${claudeBtn("w-correct", "w-correct", "Correct with Claude", "", "btn primary")}<button class="btn" data-act="w-copy" title="Copies the task, the TCF Canada rules and criteria, and your draft, ready to paste into another AI for a correction">Copy for another AI</button><button class="btn" data-act="w-save">Save my text</button>${ui.confirm === "w-clear" ? `<button class="btn danger" data-act="w-clear">Clear the draft</button><button class="btn ghost" data-act="confirm-cancel">Keep it</button>` : `<button class="btn ghost" data-act="confirm" data-key="w-clear">Clear draft</button>`}</div>
         ${ui.w.copyOut && ui.w.copyOut.task === task ? `<section class="panel stack tight"><p class="h3">Copy this into another AI</p><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac), or select it all first.</p><textarea id="w-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.w.copyOut.text)}</textarea><div class="row"><button class="btn sm ghost" data-act="w-copy-close">Close</button></div></section>` : ""}
         ${viewing ? writingFb(ui.w.viewing, viewing) : ""}
         <section class="sec"><div class="sec-head"><h2 class="h2">History</h2><span class="small muted">${hist.length ? `${hist.length} most recent` : ""}</span></div>
@@ -7035,7 +7154,7 @@
           ${hist.length ? `<div class="table-wrap"><table class="deck"><thead><tr><th>Date</th><th>Task</th><th>Words</th><th>Level</th><th></th></tr></thead><tbody>${hist.map((w) => {
             const WW = T.WRITING[w.task] || W;
             const ok = w.words >= WW.min && w.words <= WW.max;
-            return `<tr><td class="n">${shortDate(w.date)}</td><td>${esc(WW.name)}${w.mock ? ` <span class="pill info">examen blanc</span>` : ""}</td><td class="n"><span class="tag7 ${ok ? "ok" : "no"}">${w.words}</span></td><td>${w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${esc(w.fb.level)}` : w.fb && w.fb.level ? esc(w.fb.level) : `<span class="muted small">not corrected</span>`}</td>
+            return `<tr><td class="n">${shortDate(w.date)}</td><td>${esc(WW.name)}${w.mock ? ` <span class="pill info">examen blanc</span>` : ""}</td><td class="n"><span class="tag7 ${ok ? "ok" : "no"}">${w.words}</span></td><td>${w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${esc(w.fb.level)}` : w.fb && w.fb.level ? esc(w.fb.level) : `<span class="muted small">${writingReviewStatus(w)}</span>`}</td>
               <td><span class="row" style="justify-content:flex-end;flex-wrap:nowrap"><button class="btn ghost sm" data-act="w-open" data-id="${esc(w.id)}">${ui.w.viewing === w.id ? "Showing" : "Open"}</button>${confirmBtn("w-del-" + w.id, "Delete this entry", "w-del", `data-id="${esc(w.id)}"`)}</span></td></tr>`;
           }).join("")}</tbody></table></div>` : `<p class="small muted">Corrected and saved drafts collect here, with their word counts.</p>`}
         </section>
@@ -7058,11 +7177,17 @@
     const inRange = doc.words >= W.min && doc.words <= W.max;
     const head = `<div class="row between"><h2 class="h2">${esc(W.name)} · ${shortDate(doc.date)}</h2><button class="btn ghost sm" data-act="${closeAct || "w-close"}">Close</button></div>
       <p class="small muted fr">${typo(doc.prompt || "")}</p>`;
-    if (!fb) return `<section class="panel fb" id="w-fb">${head}<div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">Not corrected</span></div><p class="corrected seyes">${esc(doc.text)}</p></section>`;
+    const reviewForm = writingReviewForm(id, `data-id="${esc(id)}"`, [{ ...doc, id }]);
+    const reviews = writingReviews(doc);
+    if (!fb || fb.reviewId) return `<section class="panel fb" id="w-fb">${head}
+      <div class="flags"><span class="pill ${inRange ? "ok" : "bad"}">${doc.words} words</span><span class="pill">${fb?.score20 != null ? `${fb.score20}/20 · ${esc(fb.level)} · NCLC ${esc(fb.nclc)}` : writingReviewStatus(doc)}</span></div>
+      ${fb?.reviewId ? `<p class="small muted">Grade entered from an AI review. This is a practice estimate, not an official score.</p>` : ""}
+      ${reviewForm}${reviews}<details class="fold" ${reviews ? "" : "open"}><summary>Your original</summary><p class="corrected seyes">${esc(doc.text)}</p></details></section>`;
     const flag = (ok, yes, no) => `<span class="pill ${ok ? "ok" : "bad"}">${ok ? "✓" : "✗"} ${esc(ok ? yes : no)}</span>`;
     const t3 = fb.tache3;
     return `<section class="panel fb" id="w-fb" data-m="rise" data-k="wfb-${esc(id)}">
       ${head}
+      ${reviewForm}${reviews}
       <div class="fb-head"><span class="level">${fb.score20 != null ? `<span data-tween="w20-${esc(id)}" data-tw="count" data-to="${fb.score20}">${fb.score20}</span><small>/20</small>` : esc(fb.level || "—")}</span><div class="stack tight"><span class="small muted">${fb.score20 != null ? `${esc(fb.level)} · about NCLC ${esc(fb.nclc)} · ` : fb.nclc ? `About NCLC ${esc(fb.nclc)} · ` : ""}Claude's estimate on the TCF Canada scale, not an official score.</span><p>${esc(fb.summary)}</p></div></div>
       ${greet("correction", ...remyMarks(fb.errors), "sm")}
       <div class="flags">
@@ -7325,7 +7450,7 @@
       const exam = c.kind === "exam";
       out.push({ kind: exam ? "exam" : "comp", id: c.id, ts: c.ts || 0, date: c.date, title: `${c.skill === "co" ? "CO" : "CE"} · ${exam ? c.title : `${c.title || ""}${c.level ? " · " + c.level : ""}`}`, result: exam ? `≈${c.est} · ${c.score}/${c.total}` : `${c.score}/${c.total}${c.src === "logged" ? " · logged" : ""}`, doc: c });
     }
-    for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : "not corrected", doc: w }); }
+    for (const w of list("writing")) { const W = T.WRITING[w.task]; out.push({ kind: "writing", id: w.id, ts: w.ts || 0, date: w.date, title: `${W ? W.name : "Écrit"} · ${clip(w.prompt, 80)}`, result: w.fb && w.fb.score20 != null ? `${w.fb.score20}/20 · ${w.fb.level}` : writingReviewStatus(w), doc: w }); }
     return out.sort((a, b) => b.ts - a.ts);
   }
   function drillReview(d) {
@@ -7493,7 +7618,8 @@
     const label = H_FILTERS.find(([k]) => k === skill)?.[1] || SECTION[x.kind];
     const score = x.kind === "eemock" ? d.score : x.kind === "writing" ? d.fb?.score20 : x.kind === "exam" ? d.est : null;
     const waiting = ["writing", "eemock"].includes(x.kind) && score == null;
-    const summary = waiting ? "À corriger" : score != null ? `${x.kind === "exam" ? "≈ " : ""}${score}${x.kind === "exam" ? " / 699" : " / 20"}` : x.result;
+    const reviewed = x.kind === "writing" ? arr(d.aiReviews).length : x.kind === "eemock" && Object.values(d.tasks).some(w => arr(w.aiReviews).length);
+    const summary = waiting ? reviewed ? "Avis enregistré · note en attente" : "À corriger" : score != null ? `${x.kind === "exam" ? "≈ " : ""}${score}${x.kind === "exam" ? " / 699" : " / 20"}` : x.result;
     const detail = x.kind === "eemock" ? `3 tâches · ${d.min || 0} min` : x.kind === "writing" ? `${d.words || 0} mots` : x.kind === "exam" ? [`${d.score}/${d.total}`, mins(d.secs)].filter(Boolean).join(" · ") : mins(d.secs);
     const available = x.kind === "comp" ? d.src !== "logged" && (samplesFor(d.skill).some(s => s.id === d.setId) || d.snap)
       : x.kind === "exam" ? XSPEC[skillOf(d)].bank().some(e => e.id === d.setId) || d.snap : true;
@@ -7502,7 +7628,7 @@
       <div class="result-symbol" aria-hidden="true">${ico(icon)}</div>
       <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span><time datetime="${esc(x.date)}">${shortDate(x.date)}</time></div>
         <h3>${esc(x.title)}</h3>${x.kind === "exam" && retakes.has(x.id) ? `<p class="small muted">Nouvelle tentative · hors estimation NCLC</p>` : ""}${detail ? `<p class="small muted">${esc(detail)}</p>` : ""}
-        ${x.kind === "eemock" ? `<div class="result-tasks">${EE_TASKS.map((t, i) => `<span>${esc(T.WRITING[t].name)} <b>${!d.tasks[t] ? "Non rendue" : d.scores[i] == null ? "À corriger" : d.scores[i] + "/20"}</b></span>`).join("")}</div>` : ""}
+        ${x.kind === "eemock" ? `<div class="result-tasks">${EE_TASKS.map((t, i) => `<span>${esc(T.WRITING[t].name)} <b>${!d.tasks[t] ? "Non rendue" : d.scores[i] == null ? arr(d.tasks[t].aiReviews).length ? "Avis enregistré" : "À corriger" : d.scores[i] + "/20"}</b></span>`).join("")}</div>` : ""}
       </div>
       <div class="result-outcome"><strong class="${waiting ? "result-pending" : ""}">${esc(summary)}</strong>${score != null && exam ? nclcTag(score, x.kind === "eemock" ? "ee" : skill) : ""}
         ${available ? `<button class="btn sm" data-act="h-review" data-id="${esc(x.id)}" aria-label="${esc((expanded ? "Fermer : " : "Voir le résultat : ") + x.title + " · " + shortDate(x.date))}"${["writing", "drill", "prod"].includes(x.kind) ? ` aria-expanded="${expanded}" aria-controls="detail-${esc(x.id)}"` : ""}>${expanded ? "Fermer" : "Voir le résultat"}</button>` : `<span class="small muted">${d.src === "logged" ? "Score ajouté manuellement" : "Énoncé indisponible"}</span>`}
@@ -7602,7 +7728,7 @@
         const errs = fb && Array.isArray(fb.errors) ? fb.errors.length : null;
         return {
           id: w.id, date: w.date, ts: w.ts, v: sc, show: String(sc),
-          pill: sc != null ? `<span class="pill ${sc >= 10 ? "ok" : ""}">${sc}/20 · ${esc(fb.level)}</span>` : `<span class="pill">${fb && fb.level ? esc(fb.level) : "not corrected"}</span>`,
+          pill: sc != null ? `<span class="pill ${sc >= 10 ? "ok" : ""}">${sc}/20 · ${esc(fb.level)}</span>` : `<span class="pill">${fb && fb.level ? esc(fb.level) : writingReviewStatus(w)}</span>`,
           meta: `<span class="small muted">${w.words} words${errs != null ? ` · ${errs} mistake${errs === 1 ? "" : "s"}` : ""}</span>`,
           sub: typo(clip(w.prompt, 90)),
           tags: n > 1 ? `<span class="pill info">same prompt · try ${n}</span>` : "",
@@ -7681,7 +7807,7 @@
   }
   function reportView(head, tabs) {
     const parts = [
-      ["Écrit", "Claude's score out of 20 on each corrected task, across prompts. 10/20 is NCLC 7.", repWriting()],
+      ["Écrit", "Your saved writing grades out of 20, across prompts. 10/20 is NCLC 7.", repWriting()],
       ["Compréhension", "Your score on each listening and reading set. Sets differ in difficulty, so read the trend over several sets.", repComp()],
       ["Grammaire", "Your score on each drill round. Every round draws different questions from its set.", repDrills()],
     ].filter(([, , gs]) => gs.length);
@@ -7781,7 +7907,7 @@
     // Writing: Claude's corrections, oldest first, with mistakes per 100 words.
     D.writes = list("writing").filter((w) => w.fb).sort((a, b) => (a.ts || 0) - (b.ts || 0)).map((w) => {
       const n = arr(w.fb.errors).length, sc = w.fb.score20;
-      return { w, n, rate: w.words ? (n / w.words) * 100 : null, score: sc != null && sc !== "" && !isNaN(sc) ? Number(sc) : null };
+      return { w, n, rate: w.words && Array.isArray(w.fb.errors) ? (n / w.words) * 100 : null, score: sc != null && sc !== "" && !isNaN(sc) ? Number(sc) : null };
     });
     D.rates = D.writes.filter((x) => x.rate != null);
     D.scores = D.writes.filter((x) => x.score != null);
@@ -7824,7 +7950,7 @@
       // Practice exams, and scores you logged (a practice exam's own copy in the log isn't counted twice).
       let hist = compAttempts(k).filter((a) => a.kind === "exam" && a.est && !R.has(a.id)).map((a) => ({ v: Number(a.est), date: a.date, ts: a.ts || 0, src: "Examen blanc (site estimate)" }))
         .concat(list("mocks").filter((m) => m[k] != null && m[k] !== "" && !isNaN(m[k]) && !m.compId).map((m) => ({ v: Number(m[k]), date: m.date, ts: m.ts || 0, src: m.label || "Logged score" })));
-      const fromClaude = k === "ee" ? D.scores.map((x) => ({ v: x.score, date: x.w.date, ts: x.w.ts || 0, src: `${taskName(x.w)}, Claude's estimate`, claude: true })) : [];
+      const fromClaude = k === "ee" ? D.scores.map((x) => ({ v: x.score, date: x.w.date, ts: x.w.ts || 0, src: `${taskName(x.w)}, ${x.w.fb.reviewId ? "grade from AI review" : "Claude’s estimate"}`, claude: true })) : [];
       hist = hist.concat(fromClaude).sort((a, b) => str(a.date).localeCompare(str(b.date)) || a.ts - b.ts);
       hist.forEach((h) => all.push({ d: str(h.date), ts: h.ts, row: [name, shortDate(h.date), h.src, scoreText(k, h.v), `NCLC ${nclcLabel(nclcOf(k, h.v))}`] }));
       // Retakes are listed in the numbers, but kept off the charts and out of the estimate.
@@ -7834,7 +7960,7 @@
       let est = null, note = "", ghosts = hist;
       if (last3.length && !(lastLogged && str(lastLogged.date) >= str(last3[last3.length - 1].date))) {
         est = last3.reduce((a, x) => a + x.v, 0) / last3.length;
-        note = `Average of Claude's last ${last3.length} score${last3.length > 1 ? "s" : ""}`;
+        note = `Average of your last ${last3.length} writing grade${last3.length > 1 ? "s" : ""}`;
       } else if (hist.length) {
         const h = hist[hist.length - 1];
         est = h.v;
@@ -8031,12 +8157,12 @@
   function eePlot(D, h) {
     const pts = D.scores, n = pts.length, lastP = pts[n - 1];
     return n ? CH.plot({
-      key: "ee-scores", h, yMin: 0, yMax: 20, ticks: [5, 10, 15, 20], label: "Claude's score out of 20 for each corrected text",
+      key: "ee-scores", h, yMin: 0, yMax: 20, ticks: [5, 10, 15, 20], label: "Your saved grade out of 20 for each text",
       bands: [{ from: 7, to: 10, label: "NCLC 6" }, { from: 10, to: 12, label: "NCLC 7", cls: "target" }],
       series: [{ label: "Score /20", color: "var(--c-ee)", line: true, points: pts.map((x, i) => ({ x: n > 1 ? i / (n - 1) : 0.5, y: x.score, tip: `${x.score}/20${x.w.fb.level ? " · " + x.w.fb.level : ""}\n${taskName(x.w)} · ${shortDate(x.w.date)} · ${x.w.words} words` })) }],
       end: { x: n > 1 ? 1 : 0.5, y: lastP.score, label: `${lastP.score}/20` },
       xs: n > 1 ? [{ x: 0, label: shortDate(pts[0].w.date) }, { x: 1, label: shortDate(lastP.w.date) }] : [],
-    }) : hint("Correct a writing task with Claude and its score shows here.");
+    }) : hint("Save a grade with your writing to see it here");
   }
   function writingMore(D) {
     const pts = D.scores, n = pts.length, last3 = pts.slice(-3), avg = last3.length ? last3.reduce((a, x) => a + x.score, 0) / last3.length : null;
@@ -8282,8 +8408,8 @@
         more: () => dashComp(),
       },
       writing: {
-        icon: "writing", title: "Écrit", en: "Claude's scores",
-        face: (() => { const l3 = D.scores.slice(-3), avg = l3.length ? l3.reduce((a, x) => a + x.score, 0) / l3.length : null; return (avg == null ? tileHero("—", "Once Claude corrects a text") : tileHero(`${CH.fr(avg, 1)}<small>/20</small>`, `the average of your last ${l3.length > 1 ? l3.length + " scores" : "score"} · NCLC ${nclcLabel(nclcOf("ee", avg))} · 10/20 is NCLC 7`)) + eePlot(D, 124); })(),
+        icon: "writing", title: "Écrit", en: "your writing grades",
+        face: (() => { const l3 = D.scores.slice(-3), avg = l3.length ? l3.reduce((a, x) => a + x.score, 0) / l3.length : null; return (avg == null ? tileHero("—", "Save a grade with your writing to see it here") : tileHero(`${CH.fr(avg, 1)}<small>/20</small>`, `the average of your last ${l3.length > 1 ? l3.length + " scores" : "score"} · NCLC ${nclcLabel(nclcOf("ee", avg))} · 10/20 is NCLC 7`)) + eePlot(D, 124); })(),
         more: () => writingMore(D),
       },
       stamps: { icon: "stamp", title: "Tampons", en: "stamps", face: stampsFace(stamps), more: () => stampsMore(stamps) },
@@ -8791,6 +8917,8 @@
     "w-copy": writingCopy,
     "w-copy-close": () => { ui.w.copyOut = null; render(true); },
     "w-save": writingSave,
+    "w-review-open": writingReviewOpen,
+    "w-review-cancel": () => { if (!ui.wReview?.saving) { ui.wReview = null; render(true); } },
     "w-clear": () => { const t = ui.w.task; ipDrop("writing--" + t); ui.w.text[t] = ""; ui.w.checks[t] = {}; ui.confirm = ""; render(true); },
     "w-open": (el) => { ui.w.viewing = el.dataset.id; render(true); const fe = document.getElementById("w-fb"); if (fe) fe.scrollIntoView({ block: "start", behavior: "smooth" }); },
     "w-close": () => { ui.w.viewing = null; render(true); },
@@ -8964,6 +9092,8 @@
     },
   };
   const INPUTS = {
+    "w-review": el => { if (ui.wReview && !ui.wReview.started) ui.wReview[el.dataset.k] = el.value; },
+    "w-review-score": el => { if (ui.wReview && !ui.wReview.started) ui.wReview.scores[el.dataset.id] = el.value; },
     "h-query": (el) => { ui.hist.query = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "card-draft": updateCardDraft,
     "c-seek": (el) => coSeek(Number(el.value) || 0),
@@ -9011,6 +9141,7 @@
   // "toggle", which also fires for folds a redraw draws open.
   document.addEventListener("click", (e) => { const s = e.target.closest && e.target.closest("summary"), d = s && s.parentElement; if (d && d.dataset && d.dataset.fold) FOLD[d.dataset.fold] = !d.open; }, true);
   document.addEventListener("submit", (e) => {
+    if (e.target.id === "ai-review-form") { e.preventDefault(); writingReviewSave(); return; }
     if (e.target.id !== "card-maker-form") return;
     e.preventDefault();
     saveCardDraft(e.target);
