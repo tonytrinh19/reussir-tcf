@@ -4,7 +4,7 @@
 //    and no example sentence appears twice across the decks. Every key in examples.js names a real card, so a
 //    card whose French side was reworded doesn't silently lose its examples.
 //  - No French side is on two cards (give or take capitals, brackets and the final stop): one copy of each word
-//    across all decks. No two cards of a deck share an id (app.js makes it from the French side), so a card's
+//    across all decks. No two cards share an id (explicit, or made from the deck and French side), so a card's
 //    progress and the links to it (the expression of the day's) find the right one.
 //  - Every expression (EXPRESSIONS, the expression of the day and the Expressions deck) has its French and its
 //    meaning, and a register, if it has one, of Québec, familier or soutenu.
@@ -49,17 +49,57 @@ console.log(`Examples: ${lines} on ${cards} cards (${(lines / cards).toFixed(1)}
 const slug = (s) => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) || "x";
 const sameFr = (s) => String(s).normalize("NFC").toLowerCase().replace(/[’]/g, "'").replace(/\(.*?\)/g, "").replace(/[.!?…\s]+$/, "").replace(/\s+/g, " ").trim();
 const frSeen = new Map();
+const cardIds = new Map();
 for (const th of T.VOCAB) {
-  const ids = new Map();
   for (const c of th.cards) {
     const k = sameFr(c[0]);
     if (frSeen.has(k)) fail(`${th.id}: "${c[0]}" is also a card in ${frSeen.get(k)}`);
     else frSeen.set(k, `${th.id} ("${c[0]}")`);
-    const id = slug(c[0]);
-    if (ids.has(id)) fail(`${th.id}: "${c[0]}" and "${ids.get(id)}" would get the same card id (${th.id}--${id})`);
-    else ids.set(id, c[0]);
+    const meta = c[4] || {};
+    const id = meta.id || th.id + "--" + slug(c[0]);
+    if (meta.id != null && (typeof meta.id !== "string" || !/^[a-z0-9-]+$/.test(meta.id))) fail(`${th.id}: "${c[0]}" has an invalid explicit card id`);
+    if (cardIds.has(id)) fail(`${th.id}: "${c[0]}" and "${cardIds.get(id)}" would get the same card id (${id})`);
+    else cardIds.set(id, c[0]);
   }
 }
+
+// Exercise the application's actual deck assembly: publishing local cards must not duplicate them,
+// replace their edits, reset their due dates, or change any existing generated ID.
+const fs = require("node:fs"), vm = require("node:vm"), assert = require("node:assert/strict");
+const app = fs.readFileSync(path.join(site, "app.js"), "utf8");
+const model = app.slice(app.indexOf("  const DECK = new Map();"), app.indexOf("  // The review schedule is FSRS"));
+const promoted = T.VOCAB.flatMap((th) => th.cards.filter((c) => c[4]?.id).map((c) => ({ th, c, id: c[4].id })));
+for (const [id, fr] of [
+  ["c-20261118-rien-de-moins", "rien de moins (que)"],
+  ["c-20261118-incontournable", "incontournable"],
+  ["c-20261118-le-tournage", "le tournage"],
+  ["c-20261118-servir-de-a", "servir / servir de / servir à"],
+]) assert.equal(promoted.find((p) => p.id === id)?.c[0], fr, "Published cards must keep their saved local IDs");
+const S = { cards: new Map(), srs: new Map() };
+for (const { th, c, id } of promoted) {
+  S.cards.set(id, Object.freeze({ fr: c[0], en: "My edited meaning", ex: "My saved example", theme: th.id }));
+  S.srs.set(id, Object.freeze({ due: "2026-11-17", stage: 3, reps: 7 }));
+}
+const stored = JSON.stringify([Array.from(S.cards), Array.from(S.srs)]);
+const context = { T, S, slug, str: (v) => String(v || ""), todayStr: () => "2026-11-18" };
+vm.createContext(context);
+vm.runInContext(model + "\nthis.deckTest = { DECK, allCards, dueIds, isNew };", context);
+const { DECK, allCards, dueIds, isNew } = context.deckTest;
+const merged = allCards();
+assert.equal(merged.size, cards, "Local overrides must not add duplicate cards");
+for (const th of T.VOCAB) for (const c of th.cards) assert.equal(DECK.get(c[4]?.id || th.id + "--" + slug(c[0])).fr, c[0]);
+for (const { c, id } of promoted) {
+  assert.equal(Array.from(merged.values()).filter((v) => v.fr === c[0]).length, 1);
+  assert.equal(merged.get(id).en, "My edited meaning");
+  assert.equal(merged.get(id).ex, "My saved example");
+  assert.equal(isNew(merged.get(id)), false, "A reviewed card must not become new");
+  assert.equal(DECK.get(id).ex, c[2], "A fresh installation must include the examples");
+  assert.equal(DECK.get(id).enNote, c[4].enNote);
+}
+assert.deepEqual(Array.from(dueIds()).sort(), promoted.map((c) => c.id).sort());
+assert.equal(JSON.stringify([Array.from(S.cards), Array.from(S.srs)]), stored);
+console.log("Card IDs: source cards, local overrides, unique entries, existing IDs and review schedules preserved.");
+
 const REGS = ["Québec", "familier", "soutenu"];
 for (const x of T.EXPRESSIONS || []) {
   if (!x || !String(x.fr || "").trim() || !String(x.en || "").trim()) { fail(`EXPRESSIONS: an entry without its French or its meaning: ${JSON.stringify(x)}`); continue; }

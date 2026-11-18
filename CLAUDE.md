@@ -1,5 +1,10 @@
 # Réussir le TCF: project notes
 
+## Working agreement
+- Keep requested code and learning-content additions in the repository, including new vocabulary cards. After validation, stage, commit and push the changes, then open a PR to `main`, unless the user asks otherwise. Saving content only in the local database does not finish the request.
+- Every new vocabulary card needs at least two French–English examples, one `French — English` pair per line, matching the existing deck format.
+- When adding a previously saved local card to the source deck, retain its card ID so local edits and review history still refer to the same card. Keep the SQLite progress database and unrelated personal records out of Git.
+
 ## The exam is TCF Canada
 - Everything here targets the **TCF Canada** from France Éducation International (FEI), the version IRCC accepts for Express Entry and citizenship. It is not the TCF tout public, the DELF/DALF or the TEF Canada.
 - All guidelines, grading rubrics, Claude prompts and generated exercises must follow TCF Canada. The single source of truth is `TCF_CANADA` in `site/data.js`. `site/app.js` builds `EXAM_BRIEF`, `EE_RUBRIC` and `EO_RUBRIC` from it and includes them in every Claude request.
