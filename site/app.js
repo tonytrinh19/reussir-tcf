@@ -156,11 +156,11 @@
       toast(e && e.code === "quota_exceeded" ? "Storage is full. Delete old entries to keep saving." : "Couldn't save that change. Check your connection and try again.");
     });
   }
-  function put(coll, id, data) {
+  function put(coll, id, data, redraw = true) {
     if (importing) return Promise.resolve();
     S[coll].set(id, data);
     dataRev++;
-    scheduleRender();
+    if (redraw) scheduleRender();
     const op = ["set", coll, id, data];
     if (backend.kind === "loading") { pendingOps.push(op); return Promise.resolve(); }
     return run(op);
@@ -235,7 +235,10 @@
       db.collection(c).onSnapshot((snap) => {
         const m = new Map();
         snap.docs.forEach((d) => { if (d.exists) m.set(d.id, d.data()); });
+        // A visibility preference (including our own save's echo) needs no page rebuild.
+        const answersOnly = c === "settings" && loaded && arrived.has(c) && answerSettingsOnly(S[c], m);
         S[c] = m;
+        if (answersOnly) { paintAnswerVisibility(); return; }
         dataRev++;
         if (!arrived.has(c)) { arrived.add(c); if (arrived.size >= COLLS.length) allIn = true; }
         if (!loaded && ++first >= COLLS.length) loaded = true;
@@ -303,9 +306,9 @@
     out.criteria = Object.assign({}, s.criteria || {});
     return out;
   }
-  function saveSettings(patch) {
+  function saveSettings(patch, redraw = true) {
     const cur = clone(S.settings.get("main") || {});
-    put("settings", "main", Object.assign(cur, patch));
+    return put("settings", "main", Object.assign(cur, patch), redraw);
   }
   function weekNo() {
     const s = settings();
@@ -3934,11 +3937,65 @@
   // explanations wait. Shown ones are kept by set or exam id (settings.main.ansShown) until the next check. Before
   // your progress has loaded, they stay hidden too.
   const ansHidden = (id) => !loaded || !(id && (settings().ansShown || {})[id]);
+  function answerSettingsOnly(before, after) {
+    if (before.size !== after.size) return false;
+    for (const [id, value] of before) {
+      if (!after.has(id)) return false;
+      const a = Object.assign({}, value), b = Object.assign({}, after.get(id));
+      if (id === "main") { delete a.ansShown; delete b.ansShown; }
+      if (JSON.stringify(a) !== JSON.stringify(b)) return false;
+    }
+    return true;
+  }
   function ansHide(id, hide) {
     if (!id || !loaded || !(settings().ansShown || {})[id] === !!hide) return;
     const m = Object.assign({}, settings().ansShown || {});
     if (hide) delete m[id]; else m[id] = true;
-    saveSettings({ ansShown: m });
+    saveSettings({ ansShown: m }, false);
+  }
+  // Corrections are mounted once. Toggling them must keep disclosures, media, selection and focus intact.
+  const answerDetail = (hid) => `data-answer-detail${hid ? " hidden" : ""}`;
+  const answerConcealed = (hid) => `data-answer-concealed${hid ? "" : " hidden"}`;
+  const answerOption = (state, concealed, hid) => `class="opt ${hid ? concealed : state}" data-answer-state="${state}" data-answer-concealed-class="${concealed}"`;
+  const answerButton = (prefix, hid, skill = "") => `<button class="btn ${hid ? "primary" : "ghost"}${prefix === "x" ? " sm" : ""}" data-answer-toggle="${prefix}" data-act="${prefix}-${hid ? "show" : "hide"}"${skill ? ` data-skill="${skill}"` : ""} aria-pressed="${!hid}"><span ${answerConcealed(hid)}>Show the answers</span><span ${answerDetail(hid)}>Hide the answers</span></button>`;
+  function paintAnswerVisibility() {
+    viewEl.querySelectorAll("[data-answer-review]").forEach((root) => {
+      const hid = ansHidden(root.dataset.answerReview);
+      root.querySelectorAll("[data-answer-detail]").forEach((el) => { el.hidden = hid; });
+      root.querySelectorAll("[data-answer-concealed]").forEach((el) => { el.hidden = !hid; });
+      root.querySelectorAll("[data-answer-state]").forEach((el) => {
+        const state = hid ? el.dataset.answerConcealedClass : el.dataset.answerState;
+        for (const name of ["ok", "bad", "picked"]) el.classList.toggle(name, state === name);
+      });
+      root.querySelectorAll("[data-answer-toggle]").forEach((el) => {
+        el.dataset.act = `${el.dataset.answerToggle}-${hid ? "show" : "hide"}`;
+        el.classList.toggle("primary", hid);
+        el.classList.toggle("ghost", !hid);
+        el.setAttribute("aria-pressed", String(!hid));
+      });
+      root.querySelectorAll("[data-answer-picture]").forEach((el) => {
+        const pic = el.querySelector("img, svg"), label = hid ? "" : el.dataset.answerPicture;
+        if (!pic) return;
+        if (pic.tagName === "IMG") { if (pic.alt !== label) pic.alt = label; }
+        else if (label) { pic.removeAttribute("aria-hidden"); pic.setAttribute("role", "img"); pic.setAttribute("aria-label", label); }
+        else { pic.setAttribute("aria-hidden", "true"); pic.removeAttribute("role"); pic.removeAttribute("aria-label"); }
+      });
+    });
+    tabSoon();
+  }
+  function paintCompTranscript() {
+    const el = viewEl.querySelector("[data-comp-transcript]"), btn = document.getElementById("c-script");
+    if (el) el.hidden = !ui.c.script && el.dataset.compTranscript !== "required";
+    if (btn) {
+      btn.setAttribute("aria-expanded", String(!!ui.c.script));
+      btn.textContent = `${ui.c.script ? "Hide" : "Show"} the transcript`;
+    }
+    tabSoon();
+  }
+  function examAnsToggle(show) {
+    if (!ui.cx?.done) return;
+    ansHide(ui.cx.exam.id, !show);
+    paintAnswerVisibility();
   }
   function compSubmit(skill) {
     const set = ui.c.set[skill];
@@ -3978,7 +4035,8 @@
     if (!set || !ui.c.submitted[skill]) return;
     ansHide(set.id, !show);
     if (skill === "co") ui.c.script = show;
-    render(true);
+    paintAnswerVisibility();
+    if (skill === "co") paintCompTranscript();
   }
   function compGap(skill, i, kind) {
     const id = ui.c.saved[skill];
@@ -4516,10 +4574,10 @@
       <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
   }
   // An item's mark in the results: ✓, ✗ or blank. While the answers are hidden only the misses are marked.
-  const xMark = (ok, a, hid) => (ok ? (hid ? "" : ` · <span class="ok-t">✓</span>`) : ` · <span class="miss">${a == null ? "blank" : "✗"}</span>`);
+  const xMark = (ok, a, hid) => (ok ? `<span ${answerDetail(hid)}> · <span class="ok-t">✓</span></span>` : ` · <span class="miss">${a == null ? "blank" : "✗"}</span>`);
   // An item's options in the results: the right one and yours, or while the answers are hidden only yours, in the
   // blue of a selected option.
-  const xOpt = (k, it, a, hid, label) => `<div class="opt ${hid ? (k === a ? "picked" : "") : k === it.answer ? "ok" : k === a ? "bad" : ""}"><span>${label}</span></div>`;
+  const xOpt = (k, it, a, hid, label) => `<div ${answerOption(k === it.answer ? "ok" : k === a ? "bad" : "", k === a ? "picked" : "", hid)}><span>${label}</span></div>`;
   // One item in the results: the drawing or the situation, the transcript, the options with the right one and
   // yours, why, and the recording to play again. While the answers are hidden: the drawing (without the
   // description, which would give the answer away), the question, your pick and the recording.
@@ -4531,12 +4589,12 @@
     const multi = new Set(said.map((l) => l.speaker)).size > 1;
     const title = it.kind === "pic" ? "Image" : it.kind === "reply" ? "Question et réponses" : esc(it.type || "Document");
     return `<details class="fold" id="co-review-${j}"><summary>${j + 1} · ${esc(it.level)}${xMark(ok, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px">
-      ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, hid ? "" : it.alt)}</figure>${hid ? "" : `<p class="small muted fr">${typo(it.alt)}</p>`}` : ""}
+      ${it.kind === "pic" ? `<figure class="pic-card seyes" data-answer-picture="${esc(it.alt)}">${coxPicture(it, hid ? "" : it.alt)}</figure><p class="small muted fr" ${answerDetail(hid)}>${typo(it.alt)}</p>` : ""}
       ${it.situation ? `<p class="small muted fr">${typo(it.situation)}</p>` : ""}
       <details class="fold"><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
       ${it.kind === "doc" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
       <div class="opts">${opts}</div>
-      ${it.why && !hid ? `<p class="small">${typo(it.why)}</p>` : ""}
+      ${it.why ? `<p class="small" ${answerDetail(hid)}>${typo(it.why)}</p>` : ""}
       ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
     </div></details>`;
   }
@@ -4645,7 +4703,7 @@
         const a = cx.ans[j];
         if (skill === "co") return coxReviewItem(it, j, a, xhid);
         const opts = it.order.map((k) => xOpt(k, it, a, xhid, readingOption(cx.exam, it, k))).join("");
-        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, xhid)} · ${typo(it.title || it.type || it.q)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why && !xhid ? `<p class="small">${typo(it.why)}</p>` : ""}</div></details>`;
+        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, xhid)} · ${typo(it.title || it.type || it.q)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small" ${answerDetail(xhid)}>${typo(it.why)}</p>` : ""}</div></details>`;
       }).join("");
       // What to do next, right from the results: the built-in exams not done yet, a retake, a new one from Claude, or the list.
       const doneIds = new Set(compAttempts(skill).filter((a) => a.kind === "exam").map((a) => a.setId));
@@ -4665,8 +4723,9 @@
           <div class="row">${next}</div>
           ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
-        <section class="sec"><div class="sec-head"><h2 class="h2">Every question</h2>${xhid ? `<button class="btn primary sm" data-act="x-show">Show the answers</button>` : `<button class="btn ghost sm" data-act="x-hide">Hide the answers</button>`}</div>
-          <p class="small muted">${xhid ? `In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.` : pdf ? "Open a question to compare your answer with the reference key from the paper." : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
+        <section class="sec" data-answer-review="${esc(cx.exam.id)}"><div class="sec-head"><h2 class="h2">Every question</h2>${answerButton("x", xhid)}</div>
+          <p class="small muted" ${answerConcealed(xhid)}>In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.</p>
+          <p class="small muted" ${answerDetail(xhid)}>${pdf ? "Open a question to compare your answer with the reference key from the paper." : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
           ${skill === "co" ? `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((it, j) => `<button data-act="x-review-jump" data-i="${j}" aria-label="Question ${j + 1}">${j + 1}</button>`).join("")}</nav>` : ""}
           <div class="stack tight">${review}</div></section>`;
     }
@@ -7324,7 +7383,7 @@
           <p class="small muted">${recorded ? "Recorded for this set with natural neural voices." : va ? `Voice: ${esc(va.name)} (${voiceTag(va)}), your browser's best French voice.` : "Voice: the browser's default."}</p>
           ${weak ? `<p class="notice small">This browser only offers basic French voices, so the audio can sound robotic. For more natural voices, open this page in Microsoft Edge (its French “Natural” voices) or Chrome (“Google français”). On a Mac you can also add an Enhanced or Premium French voice: System Settings → Accessibility → Spoken Content → System voice → Manage voices. For real recordings, use the official practice below.</p>` : ""}`
           : `<p class="notice warn small">This browser can't read text aloud. Use the transcript as a reading exercise, and the official recordings below.</p>`}
-        ${ui.c.script || !canPlay ? `<article class="sheet"><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>` : ""}`;
+        <article class="sheet" data-comp-transcript="${canPlay ? "optional" : "required"}"${ui.c.script || !canPlay ? "" : " hidden"}><p class="eyebrow">Transcription</p><div class="transcript">${set.lines.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("")}</div></article>`;
       }
       const fallback = set && set.fallback ? `<p class="notice small">There's no built-in ${esc(lvl)} set on ${esc(themeLabel(th))} yet${claudeOn() ? ", and Claude couldn't write one just now" : ""}, so here's another set.</p>` : "";
       const rv = ui.c.review[skill];
@@ -7347,15 +7406,15 @@
       const qs = !set ? "" : `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
         return `<li${miss ? ` class="q-miss"` : ""}${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}${miss ? ` <span class="q-mark"><span aria-hidden="true">✗</span> raté</span>` : ""}</p><div class="opts">${q.order.map((k) => {
-          const st = submitted && !hid ? (k === q.answer ? "ok" : ans[i] === k ? "bad" : "") : "";
-          return `<label class="opt ${st}"><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
+          const st = k === q.answer ? "ok" : ans[i] === k ? "bad" : "";
+          return `<label ${submitted ? answerOption(st, "", hid) : 'class="opt"'}><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
         }).join("")}</div>
-        ${submitted && !hid && q.why ? `<p class="small">${typo(q.why)}</p>` : ""}
-        ${miss && !hid ? `<div class="row"><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
+        ${submitted && q.why ? `<p class="small" ${answerDetail(hid)}>${typo(q.why)}</p>` : ""}
+        ${miss ? `<div class="row" ${answerDetail(hid)}><span class="small muted">This miss was a…</span><div class="seg">${[["vocab", "Vocabulary gap"], ["comp", "Comprehension gap"]].map(([k, l]) => `<button data-act="c-gap" data-i="${i}" data-k="${k}" aria-pressed="${gaps[i] === k}">${l}</button>`).join("")}</div></div>` : ""}
         </li>`;
       }).join("")}</ol>
-        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${hid ? `<button class="btn primary" data-act="c-show" data-skill="${skill}">Show the answers</button>` : `<button class="btn ghost" data-act="c-hide" data-skill="${skill}">Hide the answers</button>`}${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>
-        ${hid ? `<p class="small muted">The right answers stay hidden until you show them, so you can think again about the ones you missed.</p>` : ""}
+        <div class="row">${submitted ? `${scoreBig}<button class="btn" data-act="c-reset" data-skill="${skill}">Try this set again</button>${answerButton("c", hid, skill)}${trend}` : `<button class="btn primary" data-act="c-submit" data-skill="${skill}">Check my answers</button>`}</div>
+        ${submitted ? `<p class="small muted" ${answerConcealed(hid)}>The right answers stay hidden until you show them, so you can think again about the ones you missed.</p>` : ""}
         ${submitted ? greet(...remyScore(skill, score, nq2, { key: `${set.id}-${ui.c.saved[skill] || ""}`, inClock: savedDoc && savedDoc.timed && savedDoc.clock ? savedDoc.secs <= savedDoc.clock : null }), "sm") : ""}`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       const inProgress = set && !submitted && Object.keys(ans || {}).length > 0;
@@ -7366,7 +7425,7 @@
           ${practiceNav(skill, "exercise")}
           ${controls}
         </div>
-        <div class="stack comp-practice">${submitted ? resultReturn() : ""}${reviewNote}${fallback}${material}${timerRow}${qs}</div>
+        <div class="stack comp-practice"${submitted && set ? ` data-answer-review="${esc(set.id)}"` : ""}>${submitted ? resultReturn() : ""}${reviewNote}${fallback}${material}${timerRow}${qs}</div>
         ${inProgress ? "" : examCta(skill)}
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
@@ -9007,7 +9066,7 @@
     "c-resume": coResume,
     "c-stop": () => { stopAudio(); render(true); },
     "c-skip": (el) => { if (audioEl) { coSeek((audioEl.currentTime || 0) + Number(el.dataset.d)); coSeekDone(); } },
-    "c-script": () => { ui.c.script = !ui.c.script; render(true); },
+    "c-script": () => { ui.c.script = !ui.c.script; paintCompTranscript(); },
     "c-gap": (el) => compGap(ui.c.skill, el.dataset.i, el.dataset.k),
     "c-log": (el) => {
       const sc = Number(ui.form["cl-score"]), tot = Number(ui.form["cl-total"]);
@@ -9054,8 +9113,8 @@
     },
     "x-review": (el) => examReview(el.dataset.id),
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
-    "x-hide": () => { const cx = ui.cx; if (cx && cx.done) { ansHide(cx.exam.id, true); render(true); } },
-    "x-show": () => { const cx = ui.cx; if (cx && cx.done) { ansHide(cx.exam.id, false); render(true); } },
+    "x-hide": () => examAnsToggle(false),
+    "x-show": () => examAnsToggle(true),
     // The same exam again, from its results: a built-in one from the bank, one of Claude's from the copy on screen.
     "x-retake": () => { const cx = ui.cx; if (!cx) return; const sk = skillOf(cx); examStart(XSPEC[sk].bank().find((e) => e.id === cx.exam.id) || cx.exam, sk); },
     "cox-pause": () => { tone("pause"); coxPause(); },
