@@ -2390,10 +2390,12 @@
   const IV = [1, 2, 4, 7, 14, 30];
   const DECK = new Map();
   T.VOCAB.forEach((th) => th.cards.forEach((c) => {
-    const base = th.id + "--" + slug(c[0]);
+    // A card promoted from the local deck keeps its ID, including its overrides and review history.
+    const meta = c[4] || {};
+    const base = meta.id || th.id + "--" + slug(c[0]);
     let id = base, k = 2;
     while (DECK.has(id)) id = base + "-" + k++;
-    DECK.set(id, Object.assign({ id, fr: c[0], en: c[1], ex: c[2] || "", theme: th.id }, c[3] ? { frNote: c[3] } : {}));
+    DECK.set(id, Object.assign({ id, fr: c[0], en: c[1], ex: c[2] || "", theme: th.id }, c[3] ? { frNote: c[3] } : {}, meta.enNote ? { enNote: meta.enNote } : {}));
   }));
   function allCards() {
     const m = new Map(DECK);

@@ -1,9 +1,10 @@
 /* The learner's own Anki deck ("French", french-cards.apkg, exported 25 Sept 2026), cleaned up:
    Anki formatting removed, spelling fixed, two duplicate pairs merged (102 notes → 100 cards).
    The 15 built-in cards it duplicated were removed from their themes in data.js.
-   Card = [fr, en, example?]; several examples are separated by "\n".
+   Card = [fr, en, examples?, frNote?, { id?, enNote? }?]; examples are separated by "\n".
    Anki review progress was copied into the page's database (srs), keyed by these card ids
-   ("anki--" + slug of the French side), so changing a card's French side resets its progress. */
+   ("anki--" + slug of the French side), so changing a card's French side resets its progress.
+   Cards first saved locally use explicit IDs to keep their overrides and review history when added here. */
 (function () {
   "use strict";
   const T = window.TCF;
@@ -108,6 +109,18 @@
     ["rentable (adj)", "profitable"],
     ["entreprendre", "to undertake (a big task); to start doing sth (formal, ≈ commencer à)"],
     ["toutefois", "however, nevertheless"],
+    ["rien de moins (que)", "nothing less; no less than",
+      "Il vise la médaille d'or, rien de moins. — He is aiming for the gold medal, nothing less.\nC'est rien de moins qu'une révolution dans notre façon de travailler. — It is nothing less than a revolution in the way we work.",
+      "", { id: "c-20261118-rien-de-moins", enNote: "Emphatic; do not confuse with « rien moins que »." }],
+    ["incontournable", "essential; unmissable; unavoidable",
+      "La maîtrise du français est incontournable pour ce poste. — A good command of French is essential for this job.\nCe musée est une étape incontournable lors d'une visite à Montréal. — This museum is a must-see on a visit to Montreal.",
+      "", { id: "c-20261118-incontournable" }],
+    ["le tournage", "filming; shooting a film",
+      "Le tournage de ce film commence lundi à Montréal. — Filming for this movie starts on Monday in Montreal.\nPendant le tournage, les acteurs ont dû répéter la même scène plusieurs fois. — During filming, the actors had to repeat the same scene several times.",
+      "", { id: "c-20261118-le-tournage" }],
+    ["servir / servir de / servir à", "to serve; serve as; be used for",
+      "Le serveur nous sert le dîner. — The waiter serves us dinner.\nCette petite pièce sert de bureau. — This small room serves as an office.\nCette application sert à réviser le vocabulaire. — This app is used to review vocabulary.",
+      "", { id: "c-20261118-servir-de-a", enNote: "de + noun: role; à + infinitive: purpose." }],
   ] });
   // It's the learner's own deck, so it's starred in every phase.
   T.PHASES.forEach((p) => p.vocab.unshift("anki"));
