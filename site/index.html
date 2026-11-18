@@ -1518,6 +1518,8 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .paper-running { display: block; margin-bottom: 3px; color: var(--accent); }
 .sheet h3 { font: 600 19px/1.3 var(--f-text); }
 .sheet .fr { font-size: 16.5px; line-height: 1.65; white-space: pre-line; }
+/* Keep corrections mounted so answer toggles leave open questions and audio alone. */
+[data-answer-detail][hidden], [data-answer-concealed][hidden], [data-comp-transcript][hidden] { display: none !important; }
 .qs { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; counter-reset: q; }
 .qs > li { position: relative; display: grid; gap: 8px; counter-increment: q; }
 .qs > li > p.q { font-weight: 700; }
