@@ -127,6 +127,8 @@
     ["décomposer", "to break down into parts; to decompose",
       "Le professeur décompose la phrase pour expliquer sa structure. — The teacher breaks down the sentence to explain its structure.\nNous avons décomposé le projet en trois étapes. — We broke the project down into three stages.\nLes feuilles mortes se décomposent lentement dans le sol. — Dead leaves slowly decompose in the soil.",
       "Décomposer quelque chose en éléments ; se décomposer : pourrir, se dégrader naturellement."],
+    ["faire la vaisselle", "to do the dishes; to wash up",
+      "Après le dîner, je fais la vaisselle pendant que Léa essuie les assiettes. — After dinner, I do the dishes while Léa dries the plates.\nHier, mon frère a fait la vaisselle pour me remercier du repas. — Yesterday, my brother washed the dishes to thank me for the meal."],
   ] });
   // It's the learner's own deck, so it's starred in every phase.
   T.PHASES.forEach((p) => p.vocab.unshift("anki"));

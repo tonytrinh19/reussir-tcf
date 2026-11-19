@@ -3623,6 +3623,15 @@
   ]
  },
  {
+  "id": "03efa1bb94a6",
+  "text": "{0} · Question {1} · Erreur {2} / {3}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+  ]
+ },
+ {
   "id": "cf7f460765c9",
   "text": "{0} · results",
   "kind": "pattern",
@@ -4313,7 +4322,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -4555,7 +4564,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
   ]
  },
  {
@@ -5052,6 +5061,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
+   "… the transcript",
    "… …<button>… the transcript</button> <p>…</p> …"
   ]
  },
@@ -9536,7 +9546,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -10553,6 +10563,15 @@
   "ctx": []
  },
  {
+  "id": "ba0603b43d81",
+  "text": "Aujourd’hui",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h2>Révision terminée</h2><p>Bonnes réponses à la deuxième écoute : … / …</p> …<a>Aujourd’hui</a>"
+  ]
+ },
+ {
   "id": "035242fe15b2",
   "text": "Aujourd'hui · Today",
   "kind": "exact",
@@ -10593,6 +10612,15 @@
   "where": "app",
   "ctx": [
    "Automatic: dark from sunset (…) to sunrise (…).…"
+  ]
+ },
+ {
+  "id": "2f2bd2ee3b58",
+  "text": "Autres examens ({0})",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<summary>Autres examens (…)</summary> …"
   ]
  },
  {
@@ -13865,7 +13893,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …",
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …",
    "… … … …… <span>… · …–… words…</span> <span><button>Another prompt</button>…</span> … <p>…</p> … … <summary>Structure and template</summary> <p>…</p> … <p>…</p> … <button>Insert the skeleton</button> … … … … … … …<button>Copy for another AI</button><button>Past"
   ]
  },
@@ -13900,7 +13928,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
   ]
  },
  {
@@ -16043,6 +16071,24 @@
   ]
  },
  {
+  "id": "2ee92948aada",
+  "text": "Erreur {0} / {1}",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+  ]
+ },
+ {
+  "id": "b3d2cb35a9dc",
+  "text": "Erreur suivante",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Erreur suivante"
+  ]
+ },
+ {
   "id": "11f9578d05e6",
   "text": "error",
   "kind": "exact",
@@ -16493,7 +16539,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
   ]
  },
  {
@@ -18839,8 +18885,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>Hide</button>",
-   "Hide"
+   "Hide",
+   "<button>Hide</button>"
   ]
  },
  {
@@ -18849,7 +18895,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>Hide the answers</button>"
+   "<button><span>Show the answers</span><span>Hide the answers</span></button>"
   ]
  },
  {
@@ -19594,7 +19640,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "In exam order, with the ones you missed marked. Open one to see …. The right answers stay hidden until you show them."
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
   ]
  },
  {
@@ -20560,6 +20606,15 @@
   "ctx": []
  },
  {
+  "id": "13224f44aa51",
+  "text": "La révision n’a pas pu être enregistrée.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "La révision n’a pas pu être enregistrée."
+  ]
+ },
+ {
   "id": "384f4f1fc4b8",
   "text": "La semaine dernière · last week",
   "kind": "exact",
@@ -21424,7 +21479,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …",
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st",
    "…",
    "Date Task Words Level …"
   ]
@@ -22565,7 +22620,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -25536,7 +25591,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
   ]
  },
  {
@@ -27941,7 +27996,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … <h2>Every question</h2>… <p>…</p> … …"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
   ]
  },
  {
@@ -29163,9 +29218,19 @@
   "id": "62fc322b3bd2",
   "text": "Question {0}",
   "kind": "pattern",
-  "where": "attr:aria-label",
+  "where": "app",
   "ctx": [
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …",
    "<button>…</button>"
+  ]
+ },
+ {
+  "id": "396625b8b61e",
+  "text": "Question {0} · Erreur {1} /",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -30819,6 +30884,24 @@
   "kind": "exact",
   "where": "attr:title",
   "ctx": []
+ },
+ {
+  "id": "807d3e13fe5e",
+  "text": "Revoir mes erreurs",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+  ]
+ },
+ {
+  "id": "7a60ff67aee4",
+  "text": "Revoir mes erreurs ({0})",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<button>Revoir mes erreurs (…)</button>"
+  ]
  },
  {
   "id": "26ab6b95ba16",
@@ -32511,8 +32594,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>… starter sheet… hidden · <button>Show …</button></p>",
-   "Show"
+   "Show",
+   "<p>… starter sheet… hidden · <button>Show …</button></p>"
   ]
  },
  {
@@ -32548,7 +32631,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<button>Show the answers</button>"
+   "<button><span>Show the answers</span><span>Hide the answers</span></button>"
   ]
  },
  {
@@ -33514,7 +33597,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
+   "… <p>Examen blanc · Expression écrite · ……</p> … <span>…</span>… <p>… min of the 60 used. …</p> … … … …<button>Copy for another AI</button><button>Start another mock</button><button>All your mocks</button> … … …"
   ]
  },
  {
@@ -37551,6 +37634,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
+   "… the transcript",
    "… …<button>… the transcript</button> <p>…</p> …"
   ]
  },
@@ -39550,8 +39634,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<summary>… · …… · …</summary> … … <summary>Transcription</summary>… … … … … … …",
-   "<p>Transcription</p> …"
+   "<summary>Transcription</summary>… … …",
+   "<p>…</p><h2>…</h2>… <span><i></i><i></i></span> … <p>Transcription</p> …"
   ]
  },
  {
