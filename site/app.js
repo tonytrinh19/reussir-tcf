@@ -3996,6 +3996,7 @@
   }
   function examAnsToggle(show) {
     if (!ui.cx?.done) return;
+    rememberExamReview();
     ansHide(ui.cx.exam.id, !show);
     paintAnswerVisibility();
   }
@@ -4580,25 +4581,51 @@
   // An item's options in the results: the right one and yours, or while the answers are hidden only yours, in the
   // blue of a selected option.
   const xOpt = (k, it, a, hid, label) => `<div ${answerOption(k === it.answer ? "ok" : k === a ? "bad" : "", k === a ? "picked" : "", hid)}><span>${label}</span></div>`;
-  // One item in the results: the drawing or the situation, the transcript, the options with the right one and
-  // yours, why, and the recording to play again. While the answers are hidden: the drawing (without the
-  // description, which would give the answer away), the question, your pick and the recording.
-  function coxReviewItem(it, j, a, hid) {
-    const ok = a === it.answer;
+  // Use the attempt ID so another paper or retake doesn't inherit these open questions. ui.c.open already
+  // lives in the tab's saved state, unlike the temporary FOLD map used for other disclosures.
+  const examReviewKey = (cx) => ["xr", skillOf(cx), cx.exam.id, cx.attemptId || "result"].join(":");
+  const examReviewNode = (cx, j, transcript = false) => [examReviewKey(cx), j, transcript ? "transcript" : "question"].join(":");
+  const examReviewAttr = (key) => `data-node="${esc(key)}"${ui.c.open[key] ? " open" : ""}`;
+  function rememberExamReview() {
+    viewEl.querySelectorAll("[data-exam-question], [data-exam-transcript]").forEach((el) => {
+      ui.c.open[el.dataset.node] = el.open;
+    });
+  }
+  function examReviewBody(cx, j, hid) {
+    const it = cx.exam.items[j], a = cx.ans[j];
+    if (skillOf(cx) !== "co") {
+      const opts = it.order.map((k) => xOpt(k, it, a, hid, readingOption(cx.exam, it, k))).join("");
+      return `<article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small" ${answerDetail(hid)}>${typo(it.why)}</p>` : ""}`;
+    }
     const lettered = it.kind !== "doc";
     const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => xOpt(k, it, a, hid, `${lettered ? `<b>${"ABCD"[k]}.</b>` : typo(it.options[k])}`)).join("");
     const said = it.lines;
     const multi = new Set(said.map((l) => l.speaker)).size > 1;
-    const title = it.kind === "pic" ? "Image" : it.kind === "reply" ? "Question et réponses" : esc(it.type || "Document");
-    return `<details class="fold" id="co-review-${j}"><summary>${j + 1} · ${esc(it.level)}${xMark(ok, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px">
+    return `
       ${it.kind === "pic" ? `<figure class="pic-card seyes" data-answer-picture="${esc(it.alt)}">${coxPicture(it, hid ? "" : it.alt)}</figure><p class="small muted fr" ${answerDetail(hid)}>${typo(it.alt)}</p>` : ""}
       ${it.situation ? `<p class="small muted fr">${typo(it.situation)}</p>` : ""}
-      <details class="fold"><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
+      <details class="fold" data-exam-transcript ${examReviewAttr(examReviewNode(cx, j, true))}><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
       ${it.kind === "doc" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
       <div class="opts">${opts}</div>
       ${it.why ? `<p class="small" ${answerDetail(hid)}>${typo(it.why)}</p>` : ""}
-      ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
-    </div></details>`;
+      ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}`;
+  }
+  function examReviewItem(cx, j, hid) {
+    const it = cx.exam.items[j], a = cx.ans[j], skill = skillOf(cx);
+    const title = skill === "co" ? it.kind === "pic" ? "Image" : it.kind === "reply" ? "Question et réponses" : esc(it.type || "Document") : typo(it.title || it.type || it.q);
+    const key = examReviewNode(cx, j), open = !!ui.c.open[key];
+    // Closed questions need no native audio controls, images or translated transcripts yet.
+    // Create a body on its first opening, then retain its DOM through answer toggles and subsequent openings.
+    return `<details class="fold" id="${skill}-review-${j}" data-exam-question="${j}" ${examReviewAttr(key)}><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, hid)} · ${title}</summary><div class="stack tight" style="margin-top:10px" data-exam-body${open ? " data-ready" : ""}>${open ? examReviewBody(cx, j, hid) : ""}</div></details>`;
+  }
+  function mountExamReviewQuestion(el) {
+    const cx = ui.cx;
+    if (!el?.isConnected || !el.open || !cx?.done || el.closest("[data-exam-review]")?.dataset.examReview !== examReviewKey(cx)) return;
+    const body = el.querySelector("[data-exam-body]"), j = Number(el.dataset.examQuestion);
+    if (!body || body.hasAttribute("data-ready") || !cx.exam.items[j]) return;
+    body.innerHTML = examReviewBody(cx, j, ansHidden(cx.exam.id));
+    body.setAttribute("data-ready", "");
+    paintMarks();
   }
   // Claude writes a fresh exam in six batches, one per level, each checked before it's kept.
   function examPrompt(lvl, n) {
@@ -4701,12 +4728,7 @@
       const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
       // Every question with your answer. The right ones and why wait until you show them (ansHidden).
       const xhid = ansHidden(cx.exam.id);
-      const review = cx.exam.items.map((it, j) => {
-        const a = cx.ans[j];
-        if (skill === "co") return coxReviewItem(it, j, a, xhid);
-        const opts = it.order.map((k) => xOpt(k, it, a, xhid, readingOption(cx.exam, it, k))).join("");
-        return `<details class="fold"><summary>${j + 1} · ${esc(it.level)}${xMark(a === it.answer, a, xhid)} · ${typo(it.title || it.type || it.q)}</summary><div class="stack tight" style="margin-top:10px"><article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small" ${answerDetail(xhid)}>${typo(it.why)}</p>` : ""}</div></details>`;
-      }).join("");
+      const review = cx.exam.items.map((_, j) => examReviewItem(cx, j, xhid)).join("");
       // What to do next, right from the results: the built-in exams not done yet, a retake, a new one from Claude, or the list.
       const doneIds = new Set(compAttempts(skill).filter((a) => a.kind === "exam").map((a) => a.setId));
       const pdf = cx.exam.src === "pdf";
@@ -4725,7 +4747,7 @@
           <div class="row">${next}</div>
           ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
-        <section class="sec" data-answer-review="${esc(cx.exam.id)}"><div class="sec-head"><h2 class="h2">Every question</h2>${answerButton("x", xhid)}</div>
+        <section class="sec" data-answer-review="${esc(cx.exam.id)}" data-exam-review="${esc(examReviewKey(cx))}"><div class="sec-head"><h2 class="h2">Every question</h2>${answerButton("x", xhid)}</div>
           <p class="small muted" ${answerConcealed(xhid)}>In exam order, with the ones you missed marked. Open one to see ${skill === "co" ? "the question and your answer, with the recording to play again" : "the document, the question and your answer"}. The right answers stay hidden until you show them.</p>
           <p class="small muted" ${answerDetail(xhid)}>${pdf ? "Open a question to compare your answer with the reference key from the paper." : `In exam order. Open one to see ${skill === "co" ? "what you heard, with the recording to play again" : "the document"}, your answer, the right one and why.`}</p>
           ${skill === "co" ? `<nav class="qnav" aria-label="Questions">${cx.exam.items.map((it, j) => `<button data-act="x-review-jump" data-i="${j}" aria-label="Question ${j + 1}">${j + 1}</button>`).join("")}</nav>` : ""}
@@ -4882,6 +4904,7 @@
     clearTimeout(tabSaveT);
     tabSaveT = 0;
     if (!hydrated) return;
+    rememberExamReview();
     try {
       const u = {};
       TAB_UI.forEach((k) => { u[k] = ui[k]; });
@@ -4964,6 +4987,8 @@
     return !!el && (el.tagName === "TEXTAREA" || el.tagName === "SELECT" || (el.tagName === "INPUT" && !/^(checkbox|radio|button|submit|range|reset)$/i.test(el.type)));
   }
   function render(force) {
+    // Native toggle events may still be queued when another update asks for a redraw.
+    rememberExamReview();
     // The first draw with your progress loaded can change what's on screen (a newer copy of the round, say),
     // so it isn't put off while a field has focus; the field, its text and the caret are kept.
     if (loaded && !hydrated) { hydrate(); force = true; }
@@ -9110,6 +9135,7 @@
       if (!target) return;
       document.querySelectorAll(".cox-audio").forEach((audio) => audio.pause());
       target.open = true;
+      mountExamReviewQuestion(target);
       target.querySelector("summary").focus({ preventScroll: true });
       target.scrollIntoView({ block: "start" });
     },
@@ -9228,7 +9254,13 @@
   if (grabBtn) grabBtn.addEventListener("pointerdown", () => { grabHold = Date.now(); });
   window.addEventListener("resize", () => { if (grabBtn && !grabBtn.hidden) grabCheck(); });
   // Keep the history tree's open branches across re-renders. "toggle" doesn't bubble, so listen while it's captured.
-  document.addEventListener("toggle", (e) => { const d = e.target; if (d && d.dataset && d.dataset.node) ui.c.open[d.dataset.node] = d.open; }, true);
+  document.addEventListener("toggle", (e) => {
+    const d = e.target;
+    if (!d?.isConnected || !d.dataset?.node) return;
+    ui.c.open[d.dataset.node] = d.open;
+    if (d.hasAttribute("data-exam-question")) mountExamReviewQuestion(d);
+    tabSoon();
+  }, true);
   // A fold remembers only what you did with it, so it's noted on the click (before it opens or closes), not on
   // "toggle", which also fires for folds a redraw draws open.
   document.addEventListener("click", (e) => { const s = e.target.closest && e.target.closest("summary"), d = s && s.parentElement; if (d && d.dataset && d.dataset.fold) FOLD[d.dataset.fold] = !d.open; }, true);
