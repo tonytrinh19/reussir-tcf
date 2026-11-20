@@ -543,6 +543,7 @@ window.TCF.FR = {
 "Attention": "Attention",
 "Au lieu de + infinitive = instead of.": "Au lieu de + infinitif = instead of.",
 "Aujourd'hui · Today": "Aujourd'hui · Today",
+"Aujourd’hui": "Aujourd’hui",
 "Auparavant points back to an earlier past: m'avait prêté.": "Auparavant renvoie à un passé antérieur : m'avait prêté.",
 "Auto": "Auto",
 "Avant de rendre": "Avant de rendre",
@@ -1084,6 +1085,7 @@ window.TCF.FR = {
 "Enter the English meaning.": "Saisis la traduction en anglais.",
 "Envoyer: que tu envoies, but nous envoyions.": "Envoyer : que tu envoies, mais nous envoyions.",
 "Envoyer: the stem enverr-.": "Envoyer : le radical enverr-.",
+"Erreur suivante": "Erreur suivante",
 "Error log": "Journal des erreurs",
 "Error log + listen-back notes": "Journal des erreurs + notes d'écoute",
 "Errors are the critics' point, but « Le risque le plus sérieux est pourtant ailleurs » : « ils apprendront à écrire pour elle », and « ce qui est mesuré finit par remplacer ce qu'on voulait mesurer ».": "Les erreurs sont l'argument des critiques, mais « Le risque le plus sérieux est pourtant ailleurs » : « ils apprendront à écrire pour elle », et « ce qui est mesuré finit par remplacer ce qu'on voulait mesurer ».",
@@ -1522,6 +1524,7 @@ window.TCF.FR = {
 "La jambe is a direct object after the verb: no agreement.": "La jambe est un COD après le verbe : pas d'accord.",
 "La nuit précédente comes before that past moment: avait travaillé.": "La nuit précédente se situe avant ce moment du passé : avait travaillé.",
 "La raison is feminine: pour laquelle.": "La raison est féminin : pour laquelle.",
+"La révision n’a pas pu être enregistrée.": "La révision n’a pas pu être enregistrée.",
 "La semaine dernière · last week": "La semaine dernière",
 "La semaine précédente: before he handed them back, so avions remises.": "La semaine précédente : avant qu'il ne les rende, donc avions remises.",
 "La veille points to an earlier action: avait visité.": "La veille indique une action antérieure : avait visité.",
@@ -2523,6 +2526,7 @@ window.TCF.FR = {
 "Review your first cards, and FSRS's forecast of what you'd recall shows here.": "Révise tes premières cartes, et les prévisions FSRS de ce dont tu te souviendras s'affichent ici.",
 "Reviews": "Révisions",
 "Revision sheets and notes": "Fiches de révision et notes",
+"Revoir mes erreurs": "Revoir mes erreurs",
 "Rewrite a paragraph using a different cause/consequence connector each time, without changing the meaning.": "Réécris un paragraphe en utilisant chaque fois un connecteur de cause ou de conséquence différent, sans changer le sens.",
 "Rewrite each blunt request politely with the conditionnel:": "Réécris chaque demande directe poliment au conditionnel :",
 "Rewrite from memory": "Réécrire de mémoire",
@@ -4889,6 +4893,10 @@ window.TCF.FR = {
 "{0} · page {1}"
 ],
 [
+"{0} · Question {1} · Erreur {2} / {3}",
+"{0} · Question {1} · Erreur {2} / {3}"
+],
+[
 "{0} · results",
 "{0} · résultats"
 ],
@@ -5985,6 +5993,10 @@ window.TCF.FR = {
 "Automatique : mode sombre du coucher ({0}) au lever ({1}) du soleil.{2}"
 ],
 [
+"Autres examens ({0})",
+"Autres examens ({0})"
+],
+[
 "Average chance of recall over the next 30 days without reviews: {0}",
 "Chance moyenne de mémorisation sur les 30 prochains jours sans révision : {0}"
 ],
@@ -6251,6 +6263,10 @@ window.TCF.FR = {
 [
 "Eagle eye! {0} of {1}, found and fixed.",
 "Œil de lynx ! {0} sur {1}, trouvées et corrigées."
+],
+[
+"Erreur {0} / {1}",
+"Erreur {0} / {1}"
 ],
 [
 "error{0} in your last 2 submissions",
@@ -6901,6 +6917,10 @@ window.TCF.FR = {
 "Question {0}"
 ],
 [
+"Question {0} · Erreur {1} /",
+"Question {0} · Erreur {1} /"
+],
+[
 "Question {0} of",
 "Question {0} sur"
 ],
@@ -6987,6 +7007,10 @@ window.TCF.FR = {
 [
 "Reviews ask English → French and move the schedule. French → English practice takes {0} card{1}, starting with those you've never practised in that direction, then those practised longest ago, and leaves their schedule as it is.",
 "Les révisions demandent Anglais → Français et modifient le planning. L'entraînement Français → Anglais prend {0} carte{1}, en commençant par celles que tu n'as jamais pratiquées dans ce sens, puis celles pratiquées il y a le plus longtemps, et laisse leur planning inchangé."
+],
+[
+"Revoir mes erreurs ({0})",
+"Revoir mes erreurs ({0})"
 ],
 [
 "role=\"img\" aria-label=\"{0}\"",

@@ -127,6 +127,14 @@
     ["décomposer", "to break down into parts; to decompose",
       "Le professeur décompose la phrase pour expliquer sa structure. — The teacher breaks down the sentence to explain its structure.\nNous avons décomposé le projet en trois étapes. — We broke the project down into three stages.\nLes feuilles mortes se décomposent lentement dans le sol. — Dead leaves slowly decompose in the soil.",
       "Décomposer quelque chose en éléments ; se décomposer : pourrir, se dégrader naturellement."],
+    ["faire la vaisselle", "to do the dishes; to wash up",
+      "Après le dîner, je fais la vaisselle pendant que Léa essuie les assiettes. — After dinner, I do the dishes while Léa dries the plates.\nHier, mon frère a fait la vaisselle pour me remercier du repas. — Yesterday, my brother washed the dishes to thank me for the meal."],
+    ["fouiller", "to search, to rummage through",
+      "J’ai fouillé tous les tiroirs pour retrouver mon passeport. — I searched every drawer to find my passport.\nElle fouille dans son sac à la recherche de ses clés. — She rummages through her bag looking for her keys."],
+    ["le sauvetage", "rescue",
+      "Le sauvetage des deux randonneurs a duré trois heures. — The rescue of the two hikers took three hours.\nChaque passager doit porter un gilet de sauvetage à bord du canoë. — Every passenger must wear a life jacket in the canoe."],
+    ["la balise", "a marker, a beacon",
+      "À chaque croisement, une balise jaune indique le chemin à suivre. — At each junction, a yellow trail marker shows which way to go.\nLe marin a activé sa balise de détresse pour signaler sa position. — The sailor activated his distress beacon to signal his location."],
   ] });
   // It's the learner's own deck, so it's starred in every phase.
   T.PHASES.forEach((p) => p.vocab.unshift("anki"));

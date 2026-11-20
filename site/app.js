@@ -4304,6 +4304,7 @@
       setId: cx.exam.id, answers: cx.exam.items.map((_, i) => (cx.ans[i] == null ? null : cx.ans[i])),
       secs, timed: true, timeUp: reason === "time", est: r.est, byLevel: r.byLevel,
     };
+    if (skill === "co") doc.missReview = { picks: {}, reviewed: [] };
     if (cx.exam.src === "claude") doc.snap = examSnap(cx.exam);
     put("comp", id, doc);
     if (cx.exam.src === "pdf") delete ui.form["ce-paper"];
@@ -4362,19 +4363,20 @@
     window.scrollTo(0, 0);
     if (skill === "co") coxRun();
   }
-  function examReview(attemptId) {
+  function examReview(attemptId, retryMisses = false) {
     if (examRunning()) { toast("Finish or quit the exam in progress first."); return; }
     const a = list("comp").find((x) => x.id === attemptId && x.kind === "exam");
     const skill = skillOf(a), X = XSPEC[skill];
     const exam = a && (X.bank().find((e) => e.id === a.setId) || a.snap);
     if (!exam) { toast("This exam's text wasn't saved, so it can't be reviewed."); return; }
-    if (exam.file && !exam.items) return loadReadingPaper(exam, () => examReview(attemptId));
+    if (exam.file && !exam.items) return loadReadingPaper(exam, () => examReview(attemptId, retryMisses));
     paperRequest++;
     const ex = clone(exam);
     ex.items.forEach((it) => { it.order = it.options.map((_, j) => j); });
     const ans = {};
     arr(a.answers).forEach((k, i) => { if (k != null) ans[i] = k; });
     ui.cx = { skill, exam: ex, i: 0, ans, done: true, confirm: false, quit: false, attemptId: a.id, result: { correct: a.score, total: a.total, est: a.est, byLevel: a.byLevel, secs: a.secs, timeUp: a.timeUp, date: a.date, review: true } };
+    ui.cx.retryMisses = skill === "co" && retryMisses;
     goTo("#" + X.home);
   }
 
@@ -4591,6 +4593,11 @@
       ui.c.open[el.dataset.node] = el.open;
     });
   }
+  function listeningTranscript(it, attributes = "") {
+    const said = arr(it.lines);
+    const multi = new Set(said.map((l) => l.speaker)).size > 1;
+    return `<details class="fold" ${attributes}><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>`;
+  }
   function examReviewBody(cx, j, hid) {
     const it = cx.exam.items[j], a = cx.ans[j];
     if (skillOf(cx) !== "co") {
@@ -4598,15 +4605,15 @@
       return `<article class="sheet"><p class="eyebrow">${esc(it.type || "Document")}</p><p class="fr">${typo(it.text)}</p></article><p class="fr"><b>${typo(it.q)}</b></p><div class="opts">${opts}</div>${it.why ? `<p class="small" ${answerDetail(hid)}>${typo(it.why)}</p>` : ""}`;
     }
     const lettered = it.kind !== "doc";
+    const second = S.comp.get(cx.attemptId)?.missReview?.picks?.[j];
     const opts = (lettered ? [0, 1, 2, 3] : it.order).map((k) => xOpt(k, it, a, hid, `${lettered ? `<b>${"ABCD"[k]}.</b>` : typo(it.options[k])}`)).join("");
-    const said = it.lines;
-    const multi = new Set(said.map((l) => l.speaker)).size > 1;
     return `
       ${it.kind === "pic" ? `<figure class="pic-card seyes" data-answer-picture="${esc(it.alt)}">${coxPicture(it, hid ? "" : it.alt)}</figure><p class="small muted fr" ${answerDetail(hid)}>${typo(it.alt)}</p>` : ""}
       ${it.situation ? `<p class="small muted fr">${typo(it.situation)}</p>` : ""}
-      <details class="fold" data-exam-transcript ${examReviewAttr(examReviewNode(cx, j, true))}><summary>Transcription</summary>${it.transcriptSource ? `<p class="small muted">${esc(it.transcriptSource)}</p>` : ""}<div class="transcript" lang="fr">${said.length ? said.map((l) => `<p>${multi ? `<b class="who">${esc(l.speaker)}</b>` : ""}${typo(l.text)}</p>`).join("") : "Transcription indisponible pour cet enregistrement."}</div>${it.transcriptPage ? `<a class="small" href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf#page=${it.transcriptPage}" target="_blank" rel="noopener">Voir ce passage dans le recueil ↗</a>` : ""}</details>
+      ${listeningTranscript(it, `data-exam-transcript ${examReviewAttr(examReviewNode(cx, j, true))}`)}
       ${it.kind === "doc" ? `<p class="fr"><b>${typo(it.q)}</b></p>` : ""}
       <div class="opts">${opts}</div>
+      ${Number.isInteger(second) ? `<p class="small" ${answerDetail(hid)}>Deuxième réponse : ${lettered ? "ABCD"[second] : typo(it.options[second])}</p>` : ""}
       ${it.why ? `<p class="small" ${answerDetail(hid)}>${typo(it.why)}</p>` : ""}
       ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}`;
   }
@@ -4697,6 +4704,95 @@
   }
   const readingOption = (exam, it, k) => (exam.src === "pdf" ? `<b>${"ABCD"[k]}.</b> ` : "") + typo(it.options[k]);
 
+  function listeningMisses(cx) {
+    return cx.exam.items.flatMap((it, j) => cx.ans[j] === it.answer ? [] : [j]);
+  }
+  function reviewDoneButton(completed, act, id) {
+    return completed ? '<span class="pill ok">Révision terminée</span>'
+      : `<button class="btn ghost sm" data-act="${act}" data-id="${esc(id)}">Marquer comme révisé</button>`;
+  }
+  function examReviewLink(cx) {
+    const doc = S.comp.get(cx.attemptId);
+    if (!doc || !Array.isArray(doc.answers)) return "";
+    const n = skillOf(cx) === "co" ? listeningMisses(cx).length : 0;
+    const completed = doc.reviewedOn || doc.missReview?.completed;
+    return `<div class="row">${n && !completed ? `<button class="btn primary" data-act="retry-open" data-id="${esc(cx.attemptId)}">Revoir mes erreurs (${n})</button>` : ""}${reviewDoneButton(completed, "exam-reviewed", cx.attemptId)}</div>`;
+  }
+  function dailyExamReviews() {
+    const pending = [];
+    for (const skill of ["co", "ce"]) {
+      const available = new Set(XSPEC[skill].bank().map(e => e.id));
+      for (const a of compAttempts(skill)) {
+        if (a.kind !== "exam" || !Array.isArray(a.answers) || a.reviewedOn || a.missReview?.completed || !(a.snap || available.has(a.setId))) continue;
+        const remaining = skill === "co" ? Math.max(0, a.total - a.score - arr(a.missReview?.reviewed).length) : 0;
+        pending.push({ ...a, label: skill === "co" ? "Compréhension orale" : "Compréhension écrite", remaining, act: remaining ? "retry-open" : "x-review" });
+      }
+    }
+    for (const m of eeMocks()) {
+      if (!Object.values(m.tasks).some(w => w.mockReviewedOn)) pending.push({ ...m, label: "Expression écrite", title: m.paperTitle || "Examen blanc", act: "ee-open" });
+    }
+    if (!pending.length) return "";
+    pending.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    const row = a => `<div class="row between"><div><b>${esc(a.title)}</b><p class="small muted">${a.label} · ${shortDate(a.date)}${a.remaining ? ` · Erreurs à revoir : ${a.remaining}` : ""}</p></div>
+      <button class="btn sm" data-act="${a.act}" data-id="${esc(a.id)}">Reprendre la révision</button></div>`;
+    return `<section class="panel stack"><h2 class="h2">Examens à revoir</h2>${row(pending[0])}
+      ${pending.length > 1 ? `<details class="fold"><summary>Autres examens (${pending.length - 1})</summary><div class="stack">${pending.slice(1).map(row).join("")}</div></details>` : ""}</section>`;
+  }
+  function listeningRetryView(cx) {
+    const doc = S.comp.get(cx.attemptId), progress = doc?.missReview || {};
+    const misses = listeningMisses(cx), reviewed = arr(progress.reviewed);
+    const j = misses.find(i => !reviewed.includes(i));
+    const back = '<button class="btn ghost sm" data-act="retry-exit">Retour au résultat</button>';
+    if (progress.completed || j == null || !doc) {
+      const recovered = misses.filter(i => progress.picks?.[i] === cx.exam.items[i].answer).length;
+      return `<section class="panel stack"><h2 class="h2">Révision terminée</h2><p>Bonnes réponses à la deuxième écoute : ${recovered} / ${misses.length}</p><div class="row">${back}<a class="btn" href="#today">Aujourd’hui</a></div></section>`;
+    }
+    const it = cx.exam.items[j], second = progress.picks?.[j], revealed = Number.isInteger(second);
+    const order = it.kind === "doc" ? it.order : [0, 1, 2, 3];
+    const label = k => it.kind === "doc" ? typo(it.options[k]) : "ABCD"[k];
+    const choices = order.map(k => `<label class="opt ${revealed && k === it.answer ? "ok" : revealed && k === second ? "bad" : ""}"><input type="radio" name="retry-choice" value="${k}" ${revealed ? "disabled" : ""} ${k === second ? "checked" : ""}><span>${label(k)}</span></label>`).join("");
+    return `<section class="panel stack" data-retry-question="${j}">
+      <div class="row between"><h2 class="h2">Revoir mes erreurs</h2>${back}</div>
+      <p class="eyebrow">${esc(doc.title)} · Question ${j + 1} · Erreur ${reviewed.length + 1} / ${misses.length}</p>
+      ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, revealed ? it.alt : "")}</figure>` : ""}
+      ${it.situation ? `<p class="fr">${typo(it.situation)}</p>` : ""}
+      ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
+      <p class="fr"><b>${typo(it.q || COX_CONSIGNE[it.kind])}</b></p>
+      <div class="opts" role="radiogroup" aria-label="Deuxième réponse">${choices}</div>
+      ${revealed ? `<div class="sheet stack"><p><b>${second === it.answer ? "Bonne réponse" : "À retenir"}</b></p>
+        <p>Réponse à l’examen : ${cx.ans[j] == null ? "sans réponse" : label(cx.ans[j])}</p>
+        <p>Deuxième réponse : ${label(second)}</p><p>Bonne réponse : ${label(it.answer)}</p>
+        ${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}${listeningTranscript(it)}</div>
+        <button class="btn primary" data-act="retry-next">${reviewed.length + 1 === misses.length ? "Terminer la révision" : "Erreur suivante"}</button>`
+        : '<button class="btn primary" data-act="retry-check">Vérifier ma réponse</button>'}
+    </section>`;
+  }
+  function updateListeningRetry(el, advance) {
+    const cx = ui.cx, panel = el.closest("[data-retry-question]");
+    if (!panel || !cx?.done || !cx.retryMisses || skillOf(cx) !== "co") return;
+    const doc = S.comp.get(cx.attemptId);
+    if (!doc || doc.missReview?.completed) return;
+    const progress = clone(doc.missReview || { picks: {}, reviewed: [] });
+    const misses = listeningMisses(cx), j = misses.find(i => !progress.reviewed.includes(i));
+    if (j == null || j !== Number(panel.dataset.retryQuestion)) return;
+    if (advance) {
+      if (!Number.isInteger(progress.picks[j])) return;
+      progress.reviewed.push(j);
+      if (progress.reviewed.length === misses.length) progress.completed = todayStr();
+    } else {
+      if (Number.isInteger(progress.picks[j])) return;
+      const choice = panel.querySelector("input:checked");
+      if (!choice) { toast("Choisis une réponse avant de vérifier."); return; }
+      const k = Number(choice.value);
+      if (!Number.isInteger(k) || k < 0 || k >= 4) return;
+      progress.picks[j] = k;
+    }
+    put("comp", cx.attemptId, { ...doc, missReview: progress }, false);
+    render(true);
+    const nextFocus = !advance ? "[data-act=retry-next]" : progress.completed ? "[data-act=retry-exit]" : "[data-retry-question] input";
+    viewEl.querySelector(nextFocus)?.focus({ preventScroll: true });
+  }
+
   // The exam page: Claude writing an exam, an exam in progress, a result (or a past attempt), or the start screen.
   function examView(skill) {
     const X = XSPEC[skill], spec = X.spec;
@@ -4723,6 +4819,7 @@
         ${cx.confirm ? `<div class="notice warn">${blanks} question${blanks > 1 ? "s are" : " is"} still blank and will count as wrong.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="x-submit">Hand in anyway</button><button class="btn sm" data-act="x-keep">Keep going</button></div></div>` : ""}
         <div class="row">${cx.quit ? `<span class="small">Quit and lose these answers?</span><button class="btn sm danger" data-act="x-quit-yes">Quit the exam</button><button class="btn sm ghost" data-act="x-keep">Keep going</button>` : `<button class="btn ghost sm" data-act="x-quit">Quit without saving</button>`}</div>`;
     }
+    if (cx?.done && cx.retryMisses && skill === "co") return listeningRetryView(cx);
     if (cx && cx.done) {
       const r = cx.result, retake = retakeIds().has(cx.attemptId);
       const rows = spec.blocks.map(([l, cnt, p]) => { const b = (r.byLevel || {})[l] || [0, cnt]; return `<tr><td>${l}</td><td>${b[0]} / ${b[1]}</td><td>${b[0] * p} / ${b[1] * p}</td></tr>`; }).join("");
@@ -4744,6 +4841,7 @@
           ${greet(...remyScore("exam", r.correct, r.total, { retake, nclc: nclcOf(skill, r.est) || 0 }), "sm")}
           <div class="table-wrap"><table class="nclc"><thead><tr><th>Level</th><th>Correct</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table></div>
           <p class="small muted">${esc(spec.note)}${retake ? " You'd taken this exam before, so you'll have remembered some answers: this score is kept as a retake and doesn't count toward your NCLC estimate." : r.review ? "" : " It has been added to Progress → Scores and NCLC."}</p>
+          ${examReviewLink(cx)}
           <div class="row">${next}</div>
           ${retake ? "" : `<p class="small muted">A retake is good practice, but you'll remember some answers, so its score won't count toward your NCLC estimate.</p>`}
         </section>
@@ -5165,6 +5263,8 @@
           ${pnote ? `<details class="fold-x" ${foldAttr("pnote-" + s.phase)}><summary>Notes de la phase · Phase notes</summary><p class="small muted">${esc(pnote)}</p>${dateIsLight(sel) ? `<p class="small muted">Le programme allégé ci-dessus remplace la charge de ce planning de référence. Pour les nouvelles séances de compréhension, une seule série suffit ; les séries supplémentaires sont facultatives. La durée des examens blancs reste inchangée.</p>` : ""}</details>` : ""}
         </section>`;
       }
+      const reviews = sel === t ? dailyExamReviews() : "";
+      if (reviews) body = `<div class="stack">${body}${reviews}</div>`;
       if (!plan && sel === t) rm = remyToday(null);
       return `<div class="wrap today-wrap">
         <header class="week-notebook">
@@ -7155,6 +7255,7 @@
         <p class="small">${m.min} min of the 60 used. ${m.score != null ? "The score is the mean of the three tasks' scores, a blank one counting 0: an estimate, since France Éducation International doesn't publish how it combines them." : busy ? "Claude is correcting your texts, one after another." : "Copy your texts for another AI, then paste its review and each task's grade below."}</p>
         ${m.score != null ? greet(...remyScore("exam", m.score, 20, { nclc: nc || 0, key: m.id }), "sm") : ""}
         <div class="ee-tasks">${cards}</div>
+        <div>${reviewDoneButton(Object.values(m.tasks).some(w => w.mockReviewedOn), "ee-reviewed", m.id)}</div>
         <div class="row">${open && !busy ? claudeBtn("ee-correct", "ee-correct", "Correct with Claude", `data-id="${esc(m.id)}"`, "btn primary") : ""}<button class="btn" data-act="ee-copy" data-id="${esc(m.id)}">Copy for another AI</button><button class="btn" data-act="ee-new">Start another mock</button><button class="btn ghost" data-act="ee-close">All your mocks</button></div>
         ${ui.eeCopyOut && ui.eeCopyOut.id === m.id ? `<div class="stack tight"><p class="small muted">This browser didn't let the page copy it. It's selected below: press Ctrl+C (⌘C on a Mac).</p><textarea id="ee-copy-out" readonly rows="10" aria-label="Prompt to copy">${esc(ui.eeCopyOut.text)}</textarea></div>` : ""}
         ${writingReviewForm("mock-" + m.id, `data-mock="${esc(m.id)}"`, EE_TASKS.map(t => m.tasks[t]).filter(Boolean))}
@@ -9050,7 +9151,21 @@
     "ee-quit": () => { ui.confirm = ""; eeQuit(); },
     "ee-correct": (el) => eeCorrect(el.dataset.id || (ui.ee && ui.ee.id)),
     "ee-copy": (el) => eeCopy(el.dataset.id),
-    "ee-open": (el) => { ui.ee = { id: el.dataset.id, done: true, view: null }; render(true); window.scrollTo(0, 0); },
+    "ee-open": (el) => {
+      if (eeRunning()) { goTo("#writing.mock"); return; }
+      ui.ee = { id: el.dataset.id, done: true, view: null };
+      goTo("#writing.mock");
+      window.scrollTo(0, 0);
+    },
+    "ee-reviewed": async (el) => {
+      const id = el.dataset.id;
+      if (!ui.ee?.done || ui.ee.id !== id) return;
+      const m = eeMocks().find(x => x.id === id);
+      const task = m && EE_TASKS.map(t => m.tasks[t]).find(Boolean);
+      if (!task) return;
+      try { await writingReviewStore("writing", task.id, doc => ({ ...doc, mockReviewedOn: todayStr() })); }
+      catch { toast("La révision n’a pas pu être enregistrée."); }
+    },
     "ee-close": () => { ui.ee = null; ui.eeCopyOut = null; render(true); },
     "ee-view": (el) => { if (ui.ee) ui.ee.view = ui.ee.view === el.dataset.id ? null : el.dataset.id; render(true); const f = document.getElementById("w-fb"); if (f && ui.ee && ui.ee.view) f.scrollIntoView({ block: "start", behavior: "smooth" }); },
     "ee-view-close": () => { if (ui.ee) ui.ee.view = null; render(true); },
@@ -9140,6 +9255,14 @@
       target.scrollIntoView({ block: "start" });
     },
     "x-review": (el) => examReview(el.dataset.id),
+    "retry-open": (el) => examReview(el.dataset.id, true),
+    "retry-check": (el) => updateListeningRetry(el, false),
+    "retry-next": (el) => updateListeningRetry(el, true),
+    "retry-exit": () => { if (ui.cx) ui.cx.retryMisses = false; render(true); },
+    "exam-reviewed": (el) => {
+      const id = el.dataset.id, doc = S.comp.get(id);
+      if (ui.cx?.done && ui.cx.attemptId === id && doc?.kind === "exam") put("comp", id, { ...doc, reviewedOn: todayStr() });
+    },
     "x-close": () => { ui.cx = null; render(true); window.scrollTo(0, 0); },
     "x-hide": () => examAnsToggle(false),
     "x-show": () => examAnsToggle(true),

@@ -8,7 +8,7 @@ const items = Array.from({ length: 39 }, (_, j) => ({ level: "B1", kind: "doc", 
 const cx = { done: true, skill: "co", attemptId: "attempt-1", exam: { id: "test-exam", items }, ans: { 4: 1, 7: 0 } };
 const ui = { cx, c: { open: {} } }, viewEl = { nodes: [], querySelectorAll() { return this.nodes; } };
 let highlights = 0, hidden = true;
-const ctx = { ui, viewEl, esc, typo: esc, skillOf: (c) => c.skill, ansHidden: () => hidden, readingOption: (_, it, k) => esc(it.options[k]), coxPicture: () => "", paintMarks: () => highlights++ };
+const ctx = { ui, viewEl, S: { comp: new Map() }, arr: (v) => Array.isArray(v) ? v : [], esc, typo: esc, skillOf: (c) => c.skill, ansHidden: () => hidden, readingOption: (_, it, k) => esc(it.options[k]), coxPicture: () => "", paintMarks: () => highlights++ };
 vm.createContext(ctx);
 vm.runInContext(helpers + review + "\nthis.reviewTest = {examReviewKey, examReviewNode, rememberExamReview, examReviewItem, mountExamReviewQuestion};", ctx);
 const { examReviewKey, examReviewNode, rememberExamReview, examReviewItem, mountExamReviewQuestion } = ctx.reviewTest;
@@ -74,3 +74,52 @@ root.dataset.examReview = examReviewKey({ ...cx, attemptId: "another-attempt" })
 mountExamReviewQuestion(el);
 assert.equal(mounts, 1, "Closed, detached or stale questions must not mount");
 console.log("Exam review: deferred bodies, saved open/closed questions and transcripts, attempt isolation, latest corrections and single player mounting pass.");
+
+// Follow a listening retry from today's plan, through a wrong answer and a blank, back to the saved result.
+const retry = source.slice(source.indexOf("  function listeningMisses("), source.indexOf("  // The exam page:"));
+const records = ctx.S.comp;
+const attempt = { id: "attempt-1", kind: "exam", skill: "co", setId: "test-exam", title: "Mock", score: 1, total: 3, answers: [1, 0, null] };
+records.set(attempt.id, attempt);
+cx.exam.items = items.slice(0, 3);
+cx.ans = { 0: 1, 1: 0 };
+cx.retryMisses = true;
+let writingTask = { id: "w1" };
+Object.assign(ctx, { clone: structuredClone, todayStr: () => "2026-11-19", shortDate: () => "19 nov.",
+  XSPEC: { co: { bank: () => [cx.exam] }, ce: { bank: () => [cx.exam] } },
+  compAttempts: skill => [...records.values()].filter(a => a.skill === skill),
+  eeMocks: () => [{ id: "written", tasks: { t1: writingTask } }],
+  put: (_, id, doc) => records.set(id, doc), render() {}, toast() {},
+});
+viewEl.querySelector = () => null;
+vm.runInContext(retry + "\nthis.retryTest = {listeningRetryView, updateListeningRetry, dailyExamReviews, examReviewLink};", ctx);
+const { listeningRetryView, updateListeningRetry, dailyExamReviews, examReviewLink } = ctx.retryTest;
+const choice = (j, k) => ({ closest: () => ({ dataset: { retryQuestion: String(j) }, querySelector: () => k == null ? null : { value: String(k) } }) });
+assert.match(dailyExamReviews(), /data-act="retry-open" data-id="attempt-1"/);
+assert.match(examReviewLink(cx), /Revoir mes erreurs \(2\)/);
+assert.match(listeningRetryView(cx), /data-retry-question="1"/);
+assert(!listeningRetryView(cx).includes("Transcription"));
+updateListeningRetry(choice(1), true);
+updateListeningRetry(choice(1), false);
+assert.equal(records.get(attempt.id), attempt);
+updateListeningRetry(choice(1, 0), false);
+assert.match(listeningRetryView(cx), /Transcription/);
+updateListeningRetry(choice(1, 1), false);
+assert.equal(records.get(attempt.id).missReview.picks[1], 0);
+updateListeningRetry(choice(1), true);
+updateListeningRetry(choice(1), true);
+assert.match(listeningRetryView(cx), /data-retry-question="2"/);
+updateListeningRetry(choice(2, 1), false);
+assert.match(listeningRetryView(cx), /sans réponse/);
+updateListeningRetry(choice(2), true);
+assert.match(listeningRetryView(cx), /1 \/ 2/);
+assert.match(examReviewLink(cx), /Révision terminée/);
+assert.deepEqual(records.get(attempt.id).answers, [1, 0, null]);
+assert.equal(records.get(attempt.id).score, 1);
+assert(!dailyExamReviews().includes('data-id="attempt-1"'));
+assert.match(dailyExamReviews(), /data-act="ee-open" data-id="written"/);
+writingTask = { ...writingTask, mockReviewedOn: "2026-11-19" };
+records.set("reading", { ...attempt, id: "reading", skill: "ce" });
+assert.match(dailyExamReviews(), /data-act="x-review" data-id="reading"/);
+records.set("reading", { ...records.get("reading"), reviewedOn: "2026-11-19" });
+assert.equal(dailyExamReviews(), "");
+console.log("Daily exam reviews: listening retries, spoilers, saved answers, scores, reading and writing completion pass.");

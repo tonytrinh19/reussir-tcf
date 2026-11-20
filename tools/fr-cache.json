@@ -5580,5 +5580,14 @@
  "Original AI response": "Réponse originale de l’IA",
  "Suggestions from this review. Add the ones you want to your homework.": "Suggestions de cet avis. Ajoute celles que tu veux à tes devoirs.",
  "Grades, criteria, corrections and advice are arranged like your other results. French and English reviews are supported. The original response is kept too.": "Les notes, critères, corrections et conseils sont présentés comme tes autres résultats. Les avis en français et en anglais sont acceptés. La réponse originale est également conservée.",
- "This review has no grade. The grade shown is the one already saved for this text.": "Cet avis ne contient pas de note. La note affichée est celle déjà enregistrée pour ce texte."
+ "This review has no grade. The grade shown is the one already saved for this text.": "Cet avis ne contient pas de note. La note affichée est celle déjà enregistrée pour ce texte.",
+ "{0} · Question {1} · Erreur {2} / {3}": "{0} · Question {1} · Erreur {2} / {3}",
+ "Aujourd’hui": "Aujourd’hui",
+ "Autres examens ({0})": "Autres examens ({0})",
+ "Erreur {0} / {1}": "Erreur {0} / {1}",
+ "Erreur suivante": "Erreur suivante",
+ "La révision n’a pas pu être enregistrée.": "La révision n’a pas pu être enregistrée.",
+ "Question {0} · Erreur {1} /": "Question {0} · Erreur {1} /",
+ "Revoir mes erreurs": "Revoir mes erreurs",
+ "Revoir mes erreurs ({0})": "Revoir mes erreurs ({0})"
 }
