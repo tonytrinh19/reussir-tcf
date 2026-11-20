@@ -121,6 +121,12 @@
     ["servir / servir de / servir à", "to serve; serve as; be used for",
       "Le serveur nous sert le dîner. — The waiter serves us dinner.\nCette petite pièce sert de bureau. — This small room serves as an office.\nCette application sert à réviser le vocabulaire. — This app is used to review vocabulary.",
       "", { id: "c-20261118-servir-de-a", enNote: "de + noun: role; à + infinitive: purpose." }],
+    ["récompenser", "to reward",
+      "Cette entreprise récompense les employés qui proposent des idées utiles. — This company rewards employees who suggest useful ideas.\nLe jury a récompensé cette réalisatrice pour son dernier film. — The jury rewarded this director for her latest film.",
+      "Récompenser quelqu'un pour quelque chose."],
+    ["décomposer", "to break down into parts; to decompose",
+      "Le professeur décompose la phrase pour expliquer sa structure. — The teacher breaks down the sentence to explain its structure.\nNous avons décomposé le projet en trois étapes. — We broke the project down into three stages.\nLes feuilles mortes se décomposent lentement dans le sol. — Dead leaves slowly decompose in the soil.",
+      "Décomposer quelque chose en éléments ; se décomposer : pourrir, se dégrader naturellement."],
   ] });
   // It's the learner's own deck, so it's starred in every phase.
   T.PHASES.forEach((p) => p.vocab.unshift("anki"));
