@@ -1608,6 +1608,37 @@ label.field.inline { grid-auto-flow: column; align-items: center; gap: 6px; }
 .qs > li { position: relative; display: grid; gap: 8px; counter-increment: q; }
 .qs > li > p.q { font-weight: 700; }
 .qs > li > p.q::before { content: counter(q) ". "; color: var(--ink-3); }
+/* The reading guide stays with the passage and questions, then leaves with the set. */
+.comp-ce { --ce-nav-top: calc(env(safe-area-inset-top, 0px) + 8px); }
+.ce-bookmarks {
+  position: sticky; top: var(--ce-nav-top); z-index: 4; display: flex; align-items: center;
+  gap: clamp(6px, 2vw, 18px); min-width: 0; padding: 5px 10px 6px;
+  background: var(--surface); border: 1px solid var(--rule-2); border-block-start: 3px solid var(--sk-ce);
+  border-radius: 9px 9px 13px 13px; box-shadow: 0 3px 0 var(--rule), var(--shadow-sm);
+}
+.ce-tally { flex: none; display: grid; gap: 1px; font: 700 11px/1.15 var(--f-ui); color: var(--ink-2); }
+.ce-tally b { color: var(--ink); font: 800 17px/1.1 var(--f-ui); font-variant-numeric: tabular-nums; }
+.ce-stops { display: flex; align-items: start; flex: 1; min-width: 0; gap: 4px; padding: 3px; overflow-x: auto; scrollbar-width: thin; }
+.ce-bookmark,.ce-type { flex: none; cursor: pointer; background: transparent; color: var(--ink); font: 800 15px/1 var(--f-ui); }
+.ce-bookmark {
+  position: relative; display: grid; place-items: center; width: 36px; height: 40px; padding: 0 0 4px;
+  border: 0; background: var(--sunk); clip-path: polygon(0 0,100% 0,100% 100%,50% calc(100% - 5px),0 100%);
+}
+.ce-bookmark .ico { width: 18px; height: 18px; }
+.ce-bookmark[aria-current="true"] { background: var(--sk-ce); color: var(--surface); }
+.ce-bookmark[data-answered="true"]::after { content: "✓"; position: absolute; top: 1px; right: 2px; font: 900 10px/1 var(--f-ui); }
+.ce-bookmark:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
+.ce-type { border: 1px solid var(--rule-2); border-radius: 9px; padding: 7px; min-height: 38px; font: 650 19px/1 var(--f-text); }
+.ce-type[aria-pressed="true"] { background: var(--green-soft); border-color: var(--sk-ce); color: var(--sk-ce); }
+.comp-ce :is(#ce-passage, [id^="ce-question-"]) { scroll-margin-top: calc(var(--ce-nav-top) + 66px); }
+.comp-ce :is(#ce-passage, [id^="ce-question-"]):focus-visible { outline: 2px solid var(--sk-ce); outline-offset: 4px; }
+.comp-ce.ce-large .ce-copy { max-width: 58ch; font-size: clamp(20px,2.4vw,24px); line-height: 1.78; }
+.comp-ce.ce-large .qs .q { font-size: clamp(22px,2.5vw,26px); }
+.comp-ce.ce-large .opts .opt { font-size: 19px; line-height: 1.55; }
+@media (max-width: 880px) { .comp-ce { --ce-nav-top: calc(env(safe-area-inset-top, 0px) + var(--rail-h, 0px) + 6px); } }
+@media (prefers-reduced-motion: no-preference) {
+  .ce-bookmark { transition: background-color .16s, color .16s; }
+}
 /* The reading set opens as a printed review. The little newspaper reuses the Montréal cover art as a halftone. */
 .ce-edition {
   --ce-cover: #1d463a;

@@ -8422,6 +8422,15 @@
   "ctx": []
  },
  {
+  "id": "2c419ecc9276",
+  "text": "Aa",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
+  ]
+ },
+ {
   "id": "4221c73c7989",
   "text": "about {0} of the 60 min",
   "kind": "pattern",
@@ -10182,6 +10191,15 @@
   "where": "app",
   "ctx": [
    ", answered"
+  ]
+ },
+ {
+  "id": "e0aafffa028c",
+  "text": "Answered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
   ]
  },
  {
@@ -20639,6 +20657,15 @@
   ]
  },
  {
+  "id": "118f9b2b3021",
+  "text": "Larger text",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
+  ]
+ },
+ {
   "id": "213ed3ea453b",
   "text": "last",
   "kind": "exact",
@@ -29228,8 +29255,9 @@
   "id": "002ff598115d",
   "text": "Question",
   "kind": "exact",
-  "where": "attr:aria-label",
+  "where": "app",
   "ctx": [
+   "Question …",
    "<button>…</button>"
   ]
  },
@@ -29239,6 +29267,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
+   "Question …",
    "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …",
    "<button>…</button>"
   ]
@@ -29576,6 +29605,15 @@
   ]
  },
  {
+  "id": "30a00bebf954",
+  "text": "Reading guide",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
+  ]
+ },
+ {
   "id": "6161567bf347",
   "text": "reading is 453–498",
   "kind": "exact",
@@ -29591,6 +29629,15 @@
   "where": "app",
   "ctx": [
    "Rythme · reading pace"
+  ]
+ },
+ {
+  "id": "55916e08c717",
+  "text": "Reading passage",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<button>…</button>"
   ]
  },
  {

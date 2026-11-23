@@ -4094,6 +4094,18 @@
     return true;
   }
   // Show a past attempt: its set, the answers given, the right ones and the explanations.
+  function readingBookmarks(set, answers, large) {
+    const count = set.questions.filter((_, i) => answers[i] != null).length;
+    const tabs = set.questions.map((_, i) => {
+      const picked = answers[i] != null;
+      return `<button type="button" class="ce-bookmark" data-goto="ce-question-${i}" data-answered="${picked}" aria-label="${picked ? `Question ${i + 1}, answered` : `Question ${i + 1}`}">${i + 1}</button>`;
+    }).join("");
+    return `<nav class="ce-bookmarks" aria-label="Reading guide">
+      <span class="ce-tally"><span>Answered</span><b><span data-ce-count>${count}</span> / ${set.questions.length}</b></span>
+      <div class="ce-stops">${set.text ? `<button type="button" class="ce-bookmark" data-goto="ce-passage" aria-label="Reading passage" title="Reading passage">${ico("read")}</button>` : ""}${tabs}</div>
+      <button type="button" class="ce-type" data-act="ce-type" aria-pressed="${large}" aria-label="Larger text" title="Larger text"><span aria-hidden="true">Aa</span></button>
+    </nav>`;
+  }
   function compReview(skill, attemptId) {
     const a = compAttempts(skill).find((x) => x.id === attemptId);
     if (!a || !compLoad(skill, a.setId, a)) return;
@@ -7538,7 +7550,7 @@
       if (loading) {
         material = `<article class="sheet"><p class="eyebrow">${skill === "co" ? "Enregistrement" : "Document"} · ${esc(lvl)}${th ? " · " + esc(themeLabel(th)) : ""}</p><h3 class="thinking">Claude is writing a new ${skill === "co" ? "listening" : "reading"} set${th ? " on " + esc(themeLabel(th)) : ""}</h3><p class="small muted">This usually takes 10–40 seconds. It stays here if you switch back to this theme later.</p></article>`;
       } else if (skill === "ce") {
-        material = `<article class="ce-edition">
+        material = `<article class="ce-edition" id="ce-passage" tabindex="-1">
           <header class="ce-mast">
             <p class="eyebrow">${tagLine(esc(set.type || (set.text ? "Document" : "Documents")))}</p>
             ${set.title ? `<h2 lang="fr">${typo(set.title)}</h2>` : ""}
@@ -7585,7 +7597,7 @@
       const trend = set && skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : "";
       const qs = !set ? "" : `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
-        return `<li${miss ? ` class="q-miss"` : ""}${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}${miss ? ` <span class="q-mark"><span aria-hidden="true">✗</span> raté</span>` : ""}</p><div class="opts">${q.order.map((k) => {
+        return `<li${skill === "ce" ? ` id="ce-question-${i}" tabindex="-1"` : ""}${miss ? ` class="q-miss"` : ""}${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}${miss ? ` <span class="q-mark"><span aria-hidden="true">✗</span> raté</span>` : ""}</p><div class="opts">${q.order.map((k) => {
           const st = k === q.answer ? "ok" : ans[i] === k ? "bad" : "";
           return `<label ${submitted ? answerOption(st, "", hid) : 'class="opt"'}><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
         }).join("")}</div>
@@ -7598,14 +7610,16 @@
         ${submitted ? greet(...remyScore(skill, score, nq2, { key: `${set.id}-${ui.c.saved[skill] || ""}`, inClock: savedDoc && savedDoc.timed && savedDoc.clock ? savedDoc.secs <= savedDoc.clock : null }), "sm") : ""}`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       const inProgress = set && !submitted && Object.keys(ans || {}).length > 0;
-      return `<div class="wrap comp-studio comp-${skill}">
+      const large = skill === "ce" && lsGet("tcf-ce-large", "") === "on";
+      const bookmarks = skill === "ce" && set?.questions.length ? readingBookmarks(set, ans, large) : "";
+      return `<div class="wrap comp-studio comp-${skill}${large ? " ce-large" : ""}">
         ${head}
         <div class="comp-toolbar">
           <div class="comp-nav tab-row">${tabs}</div>
           ${practiceNav(skill, "exercise")}
           ${controls}
         </div>
-        <div class="stack comp-practice"${submitted && set ? ` data-answer-review="${esc(set.id)}"` : ""}>${submitted ? resultReturn() : ""}${reviewNote}${fallback}${material}${timerRow}${qs}</div>
+        <div class="stack comp-practice"${submitted && set ? ` data-answer-review="${esc(set.id)}"` : ""}>${submitted ? resultReturn() : ""}${reviewNote}${fallback}${bookmarks}${material}${timerRow}${qs}</div>
         ${inProgress ? "" : examCta(skill)}
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
@@ -8947,6 +8961,11 @@
   }
 
   const ACTS = {
+    "ce-type": el => {
+      const large = el.closest(".comp-ce").classList.toggle("ce-large");
+      el.setAttribute("aria-pressed", String(large));
+      lsSet("tcf-ce-large", large ? "on" : "off");
+    },
     day: (el) => { ui.day = el.dataset.date; render(true); },
     theme: toggleTheme,
     lang: toggleLang,
@@ -9368,7 +9387,20 @@
     "grab-theme": (el) => { if (ui.grab) ui.grab.theme = el.value; },
     "v-theme": (el) => { ui.vTheme = el.value; render(true); },
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
-    "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); compKeep(ui.c.skill); },
+    "c-ans": (el) => {
+      const skill = ui.c.skill, i = Number(el.dataset.i), answers = ui.c.ans[skill];
+      answers[i] = Number(el.dataset.k);
+      if (skill === "ce") {
+        const nav = viewEl.querySelector(".ce-bookmarks");
+        const mark = nav?.querySelector(`[data-goto="ce-question-${i}"]`);
+        if (mark && mark.dataset.answered !== "true") {
+          mark.dataset.answered = "true";
+          mark.setAttribute("aria-label", `Question ${i + 1}, answered`);
+          nav.querySelector("[data-ce-count]").textContent = ui.c.set.ce.questions.filter((_, j) => answers[j] != null).length;
+        }
+      }
+      compKeep(skill);
+    },
     // Updates the navigator in place rather than re-rendering, so the chosen option keeps focus.
     "bk-file": (el) => { bkPick(el.files && el.files[0]); el.value = ""; },
     "x-ans": (el) => {

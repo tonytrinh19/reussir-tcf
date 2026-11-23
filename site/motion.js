@@ -387,11 +387,13 @@
   document.addEventListener("click", (e) => {
     const b = e.target && e.target.closest ? e.target.closest("[data-goto]") : null;
     const sec = b && document.getElementById(b.getAttribute("data-goto"));
-    if (sec) sec.scrollIntoView({ behavior: still() ? "auto" : "smooth", block: "start" });
+    if (!sec) return;
+    if (b.closest(".ce-bookmarks")) sec.focus({ preventScroll: true });
+    sec.scrollIntoView({ behavior: still() ? "auto" : "smooth", block: "start" });
   });
   let navPill = null, spyRaf = 0;
   function spy(instant) {
-    const nav = document.querySelector(".dash-nav");
+    const nav = document.querySelector(".dash-nav, .ce-bookmarks");
     if (!nav) return;
     const btns = [...nav.querySelectorAll("[data-goto]")];
     if (!btns.length) return;
@@ -400,7 +402,12 @@
     btns.forEach((b) => { const s = document.getElementById(b.getAttribute("data-goto")); if (s && s.getBoundingClientRect().top <= line) cur = b; });
     const doc = document.documentElement;
     if (window.scrollY > 0 && window.innerHeight + window.scrollY >= doc.scrollHeight - 4) cur = btns[btns.length - 1];
-    btns.forEach((b) => { if (b === cur) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+    const previous = nav.querySelector('[aria-current="true"]');
+    if (previous !== cur) {
+      previous?.removeAttribute("aria-current");
+      cur.setAttribute("aria-current", "true");
+    }
+    if (nav.classList.contains("ce-bookmarks")) return;
     if (!navPill || !nav.contains(navPill)) {
       navPill = document.createElement("span");
       navPill.className = "dash-pill";
