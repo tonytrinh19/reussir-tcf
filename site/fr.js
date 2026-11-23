@@ -1717,6 +1717,7 @@ window.TCF.FR = {
 "Minutes par jour · minutes a day": "Minutes par jour",
 "Minutes ticked": "Minutes comptabilisées",
 "Missed": "Raté",
+"Missed cards get priority in your review schedule.": "Les cartes manquées sont prioritaires dans tes révisions.",
 "Missed last time": "Raté la dernière fois",
 "Missed most in the last 30 days (rules met 3 times or more)": "Le plus souvent raté ces 30 derniers jours (règles appliquées 3 fois ou plus)",
 "Missed the most: an example of your own helps (Edit card, or E while reviewing)": "Le plus souvent raté : un exemple personnel aide (Modifier la carte, ou E pendant la révision)",
@@ -1865,6 +1866,7 @@ window.TCF.FR = {
 "Next": "Suivant",
 "Next in today's plan": "Suivant dans le plan du jour",
 "Next month": "Mois suivant",
+"Next review:": "Prochaine révision :",
 "Next text": "Texte suivant",
 "Next week's two aren't picked yet.": "Les deux de la semaine prochaine ne sont pas encore choisies.",
 "Next →": "Suivant →",
@@ -2431,6 +2433,7 @@ window.TCF.FR = {
 "Recall each card cold before you flip it. No peeking.": "Essaie de te rappeler chaque carte de tête avant de la retourner. Pas de triche.",
 "Recall each card cold, no peeking.": "Essaie de te rappeler chaque carte de tête, sans tricher.",
 "Recall each card cold.": "Essaie de te rappeler chaque carte de tête.",
+"Recalled on the first try": "Retrouvées du premier coup",
 "Recent studies often find no clear gain in attention or memory, but two languages open « deux cultures », family ties and jobs: « nul besoin de leur ajouter des pouvoirs magiques ». Giving it up? « Évidemment pas ».": "Les études récentes ne trouvent souvent aucun gain net sur l'attention ou la mémoire, mais deux langues ouvrent « deux cultures », des liens familiaux et des emplois : « nul besoin de leur ajouter des pouvoirs magiques ». Y renoncer ? « Évidemment pas ».",
 "Recevoir: ils reçoivent → reçoive, but nous recevions.": "Recevoir : ils reçoivent → reçoive, mais nous recevions.",
 "Rechercher": "Rechercher",
@@ -3498,6 +3501,7 @@ window.TCF.FR = {
 "Toutes": "Toutes",
 "Tracking their spending showed « Plus de 600 $ par mois en restaurants » ; one restaurant meal a month, with the difference saved « le jour même de la paie ». They didn't give up restaurants entirely, and they already earned well.": "Suivre leurs dépenses a montré « Plus de 600 $ par mois en restaurants » ; un repas au restaurant par mois, avec la différence épargnée « le jour même de la paie ». Ils n'ont pas complètement renoncé aux restaurants, et ils gagnaient déjà bien leur vie.",
 "Transcription": "Transcription",
+"Translation": "Traduction",
 "Translation tools are « devenus excellents » for information but much less useful for « tout ce qui fait une vraie relation » : « Elle ne vous fera pas d'amis. » Falling enrolments are the context, not the reason.": "Les outils de traduction sont « devenus excellents » pour l'information, mais beaucoup moins utiles pour « tout ce qui fait une vraie relation » : « Elle ne vous fera pas d'amis. » La baisse des inscriptions est le contexte, pas la raison.",
 "Trap: this si introduces an indirect question, not a condition, so the conditionnel is correct.": "Piège : ce si introduit une interrogation indirecte, pas une condition, donc le conditionnel est correct.",
 "Travailler SUR + a thing: sur lequel.": "Travailler SUR + une chose : sur lequel.",
@@ -3735,6 +3739,7 @@ window.TCF.FR = {
 "Words": "Mots",
 "Words that change form: tout, quelque, de before an adjective": "Mots qui changent de forme : tout, quelque, de devant un adjectif",
 "Words that start with a vowel but don't elide: oui, onze, y": "Mots qui commencent par une voyelle mais sans élision : oui, onze, y",
+"Words to revisit": "Mots à revoir",
 "Working sick halves output, spreads illness and « coûterait aux entreprises deux à trois fois plus cher que les absences » : staying home is better for the company too. The researchers want employers to act, with paid sick days, not sanctions.": "Travailler malade réduit le rendement de moitié, propage la maladie et « coûterait aux entreprises deux à trois fois plus cher que les absences » : rester chez soi est aussi préférable pour l'entreprise. Les chercheurs veulent que les employeurs agissent, avec des congés de maladie payés, et non des sanctions.",
 "Write 3 sentences about your city or your job using dont, où and a form of lequel (auquel, pour laquelle…).": "Écris 3 phrases sur ta ville ou ton métier en utilisant dont, où et une forme de lequel (auquel, pour laquelle…).",
 "Write a task": "Rédiger une tâche",
@@ -5208,10 +5213,6 @@ window.TCF.FR = {
 "{0} min{1}"
 ],
 [
-"{0} miss{1} went to the priority pile: FSRS brings {2} back {3}, and counts {4} as a little harder from now on.",
-"L'erreur{1} {0} va dans la pile prioritaire : FSRS te la{2} ramène {3} et la{4} considère un peu plus difficile désormais."
-],
-[
 "{0} missed last time",
 "{0} manquées la dernière fois"
 ],
@@ -6590,10 +6591,6 @@ window.TCF.FR = {
 [
 "Minutes the plan asks each day: {0} in all",
 "Minutes demandées par le plan chaque jour : {0} au total"
-],
-[
-"miss{0} went to the priority pile: FSRS brings {1} back {2}, and counts {3} as a little harder from now on.",
-"l'erreur{0} est passée en priorité : FSRS la{1} ramène {2} et la considère{3} désormais un peu plus difficile."
 ],
 [
 "Missed {0} of {1}",

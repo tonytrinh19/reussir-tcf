@@ -3074,7 +3074,7 @@
     return m ? [m[1], m[2].trim()] : [l, ""];
   }
   // A card's examples, one per line with its English underneath, and the words you saved in bold.
-  function exHTML(c) {
+  function exHTML(c, reviewKey = "") {
     const re = grabClean(c.seen).length > 1 ? new RegExp(`(?<![\\p{L}\\p{N}])${markPat(grabClean(c.seen))}(?![\\p{L}\\p{N}])`, "giu") : null;
     const bold = (l) => {
       if (!re) return typo(l);
@@ -3082,9 +3082,12 @@
       for (const m of l.matchAll(re)) { out += typo(l.slice(at, m.index)) + `<b>${typo(m[0])}</b>`; at = m.index + m[0].length; }
       return out + typo(l.slice(at));
     };
-    return exLines(c.ex).map((l) => {
+    return exLines(c.ex).map((l, index) => {
       const [fr, en] = exSplit(l);
-      return `<span class="ex-l" translate="no"><span class="ex-fr" lang="fr">${bold(fr)}</span>${en ? `<span class="ex-en" lang="en">${esc(en)}</span>` : ""}</span>`;
+      const french = `<span class="ex-fr" lang="fr" translate="no">${bold(fr)}</span>`;
+      const english = en ? `<span class="ex-en" lang="en" translate="no">${esc(en)}</span>` : "";
+      if (!reviewKey) return `<span class="ex-l" translate="no">${french}${english}</span>`;
+      return `<li>${french}${english ? `<details class="ex-translation" ${foldAttr(reviewKey + "-" + index)}><summary>Translation</summary>${english}</details>` : ""}</li>`;
     }).join("");
   }
 
@@ -6868,7 +6871,7 @@
         </div>
         ${v.edit ? vocabEditForm(id) : `<div class="flash-face">
           <div class="flash-question">${front}</div>
-        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : ""}
+        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<div class="v-examples"><h2 class="eyebrow">Examples</h2><ul role="list">${exHTML(c, "vx-" + id + "-" + v.i)}</ul></div>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : ""}
         </div>
         <div class="flash-actions">
           ${!v.shown ? `<p class="muted small">${frFirst ? "Say what it means before you flip." : "Say it out loud before you flip."}</p>` : ""}
@@ -6951,6 +6954,17 @@
     if (!ds.length) return "soon";
     return ds[0] === ds[ds.length - 1] ? `on ${shortDate(ds[0])}` : `between ${shortDate(ds[0])} and ${shortDate(ds[ds.length - 1])}`;
   }
+  function missedVocabWords(v) {
+    if (!v.miss) return "";
+    // New sessions record the first check per card. Reviews and practice enqueue "re" after a miss.
+    const ids = v.mode === "new" ? Object.keys(v.first || {}).filter(id => v.first[id] === 0)
+      : [...new Set(v.queue.filter(e => e.k === "re").map(e => e.id))];
+    const cards = allCards();
+    const words = ids.map(id => cards.get(id)).filter(Boolean);
+    if (!words.length) return "";
+    return `<details class="v-recap-words"${words.length <= 5 ? " open" : ""}><summary>Words to revisit <span>${words.length}</span></summary>
+      <ul role="list">${words.map(c => `<li><b lang="fr" translate="no">${typo(c.fr)}</b><span lang="en" translate="no">${esc(c.en)}</span></li>`).join("")}</ul></details>`;
+  }
   function vocabDone() {
     const v = ui.vocab;
     const due = dueIds().length;
@@ -6964,12 +6978,14 @@
     const lede = v.mode === "new"
       ? `You recalled ${v.ok} of ${checked} at the first check. They come back ${backWhen(ids("show"))} for their first review.`
       : v.mode === "practice" ? `Practice only: the schedule didn't change.${v.miss ? ` The ${v.miss} you missed came back until you got ${v.miss > 1 ? "them" : "it"}.` : ""}`
-      : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile: FSRS brings ${v.miss > 1 ? "them" : "it"} back ${backWhen(ids("re"))}, and counts ${v.miss > 1 ? "them" : "it"} as a little harder from now on.` : "Clean session.";
-    return `<div class="wrap"><section class="panel stack" data-m="pop" data-k="vdone-${sk}">
-      <p class="eyebrow">${v.mode === "practice" ? "Practice complete" : "Session complete"}</p>
+      : v.miss ? `<span>Missed cards get priority in your review schedule.</span> <span>Next review:</span> <span>${backWhen(ids("re"))}</span>` : "Clean session.";
+    return `<div class="wrap"><section class="panel stack v-recap" data-m="pop" data-k="vdone-${sk}">
+      <div class="v-recap-head"><span class="v-recap-mark" aria-hidden="true">${ico("vocab")}</span><div><p class="eyebrow">${v.mode === "practice" ? "Practice complete" : "Session complete"}</p>
       <p class="scorebig"${perfect ? ` data-m="burst" data-k="vperfect-${sk}"` : ""}>${v.mode === "new" ? `<span data-tween="vdone-${sk}" data-tw="count" data-to="${n}">${n}</span> new` : `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.ok}">${v.ok}</span> / ${checked}`}</p>
+      ${v.mode !== "new" ? '<p class="small muted">Recalled on the first try</p>' : ""}</div></div>
       ${greet(rm[0], rm[1], rm[2], "sm")}
       <p class="lede">${lede}${due ? ` ${due} card${due > 1 ? "s are" : " is"} still due.` : ""}</p>
+      ${missedVocabWords(v)}
       <div class="row"><button class="btn primary" data-act="v-close">Back to the deck</button>${due ? `<button class="btn" data-act="v-start" data-mode="review">Review the rest</button>` : ""}${v.mode === "practice" ? `<button class="btn" data-act="v-start" data-mode="practice">Practise more</button>` : ""}</div>
     </section></div>`;
   }
@@ -9514,6 +9530,7 @@
       return;
     }
     if (route.view === "vocab" && ui.vocab && !ui.vocab.finished) {
+      if ((e.key === " " || e.key === "Enter") && t?.closest?.(".ex-translation summary")) return;
       const v = ui.vocab, step = v.queue[v.i] || {};
       if (e.key === "e" || e.key === "E") { e.preventDefault(); vocabEditOpen(); return; }
       if (e.key === "m" || e.key === "M") { e.preventDefault(); soundToggle(); return; }

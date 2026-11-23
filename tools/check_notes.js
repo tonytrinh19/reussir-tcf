@@ -100,6 +100,22 @@ assert.deepEqual(Array.from(dueIds()).sort(), promoted.map((c) => c.id).sort());
 assert.equal(JSON.stringify([Array.from(S.cards), Array.from(S.srs)]), stored);
 console.log("Card IDs: source cards, local overrides, unique entries, existing IDs and review schedules preserved.");
 
+// The recap uses first checks for new cards and deduplicates repeated review misses.
+Object.assign(context, { typo: String, esc: String });
+vm.runInContext(app.slice(app.indexOf("  function missedVocabWords"), app.indexOf("  function vocabDone")), context);
+const missedId = promoted[0].id, knownId = promoted[1].id;
+const recap = context.missedVocabWords;
+const learning = recap({ mode: "new", miss: 1, first: { [missedId]: 0, [knownId]: 1 } });
+assert(learning.includes(promoted[0].c[0]));
+assert(!learning.includes(promoted[1].c[0]));
+assert(learning.includes("My edited meaning"));
+for (const mode of ["practice", "review"]) {
+  const queue = [ { id: knownId, k: "rev" }, { id: missedId, k: "re" }, { id: missedId, k: "re" }, { id: "deleted", k: "re" } ];
+  assert.equal(recap({ mode, miss: 1, queue }), learning);
+  assert.equal(recap({ mode, miss: 0, queue }), "");
+}
+assert.equal(JSON.stringify([Array.from(S.cards), Array.from(S.srs)]), stored);
+
 const REGS = ["Québec", "familier", "soutenu"];
 for (const x of T.EXPRESSIONS || []) {
   if (!x || !String(x.fr || "").trim() || !String(x.en || "").trim()) { fail(`EXPRESSIONS: an entry without its French or its meaning: ${JSON.stringify(x)}`); continue; }

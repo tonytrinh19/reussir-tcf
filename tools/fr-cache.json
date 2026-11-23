@@ -5595,5 +5595,10 @@
  "≈ {0} min": "≈ {0} min",
  "more to reach the minimum": "pour atteindre le minimum",
  "over the limit": "au-dessus du maximum",
- "Within the word range": "Longueur attendue"
+ "Within the word range": "Longueur attendue",
+ "Translation": "Traduction",
+ "Words to revisit": "Mots à revoir",
+ "Missed cards get priority in your review schedule.": "Les cartes manquées sont prioritaires dans tes révisions.",
+ "Next review:": "Prochaine révision :",
+ "Recalled on the first try": "Retrouvées du premier coup"
 }

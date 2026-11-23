@@ -4336,15 +4336,6 @@
   ]
  },
  {
-  "id": "eed502185dbb",
-  "text": "{0} miss{1} went to the priority pile: FSRS brings {2} back {3}, and counts {4} as a little harder from now on.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… miss… went to the priority pile: FSRS brings … back …, and counts … as a little harder from now on."
-  ]
- },
- {
   "id": "a93d9c4ef786",
   "text": "{0} missed last time",
   "kind": "pattern",
@@ -11088,7 +11079,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…</p> <p>…</p> … <p>……</p> <button>Back to the deck</button>……"
+   "<span>…</span> <p>…</p> <p>…</p> … … <p>……</p> … <button>Back to the deck</button>……"
   ]
  },
  {
@@ -16845,7 +16836,7 @@
   "ctx": [
    "<li> <p><b>…</b> <span>· …</span></p> Examples <span>one per line, French — English</span> … <button>Save</button><button>Not now</button> </li>",
    "Exemples · Examples",
-   "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
+   "<h2>Examples</h2> …"
   ]
  },
  {
@@ -22715,15 +22706,6 @@
   ]
  },
  {
-  "id": "83610538531d",
-  "text": "miss{0} went to the priority pile: FSRS brings {1} back {2}, and counts {3} as a little harder from now on.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… miss… went to the priority pile: FSRS brings … back …, and counts … as a little harder from now on."
-  ]
- },
- {
   "id": "b564001a58dc",
   "text": "Missed",
   "kind": "exact",
@@ -22757,6 +22739,15 @@
   "where": "app",
   "ctx": [
    "<p>Missed … times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span>E</span>.</p>"
+  ]
+ },
+ {
+  "id": "a24962f9eb8a",
+  "text": "Missed cards get priority in your review schedule.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Missed cards get priority in your review schedule.</span> <span>Next review:</span> <span>…</span>"
   ]
  },
  {
@@ -24163,6 +24154,15 @@
   "where": "attr:aria-label",
   "ctx": [
    "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+  ]
+ },
+ {
+  "id": "aebd7da655a7",
+  "text": "Next review:",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Missed cards get priority in your review schedule.</span> <span>Next review:</span> <span>…</span>"
   ]
  },
  {
@@ -29733,6 +29733,15 @@
   "kind": "exact",
   "where": "plan",
   "ctx": []
+ },
+ {
+  "id": "c2aaceb2f0cc",
+  "text": "Recalled on the first try",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Recalled on the first try</p>"
+  ]
  },
  {
   "id": "78b18f77bcf1",
@@ -39658,6 +39667,15 @@
   ]
  },
  {
+  "id": "ac26a7a94ea2",
+  "text": "Translation",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary>Translation</summary>…"
+  ]
+ },
+ {
   "id": "df4330e9bbb4",
   "text": "Translation tools are « devenus excellents » for information but much less useful for « tout ce qui fait une vraie relation » : « Elle ne vous fera pas d'amis. » Falling enrolments are the context, not the reason.",
   "kind": "exact",
@@ -41631,6 +41649,15 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "4a5b7b8f61c5",
+  "text": "Words to revisit",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary>Words to revisit <span>…</span></summary> …"
+  ]
  },
  {
   "id": "e247450845ee",

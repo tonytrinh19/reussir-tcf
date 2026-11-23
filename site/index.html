@@ -1019,6 +1019,48 @@ input[type="text"].blank:focus-visible { outline: 2px solid var(--accent); outli
 .v-session .flash-back { justify-self: center; gap: 10px; width: min(100%, 52ch); padding-top: 15px; border-top: 1px dashed var(--rule-2); }
 .v-session .flash-back > :is(.answer, .prompt) { font: 600 clamp(23px, 3.3vw, 31px)/1.2 var(--f-text); color: var(--accent); }
 .v-session .flash .ex { max-width: 100%; margin: 0; padding: 10px 15px; background: var(--surface); border-inline-start: 3px solid var(--amber); border-radius: 2px 9px 9px 2px; text-align: left; }
+/* A notebook page on the back of a study card. French and its optional gloss stay together. */
+.v-examples {
+  position: relative; isolation: isolate; text-align: start; min-width: 0;
+  padding: 17px clamp(12px,3vw,22px) 5px 35px;
+  border: 1px solid var(--rule-2); border-radius: 4px 13px 13px 4px;
+  background: linear-gradient(90deg,transparent 23px,var(--margin) 23px 24px,transparent 24px),var(--surface);
+  box-shadow: 0 3px 0 -1px var(--sunk),0 4px 0 -1px var(--rule-2);
+}
+.v-examples::before {
+  content: ""; position: absolute; width: 9px; inset: 10px auto 10px 7px;
+  background: radial-gradient(circle at center,var(--sunk) 2px,var(--rule-2) 2.5px,transparent 3px) center top / 9px 22px repeat-y;
+}
+.v-examples h2 { color: var(--sk-voc); margin: 0; }
+.v-examples ul,.v-recap-words ul { padding: 0; margin: 0; list-style: none; }
+.v-examples li { padding: 10px 0; overflow-wrap: anywhere; }
+.v-examples li + li { border-top: 1px solid var(--seyes-2); }
+.v-examples .ex-fr { display: block; font: 500 clamp(16px,2.2vw,19px)/1.48 var(--f-text); color: var(--ink); }
+.ex-translation { margin-top: 3px; }
+.ex-translation summary,.v-recap-words summary { cursor: pointer; color: var(--sk-voc); font: 750 13px/1.4 var(--f-ui); }
+.ex-translation summary { min-height: 28px; width: fit-content; padding: 5px 4px 3px 0; }
+.ex-translation .ex-en { border-inline-start: 2px solid var(--rule-2); padding-inline-start: 10px; color: var(--ink-2); }
+.v-recap { border-top: 4px solid var(--sk-voc); background: linear-gradient(135deg,var(--amber-soft),var(--surface) 48%); }
+.v-recap-head { display: flex; align-items: center; gap: 20px; }
+.v-recap-head p { margin: 0; }
+.v-recap-mark {
+  position: relative; isolation: isolate; display: grid; place-items: center; flex: none; width: 64px; height: 56px;
+  color: var(--sk-voc); border: 1px solid var(--rule-2); border-radius: 8px; background: var(--surface);
+  box-shadow: -3px 3px 0 var(--amber-soft),-4px 4px 0 var(--rule-2); transform: rotate(-5deg);
+}
+.v-recap-mark .ico { width: 30px; height: 30px; }
+.v-recap-words { padding: 12px 16px; border: 1px solid var(--rule-2); border-radius: 12px; background: var(--surface); }
+.v-recap-words summary { font-size: 15px; color: var(--ink); padding-block: 4px; }
+.v-recap-words summary span { padding: 1px 7px; border-radius: 10px; color: var(--sk-voc); background: var(--amber-soft); }
+.v-recap-words ul { margin-top: 6px; }
+.v-recap-words li { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,3fr); align-items: baseline; gap: 4px 16px; padding: 9px 0; border-top: 1px solid var(--rule); overflow-wrap: anywhere; }
+.v-recap-words li b { font: 650 18px/1.35 var(--f-text); }
+.v-recap-words li span { font-size: 14px; color: var(--ink-2); }
+@media (max-width: 520px) { .v-recap-words li { grid-template-columns: minmax(0,1fr); } }
+@media (prefers-reduced-motion: no-preference) {
+  .ex-translation[open] .ex-en { animation: example-reveal .19s ease-out; }
+  @keyframes example-reveal { from { opacity: .4; transform: translateY(-3px); } }
+}
 .flash-actions { display: grid; gap: 12px; justify-items: center; padding: 16px clamp(16px, 4vw, 30px) 20px; border-top: 1px solid var(--rule); border-radius: 0 0 16px 16px; background: var(--surface); }
 .flash-actions > p { max-width: 56ch; }
 .flash-actions .row { width: 100%; }
