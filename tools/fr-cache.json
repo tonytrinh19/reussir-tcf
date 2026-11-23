@@ -5589,5 +5589,11 @@
  "La révision n’a pas pu être enregistrée.": "La révision n’a pas pu être enregistrée.",
  "Question {0} · Erreur {1} /": "Question {0} · Erreur {1} /",
  "Revoir mes erreurs": "Revoir mes erreurs",
- "Revoir mes erreurs ({0})": "Revoir mes erreurs ({0})"
+ "Revoir mes erreurs ({0})": "Revoir mes erreurs ({0})",
+ "{0} more to reach the minimum": "Minimum : encore {0}",
+ "{0} over the limit": "{0} au-dessus du maximum",
+ "≈ {0} min": "≈ {0} min",
+ "more to reach the minimum": "pour atteindre le minimum",
+ "over the limit": "au-dessus du maximum",
+ "Within the word range": "Longueur attendue"
 }

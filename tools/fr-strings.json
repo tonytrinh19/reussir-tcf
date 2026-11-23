@@ -60,7 +60,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "…–… words"
+   "…–… words",
+   "<li> <span>…</span><span>≈ … min</span> <span>…</span><b>…</b><span>…–… words</span></li>"
   ]
  },
  {
@@ -196,15 +197,6 @@
   "where": "app",
   "ctx": [
    "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
-  ]
- },
- {
-  "id": "07027a3c7533",
-  "text": "· {0} · {1}–{2} words · about {3} min",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<li><b>…</b> · … · …–… words · about … min</li>"
   ]
  },
  {
@@ -3522,15 +3514,6 @@
   ]
  },
  {
-  "id": "f29759bbf699",
-  "text": "{0} · {1}–{2} words · about {3} min",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<li><b>…</b> · … · …–… words · about … min</li>"
-  ]
- },
- {
   "id": "fe0394b9494e",
   "text": "{0} · {1}–{2} words · about {3} of the 60 min",
   "kind": "pattern",
@@ -3628,7 +3611,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -4463,6 +4446,15 @@
   ]
  },
  {
+  "id": "0d902d7678ad",
+  "text": "{0} more to reach the minimum",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… more to reach the minimum"
+  ]
+ },
+ {
   "id": "697a634bc0ca",
   "text": "{0} most recent",
   "kind": "pattern",
@@ -4827,6 +4819,15 @@
   "where": "app",
   "ctx": [
    "… of your texts to prepare first."
+  ]
+ },
+ {
+  "id": "84cc43c9c741",
+  "text": "{0} over the limit",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… over the limit"
   ]
  },
  {
@@ -5209,7 +5210,7 @@
   "where": "app",
   "ctx": [
    "…–… words",
-   "<li><b>…</b> · … · …–… words · about … min</li>",
+   "<li> <span>…</span><span>≈ … min</span> <span>…</span><b>…</b><span>…–… words</span></li>",
    "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
@@ -6022,6 +6023,15 @@
   "where": "app",
   "ctx": [
    "| Quand | Quoi | Exemple | |---|---|---| | … | … | … |"
+  ]
+ },
+ {
+  "id": "8d5d3ef078e9",
+  "text": "≈ {0} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<li> <span>…</span><span>≈ … min</span> <span>…</span><b>…</b><span>…–… words</span></li>"
   ]
  },
  {
@@ -8421,15 +8431,6 @@
   "ctx": []
  },
  {
-  "id": "aebe40c4bc4f",
-  "text": "about {0} min",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<li><b>…</b> · … · …–… words · about … min</li>"
-  ]
- },
- {
   "id": "4221c73c7989",
   "text": "about {0} of the 60 min",
   "kind": "pattern",
@@ -10568,7 +10569,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Révision terminée</h2><p>Bonnes réponses à la deuxième écoute : … / …</p> …<a>Aujourd’hui</a>"
+   "<span>…</span><h2>Révision terminée</h2>…<p>Bonnes réponses à la deuxième écoute : … / …</p> …<a>Aujourd’hui</a>"
   ]
  },
  {
@@ -16076,7 +16077,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -23031,6 +23032,15 @@
   ]
  },
  {
+  "id": "7e34a6fad239",
+  "text": "more to reach the minimum",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… more to reach the minimum"
+  ]
+ },
+ {
   "id": "8cd4ba4a3a7c",
   "text": "Morphosyntaxe",
   "kind": "exact",
@@ -26777,6 +26787,15 @@
   ]
  },
  {
+  "id": "e1c2da5bc84e",
+  "text": "over the limit",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… over the limit"
+  ]
+ },
+ {
   "id": "fed758b7a842",
   "text": "overview",
   "kind": "exact",
@@ -29220,7 +29239,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …",
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …",
    "<button>…</button>"
   ]
  },
@@ -29230,7 +29249,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -30891,7 +30910,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -41499,6 +41518,15 @@
   ]
  },
  {
+  "id": "4eba25618f70",
+  "text": "Within the word range",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Within the word range"
+  ]
+ },
+ {
   "id": "bae6cddfaf76",
   "text": "Without it, what's here now can't be brought back after the import.",
   "kind": "exact",
@@ -41576,8 +41604,9 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "Words",
-   "Date Task Words Level …"
+   "<span>Words</span><span><b></b> / …–…</span> <span></span><i></i> <small></small>",
+   "Date Task Words Level …",
+   "Words"
   ]
  },
  {

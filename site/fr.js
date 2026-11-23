@@ -3727,6 +3727,7 @@ window.TCF.FR = {
 "With the infinitive, ne pas both go before it: de ne pas toucher.": "Avec l'infinitif, ne pas se placent tous les deux devant : de ne pas toucher.",
 "With two pronouns, me comes before les: me les envoyer.": "Avec deux pronoms, me se place avant les : me les envoyer.",
 "With y or en": "Avec y ou en",
+"Within the word range": "Longueur attendue",
 "Without it, what's here now can't be brought back after the import.": "Sans elle, impossible de récupérer le contenu actuel après l'importation.",
 "Word choice": "Choix des mots",
 "Word counts on all three tasks; comparison present in Tâche 3.": "Nombre de mots respecté pour les trois tâches ; comparaison présente dans la Tâche 3.",
@@ -4020,6 +4021,7 @@ window.TCF.FR = {
 "mistakes": "erreurs",
 "more": "Plus",
 "more time on the clock, and each miss gone over": "plus de temps et chaque erreur revue",
+"more to reach the minimum": "pour atteindre le minimum",
 "most recent": "plus récent",
 "mostly": "surtout",
 "mots": "mots",
@@ -4066,6 +4068,7 @@ window.TCF.FR = {
 "optional: that page shows a tab to this sheet": "facultatif : cette page affichera un onglet vers cette fiche",
 "or leave it for later": "ou laisse-le pour plus tard",
 "over": "Terminé",
+"over the limit": "au-dessus du maximum",
 "overview": "Vue d'ensemble",
 "page": "page",
 "passé composé where the plus-que-parfait is needed for implied anteriority": "passé composé là où le plus-que-parfait est requis pour marquer l'antériorité",
@@ -4741,10 +4744,6 @@ window.TCF.FR = {
 ", puis repris {0}"
 ],
 [
-"· {0} · {1}–{2} words · about {3} min",
-"· {0} · {1}–{2} mots · environ {3} min"
-],
-[
 "· {0} fixed",
 "· {0} corrigée(s)"
 ],
@@ -4847,10 +4846,6 @@ window.TCF.FR = {
 [
 "{0} · {1} words",
 "{0} · {1} mots"
-],
-[
-"{0} · {1}–{2} words · about {3} min",
-"{0} · {1}–{2} mots · environ {3} min"
 ],
 [
 "{0} · {1}–{2} words · about {3} of the 60 min",
@@ -5261,6 +5256,10 @@ window.TCF.FR = {
 "Encore {0} pour l'égaler."
 ],
 [
+"{0} more to reach the minimum",
+"Minimum : encore {0}"
+],
+[
 "{0} most recent",
 "{0} plus récents"
 ],
@@ -5419,6 +5418,10 @@ window.TCF.FR = {
 [
 "{0} of your texts to prepare first.",
 "{0} de tes textes à préparer d'abord."
+],
+[
+"{0} over the limit",
+"{0} au-dessus du maximum"
 ],
 [
 "{0} per 100 words",
@@ -5861,6 +5864,10 @@ window.TCF.FR = {
 "×{0} cette semaine"
 ],
 [
+"≈ {0} min",
+"≈ {0} min"
+],
+[
 "≈ {0} of reviews at your pace",
 "≈ {0} de révision à ton rythme"
 ],
@@ -5903,10 +5910,6 @@ window.TCF.FR = {
 [
 "a second set at {0}",
 "une deuxième série à {0}"
-],
-[
-"about {0} min",
-"environ {0} min"
 ],
 [
 "about {0} of the 60 min",

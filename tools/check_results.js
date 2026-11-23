@@ -34,3 +34,18 @@ assert(resultMatches({kind:'eemock',paperTitle:'Sujet du mois',title:'Examen bla
 assert(resultMatches({kind:'comp',skill:'co',title:'Entretien'},{filter:'co',type:'exercise'}));
 assert.equal(JSON.stringify({writing,attempts}),before,'Browsing results must not mutate any stored attempt');
 console.log('Results: grouped writing mocks, incomplete corrections, zero scores, accent-insensitive search, skill/type filters and immutable records pass.');
+
+// Render the actual mock history with both pending and graded results. A pending score
+// belongs to the whole mock, even when only one of its three tasks has received feedback.
+Object.assign(context, {
+  EE_IP: "writing-mock", ipGet: () => null, ico: () => "", esc: String, ui: { form: {} },
+  eePaperPicker: () => "", claudeOn: () => false, resultsLink: () => "", nclcTag: () => "",
+  arr: v => Array.isArray(v) ? v : [], T: { WRITING: Object.fromEntries(context.EE_TASKS.map(t =>
+    [t, { name: t, kind: t, min: 60, max: 120, exam: 15 }])) },
+});
+const intro = source.slice(source.indexOf('  function eeIntro()'), source.indexOf('  function eeRun('));
+const status = source.split('\n').find(line => line.includes('const writingReviewStatus ='));
+vm.runInContext(status + '\n' + intro, context);
+assert.match(context.eeIntro(), /not corrected/);
+writing[2] = { ...writing[2], aiReviews: [{ text: 'Feedback without a grade' }] };
+assert.match(context.eeIntro(), /Review saved · no score/);

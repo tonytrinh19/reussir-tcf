@@ -3247,15 +3247,33 @@
     const st = words === 0 ? "" : words < min ? "under" : words > max ? "over" : "in";
     return { cls: st, html: `<div class="lab"><span>${label}</span><span><b>${words}</b> / ${min}–${max}</span></div><div class="track"><div class="zone" style="left:${(min / top) * 100}%;width:${((max - min) / top) * 100}%"></div><div class="fill" style="width:${Math.min(100, (words / top) * 100)}%"></div></div>` };
   }
+  // Keep the cursor and scale mounted while typing, including when a draft crosses a word limit.
+  function paintWordRuler(el, words, W) {
+    const top = Math.max(words, W.max * 1.25);
+    if (!el.querySelector(".word-ruler")) {
+      el.innerHTML = `<div class="lab"><span>Words</span><span><b data-word-count></b> / ${W.min}–${W.max}</span></div>
+        <div class="word-ruler" aria-hidden="true"><span class="word-zone"></span><i></i></div>
+        <small class="word-status"></small>`;
+    }
+    const state = eeState(words, W);
+    el.classList.add("word-meter");
+    for (const name of ["under", "in", "over"]) el.classList.toggle(name, name === state);
+    el.style.setProperty("--min-pos", (100 * W.min / top) + "%");
+    el.style.setProperty("--max-pos", (100 * W.max / top) + "%");
+    el.style.setProperty("--word-pos", (100 * words / top) + "%");
+    el.querySelector("[data-word-count]").textContent = words;
+    let status = "Within the word range";
+    if (words < W.min) status = `${W.min - words} more to reach the minimum`;
+    if (words > W.max) status = `${words - W.max} over the limit`;
+    el.querySelector(".word-status").textContent = status;
+  }
   function updateMeters() {
     const el = document.getElementById("w-meter");
     if (!el) return;
     const task = ui.w.task, W = T.WRITING[task];
     const text = ui.w.text[task] || "";
     const n = countWords(text);
-    const m = meterHTML(n, W.min, W.max, "Words");
-    el.className = "meter " + m.cls;
-    el.innerHTML = m.html;
+    paintWordRuler(el, n, W);
     const pe = document.getElementById("w-paras");
     if (pe && W.paras) {
       // TCF Canada marks Tâche 3 in two parts: the first paragraph is Partie 1, the rest is Partie 2.
@@ -7187,7 +7205,7 @@
     if (!e || e.done) return;
     const W = T.WRITING[e.task], text = str(e.texts[e.task]);
     const el = document.getElementById("ee-meter");
-    if (el) { const m = meterHTML(countWords(text), W.min, W.max, "Words"); el.className = "meter " + m.cls; el.innerHTML = m.html; }
+    if (el) paintWordRuler(el, countWords(text), W);
     const pe = document.getElementById("ee-paras");
     if (pe && W.paras) {
       const ps = paragraphs(text), counts = [ps[0] ? countWords(ps[0]) : 0, ps.slice(1).reduce((n, x) => n + countWords(x), 0)];
@@ -7209,12 +7227,18 @@
   }
   function eeIntro() {
     const ip = ipGet(EE_IP), mocks = eeMocks();
-    const plan = EE_TASKS.map((t) => { const W = T.WRITING[t]; return `<li><b>${esc(W.name)}</b> · ${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} min</li>`; }).join("");
-    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">${writingReviewStatus(w)}</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
+    const taskIcons = { t1: "envelope", t2: "writing", t3: "papers" };
+    const plan = EE_TASKS.map(t => {
+      const W = T.WRITING[t];
+      return `<li class="ee-brief" data-task="${t}" data-m="paper" data-k="ee-brief-${t}">
+        <div class="ee-brief-top"><span class="ee-brief-icon" aria-hidden="true">${ico(taskIcons[t])}</span><span class="ee-brief-time">≈ ${W.exam} min</span></div>
+        <span class="eyebrow">${esc(W.name)}</span><b>${esc(W.kind)}</b><span class="ee-brief-range">${W.min}–${W.max} words</span></li>`;
+    }).join("");
+    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">${writingReviewStatus(Object.values(m.tasks).find(task => arr(task.aiReviews).length) || {})}</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
     return `<section class="panel stack" data-spot>
         <p class="h3 with-ico">${ico("exam")}Examen blanc · Expression écrite</p>
         <p class="small">The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p>
-        <ul class="small ee-plan">${plan}</ul>
+        <ul class="ee-plan" role="list">${plan}</ul>
         <p class="small muted">${(ui.form["ee-paper"] || "builtin") === "builtin" ? "Each task gets a prompt you haven't written yet." : "Les sujets PDF sélectionnés sont conservés ensemble pour cet examen."} ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
         ${ip ? "" : eePaperPicker()}
         ${ip ? `<div class="notice"><b>You have an unfinished mock:</b> ${esc(ipProgress(ip))}.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${EE_IP}">Resume the mock</button>${discardBtn(EE_IP)}</div></div>` : `<div class="row"><button class="btn primary" data-act="ee-start">Start the exam · 60:00</button></div>`}
