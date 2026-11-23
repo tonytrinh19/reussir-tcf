@@ -16,7 +16,8 @@ const before = JSON.stringify({writing,attempts});
 const context = {list:()=>writing,EE_TASKS:['t1','t2','t3'],finishedAttempts:()=>attempts,str:v=>v==null?'':String(v),shortDate:v=>v==='2026-11-10'?'10 nov.':v,SECTION:{writing:'Écrit',eemock:'Écrit',exam:'Compréhension',comp:'Compréhension',drill:'Grammaire'},sectionOf:kind=>['drill','prod'].includes(kind)?'grammar':kind==='exam'?'comp':kind==='eemock'?'writing':kind};
 const mocks = source.slice(source.indexOf('  function eeMocks()'), source.indexOf('  // Claude corrects the mock',source.indexOf('  function eeMocks()')));
 const model = source.slice(source.indexOf('  function resultEntries()'),source.indexOf('  function resultsLink('));
-vm.createContext(context); vm.runInContext(mocks+model+'\nthis.results = {resultEntries,resultMatches,resultType,resultSkill};',context);
+const dates = source.slice(source.indexOf("  const pad ="), source.indexOf("  const dow ="));
+vm.createContext(context); vm.runInContext(dates+mocks+model+'\nthis.results = {resultEntries,resultMatches,resultType,resultSkill};',context);
 const {resultEntries,resultMatches,resultType} = context.results;
 const entries = resultEntries();
 assert.deepEqual(Array.from(entries,x=>x.id),['co1','w4','eemock-mock1','eemock-mock0','ce1']);
@@ -32,6 +33,12 @@ assert(resultMatches(entries[4],{query:'10 nov.'}),'Dates shown on the cards mus
 assert(resultMatches({kind:'eemock',prompts:{t1:{q:'Réunion des voisins'}}},{query:'reunion voisins'}),'Search includes unfinished mock prompts');
 assert(resultMatches({kind:'eemock',paperTitle:'Sujet du mois',title:'Examen blanc EE',texts:{}},{filter:'writing',type:'exam',query:'sujet mois'}),'Unfinished exams must use the same filters');
 assert(resultMatches({kind:'comp',skill:'co',title:'Entretien'},{filter:'co',type:'exercise'}));
+const inWeek = x => resultMatches(x, {filter:'co',type:'exam'}, '2026-11-08', '2026-11-14');
+for (const [date, expected] of [['2026-11-08',true],['2026-11-14',true],['2026-11-07',false],['2026-11-15',false]]) {
+  assert.equal(inWeek({...entries[0],date}),expected);
+}
+assert(inWeek({kind:'exam',skill:'co',updated:new Date(2026,10,10,12).getTime()}),'Unfinished exams use their last editing day');
+assert(!inWeek({kind:'exam',skill:'co'}),'Undated exams only appear in all dates');
 assert.equal(JSON.stringify({writing,attempts}),before,'Browsing results must not mutate any stored attempt');
 console.log('Results: grouped writing mocks, incomplete corrections, zero scores, accent-insensitive search, skill/type filters and immutable records pass.');
 

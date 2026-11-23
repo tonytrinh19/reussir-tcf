@@ -14253,6 +14253,15 @@
   ]
  },
  {
+  "id": "b84aeb5b9204",
+  "text": "Date inconnue",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Date inconnue"
+  ]
+ },
+ {
   "id": "a2620cbc10f5",
   "text": "day",
   "kind": "exact",
@@ -18915,6 +18924,15 @@
   "where": "attr:title",
   "ctx": [
    "<a>← Fiches</a><span>…</span> <span>…<span>…</span>…</span> <h1>…</h1> … <button>…</button> <a>Edit</a>…… … … … … · select any line, then “Save to cards” to drill it."
+  ]
+ },
+ {
+  "id": "e6faf8c20c6b",
+  "text": "Hier",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Hier"
   ]
  },
  {
@@ -29810,7 +29828,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … Période … … …"
   ]
  },
  {
@@ -34241,7 +34259,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … Période … … …"
   ]
  },
  {
@@ -40227,7 +40245,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … Période … … …"
   ]
  },
  {

@@ -1727,7 +1727,7 @@
  "Learner's part 1 (first paragraph): {0} words (TCF Canada: 40–60). Part 2 (everything after it): {1} words (TCF Canada: 80–120).": "Partie 1 de l'apprenant (premier paragraphe) : {0} mots (TCF Canada : 40–60). Partie 2 (tout le reste) : {1} mots (TCF Canada : 80–120).",
  "Learning new cards": "Apprentissage de nouvelles cartes",
  "Leave a skill blank if you didn't sit it.": "Laisse une compétence vide si tu ne l'as pas passée.",
- "Lecture": "Écoute",
+ "Lecture": "Lecture",
  "Lecture B1": "Lecture B1",
  "Lecture B2": "Lecture B2",
  "Lecture libre": "Lecture libre",
@@ -5605,5 +5605,7 @@
  "Answered": "Répondues",
  "Larger text": "Agrandir le texte",
  "Reading guide": "Repères de lecture",
- "Reading passage": "Texte à lire"
+ "Reading passage": "Texte à lire",
+ "Date inconnue": "Date inconnue",
+ "Hier": "Hier"
 }

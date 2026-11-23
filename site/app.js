@@ -368,7 +368,7 @@
     },
     wReview: null, // a pasted review being attached to an existing submission
     calendarDay: null,
-    hist: { filter: "all", type: "all", status: "done", query: "", limit: 30, open: null },
+    hist: { filter: "all", type: "all", status: "done", period: "all", query: "", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
     c: { skill: "ce", lv: { ce: "", co: "" }, theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
@@ -7871,13 +7871,21 @@
   const resultSkill = x => ["comp", "exam"].includes(x.kind) ? (x.doc || x).skill : sectionOf(x.kind);
   const resultType = x => ["exam", "eemock"].includes(x.kind) ? "exam" : "exercise";
   const resultText = text => str(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  function resultMatches(x, filters) {
+  function resultDay(x) {
+    const timestamp = x.updated || x.ts;
+    if (!x.updated && /^\d{4}-\d{2}-\d{2}$/.test(x.date) && ymd(parse(x.date)) === x.date) return x.date;
+    const day = new Date(timestamp);
+    return timestamp && Number.isFinite(day.getTime()) ? ymd(day) : "";
+  }
+  function resultMatches(x, filters, since, today) {
+    const day = resultDay(x);
+    if (since && (day < since || day > today)) return false;
     const skill = resultSkill(x), type = resultType(x), d = x.doc || x;
     if (filters.filter && filters.filter !== "all" && filters.filter !== skill && !(filters.filter === "comp" && ["ce", "co"].includes(skill))) return false;
     if (filters.type && filters.type !== "all" && filters.type !== type) return false;
     const terms = resultText(filters.query).trim().split(/\s+/).filter(Boolean);
     const subjects = x.kind === "eemock" ? Object.values(d.tasks || d.prompts || {}).map(w => w.prompt || w.q).join(" ") : typeof d.prompt === "object" ? d.prompt?.q : d.prompt;
-    const text = resultText([x.title, x.date, x.date ? shortDate(x.date) : "", subjects, d.paperTitle, d.source?.title, SECTION[x.kind], skill, type === "exam" ? "examen blanc" : "exercice"].join(" "));
+    const text = resultText([x.title, day, shortDate(day), subjects, d.paperTitle, d.source?.title, SECTION[x.kind], skill, type === "exam" ? "examen blanc" : "exercice"].join(" "));
     return terms.every(term => text.includes(term));
   }
   function resultsLink(skill = "all", type = "all", label = "Mes résultats") {
@@ -7907,9 +7915,9 @@
     const available = x.kind === "comp" ? d.src !== "logged" && (samplesFor(d.skill).some(s => s.id === d.setId) || d.snap)
       : x.kind === "exam" ? XSPEC[skillOf(d)].bank().some(e => e.id === d.setId) || d.snap : true;
     const expanded = ui.hist.open === x.id && ["writing", "drill", "prod"].includes(x.kind);
-    return `<article class="result-card" id="h-${esc(x.id)}" tabindex="-1">
+    return `<article class="result-card" data-skill="${esc(skill)}" id="h-${esc(x.id)}" tabindex="-1">
       <div class="result-symbol" aria-hidden="true">${ico(icon)}</div>
-      <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span><time datetime="${esc(x.date)}">${shortDate(x.date)}</time></div>
+      <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span></div>
         <h3>${esc(x.title)}</h3>${x.kind === "exam" && retakes.has(x.id) ? `<p class="small muted">Nouvelle tentative · hors estimation NCLC</p>` : ""}${detail ? `<p class="small muted">${esc(detail)}</p>` : ""}
         ${x.kind === "eemock" ? `<div class="result-tasks">${EE_TASKS.map((t, i) => `<span>${esc(T.WRITING[t].name)} <b>${!d.tasks[t] ? "Non rendue" : d.scores[i] == null ? arr(d.tasks[t].aiReviews).length ? "Avis enregistré" : "À corriger" : d.scores[i] + "/20"}</b></span>`).join("")}</div>` : ""}
       </div>
@@ -7922,16 +7930,36 @@
     return `<article class="resume-card"><div><p class="eyebrow">${esc(SECTION[ip.kind])} · À reprendre</p><h3>${esc(ip.paperTitle || ip.title)}</h3><p class="small muted">${esc(ipProgress(ip))}</p><p class="small muted">${esc(whenOf(ip.updated))}</p></div>
       <div class="row"><button class="btn primary sm" data-act="ip-resume" data-id="${esc(ip.id)}">Reprendre</button>${discardBtn(ip.id)}</div></article>`;
   }
+  function historyDays(entries, today, card) {
+    const groups = new Map(), yesterday = addDays(today, -1);
+    for (const x of entries) {
+      const day = resultDay(x);
+      if (!groups.has(day)) groups.set(day, []);
+      groups.get(day).push(x);
+    }
+    return [...groups].sort(([a], [b]) => b.localeCompare(a)).map(([day, items]) => {
+      const date = day && parse(day);
+      const caption = !day ? "Date inconnue" : day === today ? "Aujourd’hui" : day === yesterday ? "Hier" : DAYS[dow(day)];
+      return `<details class="history-day" ${foldAttr("history-day-" + ui.hist.status + "-" + day, true)}>
+        <summary><span class="history-stamp" aria-hidden="true">${day ? `<small>${MONTHS_SHORT[date.getMonth()]}</small><b>${date.getDate()}</b>` : ico("papers")}</span>
+          <span class="history-heading"><strong>${caption}</strong>${day ? `<time datetime="${day}">${frDate(day)}</time>` : ""}</span>
+          <span class="history-caret" aria-hidden="true"></span></summary>
+        <div class="history-entries">${items.map(card).join("")}</div></details>`;
+    }).join("");
+  }
   function historyList() {
-    const all = resultEntries().filter(x => resultMatches(x, ui.hist));
-    const ips = unfinished().filter(x => resultMatches(x, ui.hist));
+    const today = todayStr();
+    const since = ["7", "30"].includes(ui.hist.period) ? addDays(today, 1 - Number(ui.hist.period)) : "";
+    const matches = x => resultMatches(x, ui.hist, since, today);
+    const all = resultEntries().filter(matches);
+    const ips = unfinished().filter(matches);
     const retakes = retakeIds();
     const pending = ui.hist.status === "pending", shown = all.slice(0, ui.hist.limit), count = pending ? ips.length : all.length;
     return `<div class="results-status" role="group" aria-label="État des tentatives">
       <button data-act="h-status" data-status="done" aria-pressed="${!pending}">Terminés <span>${all.length}</span></button>
       <button data-act="h-status" data-status="pending" aria-pressed="${pending}">À reprendre <span>${ips.length}</span></button></div>
       <p class="small muted" role="status" aria-live="polite">${count} résultat${count === 1 ? "" : "s"} · du plus récent au plus ancien</p>
-      ${count ? `<div class="results-list">${pending ? ips.map(unfinishedCard).join("") : shown.map(x => resultCard(x, retakes)).join("")}</div>` : `<div class="results-empty">${ico("papers")}<h2>${ui.hist.query || ui.hist.filter !== "all" || ui.hist.type !== "all" ? "Aucun résultat avec ces filtres" : pending ? "Tout est à jour" : "Tes résultats commencent ici"}</h2><p>${pending ? "Tes exercices et examens inachevés seront disponibles ici pour les reprendre." : "Retrouve ici tes exercices, tes examens et tes corrections après chaque tentative."}</p><button class="btn sm" data-act="h-reset">Réinitialiser les filtres</button><a class="btn primary sm" href="#comp.co">Choisir un exercice</a></div>`}
+      ${count ? `<div class="results-list">${pending ? historyDays(ips, today, unfinishedCard) : historyDays(shown, today, x => resultCard(x, retakes))}</div>` : `<div class="results-empty">${ico("papers")}<h2>${since || ui.hist.query || ui.hist.filter !== "all" || ui.hist.type !== "all" ? "Aucun résultat avec ces filtres" : pending ? "Tout est à jour" : "Tes résultats commencent ici"}</h2><p>${pending ? "Tes exercices et examens inachevés seront disponibles ici pour les reprendre." : "Retrouve ici tes exercices, tes examens et tes corrections après chaque tentative."}</p><button class="btn sm" data-act="h-reset">Réinitialiser les filtres</button><a class="btn primary sm" href="#comp.co">Choisir un exercice</a></div>`}
       ${!pending && all.length > shown.length ? `<button class="btn" data-act="h-more">Voir plus de résultats</button>` : ""}`;
   }
   function historyView(head, tabs) {
@@ -7939,7 +7967,8 @@
       <section class="results-hero"><div><p class="eyebrow">Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p></div><span class="results-hero-mark" aria-hidden="true">${ico("papers")}</span></section>
       <section class="results-browser" aria-label="Rechercher dans mes résultats">
         <div class="results-tools"><label class="field">Rechercher<input id="h-query" type="search" data-input="h-query" value="${esc(ui.hist.query || "")}" placeholder="Sujet, examen, date…" aria-controls="results-content"></label>
-          <label class="field">Type de pratique<select id="h-type" data-change="h-type">${[["all", "Tous les formats"], ["exercise", "Exercices"], ["exam", "Examens blancs"]].map(([value, label]) => `<option value="${value}"${(ui.hist.type || "all") === value ? " selected" : ""}>${label}</option>`).join("")}</select></label></div>
+          <label class="field">Type de pratique<select id="h-type" data-change="h-type">${[["all", "Tous les formats"], ["exercise", "Exercices"], ["exam", "Examens blancs"]].map(([value, label]) => `<option value="${value}"${(ui.hist.type || "all") === value ? " selected" : ""}>${label}</option>`).join("")}</select></label>
+          <label class="field">Période<select id="h-period" data-change="h-period">${[["all", "Toutes les dates"], ["7", "7 derniers jours"], ["30", "30 derniers jours"]].map(([value, label]) => `<option value="${value}"${ui.hist.period === value ? " selected" : ""}>${label}</option>`).join("")}</select></label></div>
         <div class="results-skills" role="group" aria-label="Compétence">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${ui.hist.filter === k}">${l}</button>`).join("")}</div>
         <div id="results-content" class="stack">${historyList()}</div>
       </section></div>`;
@@ -8890,7 +8919,7 @@
       if (tab === "history") {
         const key = args.join(".");
         if (ui.hist.route !== key) {
-          ui.hist = { filter: H_FILTERS.some(([k]) => k === args[1]) || args[1] === "comp" ? args[1] : "all", type: ["exam", "exercise"].includes(args[2]) ? args[2] : "all", status: args[3] === "pending" ? "pending" : "done", query: "", limit: 30, open: null, route: key };
+          ui.hist = { filter: H_FILTERS.some(([k]) => k === args[1]) || args[1] === "comp" ? args[1] : "all", type: ["exam", "exercise"].includes(args[2]) ? args[2] : "all", status: args[3] === "pending" ? "pending" : "done", period: "all", query: "", limit: 30, open: null, route: key };
         }
         return historyView(head, tabs);
       }
@@ -9029,7 +9058,7 @@
     },
     "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; document.querySelectorAll("[data-act=h-filter]").forEach(b => b.setAttribute("aria-pressed", b === el)); updateHistoryList(); },
     "h-status": (el) => { ui.hist.status = el.dataset.status; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); document.querySelector(`[data-act=h-status][data-status="${ui.hist.status}"]`)?.focus(); },
-    "h-reset": () => { Object.assign(ui.hist, { filter: "all", type: "all", query: "", limit: 30, open: null }); render(true); document.getElementById("h-query")?.focus(); },
+    "h-reset": () => { Object.assign(ui.hist, { filter: "all", type: "all", period: "all", query: "", limit: 30, open: null }); render(true); document.getElementById("h-query")?.focus(); },
     "h-review": (el) => {
       const x = resultEntries().find(x => x.id === el.dataset.id);
       if (!x) return;
@@ -9070,7 +9099,7 @@
       if (writing?.mock?.id && eeRunning()) { toast("Termine l’examen écrit en cours avant d’ouvrir un autre résultat."); return; }
       if (writing?.mock?.id) { ui.ee = { id: writing.mock.id, done: true, view: id }; goTo("#writing.mock"); return; }
       const idx = resultEntries().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
-      ui.hist = { filter: f, type: "all", status: "done", query: "", route: "history", limit: Math.max(30, idx + 1), open: id, jump: id };
+      ui.hist = { filter: f, type: "all", status: "done", period: "all", query: "", route: "history", limit: Math.max(30, idx + 1), open: id, jump: id };
       goTo("#progress.history");
     },
     "drill-start": (el) => {
@@ -9367,6 +9396,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "h-period": (el) => { ui.hist.period = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "h-type": (el) => { ui.hist.type = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "ee-paper": (el) => { ui.form["ee-paper"] = el.value; render(true); document.getElementById("ee-paper")?.focus(); },
     "library-theme": selectLibraryTheme,
