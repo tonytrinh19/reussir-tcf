@@ -4733,10 +4733,21 @@
     }
     if (!pending.length) return "";
     pending.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    const row = a => `<div class="row between"><div><b>${esc(a.title)}</b><p class="small muted">${a.label} · ${shortDate(a.date)}${a.remaining ? ` · Erreurs à revoir : ${a.remaining}` : ""}</p></div>
-      <button class="btn sm" data-act="${a.act}" data-id="${esc(a.id)}">Reprendre la révision</button></div>`;
-    return `<section class="panel stack"><h2 class="h2">Examens à revoir</h2>${row(pending[0])}
+    const row = a => {
+      const skill = a.skill || "ee";
+      const icon = skill === "co" ? "listen" : skill === "ce" ? "read" : "writing";
+      return `<div class="review-ticket" data-skill="${skill}">
+        <span class="review-ticket-icon" aria-hidden="true">${ico(icon)}</span>
+        <div class="review-ticket-copy"><p class="eyebrow">${a.label}</p><h3>${esc(a.title)}</h3><p class="small muted">${shortDate(a.date)}${a.remaining ? ` · Erreurs à revoir : ${a.remaining}` : ""}</p></div>
+        <button class="btn sm" data-act="${a.act}" data-id="${esc(a.id)}">Reprendre la révision</button></div>`;
+    };
+    return `<section class="panel stack review-inbox" data-m="paper" data-k="daily-review-inbox"><h2 class="h2">Examens à revoir</h2>${row(pending[0])}
       ${pending.length > 1 ? `<details class="fold"><summary>Autres examens (${pending.length - 1})</summary><div class="stack">${pending.slice(1).map(row).join("")}</div></details>` : ""}</section>`;
+  }
+  function retryTrack(misses, reviewed, current) {
+    // The adjacent question counter carries the same information for screen readers.
+    return `<div class="retry-track" aria-hidden="true">${misses.map(i =>
+      `<i class="${reviewed.includes(i) ? "finished" : i === current ? "current" : ""}"></i>`).join("")}</div>`;
   }
   function listeningRetryView(cx) {
     const doc = S.comp.get(cx.attemptId), progress = doc?.missReview || {};
@@ -4745,21 +4756,22 @@
     const back = '<button class="btn ghost sm" data-act="retry-exit">Retour au résultat</button>';
     if (progress.completed || j == null || !doc) {
       const recovered = misses.filter(i => progress.picks?.[i] === cx.exam.items[i].answer).length;
-      return `<section class="panel stack"><h2 class="h2">Révision terminée</h2><p>Bonnes réponses à la deuxième écoute : ${recovered} / ${misses.length}</p><div class="row">${back}<a class="btn" href="#today">Aujourd’hui</a></div></section>`;
+      return `<section class="panel stack retry-finish"><span class="retry-seal" aria-hidden="true" data-m="press" data-k="retry-seal-${esc(cx.attemptId)}">${ico("stamp")}</span><h2 class="h2">Révision terminée</h2>${retryTrack(misses, reviewed, null)}<p>Bonnes réponses à la deuxième écoute : ${recovered} / ${misses.length}</p><div class="row">${back}<a class="btn" href="#today">Aujourd’hui</a></div></section>`;
     }
     const it = cx.exam.items[j], second = progress.picks?.[j], revealed = Number.isInteger(second);
     const order = it.kind === "doc" ? it.order : [0, 1, 2, 3];
     const label = k => it.kind === "doc" ? typo(it.options[k]) : "ABCD"[k];
     const choices = order.map(k => `<label class="opt ${revealed && k === it.answer ? "ok" : revealed && k === second ? "bad" : ""}"><input type="radio" name="retry-choice" value="${k}" ${revealed ? "disabled" : ""} ${k === second ? "checked" : ""}><span>${label(k)}</span></label>`).join("");
-    return `<section class="panel stack" data-retry-question="${j}">
+    return `<section class="panel stack retry-card" data-retry-question="${j}">
       <div class="row between"><h2 class="h2">Revoir mes erreurs</h2>${back}</div>
       <p class="eyebrow">${esc(doc.title)} · Question ${j + 1} · Erreur ${reviewed.length + 1} / ${misses.length}</p>
+      ${retryTrack(misses, reviewed, j)}
       ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, revealed ? it.alt : "")}</figure>` : ""}
       ${it.situation ? `<p class="fr">${typo(it.situation)}</p>` : ""}
-      ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
+      ${it.audio ? `<div class="retry-player"><span class="retry-cassette" aria-hidden="true"><i></i><i></i></span><audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio></div>` : ""}
       <p class="fr"><b>${typo(it.q || COX_CONSIGNE[it.kind])}</b></p>
       <div class="opts" role="radiogroup" aria-label="Deuxième réponse">${choices}</div>
-      ${revealed ? `<div class="sheet stack"><p><b>${second === it.answer ? "Bonne réponse" : "À retenir"}</b></p>
+      ${revealed ? `<div class="sheet stack retry-feedback" data-m="rise" data-k="retry-feedback-${esc(cx.attemptId)}-${j}"><p><b>${second === it.answer ? "Bonne réponse" : "À retenir"}</b></p>
         <p>Réponse à l’examen : ${cx.ans[j] == null ? "sans réponse" : label(cx.ans[j])}</p>
         <p>Deuxième réponse : ${label(second)}</p><p>Bonne réponse : ${label(it.answer)}</p>
         ${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}${listeningTranscript(it)}</div>

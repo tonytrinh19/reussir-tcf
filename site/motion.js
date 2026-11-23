@@ -674,6 +674,15 @@
       if (a.constructor.name === "Animation") safe(() => a.finish());
     });
   });
+  // Native controls own playback. Animate only the visible tape that emitted the event.
+  function syncCassette(event) {
+    const player = event.target.closest?.(".retry-player");
+    if (player) player.classList.toggle("playing", event.type === "playing");
+  }
+  for (const type of ["playing", "pause", "ended", "waiting", "emptied", "error", "seeking"]) {
+    document.addEventListener(type, syncCassette, true);
+  }
+
   document.addEventListener("tcf:render", (e) => safe(() => onRender(e)));
   document.addEventListener("tcf:grade", (e) => safe(() => gradeFx(e.detail)));
   document.addEventListener("tcf:ring", () => safe(ring));
