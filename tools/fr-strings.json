@@ -60,7 +60,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "…–… words"
+   "…–… words",
+   "<li> <span>…</span><span>≈ … min</span> <span>…</span><b>…</b><span>…–… words</span></li>"
   ]
  },
  {
@@ -196,15 +197,6 @@
   "where": "app",
   "ctx": [
    "…. On the real test, a task outside its range can be marked « A1 non atteint », and a blank one counts 0. <button>Hand in anyway</button><button>Keep writing</button>"
-  ]
- },
- {
-  "id": "07027a3c7533",
-  "text": "· {0} · {1}–{2} words · about {3} min",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<li><b>…</b> · … · …–… words · about … min</li>"
   ]
  },
  {
@@ -3522,15 +3514,6 @@
   ]
  },
  {
-  "id": "f29759bbf699",
-  "text": "{0} · {1}–{2} words · about {3} min",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "<li><b>…</b> · … · …–… words · about … min</li>"
-  ]
- },
- {
   "id": "fe0394b9494e",
   "text": "{0} · {1}–{2} words · about {3} of the 60 min",
   "kind": "pattern",
@@ -3628,7 +3611,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -4353,15 +4336,6 @@
   ]
  },
  {
-  "id": "eed502185dbb",
-  "text": "{0} miss{1} went to the priority pile: FSRS brings {2} back {3}, and counts {4} as a little harder from now on.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… miss… went to the priority pile: FSRS brings … back …, and counts … as a little harder from now on."
-  ]
- },
- {
   "id": "a93d9c4ef786",
   "text": "{0} missed last time",
   "kind": "pattern",
@@ -4460,6 +4434,15 @@
   "where": "app",
   "ctx": [
    "<p>…Record: … days · … more to equal it.</p>"
+  ]
+ },
+ {
+  "id": "0d902d7678ad",
+  "text": "{0} more to reach the minimum",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… more to reach the minimum"
   ]
  },
  {
@@ -4827,6 +4810,15 @@
   "where": "app",
   "ctx": [
    "… of your texts to prepare first."
+  ]
+ },
+ {
+  "id": "84cc43c9c741",
+  "text": "{0} over the limit",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "… over the limit"
   ]
  },
  {
@@ -5209,7 +5201,7 @@
   "where": "app",
   "ctx": [
    "…–… words",
-   "<li><b>…</b> · … · …–… words · about … min</li>",
+   "<li> <span>…</span><span>≈ … min</span> <span>…</span><b>…</b><span>…–… words</span></li>",
    "<p>…Examen blanc EE</p>… … … <span>… · …–… words · about … of the 60 min</span> <p>…</p> … … … … … … … … <button>Hand in</button>…"
   ]
  },
@@ -6022,6 +6014,15 @@
   "where": "app",
   "ctx": [
    "| Quand | Quoi | Exemple | |---|---|---| | … | … | … |"
+  ]
+ },
+ {
+  "id": "8d5d3ef078e9",
+  "text": "≈ {0} min",
+  "kind": "pattern",
+  "where": "app",
+  "ctx": [
+   "<li> <span>…</span><span>≈ … min</span> <span>…</span><b>…</b><span>…–… words</span></li>"
   ]
  },
  {
@@ -8421,12 +8422,12 @@
   "ctx": []
  },
  {
-  "id": "aebe40c4bc4f",
-  "text": "about {0} min",
-  "kind": "pattern",
+  "id": "2c419ecc9276",
+  "text": "Aa",
+  "kind": "exact",
   "where": "app",
   "ctx": [
-   "<li><b>…</b> · … · …–… words · about … min</li>"
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
   ]
  },
  {
@@ -10193,6 +10194,15 @@
   ]
  },
  {
+  "id": "e0aafffa028c",
+  "text": "Answered",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
+  ]
+ },
+ {
   "id": "45d706326add",
   "text": "Answering yes to a negative question: si.",
   "kind": "exact",
@@ -10568,7 +10578,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Révision terminée</h2><p>Bonnes réponses à la deuxième écoute : … / …</p> …<a>Aujourd’hui</a>"
+   "<span>…</span><h2>Révision terminée</h2>…<p>Bonnes réponses à la deuxième écoute : … / …</p> …<a>Aujourd’hui</a>"
   ]
  },
  {
@@ -11087,7 +11097,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<p>…</p> <p>…</p> … <p>……</p> <button>Back to the deck</button>……"
+   "<span>…</span> <p>…</p> <p>…</p> … … <p>……</p> … <button>Back to the deck</button>……"
   ]
  },
  {
@@ -14243,6 +14253,15 @@
   ]
  },
  {
+  "id": "b84aeb5b9204",
+  "text": "Date inconnue",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Date inconnue"
+  ]
+ },
+ {
   "id": "a2620cbc10f5",
   "text": "day",
   "kind": "exact",
@@ -16076,7 +16095,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -16844,7 +16863,7 @@
   "ctx": [
    "<li> <p><b>…</b> <span>· …</span></p> Examples <span>one per line, French — English</span> … <button>Save</button><button>Not now</button> </li>",
    "Exemples · Examples",
-   "<p>French side</p> French Notes … … <p>English side</p> English Notes … … Examples … … <p>Notes show with their side of the card. Your review progress stays with the card.</p> <button>Save <span>⌘↵</span></button><button>Cancel <span>Esc</span></button>…"
+   "<h2>Examples</h2> …"
   ]
  },
  {
@@ -18908,6 +18927,15 @@
   ]
  },
  {
+  "id": "e6faf8c20c6b",
+  "text": "Hier",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Hier"
+  ]
+ },
+ {
   "id": "de1b812e10b3",
   "text": "Hier has a mute h: qu'hier.",
   "kind": "exact",
@@ -20644,6 +20672,15 @@
   "where": "app",
   "ctx": [
    "lang=\"fr\" spellcheck=\"false\""
+  ]
+ },
+ {
+  "id": "118f9b2b3021",
+  "text": "Larger text",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
   ]
  },
  {
@@ -22714,15 +22751,6 @@
   ]
  },
  {
-  "id": "83610538531d",
-  "text": "miss{0} went to the priority pile: FSRS brings {1} back {2}, and counts {3} as a little harder from now on.",
-  "kind": "pattern",
-  "where": "app",
-  "ctx": [
-   "… miss… went to the priority pile: FSRS brings … back …, and counts … as a little harder from now on."
-  ]
- },
- {
   "id": "b564001a58dc",
   "text": "Missed",
   "kind": "exact",
@@ -22756,6 +22784,15 @@
   "where": "app",
   "ctx": [
    "<p>Missed … times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span>E</span>.</p>"
+  ]
+ },
+ {
+  "id": "a24962f9eb8a",
+  "text": "Missed cards get priority in your review schedule.",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Missed cards get priority in your review schedule.</span> <span>Next review:</span> <span>…</span>"
   ]
  },
  {
@@ -23028,6 +23065,15 @@
   "where": "app",
   "ctx": [
    "more time on the clock, and each miss gone over"
+  ]
+ },
+ {
+  "id": "7e34a6fad239",
+  "text": "more to reach the minimum",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… more to reach the minimum"
   ]
  },
  {
@@ -24153,6 +24199,15 @@
   "where": "attr:aria-label",
   "ctx": [
    "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+  ]
+ },
+ {
+  "id": "aebd7da655a7",
+  "text": "Next review:",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Missed cards get priority in your review schedule.</span> <span>Next review:</span> <span>…</span>"
   ]
  },
  {
@@ -26777,6 +26832,15 @@
   ]
  },
  {
+  "id": "e1c2da5bc84e",
+  "text": "over the limit",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "… over the limit"
+  ]
+ },
+ {
   "id": "fed758b7a842",
   "text": "overview",
   "kind": "exact",
@@ -29209,8 +29273,9 @@
   "id": "002ff598115d",
   "text": "Question",
   "kind": "exact",
-  "where": "attr:aria-label",
+  "where": "app",
   "ctx": [
+   "Question …",
    "<button>…</button>"
   ]
  },
@@ -29220,7 +29285,8 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …",
+   "Question …",
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …",
    "<button>…</button>"
   ]
  },
@@ -29230,7 +29296,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -29557,6 +29623,15 @@
   ]
  },
  {
+  "id": "30a00bebf954",
+  "text": "Reading guide",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<span><span>Answered</span><b><span>…</span> / …</b></span> …… <button><span>Aa</span></button>"
+  ]
+ },
+ {
   "id": "6161567bf347",
   "text": "reading is 453–498",
   "kind": "exact",
@@ -29572,6 +29647,15 @@
   "where": "app",
   "ctx": [
    "Rythme · reading pace"
+  ]
+ },
+ {
+  "id": "55916e08c717",
+  "text": "Reading passage",
+  "kind": "exact",
+  "where": "attr:aria-label",
+  "ctx": [
+   "<button>…</button>"
   ]
  },
  {
@@ -29716,6 +29800,15 @@
   "ctx": []
  },
  {
+  "id": "c2aaceb2f0cc",
+  "text": "Recalled on the first try",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<p>Recalled on the first try</p>"
+  ]
+ },
+ {
   "id": "78b18f77bcf1",
   "text": "Recent studies often find no clear gain in attention or memory, but two languages open « deux cultures », family ties and jobs: « nul besoin de leur ajouter des pouvoirs magiques ». Giving it up? « Évidemment pas ».",
   "kind": "exact",
@@ -29735,7 +29828,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … Période … … …"
   ]
  },
  {
@@ -30891,7 +30984,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … <p><b>…</b></p> … …"
+   "<h2>Revoir mes erreurs</h2>… <p>… · Question … · Erreur … / …</p> … … … … <p><b>…</b></p> … …"
   ]
  },
  {
@@ -34166,7 +34259,7 @@
   "kind": "exact",
   "where": "attr:placeholder",
   "ctx": [
-   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … Période … … …"
   ]
  },
  {
@@ -39639,6 +39732,15 @@
   ]
  },
  {
+  "id": "ac26a7a94ea2",
+  "text": "Translation",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary>Translation</summary>…"
+  ]
+ },
+ {
   "id": "df4330e9bbb4",
   "text": "Translation tools are « devenus excellents » for information but much less useful for « tout ce qui fait une vraie relation » : « Elle ne vous fera pas d'amis. » Falling enrolments are the context, not the reason.",
   "kind": "exact",
@@ -40143,7 +40245,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … … …"
+   "…… <p>Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p> <span>…</span> Rechercher Type de pratique … Période … … …"
   ]
  },
  {
@@ -41499,6 +41601,15 @@
   ]
  },
  {
+  "id": "4eba25618f70",
+  "text": "Within the word range",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Within the word range"
+  ]
+ },
+ {
   "id": "bae6cddfaf76",
   "text": "Without it, what's here now can't be brought back after the import.",
   "kind": "exact",
@@ -41576,8 +41687,9 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "Words",
-   "Date Task Words Level …"
+   "<span>Words</span><span><b></b> / …–…</span> <span></span><i></i> <small></small>",
+   "Date Task Words Level …",
+   "Words"
   ]
  },
  {
@@ -41602,6 +41714,15 @@
   "kind": "exact",
   "where": "content:rule",
   "ctx": []
+ },
+ {
+  "id": "4a5b7b8f61c5",
+  "text": "Words to revisit",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<summary>Words to revisit <span>…</span></summary> …"
+  ]
  },
  {
   "id": "e247450845ee",

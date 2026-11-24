@@ -308,6 +308,7 @@ window.TCF.FR = {
 "AI estimate on the TCF Canada scale, not an official score.": "Estimation de l’IA sur l’échelle du TCF Canada, pas une note officielle.",
 "AI review": "Avis de l’IA",
 "AI review saved with your writing.": "Avis de l’IA enregistré avec ton texte.",
+"Aa": "Aa",
 "Accented letters": "Lettres accentuées",
 "Accepted:": "Accepté :",
 "Acheter quelque chose is direct: les.": "Acheter quelque chose est direct : les.",
@@ -506,6 +507,7 @@ window.TCF.FR = {
 "Another prompt": "Autre consigne",
 "Another untimed reading segment.": "Un autre segment de lecture non chronométré.",
 "Answer every question first. On the real test a blank is simply wrong.": "Réponds d'abord à chaque question. Le jour du test, une case vide est tout simplement fausse.",
+"Answered": "Répondues",
 "Answering yes to a negative question: si.": "Répondre oui à une question négative : si.",
 "Answers stay hidden until you hand in, and a blank counts as wrong.": "Les réponses restent masquées jusqu'à la fin, et une case vide compte comme une faute.",
 "Anterior to il était content: plus-que-parfait.": "Antérieur à il était content : plus-que-parfait.",
@@ -907,6 +909,7 @@ window.TCF.FR = {
 "Dans la mesure où + clause = insofar as.": "Dans la mesure où + proposition = dans la mesure où.",
 "Dark mode": "Mode sombre",
 "Date": "Date",
+"Date inconnue": "Date inconnue",
 "Day": "Jour",
 "Day done! Day one of a streak.": "Jour validé ! Premier jour d'une série.",
 "Days of the plan": "Jours du programme",
@@ -1343,6 +1346,7 @@ window.TCF.FR = {
 "Hide": "Masquer",
 "Hide the answers": "Masquer les réponses",
 "Hide the answers and test yourself": "Masquer les réponses et te tester",
+"Hier": "Hier",
 "Hier has a mute h: qu'hier.": "Hier a un h muet : qu'hier.",
 "Historique": "Historique",
 "History": "Historique",
@@ -1528,6 +1532,7 @@ window.TCF.FR = {
 "La semaine dernière · last week": "La semaine dernière",
 "La semaine précédente: before he handed them back, so avions remises.": "La semaine précédente : avant qu'il ne les rende, donc avions remises.",
 "La veille points to an earlier action: avait visité.": "La veille indique une action antérieure : avait visité.",
+"Larger text": "Agrandir le texte",
 "Last 2 weeks": "Les 2 dernières semaines",
 "Last 4 weeks": "Les 4 dernières semaines",
 "Last year clients « ont attendu plus d'une heure » and some left unvaccinated, hence « uniquement sur rendez-vous ». The vaccine is still free for people 60 and over, pregnant women and the chronically ill.": "L'an dernier, les clients « ont attendu plus d'une heure » et certains sont partis sans être vaccinés, d'où « uniquement sur rendez-vous ». Le vaccin reste gratuit pour les personnes de 60 ans et plus, les femmes enceintes et les malades chroniques.",
@@ -1558,7 +1563,7 @@ window.TCF.FR = {
 "Learning new cards": "Apprentissage de nouvelles cartes",
 "Leave a skill blank if you didn't sit it.": "Laisse une compétence vide si tu ne l'as pas passée.",
 "Leave the grade blank to use the one detected in the review. Enter a grade only to override it. If none is found, your current grade stays unchanged.": "Laisse la note vide pour utiliser celle détectée dans l’avis. Saisis une note uniquement pour la remplacer. Si aucune note n’est trouvée, ta note actuelle est conservée.",
-"Lecture": "Écoute",
+"Lecture": "Lecture",
 "Lecture B1": "Lecture B1",
 "Lecture B2": "Lecture B2",
 "Lecture libre": "Lecture libre",
@@ -1717,6 +1722,7 @@ window.TCF.FR = {
 "Minutes par jour · minutes a day": "Minutes par jour",
 "Minutes ticked": "Minutes comptabilisées",
 "Missed": "Raté",
+"Missed cards get priority in your review schedule.": "Les cartes manquées sont prioritaires dans tes révisions.",
 "Missed last time": "Raté la dernière fois",
 "Missed most in the last 30 days (rules met 3 times or more)": "Le plus souvent raté ces 30 derniers jours (règles appliquées 3 fois ou plus)",
 "Missed the most: an example of your own helps (Edit card, or E while reviewing)": "Le plus souvent raté : un exemple personnel aide (Modifier la carte, ou E pendant la révision)",
@@ -1865,6 +1871,7 @@ window.TCF.FR = {
 "Next": "Suivant",
 "Next in today's plan": "Suivant dans le plan du jour",
 "Next month": "Mois suivant",
+"Next review:": "Prochaine révision :",
 "Next text": "Texte suivant",
 "Next week's two aren't picked yet.": "Les deux de la semaine prochaine ne sont pas encore choisies.",
 "Next →": "Suivant →",
@@ -2417,6 +2424,8 @@ window.TCF.FR = {
 "Read the transcript of today's news, then listen to it.": "Lis la transcription de l'actualité du jour, puis écoute-la.",
 "Reading": "Lecture",
 "Reading exam papers": "Sujets de compréhension écrite",
+"Reading guide": "Repères de lecture",
+"Reading passage": "Texte à lire",
 "Reading set #2 at exam pace": "Série de lecture nº 2 au rythme de l'examen",
 "Reading set at exam pace": "Série de lecture au rythme de l'examen",
 "Reading sets": "Séries de lecture",
@@ -2431,6 +2440,7 @@ window.TCF.FR = {
 "Recall each card cold before you flip it. No peeking.": "Essaie de te rappeler chaque carte de tête avant de la retourner. Pas de triche.",
 "Recall each card cold, no peeking.": "Essaie de te rappeler chaque carte de tête, sans tricher.",
 "Recall each card cold.": "Essaie de te rappeler chaque carte de tête.",
+"Recalled on the first try": "Retrouvées du premier coup",
 "Recent studies often find no clear gain in attention or memory, but two languages open « deux cultures », family ties and jobs: « nul besoin de leur ajouter des pouvoirs magiques ». Giving it up? « Évidemment pas ».": "Les études récentes ne trouvent souvent aucun gain net sur l'attention ou la mémoire, mais deux langues ouvrent « deux cultures », des liens familiaux et des emplois : « nul besoin de leur ajouter des pouvoirs magiques ». Y renoncer ? « Évidemment pas ».",
 "Recevoir: ils reçoivent → reçoive, but nous recevions.": "Recevoir : ils reçoivent → reçoive, mais nous recevions.",
 "Rechercher": "Rechercher",
@@ -3498,6 +3508,7 @@ window.TCF.FR = {
 "Toutes": "Toutes",
 "Tracking their spending showed « Plus de 600 $ par mois en restaurants » ; one restaurant meal a month, with the difference saved « le jour même de la paie ». They didn't give up restaurants entirely, and they already earned well.": "Suivre leurs dépenses a montré « Plus de 600 $ par mois en restaurants » ; un repas au restaurant par mois, avec la différence épargnée « le jour même de la paie ». Ils n'ont pas complètement renoncé aux restaurants, et ils gagnaient déjà bien leur vie.",
 "Transcription": "Transcription",
+"Translation": "Traduction",
 "Translation tools are « devenus excellents » for information but much less useful for « tout ce qui fait une vraie relation » : « Elle ne vous fera pas d'amis. » Falling enrolments are the context, not the reason.": "Les outils de traduction sont « devenus excellents » pour l'information, mais beaucoup moins utiles pour « tout ce qui fait une vraie relation » : « Elle ne vous fera pas d'amis. » La baisse des inscriptions est le contexte, pas la raison.",
 "Trap: this si introduces an indirect question, not a condition, so the conditionnel is correct.": "Piège : ce si introduit une interrogation indirecte, pas une condition, donc le conditionnel est correct.",
 "Travailler SUR + a thing: sur lequel.": "Travailler SUR + une chose : sur lequel.",
@@ -3727,6 +3738,7 @@ window.TCF.FR = {
 "With the infinitive, ne pas both go before it: de ne pas toucher.": "Avec l'infinitif, ne pas se placent tous les deux devant : de ne pas toucher.",
 "With two pronouns, me comes before les: me les envoyer.": "Avec deux pronoms, me se place avant les : me les envoyer.",
 "With y or en": "Avec y ou en",
+"Within the word range": "Longueur attendue",
 "Without it, what's here now can't be brought back after the import.": "Sans elle, impossible de récupérer le contenu actuel après l'importation.",
 "Word choice": "Choix des mots",
 "Word counts on all three tasks; comparison present in Tâche 3.": "Nombre de mots respecté pour les trois tâches ; comparaison présente dans la Tâche 3.",
@@ -3734,6 +3746,7 @@ window.TCF.FR = {
 "Words": "Mots",
 "Words that change form: tout, quelque, de before an adjective": "Mots qui changent de forme : tout, quelque, de devant un adjectif",
 "Words that start with a vowel but don't elide: oui, onze, y": "Mots qui commencent par une voyelle mais sans élision : oui, onze, y",
+"Words to revisit": "Mots à revoir",
 "Working sick halves output, spreads illness and « coûterait aux entreprises deux à trois fois plus cher que les absences » : staying home is better for the company too. The researchers want employers to act, with paid sick days, not sanctions.": "Travailler malade réduit le rendement de moitié, propage la maladie et « coûterait aux entreprises deux à trois fois plus cher que les absences » : rester chez soi est aussi préférable pour l'entreprise. Les chercheurs veulent que les employeurs agissent, avec des congés de maladie payés, et non des sanctions.",
 "Write 3 sentences about your city or your job using dont, où and a form of lequel (auquel, pour laquelle…).": "Écris 3 phrases sur ta ville ou ton métier en utilisant dont, où et une forme de lequel (auquel, pour laquelle…).",
 "Write a task": "Rédiger une tâche",
@@ -4020,6 +4033,7 @@ window.TCF.FR = {
 "mistakes": "erreurs",
 "more": "Plus",
 "more time on the clock, and each miss gone over": "plus de temps et chaque erreur revue",
+"more to reach the minimum": "pour atteindre le minimum",
 "most recent": "plus récent",
 "mostly": "surtout",
 "mots": "mots",
@@ -4066,6 +4080,7 @@ window.TCF.FR = {
 "optional: that page shows a tab to this sheet": "facultatif : cette page affichera un onglet vers cette fiche",
 "or leave it for later": "ou laisse-le pour plus tard",
 "over": "Terminé",
+"over the limit": "au-dessus du maximum",
 "overview": "Vue d'ensemble",
 "page": "page",
 "passé composé where the plus-que-parfait is needed for implied anteriority": "passé composé là où le plus-que-parfait est requis pour marquer l'antériorité",
@@ -4741,10 +4756,6 @@ window.TCF.FR = {
 ", puis repris {0}"
 ],
 [
-"· {0} · {1}–{2} words · about {3} min",
-"· {0} · {1}–{2} mots · environ {3} min"
-],
-[
 "· {0} fixed",
 "· {0} corrigée(s)"
 ],
@@ -4847,10 +4858,6 @@ window.TCF.FR = {
 [
 "{0} · {1} words",
 "{0} · {1} mots"
-],
-[
-"{0} · {1}–{2} words · about {3} min",
-"{0} · {1}–{2} mots · environ {3} min"
 ],
 [
 "{0} · {1}–{2} words · about {3} of the 60 min",
@@ -5213,10 +5220,6 @@ window.TCF.FR = {
 "{0} min{1}"
 ],
 [
-"{0} miss{1} went to the priority pile: FSRS brings {2} back {3}, and counts {4} as a little harder from now on.",
-"L'erreur{1} {0} va dans la pile prioritaire : FSRS te la{2} ramène {3} et la{4} considère un peu plus difficile désormais."
-],
-[
 "{0} missed last time",
 "{0} manquées la dernière fois"
 ],
@@ -5259,6 +5262,10 @@ window.TCF.FR = {
 [
 "{0} more to equal it.",
 "Encore {0} pour l'égaler."
+],
+[
+"{0} more to reach the minimum",
+"Minimum : encore {0}"
 ],
 [
 "{0} most recent",
@@ -5419,6 +5426,10 @@ window.TCF.FR = {
 [
 "{0} of your texts to prepare first.",
 "{0} de tes textes à préparer d'abord."
+],
+[
+"{0} over the limit",
+"{0} au-dessus du maximum"
 ],
 [
 "{0} per 100 words",
@@ -5861,6 +5872,10 @@ window.TCF.FR = {
 "×{0} cette semaine"
 ],
 [
+"≈ {0} min",
+"≈ {0} min"
+],
+[
 "≈ {0} of reviews at your pace",
 "≈ {0} de révision à ton rythme"
 ],
@@ -5903,10 +5918,6 @@ window.TCF.FR = {
 [
 "a second set at {0}",
 "une deuxième série à {0}"
-],
-[
-"about {0} min",
-"environ {0} min"
 ],
 [
 "about {0} of the 60 min",
@@ -6587,10 +6598,6 @@ window.TCF.FR = {
 [
 "Minutes the plan asks each day: {0} in all",
 "Minutes demandées par le plan chaque jour : {0} au total"
-],
-[
-"miss{0} went to the priority pile: FSRS brings {1} back {2}, and counts {3} as a little harder from now on.",
-"l'erreur{0} est passée en priorité : FSRS la{1} ramène {2} et la considère{3} désormais un peu plus difficile."
 ],
 [
 "Missed {0} of {1}",

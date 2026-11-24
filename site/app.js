@@ -368,7 +368,7 @@
     },
     wReview: null, // a pasted review being attached to an existing submission
     calendarDay: null,
-    hist: { filter: "all", type: "all", status: "done", query: "", limit: 30, open: null },
+    hist: { filter: "all", type: "all", status: "done", period: "all", query: "", limit: 30, open: null },
     rep: { open: null },
     hwSug: null,
     c: { skill: "ce", lv: { ce: "", co: "" }, theme: "", set: { ce: null, co: null }, ans: { ce: {}, co: {} }, submitted: { ce: false, co: false }, saved: { ce: null, co: null }, plays: 0, player: "idle", script: false, cache: {}, failed: {}, inflight: {}, queued: false, open: {}, t0: { ce: 0, co: 0 }, review: { ce: null, co: null }, shown: {} },
@@ -3074,7 +3074,7 @@
     return m ? [m[1], m[2].trim()] : [l, ""];
   }
   // A card's examples, one per line with its English underneath, and the words you saved in bold.
-  function exHTML(c) {
+  function exHTML(c, reviewKey = "") {
     const re = grabClean(c.seen).length > 1 ? new RegExp(`(?<![\\p{L}\\p{N}])${markPat(grabClean(c.seen))}(?![\\p{L}\\p{N}])`, "giu") : null;
     const bold = (l) => {
       if (!re) return typo(l);
@@ -3082,9 +3082,12 @@
       for (const m of l.matchAll(re)) { out += typo(l.slice(at, m.index)) + `<b>${typo(m[0])}</b>`; at = m.index + m[0].length; }
       return out + typo(l.slice(at));
     };
-    return exLines(c.ex).map((l) => {
+    return exLines(c.ex).map((l, index) => {
       const [fr, en] = exSplit(l);
-      return `<span class="ex-l" translate="no"><span class="ex-fr" lang="fr">${bold(fr)}</span>${en ? `<span class="ex-en" lang="en">${esc(en)}</span>` : ""}</span>`;
+      const french = `<span class="ex-fr" lang="fr" translate="no">${bold(fr)}</span>`;
+      const english = en ? `<span class="ex-en" lang="en" translate="no">${esc(en)}</span>` : "";
+      if (!reviewKey) return `<span class="ex-l" translate="no">${french}${english}</span>`;
+      return `<li>${french}${english ? `<details class="ex-translation" ${foldAttr(reviewKey + "-" + index)}><summary>Translation</summary>${english}</details>` : ""}</li>`;
     }).join("");
   }
 
@@ -3247,15 +3250,33 @@
     const st = words === 0 ? "" : words < min ? "under" : words > max ? "over" : "in";
     return { cls: st, html: `<div class="lab"><span>${label}</span><span><b>${words}</b> / ${min}–${max}</span></div><div class="track"><div class="zone" style="left:${(min / top) * 100}%;width:${((max - min) / top) * 100}%"></div><div class="fill" style="width:${Math.min(100, (words / top) * 100)}%"></div></div>` };
   }
+  // Keep the cursor and scale mounted while typing, including when a draft crosses a word limit.
+  function paintWordRuler(el, words, W) {
+    const top = Math.max(words, W.max * 1.25);
+    if (!el.querySelector(".word-ruler")) {
+      el.innerHTML = `<div class="lab"><span>Words</span><span><b data-word-count></b> / ${W.min}–${W.max}</span></div>
+        <div class="word-ruler" aria-hidden="true"><span class="word-zone"></span><i></i></div>
+        <small class="word-status"></small>`;
+    }
+    const state = eeState(words, W);
+    el.classList.add("word-meter");
+    for (const name of ["under", "in", "over"]) el.classList.toggle(name, name === state);
+    el.style.setProperty("--min-pos", (100 * W.min / top) + "%");
+    el.style.setProperty("--max-pos", (100 * W.max / top) + "%");
+    el.style.setProperty("--word-pos", (100 * words / top) + "%");
+    el.querySelector("[data-word-count]").textContent = words;
+    let status = "Within the word range";
+    if (words < W.min) status = `${W.min - words} more to reach the minimum`;
+    if (words > W.max) status = `${words - W.max} over the limit`;
+    el.querySelector(".word-status").textContent = status;
+  }
   function updateMeters() {
     const el = document.getElementById("w-meter");
     if (!el) return;
     const task = ui.w.task, W = T.WRITING[task];
     const text = ui.w.text[task] || "";
     const n = countWords(text);
-    const m = meterHTML(n, W.min, W.max, "Words");
-    el.className = "meter " + m.cls;
-    el.innerHTML = m.html;
+    paintWordRuler(el, n, W);
     const pe = document.getElementById("w-paras");
     if (pe && W.paras) {
       // TCF Canada marks Tâche 3 in two parts: the first paragraph is Partie 1, the rest is Partie 2.
@@ -4073,6 +4094,18 @@
     return true;
   }
   // Show a past attempt: its set, the answers given, the right ones and the explanations.
+  function readingBookmarks(set, answers, large) {
+    const count = set.questions.filter((_, i) => answers[i] != null).length;
+    const tabs = set.questions.map((_, i) => {
+      const picked = answers[i] != null;
+      return `<button type="button" class="ce-bookmark" data-goto="ce-question-${i}" data-answered="${picked}" aria-label="${picked ? `Question ${i + 1}, answered` : `Question ${i + 1}`}">${i + 1}</button>`;
+    }).join("");
+    return `<nav class="ce-bookmarks" aria-label="Reading guide">
+      <span class="ce-tally"><span>Answered</span><b><span data-ce-count>${count}</span> / ${set.questions.length}</b></span>
+      <div class="ce-stops">${set.text ? `<button type="button" class="ce-bookmark" data-goto="ce-passage" aria-label="Reading passage" title="Reading passage">${ico("read")}</button>` : ""}${tabs}</div>
+      <button type="button" class="ce-type" data-act="ce-type" aria-pressed="${large}" aria-label="Larger text" title="Larger text"><span aria-hidden="true">Aa</span></button>
+    </nav>`;
+  }
   function compReview(skill, attemptId) {
     const a = compAttempts(skill).find((x) => x.id === attemptId);
     if (!a || !compLoad(skill, a.setId, a)) return;
@@ -4733,10 +4766,21 @@
     }
     if (!pending.length) return "";
     pending.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    const row = a => `<div class="row between"><div><b>${esc(a.title)}</b><p class="small muted">${a.label} · ${shortDate(a.date)}${a.remaining ? ` · Erreurs à revoir : ${a.remaining}` : ""}</p></div>
-      <button class="btn sm" data-act="${a.act}" data-id="${esc(a.id)}">Reprendre la révision</button></div>`;
-    return `<section class="panel stack"><h2 class="h2">Examens à revoir</h2>${row(pending[0])}
+    const row = a => {
+      const skill = a.skill || "ee";
+      const icon = skill === "co" ? "listen" : skill === "ce" ? "read" : "writing";
+      return `<div class="review-ticket" data-skill="${skill}">
+        <span class="review-ticket-icon" aria-hidden="true">${ico(icon)}</span>
+        <div class="review-ticket-copy"><p class="eyebrow">${a.label}</p><h3>${esc(a.title)}</h3><p class="small muted">${shortDate(a.date)}${a.remaining ? ` · Erreurs à revoir : ${a.remaining}` : ""}</p></div>
+        <button class="btn sm" data-act="${a.act}" data-id="${esc(a.id)}">Reprendre la révision</button></div>`;
+    };
+    return `<section class="panel stack review-inbox" data-m="paper" data-k="daily-review-inbox"><h2 class="h2">Examens à revoir</h2>${row(pending[0])}
       ${pending.length > 1 ? `<details class="fold"><summary>Autres examens (${pending.length - 1})</summary><div class="stack">${pending.slice(1).map(row).join("")}</div></details>` : ""}</section>`;
+  }
+  function retryTrack(misses, reviewed, current) {
+    // The adjacent question counter carries the same information for screen readers.
+    return `<div class="retry-track" aria-hidden="true">${misses.map(i =>
+      `<i class="${reviewed.includes(i) ? "finished" : i === current ? "current" : ""}"></i>`).join("")}</div>`;
   }
   function listeningRetryView(cx) {
     const doc = S.comp.get(cx.attemptId), progress = doc?.missReview || {};
@@ -4745,21 +4789,22 @@
     const back = '<button class="btn ghost sm" data-act="retry-exit">Retour au résultat</button>';
     if (progress.completed || j == null || !doc) {
       const recovered = misses.filter(i => progress.picks?.[i] === cx.exam.items[i].answer).length;
-      return `<section class="panel stack"><h2 class="h2">Révision terminée</h2><p>Bonnes réponses à la deuxième écoute : ${recovered} / ${misses.length}</p><div class="row">${back}<a class="btn" href="#today">Aujourd’hui</a></div></section>`;
+      return `<section class="panel stack retry-finish"><span class="retry-seal" aria-hidden="true" data-m="press" data-k="retry-seal-${esc(cx.attemptId)}">${ico("stamp")}</span><h2 class="h2">Révision terminée</h2>${retryTrack(misses, reviewed, null)}<p>Bonnes réponses à la deuxième écoute : ${recovered} / ${misses.length}</p><div class="row">${back}<a class="btn" href="#today">Aujourd’hui</a></div></section>`;
     }
     const it = cx.exam.items[j], second = progress.picks?.[j], revealed = Number.isInteger(second);
     const order = it.kind === "doc" ? it.order : [0, 1, 2, 3];
     const label = k => it.kind === "doc" ? typo(it.options[k]) : "ABCD"[k];
     const choices = order.map(k => `<label class="opt ${revealed && k === it.answer ? "ok" : revealed && k === second ? "bad" : ""}"><input type="radio" name="retry-choice" value="${k}" ${revealed ? "disabled" : ""} ${k === second ? "checked" : ""}><span>${label(k)}</span></label>`).join("");
-    return `<section class="panel stack" data-retry-question="${j}">
+    return `<section class="panel stack retry-card" data-retry-question="${j}">
       <div class="row between"><h2 class="h2">Revoir mes erreurs</h2>${back}</div>
       <p class="eyebrow">${esc(doc.title)} · Question ${j + 1} · Erreur ${reviewed.length + 1} / ${misses.length}</p>
+      ${retryTrack(misses, reviewed, j)}
       ${it.kind === "pic" ? `<figure class="pic-card seyes">${coxPicture(it, revealed ? it.alt : "")}</figure>` : ""}
       ${it.situation ? `<p class="fr">${typo(it.situation)}</p>` : ""}
-      ${it.audio ? `<audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio>` : ""}
+      ${it.audio ? `<div class="retry-player"><span class="retry-cassette" aria-hidden="true"><i></i><i></i></span><audio class="cox-audio" controls preload="none" src="${esc(it.audio)}"></audio></div>` : ""}
       <p class="fr"><b>${typo(it.q || COX_CONSIGNE[it.kind])}</b></p>
       <div class="opts" role="radiogroup" aria-label="Deuxième réponse">${choices}</div>
-      ${revealed ? `<div class="sheet stack"><p><b>${second === it.answer ? "Bonne réponse" : "À retenir"}</b></p>
+      ${revealed ? `<div class="sheet stack retry-feedback" data-m="rise" data-k="retry-feedback-${esc(cx.attemptId)}-${j}"><p><b>${second === it.answer ? "Bonne réponse" : "À retenir"}</b></p>
         <p>Réponse à l’examen : ${cx.ans[j] == null ? "sans réponse" : label(cx.ans[j])}</p>
         <p>Deuxième réponse : ${label(second)}</p><p>Bonne réponse : ${label(it.answer)}</p>
         ${it.why ? `<p class="small">${typo(it.why)}</p>` : ""}${listeningTranscript(it)}</div>
@@ -6838,7 +6883,7 @@
         </div>
         ${v.edit ? vocabEditForm(id) : `<div class="flash-face">
           <div class="flash-question">${front}</div>
-        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<p class="ex">${exHTML(c)}</p>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : ""}
+        ${v.shown ? `<div class="flash-back" data-m="rise" data-k="vb-${esc(id)}-${v.i}">` + back + (c.ex ? `<div class="v-examples"><h2 class="eyebrow">Examples</h2><ul role="list">${exHTML(c, "vx-" + id + "-" + v.i)}</ul></div>` : "") + (c.src ? `<p class="small muted">Saved from ${esc(c.src)}</p>` : "") + (st && st.lapses >= 4 ? `<p class="small muted">Missed ${st.lapses} times. Give it an example sentence of your own, or split it if it mixes two look-alikes: Edit card <span class="kbd">E</span>.</p>` : "") + `</div>` : ""}
         </div>
         <div class="flash-actions">
           ${!v.shown ? `<p class="muted small">${frFirst ? "Say what it means before you flip." : "Say it out loud before you flip."}</p>` : ""}
@@ -6921,6 +6966,17 @@
     if (!ds.length) return "soon";
     return ds[0] === ds[ds.length - 1] ? `on ${shortDate(ds[0])}` : `between ${shortDate(ds[0])} and ${shortDate(ds[ds.length - 1])}`;
   }
+  function missedVocabWords(v) {
+    if (!v.miss) return "";
+    // New sessions record the first check per card. Reviews and practice enqueue "re" after a miss.
+    const ids = v.mode === "new" ? Object.keys(v.first || {}).filter(id => v.first[id] === 0)
+      : [...new Set(v.queue.filter(e => e.k === "re").map(e => e.id))];
+    const cards = allCards();
+    const words = ids.map(id => cards.get(id)).filter(Boolean);
+    if (!words.length) return "";
+    return `<details class="v-recap-words"${words.length <= 5 ? " open" : ""}><summary>Words to revisit <span>${words.length}</span></summary>
+      <ul role="list">${words.map(c => `<li><b lang="fr" translate="no">${typo(c.fr)}</b><span lang="en" translate="no">${esc(c.en)}</span></li>`).join("")}</ul></details>`;
+  }
   function vocabDone() {
     const v = ui.vocab;
     const due = dueIds().length;
@@ -6934,12 +6990,14 @@
     const lede = v.mode === "new"
       ? `You recalled ${v.ok} of ${checked} at the first check. They come back ${backWhen(ids("show"))} for their first review.`
       : v.mode === "practice" ? `Practice only: the schedule didn't change.${v.miss ? ` The ${v.miss} you missed came back until you got ${v.miss > 1 ? "them" : "it"}.` : ""}`
-      : v.miss ? `${v.miss} miss${v.miss > 1 ? "es" : ""} went to the priority pile: FSRS brings ${v.miss > 1 ? "them" : "it"} back ${backWhen(ids("re"))}, and counts ${v.miss > 1 ? "them" : "it"} as a little harder from now on.` : "Clean session.";
-    return `<div class="wrap"><section class="panel stack" data-m="pop" data-k="vdone-${sk}">
-      <p class="eyebrow">${v.mode === "practice" ? "Practice complete" : "Session complete"}</p>
+      : v.miss ? `<span>Missed cards get priority in your review schedule.</span> <span>Next review:</span> <span>${backWhen(ids("re"))}</span>` : "Clean session.";
+    return `<div class="wrap"><section class="panel stack v-recap" data-m="pop" data-k="vdone-${sk}">
+      <div class="v-recap-head"><span class="v-recap-mark" aria-hidden="true">${ico("vocab")}</span><div><p class="eyebrow">${v.mode === "practice" ? "Practice complete" : "Session complete"}</p>
       <p class="scorebig"${perfect ? ` data-m="burst" data-k="vperfect-${sk}"` : ""}>${v.mode === "new" ? `<span data-tween="vdone-${sk}" data-tw="count" data-to="${n}">${n}</span> new` : `<span data-tween="vdone-${sk}" data-tw="count" data-to="${v.ok}">${v.ok}</span> / ${checked}`}</p>
+      ${v.mode !== "new" ? '<p class="small muted">Recalled on the first try</p>' : ""}</div></div>
       ${greet(rm[0], rm[1], rm[2], "sm")}
       <p class="lede">${lede}${due ? ` ${due} card${due > 1 ? "s are" : " is"} still due.` : ""}</p>
+      ${missedVocabWords(v)}
       <div class="row"><button class="btn primary" data-act="v-close">Back to the deck</button>${due ? `<button class="btn" data-act="v-start" data-mode="review">Review the rest</button>` : ""}${v.mode === "practice" ? `<button class="btn" data-act="v-start" data-mode="practice">Practise more</button>` : ""}</div>
     </section></div>`;
   }
@@ -7175,7 +7233,7 @@
     if (!e || e.done) return;
     const W = T.WRITING[e.task], text = str(e.texts[e.task]);
     const el = document.getElementById("ee-meter");
-    if (el) { const m = meterHTML(countWords(text), W.min, W.max, "Words"); el.className = "meter " + m.cls; el.innerHTML = m.html; }
+    if (el) paintWordRuler(el, countWords(text), W);
     const pe = document.getElementById("ee-paras");
     if (pe && W.paras) {
       const ps = paragraphs(text), counts = [ps[0] ? countWords(ps[0]) : 0, ps.slice(1).reduce((n, x) => n + countWords(x), 0)];
@@ -7197,12 +7255,18 @@
   }
   function eeIntro() {
     const ip = ipGet(EE_IP), mocks = eeMocks();
-    const plan = EE_TASKS.map((t) => { const W = T.WRITING[t]; return `<li><b>${esc(W.name)}</b> · ${esc(W.kind)} · ${W.min}–${W.max} words · about ${W.exam} min</li>`; }).join("");
-    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">${writingReviewStatus(w)}</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
+    const taskIcons = { t1: "envelope", t2: "writing", t3: "papers" };
+    const plan = EE_TASKS.map(t => {
+      const W = T.WRITING[t];
+      return `<li class="ee-brief" data-task="${t}" data-m="paper" data-k="ee-brief-${t}">
+        <div class="ee-brief-top"><span class="ee-brief-icon" aria-hidden="true">${ico(taskIcons[t])}</span><span class="ee-brief-time">≈ ${W.exam} min</span></div>
+        <span class="eyebrow">${esc(W.name)}</span><b>${esc(W.kind)}</b><span class="ee-brief-range">${W.min}–${W.max} words</span></li>`;
+    }).join("");
+    const rows = mocks.map((m) => `<tr><td class="n">${shortDate(m.date)}${m.paperTitle ? `<div class="small muted">${esc(m.paperTitle)}</div>` : ""}</td>${EE_TASKS.map((t, k) => { const w = m.tasks[t], W = T.WRITING[t]; return `<td class="n">${w ? `<span class="tag7 ${w.words >= W.min && w.words <= W.max ? "ok" : "no"}">${w.words}</span>${m.scores[k] != null ? ` · ${m.scores[k]}/20` : ""}` : `<span class="muted small">blank</span>`}</td>`; }).join("")}<td class="n">${m.score != null ? `<b>${m.score}/20</b> ${nclcTag(m.score, "ee")}` : `<span class="muted small">${writingReviewStatus(Object.values(m.tasks).find(task => arr(task.aiReviews).length) || {})}</span>`}</td><td><button class="btn ghost sm" data-act="ee-open" data-id="${esc(m.id)}">Open</button></td></tr>`).join("");
     return `<section class="panel stack" data-spot>
         <p class="h3 with-ico">${ico("exam")}Examen blanc · Expression écrite</p>
         <p class="small">The three tasks on one 60-minute clock, as on the real test: no dictionary, no spellcheck, and only your final texts are marked. Move between the tasks as you like; at 0:00 the exam is handed in.</p>
-        <ul class="small ee-plan">${plan}</ul>
+        <ul class="ee-plan" role="list">${plan}</ul>
         <p class="small muted">${(ui.form["ee-paper"] || "builtin") === "builtin" ? "Each task gets a prompt you haven't written yet." : "Les sujets PDF sélectionnés sont conservés ensemble pour cet examen."} ${claudeOn() ? "When you hand in, Claude corrects all three, and the mock's score is the mean of the three." : "Corrections need Claude, on claude.ai; here you can copy your three texts for another AI."}</p>
         ${ip ? "" : eePaperPicker()}
         ${ip ? `<div class="notice"><b>You have an unfinished mock:</b> ${esc(ipProgress(ip))}.<div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="ip-resume" data-id="${EE_IP}">Resume the mock</button>${discardBtn(EE_IP)}</div></div>` : `<div class="row"><button class="btn primary" data-act="ee-start">Start the exam · 60:00</button></div>`}
@@ -7486,7 +7550,7 @@
       if (loading) {
         material = `<article class="sheet"><p class="eyebrow">${skill === "co" ? "Enregistrement" : "Document"} · ${esc(lvl)}${th ? " · " + esc(themeLabel(th)) : ""}</p><h3 class="thinking">Claude is writing a new ${skill === "co" ? "listening" : "reading"} set${th ? " on " + esc(themeLabel(th)) : ""}</h3><p class="small muted">This usually takes 10–40 seconds. It stays here if you switch back to this theme later.</p></article>`;
       } else if (skill === "ce") {
-        material = `<article class="ce-edition">
+        material = `<article class="ce-edition" id="ce-passage" tabindex="-1">
           <header class="ce-mast">
             <p class="eyebrow">${tagLine(esc(set.type || (set.text ? "Document" : "Documents")))}</p>
             ${set.title ? `<h2 lang="fr">${typo(set.title)}</h2>` : ""}
@@ -7533,7 +7597,7 @@
       const trend = set && skill === "ce" ? `<span class="small muted">${ceTrend(set.level || lvl)}</span>` : "";
       const qs = !set ? "" : `<ol class="qs ${set.questions.some((q) => q.doc) ? "ce-items" : ""}">${set.questions.map((q, i) => {
         const miss = submitted && ans[i] !== q.answer;
-        return `<li${miss ? ` class="q-miss"` : ""}${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}${miss ? ` <span class="q-mark"><span aria-hidden="true">✗</span> raté</span>` : ""}</p><div class="opts">${q.order.map((k) => {
+        return `<li${skill === "ce" ? ` id="ce-question-${i}" tabindex="-1"` : ""}${miss ? ` class="q-miss"` : ""}${submitted ? ` data-m="rise" data-k="cr-${esc(set.id)}-${i}"` : ""}>${docOf(q, i)}<p class="fr q">${typo(q.q)}${miss ? ` <span class="q-mark"><span aria-hidden="true">✗</span> raté</span>` : ""}</p><div class="opts">${q.order.map((k) => {
           const st = k === q.answer ? "ok" : ans[i] === k ? "bad" : "";
           return `<label ${submitted ? answerOption(st, "", hid) : 'class="opt"'}><input type="radio" name="q${i}" data-change="c-ans" data-i="${i}" data-k="${k}" ${ans[i] === k ? "checked" : ""} ${submitted ? "disabled" : ""}><span>${typo(q.options[k])}</span></label>`;
         }).join("")}</div>
@@ -7546,14 +7610,16 @@
         ${submitted ? greet(...remyScore(skill, score, nq2, { key: `${set.id}-${ui.c.saved[skill] || ""}`, inClock: savedDoc && savedDoc.timed && savedDoc.clock ? savedDoc.secs <= savedDoc.clock : null }), "sm") : ""}`;
       const res = T.COMP.resources.filter((r) => arr(r.skills).includes(skill));
       const inProgress = set && !submitted && Object.keys(ans || {}).length > 0;
-      return `<div class="wrap comp-studio comp-${skill}">
+      const large = skill === "ce" && lsGet("tcf-ce-large", "") === "on";
+      const bookmarks = skill === "ce" && set?.questions.length ? readingBookmarks(set, ans, large) : "";
+      return `<div class="wrap comp-studio comp-${skill}${large ? " ce-large" : ""}">
         ${head}
         <div class="comp-toolbar">
           <div class="comp-nav tab-row">${tabs}</div>
           ${practiceNav(skill, "exercise")}
           ${controls}
         </div>
-        <div class="stack comp-practice"${submitted && set ? ` data-answer-review="${esc(set.id)}"` : ""}>${submitted ? resultReturn() : ""}${reviewNote}${fallback}${material}${timerRow}${qs}</div>
+        <div class="stack comp-practice"${submitted && set ? ` data-answer-review="${esc(set.id)}"` : ""}>${submitted ? resultReturn() : ""}${reviewNote}${fallback}${bookmarks}${material}${timerRow}${qs}</div>
         ${inProgress ? "" : examCta(skill)}
         ${fold("c-more-" + skill, "Pratique officielle · Official practice and scores from elsewhere", `<div class="grid2">
           <section class="panel stack"><p class="h3">${skill === "co" ? "Real recordings: official practice" : "Official practice"}</p>
@@ -7805,13 +7871,21 @@
   const resultSkill = x => ["comp", "exam"].includes(x.kind) ? (x.doc || x).skill : sectionOf(x.kind);
   const resultType = x => ["exam", "eemock"].includes(x.kind) ? "exam" : "exercise";
   const resultText = text => str(text).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  function resultMatches(x, filters) {
+  function resultDay(x) {
+    const timestamp = x.updated || x.ts;
+    if (!x.updated && /^\d{4}-\d{2}-\d{2}$/.test(x.date) && ymd(parse(x.date)) === x.date) return x.date;
+    const day = new Date(timestamp);
+    return timestamp && Number.isFinite(day.getTime()) ? ymd(day) : "";
+  }
+  function resultMatches(x, filters, since, today) {
+    const day = resultDay(x);
+    if (since && (day < since || day > today)) return false;
     const skill = resultSkill(x), type = resultType(x), d = x.doc || x;
     if (filters.filter && filters.filter !== "all" && filters.filter !== skill && !(filters.filter === "comp" && ["ce", "co"].includes(skill))) return false;
     if (filters.type && filters.type !== "all" && filters.type !== type) return false;
     const terms = resultText(filters.query).trim().split(/\s+/).filter(Boolean);
     const subjects = x.kind === "eemock" ? Object.values(d.tasks || d.prompts || {}).map(w => w.prompt || w.q).join(" ") : typeof d.prompt === "object" ? d.prompt?.q : d.prompt;
-    const text = resultText([x.title, x.date, x.date ? shortDate(x.date) : "", subjects, d.paperTitle, d.source?.title, SECTION[x.kind], skill, type === "exam" ? "examen blanc" : "exercice"].join(" "));
+    const text = resultText([x.title, day, shortDate(day), subjects, d.paperTitle, d.source?.title, SECTION[x.kind], skill, type === "exam" ? "examen blanc" : "exercice"].join(" "));
     return terms.every(term => text.includes(term));
   }
   function resultsLink(skill = "all", type = "all", label = "Mes résultats") {
@@ -7841,9 +7915,9 @@
     const available = x.kind === "comp" ? d.src !== "logged" && (samplesFor(d.skill).some(s => s.id === d.setId) || d.snap)
       : x.kind === "exam" ? XSPEC[skillOf(d)].bank().some(e => e.id === d.setId) || d.snap : true;
     const expanded = ui.hist.open === x.id && ["writing", "drill", "prod"].includes(x.kind);
-    return `<article class="result-card" id="h-${esc(x.id)}" tabindex="-1">
+    return `<article class="result-card" data-skill="${esc(skill)}" id="h-${esc(x.id)}" tabindex="-1">
       <div class="result-symbol" aria-hidden="true">${ico(icon)}</div>
-      <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span><time datetime="${esc(x.date)}">${shortDate(x.date)}</time></div>
+      <div class="result-copy"><div class="result-meta"><span>${esc(label)}</span><span>${exam ? "Examen blanc" : "Exercice"}</span></div>
         <h3>${esc(x.title)}</h3>${x.kind === "exam" && retakes.has(x.id) ? `<p class="small muted">Nouvelle tentative · hors estimation NCLC</p>` : ""}${detail ? `<p class="small muted">${esc(detail)}</p>` : ""}
         ${x.kind === "eemock" ? `<div class="result-tasks">${EE_TASKS.map((t, i) => `<span>${esc(T.WRITING[t].name)} <b>${!d.tasks[t] ? "Non rendue" : d.scores[i] == null ? arr(d.tasks[t].aiReviews).length ? "Avis enregistré" : "À corriger" : d.scores[i] + "/20"}</b></span>`).join("")}</div>` : ""}
       </div>
@@ -7856,16 +7930,36 @@
     return `<article class="resume-card"><div><p class="eyebrow">${esc(SECTION[ip.kind])} · À reprendre</p><h3>${esc(ip.paperTitle || ip.title)}</h3><p class="small muted">${esc(ipProgress(ip))}</p><p class="small muted">${esc(whenOf(ip.updated))}</p></div>
       <div class="row"><button class="btn primary sm" data-act="ip-resume" data-id="${esc(ip.id)}">Reprendre</button>${discardBtn(ip.id)}</div></article>`;
   }
+  function historyDays(entries, today, card) {
+    const groups = new Map(), yesterday = addDays(today, -1);
+    for (const x of entries) {
+      const day = resultDay(x);
+      if (!groups.has(day)) groups.set(day, []);
+      groups.get(day).push(x);
+    }
+    return [...groups].sort(([a], [b]) => b.localeCompare(a)).map(([day, items]) => {
+      const date = day && parse(day);
+      const caption = !day ? "Date inconnue" : day === today ? "Aujourd’hui" : day === yesterday ? "Hier" : DAYS[dow(day)];
+      return `<details class="history-day" ${foldAttr("history-day-" + ui.hist.status + "-" + day, true)}>
+        <summary><span class="history-stamp" aria-hidden="true">${day ? `<small>${MONTHS_SHORT[date.getMonth()]}</small><b>${date.getDate()}</b>` : ico("papers")}</span>
+          <span class="history-heading"><strong>${caption}</strong>${day ? `<time datetime="${day}">${frDate(day)}</time>` : ""}</span>
+          <span class="history-caret" aria-hidden="true"></span></summary>
+        <div class="history-entries">${items.map(card).join("")}</div></details>`;
+    }).join("");
+  }
   function historyList() {
-    const all = resultEntries().filter(x => resultMatches(x, ui.hist));
-    const ips = unfinished().filter(x => resultMatches(x, ui.hist));
+    const today = todayStr();
+    const since = ["7", "30"].includes(ui.hist.period) ? addDays(today, 1 - Number(ui.hist.period)) : "";
+    const matches = x => resultMatches(x, ui.hist, since, today);
+    const all = resultEntries().filter(matches);
+    const ips = unfinished().filter(matches);
     const retakes = retakeIds();
     const pending = ui.hist.status === "pending", shown = all.slice(0, ui.hist.limit), count = pending ? ips.length : all.length;
     return `<div class="results-status" role="group" aria-label="État des tentatives">
       <button data-act="h-status" data-status="done" aria-pressed="${!pending}">Terminés <span>${all.length}</span></button>
       <button data-act="h-status" data-status="pending" aria-pressed="${pending}">À reprendre <span>${ips.length}</span></button></div>
       <p class="small muted" role="status" aria-live="polite">${count} résultat${count === 1 ? "" : "s"} · du plus récent au plus ancien</p>
-      ${count ? `<div class="results-list">${pending ? ips.map(unfinishedCard).join("") : shown.map(x => resultCard(x, retakes)).join("")}</div>` : `<div class="results-empty">${ico("papers")}<h2>${ui.hist.query || ui.hist.filter !== "all" || ui.hist.type !== "all" ? "Aucun résultat avec ces filtres" : pending ? "Tout est à jour" : "Tes résultats commencent ici"}</h2><p>${pending ? "Tes exercices et examens inachevés seront disponibles ici pour les reprendre." : "Retrouve ici tes exercices, tes examens et tes corrections après chaque tentative."}</p><button class="btn sm" data-act="h-reset">Réinitialiser les filtres</button><a class="btn primary sm" href="#comp.co">Choisir un exercice</a></div>`}
+      ${count ? `<div class="results-list">${pending ? historyDays(ips, today, unfinishedCard) : historyDays(shown, today, x => resultCard(x, retakes))}</div>` : `<div class="results-empty">${ico("papers")}<h2>${since || ui.hist.query || ui.hist.filter !== "all" || ui.hist.type !== "all" ? "Aucun résultat avec ces filtres" : pending ? "Tout est à jour" : "Tes résultats commencent ici"}</h2><p>${pending ? "Tes exercices et examens inachevés seront disponibles ici pour les reprendre." : "Retrouve ici tes exercices, tes examens et tes corrections après chaque tentative."}</p><button class="btn sm" data-act="h-reset">Réinitialiser les filtres</button><a class="btn primary sm" href="#comp.co">Choisir un exercice</a></div>`}
       ${!pending && all.length > shown.length ? `<button class="btn" data-act="h-more">Voir plus de résultats</button>` : ""}`;
   }
   function historyView(head, tabs) {
@@ -7873,7 +7967,8 @@
       <section class="results-hero"><div><p class="eyebrow">Ton carnet de pratique</p><h2>Mes résultats</h2><p>Reprends un exercice, retrouve une correction et suis tes examens au même endroit.</p></div><span class="results-hero-mark" aria-hidden="true">${ico("papers")}</span></section>
       <section class="results-browser" aria-label="Rechercher dans mes résultats">
         <div class="results-tools"><label class="field">Rechercher<input id="h-query" type="search" data-input="h-query" value="${esc(ui.hist.query || "")}" placeholder="Sujet, examen, date…" aria-controls="results-content"></label>
-          <label class="field">Type de pratique<select id="h-type" data-change="h-type">${[["all", "Tous les formats"], ["exercise", "Exercices"], ["exam", "Examens blancs"]].map(([value, label]) => `<option value="${value}"${(ui.hist.type || "all") === value ? " selected" : ""}>${label}</option>`).join("")}</select></label></div>
+          <label class="field">Type de pratique<select id="h-type" data-change="h-type">${[["all", "Tous les formats"], ["exercise", "Exercices"], ["exam", "Examens blancs"]].map(([value, label]) => `<option value="${value}"${(ui.hist.type || "all") === value ? " selected" : ""}>${label}</option>`).join("")}</select></label>
+          <label class="field">Période<select id="h-period" data-change="h-period">${[["all", "Toutes les dates"], ["7", "7 derniers jours"], ["30", "30 derniers jours"]].map(([value, label]) => `<option value="${value}"${ui.hist.period === value ? " selected" : ""}>${label}</option>`).join("")}</select></label></div>
         <div class="results-skills" role="group" aria-label="Compétence">${H_FILTERS.map(([k, l]) => `<button data-act="h-filter" data-f="${k}" aria-pressed="${ui.hist.filter === k}">${l}</button>`).join("")}</div>
         <div id="results-content" class="stack">${historyList()}</div>
       </section></div>`;
@@ -8824,7 +8919,7 @@
       if (tab === "history") {
         const key = args.join(".");
         if (ui.hist.route !== key) {
-          ui.hist = { filter: H_FILTERS.some(([k]) => k === args[1]) || args[1] === "comp" ? args[1] : "all", type: ["exam", "exercise"].includes(args[2]) ? args[2] : "all", status: args[3] === "pending" ? "pending" : "done", query: "", limit: 30, open: null, route: key };
+          ui.hist = { filter: H_FILTERS.some(([k]) => k === args[1]) || args[1] === "comp" ? args[1] : "all", type: ["exam", "exercise"].includes(args[2]) ? args[2] : "all", status: args[3] === "pending" ? "pending" : "done", period: "all", query: "", limit: 30, open: null, route: key };
         }
         return historyView(head, tabs);
       }
@@ -8895,6 +8990,11 @@
   }
 
   const ACTS = {
+    "ce-type": el => {
+      const large = el.closest(".comp-ce").classList.toggle("ce-large");
+      el.setAttribute("aria-pressed", String(large));
+      lsSet("tcf-ce-large", large ? "on" : "off");
+    },
     day: (el) => { ui.day = el.dataset.date; render(true); },
     theme: toggleTheme,
     lang: toggleLang,
@@ -8958,7 +9058,7 @@
     },
     "h-filter": (el) => { ui.hist.filter = el.dataset.f; ui.hist.limit = 30; ui.hist.open = null; document.querySelectorAll("[data-act=h-filter]").forEach(b => b.setAttribute("aria-pressed", b === el)); updateHistoryList(); },
     "h-status": (el) => { ui.hist.status = el.dataset.status; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); document.querySelector(`[data-act=h-status][data-status="${ui.hist.status}"]`)?.focus(); },
-    "h-reset": () => { Object.assign(ui.hist, { filter: "all", type: "all", query: "", limit: 30, open: null }); render(true); document.getElementById("h-query")?.focus(); },
+    "h-reset": () => { Object.assign(ui.hist, { filter: "all", type: "all", period: "all", query: "", limit: 30, open: null }); render(true); document.getElementById("h-query")?.focus(); },
     "h-review": (el) => {
       const x = resultEntries().find(x => x.id === el.dataset.id);
       if (!x) return;
@@ -8999,7 +9099,7 @@
       if (writing?.mock?.id && eeRunning()) { toast("Termine l’examen écrit en cours avant d’ouvrir un autre résultat."); return; }
       if (writing?.mock?.id) { ui.ee = { id: writing.mock.id, done: true, view: id }; goTo("#writing.mock"); return; }
       const idx = resultEntries().filter((x) => f === "all" || sectionOf(x.kind) === f).findIndex((x) => x.id === id);
-      ui.hist = { filter: f, type: "all", status: "done", query: "", route: "history", limit: Math.max(30, idx + 1), open: id, jump: id };
+      ui.hist = { filter: f, type: "all", status: "done", period: "all", query: "", route: "history", limit: Math.max(30, idx + 1), open: id, jump: id };
       goTo("#progress.history");
     },
     "drill-start": (el) => {
@@ -9296,6 +9396,7 @@
     "e-del": (el) => { ui.confirm = ""; remove("errors", el.dataset.id); },
   };
   const CHANGES = {
+    "h-period": (el) => { ui.hist.period = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "h-type": (el) => { ui.hist.type = el.value; ui.hist.limit = 30; ui.hist.open = null; updateHistoryList(); },
     "ee-paper": (el) => { ui.form["ee-paper"] = el.value; render(true); document.getElementById("ee-paper")?.focus(); },
     "library-theme": selectLibraryTheme,
@@ -9316,7 +9417,20 @@
     "grab-theme": (el) => { if (ui.grab) ui.grab.theme = el.value; },
     "v-theme": (el) => { ui.vTheme = el.value; render(true); },
     "c-theme": (el) => { ui.c.theme = el.value; render(true); },
-    "c-ans": (el) => { ui.c.ans[ui.c.skill][Number(el.dataset.i)] = Number(el.dataset.k); compKeep(ui.c.skill); },
+    "c-ans": (el) => {
+      const skill = ui.c.skill, i = Number(el.dataset.i), answers = ui.c.ans[skill];
+      answers[i] = Number(el.dataset.k);
+      if (skill === "ce") {
+        const nav = viewEl.querySelector(".ce-bookmarks");
+        const mark = nav?.querySelector(`[data-goto="ce-question-${i}"]`);
+        if (mark && mark.dataset.answered !== "true") {
+          mark.dataset.answered = "true";
+          mark.setAttribute("aria-label", `Question ${i + 1}, answered`);
+          nav.querySelector("[data-ce-count]").textContent = ui.c.set.ce.questions.filter((_, j) => answers[j] != null).length;
+        }
+      }
+      compKeep(skill);
+    },
     // Updates the navigator in place rather than re-rendering, so the chosen option keeps focus.
     "bk-file": (el) => { bkPick(el.files && el.files[0]); el.value = ""; },
     "x-ans": (el) => {
@@ -9478,6 +9592,7 @@
       return;
     }
     if (route.view === "vocab" && ui.vocab && !ui.vocab.finished) {
+      if ((e.key === " " || e.key === "Enter") && t?.closest?.(".ex-translation summary")) return;
       const v = ui.vocab, step = v.queue[v.i] || {};
       if (e.key === "e" || e.key === "E") { e.preventDefault(); vocabEditOpen(); return; }
       if (e.key === "m" || e.key === "M") { e.preventDefault(); soundToggle(); return; }
