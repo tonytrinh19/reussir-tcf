@@ -2691,6 +2691,7 @@ window.TCF.FR = {
 "Second CE diagnostic set": "Deuxième série de diagnostic CE",
 "Seconds a question": "Secondes par question",
 "Seconds a reading question, against exam pace": "Secondes par question de lecture, selon le rythme de l'examen",
+"Section": "Section",
 "Sections": "Sections",
 "Sections of this sheet": "Sections de cette fiche",
 "See results": "Voir les résultats",

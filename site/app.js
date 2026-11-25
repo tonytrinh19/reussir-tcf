@@ -5314,6 +5314,10 @@
       return `<div class="wrap today-wrap">
         <header class="week-notebook">
           <div class="cahier-head">
+            <picture class="cover-landscape" aria-hidden="true">
+              <source media="(max-width: 640px)" srcset="media/montreal-waterfront-small.jpg">
+              <img src="media/montreal-waterfront.jpg" alt="" width="1680" height="560">
+            </picture>
             <svg class="cover-flight" viewBox="0 0 360 135" aria-hidden="true" focusable="false">
               <defs><path id="postcard-route" pathLength="1" d="M10 106C64 115 108 95 137 64S132 24 119 42C94 76 186 110 250 58Q291 23 344 17"/></defs>
               <use href="#postcard-route" class="flight-guide"/>
@@ -5325,12 +5329,7 @@
               <h1 class="notebook-date" lang="fr"><time datetime="${sel}">${frDate(sel)}</time></h1>
               <div class="meta"><b>Phase ${s.phase} · ${esc(P.name)}</b><span>${esc(P.weeks)}</span>${sel !== t ? `<button class="btn ghost sm" data-act="day" data-date="${t}">Back to today</button>` : ""}</div>
             </div>
-            <div class="postcard-place" data-m="postcard" data-k="montreal-cover">
-              <figure class="cover-postcard">
-                <img src="montreal-postcard.png" width="840" height="560" alt="">
-                <figcaption lang="fr">Montréal<svg viewBox="0 0 24 26" aria-hidden="true"><use href="#leaf" width="24" height="26"/></svg></figcaption>
-              </figure>
-            </div>
+            <span class="cover-imprint" lang="fr" data-m="postcard" data-k="montreal-cover"><svg viewBox="0 0 24 26" aria-hidden="true"><use href="#leaf" width="24" height="26"/></svg>Montréal</span>
             ${rm ? greet(rm[0], rm[1], rm[2]) : ""}
           </div>
           <div class="daychips" role="group" aria-label="This week">${chips}</div>
@@ -6476,7 +6475,14 @@
           </div>
         </header>
         ${ui.fx.cacher ? `<p class="fx-cacher-tip small">Cache-réponses : tap a dotted blank to check yourself.</p>` : ""}
-        ${heads.length > 1 ? `<nav class="dash-nav fx-toc" aria-label="Sections of this sheet">${heads.map(([hid, t]) => `<button type="button" data-goto="${hid}">${fxInline(t)}</button>`).join("")}</nav>` : ""}
+        ${heads.length > 1 ? `<div class="fx-guide">
+          <div class="fx-guide-scale" aria-hidden="true">
+            <span class="fx-guide-label">Section</span>
+            <span class="fx-folio"><span class="fx-digit-window"><span class="fx-digit-strip">${heads.map((_, i) => `<b>${i + 1}</b>`).join("")}</span></span><span>/ ${heads.length}</span></span>
+            <span class="fx-ruler"><i class="fx-mark"></i><i class="fx-pencil-track"><i class="fx-pencil"></i></i></span>
+          </div>
+          <nav class="dash-nav fx-toc" aria-label="Sections of this sheet">${heads.map(([hid, t]) => `<button type="button" data-goto="${hid}">${fxInline(t)}</button>`).join("")}</nav>
+        </div>` : ""}
         <div class="fx-body">${html}</div>
         <footer class="fx-sheet-foot small muted">${f.starter ? (f.changed ? `Fiche de départ, modifiée le ${shortDate(f.edited || todayStr())}` : "Fiche de départ") : `Ta fiche${f.edited ? ` · modifiée le ${shortDate(f.edited)}` : ""}`} · select any line, then “Save to cards” to drill it.</footer>
       </article>

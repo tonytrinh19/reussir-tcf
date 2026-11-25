@@ -27641,7 +27641,7 @@
   "where": "app",
   "ctx": [
    "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>",
-   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… Montréal … … … ……………",
+   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… <span> Montréal</span> … … … ……………",
    "<span>Phase …</span>"
   ]
  },
@@ -27652,7 +27652,7 @@
   "where": "app",
   "ctx": [
    "<a><span><span>Vol TCF-7</span><span>B1 → NCLC 7</span></span><b>Phase … · …</b>…<span><span>Semaine … · …</span>…</span></a>",
-   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… Montréal … … … ……………",
+   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… <span> Montréal</span> … … … ……………",
    "… of … criteria met Phase … · …"
   ]
  },
@@ -32241,6 +32241,15 @@
   ]
  },
  {
+  "id": "f2c6b564bd81",
+  "text": "Section",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "<span>Section</span> <span><span><span>…</span></span><span>/ …</span></span> <span><i></i><i><i></i></i></span> …"
+  ]
+ },
+ {
   "id": "7ff5a6dafd80",
   "text": "Sections",
   "kind": "exact",
@@ -32253,7 +32262,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "…"
+   "<span>Section</span> <span><span><span>…</span></span><span>/ …</span></span> <span><i></i><i><i></i></i></span> …"
   ]
  },
  {
@@ -38474,7 +38483,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… Montréal … … … ……………"
+   "<span>…</span><span>Semaine …</span> <h1> … </h1> <b>Phase … · …</b><span>…</span>… <span> Montréal</span> … … … ……………"
   ]
  },
  {
