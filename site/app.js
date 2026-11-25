@@ -5676,6 +5676,20 @@
   }
   // The same round keeps the same key across redraws and a refresh, so its animations play once (motion.js).
   const roundKey = (d) => hk([d.topic, d.set, d.src, d.items.length, (d.items[0] || {}).q].join("|"));
+  function drillBoard(d, rk) {
+    const cells = d.items.map((_, i) => {
+      const r = d.results[i], current = !d.done && i === d.i;
+      const state = r ? (r.ok ? "right" : "miss") : "waiting";
+      const number = String(i + 1).padStart(2, "0");
+      const flip = current && d.checked && r ? ` data-m="flap" data-k="flap-${rk}-${i}-${state}"` : "";
+      const label = r ? (r.ok ? "Correct" : "À revoir") : "";
+      return `<li class="drill-tile ${state}"${current ? ' aria-current="step"' : ""}>
+        <span class="sr"><span>Question ${i + 1}</span>${label ? ` · <span>${label}</span>` : ""}</span>
+        <span class="drill-flap" aria-hidden="true"${flip}><i class="flap-number">${number}</i>${r ? `<i class="flap-mark">${r.ok ? "✓" : "×"}</i>` : ""}</span>
+      </li>`;
+    }).join("");
+    return `<ol class="drill-board" role="list" aria-label="Questions">${cells}</ol>`;
+  }
   function drillCard(d) {
     const it = d.items[d.i], n = d.items.length, rk = roundKey(d), at = `${rk}-${d.i}`;
     // A right answer pops; a wrong one gives a small shake before the red-pen correction.
@@ -5710,10 +5724,12 @@
         ? `<div class="row"><button class="btn primary" data-act="drill-check">Check <span class="kbd">Enter</span></button><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`
         : `<div class="row"><span class="small muted">Pick an answer, or press 1–${it.options.length}.</span><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`;
     }
-    const done = d.results.filter((r) => r && r.ok).length, w = (d.i / n) * 100;
+    const done = d.results.filter((r) => r && r.ok).length;
     return `<section class="panel drill" id="drill-area">
-      <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? " · retrying today's misses" : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
-      <div class="bar"><i style="width:${w}%" data-tween="bar-${rk}" data-tw="width" data-to="${w}"></i></div>
+      <div class="drill-console">
+        <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? " · retrying today's misses" : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
+        ${drillBoard(d, rk)}
+      </div>
       <div class="drill-q" data-m="slide" data-k="q-${at}">
         ${drillAsk(d, it)}
         ${it.src ? `<p class="src">${typo(it.src)}</p>` : ""}
@@ -5749,6 +5765,7 @@
     return `<section class="panel drill" id="drill-area" data-m="pop" data-k="done-${rk}">
       <div class="row between"><span class="eyebrow">${esc(d.title)} · results</span>${target != null && d.src !== "retry" ? `<span class="pill ${met ? "ok" : "warn"}"${met ? ` data-m="pop" data-k="met-${rk}"` : ""}>${met ? "Target met" : `Target ${pct(target)}`}</span>` : ""}</div>
       <div class="row"><span class="scorebig"><span data-tween="score-${rk}" data-tw="count" data-to="${score}">${score}</span>/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
+      ${drillBoard(d, rk)}
       ${greet(...remyScore("drill", score, n, { key: rk, met: met && d.src !== "retry", retry: d.src === "retry" }), "sm")}
       ${breakdown}
       ${misses.length ? `<div class="stack tight"><p class="h3">Review</p><ul class="misses">${misses.map(({ it, k, r }) => `<li>
@@ -7829,6 +7846,14 @@
     return `<li class="cal-attempt"><div><b>${typo(x.title)}</b><small>${x.kind === "retry" ? "<span>Retry</span> · " : ""}${x.kind === "drill" ? scorePill(x.doc) : esc(x.result)}</small></div>${open}</li>`;
   }
 
+  // Calendar markers use the same four activity groups as the day's journal.
+  const calendarMarks = [
+    ["writing", "Écrit", d => d.attempts.some(x => x.kind === "writing")],
+    ["exercise", "Exercices", d => d.attempts.some(x => x.kind !== "writing")],
+    ["vocab", "Cartes", d => d.cards.length > 0],
+    ["plan", "Programme", d => d.blocks.length > 0],
+  ];
+  const calendarMark = kind => `<i class="cal-mark cal-mark-${kind}" aria-hidden="true"></i>`;
   function calendarDay(date, data) {
     const group = (name, icon, items) => items.length ? `<section class="cal-group"><h3>${ico(icon)}${name}<small>${items.length}</small></h3><ul>${items.join("")}</ul></section>` : "";
     let groups = "";
@@ -7839,7 +7864,12 @@
         + group("Vocabulary cards", "vocab", data.cards.map((c) => `<li><b lang="fr" translate="no">${typo(c.fr)}</b><small lang="en" translate="no">${esc(c.en)}</small></li>`))
         + group("Completed plan blocks", "today", data.blocks.map((label) => `<li>${esc(label)}</li>`));
     }
-    return `<section class="cal-journal" aria-labelledby="cal-date"><header><small lang="fr">${DAYS[dow(date)]}</small><h2 id="cal-date" lang="fr" tabindex="-1">${frDate(date)}</h2></header>
+    const d = parse(date);
+    return `<section class="cal-journal" aria-labelledby="cal-date"><header>
+      <h2 id="cal-date" lang="fr" tabindex="-1"><span class="sr">${DAYS[dow(date)]} ${frDate(date)}</span>
+        <span class="cal-date-face" aria-hidden="true" data-m="calendarLeaf" data-k="journal-${date}">${d.getDate()}</span>
+        <span class="cal-date-caption" aria-hidden="true"><small>${DAYS[dow(date)]}</small>${MONTHS[d.getMonth()]} ${d.getFullYear()}</span>
+      </h2></header>
       ${groups || '<p class="cal-empty">No saved activity for this date.</p>'}</section>`;
   }
 
@@ -7852,17 +7882,18 @@
     const cells = [];
     for (let i = 0; i < dow(first); i++) cells.push('<span aria-hidden="true"></span>');
     for (let n = 1; n <= monthDays; n++) {
-      const date = first.slice(0, 8) + pad(n), active = days.has(date);
-      cells.push(`<button type="button" id="cal-${date}" class="cal-cell${active ? " has-work" : ""}" data-act="cal-day" data-date="${date}" aria-pressed="${date === selected}"${date === today ? ' aria-current="date"' : ""}${date > today ? " disabled" : ""}>
-        <span aria-hidden="true">${n}</span><span class="sr">${frDate(date)}</span>${active ? '<span class="sr">Saved activity</span>' : ""}</button>`);
+      const date = first.slice(0, 8) + pad(n), data = days.get(date);
+      const marks = data ? calendarMarks.filter(([, , hasActivity]) => hasActivity(data)) : [];
+      cells.push(`<button type="button" id="cal-${date}" class="cal-cell${marks.length ? " has-work" : ""}" data-act="cal-day" data-date="${date}" aria-pressed="${date === selected}"${date === today ? ' aria-current="date"' : ""}${date > today ? " disabled" : ""}>
+        <span aria-hidden="true">${n}</span><span class="sr">${frDate(date)}</span>${marks.length ? `<span class="cal-marks">${marks.map(([kind, name]) => calendarMark(kind) + `<span class="sr"> · ${name}</span>`).join("")}</span>` : ""}</button>`);
     }
     const previous = addDays(first, -1), next = addDays(first, monthDays);
     return `<div class="wrap">${head}${tabs}<div class="study-calendar">
       <section class="cal-month" aria-labelledby="cal-month-title"><header><h2 id="cal-month-title" lang="fr">${MONTHS[start.getMonth()]} ${start.getFullYear()}</h2>
         <div class="cal-nav"><button id="cal-prev" class="btn sm" data-act="cal-day" data-date="${previous}" aria-label="Previous month">‹</button>
           <button id="cal-next" class="btn sm" data-act="cal-day" data-date="${next}" aria-label="Next month"${next > today ? " disabled" : ""}>›</button></div></header>
-        <div class="cal-grid">${DAYS_SHORT.map((name) => `<span class="cal-weekday" aria-hidden="true">${name}</span>`).join("")}${cells.join("")}</div>
-        <footer><span class="cal-key">Saved activity</span><button id="cal-today" class="btn ghost sm" data-act="cal-day" data-date="${today}">Today</button></footer>
+        <div class="cal-grid" data-m="calendarLeaf" data-k="month-${first}">${DAYS_SHORT.map((name) => `<span class="cal-weekday" aria-hidden="true">${name}</span>`).join("")}${cells.join("")}</div>
+        <footer><ul class="cal-legend" aria-label="Saved activity">${calendarMarks.map(([kind, name]) => `<li>${calendarMark(kind)}${name}</li>`).join("")}</ul><button id="cal-today" class="btn ghost sm" data-act="cal-day" data-date="${today}">Today</button></footer>
       </section>${calendarDay(selected, days.get(selected))}</div></div>`;
   }
 

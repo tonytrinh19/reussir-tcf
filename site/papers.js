@@ -14,7 +14,8 @@
     $("document").src = viewerUrl(current.pdf, it.page);
     $("picture").hidden = !it.image;
     if (it.image) { $("picture").src = it.image; $("picture").alt = `Illustration de la question ${index + 1}`; }
-    $("audio").hidden = !it.audio;
+    $("record-player").hidden = !it.audio;
+    $("record-player").classList.remove("playing");
     if (it.audio) $("audio").src = it.audio;
     else $("audio").removeAttribute("src");
     $("missing").textContent = it.audio ? "" : "L’enregistrement de cette question manque dans les fichiers fournis.";
@@ -76,6 +77,14 @@
   $("search").addEventListener("input", filter); $("paper").addEventListener("change", openPaper);
   $("previous").addEventListener("click", () => { if (index > 0) { index--; showQuestion(); } });
   $("next").addEventListener("click", () => { if (index < items.length - 1) { index++; showQuestion(); } });
+  // The record follows native playback, including pauses caused by buffering or a source change.
+  const audio = $("audio"), player = $("record-player");
+  for (const type of ["playing", "pause", "ended", "waiting", "seeking", "seeked", "emptied", "error"]) {
+    audio.addEventListener(type, () => {
+      const running = (type === "playing" || type === "seeked") && !audio.paused && !audio.ended && audio.readyState >= 3;
+      player.classList.toggle("playing", running);
+    });
+  }
   $("audio").addEventListener("error", () => { $("missing").textContent = "Impossible de lire cet enregistrement. Recharge le sujet pour réessayer."; });
   fetch("exam-sources/catalog.json").then(r => { if (!r.ok) throw new Error("catalog_failed"); return r.json(); }).then(data => { catalog = data; if (!["co","eo","ee"].includes(skill)) skill = "co"; filter(); }).catch(() => status("Impossible de charger les annales. Recharge la page pour réessayer."));
 }());

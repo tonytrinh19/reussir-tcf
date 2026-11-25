@@ -7,8 +7,21 @@
 <body>
 <header><a href="index.html#comp.co.exam">← Réussir le TCF</a><span>COLLECTION VIỆT–PHÁP</span></header>
 <main>
-<h1>À toi de jouer.</h1><p class="intro">Les sujets, les images et les voix de tes annales, réunis pour t’entraîner.</p>
-<nav aria-label="Collections"><button data-skill="co" aria-pressed="true">Compréhension orale</button><button data-skill="eo" aria-pressed="false">Production orale</button><button data-skill="ee" aria-pressed="false">Production écrite</button></nav>
+<h1>Annales</h1><p class="intro">Les sujets, les images et les voix de tes annales, réunis pour t’entraîner.</p>
+<nav class="collections" aria-label="Collections">
+  <button type="button" data-skill="co" aria-pressed="true">
+    <span class="folder" aria-hidden="true"><i class="folder-back"></i><i class="folder-sheet">CO</i><i class="folder-front"></i></span>
+    <span class="collection-name">Compréhension orale</span>
+  </button>
+  <button type="button" data-skill="eo" aria-pressed="false">
+    <span class="folder" aria-hidden="true"><i class="folder-back"></i><i class="folder-sheet">EO</i><i class="folder-front"></i></span>
+    <span class="collection-name">Production orale</span>
+  </button>
+  <button type="button" data-skill="ee" aria-pressed="false">
+    <span class="folder" aria-hidden="true"><i class="folder-back"></i><i class="folder-sheet">EE</i><i class="folder-front"></i></span>
+    <span class="collection-name">Production écrite</span>
+  </button>
+</nav>
 <section class="picker"><label>Rechercher un sujet<input id="search" type="search" placeholder="Mois, année, numéro…"></label><label>Choisir un sujet<select id="paper"></select></label></section>
 <p id="collection-count" class="small"></p>
 <p id="status" role="status"></p>
@@ -17,7 +30,11 @@
 <div class="layout"><section id="listening" hidden>
 <p class="eyebrow">RÉVISION LIBRE</p><p>Choisis une question, réécoute l’enregistrement et ouvre sa transcription quand tu le souhaites.</p>
 <nav id="questions" aria-label="Questions"></nav><h3 id="question-title" tabindex="-1"></h3>
-<img id="picture" hidden alt=""><audio id="audio" controls preload="none"></audio><p id="missing"></p>
+<img id="picture" hidden alt="">
+<div id="record-player" hidden>
+  <span class="turntable" aria-hidden="true"><i class="record"></i><i class="tonearm"></i></span>
+  <div class="record-controls"><label for="audio">Enregistrement</label><audio id="audio" aria-label="Enregistrement de la question" controls preload="none"></audio></div>
+</div><p id="missing"></p>
 <div class="answers" id="choices" role="radiogroup" aria-labelledby="question-title"></div><details id="key"><summary>Voir le corrigé de référence</summary><p></p></details>
 <details id="transcript"><summary>Afficher la transcription</summary><p class="source-note"></p><div class="transcript" lang="fr"></div><a id="transcript-original" class="small" target="_blank" rel="noopener" hidden>Voir ce passage dans le recueil ↗</a></details>
 <p class="small"><a href="pdf-viewer.html?file=exam-sources/papers/transcripts.pdf" target="_blank" rel="noopener">Consulter le recueil de transcriptions ↗</a></p>

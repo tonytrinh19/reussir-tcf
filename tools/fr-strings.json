@@ -3620,7 +3620,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … <button>Close</button> …"
+   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … … <button>Close</button> …"
   ]
  },
  {
@@ -3692,7 +3692,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>……</span><span>… / … · … correct</span> <i></i> … … <p>…</p> … …"
+   "<span>……</span><span>… / … · … correct</span> … … … <p>…</p> … …"
   ]
  },
  {
@@ -3939,7 +3939,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>……</span><span>… / … · … correct</span> <i></i> … … <p>…</p> … …"
+   "<span>……</span><span>… / … · … correct</span> … … … <p>…</p> … …"
   ]
  },
  {
@@ -5733,7 +5733,7 @@
   "kind": "pattern",
   "where": "app",
   "ctx": [
-   "<span>……</span><span>… / … · … correct</span> <i></i> … … <p>…</p> … …"
+   "<span>……</span><span>… / … · … correct</span> … … … <p>…</p> … …"
   ]
  },
  {
@@ -13179,7 +13179,7 @@
   "where": "attr:title",
   "ctx": [
    "<p>…Save to your cards</p><button>×</button>",
-   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … <button>Close</button> …",
+   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … … <button>Close</button> …",
    "… <p>Your text is back with all … of your mistakes in it, as you wrote them; everything else is corrected. Tap each word that looks wrong (tap it again to unmark it), then check.</p> … <button>Check · … marked</button><button>Close</button>"
   ]
  },
@@ -13938,7 +13938,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st"
+   "…… <p>… · … · ……</p> <span>≈ <span>…</span></span>…<span>…</span>… <p>… of … correct…. NCLC 7 in ….</p> … Level Correct Points … <p>……</p> … … … <h2>Every question</h2>… <p>In exam order, with the ones you missed marked. Open one to see …. The right answers st",
+   "Correct"
   ]
  },
  {
@@ -16952,8 +16953,8 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<a>…Exercices</a> <a>……</a> <a>…Mes résultats</a>",
-   "Exercices"
+   "Exercices",
+   "<a>…Exercices</a> <a>……</a> <a>…Mes résultats</a>"
   ]
  },
  {
@@ -24198,7 +24199,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… … <button>Today</button> …"
   ]
  },
  {
@@ -28595,7 +28596,7 @@
   "kind": "exact",
   "where": "attr:aria-label",
   "ctx": [
-   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… … <button>Today</button> …"
   ]
  },
  {
@@ -28666,6 +28667,15 @@
   "where": "app",
   "ctx": [
    "Production task passed"
+  ]
+ },
+ {
+  "id": "8682d73e62dd",
+  "text": "Programme",
+  "kind": "exact",
+  "where": "app",
+  "ctx": [
+   "Programme"
   ]
  },
  {
@@ -29276,7 +29286,8 @@
   "where": "app",
   "ctx": [
    "Question …",
-   "<button>…</button>"
+   "<button>…</button>",
+   "<li> <span><span>Question …</span>…</span> <span><i>…</i>…</span> </li>"
   ]
  },
  {
@@ -30545,7 +30556,7 @@
   "kind": "exact",
   "where": "app",
   "ctx": [
-   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … <button>Close</button> …"
+   "<span>… · results</span>… <span><span>…</span>/…</span><span>……</span> … … … … … … <button>Close</button> …"
   ]
  },
  {
@@ -31660,10 +31671,9 @@
   "id": "d6b70d86d62d",
   "text": "Saved activity",
   "kind": "exact",
-  "where": "app",
+  "where": "attr:aria-label",
   "ctx": [
-   "<span>Saved activity</span>",
-   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… … <button>Today</button> …"
   ]
  },
  {
@@ -39452,7 +39462,7 @@
   "ctx": [
    "<span>Carte d'embarquement · Boarding pass</span><span>Vol TCF-7</span> <small>Départ · From</small><b>B1</b><span>Where you started</span> … <small>Arrivée · To</small><b>NCLC 7</b><span>All four skills</span> Phase … · … Semaine · Week … sur … Porte · Gate …",
    "Today",
-   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… <span>Saved activity</span><button>Today</button> …"
+   "…… <h2>… …</h2> <button>‹</button> <button>›</button> …… … <button>Today</button> …"
   ]
  },
  {
