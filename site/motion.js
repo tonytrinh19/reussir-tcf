@@ -28,6 +28,11 @@
 
   const KINDS = {
     rise: (el, i) => el.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: Math.min(i, 8) * 40, easing: EASE, fill: "backwards" }),
+    calendarLeaf: el => el.animate([
+      { transform: "perspective(700px) rotateX(-11deg) translateY(-3px)", opacity: .65 },
+      { transform: "perspective(700px) rotateX(1deg)", opacity: 1, offset: .76 },
+      { transform: "none", opacity: 1 }
+    ], { duration: 350, easing: EASE }),
     // A postcard is dealt onto the cover. Its inner frame follows the scroll independently.
     postcard: (el) => el.animate([
       { opacity: .65, transform: "translate(10px, -12px) rotate(7deg)" },

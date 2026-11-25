@@ -2316,6 +2316,7 @@ window.TCF.FR = {
 "Production": "Production",
 "Production task not passed yet": "Tâche de production non validée pour l'instant",
 "Production task passed": "Tâche de production validée",
+"Programme": "Programme",
 "Progress": "Progrès",
 "Progress saved in this browser only": "Progrès enregistrés uniquement dans ce navigateur",
 "Progress saved on claude.ai": "Progrès enregistrés sur claude.ai",

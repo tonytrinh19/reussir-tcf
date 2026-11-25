@@ -7846,6 +7846,14 @@
     return `<li class="cal-attempt"><div><b>${typo(x.title)}</b><small>${x.kind === "retry" ? "<span>Retry</span> · " : ""}${x.kind === "drill" ? scorePill(x.doc) : esc(x.result)}</small></div>${open}</li>`;
   }
 
+  // Calendar markers use the same four activity groups as the day's journal.
+  const calendarMarks = [
+    ["writing", "Écrit", d => d.attempts.some(x => x.kind === "writing")],
+    ["exercise", "Exercices", d => d.attempts.some(x => x.kind !== "writing")],
+    ["vocab", "Cartes", d => d.cards.length > 0],
+    ["plan", "Programme", d => d.blocks.length > 0],
+  ];
+  const calendarMark = kind => `<i class="cal-mark cal-mark-${kind}" aria-hidden="true"></i>`;
   function calendarDay(date, data) {
     const group = (name, icon, items) => items.length ? `<section class="cal-group"><h3>${ico(icon)}${name}<small>${items.length}</small></h3><ul>${items.join("")}</ul></section>` : "";
     let groups = "";
@@ -7856,7 +7864,12 @@
         + group("Vocabulary cards", "vocab", data.cards.map((c) => `<li><b lang="fr" translate="no">${typo(c.fr)}</b><small lang="en" translate="no">${esc(c.en)}</small></li>`))
         + group("Completed plan blocks", "today", data.blocks.map((label) => `<li>${esc(label)}</li>`));
     }
-    return `<section class="cal-journal" aria-labelledby="cal-date"><header><small lang="fr">${DAYS[dow(date)]}</small><h2 id="cal-date" lang="fr" tabindex="-1">${frDate(date)}</h2></header>
+    const d = parse(date);
+    return `<section class="cal-journal" aria-labelledby="cal-date"><header>
+      <h2 id="cal-date" lang="fr" tabindex="-1"><span class="sr">${DAYS[dow(date)]} ${frDate(date)}</span>
+        <span class="cal-date-face" aria-hidden="true" data-m="calendarLeaf" data-k="journal-${date}">${d.getDate()}</span>
+        <span class="cal-date-caption" aria-hidden="true"><small>${DAYS[dow(date)]}</small>${MONTHS[d.getMonth()]} ${d.getFullYear()}</span>
+      </h2></header>
       ${groups || '<p class="cal-empty">No saved activity for this date.</p>'}</section>`;
   }
 
@@ -7869,17 +7882,18 @@
     const cells = [];
     for (let i = 0; i < dow(first); i++) cells.push('<span aria-hidden="true"></span>');
     for (let n = 1; n <= monthDays; n++) {
-      const date = first.slice(0, 8) + pad(n), active = days.has(date);
-      cells.push(`<button type="button" id="cal-${date}" class="cal-cell${active ? " has-work" : ""}" data-act="cal-day" data-date="${date}" aria-pressed="${date === selected}"${date === today ? ' aria-current="date"' : ""}${date > today ? " disabled" : ""}>
-        <span aria-hidden="true">${n}</span><span class="sr">${frDate(date)}</span>${active ? '<span class="sr">Saved activity</span>' : ""}</button>`);
+      const date = first.slice(0, 8) + pad(n), data = days.get(date);
+      const marks = data ? calendarMarks.filter(([, , hasActivity]) => hasActivity(data)) : [];
+      cells.push(`<button type="button" id="cal-${date}" class="cal-cell${marks.length ? " has-work" : ""}" data-act="cal-day" data-date="${date}" aria-pressed="${date === selected}"${date === today ? ' aria-current="date"' : ""}${date > today ? " disabled" : ""}>
+        <span aria-hidden="true">${n}</span><span class="sr">${frDate(date)}</span>${marks.length ? `<span class="cal-marks">${marks.map(([kind, name]) => calendarMark(kind) + `<span class="sr"> · ${name}</span>`).join("")}</span>` : ""}</button>`);
     }
     const previous = addDays(first, -1), next = addDays(first, monthDays);
     return `<div class="wrap">${head}${tabs}<div class="study-calendar">
       <section class="cal-month" aria-labelledby="cal-month-title"><header><h2 id="cal-month-title" lang="fr">${MONTHS[start.getMonth()]} ${start.getFullYear()}</h2>
         <div class="cal-nav"><button id="cal-prev" class="btn sm" data-act="cal-day" data-date="${previous}" aria-label="Previous month">‹</button>
           <button id="cal-next" class="btn sm" data-act="cal-day" data-date="${next}" aria-label="Next month"${next > today ? " disabled" : ""}>›</button></div></header>
-        <div class="cal-grid">${DAYS_SHORT.map((name) => `<span class="cal-weekday" aria-hidden="true">${name}</span>`).join("")}${cells.join("")}</div>
-        <footer><span class="cal-key">Saved activity</span><button id="cal-today" class="btn ghost sm" data-act="cal-day" data-date="${today}">Today</button></footer>
+        <div class="cal-grid" data-m="calendarLeaf" data-k="month-${first}">${DAYS_SHORT.map((name) => `<span class="cal-weekday" aria-hidden="true">${name}</span>`).join("")}${cells.join("")}</div>
+        <footer><ul class="cal-legend" aria-label="Saved activity">${calendarMarks.map(([kind, name]) => `<li>${calendarMark(kind)}${name}</li>`).join("")}</ul><button id="cal-today" class="btn ghost sm" data-act="cal-day" data-date="${today}">Today</button></footer>
       </section>${calendarDay(selected, days.get(selected))}</div></div>`;
   }
 
