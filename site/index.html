@@ -859,6 +859,39 @@ label.check input { margin-top: 3px; width: 18px; height: 18px; accent-color: va
 .examples div p:first-child { font: 400 17px/1.4 var(--f-text); }
 .examples div p + p { font-size: 13.5px; color: var(--ink-3); }
 .drill { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+/* Numbered split flaps retain every verdict in reading order, including after a round is resumed. */
+.drill-board {
+  display: flex; flex-wrap: wrap; gap: 5px; list-style: none; margin: 0; padding: 13px 16px 15px;
+  border: 1px solid #384249; border-radius: 9px; background: linear-gradient(165deg,#333e42,#20282d 72%);
+  box-shadow: inset 0 1px 0 #ffffff28, inset 0 -3px 0 #161e22;
+}
+.drill-console {
+  padding: 13px clamp(12px,2vw,22px); border: 1px solid #39464c; border-radius: 12px;
+  background: linear-gradient(135deg,#354146,#1e282d); box-shadow: inset 0 1px 0 #ffffff30,inset 0 -3px 0 #141d21;
+}
+.drill-console .drill-head { padding-bottom: 9px; border-bottom: 1px solid #ffffff29; }
+.drill-console .eyebrow { color: #ffda8c; }
+.drill-console .drill-head .num { color: #d7e3e5; }
+.drill-console .drill-board { padding: 12px 0 4px; border: 0; background: none; box-shadow: none; }
+.drill-tile { position: relative; height: 32px; width: 29px; margin: 0; }
+.drill-flap { position: absolute; inset: 0; perspective: 130px; border-radius: 3px; background: #10171b; box-shadow: 0 1px 0 #70808855; }
+.drill-flap i {
+  position: absolute; inset: 1px; display: grid; place-items: center; border-radius: 2px; backface-visibility: hidden;
+  font: 750 15px/1 ui-monospace,monospace; font-variant-numeric: tabular-nums;
+  color: #cfdbde; background: linear-gradient(#414e54 48%,#172025 49% 51%,#334046 52%);
+}
+.drill-tile[aria-current]::after { content: ""; position: absolute; inset: auto 4px -4px; height: 2px; background: #ffce77; border-radius: 2px; }
+.drill-tile[aria-current] .flap-number { color: #ffda8c; }
+.drill-tile:is(.right,.miss) .flap-number { transform: rotateX(-90deg); }
+.drill-flap .flap-mark { font: 800 19px/1 var(--f-ui); }
+.drill-tile.right .flap-mark { color: #c5f6d5; background: linear-gradient(#315e50 48%,#19392e 49% 51%,#285043 52%); }
+.drill-tile.miss .flap-mark { color: #ffdec6; background: linear-gradient(#824f3c 48%,#48291d 49% 51%,#70432f 52%); }
+@media (max-width: 600px) {
+  .drill-board { gap: 5px 3px; padding: 10px 8px 12px; }
+  .drill-tile { width: 23px; height: 28px; }
+  .drill-flap i { font-size: 13px; }
+  .drill-flap .flap-mark { font-size: 17px; }
+}
 .drill-q { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
 .drill-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
 .drill .src { font: italic 400 16px/1.45 var(--f-text); color: var(--ink-2); }

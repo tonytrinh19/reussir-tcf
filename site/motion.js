@@ -42,6 +42,15 @@
     pop: (el) => el.animate([{ opacity: 0, transform: "scale(.92)" }, { opacity: 1, transform: "scale(1.03)", offset: 0.6 }, { opacity: 1, transform: "none" }], { duration: 340, easing: EASE }),
     slide: (el) => el.animate([{ opacity: 0, transform: "translateX(16px)" }, { opacity: 1, transform: "none" }], { duration: 240, easing: EASE }),
     shake: (el) => el.animate([{ transform: "none" }, { transform: "translateX(-6px)" }, { transform: "translateX(5px)" }, { transform: "translateX(-3px)" }, { transform: "translateX(2px)" }, { transform: "none" }], { duration: 380, easing: "ease-out" }),
+    // Fold the numbered face away before bringing the result up from the hinge.
+    flap: (el) => [
+      el.querySelector(".flap-number").animate([
+        { transform: "rotateX(0deg)" }, { transform: "rotateX(-90deg)" }
+      ], { duration: 140, easing: "ease-in", fill: "backwards" }),
+      el.querySelector(".flap-mark").animate([
+        { transform: "rotateX(90deg)" }, { transform: "rotateX(-9deg)", offset: .76 }, { transform: "rotateX(0deg)" }
+      ], { duration: 220, delay: 138, easing: "ease-out", fill: "backwards" })
+    ],
     // A tick: the circle pops and the check mark draws itself.
     tick: (el) => {
       const box = el.previousElementSibling, out = [];

@@ -5676,6 +5676,20 @@
   }
   // The same round keeps the same key across redraws and a refresh, so its animations play once (motion.js).
   const roundKey = (d) => hk([d.topic, d.set, d.src, d.items.length, (d.items[0] || {}).q].join("|"));
+  function drillBoard(d, rk) {
+    const cells = d.items.map((_, i) => {
+      const r = d.results[i], current = !d.done && i === d.i;
+      const state = r ? (r.ok ? "right" : "miss") : "waiting";
+      const number = String(i + 1).padStart(2, "0");
+      const flip = current && d.checked && r ? ` data-m="flap" data-k="flap-${rk}-${i}-${state}"` : "";
+      const label = r ? (r.ok ? "Correct" : "À revoir") : "";
+      return `<li class="drill-tile ${state}"${current ? ' aria-current="step"' : ""}>
+        <span class="sr"><span>Question ${i + 1}</span>${label ? ` · <span>${label}</span>` : ""}</span>
+        <span class="drill-flap" aria-hidden="true"${flip}><i class="flap-number">${number}</i>${r ? `<i class="flap-mark">${r.ok ? "✓" : "×"}</i>` : ""}</span>
+      </li>`;
+    }).join("");
+    return `<ol class="drill-board" role="list" aria-label="Questions">${cells}</ol>`;
+  }
   function drillCard(d) {
     const it = d.items[d.i], n = d.items.length, rk = roundKey(d), at = `${rk}-${d.i}`;
     // A right answer pops; a wrong one gives a small shake before the red-pen correction.
@@ -5710,10 +5724,12 @@
         ? `<div class="row"><button class="btn primary" data-act="drill-check">Check <span class="kbd">Enter</span></button><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`
         : `<div class="row"><span class="small muted">Pick an answer, or press 1–${it.options.length}.</span><button class="btn ghost sm" data-act="drill-quit" title="Your answers so far are kept">Pause</button></div>`;
     }
-    const done = d.results.filter((r) => r && r.ok).length, w = (d.i / n) * 100;
+    const done = d.results.filter((r) => r && r.ok).length;
     return `<section class="panel drill" id="drill-area">
-      <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? " · retrying today's misses" : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
-      <div class="bar"><i style="width:${w}%" data-tween="bar-${rk}" data-tw="width" data-to="${w}"></i></div>
+      <div class="drill-console">
+        <div class="drill-head"><span class="eyebrow">${esc(d.title)}${d.src === "claude" ? " · new items from Claude" : d.src === "retry" ? " · retrying today's misses" : ""}</span><span class="small muted num">${d.i + 1} / ${n} · ${done} correct</span></div>
+        ${drillBoard(d, rk)}
+      </div>
       <div class="drill-q" data-m="slide" data-k="q-${at}">
         ${drillAsk(d, it)}
         ${it.src ? `<p class="src">${typo(it.src)}</p>` : ""}
@@ -5749,6 +5765,7 @@
     return `<section class="panel drill" id="drill-area" data-m="pop" data-k="done-${rk}">
       <div class="row between"><span class="eyebrow">${esc(d.title)} · results</span>${target != null && d.src !== "retry" ? `<span class="pill ${met ? "ok" : "warn"}"${met ? ` data-m="pop" data-k="met-${rk}"` : ""}>${met ? "Target met" : `Target ${pct(target)}`}</span>` : ""}</div>
       <div class="row"><span class="scorebig"><span data-tween="score-${rk}" data-tw="count" data-to="${score}">${score}</span>/${n}</span><span class="muted">${pct(score / n)}${d.src === "retry" ? " · retry rounds don't count toward mastery" : ""}</span></div>
+      ${drillBoard(d, rk)}
       ${greet(...remyScore("drill", score, n, { key: rk, met: met && d.src !== "retry", retry: d.src === "retry" }), "sm")}
       ${breakdown}
       ${misses.length ? `<div class="stack tight"><p class="h3">Review</p><ul class="misses">${misses.map(({ it, k, r }) => `<li>
