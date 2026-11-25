@@ -6475,7 +6475,14 @@
           </div>
         </header>
         ${ui.fx.cacher ? `<p class="fx-cacher-tip small">Cache-réponses : tap a dotted blank to check yourself.</p>` : ""}
-        ${heads.length > 1 ? `<nav class="dash-nav fx-toc" aria-label="Sections of this sheet">${heads.map(([hid, t]) => `<button type="button" data-goto="${hid}">${fxInline(t)}</button>`).join("")}</nav>` : ""}
+        ${heads.length > 1 ? `<div class="fx-guide">
+          <div class="fx-guide-scale" aria-hidden="true">
+            <span class="fx-guide-label">Section</span>
+            <span class="fx-folio"><span class="fx-digit-window"><span class="fx-digit-strip">${heads.map((_, i) => `<b>${i + 1}</b>`).join("")}</span></span><span>/ ${heads.length}</span></span>
+            <span class="fx-ruler"><i class="fx-mark"></i><i class="fx-pencil-track"><i class="fx-pencil"></i></i></span>
+          </div>
+          <nav class="dash-nav fx-toc" aria-label="Sections of this sheet">${heads.map(([hid, t]) => `<button type="button" data-goto="${hid}">${fxInline(t)}</button>`).join("")}</nav>
+        </div>` : ""}
         <div class="fx-body">${html}</div>
         <footer class="fx-sheet-foot small muted">${f.starter ? (f.changed ? `Fiche de départ, modifiée le ${shortDate(f.edited || todayStr())}` : "Fiche de départ") : `Ta fiche${f.edited ? ` · modifiée le ${shortDate(f.edited)}` : ""}`} · select any line, then “Save to cards” to drill it.</footer>
       </article>

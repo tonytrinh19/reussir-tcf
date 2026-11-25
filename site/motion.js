@@ -397,7 +397,8 @@
     if (!nav) return;
     const btns = [...nav.querySelectorAll("[data-goto]")];
     if (!btns.length) return;
-    const line = nav.getBoundingClientRect().bottom + 28;
+    const navBottom = nav.getBoundingClientRect().bottom;
+    const line = navBottom + 28;
     let cur = btns[0];
     btns.forEach((b) => { const s = document.getElementById(b.getAttribute("data-goto")); if (s && s.getBoundingClientRect().top <= line) cur = b; });
     const doc = document.documentElement;
@@ -406,6 +407,17 @@
     if (previous !== cur) {
       previous?.removeAttribute("aria-current");
       cur.setAttribute("aria-current", "true");
+    }
+    if (nav.classList.contains("fx-toc")) {
+      const guide = nav.parentElement;
+      if (instant || previous !== cur) guide.style.setProperty("--section", btns.indexOf(cur));
+      const body = guide.nextElementSibling.getBoundingClientRect();
+      // The pencil finishes when the bottom of the text is visible. A short sheet fits in one view.
+      const range = body.height - Math.max(0, window.innerHeight - navBottom);
+      const position = range > 0 ? Math.min(1, Math.max(0, (navBottom - body.top) / range)) : 1;
+      const value = (still() ? btns.indexOf(cur) / (btns.length - 1) : position).toFixed(4);
+      if (guide.style.getPropertyValue("--position") !== value) guide.style.setProperty("--position", value);
+      if (!instant && previous === cur) return;
     }
     if (nav.classList.contains("ce-bookmarks")) return;
     if (!navPill || !nav.contains(navPill)) {

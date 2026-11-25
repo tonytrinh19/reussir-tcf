@@ -2491,8 +2491,45 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
 .fx-sheet .fx-sheet-title .fx-en { margin: 4px 0 0; font-size: 14px; color: var(--ink-3); }
 .fx-sheet-acts { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 28px 2px 58px; }
 .fx-cacher-tip { margin: 8px 28px 0 58px; color: var(--accent); }
-/* Its margins count against max-width, so a sheet with many sections stays inside the card. */
-.fx-toc { margin: 14px 28px 0 58px; max-width: calc(100% - 86px); }
+/* A sticky index tab with a mechanical section counter and a pencil that traces the reading position. */
+.fx-guide {
+  --position: 0; --section: 0;
+  position: sticky; top: 10px; z-index: 4; min-width: 0;
+  margin: 16px 22px 8px 50px; padding: 8px;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--rule-2);
+  border-top: 3px solid var(--tci); border-radius: 6px 6px 13px 6px; box-shadow: var(--shadow);
+}
+.fx-guide-scale { display: flex; align-items: center; gap: 8px; padding: 2px 23px 7px 7px; }
+.fx-guide-label { font: 800 11px/1 var(--f-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--tci); }
+.fx-folio { display: flex; align-items: center; gap: 4px; white-space: nowrap; font: 700 12px/1 var(--f-ui); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.fx-digit-window { display: block; overflow: hidden; height: 20px; min-width: 22px; text-align: center; border-radius: 3px; color: var(--surface); background: var(--ink); }
+.fx-digit-strip { display: grid; transform: translateY(calc(-20px * var(--section))); }
+.fx-digit-strip b { padding-inline: 4px; line-height: 20px; }
+.fx-ruler { flex: 1; position: relative; height: 18px; margin-left: 3px; background: repeating-linear-gradient(90deg,var(--rule-2) 0 1px,transparent 1px 20px) bottom / 100% 8px no-repeat, repeating-linear-gradient(90deg,var(--rule-2) 0 1px,transparent 1px 4px) bottom / 100% 4px no-repeat; border-bottom: 1px solid var(--rule-2); }
+.fx-mark, .fx-pencil-track { position: absolute; inset: auto 0 -1px; height: 2px; }
+.fx-mark { background: var(--tci); transform-origin: left; transform: scaleX(var(--position)); }
+.fx-pencil-track { transform: translateX(calc(var(--position) * 100%)); pointer-events: none; }
+.fx-pencil {
+  position: absolute; left: 0; bottom: -3px; width: 25px; height: 8px; transform-origin: left center; transform: rotate(-43deg);
+  clip-path: polygon(0 50%, 7px 0, 100% 0, 100% 100%, 7px 100%);
+  background: linear-gradient(90deg, #273748 0 3px, #e2bb8e 3px 7px, transparent 7px 18px, #737d7e 18px 21px, #be625f 21px),
+    linear-gradient(#ffdd8b 0 28%, #f0a93b 28% 72%, #93561f 72%);
+}
+.fx-guide .fx-toc { position: relative; top: auto; max-width: 100%; margin: 0; padding: 3px; border: 0; border-radius: 7px; background: var(--sunk); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; }
+.fx-toc button { padding: 9px 12px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fx-toc .dash-pill, .fx-toc button { border-radius: 5px; }
+.fx-toc button:focus-visible { outline-offset: -2px; }
+.fx-sheet:has(.fx-guide) .fx-h { scroll-margin-top: 112px; }
+@media (max-width: 880px) {
+  .fx-guide { top: calc(var(--rail-h, 0px) + env(safe-area-inset-top, 0px) + 4px); }
+  .fx-sheet:has(.fx-guide) .fx-h { scroll-margin-top: calc(var(--rail-h, 0px) + env(safe-area-inset-top, 0px) + 104px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fx-digit-strip { transition: transform .24s var(--ease); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-pencil-track { display: none; }
+}
 .fx-body { display: grid; gap: 22px; padding: 10px 28px 26px 58px; container-type: inline-size; }
 .fx-scope { display: grid; gap: 14px; min-width: 0; }
 .fx-body p { margin: 0; }
@@ -2598,8 +2635,8 @@ button.bt-h:hover .bt-x, .btile.open .bt-x { background: var(--accent); color: v
   .fx-pins { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
   .fx-sheet::before { left: 22px; }
   .fx-sheet-title, .fx-sheet-acts, .fx-body, .fx-sheet-foot { padding-left: 34px; padding-right: 16px; }
-  .fx-cacher-tip, .fx-toc { margin-left: 34px; margin-right: 16px; }
-  .fx-toc { max-width: calc(100% - 50px); }
+  .fx-cacher-tip { margin-left: 34px; margin-right: 16px; }
+  .fx-guide { margin-inline: 9px; }
   .fx-table th, .fx-table td { padding: 8px; }
 }
 /* A chain that can't fit on one line stacks, one slot per row, with the arrows pointing down. */
